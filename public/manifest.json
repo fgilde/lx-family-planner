@@ -1,0 +1,17 @@
+{
+  "name": "LX Family Planner",
+  "short_name": "LX Familie",
+  "description": "Familienplaner mit Kalender, Einkauf, Essen, Aufgaben und mehr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f1e8",
+  "theme_color": "#246b58",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

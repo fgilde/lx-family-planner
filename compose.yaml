@@ -1,0 +1,33 @@
+services:
+  family-planner:
+    build:
+      context: .
+      target: runtime
+    image: lx-family-planner:local
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_FILE: /app/data/family_planner.sqlite
+      LEGACY_DATABASE_FILE: /app/data/family_db.json
+    ports:
+      - "${HOST_PORT:-3001}:3001"
+    volumes:
+      - ./data:/app/data
+      - ./backups:/app/backups
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

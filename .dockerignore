@@ -1,0 +1,15 @@
+.git
+.env
+.openai
+backups
+data
+dist
+docs
+family_db.json
+family_db.json.bak
+family_planner.sqlite
+family_planner.sqlite-shm
+family_planner.sqlite-wal
+node_modules
+scratch
+*.log
