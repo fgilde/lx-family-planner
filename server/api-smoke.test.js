@@ -165,6 +165,20 @@ test('family flow stays isolated, authorized and internally consistent', async (
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
   assert.equal(bootstrap.body.members.length, 4);
+  assert.equal(
+    bootstrap.body.family.grandparentsHouseholdEnabled,
+    true
+  );
+
+  const updatedFamilySettings = await request('/api/family', {
+    method: 'PATCH',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ grandparentsHouseholdEnabled: false })
+  });
+  assert.equal(
+    updatedFamilySettings.body.family.grandparentsHouseholdEnabled,
+    false
+  );
 
   const liveResponse = await fetch(`${baseUrl}/api/live`, {
     headers: { cookie }

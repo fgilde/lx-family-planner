@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings } from 'lucide-react';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Info, Users, Sparkles, Settings } from 'lucide-react';
 import { isChildProfile } from '../constants/roles';
 import FamilyEditModal from './FamilyTree/FamilyEditModal';
 
@@ -33,6 +33,8 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
   const isChild = isChildProfile(activeMember);
+  const grandparentsHouseholdEnabled =
+    familyAccount?.grandparentsHouseholdEnabled !== false;
   const availableThemes = isChild ? CHILD_THEMES : ADULT_THEMES;
 
   const toggleHousehold = (targetHousehold) => {
@@ -57,13 +59,28 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
       </a>
 
       {/* Household planning context */}
-      {!isChild && <div
+      {!isChild && grandparentsHouseholdEnabled && <div
         className="household-switcher"
         role="group"
         aria-label="Planungsort auswählen"
-        title="Wechselt Termine, Aufgaben, Essensplan, Mülltermine und Pinnwand zwischen den beiden Haushalten."
       >
-        <span className="household-switcher-label">Planungsort</span>
+        <span className="household-switcher-label">
+          Planungsort
+          <span className="household-info">
+            <button
+              type="button"
+              className="household-info-button"
+              aria-label="Was bedeutet Planungsort?"
+            >
+              <Info size={13} />
+            </button>
+            <span role="tooltip">
+              Für Großeltern ohne eigenes Familienkonto: Termine, Aufgaben,
+              Speiseplan, Mülltermine und Pinnwand können für ihr Zuhause
+              getrennt geplant werden.
+            </span>
+          </span>
+        </span>
         <button
           onClick={() => toggleHousehold('familie')}
           className={activeHousehold === 'familie' ? 'active' : ''}

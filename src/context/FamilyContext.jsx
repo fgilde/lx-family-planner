@@ -380,6 +380,19 @@ export function FamilyProvider({ children }) {
     localStorage.setItem('lx_active_household', value);
   }, []);
 
+  useEffect(() => {
+    if (
+      familyAccount?.grandparentsHouseholdEnabled === false &&
+      activeHouseholdState !== 'familie'
+    ) {
+      setActiveHouseholdState('familie');
+      localStorage.setItem('lx_active_household', 'familie');
+    }
+  }, [
+    activeHouseholdState,
+    familyAccount?.grandparentsHouseholdEnabled
+  ]);
+
   const loginFamily = useCallback(async (familyId, password) => {
     const data = await apiRequest('/api/auth/family', {
       method: 'POST',

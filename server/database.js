@@ -153,6 +153,19 @@ database.exec(`
     ON family_relationships(target_family_id, status);
 `);
 
+const familyColumns = database.prepare('PRAGMA table_info(families)').all();
+if (
+  !familyColumns.some(
+    column => column.name === 'grandparents_household_enabled'
+  )
+) {
+  database.exec(`
+    ALTER TABLE families
+    ADD COLUMN grandparents_household_enabled INTEGER NOT NULL DEFAULT 1
+      CHECK(grandparents_household_enabled IN (0, 1));
+  `);
+}
+
 const pushSubscriptionTable = database
   .prepare(`
     SELECT sql FROM sqlite_master
@@ -263,6 +276,8 @@ function mapFamilyRow(row) {
     familyName: row.name,
     familyAvatar: row.avatar,
     badge: row.badge,
+    grandparentsHouseholdEnabled:
+      Number(row.grandparents_household_enabled ?? 1) === 1,
     isConfigured: true,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -537,6 +552,7 @@ export function updateFamily(familyId, changes) {
           name = ?,
           avatar = ?,
           badge = ?,
+          grandparents_household_enabled = ?,
           password_hash = ?,
           updated_at = ?
         WHERE id = ?
@@ -545,6 +561,11 @@ export function updateFamily(familyId, changes) {
         changes.familyName ?? existing.name,
         changes.familyAvatar ?? existing.avatar,
         changes.badge ?? existing.badge,
+        changes.grandparentsHouseholdEnabled === undefined
+          ? Number(existing.grandparents_household_enabled ?? 1)
+          : changes.grandparentsHouseholdEnabled
+            ? 1
+            : 0,
         nextPasswordHash,
         now,
         familyId

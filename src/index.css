@@ -2551,6 +2551,7 @@ textarea {
 /* --- FAMILY SETTINGS --- */
 .family-settings-modal {
   max-width: 620px;
+  overflow-x: hidden;
 }
 
 .family-settings-heading {
@@ -2612,6 +2613,134 @@ textarea {
 .family-settings-actions {
   justify-content: space-between;
   padding-top: 10px;
+}
+
+.family-feature-setting {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 17px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 7%, transparent),
+      transparent 66%
+    ),
+    var(--bg-subtle);
+}
+
+.family-feature-setting-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--primary);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.family-feature-setting-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.family-feature-setting-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.family-feature-setting-title strong {
+  font-size: 0.9rem;
+}
+
+.family-feature-setting-copy > small {
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.family-setting-info {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border-color));
+  border-radius: 50%;
+  color: var(--primary);
+  background: var(--bg-card);
+  cursor: help;
+}
+
+.family-setting-info > span[role='tooltip'] {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  z-index: 30;
+  width: min(300px, calc(100vw - 40px));
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.45;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 5px);
+  transition: 160ms ease;
+}
+
+.family-setting-info:hover > span[role='tooltip'],
+.family-setting-info:focus > span[role='tooltip'] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.family-feature-switch {
+  min-width: 70px;
+  min-height: 37px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 5px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  font-size: 0.76rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.family-feature-switch > span {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.family-feature-switch.active {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-card));
+}
+
+.family-feature-switch.active > span {
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 13%, transparent);
 }
 
 .family-danger-link {
@@ -6950,6 +7079,7 @@ textarea {
 
 /* --- EXPLICIT HOUSEHOLD CONTEXT --- */
 .household-switcher {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -6960,6 +7090,9 @@ textarea {
 }
 
 .household-switcher-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 0 7px 0 9px;
   color: var(--text-muted);
   font-size: 0.67rem;
@@ -6992,6 +7125,54 @@ textarea {
 .household-switcher button.active.grandparents {
   background: #b86618;
   box-shadow: 0 4px 10px rgba(184, 102, 24, 0.22);
+}
+
+.household-switcher .household-info-button {
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border-color));
+  border-radius: 50%;
+  color: var(--primary);
+  background: var(--bg-card);
+  cursor: help;
+}
+
+.household-info {
+  display: inline-flex;
+}
+
+.household-info > span[role='tooltip'] {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 50%;
+  z-index: 120;
+  width: min(320px, calc(100vw - 24px));
+  padding: 11px 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: var(--text-main);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  line-height: 1.5;
+  text-align: left;
+  text-transform: none;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -4px);
+  transition: 160ms ease;
+}
+
+.household-info:hover > span[role='tooltip'],
+.household-info:focus-within > span[role='tooltip'] {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 /* --- LANDSCAPE TABLET COMMAND CENTER --- */
@@ -7563,6 +7744,47 @@ textarea {
 }
 
 @media (max-width: 680px) {
+  .family-settings-modal > .card-header {
+    align-items: flex-start;
+    flex-wrap: nowrap;
+  }
+
+  .family-settings-heading {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .family-settings-heading > span {
+    width: 41px;
+    height: 41px;
+    flex: 0 0 auto;
+  }
+
+  .family-settings-heading h2 {
+    font-size: 1.35rem;
+  }
+
+  .family-feature-setting {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .family-feature-switch {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .family-setting-info > span[role='tooltip'] {
+    right: -4px;
+    left: auto;
+    width: min(260px, calc(100vw - 72px));
+    transform: translateY(5px);
+  }
+
+  .family-setting-info:hover > span[role='tooltip'],
+  .family-setting-info:focus > span[role='tooltip'] {
+    transform: translateY(0);
+  }
+
   .profile-modal-backdrop {
     align-items: center;
     padding: 6px;

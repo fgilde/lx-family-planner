@@ -1437,6 +1437,16 @@ export function createApp() {
     if (Object.hasOwn(input, 'badge')) {
       changes.badge = cleanText(input.badge, 'Familie', 60);
     }
+    if (Object.hasOwn(input, 'grandparentsHouseholdEnabled')) {
+      if (typeof input.grandparentsHouseholdEnabled !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          error: 'Die Einstellung für den zweiten Planungsort ist ungültig.'
+        });
+      }
+      changes.grandparentsHouseholdEnabled =
+        input.grandparentsHouseholdEnabled;
+    }
     if (input.password) {
       changes.password = requireText(input.password, 'Passwort', 100);
       if (changes.password.length < 4) {

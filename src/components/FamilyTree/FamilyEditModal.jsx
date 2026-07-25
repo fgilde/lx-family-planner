@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Check,
   Home,
+  Info,
   LockKeyhole,
   ShieldAlert,
   Trash2,
@@ -17,6 +19,10 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
   const [familyName, setFamilyName] = useState('');
   const [badge, setBadge] = useState('');
   const [familyAvatar, setFamilyAvatar] = useState('');
+  const [
+    grandparentsHouseholdEnabled,
+    setGrandparentsHouseholdEnabled
+  ] = useState(true);
   const [newPassword, setNewPassword] = useState('');
   const [deletePassword, setDeletePassword] = useState('');
   const [showDelete, setShowDelete] = useState(false);
@@ -27,6 +33,9 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
     setFamilyName(family.familyName || '');
     setBadge(family.badge || '');
     setFamilyAvatar(family.familyAvatar || '');
+    setGrandparentsHouseholdEnabled(
+      family.grandparentsHouseholdEnabled !== false
+    );
     setNewPassword('');
     setDeletePassword('');
     setShowDelete(false);
@@ -57,7 +66,8 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
     const payload = {
       familyName: familyName.trim(),
       badge: badge.trim() || 'Unsere Familie',
-      familyAvatar
+      familyAvatar,
+      grandparentsHouseholdEnabled
     };
     if (newPassword) payload.password = newPassword;
     const result = await updateFamilyAccount(payload);
@@ -73,7 +83,7 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
     if (deleted) onClose();
   };
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal-card family-settings-modal"
@@ -120,6 +130,48 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
                 placeholder="z. B. Unser Zuhause"
               />
             </label>
+
+            <section className="family-feature-setting">
+              <span className="family-feature-setting-icon">
+                <Home size={20} />
+              </span>
+              <div className="family-feature-setting-copy">
+                <span className="family-feature-setting-title">
+                  <strong>Zweiten Planungsort anzeigen</strong>
+                  <span
+                    className="family-setting-info"
+                    tabIndex={0}
+                    aria-label="Erklärung zum zweiten Planungsort"
+                  >
+                    <Info size={14} />
+                    <span role="tooltip">
+                      Ideal, wenn Oma und Opa kein eigenes Familienkonto nutzen:
+                      Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand
+                      lassen sich für ihr Zuhause getrennt planen.
+                    </span>
+                  </span>
+                </span>
+                <small>
+                  Blendet „Zuhause Oma &amp; Opa“ als eigenen Planungsbereich
+                  im Kopf der App ein.
+                </small>
+              </div>
+              <button
+                type="button"
+                className={`family-feature-switch ${
+                  grandparentsHouseholdEnabled ? 'active' : ''
+                }`}
+                role="switch"
+                aria-checked={grandparentsHouseholdEnabled}
+                onClick={() =>
+                  setGrandparentsHouseholdEnabled(value => !value)
+                }
+              >
+                <span />
+                {grandparentsHouseholdEnabled ? 'An' : 'Aus'}
+              </button>
+            </section>
+
             <label className="auth-field">
               <span>Neues Familienpasswort (optional)</span>
               <div className="auth-input-wrap">
@@ -187,6 +239,7 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
