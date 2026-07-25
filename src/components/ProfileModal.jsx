@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BellOff,
   BellRing,
   Check,
+  ChevronDown,
   Edit3,
   KeyRound,
   Lock,
@@ -68,6 +69,28 @@ export default function ProfileModal() {
   const [pinInput, setPinInput] = useState('');
   const [profileSecretType, setProfileSecretType] = useState('pin');
   const [busy, setBusy] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const modalBodyRef = useRef(null);
+
+  useEffect(() => {
+    if (!isProfileModalOpen) return undefined;
+
+    setMode('list');
+    setPinTarget(null);
+    setPinInput('');
+    setShowNotifications(false);
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const frame = window.requestAnimationFrame(() => {
+      modalBodyRef.current?.scrollTo({ top: 0 });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isProfileModalOpen]);
 
   if (!isProfileModalOpen) return null;
 
@@ -83,6 +106,7 @@ export default function ProfileModal() {
   const close = () => {
     setMode('list');
     setPinTarget(null);
+    setShowNotifications(false);
     setIsProfileModalOpen(false);
   };
 
@@ -134,6 +158,7 @@ export default function ProfileModal() {
   const beginAdd = () => {
     setEditingMemberId(null);
     setForm(EMPTY_FORM);
+    setShowNotifications(false);
     setMode('form');
   };
 
@@ -149,6 +174,7 @@ export default function ProfileModal() {
       avatar: member.avatar || FUNNY_COMIC_AVATARS[0]?.url || '',
       pin: ''
     });
+    setShowNotifications(false);
     setMode('form');
   };
 
@@ -213,24 +239,48 @@ export default function ProfileModal() {
   };
 
   return (
-    <div className="modal-backdrop" onClick={close}>
+    <div className="modal-backdrop profile-modal-backdrop" onClick={close}>
       <div
         className="modal-card profile-modal-modern"
         onClick={event => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-modal-title"
       >
         <div className="card-header profile-modal-header">
           <div>
-            <span className="eyebrow">Eure Familie</span>
-            <h2 className="card-title">
-              <UserRound size={23} /> Profile & Rollen
+            <span className="eyebrow">
+              {pinTarget
+                ? 'Geschütztes Profil'
+                : mode === 'form'
+                  ? editingMemberId
+                    ? 'Profil bearbeiten'
+                    : 'Neues Profil'
+                  : 'Eure Familie'}
+            </span>
+            <h2 className="card-title" id="profile-modal-title">
+              <UserRound size={23} />
+              {pinTarget
+                ? `${pinTarget.name} entsperren`
+                : mode === 'form'
+                  ? editingMemberId
+                    ? 'Profil bearbeiten'
+                    : 'Profil anlegen'
+                  : 'Wer ist gerade dran?'}
             </h2>
           </div>
-          <button className="icon-circle-btn" onClick={close} aria-label="Schließen">
+          <button
+            type="button"
+            className="icon-circle-btn"
+            onClick={close}
+            aria-label="Schließen"
+          >
             <X size={20} />
           </button>
         </div>
 
-        {pinTarget ? (
+        <div className="profile-modal-body" ref={modalBodyRef}>
+          {pinTarget ? (
           <form className="profile-pin-panel" onSubmit={verifyPin}>
             <div className="profile-pin-icon"><Lock size={26} /></div>
             <h3>{pinTarget.name}s Profil ist geschützt</h3>
@@ -250,8 +300,8 @@ export default function ProfileModal() {
                     ? 'one-time-code'
                     : 'current-password'
                 }
-                inputMode="numeric"
-                maxLength={12}
+                inputMode={profileSecretType === 'pin' ? 'numeric' : undefined}
+                maxLength={profileSecretType === 'pin' ? 12 : 128}
                 placeholder={
                   profileSecretType === 'pin'
                     ? 'Profil-PIN'
@@ -273,56 +323,114 @@ export default function ProfileModal() {
               </button>
             </div>
           </form>
-        ) : mode === 'list' ? (
+          ) : mode === 'list' ? (
           <>
-            <div className="profile-list-modern">
-              {members.map(member => {
+            <p className="profile-switch-intro">
+              Tippe auf ein Profil, um direkt in seine persönliche Familienwelt
+              zu wechseln.
+            </p>
+            <div className="profile-switch-grid" role="list">
+              {members.map((member, index) => {
                 const isActive = member.id === activeMemberId;
+                const canEdit = canManage || member.id === activeMemberId;
                 return (
+                  <div
+                    key={member.id}
+                    className={`profile-switch-card ${isActive ? 'active' : ''}`}
+                    style={{
+                      '--member-color': member.color || '#246B58',
+                      '--profile-index': index
+                    }}
+                    role="listitem"
+                  >
                   <button
                     type="button"
-                    key={member.id}
-                    className={`profile-list-item ${isActive ? 'active' : ''}`}
-                    style={{ '--member-color': member.color || '#246B58' }}
+                    className="profile-switch-target"
                     onClick={() => selectProfile(member)}
                     disabled={busy}
+                    aria-label={`${member.name}, ${getPositionLabel(member)} auswählen`}
                   >
-                    <img
-                      src={member.avatar || DEFAULT_FAMILY_AVATAR}
-                      onError={handleImgError}
-                      alt=""
-                    />
-                    <span className="profile-list-copy">
-                      <strong>
-                        {member.name}
-                        {isActive && <small>Aktiv</small>}
-                      </strong>
-                      <span>
-                        {getPositionLabel(member)}
-                        {member.hasPin && <Lock size={12} />}
-                      </span>
+                    <span className="profile-switch-avatar">
+                      <img
+                        src={member.avatar || DEFAULT_FAMILY_AVATAR}
+                        onError={handleImgError}
+                        alt=""
+                      />
+                      {isActive && (
+                        <span className="profile-active-check" aria-label="Aktives Profil">
+                          <Check size={16} strokeWidth={3} />
+                        </span>
+                      )}
+                      {member.hasPin && (
+                        <span className="profile-lock-badge" aria-label="Mit PIN geschützt">
+                          <Lock size={13} />
+                        </span>
+                      )}
                     </span>
-                    <span className="profile-stars">
-                      <Star size={15} fill="currentColor" /> {member.stars || 0}
+                    <strong>{member.name}</strong>
+                    <span className="profile-switch-role">
+                      {getPositionLabel(member)}
                     </span>
-                    {(canManage || member.id === activeMemberId) && (
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        className="profile-edit-button"
-                        onClick={event => beginEdit(member, event)}
-                        onKeyDown={event => {
-                          if (event.key === 'Enter') beginEdit(member, event);
-                        }}
-                      >
-                        <Edit3 size={16} />
+                    {member.role === 'child' && (
+                      <span className="profile-switch-stars">
+                        <Star size={13} fill="currentColor" /> {member.stars || 0}
                       </span>
                     )}
                   </button>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      className="profile-switch-edit"
+                      onClick={event => beginEdit(member, event)}
+                      aria-label={`${member.name} bearbeiten`}
+                      title={`${member.name} bearbeiten`}
+                    >
+                      <Edit3 size={15} />
+                    </button>
+                  )}
+                </div>
                 );
               })}
             </div>
-            <section className="profile-notification-settings">
+
+            <div className="profile-tools">
+              <button
+                type="button"
+                className="profile-tool-button"
+                aria-expanded={showNotifications}
+                aria-controls="profile-notification-settings"
+                onClick={() => setShowNotifications(value => !value)}
+              >
+                <span className="profile-tool-icon">
+                  {notificationsEnabled ? <BellRing size={19} /> : <BellOff size={19} />}
+                </span>
+                <span className="profile-tool-copy">
+                  <strong>Benachrichtigungen</strong>
+                  <small>
+                    Für {activeMember?.name} auf diesem Gerät
+                  </small>
+                </span>
+                <ChevronDown
+                  className={showNotifications ? 'open' : ''}
+                  size={18}
+                />
+              </button>
+              {canManage && (
+                <button
+                  type="button"
+                  className="auth-secondary profile-add"
+                  onClick={beginAdd}
+                >
+                  <Plus size={18} /> Mitglied hinzufügen
+                </button>
+              )}
+            </div>
+
+            {showNotifications && (
+              <section
+                className="profile-notification-settings"
+                id="profile-notification-settings"
+              >
               <div className="profile-notification-heading">
                 <span className="profile-notification-icon">
                   {notificationsEnabled ? <BellRing size={20} /> : <BellOff size={20} />}
@@ -410,14 +518,10 @@ export default function ProfileModal() {
                   </button>
                 </>
               )}
-            </section>
-            {canManage && (
-              <button className="auth-secondary profile-add" onClick={beginAdd}>
-                <Plus size={18} /> Familienmitglied hinzufügen
-              </button>
+              </section>
             )}
           </>
-        ) : (
+          ) : (
           <form className="profile-editor-modern" onSubmit={save}>
             <div className="profile-editor-preview">
               <img src={form.avatar || DEFAULT_FAMILY_AVATAR} alt="" />
@@ -536,7 +640,8 @@ export default function ProfileModal() {
               )}
             </div>
           </form>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
