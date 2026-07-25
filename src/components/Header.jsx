@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Info, Users, Sparkles, Settings } from 'lucide-react';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings } from 'lucide-react';
 import { isChildProfile } from '../constants/roles';
 import FamilyEditModal from './FamilyTree/FamilyEditModal';
+import PlanLocationHelp from './PlanLocationHelp';
 
 const ADULT_THEMES = [
   { id: 'light', name: 'Waldruhe', description: 'warm & natürlich', icon: '❧', color: '#286a58', accent: '#d87058' },
@@ -66,20 +67,7 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
       >
         <span className="household-switcher-label">
           Planungsort
-          <span className="household-info">
-            <button
-              type="button"
-              className="household-info-button"
-              aria-label="Was bedeutet Planungsort?"
-            >
-              <Info size={13} />
-            </button>
-            <span role="tooltip">
-              Für Großeltern ohne eigenes Familienkonto: Termine, Aufgaben,
-              Speiseplan, Mülltermine und Pinnwand können für ihr Zuhause
-              getrennt geplant werden.
-            </span>
-          </span>
+          <PlanLocationHelp />
         </span>
         <button
           onClick={() => toggleHousehold('familie')}

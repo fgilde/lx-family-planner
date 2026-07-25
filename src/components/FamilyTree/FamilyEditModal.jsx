@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Check,
+  CircleHelp,
   Home,
-  Info,
   LockKeyhole,
   ShieldAlert,
   Trash2,
@@ -138,23 +138,21 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
               <div className="family-feature-setting-copy">
                 <span className="family-feature-setting-title">
                   <strong>Zweiten Planungsort anzeigen</strong>
-                  <span
-                    className="family-setting-info"
-                    tabIndex={0}
-                    aria-label="Erklärung zum zweiten Planungsort"
-                  >
-                    <Info size={14} />
-                    <span role="tooltip">
-                      Ideal, wenn Oma und Opa kein eigenes Familienkonto nutzen:
-                      Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand
-                      lassen sich für ihr Zuhause getrennt planen.
-                    </span>
-                  </span>
                 </span>
                 <small>
                   Blendet „Zuhause Oma &amp; Opa“ als eigenen Planungsbereich
                   im Kopf der App ein.
                 </small>
+                <details className="family-feature-explainer">
+                  <summary>
+                    <CircleHelp size={14} /> Warum gibt es das?
+                  </summary>
+                  <p>
+                    Ideal, wenn Oma und Opa kein eigenes Familienkonto nutzen:
+                    Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand
+                    lassen sich für ihr Zuhause getrennt planen.
+                  </p>
+                </details>
               </div>
               <button
                 type="button"

@@ -9,6 +9,7 @@ FROM dependencies AS build
 COPY index.html vite.config.js ./
 COPY public ./public
 COPY src ./src
+COPY shared ./shared
 RUN npm run build
 
 FROM node:24-bookworm-slim AS runtime
@@ -28,6 +29,7 @@ RUN npm ci --omit=dev \
 
 COPY --chown=node:node server.js ./
 COPY --chown=node:node server ./server
+COPY --chown=node:node shared ./shared
 COPY --chown=node:node --from=build /app/dist ./dist
 
 USER node

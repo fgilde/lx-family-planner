@@ -1,45 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useFamily } from '../../context/FamilyContext';
 import { handleImgError, DEFAULT_RECIPE_IMAGE } from '../../utils/imageFallback';
-import { X, Play, Pause, RotateCcw, Clock, ShoppingBag, CheckSquare, Sparkles, Heart, Users, Flame, BellRing } from 'lucide-react';
-
-// Intelligent sentence & step splitter - completely defensive for strings, arrays, objects
-function parseInstructionSteps(instructionsInput) {
-  if (!instructionsInput) return ['Zutaten vorbereiten und nach Wunsch zubereiten.'];
-  
-  let rawText = '';
-  if (Array.isArray(instructionsInput)) {
-    rawText = instructionsInput.map(item => (typeof item === 'string' ? item : (item?.text || item?.name || String(item || '')))).join('\n');
-  } else if (typeof instructionsInput === 'string') {
-    rawText = instructionsInput;
-  } else if (typeof instructionsInput === 'object' && instructionsInput.text) {
-    rawText = instructionsInput.text;
-  } else {
-    rawText = String(instructionsInput);
-  }
-
-  const rawLines = rawText.split(/\n+/);
-  const steps = [];
-
-  rawLines.forEach(line => {
-    line = line.trim();
-    if (!line) return;
-
-    // Split sentences by dot followed by space or end of string
-    const sentenceParts = line.split(/(?<=[a-zA-ZäöüÄÖÜß]\.)\s+/g);
-    sentenceParts.forEach(part => {
-      part = part.trim();
-      if (part) {
-        const cleaned = part.replace(/^(\d+[\.\)]|Schritt\s*\d+:?)\s*/i, '').trim();
-        if (cleaned.length > 2) {
-          steps.push(cleaned);
-        }
-      }
-    });
-  });
-
-  return steps.length > 0 ? steps : [rawText];
-}
+import { X, Play, Pause, RotateCcw, Clock, ShoppingBag, CheckSquare, Users, Flame, BellRing } from 'lucide-react';
+import {
+  getInstructionDurationMinutes,
+  parseInstructionSteps
+} from '../../../shared/recipeInstructions.js';
 
 export default function CookingModeModal({ recipe, onClose }) {
   const { addMealIngredientsToShopping, showToast } = useFamily();
@@ -60,6 +26,9 @@ export default function CookingModeModal({ recipe, onClose }) {
 
   // Parse instruction steps into an array of individual sentences
   const steps = parseInstructionSteps(recipe.instructions);
+  const stepProgress = steps.length
+    ? Math.round((completedSteps.length / steps.length) * 100)
+    : 0;
 
   // Scale ingredient quantities based on portion multiplier
   const portionMultiplier = portions / (basePortions || 1);
@@ -291,48 +260,77 @@ export default function CookingModeModal({ recipe, onClose }) {
           </div>
 
           {/* COLUMN 2: STEP-BY-STEP INSTRUCTIONS */}
-          <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: '#2563eb' }}>
+          <div className="cooking-steps-panel">
+            <div className="cooking-steps-heading">
+              <h3>
                 <CheckSquare size={20} /> Schritt-für-Schritt Zubereitung
               </h3>
-              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+              <span>
                 {completedSteps.length} / {steps.length} erledigt
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 340, overflowY: 'auto', paddingRight: 4 }}>
+            <div
+              className="cooking-steps-progress"
+              role="progressbar"
+              aria-label="Fortschritt der Zubereitung"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={stepProgress}
+            >
+              <span style={{ width: `${stepProgress}%` }} />
+            </div>
+
+            <div className="cooking-steps-list">
               {steps.map((stepText, idx) => {
                 const isDone = completedSteps.includes(idx);
+                const durationMinutes =
+                  getInstructionDurationMinutes(stepText);
+                const isParallel =
+                  /\b(?:während|in der zwischenzeit|gleichzeitig)\b/i.test(
+                    stepText
+                  );
 
                 return (
-                  <div
+                  <article
                     key={idx}
-                    onClick={() => toggleStepCompleted(idx)}
-                    style={{
-                      padding: 12,
-                      background: isDone ? 'var(--bg-subtle)' : 'var(--bg-card)',
-                      borderRadius: 'var(--radius-md)',
-                      border: `2px solid ${isDone ? '#10b981' : 'var(--border-color)'}`,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      opacity: isDone ? 0.65 : 1
-                    }}
+                    className={`cooking-step-card ${
+                      isDone ? 'completed' : ''
+                    } ${isParallel ? 'parallel' : ''}`}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                      <span style={{
-                        width: 24, height: 24, borderRadius: '50%',
-                        background: isDone ? '#10b981' : '#2563eb',
-                        color: 'white', fontSize: '0.75rem', fontWeight: 900,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2
-                      }}>
+                    <button
+                      type="button"
+                      className="cooking-step-main"
+                      onClick={() => toggleStepCompleted(idx)}
+                      aria-pressed={isDone}
+                    >
+                      <span className="cooking-step-number">
                         {idx + 1}
                       </span>
-                      <span style={{ fontSize: '0.9rem', fontWeight: isDone ? 600 : 700, textDecoration: isDone ? 'line-through' : 'none', flex: 1 }}>
+                      <span className="cooking-step-copy">
                         {stepText}
+                        {isParallel && (
+                          <small>Parallel vorbereiten</small>
+                        )}
                       </span>
-                    </div>
-                  </div>
+                      <CheckSquare
+                        className="cooking-step-check"
+                        size={18}
+                      />
+                    </button>
+                    {durationMinutes > 0 && (
+                      <button
+                        type="button"
+                        className="cooking-step-timer"
+                        onClick={() =>
+                          startTimerWithMinutes(durationMinutes)
+                        }
+                      >
+                        <Clock size={14} />
+                        Timer · {durationMinutes} Min
+                      </button>
+                    )}
+                  </article>
                 );
               })}
             </div>

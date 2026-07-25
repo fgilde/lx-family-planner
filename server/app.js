@@ -12,6 +12,7 @@ import {
 import BringApi from 'bring-shopping';
 import * as cheerio from 'cheerio';
 import webPush from 'web-push';
+import { parseInstructionSteps } from '../shared/recipeInstructions.js';
 import { loadBringCatalog } from './bringCatalog.js';
 import {
   RECORD_TYPES,
@@ -909,12 +910,23 @@ function recipeInstructionText(value) {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(recipeInstructionText);
   if (typeof value !== 'object') return [];
-  return [
-    value.text,
-    value.name,
-    value.itemListElement,
-    value.steps
-  ].flatMap(recipeInstructionText);
+
+  const types = Array.isArray(value['@type'])
+    ? value['@type']
+    : [value['@type']].filter(Boolean);
+  const nestedSteps = value.itemListElement || value.steps;
+
+  if (types.includes('HowToSection') && nestedSteps) {
+    return recipeInstructionText(nestedSteps);
+  }
+  if (typeof value.text === 'string' && value.text.trim()) {
+    return [value.text];
+  }
+  if (typeof value.description === 'string' && value.description.trim()) {
+    return [value.description];
+  }
+  if (nestedSteps) return recipeInstructionText(nestedSteps);
+  return typeof value.name === 'string' ? [value.name] : [];
 }
 
 function firstRecipeText(value, fallback = '', maxLength = 160) {
@@ -946,12 +958,11 @@ function normalizeRecipe(recipe, url, fallbackImage = '') {
   ]
     .map(candidate => resolveExternalUrl(candidate, url))
     .find(Boolean) || '';
-  const instructions = Array.isArray(recipe.recipeInstructions)
-    ? recipeInstructionText(recipe.recipeInstructions)
-        .map(step => cleanText(step, '', 1200))
-        .filter(Boolean)
-        .join('\n')
-    : cleanText(recipe.recipeInstructions, '', 10000);
+  const instructions = parseInstructionSteps(
+    recipeInstructionText(recipe.recipeInstructions)
+      .map(step => cleanText(step, '', 4000))
+      .filter(Boolean)
+  );
   return {
     title: cleanText(recipe.name, 'Importiertes Rezept', 160),
     image: cleanText(image, '', 1000),

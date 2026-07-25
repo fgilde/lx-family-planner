@@ -13,10 +13,16 @@ process.env.DISABLE_LEGACY_IMPORT = 'true';
 process.env.APP_SECRET = 'test-secret-only-for-automated-api-checks';
 process.env.NODE_ENV = 'test';
 
-const [{ createApp }, { database }, { normalizeBringCatalog }] = await Promise.all([
+const [
+  { createApp },
+  { database },
+  { normalizeBringCatalog },
+  { getInstructionDurationMinutes, parseInstructionSteps }
+] = await Promise.all([
   import('./app.js'),
   import('./database.js'),
-  import('./bringCatalog.js')
+  import('./bringCatalog.js'),
+  import('../shared/recipeInstructions.js')
 ]);
 
 const server = createApp().listen(0, '127.0.0.1');
@@ -124,6 +130,33 @@ test('Bring catalog is normalized, grouped and deduplicated', () => {
   assert.deepEqual(
     catalog.sections.flatMap(section => section.items.map(item => item.name)),
     ['Eier', 'Brötchen']
+  );
+});
+
+test('recipe instructions are cleaned and scheduled in a useful order', () => {
+  const steps = parseInstructionSteps([
+    '1, Zubereitung',
+    'Die Zucchini halbieren und aushöhlen.',
+    'Das Hackfleisch anbraten und die Zucchini füllen.',
+    'Im Ofen bei 180 Grad ca.',
+    '25 Minuten backen.',
+    'In der Zwischenzeit die Tomatensauce zubereiten.',
+    'Dazu passt Reis.'
+  ]);
+
+  assert.equal(steps.includes('Zubereitung'), false);
+  assert.equal(
+    steps.some(step =>
+      step.includes('180 Grad ca. 25 Minuten backen')
+    ),
+    true
+  );
+  const riceIndex = steps.findIndex(step => step.includes('Reis'));
+  const ovenIndex = steps.findIndex(step => step.includes('180 Grad'));
+  assert.equal(riceIndex >= 0 && riceIndex < ovenIndex, true);
+  assert.equal(
+    getInstructionDurationMinutes(steps[ovenIndex]),
+    25
   );
 });
 
