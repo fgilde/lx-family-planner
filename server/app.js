@@ -600,10 +600,16 @@ function requireAdult(req, res, next) {
 }
 
 function requireResourceManager(req, res, next) {
-  if (!ADULT_MANAGED_RESOURCES.has(req.params.type)) return next();
   const member = req.session?.memberId
     ? getMember(req.session.familyId, req.session.memberId)
     : null;
+  if (member?.role === 'pet') {
+    return res.status(403).json({
+      success: false,
+      error: 'Haustierprofile sind eine geschützte Übersicht.'
+    });
+  }
+  if (!ADULT_MANAGED_RESOURCES.has(req.params.type)) return next();
   if (!member || !ADULT_ROLES.has(member.role)) {
     return res.status(403).json({
       success: false,
@@ -611,6 +617,19 @@ function requireResourceManager(req, res, next) {
     });
   }
   return next();
+}
+
+function rejectPetChatAccess(req, res) {
+  if (req.params.type !== 'chatMessages') return false;
+  const member = req.session?.memberId
+    ? getMember(req.session.familyId, req.session.memberId)
+    : null;
+  if (member?.role !== 'pet') return false;
+  res.status(403).json({
+    success: false,
+    error: 'Haustierprofile verwenden keinen Chat.'
+  });
+  return true;
 }
 
 function integrationStatus(familyId) {
@@ -821,10 +840,16 @@ function visibleChatMessages(records, memberId) {
 
 function bootstrapForSession(session) {
   const bootstrap = getBootstrap(session.familyId);
-  bootstrap.resources.chatMessages = visibleChatMessages(
-    bootstrap.resources.chatMessages,
-    session.memberId
-  );
+  const member = session.memberId
+    ? getMember(session.familyId, session.memberId)
+    : null;
+  bootstrap.resources.chatMessages =
+    member?.role === 'pet'
+      ? []
+      : visibleChatMessages(
+          bootstrap.resources.chatMessages,
+          session.memberId
+        );
   bootstrap.familyRelationships = listFamilyRelationships(session.familyId);
   return bootstrap;
 }
@@ -840,10 +865,20 @@ function sessionChatRecord(req, record) {
     throw error;
   }
   const target = cleanText(input.target, 'group', 100);
-  if (target !== 'group' && !getMember(req.session.familyId, target)) {
-    const error = new Error('Das Zielprofil wurde nicht gefunden.');
-    error.statusCode = 404;
-    throw error;
+  if (target !== 'group') {
+    const targetMember = getMember(req.session.familyId, target);
+    if (!targetMember) {
+      const error = new Error('Das Zielprofil wurde nicht gefunden.');
+      error.statusCode = 404;
+      throw error;
+    }
+    if (targetMember.role === 'pet') {
+      const error = new Error(
+        'Haustierprofile können keine Chatnachrichten empfangen.'
+      );
+      error.statusCode = 403;
+      throw error;
+    }
   }
   return {
     ...input,
@@ -1605,6 +1640,7 @@ export function createApp() {
   });
 
   app.get('/api/resources/:type', requireAuth, (req, res) => {
+    if (rejectPetChatAccess(req, res)) return;
     let records = listRecords(req.session.familyId, req.params.type);
     if (req.params.type === 'chatMessages') {
       records = visibleChatMessages(records, req.session.memberId);
@@ -1642,6 +1678,7 @@ export function createApp() {
   });
 
   app.post('/api/resources/:type', requireAuth, requireResourceManager, (req, res) => {
+    if (rejectPetChatAccess(req, res)) return;
     let input = ensureObject(req.body);
     if (req.params.type === 'chatMessages') {
       input = sessionChatRecord(req, input);
@@ -1705,6 +1742,7 @@ export function createApp() {
   });
 
   app.patch('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
+    if (rejectPetChatAccess(req, res)) return;
     if (req.params.type === 'chatMessages') {
       const existing = getRecord(
         req.session.familyId,
@@ -1773,6 +1811,7 @@ export function createApp() {
   });
 
   app.delete('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
+    if (rejectPetChatAccess(req, res)) return;
     if (req.params.type === 'chatMessages') {
       const existing = getRecord(
         req.session.familyId,
@@ -1813,6 +1852,12 @@ export function createApp() {
     const member = req.session.memberId
       ? getMember(req.session.familyId, req.session.memberId)
       : null;
+    if (member?.role === 'pet') {
+      return res.status(403).json({
+        success: false,
+        error: 'Pflegepunkte werden von einem Erwachsenen bestätigt.'
+      });
+    }
     if (!member || (!ADULT_ROLES.has(member.role) && task.memberId !== member.id)) {
       return res.status(403).json({
         success: false,

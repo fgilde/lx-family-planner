@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BellRing, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import { isPetProfile } from '../../constants/roles';
 
 const SNOOZE_MS = 24 * 60 * 60 * 1000;
 
@@ -14,8 +15,10 @@ export default function NotificationPermissionBanner() {
     setSnoozedUntil(Number(localStorage.getItem(storageKey) || 0));
   }, [storageKey]);
   const isChild = ['child', 'teen'].includes(activeMember?.role);
+  const isPet = isPetProfile(activeMember);
   const alreadyConnected = Boolean(webPush.currentDeviceId);
   const canOffer =
+    !isPet &&
     !webPush.loading &&
     webPush.supported &&
     ['default', 'granted'].includes(webPush.permission) &&

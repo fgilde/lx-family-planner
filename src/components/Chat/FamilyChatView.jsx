@@ -45,8 +45,11 @@ export default function FamilyChatView() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const chatPartners = members.filter(member => member.id !== activeMember?.id);
-  const activeTargetMember = members.find(
+  const chatMembers = members.filter(member => member.role !== 'pet');
+  const chatPartners = chatMembers.filter(
+    member => member.id !== activeMember?.id
+  );
+  const activeTargetMember = chatMembers.find(
     member => member.id === activeChatTarget
   );
 
@@ -218,7 +221,7 @@ export default function FamilyChatView() {
           <div>
             <small>
               {activeChatTarget === 'group'
-                ? `${members.length} Familienprofile`
+                ? `${chatMembers.length} Familienprofile`
                 : getPositionLabel(activeTargetMember)}
             </small>
             <h1>

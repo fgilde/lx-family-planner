@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFamily } from '../context/FamilyContext';
-import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck } from 'lucide-react';
-import { canManageFamily, isChildProfile } from '../constants/roles';
+import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint } from 'lucide-react';
+import { canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
 
 export default function Navigation({ onOpenFamilyTree }) {
   const {
@@ -45,12 +45,19 @@ export default function Navigation({ onOpenFamilyTree }) {
     { id: 'board', label: 'Pinnwand', icon: Pin }
   ];
 
+  const petTabs = [
+    { id: 'dashboard', label: `Für ${activeMember?.name?.split(' ')[0] || 'unser Tier'}`, icon: PawPrint },
+    { id: 'calendar', label: 'Tierarzt & Termine', icon: Calendar }
+  ];
+
   // Granular access filter: If member has allowedModules restriction, filter tabs accordingly
-  const roleTabs = isChildProfile(activeMember)
-    ? childTabs
-    : canManageFamily(activeMember)
-      ? [...allTabs, { id: 'admin', label: 'Elternzentrale', icon: ShieldCheck }]
-      : allTabs;
+  const roleTabs = isPetProfile(activeMember)
+    ? petTabs
+    : isChildProfile(activeMember)
+      ? childTabs
+      : canManageFamily(activeMember)
+        ? [...allTabs, { id: 'admin', label: 'Elternzentrale', icon: ShieldCheck }]
+        : allTabs;
   const visibleTabs = activeMember?.allowedModules
     ? roleTabs.filter(t => t.id === 'dashboard' || activeMember.allowedModules.includes(t.id))
     : roleTabs;

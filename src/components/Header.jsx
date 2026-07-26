@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings } from 'lucide-react';
-import { isChildProfile } from '../constants/roles';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X } from 'lucide-react';
+import { isChildProfile, isPetProfile } from '../constants/roles';
 import FamilyEditModal from './FamilyTree/FamilyEditModal';
 import PlanLocationHelp from './PlanLocationHelp';
 
@@ -22,6 +23,13 @@ const CHILD_THEMES = [
   { id: 'adventure', name: 'Helden-Camp', description: 'Helden & Blitze', icon: '🦸', color: '#3169c8', accent: '#e7474f' }
 ];
 
+const PET_THEMES = [
+  { id: 'light', name: 'Grüne Wiese', description: 'ruhig & natürlich', icon: '🐾', color: '#286a58', accent: '#d87058' },
+  { id: 'ocean', name: 'Küstenpfoten', description: 'frisch & entspannt', icon: '🌊', color: '#17687a', accent: '#d99157' },
+  { id: 'rock', name: 'Wilde Schnauze', description: 'kräftig & verspielt', icon: '🦴', color: '#70251f', accent: '#efb84d' },
+  { id: 'midnight', name: 'Nachtpfote', description: 'sanft & dunkel', icon: '🌙', color: '#164f49', accent: '#e0a65b' }
+];
+
 export default function Header({ onLogout, unreadChatCount = 0 }) {
   const {
     theme, setTheme,
@@ -34,9 +42,33 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
   const isChild = isChildProfile(activeMember);
+  const isPet = isPetProfile(activeMember);
   const grandparentsHouseholdEnabled =
     familyAccount?.grandparentsHouseholdEnabled !== false;
-  const availableThemes = isChild ? CHILD_THEMES : ADULT_THEMES;
+  const availableThemes = isPet
+    ? PET_THEMES
+    : isChild
+      ? CHILD_THEMES
+      : ADULT_THEMES;
+  const themePickerTitle = isPet
+    ? `${activeMember?.name?.split(' ')[0] || 'Deine Fellnase'}s Pfotenwelt`
+    : isChild
+      ? 'Deine Themenwelt'
+      : 'Dein Zuhause, dein Stil';
+  const themePickerDescription = isPet
+    ? 'Wähle eine ruhige Welt für das Haustierprofil.'
+    : isChild
+      ? 'Such dir deine Lieblingswelt aus.'
+      : 'Ruhig oder laut – die Auswahl wird im Profil gespeichert.';
+
+  useEffect(() => {
+    if (!isThemePickerOpen) return undefined;
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') setIsThemePickerOpen(false);
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [isThemePickerOpen]);
 
   const toggleHousehold = (targetHousehold) => {
     setActiveHousehold(targetHousehold);
@@ -60,7 +92,7 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
       </a>
 
       {/* Household planning context */}
-      {!isChild && grandparentsHouseholdEnabled && <div
+      {!isChild && !isPet && grandparentsHouseholdEnabled && <div
         className="household-switcher"
         role="group"
         aria-label="Planungsort auswählen"
@@ -87,7 +119,7 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
       </div>}
 
       <div className="header-right">
-        {!isChild && (
+        {!isChild && !isPet && (
           <button
             className="icon-circle-btn"
             onClick={() => setIsFamilySettingsOpen(true)}
@@ -101,40 +133,67 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
           <button
             className="icon-circle-btn"
             onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
-            title={isChild ? 'Meine Themenwelt wählen' : 'Themenwelt wählen'}
-            aria-label={isChild ? 'Meine Themenwelt wählen' : 'Themenwelt wählen'}
+            title={isPet ? 'Pfotenwelt wählen' : isChild ? 'Meine Themenwelt wählen' : 'Themenwelt wählen'}
+            aria-label={isPet ? 'Pfotenwelt wählen' : isChild ? 'Meine Themenwelt wählen' : 'Themenwelt wählen'}
             aria-expanded={isThemePickerOpen}
           >
             <Sparkles size={20} style={{ color: 'var(--primary)' }} />
           </button>
 
-          {isThemePickerOpen && (
-            <div className="theme-picker">
-              <div className="theme-picker-title">
-                <strong>{isChild ? 'Deine Themenwelt' : 'Dein Zuhause, dein Stil'}</strong>
-                <span>{isChild ? 'Such dir deine Lieblingswelt aus.' : 'Ruhig oder laut – die Auswahl wird im Profil gespeichert.'}</span>
-              </div>
-              {availableThemes.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => { setTheme(t.id); setIsThemePickerOpen(false); }}
-                  className={`theme-choice ${theme === t.id ? 'active' : ''}`}
-                  style={{ '--choice-color': t.color, '--choice-accent': t.accent }}
-                  aria-pressed={theme === t.id}
+          {isThemePickerOpen &&
+            createPortal(
+              <div
+                className="theme-picker-layer"
+                onPointerDown={() => setIsThemePickerOpen(false)}
+              >
+                <section
+                  className="theme-picker theme-picker-portal"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="theme-picker-title"
+                  onPointerDown={event => event.stopPropagation()}
                 >
-                  <span className="theme-choice-preview" aria-hidden="true">{t.icon}</span>
-                  <span className="theme-choice-copy">
-                    <strong>{t.name}</strong>
-                    <small>{t.description}</small>
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+                  <div className="theme-picker-title">
+                    <span className="theme-picker-kicker">
+                      <Sparkles size={14} /> Designwelt
+                    </span>
+                    <strong id="theme-picker-title">{themePickerTitle}</strong>
+                    <span>{themePickerDescription}</span>
+                    <button
+                      type="button"
+                      className="theme-picker-close"
+                      onClick={() => setIsThemePickerOpen(false)}
+                      aria-label="Designauswahl schließen"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                  {availableThemes.map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => {
+                        setTheme(t.id);
+                        setIsThemePickerOpen(false);
+                      }}
+                      className={`theme-choice ${theme === t.id ? 'active' : ''}`}
+                      style={{ '--choice-color': t.color, '--choice-accent': t.accent }}
+                      aria-pressed={theme === t.id}
+                    >
+                      <span className="theme-choice-preview" aria-hidden="true">{t.icon}</span>
+                      <span className="theme-choice-copy">
+                        <strong>{t.name}</strong>
+                        <small>{t.description}</small>
+                      </span>
+                    </button>
+                  ))}
+                </section>
+              </div>,
+              document.body
+            )}
         </div>
 
         {/* Tablet Dashboard Toggle */}
-        {!isChild && <button
+        {!isChild && !isPet && <button
           className={`tablet-mode-btn ${activeTab === 'kitchen' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'kitchen' ? 'dashboard' : 'kitchen')}
           title={activeTab === 'kitchen' ? 'Tablet Mode verlassen' : 'Tablet Mode öffnen'}
@@ -161,10 +220,15 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
                 <Star size={10} fill="#f59e0b" /> {activeMember.stars || 0}★
               </span>
             )}
+            {isPet && (
+              <span className="profile-pill-pet">
+                <PawPrint size={11} /> Haustier
+              </span>
+            )}
           </div>
 
           {/* Unread Chat Badge Counter */}
-          {unreadChatCount > 0 && (
+          {!isPet && unreadChatCount > 0 && (
             <span style={{
               position: 'absolute', top: -4, right: -4,
               background: '#ef4444', color: 'white',

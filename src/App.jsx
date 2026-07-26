@@ -21,6 +21,7 @@ import OnboardingWizard from './components/Auth/OnboardingWizard';
 import BringAccountModal from './components/Shopping/BringAccountModal';
 import ParentAdmin from './components/Admin/ParentAdmin';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
+import { isPetProfile } from './constants/roles';
 
 function MainContent() {
   const {
@@ -28,6 +29,7 @@ function MainContent() {
     authStatus,
     logout,
     setActiveTab,
+    activeMember,
     toast,
     setToast
   } = useFamily();
@@ -48,11 +50,26 @@ function MainContent() {
       'meals'
     ]);
     if (allowedViews.has(requestedView)) {
-      setActiveTab(requestedView);
+      if (
+        !isPetProfile(activeMember) ||
+        ['dashboard', 'calendar'].includes(requestedView)
+      ) {
+        setActiveTab(requestedView);
+      }
       url.searchParams.delete('view');
       window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
     }
-  }, [authStatus, setActiveTab]);
+  }, [activeMember, authStatus, setActiveTab]);
+
+  useEffect(() => {
+    if (
+      authStatus === 'authenticated' &&
+      isPetProfile(activeMember) &&
+      !['dashboard', 'calendar'].includes(activeTab)
+    ) {
+      setActiveTab('dashboard');
+    }
+  }, [activeMember, activeTab, authStatus, setActiveTab]);
 
   if (authStatus === 'loading') {
     return (

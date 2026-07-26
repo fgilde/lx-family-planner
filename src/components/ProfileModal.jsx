@@ -7,6 +7,7 @@ import {
   Edit3,
   KeyRound,
   Lock,
+  PawPrint,
   Plus,
   Star,
   Send,
@@ -21,6 +22,7 @@ import {
   POSITION_OPTIONS,
   canManageFamily,
   getPositionLabel,
+  isPetProfile,
   roleForPosition
 } from '../constants/roles';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../utils/imageFallback';
@@ -103,6 +105,7 @@ export default function ProfileModal() {
     ...(currentPushDevice?.preferences || {})
   };
   const notificationsEnabled = Boolean(webPush.currentDeviceId);
+  const activeProfileIsPet = isPetProfile(activeMember);
   const close = () => {
     setMode('list');
     setPinTarget(null);
@@ -287,7 +290,9 @@ export default function ProfileModal() {
             <p>
               {profileSecretType === 'pin'
                 ? 'Gib die persönliche Profil-PIN ein.'
-                : 'Für den Wechsel aus einem Kinderprofil wird das Familienpasswort benötigt.'}
+                : activeProfileIsPet
+                  ? 'Für den Wechsel aus einem Haustierprofil wird das Familienpasswort benötigt.'
+                  : 'Für den Wechsel aus einem Kinderprofil wird das Familienpasswort benötigt.'}
             </p>
             <div className="auth-input-wrap">
               <KeyRound size={18} />
@@ -336,7 +341,9 @@ export default function ProfileModal() {
                 return (
                   <div
                     key={member.id}
-                    className={`profile-switch-card ${isActive ? 'active' : ''}`}
+                    className={`profile-switch-card ${
+                      isPetProfile(member) ? 'pet' : ''
+                    } ${isActive ? 'active' : ''}`}
                     style={{
                       '--member-color': member.color || '#246B58',
                       '--profile-index': index
@@ -376,6 +383,11 @@ export default function ProfileModal() {
                         <Star size={13} fill="currentColor" /> {member.stars || 0}
                       </span>
                     )}
+                    {isPetProfile(member) && (
+                      <span className="profile-switch-pet">
+                        <PawPrint size={13} /> Pfotenprofil
+                      </span>
+                    )}
                   </button>
                   {canEdit && (
                     <button
@@ -393,28 +405,39 @@ export default function ProfileModal() {
               })}
             </div>
 
-            <div className="profile-tools">
-              <button
-                type="button"
-                className="profile-tool-button"
-                aria-expanded={showNotifications}
-                aria-controls="profile-notification-settings"
-                onClick={() => setShowNotifications(value => !value)}
-              >
-                <span className="profile-tool-icon">
-                  {notificationsEnabled ? <BellRing size={19} /> : <BellOff size={19} />}
-                </span>
-                <span className="profile-tool-copy">
-                  <strong>Benachrichtigungen</strong>
-                  <small>
-                    Für {activeMember?.name} auf diesem Gerät
-                  </small>
-                </span>
-                <ChevronDown
-                  className={showNotifications ? 'open' : ''}
-                  size={18}
-                />
-              </button>
+            <div className={`profile-tools ${activeProfileIsPet ? 'pet-active' : ''}`}>
+              {!activeProfileIsPet && (
+                <button
+                  type="button"
+                  className="profile-tool-button"
+                  aria-expanded={showNotifications}
+                  aria-controls="profile-notification-settings"
+                  onClick={() => setShowNotifications(value => !value)}
+                >
+                  <span className="profile-tool-icon">
+                    {notificationsEnabled ? <BellRing size={19} /> : <BellOff size={19} />}
+                  </span>
+                  <span className="profile-tool-copy">
+                    <strong>Benachrichtigungen</strong>
+                    <small>
+                      Für {activeMember?.name} auf diesem Gerät
+                    </small>
+                  </span>
+                  <ChevronDown
+                    className={showNotifications ? 'open' : ''}
+                    size={18}
+                  />
+                </button>
+              )}
+              {activeProfileIsPet && (
+                <div className="profile-pet-mode-note">
+                  <PawPrint size={19} />
+                  <span>
+                    <strong>Haustiermodus aktiv</strong>
+                    <small>Ohne Chat, Meldungen und Kontofunktionen</small>
+                  </span>
+                </div>
+              )}
               {canManage && (
                 <button
                   type="button"
@@ -426,7 +449,7 @@ export default function ProfileModal() {
               )}
             </div>
 
-            {showNotifications && (
+            {!activeProfileIsPet && showNotifications && (
               <section
                 className="profile-notification-settings"
                 id="profile-notification-settings"
@@ -533,13 +556,27 @@ export default function ProfileModal() {
             </div>
 
             <div className="profile-editor-fields">
+              {form.role === 'pet' && (
+                <div className="pet-profile-editor-note">
+                  <PawPrint size={20} />
+                  <span>
+                    <strong>Haustierprofil</strong>
+                    <small>
+                      Zeigt Pflegeaufgaben und Tiertermine – ohne Chat,
+                      Benachrichtigungen oder Sterneshop.
+                    </small>
+                  </span>
+                </div>
+              )}
               <label className="form-group">
-                <span className="form-label">Name</span>
+                <span className="form-label">
+                  {form.role === 'pet' ? 'Name des Haustiers' : 'Name'}
+                </span>
                 <input
                   className="form-input"
                   value={form.name}
                   onChange={event => updateForm({ name: event.target.value })}
-                  placeholder="z. B. Testname"
+                  placeholder={form.role === 'pet' ? 'z. B. Luna' : 'z. B. Testname'}
                   maxLength={80}
                   required
                 />
@@ -600,21 +637,23 @@ export default function ProfileModal() {
                 </div>
               </div>
 
-              <label className="form-group">
-                <span className="form-label">
-                  {editingMemberId ? 'Neue Profil-PIN (optional)' : 'Profil-PIN (optional)'}
-                </span>
-                <input
-                  className="form-input"
-                  type="password"
-                  autoComplete="new-password"
-                  inputMode="numeric"
-                  value={form.pin}
-                  onChange={event => updateForm({ pin: event.target.value })}
-                  placeholder={editingMemberId ? 'Leer lassen = unverändert' : 'Persönlicher Schutz'}
-                  maxLength={12}
-                />
-              </label>
+              {form.role !== 'pet' && (
+                <label className="form-group">
+                  <span className="form-label">
+                    {editingMemberId ? 'Neue Profil-PIN (optional)' : 'Profil-PIN (optional)'}
+                  </span>
+                  <input
+                    className="form-input"
+                    type="password"
+                    autoComplete="new-password"
+                    inputMode="numeric"
+                    value={form.pin}
+                    onChange={event => updateForm({ pin: event.target.value })}
+                    placeholder={editingMemberId ? 'Leer lassen = unverändert' : 'Persönlicher Schutz'}
+                    maxLength={12}
+                  />
+                </label>
+              )}
             </div>
 
             <div className="modal-actions profile-editor-actions">

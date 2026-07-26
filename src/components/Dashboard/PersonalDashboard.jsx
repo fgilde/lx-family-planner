@@ -3,7 +3,8 @@ import { useFamily } from '../../context/FamilyContext';
 import { Calendar, CheckSquare, Pin, Trash2, UtensilsCrossed, Star, Plus, Sun, Moon, Clock, ArrowRight, Sparkles, Award } from 'lucide-react';
 import { INITIAL_TRASH_EVENTS } from '../Calendar/TrashCalendarView';
 import ChildDashboard from './ChildDashboard';
-import { isChildProfile } from '../../constants/roles';
+import PetDashboard from './PetDashboard';
+import { isChildProfile, isPetProfile } from '../../constants/roles';
 
 export default function PersonalDashboard() {
   const {
@@ -13,6 +14,9 @@ export default function PersonalDashboard() {
 
   if (isChildProfile(activeMember)) {
     return <ChildDashboard />;
+  }
+  if (isPetProfile(activeMember)) {
+    return <PetDashboard />;
   }
 
   // Time-based greeting

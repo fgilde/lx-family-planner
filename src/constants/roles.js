@@ -47,6 +47,10 @@ export function isChildProfile(member) {
   return member?.role === 'child';
 }
 
+export function isPetProfile(member) {
+  return member?.role === 'pet';
+}
+
 export function isYoungProfile(member) {
   return member?.role === 'child' || member?.role === 'teen';
 }

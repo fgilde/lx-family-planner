@@ -8,7 +8,7 @@ import React, {
   useState
 } from 'react';
 import { exportEventsToICS, parseICSContent } from '../utils/icsUtils';
-import { canManageFamily } from '../constants/roles';
+import { canManageFamily, isPetProfile } from '../constants/roles';
 import {
   currentBrowserSubscription,
   friendlyDeviceName,
@@ -371,7 +371,11 @@ export function FamilyProvider({ children }) {
     document.documentElement.setAttribute('data-theme', nextTheme);
     document.documentElement.setAttribute(
       'data-profile-mode',
-      activeMember?.role === 'child' ? 'child' : 'adult'
+      isPetProfile(activeMember)
+        ? 'pet'
+        : activeMember?.role === 'child'
+          ? 'child'
+          : 'adult'
     );
   }, [activeMember?.id, activeMember?.role, activeMember?.theme]);
 

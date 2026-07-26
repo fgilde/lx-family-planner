@@ -178,7 +178,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
           { name: 'Testname', position: 'mama', role: 'adult' },
           { name: 'Kind Eins', position: 'kind', role: 'child' },
           { name: 'Kind Zwei', position: 'kind', role: 'child' },
-          { name: 'Zweiter Elternteil', position: 'papa', role: 'adult' }
+          { name: 'Zweiter Elternteil', position: 'papa', role: 'adult' },
+          { name: 'Luna', position: 'haustier', role: 'pet' }
         ]
       })
     },
@@ -191,13 +192,14 @@ test('family flow stays isolated, authorized and internally consistent', async (
     cookie,
     'content-type': 'application/json'
   };
-  const [adult, childOne, childTwo, secondAdult] = registration.body.members;
+  const [adult, childOne, childTwo, secondAdult, pet] =
+    registration.body.members;
 
   const bootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.members.length, 4);
+  assert.equal(bootstrap.body.members.length, 5);
   assert.equal(
     bootstrap.body.family.grandparentsHouseholdEnabled,
     true
@@ -268,6 +270,53 @@ test('family flow stays isolated, authorized and internally consistent', async (
     201
   );
   assert.equal(directMessage.body.record.senderId, adult.id);
+
+  await request(
+    '/api/resources/chatMessages',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        text: 'Unpassendes Haustier-DM',
+        target: pet.id
+      })
+    },
+    403
+  );
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: pet.id })
+  });
+  const petBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.deepEqual(petBootstrap.body.resources.chatMessages, []);
+  await request(
+    `/api/tasks/${task.body.record.id}/toggle`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders
+    },
+    403
+  );
+  await request(
+    '/api/resources/chatMessages',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        text: 'Haustiere schreiben nicht',
+        target: 'group'
+      })
+    },
+    403
+  );
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: adult.id, familyPassword: password })
+  });
 
   await request('/api/auth/member', {
     method: 'POST',
