@@ -9,13 +9,23 @@ import {
   randomUUID,
   timingSafeEqual
 } from 'crypto';
+import { promises as dns } from 'dns';
+import { isIP } from 'net';
 import BringApi from 'bring-shopping';
 import * as cheerio from 'cheerio';
 import webPush from 'web-push';
+import { parseICalendar } from '../shared/icsCalendar.js';
 import { parseInstructionSteps } from '../shared/recipeInstructions.js';
+import {
+  TASK_REPEAT_RULES,
+  normalizeTaskDate
+} from '../shared/taskRecurrence.js';
 import { loadBringCatalog } from './bringCatalog.js';
 import {
   RECORD_TYPES,
+  countUnreadInboxNotifications,
+  createCalendarSubscription,
+  createInboxNotifications,
   createFamily,
   createFamilyRelationshipRequest,
   createMember,
@@ -23,6 +33,7 @@ import {
   createSession,
   countPushSubscriptionsByEndpoint,
   deleteFamily,
+  deleteCalendarSubscription,
   deleteFamilyRelationship,
   deleteIntegration,
   deleteMember,
@@ -33,6 +44,7 @@ import {
   deleteTaskRecords,
   deleteSession,
   getBootstrap,
+  getCalendarSubscription,
   getFamily,
   getFamilyAuthRow,
   getFamilyVersion,
@@ -44,7 +56,10 @@ import {
   getRecord,
   getSession,
   listPublicFamilies,
+  listCalendarSubscriptions,
+  listEnabledCalendarSubscriptions,
   listFamilyRelationships,
+  listInboxNotifications,
   listPushSubscriptions,
   listRecords,
   redeemRewardRecord,
@@ -55,8 +70,12 @@ import {
   savePushSubscription,
   setAppMeta,
   setSessionMember,
+  markAllInboxNotificationsRead,
+  markInboxNotificationRead,
   reviewTaskRecord,
   toggleTaskRecord,
+  updateCalendarSubscription,
+  updateCalendarSubscriptionSync,
   updateFamily,
   updateMember,
   updateRecord,
@@ -67,13 +86,24 @@ import {
 const SESSION_COOKIE = 'lx_session';
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30;
 const DEFAULT_PORT = 3001;
-const JSON_LIMIT = '3mb';
+const JSON_LIMIT = process.env.JSON_LIMIT || '5mb';
 const APP_SECRET =
   process.env.APP_SECRET ||
   process.env.SECRET_KEY ||
   'lx-family-development-secret-change-me';
 const ENCRYPTION_KEY = createHash('sha256').update(APP_SECRET).digest();
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const CALENDAR_ALLOW_PRIVATE_HOSTS =
+  process.env.CALENDAR_ALLOW_PRIVATE_HOSTS === 'true';
+const CALENDAR_ALLOW_LOOPBACK_FOR_TESTS =
+  process.env.NODE_ENV === 'test' &&
+  process.env.CALENDAR_ALLOW_LOOPBACK_FOR_TESTS === 'true';
+const CALENDAR_SYNC_INTERVAL_MS = Math.max(
+  15,
+  Number(process.env.CALENDAR_SYNC_INTERVAL_MINUTES || 60)
+) * 60 * 1000;
+const CALENDAR_FETCH_TIMEOUT_MS = 12_000;
+const CALENDAR_MAX_BYTES = 2 * 1024 * 1024;
 const pendingBringLogins = new Map();
 const authAttempts = new Map();
 
@@ -195,6 +225,35 @@ function normalizeMemberInput(value = {}) {
   };
 }
 
+function normalizeTaskSchedule(value = {}) {
+  const repeatRule = TASK_REPEAT_RULES.has(value.repeatRule)
+    ? value.repeatRule
+    : 'none';
+  const now = new Date();
+  const today = new Date(
+    now.getTime() - now.getTimezoneOffset() * 60_000
+  ).toISOString().slice(0, 10);
+  const dueDate = normalizeTaskDate(
+    value.dueDate,
+    repeatRule === 'none' ? '' : today
+  );
+  return {
+    repeatRule,
+    dueDate,
+    repeatAnchorDay: Math.max(
+      1,
+      Math.min(
+        31,
+        Number(value.repeatAnchorDay || dueDate.slice(8, 10) || 1)
+      )
+    ),
+    occurrenceDate: normalizeTaskDate(
+      value.occurrenceDate,
+      dueDate
+    )
+  };
+}
+
 function parseCookies(header = '') {
   return header.split(';').reduce((cookies, pair) => {
     const separator = pair.indexOf('=');
@@ -275,6 +334,280 @@ function decryptJson(value) {
       decipher.final()
     ]).toString('utf8')
   );
+}
+
+function calendarSourceKey(subscriptionId) {
+  return `calendar-subscription:${subscriptionId}`;
+}
+
+function isCalendarSubscriptionEvent(record) {
+  return Boolean(
+    record?.readOnly &&
+    String(record?.source || '').startsWith('calendar-subscription:')
+  );
+}
+
+function normalizeCalendarFeedUrl(value) {
+  let url;
+  try {
+    url = new URL(requireText(value, 'Kalender-Link', 4000));
+  } catch {
+    const error = new Error('Bitte gib einen vollständigen Kalender-Link ein.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    const error = new Error('Kalender-Links müssen mit http:// oder https:// beginnen.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (url.username || url.password) {
+    const error = new Error(
+      'Benutzername und Passwort dürfen nicht direkt im Kalender-Link stehen.'
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  url.hash = '';
+  return url;
+}
+
+function ipv4Parts(address) {
+  if (isIP(address) !== 4) return null;
+  return address.split('.').map(Number);
+}
+
+function blockedCalendarAddress(address) {
+  const normalized = String(address || '').toLowerCase();
+  const mappedIpv4 = normalized.startsWith('::ffff:')
+    ? normalized.slice(7)
+    : normalized;
+  const parts = ipv4Parts(mappedIpv4);
+  if (parts) {
+    const [first, second] = parts;
+    if (first === 127 && CALENDAR_ALLOW_LOOPBACK_FOR_TESTS) {
+      return false;
+    }
+    if (
+      first === 0 ||
+      first === 127 ||
+      first >= 224 ||
+      (first === 169 && second === 254)
+    ) {
+      return true;
+    }
+    if (CALENDAR_ALLOW_PRIVATE_HOSTS) return false;
+    return (
+      first === 10 ||
+      (first === 172 && second >= 16 && second <= 31) ||
+      (first === 192 && second === 168) ||
+      (first === 100 && second >= 64 && second <= 127)
+    );
+  }
+  if (isIP(normalized) === 6) {
+    if (
+      normalized === '::' ||
+      normalized === '::1' ||
+      normalized.startsWith('fe8') ||
+      normalized.startsWith('fe9') ||
+      normalized.startsWith('fea') ||
+      normalized.startsWith('feb') ||
+      normalized.startsWith('ff')
+    ) {
+      return true;
+    }
+    if (!CALENDAR_ALLOW_PRIVATE_HOSTS) {
+      return normalized.startsWith('fc') || normalized.startsWith('fd');
+    }
+  }
+  return false;
+}
+
+async function validateCalendarFeedTarget(url) {
+  let addresses;
+  try {
+    addresses = isIP(url.hostname)
+      ? [{ address: url.hostname }]
+      : await dns.lookup(url.hostname, { all: true, verbatim: true });
+  } catch {
+    const error = new Error('Der Kalender-Server konnte nicht gefunden werden.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (
+    !addresses.length ||
+    addresses.some(entry => blockedCalendarAddress(entry.address))
+  ) {
+    const error = new Error(
+      CALENDAR_ALLOW_PRIVATE_HOSTS
+        ? 'Lokale Geräteadressen und Link-Local-Adressen sind nicht erlaubt.'
+        : 'Private Heimnetz-Adressen sind für Kalenderquellen nicht freigeschaltet.'
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+}
+
+async function readLimitedCalendarBody(response) {
+  const announcedLength = Number(response.headers.get('content-length') || 0);
+  if (announcedLength > CALENDAR_MAX_BYTES) {
+    const error = new Error('Die Kalenderdatei ist größer als 2 MB.');
+    error.statusCode = 413;
+    throw error;
+  }
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > CALENDAR_MAX_BYTES) {
+      await reader.cancel();
+      const error = new Error('Die Kalenderdatei ist größer als 2 MB.');
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+async function fetchCalendarFeed(rawUrl) {
+  let url = normalizeCalendarFeedUrl(rawUrl);
+  for (let redirect = 0; redirect <= 3; redirect += 1) {
+    await validateCalendarFeedTarget(url);
+    let response;
+    try {
+      response = await fetch(url, {
+        redirect: 'manual',
+        signal: AbortSignal.timeout(CALENDAR_FETCH_TIMEOUT_MS),
+        headers: {
+          accept: 'text/calendar, text/plain;q=0.9, */*;q=0.2',
+          'user-agent': 'LX-Family-Planner/1.0 Calendar-Sync'
+        }
+      });
+    } catch {
+      const error = new Error('Der Kalender-Server antwortet gerade nicht.');
+      error.statusCode = 502;
+      throw error;
+    }
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+      const location = response.headers.get('location');
+      if (!location || redirect === 3) {
+        const error = new Error('Der Kalender-Link leitet zu oft weiter.');
+        error.statusCode = 502;
+        throw error;
+      }
+      url = normalizeCalendarFeedUrl(new URL(location, url).toString());
+      continue;
+    }
+    if (!response.ok) {
+      const error = new Error(
+        response.status === 401 || response.status === 403
+          ? 'Der Kalender-Link ist nicht öffentlich freigegeben oder abgelaufen.'
+          : `Der Kalender-Server meldet Fehler ${response.status}.`
+      );
+      error.statusCode = 502;
+      throw error;
+    }
+    const content = await readLimitedCalendarBody(response);
+    if (!/BEGIN:VCALENDAR/i.test(content)) {
+      const error = new Error('Unter diesem Link wurde kein ICS-Kalender gefunden.');
+      error.statusCode = 422;
+      throw error;
+    }
+    return content;
+  }
+  throw new Error('Kalender konnte nicht geladen werden.');
+}
+
+function calendarEventRecord(subscription, event) {
+  const occurrenceKey =
+    event.occurrenceKey || `${event.date}T${event.time || ''}`;
+  const externalKey = `${subscription.id}|${event.uid}|${occurrenceKey}`;
+  const id = `cal-${createHash('sha256')
+    .update(externalKey)
+    .digest('hex')
+    .slice(0, 28)}`;
+  return {
+    id,
+    externalUid: event.uid,
+    externalOccurrence: occurrenceKey,
+    title: cleanText(event.title, 'Kalendertermin', 300),
+    date: event.date,
+    time: event.time || '',
+    allDay: Boolean(event.allDay),
+    endDate: event.endDate || '',
+    endTime: event.endTime || '',
+    location: cleanText(event.location, '', 500),
+    notes: cleanText(event.notes, '', 4000),
+    category: `Abo · ${subscription.name}`,
+    memberId: subscription.memberId || 'all',
+    household: subscription.household || 'familie',
+    readOnly: true,
+    sourceId: subscription.id,
+    sourceName: subscription.name,
+    sourceColor: subscription.color
+  };
+}
+
+async function syncCalendarSubscription(subscription) {
+  let url = '';
+  try {
+    url = decryptJson(subscription.secretEncrypted).url;
+    const content = await fetchCalendarFeed(url);
+    const now = Date.now();
+    const events = parseICalendar(content, {
+      targetTimeZone: process.env.TZ || 'Europe/Berlin',
+      rangeStart: now - 45 * 86_400_000,
+      rangeEnd: now + 730 * 86_400_000,
+      maxEvents: 1500
+    }).map(event => calendarEventRecord(subscription, event));
+    const records = replaceRecordsBySource(
+      subscription.familyId,
+      'events',
+      calendarSourceKey(subscription.id),
+      events
+    );
+    const updated = updateCalendarSubscriptionSync(
+      subscription.familyId,
+      subscription.id,
+      { success: true, eventCount: records.length }
+    );
+    return { subscription: updated, records };
+  } catch (error) {
+    updateCalendarSubscriptionSync(
+      subscription.familyId,
+      subscription.id,
+      {
+        success: false,
+        error: cleanText(
+          error.message,
+          'Kalender konnte nicht aktualisiert werden.',
+          300
+        )
+      }
+    );
+    throw error;
+  }
+}
+
+async function syncAllCalendarSubscriptions() {
+  const subscriptions = listEnabledCalendarSubscriptions({
+    includeSecret: true
+  });
+  for (const subscription of subscriptions.slice(0, 100)) {
+    try {
+      await syncCalendarSubscription(subscription);
+    } catch (error) {
+      console.warn(
+        `Kalender-Abo ${subscription.id} (${subscription.host}) konnte nicht synchronisiert werden:`,
+        error.message
+      );
+    }
+  }
 }
 
 function normalizePushPreferences(value = {}) {
@@ -429,6 +762,23 @@ async function sendWebPushEvent(
 }
 
 function queueWebPushEvent(familyId, eventKey, payload) {
+  const excluded = new Set((payload.excludeMemberIds || []).filter(Boolean));
+  const requestedRecipients = payload.recipientMemberIds
+    ? new Set(payload.recipientMemberIds.filter(Boolean))
+    : null;
+  const inboxMemberIds = getMembers(familyId)
+    .filter(member => member.role !== 'pet')
+    .filter(member => !requestedRecipients || requestedRecipients.has(member.id))
+    .filter(member => !excluded.has(member.id))
+    .map(member => member.id);
+  createInboxNotifications(familyId, inboxMemberIds, {
+    eventKey,
+    title: payload.title,
+    body: payload.body,
+    url: payload.url,
+    priority: payload.priority,
+    dedupeKey: payload.tag
+  });
   void sendWebPushEvent(familyId, eventKey, payload).catch(error => {
     console.error(
       'Browser-Benachrichtigung fehlgeschlagen:',
@@ -851,6 +1201,15 @@ function bootstrapForSession(session) {
           session.memberId
         );
   bootstrap.familyRelationships = listFamilyRelationships(session.familyId);
+  bootstrap.calendarSubscriptions = listCalendarSubscriptions(
+    session.familyId
+  );
+  bootstrap.notifications = member?.role === 'pet'
+    ? []
+    : listInboxNotifications(session.familyId, session.memberId);
+  bootstrap.unreadNotificationCount = member?.role === 'pet'
+    ? 0
+    : countUnreadInboxNotifications(session.familyId, session.memberId);
   return bootstrap;
 }
 
@@ -1374,6 +1733,342 @@ export function createApp() {
     });
   });
 
+  app.get('/api/notifications', requireAuth, (req, res) => {
+    const member = req.session.memberId
+      ? getMember(req.session.familyId, req.session.memberId)
+      : null;
+    if (!member || member.role === 'pet') {
+      return res.json({
+        success: true,
+        notifications: [],
+        unreadCount: 0
+      });
+    }
+    res.json({
+      success: true,
+      notifications: listInboxNotifications(
+        req.session.familyId,
+        member.id
+      ),
+      unreadCount: countUnreadInboxNotifications(
+        req.session.familyId,
+        member.id
+      )
+    });
+  });
+
+  app.patch(
+    '/api/notifications/:notificationId',
+    requireAuth,
+    (req, res) => {
+      if (!req.session.memberId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Bitte zuerst ein Profil auswählen.'
+        });
+      }
+      const notification = markInboxNotificationRead(
+        req.session.familyId,
+        req.session.memberId,
+        req.params.notificationId,
+        req.body?.read !== false
+      );
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          error: 'Benachrichtigung nicht gefunden.'
+        });
+      }
+      publishFamilyChange(req.session.familyId, 'notifications');
+      res.json({
+        success: true,
+        notification,
+        unreadCount: countUnreadInboxNotifications(
+          req.session.familyId,
+          req.session.memberId
+        ),
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post('/api/notifications/read-all', requireAuth, (req, res) => {
+    if (!req.session.memberId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Bitte zuerst ein Profil auswählen.'
+      });
+    }
+    const changed = markAllInboxNotificationsRead(
+      req.session.familyId,
+      req.session.memberId
+    );
+    if (changed) {
+      publishFamilyChange(req.session.familyId, 'notifications');
+    }
+    res.json({
+      success: true,
+      changed,
+      unreadCount: 0,
+      version: getFamilyVersion(req.session.familyId)
+    });
+  });
+
+  app.get('/api/calendar/subscriptions', requireAuth, (req, res) => {
+    res.json({
+      success: true,
+      subscriptions: listCalendarSubscriptions(req.session.familyId),
+      version: getFamilyVersion(req.session.familyId)
+    });
+  });
+
+  app.post(
+    '/api/calendar/subscriptions',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const input = ensureObject(req.body);
+      const url = normalizeCalendarFeedUrl(input.url);
+      const memberId = cleanText(input.memberId, 'all', 100) || 'all';
+      if (
+        memberId !== 'all' &&
+        !getMember(req.session.familyId, memberId)
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: 'Das ausgewählte Profil wurde nicht gefunden.'
+        });
+      }
+      const household = ['familie', 'grosseltern'].includes(input.household)
+        ? input.household
+        : 'familie';
+      const color = /^#[0-9a-f]{6}$/i.test(String(input.color || ''))
+        ? String(input.color)
+        : '#2563eb';
+      const created = createCalendarSubscription(req.session.familyId, {
+        name: requireText(input.name, 'Kalendername', 100),
+        host: url.hostname,
+        secretEncrypted: encryptJson({ url: url.toString() }),
+        color,
+        memberId,
+        household,
+        enabled: true
+      });
+      let syncResult = null;
+      let warning = '';
+      try {
+        syncResult = await syncCalendarSubscription(
+          getCalendarSubscription(
+            req.session.familyId,
+            created.id,
+            { includeSecret: true }
+          )
+        );
+      } catch (error) {
+        warning = error.message;
+      }
+      publishFamilyChange(req.session.familyId, 'calendar-subscriptions');
+      res.status(201).json({
+        success: true,
+        subscription:
+          syncResult?.subscription ||
+          getCalendarSubscription(req.session.familyId, created.id),
+        records: syncResult?.records || [],
+        warning,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.patch(
+    '/api/calendar/subscriptions/:subscriptionId',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const existing = getCalendarSubscription(
+        req.session.familyId,
+        req.params.subscriptionId,
+        { includeSecret: true }
+      );
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          error: 'Kalenderquelle nicht gefunden.'
+        });
+      }
+      const input = ensureObject(req.body);
+      const memberId = Object.hasOwn(input, 'memberId')
+        ? cleanText(input.memberId, 'all', 100) || 'all'
+        : existing.memberId;
+      if (
+        memberId !== 'all' &&
+        !getMember(req.session.familyId, memberId)
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: 'Das ausgewählte Profil wurde nicht gefunden.'
+        });
+      }
+      const nextUrl = Object.hasOwn(input, 'url')
+        ? normalizeCalendarFeedUrl(input.url)
+        : null;
+      const updated = updateCalendarSubscription(
+        req.session.familyId,
+        existing.id,
+        {
+          name: Object.hasOwn(input, 'name')
+            ? requireText(input.name, 'Kalendername', 100)
+            : existing.name,
+          host: nextUrl?.hostname || existing.host,
+          secretEncrypted: nextUrl
+            ? encryptJson({ url: nextUrl.toString() })
+            : existing.secretEncrypted,
+          color:
+            Object.hasOwn(input, 'color') &&
+            /^#[0-9a-f]{6}$/i.test(String(input.color))
+              ? String(input.color)
+              : existing.color,
+          memberId,
+          household: Object.hasOwn(input, 'household') &&
+            ['familie', 'grosseltern'].includes(input.household)
+              ? input.household
+              : existing.household,
+          enabled: Object.hasOwn(input, 'enabled')
+            ? Boolean(input.enabled)
+            : existing.enabled
+        }
+      );
+      let syncResult = null;
+      let warning = '';
+      if (updated.enabled) {
+        try {
+          syncResult = await syncCalendarSubscription(
+            getCalendarSubscription(
+              req.session.familyId,
+              updated.id,
+              { includeSecret: true }
+            )
+          );
+        } catch (error) {
+          warning = error.message;
+        }
+      } else {
+        replaceRecordsBySource(
+          req.session.familyId,
+          'events',
+          calendarSourceKey(updated.id),
+          []
+        );
+      }
+      publishFamilyChange(req.session.familyId, 'calendar-subscriptions');
+      res.json({
+        success: true,
+        subscription:
+          syncResult?.subscription ||
+          getCalendarSubscription(req.session.familyId, updated.id),
+        records: syncResult?.records || [],
+        warning,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/calendar/subscriptions/:subscriptionId/sync',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const subscription = getCalendarSubscription(
+        req.session.familyId,
+        req.params.subscriptionId,
+        { includeSecret: true }
+      );
+      if (!subscription) {
+        return res.status(404).json({
+          success: false,
+          error: 'Kalenderquelle nicht gefunden.'
+        });
+      }
+      const result = await syncCalendarSubscription(subscription);
+      publishFamilyChange(req.session.familyId, 'calendar-subscriptions');
+      res.json({
+        success: true,
+        ...result,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/calendar/subscriptions/sync-all',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const subscriptions = listCalendarSubscriptions(req.session.familyId)
+        .filter(subscription => subscription.enabled);
+      const results = [];
+      for (const subscription of subscriptions) {
+        try {
+          const synced = await syncCalendarSubscription(
+            getCalendarSubscription(
+              req.session.familyId,
+              subscription.id,
+              { includeSecret: true }
+            )
+          );
+          results.push({
+            id: subscription.id,
+            success: true,
+            eventCount: synced.records.length
+          });
+        } catch (error) {
+          results.push({
+            id: subscription.id,
+            success: false,
+            error: error.message
+          });
+        }
+      }
+      publishFamilyChange(req.session.familyId, 'calendar-subscriptions');
+      res.json({
+        success: true,
+        results,
+        subscriptions: listCalendarSubscriptions(req.session.familyId),
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.delete(
+    '/api/calendar/subscriptions/:subscriptionId',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const subscription = getCalendarSubscription(
+        req.session.familyId,
+        req.params.subscriptionId
+      );
+      if (!subscription) {
+        return res.status(404).json({
+          success: false,
+          error: 'Kalenderquelle nicht gefunden.'
+        });
+      }
+      replaceRecordsBySource(
+        req.session.familyId,
+        'events',
+        calendarSourceKey(subscription.id),
+        []
+      );
+      deleteCalendarSubscription(req.session.familyId, subscription.id);
+      publishFamilyChange(req.session.familyId, 'calendar-subscriptions');
+      res.json({
+        success: true,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
   app.get('/api/family/relationships', requireAuth, (req, res) => {
     res.json({
       success: true,
@@ -1702,8 +2397,20 @@ export function createApp() {
     }
     if (req.params.type === 'tasks') {
       const creator = getMember(req.session.familyId, req.session.memberId);
+      const memberId = requireText(input.memberId, 'Zielprofil', 100);
+      if (!getMember(req.session.familyId, memberId)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Das ausgewählte Profil wurde nicht gefunden.'
+        });
+      }
       input = {
         ...input,
+        ...normalizeTaskSchedule(input),
+        title: requireText(input.title, 'Aufgabe', 200),
+        memberId,
+        category: cleanText(input.category, 'Haushalt', 80),
+        stars: Math.max(0, Math.min(1000, Number(input.stars || 10))),
         completed: false,
         completionStatus: 'open',
         createdByMemberId: creator?.id || null,
@@ -1743,6 +2450,20 @@ export function createApp() {
 
   app.patch('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
+    if (req.params.type === 'events') {
+      const existing = getRecord(
+        req.session.familyId,
+        'events',
+        req.params.id
+      );
+      if (isCalendarSubscriptionEvent(existing)) {
+        return res.status(409).json({
+          success: false,
+          error:
+            'Dieser Termin wird von einer Kalenderquelle verwaltet und ist schreibgeschützt.'
+        });
+      }
+    }
     if (req.params.type === 'chatMessages') {
       const existing = getRecord(
         req.session.familyId,
@@ -1812,6 +2533,20 @@ export function createApp() {
 
   app.delete('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
+    if (req.params.type === 'events') {
+      const existing = getRecord(
+        req.session.familyId,
+        'events',
+        req.params.id
+      );
+      if (isCalendarSubscriptionEvent(existing)) {
+        return res.status(409).json({
+          success: false,
+          error:
+            'Dieser Termin wird von einer Kalenderquelle verwaltet und ist schreibgeschützt.'
+        });
+      }
+    }
     if (req.params.type === 'chatMessages') {
       const existing = getRecord(
         req.session.familyId,
@@ -2676,7 +3411,9 @@ export function createApp() {
     res.status(status).json({
       success: false,
       error:
-        status >= 500
+        status === 413
+          ? 'Das Bild ist zu groß. Bitte wähle ein kleineres Foto; Bilder werden vor dem Speichern automatisch optimiert.'
+          : status >= 500
           ? 'Es ist ein interner Fehler aufgetreten.'
           : error.message || 'Die Anfrage konnte nicht verarbeitet werden.'
     });
@@ -2687,7 +3424,7 @@ export function createApp() {
 
 export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
   const app = createApp();
-  return app.listen(port, () => {
+  const server = app.listen(port, () => {
     if (!IS_PRODUCTION && APP_SECRET.includes('development-secret')) {
       console.warn(
         'Hinweis: Für Produktion APP_SECRET als sichere Umgebungsvariable setzen.'
@@ -2695,4 +3432,17 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     }
     console.log(`LX Family Planner läuft auf http://localhost:${port}`);
   });
+  const calendarSyncTimer = setInterval(() => {
+    void syncAllCalendarSubscriptions();
+  }, CALENDAR_SYNC_INTERVAL_MS);
+  calendarSyncTimer.unref();
+  const initialCalendarSync = setTimeout(() => {
+    void syncAllCalendarSubscriptions();
+  }, 20_000);
+  initialCalendarSync.unref();
+  server.on('close', () => {
+    clearInterval(calendarSyncTimer);
+    clearTimeout(initialCalendarSync);
+  });
+  return server;
 }

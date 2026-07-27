@@ -5,6 +5,7 @@ import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, 
 import { isChildProfile, isPetProfile } from '../constants/roles';
 import FamilyEditModal from './FamilyTree/FamilyEditModal';
 import PlanLocationHelp from './PlanLocationHelp';
+import NotificationCenter from './Notifications/NotificationCenter';
 
 const ADULT_THEMES = [
   { id: 'light', name: 'Waldruhe', description: 'warm & natürlich', icon: '❧', color: '#286a58', accent: '#d87058' },
@@ -119,6 +120,7 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
       </div>}
 
       <div className="header-right">
+        {!isPet && <NotificationCenter />}
         {!isChild && !isPet && (
           <button
             className="icon-circle-btn"

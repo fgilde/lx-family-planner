@@ -10,17 +10,81 @@ import {
   Pin,
   Plus,
   ShoppingBag,
+  SlidersHorizontal,
   Star,
   Trash2,
   Users,
   UtensilsCrossed
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { isChildProfile } from '../../constants/roles';
+import DashboardCustomizer from './DashboardCustomizer';
+import OrderedDashboardGrid from './OrderedDashboardGrid';
 import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+
+const TABLET_WIDGETS = [
+  {
+    id: 'calendar',
+    label: 'Heute',
+    description: 'Alle heutigen Termine',
+    icon: CalendarDays,
+    color: '#377d69'
+  },
+  {
+    id: 'meals',
+    label: 'Essen',
+    description: 'Der aktuelle Tagesplan',
+    icon: UtensilsCrossed,
+    color: '#c26745'
+  },
+  {
+    id: 'tasks',
+    label: 'Aufgaben',
+    description: 'Offene Aufgaben und Freigaben',
+    icon: CheckSquare,
+    color: '#3975b9'
+  },
+  {
+    id: 'shopping',
+    label: 'Einkauf',
+    description: 'Noch benötigte Artikel',
+    icon: ShoppingBag,
+    color: '#8a6a24'
+  },
+  {
+    id: 'chat',
+    label: 'Familienchat',
+    description: 'Die letzten Familiennachrichten',
+    icon: MessageSquare,
+    color: '#6d5faf'
+  },
+  {
+    id: 'board',
+    label: 'Pinnwand',
+    description: 'Aktuelle Familiennotizen',
+    icon: Pin,
+    color: '#a65a3f'
+  },
+  {
+    id: 'trash',
+    label: 'Müllabfuhr',
+    description: 'Der nächste Abholtermin',
+    icon: Trash2,
+    color: '#66736e'
+  },
+  {
+    id: 'family',
+    label: 'Familie',
+    description: 'Profile und Sterne im Überblick',
+    icon: Users,
+    color: '#b35d6d'
+  }
+];
+const TABLET_WIDGET_IDS = TABLET_WIDGETS.map(widget => widget.id);
 
 function localDateKey(date) {
   const year = date.getFullYear();
@@ -77,6 +141,12 @@ export default function KitchenTabletView() {
     trashEvents
   } = useFamily();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const dashboardLayout = useDashboardLayout(
+    activeMember?.id,
+    'tablet',
+    TABLET_WIDGET_IDS
+  );
 
   useEffect(() => {
     const timer = window.setInterval(() => setCurrentTime(new Date()), 30_000);
@@ -203,11 +273,18 @@ export default function KitchenTabletView() {
           <button type="button" onClick={() => setActiveTab('dashboard')}>
             Standardansicht <ArrowUpRight size={16} />
           </button>
+          <button type="button" onClick={() => setIsCustomizerOpen(true)}>
+            <SlidersHorizontal size={16} /> Kacheln
+          </button>
         </div>
       </header>
 
-      <div className="tablet-command-grid">
+      <OrderedDashboardGrid
+        className="tablet-command-grid"
+        layout={dashboardLayout.layout}
+      >
         <TabletCard
+          widgetId="calendar"
           tab="calendar"
           icon={CalendarDays}
           title="Heute"
@@ -250,6 +327,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="meals"
           tab="meals"
           icon={UtensilsCrossed}
           title="Essen"
@@ -279,6 +357,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="tasks"
           tab="tasks"
           icon={CheckSquare}
           title="Aufgaben"
@@ -321,6 +400,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="shopping"
           tab="shopping"
           icon={ShoppingBag}
           title="Einkauf"
@@ -351,6 +431,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="chat"
           tab="chat"
           icon={MessageSquare}
           title="Familienchat"
@@ -382,6 +463,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="board"
           tab="board"
           icon={Pin}
           title="Pinnwand"
@@ -411,6 +493,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="trash"
           tab="trash"
           icon={Trash2}
           title="Nächste Abholung"
@@ -437,6 +520,7 @@ export default function KitchenTabletView() {
         </TabletCard>
 
         <TabletCard
+          widgetId="family"
           tab="dashboard"
           icon={Users}
           title="Familie"
@@ -465,7 +549,20 @@ export default function KitchenTabletView() {
             ))}
           </div>
         </TabletCard>
-      </div>
+      </OrderedDashboardGrid>
+
+      <DashboardCustomizer
+        isOpen={isCustomizerOpen}
+        layout={dashboardLayout.layout}
+        mode="tablet"
+        moveWidget={dashboardLayout.moveWidget}
+        onClose={() => setIsCustomizerOpen(false)}
+        profileName={activeMember?.name?.split(' ')[0]}
+        resetLayout={dashboardLayout.resetLayout}
+        setDensity={dashboardLayout.setDensity}
+        toggleWidget={dashboardLayout.toggleWidget}
+        widgets={TABLET_WIDGETS}
+      />
     </div>
   );
 }

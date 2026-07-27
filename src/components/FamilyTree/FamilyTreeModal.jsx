@@ -15,6 +15,7 @@ import { useFamily } from '../../context/FamilyContext';
 import { canManageFamily, getPositionLabel } from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
+  DEFAULT_MEMBER_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
 
@@ -56,6 +57,9 @@ function relationLabel(type) {
 }
 
 function FamilyNode({ family, relation, highlighted = false }) {
+  const membersCount = Array.isArray(family?.members)
+    ? family.members.length
+    : family?.membersCount || 0;
   return (
     <article className={`tree-family-node ${highlighted ? 'current' : ''}`}>
       <img
@@ -66,9 +70,46 @@ function FamilyNode({ family, relation, highlighted = false }) {
       <div>
         <small>{relation}</small>
         <strong>{family?.familyName || 'Unsere Familie'}</strong>
-        <span><Users size={13} /> {family?.membersCount || 0} Profile</span>
+        <span><Users size={13} /> {membersCount} Profile</span>
       </div>
     </article>
+  );
+}
+
+function FamilyBranch({ family, relation, highlighted = false }) {
+  const familyMembers = Array.isArray(family?.members) ? family.members : [];
+  return (
+    <div className={`tree-family-branch ${highlighted ? 'current' : ''}`}>
+      <FamilyNode
+        family={family}
+        relation={relation}
+        highlighted={highlighted}
+      />
+      <div
+        className="tree-member-roster"
+        aria-label={`Mitglieder von ${family?.familyName || 'dieser Familie'}`}
+      >
+        {familyMembers.map(member => (
+          <article
+            key={member.id}
+            style={{ '--member-accent': member.color || 'var(--primary)' }}
+          >
+            <img
+              src={member.avatar || DEFAULT_MEMBER_AVATAR}
+              onError={event => handleImgError(event, DEFAULT_MEMBER_AVATAR)}
+              alt=""
+            />
+            <span>
+              <strong>{member.name}</strong>
+              <small>{getPositionLabel(member)}</small>
+            </span>
+          </article>
+        ))}
+        {!familyMembers.length && (
+          <span className="tree-member-empty">Keine Profile vorhanden</span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -152,7 +193,8 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
 
   const currentFamily = {
     ...familyAccount,
-    membersCount: members.length
+    membersCount: members.length,
+    members
   };
 
   return (
@@ -188,7 +230,7 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
               <span className="tree-generation-label">Elternfamilien</span>
               <div className="tree-node-row">
                 {parentFamilies.length ? parentFamilies.map(relationship => (
-                  <FamilyNode
+                  <FamilyBranch
                     key={relationship.id}
                     family={relationship.otherFamily}
                     relation={relationLabel(perspectiveRelation(relationship))}
@@ -203,13 +245,13 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
 
             <div className="tree-current-row">
               {sideFamilies.map(relationship => (
-                <FamilyNode
+                <FamilyBranch
                   key={relationship.id}
                   family={relationship.otherFamily}
                   relation={relationLabel(perspectiveRelation(relationship))}
                 />
               ))}
-              <FamilyNode
+              <FamilyBranch
                 family={currentFamily}
                 relation="Euer Konto"
                 highlighted
@@ -222,7 +264,7 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
               <span className="tree-generation-label">Kinderfamilien</span>
               <div className="tree-node-row">
                 {childFamilies.length ? childFamilies.map(relationship => (
-                  <FamilyNode
+                  <FamilyBranch
                     key={relationship.id}
                     family={relationship.otherFamily}
                     relation={relationLabel(perspectiveRelation(relationship))}
@@ -231,28 +273,6 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
                   <span className="tree-empty-branch">Noch kein Familienzweig</span>
                 )}
               </div>
-            </div>
-          </section>
-
-          <section className="household-members">
-            <header>
-              <span className="admin-section-kicker">In diesem Haushalt</span>
-              <h3>{familyAccount?.familyName || 'Unsere Familie'}</h3>
-            </header>
-            <div>
-              {members.map(member => (
-                <article key={member.id}>
-                  <img
-                    src={member.avatar || DEFAULT_FAMILY_AVATAR}
-                    onError={handleImgError}
-                    alt=""
-                  />
-                  <span>
-                    <strong>{member.name}</strong>
-                    <small>{getPositionLabel(member)}</small>
-                  </span>
-                </article>
-              ))}
             </div>
           </section>
 

@@ -1,8 +1,14 @@
 import fs from 'fs';
 import path from 'path';
-import { database } from './database.js';
+import { DatabaseSync } from 'node:sqlite';
+import { createDataManifest } from './dataIntegrity.js';
 
-const backupDirectory = path.join(process.cwd(), 'backups');
+const databaseFile = process.env.DATABASE_FILE
+  ? path.resolve(process.env.DATABASE_FILE)
+  : path.join(process.cwd(), 'family_planner.sqlite');
+const backupDirectory = process.env.BACKUP_DIRECTORY
+  ? path.resolve(process.env.BACKUP_DIRECTORY)
+  : path.join(process.cwd(), 'backups');
 fs.mkdirSync(backupDirectory, { recursive: true });
 
 const timestamp = new Date()
@@ -15,8 +21,25 @@ const target = path.join(
 );
 const escapedTarget = target.replaceAll("'", "''");
 
-database.exec('PRAGMA wal_checkpoint(FULL)');
-database.exec(`VACUUM INTO '${escapedTarget}'`);
-database.close();
+const database = new DatabaseSync(databaseFile);
+try {
+  database.exec('PRAGMA wal_checkpoint(FULL)');
+  database.exec(`VACUUM INTO '${escapedTarget}'`);
+} finally {
+  database.close();
+}
 
+const manifestTarget = `${target}.manifest.json`;
+const manifest = createDataManifest(target, { includeFileHash: true });
+fs.writeFileSync(
+  manifestTarget,
+  `${JSON.stringify(manifest, null, 2)}\n`,
+  'utf8'
+);
+if (!manifest.ok) {
+  throw new Error(
+    'Die Sicherung wurde erstellt, hat die Integritätsprüfung aber nicht bestanden.'
+  );
+}
 console.log(`Datenbanksicherung erstellt: ${target}`);
+console.log(`Prüfmanifest erstellt: ${manifestTarget}`);

@@ -34,7 +34,8 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
 
 - Familienkonten mit Profilen für Mama, Papa, Kind, Oma, Opa und weitere Rollen
 - kinderleichte Bubble-Profilauswahl und optionaler Profil-PIN
-- Kalender, Müllkalender mit ICS-Import und mehrere Planungsorte
+- Kalender, Müllkalender, ICS-Dateiimport und automatisch aktualisierte
+  Kalender-Abos
 - gemeinsamer Familienchat und geschützte Direktnachrichten
 - Einkaufslisten mit großem, alltagstauglichem Produktkatalog und Bring!-Anbindung
 - Wochen-Speiseplan, Rezeptbuch, Rezeptimport und Kochmodus
@@ -47,6 +48,12 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   Heldenwelt
 - Erwachsenen-Themes von Waldruhe und Küstenruhe bis Backstage und Neon Nacht
 - profilgebundene Browser-Benachrichtigungen und optionale Gotify-Anbindung
+- dauerhaftes, profilgetrenntes Meldungszentrum mit gelesen/ungelesen
+- Familien-Posteingang mit persönlichem Tagesüberblick für Termine, Aufgaben,
+  Essen und Einkauf
+- wiederkehrende Aufgaben für täglich, werktags, wöchentlich und monatlich
+- frei anpassbare Dashboard-Kacheln pro Profil und Gerät mit eigener
+  Tablet-Anordnung, Sichtbarkeit und kompakter Ansicht
 - eigenständiger Tablet Mode mit acht Kacheln für das Querformat
 - responsive Darstellung für PC, Tablet und Smartphone
 
@@ -88,6 +95,8 @@ für den reinen Heimnetzbetrieb nicht nötig und wird nicht empfohlen.
 
 Weitere Helfer:
 
+- `Update-Familienplaner.cmd` lädt Updates, prüft sie auf einer Kopie der
+  Datenbank und spielt sie mit automatischer Rückfallmöglichkeit ein.
 - `Stop-Familienplaner.cmd` beendet die App, ohne Daten zu löschen.
 - `Backup-Familienplaner.cmd` erzeugt eine konsistente SQLite-Sicherung.
 - Ein erneuter Start baut geänderten Programmcode automatisch neu.
@@ -120,6 +129,94 @@ docker compose down
 
 Die aktiven Daten liegen in `data/`, Sicherungen in `backups/`. Beide Ordner
 werden absichtlich nicht in Git aufgenommen.
+
+## Bequem und sicher aktualisieren
+
+### Docker unter Windows
+
+Ein Doppelklick genügt:
+
+```text
+Update-Familienplaner.cmd
+```
+
+Das Update läuft bewusst in dieser Reihenfolge:
+
+1. Nur bei einem sauberen Programmordner wird die neue Git-Version geladen.
+2. Das bisherige Docker-Abbild wird als Rückfallversion vorgemerkt.
+3. Die neue Version wird gebaut, während der Planer noch erreichbar bleibt.
+4. Danach wird die App kurz angehalten und eine konsistente SQLite-Sicherung
+   samt Prüfmanifest erstellt.
+5. Alle Datenbankmigrationen laufen zuerst auf einer temporären Kopie dieser
+   Sicherung.
+6. Erst nach erfolgreicher Simulation startet die neue Version.
+7. Abschließend werden alle bereits vorhandenen Datensätze und gespeicherten
+   Einstellungen mit dem Stand vor dem Update verglichen.
+
+Schlägt Start, Migration, Gesundheitscheck oder Datenvergleich fehl, stellt das
+Skript automatisch die vorherige Docker-Version und die Sicherung wieder her.
+
+Lokale Änderungen an Programmdateien werden nicht überschrieben. In diesem Fall
+bricht das Update mit einer Erklärung ab. Absichtlich lokal bereitgestellter
+Quellcode kann ohne Git-Abruf aktualisiert werden:
+
+```powershell
+powershell -File scripts/docker-update.ps1 -SkipPull
+```
+
+### Docker unter Linux
+
+Im Projektordner:
+
+```bash
+bash scripts/docker-update.sh
+```
+
+Ohne Git-Abruf:
+
+```bash
+bash scripts/docker-update.sh --skip-pull
+```
+
+### Ohne Docker
+
+Vor dem Austausch des Programmcodes:
+
+```powershell
+npm run backup
+git pull --ff-only
+npm ci
+npm run check
+```
+
+Danach den laufenden Node-Prozess beziehungsweise den verwendeten Systemdienst
+neu starten und prüfen:
+
+```powershell
+npm run audit
+```
+
+Die `.env` darf bei einem Update nicht ersetzt werden. Insbesondere
+`APP_SECRET` muss gleich bleiben, weil damit Bring!, Gotify, private
+Kalenderlinks und Push-Schlüssel verschlüsselt werden.
+
+### Was erhalten bleibt
+
+Der Docker-Updater behält den Ordner `data/` als unabhängiges Volume. Das
+Prüfmanifest kontrolliert unter anderem:
+
+- Familienkonten, Profile, Rollen, PINs, Sterne und Profil-Themes
+- Kalendertermine, Aufgaben, Einkauf, Speisepläne und Mülltermine
+- importierte Rezepte einschließlich Zutaten, Zubereitung und Bildern
+- Pinnwandnotizen und Pinnwandbilder
+- Chat, Familiennetz, Medienlinks und Dashboard-Inhalte
+- Kalender-Abos, Bring!, Gotify und deren verschlüsselte Konfiguration
+- Push-Geräte, Benachrichtigungseinstellungen und Familien-Posteingang
+
+Gerätespezifische Komfortwerte wie das zuletzt aktive Profil, der ausgewählte
+Haushalt, die Reihenfolge der Dashboard-Kacheln und ein zurückgestellter
+Benachrichtigungshinweis liegen im Browser. Ein Update löscht diesen Speicher
+nicht. Dafür müssen Adresse und Port der App gleich bleiben.
 
 ## Weg 2: Ohne Docker starten
 
@@ -158,6 +255,32 @@ npm run dev
 Vite läuft dann unter `http://localhost:3000` und leitet API-Anfragen an den
 Server auf Port `3001` weiter.
 
+## Externe Kalender verbinden
+
+Eltern und Großeltern können im Familienkalender unter **Kalenderquellen**
+veröffentlichte ICS-Links aus Google Kalender, Outlook, Nextcloud und anderen
+Kalenderdiensten hinterlegen. Die Verbindung ist bewusst nur lesend:
+
+- der geheime Kalenderlink wird verschlüsselt in SQLite gespeichert,
+- Termine werden standardmäßig einmal pro Stunde aktualisiert,
+- wiederkehrende Termine, Ausnahmen, Ganztagstermine und Zeitzonen werden
+  berücksichtigt,
+- abonnierte Termine sind im Familienplaner als schreibgeschützt markiert,
+- bei einem Verbindungsfehler bleiben die zuletzt erfolgreich gelesenen
+  Termine erhalten.
+
+Kalender auf privaten Heimnetz-Adressen sind aus Sicherheitsgründen zunächst
+gesperrt. Für einen lokalen Nextcloud- oder CalDAV-Server kann in `.env`
+bewusst freigeschaltet werden:
+
+```text
+CALENDAR_ALLOW_PRIVATE_HOSTS=true
+```
+
+Link-Local- und Loopback-Adressen bleiben trotzdem gesperrt. Das
+Aktualisierungsintervall lässt sich mit
+`CALENDAR_SYNC_INTERVAL_MINUTES=60` anpassen.
+
 ## Benachrichtigungen
 
 ### Browser-Push
@@ -165,6 +288,14 @@ Server auf Port `3001` weiter.
 Browser-Benachrichtigungen werden pro Familienprofil und Gerät gespeichert. Ein
 Gerät kann mehreren Profilen zugeordnet sein; in den Profileinstellungen lassen
 sich einzelne Meldungsarten an- und ausschalten.
+
+Unabhängig davon landen wichtige Ereignisse zusätzlich im profilgetrennten
+Familien-Posteingang der App. Der Reiter **Heute** bündelt Termine, fällige
+Aufgaben, Elternfreigaben, Speiseplan und Einkauf passend zum aktiven Profil.
+Im Reiter **Meldungen** bleiben Aufgabenfreigaben, Termine und Chatnachrichten
+nachvollziehbar, auch wenn ein Browser-Push nicht zugestellt wurde.
+Gelesen/ungelesen wird zwischen den Geräten synchronisiert; alte Meldungen
+werden nach 90 Tagen automatisch entfernt.
 
 Echte Benachrichtigungen im Hintergrund benötigen eine vertrauenswürdige
 HTTPS-Adresse. Eine reine Heimnetz-Adresse wie `http://192.168.x.x:3001` genügt
@@ -190,7 +321,8 @@ dort geöffnet werden.
 - Passwörter und Profil-PINs werden nicht im Klartext gespeichert.
 - Sitzungen verwenden ein `HttpOnly`-Cookie.
 - Familien und Direktnachrichten werden serverseitig voneinander isoliert.
-- Bring!-Zugangsdaten und Push-Schlüssel werden mit `APP_SECRET` verschlüsselt.
+- Bring!-Zugangsdaten, private Kalenderlinks und Push-Schlüssel werden mit
+  `APP_SECRET` verschlüsselt.
 - Der Docker-Container läuft ohne Root-Rechte, mit schreibgeschütztem
   Dateisystem, ohne Linux-Capabilities und mit `no-new-privileges`.
 - Ohne `AGENT_API_KEY` bleibt die optionale Agent-Schnittstelle deaktiviert.
@@ -212,6 +344,13 @@ Ohne Docker:
 ```powershell
 npm run backup
 ```
+
+Zu jeder neuen `.sqlite`-Sicherung wird eine Datei
+`.sqlite.manifest.json` angelegt. Sie enthält keine Passwörter oder
+Integrationstokens, sondern Prüfsummen, Datensatzkennungen und
+Integritätsergebnisse. Damit kann nach einem Update erkannt werden, ob ein
+bestehender Eintrag oder ein gespeichertes Einstellungsfeld fehlt oder verändert
+wurde.
 
 Sicherungen sollten regelmäßig zusätzlich auf ein anderes Gerät oder Medium
 kopiert werden. Ein Backup ist erst dann ein gutes Backup, wenn die
@@ -240,6 +379,12 @@ npm run check
 
 Der Befehl prüft die Serverdateien, führt den isolierten API-Smoke-Test aus und
 erstellt einen vollständigen Produktions-Build.
+
+Nur die aktive Datenbank kontrollieren:
+
+```powershell
+npm run audit
+```
 
 ## Architektur
 

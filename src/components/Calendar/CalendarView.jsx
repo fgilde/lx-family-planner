@@ -1,181 +1,349 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import {
+  Calendar as CalendarIcon,
+  CalendarPlus,
+  ChevronRight,
+  Cloud,
+  Download,
+  History,
+  LockKeyhole,
+  MapPin,
+  Plus,
+  Radio,
+  Trash2,
+  Upload,
+  UserRound
+} from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
-import { Calendar as CalendarIcon, Download, Upload, Plus, Trash2, MapPin, Clock, Filter, User } from 'lucide-react';
+import { canManageFamily } from '../../constants/roles';
+import {
+  DEFAULT_MEMBER_AVATAR,
+  handleImgError
+} from '../../utils/imageFallback';
+import CalendarSubscriptionManager from './CalendarSubscriptionManager';
+
+function localDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function dateFromKey(value) {
+  return new Date(`${value}T12:00:00`);
+}
+
+function dayHeading(dateKey, todayKey) {
+  const date = dateFromKey(dateKey);
+  const tomorrow = new Date(dateFromKey(todayKey).getTime() + 86_400_000);
+  if (dateKey === todayKey) return 'Heute';
+  if (dateKey === localDateKey(tomorrow)) return 'Morgen';
+  return date.toLocaleDateString('de-DE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long'
+  });
+}
+
+function eventDateValue(event) {
+  return new Date(`${event.date}T${event.time || '00:00'}:00`).getTime();
+}
 
 export default function CalendarView() {
   const {
-    events, addEvent, deleteEvent, members, exportICS, importICS,
-    setIsQuickAddOpen, setQuickAddDefaultType, activeHousehold
+    events,
+    deleteEvent,
+    members,
+    activeMember,
+    calendarSubscriptions,
+    exportICS,
+    importICS,
+    setIsQuickAddOpen,
+    setQuickAddDefaultType,
+    activeHousehold
   } = useFamily();
-
-  const [viewMode, setViewMode] = useState('list'); // 'list', 'month'
   const [selectedMemberFilter, setSelectedMemberFilter] = useState('all');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const [showPast, setShowPast] = useState(false);
+  const [isSourcesOpen, setIsSourcesOpen] = useState(false);
+  const todayKey = localDateKey();
+  const canManage = canManageFamily(activeMember);
 
-  const filteredEvents = events.filter(evt => {
-    if ((evt.household || 'familie') !== activeHousehold) return false;
-    if (selectedMemberFilter !== 'all' && evt.memberId !== selectedMemberFilter) return false;
-    if (selectedCategoryFilter !== 'all' && evt.category !== selectedCategoryFilter) return false;
-    return true;
-  }).sort((a, b) => new Date(`${a.date}T${a.time || '00:00'}`) - new Date(`${b.date}T${b.time || '00:00'}`));
+  const householdEvents = useMemo(
+    () =>
+      events.filter(
+        event => (event.household || 'familie') === activeHousehold
+      ),
+    [activeHousehold, events]
+  );
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      importICS(file);
-    }
+  const filteredEvents = useMemo(
+    () =>
+      householdEvents
+        .filter(event => showPast || event.date >= todayKey)
+        .filter(
+          event =>
+            selectedMemberFilter === 'all' ||
+            event.memberId === 'all' ||
+            event.memberId === selectedMemberFilter
+        )
+        .sort((left, right) => eventDateValue(left) - eventDateValue(right)),
+    [householdEvents, selectedMemberFilter, showPast, todayKey]
+  );
+
+  const groupedEvents = useMemo(() => {
+    const groups = new Map();
+    filteredEvents.forEach(event => {
+      const date = event.date || todayKey;
+      if (!groups.has(date)) groups.set(date, []);
+      groups.get(date).push(event);
+    });
+    return [...groups.entries()];
+  }, [filteredEvents, todayKey]);
+
+  const todayEvents = householdEvents.filter(event => event.date === todayKey);
+  const upcomingEvents = householdEvents
+    .filter(event => event.date >= todayKey)
+    .sort((left, right) => eventDateValue(left) - eventDateValue(right));
+  const nextEvent = upcomingEvents[0];
+
+  const handleFileUpload = event => {
+    const file = event.target.files?.[0];
+    if (file) importICS(file);
+    event.target.value = '';
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header Bar */}
-      <div className="card" style={{ padding: 18 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <CalendarIcon size={24} style={{ color: 'var(--primary)' }} />
-            <h2 className="card-title" style={{ margin: 0 }}>Familienkalender</h2>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            {/* ICS Export Button */}
-            <button className="btn-secondary" onClick={exportICS} title="Kalender als .ics exportieren">
-              <Download size={16} />
-              <span>ICS Export</span>
-            </button>
-
-            {/* ICS Import Button */}
-            <label className="btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Upload size={16} />
-              <span>ICS Import</span>
-              <input type="file" accept=".ics" onChange={handleFileUpload} style={{ display: 'none' }} />
-            </label>
-
-            {/* Add Event Button */}
-            <button
-              className="btn-primary"
-              onClick={() => { setQuickAddDefaultType('event'); setIsQuickAddOpen(true); }}
-            >
-              <Plus size={18} />
-              <span>Neuer Termin</span>
-            </button>
-          </div>
+    <div className="family-calendar">
+      <section className="calendar-hero">
+        <div className="calendar-hero-copy">
+          <span className="calendar-eyebrow">
+            <Radio size={13} /> Familienzeit
+          </span>
+          <h1>Euer Kalender, ohne Terminchaos.</h1>
+          <p>
+            Heute stehen <strong>{todayEvents.length}</strong>{' '}
+            {todayEvents.length === 1 ? 'Termin' : 'Termine'} an.
+            {nextEvent
+              ? ` Als Nächstes: ${nextEvent.title}.`
+              : ' Der nächste freie Moment gehört euch.'}
+          </p>
         </div>
 
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-          {/* Member Filter Pills */}
-          <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+        <div className="calendar-hero-actions">
+          {canManage && (
             <button
-              className={`cat-pill ${selectedMemberFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setSelectedMemberFilter('all')}
+              type="button"
+              className="calendar-source-button"
+              onClick={() => setIsSourcesOpen(true)}
             >
-              Alle Personen
+              <Cloud size={17} />
+              Kalenderquellen
+              {calendarSubscriptions.length > 0 && (
+                <span>{calendarSubscriptions.length}</span>
+              )}
             </button>
-            {members.map(m => (
-              <button
-                key={m.id}
-                className={`cat-pill ${selectedMemberFilter === m.id ? 'active' : ''}`}
-                style={{
-                  borderColor: selectedMemberFilter === m.id ? m.color : 'var(--border-color)',
-                  color: selectedMemberFilter === m.id ? 'white' : 'var(--text-main)',
-                  backgroundColor: selectedMemberFilter === m.id ? m.color : 'var(--bg-subtle)'
-                }}
-                onClick={() => setSelectedMemberFilter(m.id)}
-              >
-                {m.name}
-              </button>
-            ))}
-          </div>
+          )}
+          <button
+            type="button"
+            className="calendar-add-button"
+            onClick={() => {
+              setQuickAddDefaultType('event');
+              setIsQuickAddOpen(true);
+            }}
+          >
+            <Plus size={18} /> Neuer Termin
+          </button>
         </div>
-      </div>
 
-      {/* Events List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {filteredEvents.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-            📅 Keine Termine in dieser Filteransicht gefunden.
+        <div className="calendar-hero-orbit" aria-hidden="true">
+          <CalendarIcon size={48} />
+        </div>
+      </section>
+
+      <section className="calendar-control-deck">
+        <div className="calendar-person-filter" aria-label="Personen filtern">
+          <button
+            type="button"
+            className={selectedMemberFilter === 'all' ? 'is-active' : ''}
+            onClick={() => setSelectedMemberFilter('all')}
+          >
+            <span><UserRound size={16} /></span>
+            Alle
+          </button>
+          {members.map(member => (
+            <button
+              type="button"
+              key={member.id}
+              className={
+                selectedMemberFilter === member.id ? 'is-active' : ''
+              }
+              style={{ '--member-color': member.color }}
+              onClick={() => setSelectedMemberFilter(member.id)}
+            >
+              <img
+                src={member.avatar || DEFAULT_MEMBER_AVATAR}
+                onError={event =>
+                  handleImgError(event, DEFAULT_MEMBER_AVATAR)
+                }
+                alt=""
+              />
+              {member.name.split(' ')[0]}
+            </button>
+          ))}
+        </div>
+
+        <div className="calendar-tools">
+          <button type="button" onClick={() => setShowPast(value => !value)}>
+            <History size={15} />
+            {showPast ? 'Vergangene aus' : 'Vergangene zeigen'}
+          </button>
+          <button type="button" onClick={exportICS}>
+            <Download size={15} /> Export
+          </button>
+          <label>
+            <Upload size={15} /> Datei importieren
+            <input
+              type="file"
+              accept=".ics,text/calendar"
+              onChange={handleFileUpload}
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className="calendar-agenda">
+        <header className="calendar-agenda-heading">
+          <div>
+            <span>Agenda</span>
+            <h2>Was als Nächstes ansteht</h2>
+          </div>
+          <strong>{filteredEvents.length} Termine</strong>
+        </header>
+
+        {groupedEvents.length === 0 ? (
+          <div className="calendar-empty-state">
+            <span><CalendarPlus size={30} /></span>
+            <h3>Hier ist noch Platz für Schönes</h3>
+            <p>
+              Trage einen Termin ein oder verbinde einen bestehenden Kalender.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setQuickAddDefaultType('event');
+                setIsQuickAddOpen(true);
+              }}
+            >
+              <Plus size={16} /> Ersten Termin eintragen
+            </button>
           </div>
         ) : (
-          filteredEvents.map(evt => {
-            const member = members.find(m => m.id === evt.memberId);
-            const evtDate = new Date(evt.date);
-            const formattedDateStr = evtDate.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+          <div className="calendar-day-groups">
+            {groupedEvents.map(([dateKey, dayEvents]) => (
+              <section className="calendar-day-group" key={dateKey}>
+                <header>
+                  <time dateTime={dateKey}>
+                    <strong>{dateKeyFromDay(dateKey)}</strong>
+                    <span>{dayHeading(dateKey, todayKey)}</span>
+                  </time>
+                  <i />
+                </header>
 
-            return (
-              <div
-                key={evt.id}
-                className="card"
-                style={{
-                  padding: 18,
-                  borderLeft: `6px solid ${member?.color || 'var(--primary)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 16
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  {/* Date Badge */}
-                  <div style={{
-                    background: member?.bgColor || 'var(--primary-light)',
-                    color: member?.color || 'var(--primary)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '10px 14px',
-                    textAlign: 'center',
-                    minWidth: 90
-                  }}>
-                    <div style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>
-                      {formattedDateStr.split(',')[0]}
-                    </div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>
-                      {evt.date.split('-')[2]}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600 }}>
-                      {evt.time} Uhr
-                    </div>
-                  </div>
+                <div className="calendar-day-events">
+                  {dayEvents.map(event => {
+                    const member = members.find(
+                      entry => entry.id === event.memberId
+                    );
+                    const accent =
+                      event.sourceColor || member?.color || 'var(--primary)';
+                    return (
+                      <article
+                        key={event.id}
+                        className={`calendar-event-card ${
+                          event.readOnly ? 'is-subscribed' : ''
+                        }`}
+                        style={{ '--event-color': accent }}
+                      >
+                        <div className="calendar-event-time">
+                          <strong>
+                            {event.allDay || !event.time
+                              ? 'Ganztags'
+                              : event.time}
+                          </strong>
+                          {event.endTime && (
+                            <span>bis {event.endTime}</span>
+                          )}
+                        </div>
 
-                  <div>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 4 }}>
-                      {evt.title}
-                    </h3>
-                    <div style={{ display: 'flex', gap: 12, fontSize: '0.85rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                      {evt.location && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <MapPin size={14} /> {evt.location}
-                        </span>
-                      )}
-                      {evt.notes && (
-                        <span>📝 {evt.notes}</span>
-                      )}
-                    </div>
-                  </div>
+                        <div className="calendar-event-copy">
+                          <div className="calendar-event-title">
+                            <h3>{event.title}</h3>
+                            {event.readOnly && (
+                              <span title="Aus einem Kalenderabo">
+                                <LockKeyhole size={12} />
+                                {event.sourceName || 'Kalenderabo'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="calendar-event-details">
+                            {event.location && (
+                              <span>
+                                <MapPin size={13} /> {event.location}
+                              </span>
+                            )}
+                            <span>
+                              <UserRound size={13} />
+                              {member?.name || 'Ganze Familie'}
+                            </span>
+                          </div>
+                          {event.notes && <p>{event.notes}</p>}
+                        </div>
+
+                        {event.readOnly ? (
+                          <span
+                            className="calendar-event-readonly"
+                            title="Dieser Termin wird von der Kalenderquelle verwaltet"
+                          >
+                            <Cloud size={16} />
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="calendar-event-delete"
+                            onClick={() => deleteEvent(event.id)}
+                            title="Termin löschen"
+                            aria-label={`${event.title} löschen`}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                        <ChevronRight
+                          className="calendar-event-chevron"
+                          size={17}
+                          aria-hidden="true"
+                        />
+                      </article>
+                    );
+                  })}
                 </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  {member ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <img src={member.avatar} alt={member.name} className="avatar-img-sm" />
-                      <span className="hide-mobile" style={{ fontWeight: 600, fontSize: '0.9rem' }}>{member.name}</span>
-                    </div>
-                  ) : (
-                    <span className="badge" style={{ background: 'var(--bg-subtle)' }}>Gemeinsam</span>
-                  )}
-
-                  <button
-                    className="icon-circle-btn"
-                    onClick={() => deleteEvent(evt.id)}
-                    title="Termin löschen"
-                    style={{ color: '#ef4444' }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            );
-          })
+              </section>
+            ))}
+          </div>
         )}
-      </div>
+      </section>
+
+      <CalendarSubscriptionManager
+        isOpen={isSourcesOpen}
+        onClose={() => setIsSourcesOpen(false)}
+      />
     </div>
   );
+}
+
+function dateKeyFromDay(value) {
+  const date = dateFromKey(value);
+  return date.toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: 'short'
+  });
 }

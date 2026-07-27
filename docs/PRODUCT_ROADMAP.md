@@ -12,6 +12,13 @@
 - Elternzentrale und kindgerechte Medienlinks
 - Familiennetz und Beziehungen zwischen Familienkonten
 - Bring!-, ICS-, Gotify- und profilgebundene Web-Push-Anbindung
+- profilgetrenntes Meldungszentrum mit gelesen/ungelesen und 90-Tage-Verlauf
+- persönlicher Familien-Posteingang mit live erzeugtem Tagesüberblick
+- verschlüsselte, stündlich aktualisierte ICS-Kalenderabonnements mit
+  Wiederholungen, Ausnahmen, Ganztagsterminen und Zeitzonen
+- wiederkehrende Aufgaben für tägliche, werktägliche, wöchentliche und
+  monatliche Abläufe
+- pro Profil und Gerät anpassbare Dashboard- und Tablet-Kacheln
 - sichere, familiengetrennte Datenhaltung und transaktionale Punktebuchung
 
 ## Nächste sinnvolle Produktstufe
@@ -32,11 +39,7 @@
    Backups regelmäßig erstellen, auf ein zweites Ziel kopieren und in einer
    isolierten Testdatenbank automatisch wiederherstellen.
 
-4. **Wiederkehrende Aufgaben und Termine**  
-   Regeln wie „jeden Dienstag“, Rotation zwischen Kindern, Ferienpausen und
-   eindeutige Serienbearbeitung.
-
-5. **Offline-fähige Kernfunktionen**  
+4. **Offline-fähige Kernfunktionen**
    Kalender, Einkauf und Aufgaben bleiben ohne Verbindung lesbar. Änderungen
    werden später mit sichtbarer Konfliktauflösung synchronisiert.
 
@@ -69,7 +72,7 @@
 - Taschengeld mit freigegebenen Sparzielen
 - Familienalbum aus erledigten Ausflügen und besonderen Momenten
 - saisonale Haushalts-Checklisten
-- CalDAV-/Google-/Outlook-Kalender-Synchronisation
+- bidirektionale CalDAV-/Google-/Outlook-Synchronisation mit Schreibzugriff
 - barrierearme Großelternansicht mit besonders großen Bedienelementen
 
 ## Produktprinzipien

@@ -8,6 +8,7 @@ import {
   timingSafeEqual
 } from 'crypto';
 import { DatabaseSync } from 'node:sqlite';
+import { nextTaskDueDate } from '../shared/taskRecurrence.js';
 
 const DATABASE_FILE = process.env.DATABASE_FILE
   ? path.resolve(process.env.DATABASE_FILE)
@@ -41,6 +42,12 @@ database.exec(`
   CREATE TABLE IF NOT EXISTS app_meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS schema_migrations (
+    version INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    applied_at INTEGER NOT NULL
   );
 
   CREATE TABLE IF NOT EXISTS families (
@@ -119,6 +126,49 @@ database.exec(`
   CREATE INDEX IF NOT EXISTS push_subscriptions_family_idx
     ON push_subscriptions(family_id, member_id);
 
+  CREATE TABLE IF NOT EXISTS inbox_notifications (
+    id TEXT PRIMARY KEY,
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    event_key TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL DEFAULT '',
+    url TEXT NOT NULL DEFAULT '/',
+    priority TEXT NOT NULL DEFAULT 'normal',
+    dedupe_key TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    read_at INTEGER,
+    UNIQUE(family_id, member_id, dedupe_key)
+  );
+
+  CREATE INDEX IF NOT EXISTS inbox_notifications_member_idx
+    ON inbox_notifications(family_id, member_id, created_at DESC);
+
+  CREATE INDEX IF NOT EXISTS inbox_notifications_unread_idx
+    ON inbox_notifications(family_id, member_id, read_at);
+
+  CREATE TABLE IF NOT EXISTS calendar_subscriptions (
+    id TEXT PRIMARY KEY,
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    feed_host TEXT NOT NULL DEFAULT '',
+    secret_encrypted TEXT NOT NULL,
+    color TEXT NOT NULL DEFAULT '#2563eb',
+    member_id TEXT NOT NULL DEFAULT 'all',
+    household TEXT NOT NULL DEFAULT 'familie',
+    enabled INTEGER NOT NULL DEFAULT 1
+      CHECK(enabled IN (0, 1)),
+    last_synced_at INTEGER,
+    last_success_at INTEGER,
+    last_error TEXT NOT NULL DEFAULT '',
+    event_count INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS calendar_subscriptions_family_idx
+    ON calendar_subscriptions(family_id, enabled, updated_at);
+
   CREATE TABLE IF NOT EXISTS integrations (
     family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
     provider TEXT NOT NULL,
@@ -153,31 +203,60 @@ database.exec(`
     ON family_relationships(target_family_id, status);
 `);
 
-const familyColumns = database.prepare('PRAGMA table_info(families)').all();
-if (
-  !familyColumns.some(
-    column => column.name === 'grandparents_household_enabled'
-  )
-) {
-  database.exec(`
-    ALTER TABLE families
-    ADD COLUMN grandparents_household_enabled INTEGER NOT NULL DEFAULT 1
-      CHECK(grandparents_household_enabled IN (0, 1));
-  `);
+function applySchemaMigration(version, name, work) {
+  const alreadyApplied = database
+    .prepare('SELECT 1 FROM schema_migrations WHERE version = ?')
+    .get(version);
+  if (alreadyApplied) return;
+
+  database.exec('BEGIN IMMEDIATE');
+  try {
+    work();
+    database
+      .prepare(`
+        INSERT INTO schema_migrations(version, name, applied_at)
+        VALUES(?, ?, ?)
+      `)
+      .run(version, name, Date.now());
+    database.exec(`PRAGMA user_version = ${Number(version)}`);
+    database.exec('COMMIT');
+  } catch (error) {
+    database.exec('ROLLBACK');
+    throw error;
+  }
 }
 
-const pushSubscriptionTable = database
-  .prepare(`
-    SELECT sql FROM sqlite_master
-    WHERE type = 'table' AND name = 'push_subscriptions'
-  `)
-  .get();
-if (
-  pushSubscriptionTable?.sql &&
-  /endpoint\s+TEXT\s+NOT\s+NULL\s+UNIQUE/i.test(pushSubscriptionTable.sql)
-) {
+applySchemaMigration(1, 'Haushalt Oma und Opa konfigurierbar', () => {
+  const familyColumns = database.prepare('PRAGMA table_info(families)').all();
+  if (
+    !familyColumns.some(
+      column => column.name === 'grandparents_household_enabled'
+    )
+  ) {
+    database.exec(`
+      ALTER TABLE families
+      ADD COLUMN grandparents_household_enabled INTEGER NOT NULL DEFAULT 1
+        CHECK(grandparents_household_enabled IN (0, 1));
+    `);
+  }
+});
+
+applySchemaMigration(2, 'Push-Geräte pro Familienprofil', () => {
+  const pushSubscriptionTable = database
+    .prepare(`
+      SELECT sql FROM sqlite_master
+      WHERE type = 'table' AND name = 'push_subscriptions'
+    `)
+    .get();
+  if (
+    !pushSubscriptionTable?.sql ||
+    !/endpoint\s+TEXT\s+NOT\s+NULL\s+UNIQUE/i.test(
+      pushSubscriptionTable.sql
+    )
+  ) {
+    return;
+  }
   database.exec(`
-    BEGIN IMMEDIATE;
     DROP INDEX IF EXISTS push_subscriptions_family_idx;
     ALTER TABLE push_subscriptions RENAME TO push_subscriptions_legacy;
     CREATE TABLE push_subscriptions (
@@ -204,9 +283,8 @@ if (
     DROP TABLE push_subscriptions_legacy;
     CREATE INDEX push_subscriptions_family_idx
       ON push_subscriptions(family_id, member_id);
-    COMMIT;
   `);
-}
+});
 
 function withTransaction(work) {
   database.exec('BEGIN IMMEDIATE');
@@ -762,10 +840,31 @@ function relationshipFamilySummary(row, prefix) {
   };
 }
 
+function relationshipMemberSummaries(familyId) {
+  return getMembers(familyId).map(member => ({
+    id: member.id,
+    name: member.name,
+    role: member.role,
+    position: member.position,
+    avatar: member.avatar,
+    color: member.color,
+    bgColor: member.bgColor
+  }));
+}
+
 function mapRelationshipRow(row, familyId) {
   if (!row) return null;
   const requesterFamily = relationshipFamilySummary(row, 'requester');
   const targetFamily = relationshipFamilySummary(row, 'target');
+  if (row.status === 'accepted') {
+    requesterFamily.members = relationshipMemberSummaries(
+      requesterFamily.id
+    );
+    targetFamily.members = relationshipMemberSummaries(targetFamily.id);
+  } else {
+    requesterFamily.members = [];
+    targetFamily.members = [];
+  }
   return {
     id: row.id,
     relationType: row.relation_type,
@@ -1193,6 +1292,365 @@ export function countPushSubscriptionsByEndpoint(endpoint) {
   );
 }
 
+function mapInboxNotificationRow(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    familyId: row.family_id,
+    memberId: row.member_id,
+    eventKey: row.event_key,
+    title: row.title,
+    body: row.body,
+    url: row.url,
+    priority: row.priority,
+    dedupeKey: row.dedupe_key,
+    createdAt: row.created_at,
+    readAt: row.read_at || null,
+    read: Boolean(row.read_at)
+  };
+}
+
+export function createInboxNotifications(
+  familyId,
+  memberIds,
+  {
+    eventKey = 'update',
+    title = 'Neu im Familienplaner',
+    body = '',
+    url = '/',
+    priority = 'normal',
+    dedupeKey = ''
+  } = {}
+) {
+  const recipients = [...new Set((memberIds || []).filter(Boolean))];
+  if (!recipients.length) return [];
+  const now = Date.now();
+  const stableKey = String(dedupeKey || `${eventKey}-${now}`);
+  const insert = database.prepare(`
+    INSERT INTO inbox_notifications(
+      id, family_id, member_id, event_key, title, body, url,
+      priority, dedupe_key, created_at, read_at
+    )
+    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+    ON CONFLICT(family_id, member_id, dedupe_key) DO NOTHING
+  `);
+
+  return withTransaction(() => {
+    const created = [];
+    for (const memberId of recipients) {
+      const id = `notification-${randomUUID()}`;
+      const result = insert.run(
+        id,
+        familyId,
+        memberId,
+        String(eventKey || 'update'),
+        String(title || 'Neu im Familienplaner'),
+        String(body || ''),
+        String(url || '/'),
+        String(priority || 'normal'),
+        stableKey,
+        now
+      );
+      if (result.changes > 0) {
+        created.push(
+          mapInboxNotificationRow(
+            database
+              .prepare('SELECT * FROM inbox_notifications WHERE id = ?')
+              .get(id)
+          )
+        );
+      }
+    }
+
+    database
+      .prepare(`
+        DELETE FROM inbox_notifications
+        WHERE family_id = ?
+          AND (
+            created_at < ?
+            OR id NOT IN (
+              SELECT id FROM inbox_notifications recent
+              WHERE recent.family_id = inbox_notifications.family_id
+                AND recent.member_id = inbox_notifications.member_id
+              ORDER BY recent.created_at DESC
+              LIMIT 200
+            )
+          )
+      `)
+      .run(familyId, now - 1000 * 60 * 60 * 24 * 90);
+
+    if (created.length) bumpFamilyVersion(familyId);
+    return created;
+  });
+}
+
+export function listInboxNotifications(
+  familyId,
+  memberId,
+  { limit = 80 } = {}
+) {
+  if (!memberId) return [];
+  const safeLimit = Math.max(1, Math.min(200, Number(limit) || 80));
+  return database
+    .prepare(`
+      SELECT * FROM inbox_notifications
+      WHERE family_id = ? AND member_id = ?
+      ORDER BY created_at DESC
+      LIMIT ?
+    `)
+    .all(familyId, memberId, safeLimit)
+    .map(mapInboxNotificationRow);
+}
+
+export function countUnreadInboxNotifications(familyId, memberId) {
+  if (!memberId) return 0;
+  return Number(
+    database
+      .prepare(`
+        SELECT COUNT(*) AS count
+        FROM inbox_notifications
+        WHERE family_id = ? AND member_id = ? AND read_at IS NULL
+      `)
+      .get(familyId, memberId)?.count || 0
+  );
+}
+
+export function markInboxNotificationRead(
+  familyId,
+  memberId,
+  notificationId,
+  read = true
+) {
+  const readAt = read ? Date.now() : null;
+  const result = database
+    .prepare(`
+      UPDATE inbox_notifications
+      SET read_at = ?
+      WHERE id = ? AND family_id = ? AND member_id = ?
+    `)
+    .run(readAt, notificationId, familyId, memberId);
+  if (result.changes > 0) bumpFamilyVersion(familyId);
+  return mapInboxNotificationRow(
+    database
+      .prepare(`
+        SELECT * FROM inbox_notifications
+        WHERE id = ? AND family_id = ? AND member_id = ?
+      `)
+      .get(notificationId, familyId, memberId)
+  );
+}
+
+export function markAllInboxNotificationsRead(familyId, memberId) {
+  if (!memberId) return 0;
+  const result = database
+    .prepare(`
+      UPDATE inbox_notifications
+      SET read_at = ?
+      WHERE family_id = ? AND member_id = ? AND read_at IS NULL
+    `)
+    .run(Date.now(), familyId, memberId);
+  if (result.changes > 0) bumpFamilyVersion(familyId);
+  return result.changes;
+}
+
+function mapCalendarSubscriptionRow(row, { includeSecret = false } = {}) {
+  if (!row) return null;
+  const subscription = {
+    id: row.id,
+    familyId: row.family_id,
+    name: row.name,
+    host: row.feed_host,
+    color: row.color,
+    memberId: row.member_id,
+    household: row.household,
+    enabled: Boolean(row.enabled),
+    lastSyncedAt: row.last_synced_at || null,
+    lastSuccessAt: row.last_success_at || null,
+    lastError: row.last_error || '',
+    eventCount: Number(row.event_count || 0),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+  if (includeSecret) {
+    subscription.secretEncrypted = row.secret_encrypted;
+  }
+  return subscription;
+}
+
+export function listCalendarSubscriptions(
+  familyId,
+  { includeSecret = false } = {}
+) {
+  return database
+    .prepare(`
+      SELECT * FROM calendar_subscriptions
+      WHERE family_id = ?
+      ORDER BY name COLLATE NOCASE ASC, created_at ASC
+    `)
+    .all(familyId)
+    .map(row => mapCalendarSubscriptionRow(row, { includeSecret }));
+}
+
+export function listEnabledCalendarSubscriptions({
+  includeSecret = true
+} = {}) {
+  return database
+    .prepare(`
+      SELECT * FROM calendar_subscriptions
+      WHERE enabled = 1
+      ORDER BY COALESCE(last_synced_at, 0) ASC
+    `)
+    .all()
+    .map(row => mapCalendarSubscriptionRow(row, { includeSecret }));
+}
+
+export function getCalendarSubscription(
+  familyId,
+  subscriptionId,
+  { includeSecret = false } = {}
+) {
+  return mapCalendarSubscriptionRow(
+    database
+      .prepare(`
+        SELECT * FROM calendar_subscriptions
+        WHERE family_id = ? AND id = ?
+      `)
+      .get(familyId, subscriptionId),
+    { includeSecret }
+  );
+}
+
+export function createCalendarSubscription(
+  familyId,
+  {
+    name,
+    host = '',
+    secretEncrypted,
+    color = '#2563eb',
+    memberId = 'all',
+    household = 'familie',
+    enabled = true
+  }
+) {
+  const id = `calendar-${randomUUID()}`;
+  const now = Date.now();
+  database
+    .prepare(`
+      INSERT INTO calendar_subscriptions(
+        id, family_id, name, feed_host, secret_encrypted, color,
+        member_id, household, enabled, created_at, updated_at
+      )
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+    .run(
+      id,
+      familyId,
+      name,
+      host,
+      secretEncrypted,
+      color,
+      memberId,
+      household,
+      enabled ? 1 : 0,
+      now,
+      now
+    );
+  bumpFamilyVersion(familyId);
+  return getCalendarSubscription(familyId, id);
+}
+
+export function updateCalendarSubscription(
+  familyId,
+  subscriptionId,
+  changes = {}
+) {
+  const existing = getCalendarSubscription(
+    familyId,
+    subscriptionId,
+    { includeSecret: true }
+  );
+  if (!existing) return null;
+  const updated = {
+    ...existing,
+    ...changes,
+    updatedAt: Date.now()
+  };
+  database
+    .prepare(`
+      UPDATE calendar_subscriptions SET
+        name = ?,
+        feed_host = ?,
+        secret_encrypted = ?,
+        color = ?,
+        member_id = ?,
+        household = ?,
+        enabled = ?,
+        updated_at = ?
+      WHERE family_id = ? AND id = ?
+    `)
+    .run(
+      updated.name,
+      updated.host,
+      updated.secretEncrypted,
+      updated.color,
+      updated.memberId,
+      updated.household,
+      updated.enabled ? 1 : 0,
+      updated.updatedAt,
+      familyId,
+      subscriptionId
+    );
+  bumpFamilyVersion(familyId);
+  return getCalendarSubscription(familyId, subscriptionId);
+}
+
+export function updateCalendarSubscriptionSync(
+  familyId,
+  subscriptionId,
+  {
+    success,
+    eventCount = 0,
+    error = ''
+  }
+) {
+  const now = Date.now();
+  const result = database
+    .prepare(`
+      UPDATE calendar_subscriptions SET
+        last_synced_at = ?,
+        last_success_at = CASE WHEN ? THEN ? ELSE last_success_at END,
+        last_error = ?,
+        event_count = CASE WHEN ? THEN ? ELSE event_count END,
+        updated_at = ?
+      WHERE family_id = ? AND id = ?
+    `)
+    .run(
+      now,
+      success ? 1 : 0,
+      now,
+      String(error || ''),
+      success ? 1 : 0,
+      Math.max(0, Number(eventCount || 0)),
+      now,
+      familyId,
+      subscriptionId
+    );
+  if (!result.changes) return null;
+  bumpFamilyVersion(familyId);
+  return getCalendarSubscription(familyId, subscriptionId);
+}
+
+export function deleteCalendarSubscription(familyId, subscriptionId) {
+  const result = database
+    .prepare(`
+      DELETE FROM calendar_subscriptions
+      WHERE family_id = ? AND id = ?
+    `)
+    .run(familyId, subscriptionId);
+  if (result.changes) bumpFamilyVersion(familyId);
+  return result.changes > 0;
+}
+
 export function deletePushSubscriptionsByEndpoint(endpoint) {
   return database
     .prepare('DELETE FROM push_subscriptions WHERE endpoint = ?')
@@ -1262,12 +1720,70 @@ function updateTaskMemberStars(familyId, task, direction) {
   return getMember(familyId, task.memberId);
 }
 
+function createNextRecurringTask(familyId, task) {
+  if (!task || task.repeatRule === 'none' || !task.repeatRule) return null;
+  const nextDueDate = nextTaskDueDate(
+    task.dueDate || task.occurrenceDate,
+    task.repeatRule,
+    task.repeatAnchorDay
+  );
+  if (!nextDueDate) return null;
+  const seriesId = task.seriesId || task.id;
+  const duplicate = listRecords(familyId, 'tasks').find(
+    record =>
+      record.seriesId === seriesId &&
+      (record.occurrenceDate || record.dueDate) === nextDueDate
+  );
+  if (duplicate) return duplicate;
+
+  const nextTask = {
+    ...task,
+    id: `task-${randomUUID()}`,
+    seriesId,
+    occurrenceDate: nextDueDate,
+    dueDate: nextDueDate,
+    previousOccurrenceId: task.id,
+    completed: false,
+    completionStatus: 'open',
+    completionRequestedByMemberId: null,
+    completionRequestedAt: null,
+    completionApprovedByMemberId: null,
+    completionApprovedAt: null,
+    completionRejectedByMemberId: null,
+    completionRejectedAt: null,
+    createdAt: Date.now()
+  };
+  delete nextTask.nextOccurrenceId;
+  return upsertRecord(
+    familyId,
+    'tasks',
+    nextTask,
+    { bump: false }
+  );
+}
+
 export function toggleTaskRecord(familyId, taskId, actorMemberId = '') {
   return withTransaction(() => {
     const task = getRecord(familyId, 'tasks', taskId);
     if (!task) return null;
     const completed = !task.completed;
     const now = Date.now();
+    const unusedNextTask = !completed && task.repeatRule !== 'none'
+      ? listRecords(familyId, 'tasks').find(
+          record =>
+            record.previousOccurrenceId === task.id &&
+            !record.completed &&
+            record.completionStatus !== 'pending_approval'
+        )
+      : null;
+    if (unusedNextTask) {
+      database
+        .prepare(`
+          DELETE FROM family_records
+          WHERE family_id = ? AND type = 'tasks' AND id = ?
+        `)
+        .run(familyId, unusedNextTask.id);
+    }
     const updatedTask = upsertRecord(
       familyId,
       'tasks',
@@ -1293,10 +1809,15 @@ export function toggleTaskRecord(familyId, taskId, actorMemberId = '') {
       { bump: false }
     );
     const member = updateTaskMemberStars(familyId, task, completed ? 1 : -1);
+    const nextTask = completed
+      ? createNextRecurringTask(familyId, updatedTask)
+      : null;
     bumpFamilyVersion(familyId);
     return {
       task: updatedTask,
       member,
+      nextTask,
+      removedNextTaskId: unusedNextTask?.id || null,
       action: completed ? 'completed' : 'reopened'
     };
   });
@@ -1380,10 +1901,14 @@ export function reviewTaskRecord(
     const member = approved
       ? updateTaskMemberStars(familyId, task, 1)
       : null;
+    const nextTask = approved
+      ? createNextRecurringTask(familyId, updatedTask)
+      : null;
     bumpFamilyVersion(familyId);
     return {
       task: updatedTask,
       member,
+      nextTask,
       action: approved ? 'approved' : 'rejected'
     };
   });

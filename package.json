@@ -13,7 +13,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "backup": "node --env-file-if-exists=.env server/backup.js",
-    "test": "node --test server/api-smoke.test.js",
+    "audit": "node --env-file-if-exists=.env server/dataIntegrity.js",
+    "simulate-update": "node --env-file-if-exists=.env server/updateSimulation.js",
+    "test": "node --test server/*.test.js",
     "check": "node --check server.js && node --check server/app.js && node --check server/database.js && npm run test && vite build"
   },
   "dependencies": {

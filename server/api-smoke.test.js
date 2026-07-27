@@ -12,17 +12,24 @@ process.env.DATABASE_FILE = path.join(testDirectory, 'test.sqlite');
 process.env.DISABLE_LEGACY_IMPORT = 'true';
 process.env.APP_SECRET = 'test-secret-only-for-automated-api-checks';
 process.env.NODE_ENV = 'test';
+process.env.CALENDAR_ALLOW_LOOPBACK_FOR_TESTS = 'true';
 
 const [
   { createApp },
   { database },
   { normalizeBringCatalog },
-  { getInstructionDurationMinutes, parseInstructionSteps }
+  { getInstructionDurationMinutes, parseInstructionSteps },
+  { parseICalendar },
+  { nextTaskDueDate },
+  { moveDashboardWidget, normalizeDashboardLayout }
 ] = await Promise.all([
   import('./app.js'),
   import('./database.js'),
   import('./bringCatalog.js'),
-  import('../shared/recipeInstructions.js')
+  import('../shared/recipeInstructions.js'),
+  import('../shared/icsCalendar.js'),
+  import('../shared/taskRecurrence.js'),
+  import('../src/utils/dashboardLayout.js')
 ]);
 
 const server = createApp().listen(0, '127.0.0.1');
@@ -81,6 +88,44 @@ await new Promise((resolve, reject) => {
 });
 const gotifyAddress = gotifyServer.address();
 const gotifyBaseUrl = `http://127.0.0.1:${gotifyAddress.port}`;
+const calendarFeed = [
+  'BEGIN:VCALENDAR',
+  'VERSION:2.0',
+  'PRODID:-//LX Test Calendar//DE',
+  'BEGIN:VEVENT',
+  'UID:school-weekly@example.test',
+  'DTSTART;TZID=Europe/Berlin:20260728T081500',
+  'RRULE:FREQ=WEEKLY;COUNT=3;BYDAY=TU',
+  'EXDATE;TZID=Europe/Berlin:20260804T081500',
+  'SUMMARY:Schulweg gemeinsam',
+  'LOCATION:Grundschule',
+  'END:VEVENT',
+  'BEGIN:VEVENT',
+  'UID:holiday@example.test',
+  'DTSTART;VALUE=DATE:20260810',
+  'SUMMARY:Ferienstart',
+  'DESCRIPTION:Heute beginnt die schulfreie ',
+  ' Zeit.',
+  'END:VEVENT',
+  'END:VCALENDAR'
+].join('\r\n');
+const calendarServer = createServer((req, res) => {
+  if (req.url !== '/family.ics') {
+    res.statusCode = 404;
+    res.end('not found');
+    return;
+  }
+  res.setHeader('content-type', 'text/calendar; charset=utf-8');
+  res.end(calendarFeed);
+});
+calendarServer.listen(0, '127.0.0.1');
+await new Promise((resolve, reject) => {
+  calendarServer.once('listening', resolve);
+  calendarServer.once('error', reject);
+});
+const calendarAddress = calendarServer.address();
+const calendarFeedUrl =
+  `http://127.0.0.1:${calendarAddress.port}/family.ics`;
 
 async function request(pathname, options = {}, expectedStatus = 200) {
   const response = await fetch(`${baseUrl}${pathname}`, options);
@@ -96,7 +141,8 @@ async function request(pathname, options = {}, expectedStatus = 200) {
 after(async () => {
   await Promise.all([
     new Promise(resolve => server.close(resolve)),
-    new Promise(resolve => gotifyServer.close(resolve))
+    new Promise(resolve => gotifyServer.close(resolve)),
+    new Promise(resolve => calendarServer.close(resolve))
   ]);
   database.close();
   fs.rmSync(testDirectory, { recursive: true, force: true });
@@ -157,6 +203,69 @@ test('recipe instructions are cleaned and scheduled in a useful order', () => {
   assert.equal(
     getInstructionDurationMinutes(steps[ovenIndex]),
     25
+  );
+});
+
+test('ICS calendars keep recurring, excluded and folded events useful', () => {
+  const events = parseICalendar(calendarFeed, {
+    targetTimeZone: 'Europe/Berlin',
+    rangeStart: new Date('2026-07-01T00:00:00Z').getTime(),
+    rangeEnd: new Date('2026-09-01T00:00:00Z').getTime()
+  });
+  assert.equal(events.length, 3);
+  assert.deepEqual(
+    events.map(event => event.date),
+    ['2026-07-28', '2026-08-10', '2026-08-11']
+  );
+  assert.equal(events[0].time, '08:15');
+  assert.equal(events[1].allDay, true);
+  assert.equal(events[1].notes, 'Heute beginnt die schulfreie Zeit.');
+  const longRunning = parseICalendar(
+    [
+      'BEGIN:VCALENDAR',
+      'BEGIN:VEVENT',
+      'UID:old-daily',
+      'DTSTART;VALUE=DATE:20200101',
+      'RRULE:FREQ=DAILY',
+      'SUMMARY:Langlaufende Serie',
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n'),
+    {
+      rangeStart: new Date('2026-07-27T00:00:00Z').getTime(),
+      rangeEnd: new Date('2026-07-29T23:59:59Z').getTime()
+    }
+  );
+  assert.deepEqual(
+    longRunning.map(event => event.date),
+    ['2026-07-27', '2026-07-28', '2026-07-29']
+  );
+});
+
+test('recurring task dates stay predictable across weekends and months', () => {
+  assert.equal(nextTaskDueDate('2026-07-31', 'daily'), '2026-08-01');
+  assert.equal(nextTaskDueDate('2026-07-31', 'weekdays'), '2026-08-03');
+  assert.equal(nextTaskDueDate('2026-07-27', 'weekly'), '2026-08-03');
+  assert.equal(nextTaskDueDate('2026-01-31', 'monthly'), '2026-02-28');
+  assert.equal(nextTaskDueDate('2026-02-28', 'monthly', 31), '2026-03-31');
+});
+
+test('dashboard layouts remain complete, ordered and never fully hidden', () => {
+  const normalized = normalizeDashboardLayout(
+    {
+      order: ['tasks', 'unknown', 'tasks', 'calendar'],
+      hidden: ['tasks', 'calendar', 'shopping'],
+      density: 'compact'
+    },
+    ['calendar', 'tasks', 'shopping']
+  );
+  assert.deepEqual(normalized.order, ['tasks', 'calendar', 'shopping']);
+  assert.equal(normalized.hidden.length, 2);
+  assert.equal(normalized.hidden.includes('tasks'), false);
+  assert.equal(normalized.density, 'compact');
+  assert.deepEqual(
+    moveDashboardWidget(normalized, 'shopping', 'up').order,
+    ['tasks', 'shopping', 'calendar']
   );
 });
 
@@ -242,6 +351,50 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   await liveReader.cancel();
 
+  const calendarSubscription = await request(
+    '/api/calendar/subscriptions',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        name: 'Schule',
+        url: calendarFeedUrl,
+        color: '#2563eb',
+        memberId: childOne.id,
+        household: 'familie'
+      })
+    },
+    201
+  );
+  assert.equal(calendarSubscription.body.warning, '');
+  assert.equal(calendarSubscription.body.records.length, 3);
+  assert.equal(calendarSubscription.body.subscription.host, '127.0.0.1');
+  assert.equal(
+    Object.hasOwn(calendarSubscription.body.subscription, 'secretEncrypted'),
+    false
+  );
+  const subscriptions = await request('/api/calendar/subscriptions', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(subscriptions.body.subscriptions.length, 1);
+  const calendarBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  const subscribedEvents = calendarBootstrap.body.resources.events.filter(
+    event => event.sourceId === calendarSubscription.body.subscription.id
+  );
+  assert.equal(subscribedEvents.length, 3);
+  assert.equal(subscribedEvents.every(event => event.readOnly), true);
+  assert.equal(subscribedEvents[0].memberId, childOne.id);
+  await request(
+    `/api/resources/events/${subscribedEvents[0].id}`,
+    {
+      method: 'DELETE',
+      headers: authenticatedHeaders
+    },
+    409
+  );
+
   const task = await request(
     '/api/resources/tasks',
     {
@@ -251,6 +404,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
         title: 'Testmission',
         memberId: childOne.id,
         stars: 15,
+        dueDate: '2026-07-27',
+        repeatRule: 'weekly',
         completed: false
       })
     },
@@ -332,6 +487,12 @@ test('family flow stays isolated, authorized and internally consistent', async (
     ),
     false
   );
+  assert.equal(
+    childTwoBootstrap.body.notifications.some(
+      notification => notification.eventKey === 'directMessages'
+    ),
+    false
+  );
 
   await request(
     '/api/auth/member',
@@ -361,6 +522,30 @@ test('family flow stays isolated, authorized and internally consistent', async (
       message => message.id === directMessage.body.record.id
     ),
     true
+  );
+  assert.equal(
+    childOneBootstrap.body.notifications.some(
+      notification => notification.eventKey === 'taskAssigned'
+    ),
+    true
+  );
+  assert.equal(
+    childOneBootstrap.body.notifications.some(
+      notification => notification.eventKey === 'directMessages'
+    ),
+    true
+  );
+  await request(
+    '/api/calendar/subscriptions',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        name: 'Nicht erlaubt',
+        url: calendarFeedUrl
+      })
+    },
+    403
   );
 
   const completionRequest = await request(`/api/tasks/${task.body.record.id}/toggle`, {
@@ -433,6 +618,30 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(approval.body.task.completed, true);
   assert.equal(approval.body.task.completionStatus, 'approved');
   assert.equal(approval.body.member.stars, 15);
+  assert.equal(approval.body.nextTask.dueDate, '2026-08-03');
+  assert.equal(approval.body.nextTask.completed, false);
+
+  const adultNotifications = await request('/api/notifications', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(adultNotifications.body.unreadCount > 0, true);
+  const unreadNotification = adultNotifications.body.notifications.find(
+    notification => !notification.read
+  );
+  const markedNotification = await request(
+    `/api/notifications/${unreadNotification.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ read: true })
+    }
+  );
+  assert.equal(markedNotification.body.notification.read, true);
+  const allRead = await request('/api/notifications/read-all', {
+    method: 'POST',
+    headers: authenticatedHeaders
+  });
+  assert.equal(allRead.body.unreadCount, 0);
 
   const gotifySetup = await request(
     '/api/integrations/gotify/setup',
@@ -644,7 +853,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     body: JSON.stringify({ memberId: childOne.id, completedOnly: true })
   });
   assert.equal(clearedTasks.body.deleted, 1);
-  assert.equal(clearedTasks.body.records.length, 0);
+  assert.equal(clearedTasks.body.records.length, 1);
+  assert.equal(clearedTasks.body.records[0].dueDate, '2026-08-03');
 
   const meal = await request(
     '/api/resources/meals',
@@ -738,6 +948,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: secondHeaders
   });
   assert.equal(incomingRelationships.body.relationships[0].direction, 'incoming');
+  assert.deepEqual(
+    incomingRelationships.body.relationships[0].otherFamily.members,
+    []
+  );
 
   await request(
     `/api/family/relationships/${relationshipRequest.body.relationship.id}`,
@@ -751,6 +965,14 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(acceptedRelationships.body.relationships[0].status, 'accepted');
+  assert.equal(
+    acceptedRelationships.body.relationships[0].otherFamily.members[0].name,
+    'Zweite Mama'
+  );
+  assert.equal(
+    acceptedRelationships.body.relationships[0].otherFamily.members[0].position,
+    'mama'
+  );
 
   const deletion = await request('/api/family', {
     method: 'DELETE',

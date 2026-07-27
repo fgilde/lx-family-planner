@@ -13,11 +13,40 @@ import {
   X,
   Clock3,
   ShieldCheck,
-  RotateCcw
+  RotateCcw,
+  CalendarDays,
+  Repeat2
 } from 'lucide-react';
 import { canManageFamily, getPositionLabel, isChildProfile } from '../../constants/roles';
 
 const REWARD_ICONS = ['🍦', '🎮', '🍿', '🎪', '🍕', '🚀', '🎁', '🛹', '🎳', '🍔', '🎨', '🏖️'];
+const REPEAT_LABELS = {
+  none: 'Einmalig',
+  daily: 'Jeden Tag',
+  weekdays: 'Montag bis Freitag',
+  weekly: 'Jede Woche',
+  monthly: 'Jeden Monat'
+};
+
+function formatTaskDate(value) {
+  if (!value) return '';
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString('de-DE', {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short'
+      });
+}
+
+function currentLocalDate() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 10);
+}
 
 export default function ChoreRewardsPlanner() {
   const {
@@ -30,6 +59,10 @@ export default function ChoreRewardsPlanner() {
   const [taskMemberId, setTaskMemberId] = useState(members[0]?.id || '');
   const [taskStars, setTaskStars] = useState(15);
   const [taskCategory, setTaskCategory] = useState('Haushalt');
+  const [taskDueDate, setTaskDueDate] = useState(
+    currentLocalDate
+  );
+  const [taskRepeatRule, setTaskRepeatRule] = useState('none');
 
   // Reward Creator / Editor State
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
@@ -47,7 +80,9 @@ export default function ChoreRewardsPlanner() {
       title: taskTitle,
       memberId: taskMemberId,
       stars: Number(taskStars),
-      category: taskCategory
+      category: taskCategory,
+      dueDate: taskDueDate,
+      repeatRule: taskRepeatRule
     });
 
     setTaskTitle('');
@@ -155,7 +190,14 @@ export default function ChoreRewardsPlanner() {
             task =>
               task.memberId === member.id &&
               (task.household || 'familie') === activeHousehold
-          );
+          ).sort((left, right) => {
+            if (Boolean(left.completed) !== Boolean(right.completed)) {
+              return left.completed ? 1 : -1;
+            }
+            return String(left.dueDate || '9999-12-31').localeCompare(
+              String(right.dueDate || '9999-12-31')
+            );
+          });
 
           return (
             <div key={member.id} className="card" style={{ borderTop: `6px solid ${member.color || 'var(--primary)'}` }}>
@@ -232,6 +274,26 @@ export default function ChoreRewardsPlanner() {
                                     ? `Erstellt von ${task.createdByName || 'einem Elternteil'}`
                                     : 'Tippen, wenn du fertig bist'}
                             </small>
+                            {(task.dueDate ||
+                              (task.repeatRule &&
+                                task.repeatRule !== 'none')) && (
+                              <span className="task-schedule-row">
+                                {task.dueDate && (
+                                  <span>
+                                    <CalendarDays size={12} />
+                                    {formatTaskDate(task.dueDate)}
+                                  </span>
+                                )}
+                                {task.repeatRule &&
+                                  task.repeatRule !== 'none' && (
+                                    <span>
+                                      <Repeat2 size={12} />
+                                      {REPEAT_LABELS[task.repeatRule] ||
+                                        'Wiederkehrend'}
+                                    </span>
+                                  )}
+                              </span>
+                            )}
                           </span>
                           <span className="task-star-value">
                             <Star size={14} fill="#f59e0b" /> +{task.stars}
@@ -463,6 +525,61 @@ export default function ChoreRewardsPlanner() {
                   {members.map(m => (
                     <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
                   ))}
+                </select>
+              </div>
+
+              <div className="task-schedule-editor">
+                <div className="task-schedule-editor-title">
+                  <CalendarDays size={18} />
+                  <div>
+                    <strong>Wann ist die Aufgabe dran?</strong>
+                    <span>
+                      Wiederholungen werden nach der Bestätigung automatisch
+                      neu eingeplant.
+                    </span>
+                  </div>
+                </div>
+                <div className="task-schedule-fields">
+                  <label className="form-group">
+                    <span className="form-label">Fällig am</span>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={taskDueDate}
+                      onChange={event => setTaskDueDate(event.target.value)}
+                      required={taskRepeatRule !== 'none'}
+                    />
+                  </label>
+                  <label className="form-group">
+                    <span className="form-label">Wiederholung</span>
+                    <select
+                      className="form-select"
+                      value={taskRepeatRule}
+                      onChange={event =>
+                        setTaskRepeatRule(event.target.value)
+                      }
+                    >
+                      {Object.entries(REPEAT_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Bereich</label>
+                <select
+                  className="form-select"
+                  value={taskCategory}
+                  onChange={event => setTaskCategory(event.target.value)}
+                >
+                  <option value="Haushalt">Haushalt</option>
+                  <option value="Küche">Küche</option>
+                  <option value="Zimmer">Zimmer</option>
+                  <option value="Schule">Schule</option>
+                  <option value="Haustier">Haustier</option>
+                  <option value="Garten">Garten</option>
                 </select>
               </div>
 

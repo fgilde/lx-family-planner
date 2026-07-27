@@ -1,6 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFamily } from '../../context/FamilyContext';
-import { Pin, Plus, Trash2, Edit3, X, Camera, Upload, RotateCw, Image as ImageIcon, Sparkles } from 'lucide-react';
+import {
+  Edit3,
+  Pin,
+  Plus,
+  RotateCw,
+  Trash2,
+  Upload,
+  X,
+  ZoomIn
+} from 'lucide-react';
+import { compressImageDataUrl } from '../../utils/imageCompressor';
 
 const NOTE_COLORS = [
   '#fef08a', // Yellow
@@ -10,10 +20,28 @@ const NOTE_COLORS = [
   '#fed7aa'  // Soft Orange
 ];
 
+const MAX_SOURCE_PHOTO_BYTES = 20 * 1024 * 1024;
+const MAX_STORED_PHOTO_LENGTH = 1_500_000;
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = event => resolve(event.target.result);
+    reader.onerror = () => reject(
+      new Error('Das Foto konnte nicht gelesen werden.')
+    );
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function FamilyPinboard() {
   const {
-    notes, addNote, updateNote, deleteNote, activeMember, activeHousehold,
-    setIsQuickAddOpen, setQuickAddDefaultType, showToast
+    notes,
+    addNote,
+    updateNote,
+    deleteNote,
+    activeHousehold,
+    showToast
   } = useFamily();
 
   // Track flipped note cards { [noteId]: boolean }
@@ -33,35 +61,96 @@ export default function FamilyPinboard() {
   const [newColor, setNewColor] = useState('#fef08a');
   const [newIsShared, setNewIsShared] = useState(false);
   const [newPhoto, setNewPhoto] = useState(null);
+  const [photoBusy, setPhotoBusy] = useState('');
+  const [saving, setSaving] = useState('');
+  const [lightboxPhoto, setLightboxPhoto] = useState(null);
+
+  useEffect(() => {
+    if (!lightboxPhoto) return undefined;
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') setLightboxPhoto(null);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [lightboxPhoto]);
 
   const toggleFlip = (noteId, e) => {
     e?.stopPropagation();
     setFlippedCards(prev => ({ ...prev, [noteId]: !prev[noteId] }));
   };
 
-  const handlePhotoUpload = (e, setPhotoFn) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = async (event, setPhotoFn, target) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setPhotoFn(event.target.result);
-      showToast('📸 Foto angeheftet!', 'Foto wurde an der Pinnwand geladen.', 'success');
-    };
-    reader.readAsDataURL(file);
+    input.value = '';
+    if (!file.type.startsWith('image/')) {
+      showToast(
+        'Keine Bilddatei',
+        'Bitte wähle ein Foto im JPG-, PNG- oder WebP-Format.',
+        'warning'
+      );
+      return;
+    }
+    if (file.size > MAX_SOURCE_PHOTO_BYTES) {
+      showToast(
+        'Foto ist zu groß',
+        'Bitte wähle ein Bild mit höchstens 20 MB.',
+        'warning'
+      );
+      return;
+    }
+
+    setPhotoBusy(target);
+    try {
+      const original = await readFileAsDataUrl(file);
+      let optimized = await compressImageDataUrl(
+        original,
+        1400,
+        1400,
+        0.78
+      );
+      if (optimized.length > MAX_STORED_PHOTO_LENGTH) {
+        optimized = await compressImageDataUrl(
+          original,
+          1000,
+          1000,
+          0.65
+        );
+      }
+      if (optimized.length > MAX_STORED_PHOTO_LENGTH) {
+        throw new Error(
+          'Das Foto ist nach der Optimierung noch zu groß. Bitte wähle ein anderes Bild.'
+        );
+      }
+      setPhotoFn(optimized);
+      showToast(
+        'Foto ist bereit',
+        'Das Bild wurde automatisch für die Pinnwand optimiert.',
+        'success'
+      );
+    } catch (error) {
+      showToast('Foto konnte nicht geladen werden', error.message, 'error');
+    } finally {
+      setPhotoBusy('');
+    }
   };
 
-  const handleAddSubmit = (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim() || photoBusy) return;
 
-    addNote({
+    setSaving('new');
+    const created = await addNote({
       title: newTitle,
       content: newContent,
       color: newColor,
       isShared: newIsShared,
       photo: newPhoto
     });
+    setSaving('');
+    if (!created) return;
 
     setNewTitle('');
     setNewContent('');
@@ -79,17 +168,20 @@ export default function FamilyPinboard() {
     setEditPhoto(note.photo || null);
   };
 
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault();
-    if (!editingNote || !editTitle.trim()) return;
+    if (!editingNote || !editTitle.trim() || photoBusy) return;
 
-    updateNote(editingNote.id, {
+    setSaving('edit');
+    const updated = await updateNote(editingNote.id, {
       title: editTitle,
       content: editContent,
       color: editColor,
       isShared: editIsShared,
       photo: editPhoto
     });
+    setSaving('');
+    if (!updated) return;
 
     setEditingNote(null);
   };
@@ -113,7 +205,8 @@ export default function FamilyPinboard() {
           </button>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Wichtige Zettel & Fotos am virtuellen Kühlschrank. Klicke auf Fotos, um die Karte wie ein Polaroid umzudrehen!
+          Wichtige Zettel & Fotos am virtuellen Kühlschrank. Tippe ein Foto
+          für die große Ansicht an – die Rückseite öffnest du über „Notiz lesen“.
         </p>
       </div>
 
@@ -141,7 +234,6 @@ export default function FamilyPinboard() {
 
               {/* 3D Card Inner Container */}
               <div
-                onClick={() => hasPhoto && toggleFlip(note.id)}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -149,7 +241,6 @@ export default function FamilyPinboard() {
                   transformStyle: 'preserve-3d',
                   transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-                  cursor: hasPhoto ? 'pointer' : 'default',
                   borderRadius: 'var(--radius-lg)',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
                 }}
@@ -178,11 +269,29 @@ export default function FamilyPinboard() {
                     {/* Polaroid Photo if present */}
                     {hasPhoto ? (
                       <div style={{ background: 'white', padding: '10px 10px 14px 10px', borderRadius: 'var(--radius-sm)', marginBottom: 12, boxShadow: 'var(--shadow-sm)', textAlign: 'center' }}>
-                        <img src={note.photo} alt={note.title} style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                        <button
+                          type="button"
+                          className="pinboard-photo-preview"
+                          onClick={event => {
+                            event.stopPropagation();
+                            setLightboxPhoto({
+                              src: note.photo,
+                              title: note.title
+                            });
+                          }}
+                          aria-label={`Bild „${note.title}“ groß ansehen`}
+                        >
+                          <img src={note.photo} alt={note.title} />
+                          <span><ZoomIn size={15} /> Groß ansehen</span>
+                        </button>
                         <div style={{ fontWeight: 800, fontSize: '1rem', marginTop: 8 }}>{note.title}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                          <RotateCw size={12} /> Klicken zum Umdrehen (Text lesen)
-                        </div>
+                        <button
+                          type="button"
+                          className="pinboard-flip-hint"
+                          onClick={event => toggleFlip(note.id, event)}
+                        >
+                          <RotateCw size={12} /> Notiz lesen
+                        </button>
                       </div>
                     ) : (
                       <>
@@ -323,7 +432,7 @@ export default function FamilyPinboard() {
                 
                 {newPhoto ? (
                   <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 10 }}>
-                    <img src={newPhoto} alt="Vorschau" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                    <img src={newPhoto} alt="Vorschau" style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }} />
                     <button
                       type="button"
                       className="icon-circle-btn"
@@ -334,11 +443,35 @@ export default function FamilyPinboard() {
                     </button>
                   </div>
                 ) : (
-                  <label className="btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', gap: 6 }}>
-                    <Upload size={16} /> Foto wählen / aufnehmen
-                    <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e, setNewPhoto)} style={{ display: 'none' }} />
+                  <label
+                    className="btn-secondary"
+                    style={{
+                      cursor: photoBusy ? 'wait' : 'pointer',
+                      display: 'inline-flex',
+                      gap: 6
+                    }}
+                  >
+                    <Upload size={16} />
+                    {photoBusy === 'new'
+                      ? 'Foto wird optimiert …'
+                      : 'Foto wählen / aufnehmen'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={Boolean(photoBusy)}
+                      onChange={(e) => handlePhotoUpload(
+                        e,
+                        setNewPhoto,
+                        'new'
+                      )}
+                      style={{ display: 'none' }}
+                    />
                   </label>
                 )}
+                <small className="form-help">
+                  Große Handyfotos werden vor dem Speichern automatisch
+                  verkleinert.
+                </small>
               </div>
 
               <div className="form-group">
@@ -370,8 +503,15 @@ export default function FamilyPinboard() {
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  Notiz Anheften
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{ flex: 1 }}
+                  disabled={Boolean(saving || photoBusy)}
+                >
+                  {saving === 'new'
+                    ? 'Wird angeheftet …'
+                    : 'Notiz anheften'}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setIsAddNoteOpen(false)}>
                   Abbrechen
@@ -420,7 +560,7 @@ export default function FamilyPinboard() {
                 <label className="form-label">Foto bearbeiten / ersetzen</label>
                 {editPhoto ? (
                   <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 10 }}>
-                    <img src={editPhoto} alt="Vorschau" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                    <img src={editPhoto} alt="Vorschau" style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }} />
                     <button
                       type="button"
                       className="icon-circle-btn"
@@ -431,11 +571,35 @@ export default function FamilyPinboard() {
                     </button>
                   </div>
                 ) : (
-                  <label className="btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', gap: 6 }}>
-                    <Upload size={16} /> Foto hochladen
-                    <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e, setEditPhoto)} style={{ display: 'none' }} />
+                  <label
+                    className="btn-secondary"
+                    style={{
+                      cursor: photoBusy ? 'wait' : 'pointer',
+                      display: 'inline-flex',
+                      gap: 6
+                    }}
+                  >
+                    <Upload size={16} />
+                    {photoBusy === 'edit'
+                      ? 'Foto wird optimiert …'
+                      : 'Foto hochladen'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={Boolean(photoBusy)}
+                      onChange={(e) => handlePhotoUpload(
+                        e,
+                        setEditPhoto,
+                        'edit'
+                      )}
+                      style={{ display: 'none' }}
+                    />
                   </label>
                 )}
+                <small className="form-help">
+                  Das Foto wird automatisch für eine schnelle Anzeige
+                  optimiert.
+                </small>
               </div>
 
               <div className="form-group">
@@ -467,14 +631,47 @@ export default function FamilyPinboard() {
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  Änderungen Speichern
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{ flex: 1 }}
+                  disabled={Boolean(saving || photoBusy)}
+                >
+                  {saving === 'edit'
+                    ? 'Wird gespeichert …'
+                    : 'Änderungen speichern'}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setEditingNote(null)}>
                   Abbrechen
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {lightboxPhoto && (
+        <div
+          className="pinboard-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Große Bildansicht: ${lightboxPhoto.title}`}
+          onClick={() => setLightboxPhoto(null)}
+        >
+          <div
+            className="pinboard-lightbox-content"
+            onClick={event => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="pinboard-lightbox-close"
+              onClick={() => setLightboxPhoto(null)}
+              aria-label="Bildansicht schließen"
+            >
+              <X size={21} />
+            </button>
+            <img src={lightboxPhoto.src} alt={lightboxPhoto.title} />
+            <strong>{lightboxPhoto.title}</strong>
           </div>
         </div>
       )}

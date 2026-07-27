@@ -144,7 +144,10 @@ export function FamilyProvider({ children }) {
   const [members, setMembers] = useState([]);
   const [activeMemberIdState, setActiveMemberIdState] = useState('');
   const [resources, setResources] = useState(EMPTY_RESOURCES);
+  const [calendarSubscriptions, setCalendarSubscriptions] = useState([]);
   const [familyRelationships, setFamilyRelationships] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [integrations, setIntegrations] = useState(EMPTY_INTEGRATIONS);
   const [webPush, setWebPush] = useState(initialWebPushState);
   const [bringCatalog, setBringCatalog] = useState({
@@ -185,7 +188,18 @@ export function FamilyProvider({ children }) {
     setFamilyAccount(data.family || null);
     setMembers(data.members || []);
     setResources(resourceWithDefaults(data.resources));
+    setCalendarSubscriptions(
+      Array.isArray(data.calendarSubscriptions)
+        ? data.calendarSubscriptions
+        : []
+    );
     setFamilyRelationships(data.familyRelationships || []);
+    setNotifications(
+      Array.isArray(data.notifications) ? data.notifications : []
+    );
+    setUnreadNotificationCount(
+      Number(data.unreadNotificationCount || 0)
+    );
     setIntegrations(data.integrations || EMPTY_INTEGRATIONS);
     setActiveMemberIdState(data.activeMemberId || '');
     versionRef.current = Number(data.version || 0);
@@ -203,7 +217,10 @@ export function FamilyProvider({ children }) {
         setFamilyAccount(null);
         setMembers([]);
         setResources(EMPTY_RESOURCES);
+        setCalendarSubscriptions([]);
         setFamilyRelationships([]);
+        setNotifications([]);
+        setUnreadNotificationCount(0);
         setIntegrations(EMPTY_INTEGRATIONS);
         setWebPush(initialWebPushState());
       } else if (!silent) {
@@ -212,6 +229,105 @@ export function FamilyProvider({ children }) {
       return null;
     }
   }, [applyBootstrap, showToast]);
+
+  const refreshNotifications = useCallback(async ({ silent = false } = {}) => {
+    if (authStatus !== 'authenticated' || !activeMemberIdState) {
+      setNotifications([]);
+      setUnreadNotificationCount(0);
+      return [];
+    }
+    try {
+      const data = await apiRequest('/api/notifications');
+      setNotifications(data.notifications || []);
+      setUnreadNotificationCount(Number(data.unreadCount || 0));
+      return data.notifications || [];
+    } catch (error) {
+      if (!silent) {
+        showToast(
+          'Meldungen nicht erreichbar',
+          error.message,
+          'warning'
+        );
+      }
+      return [];
+    }
+  }, [activeMemberIdState, authStatus, showToast]);
+
+  const markNotificationRead = useCallback(async (
+    notificationId,
+    read = true
+  ) => {
+    const existing = notifications.find(
+      notification => notification.id === notificationId
+    );
+    if (!existing || existing.read === read) return existing || null;
+    const optimisticReadAt = read ? Date.now() : null;
+    setNotifications(previous =>
+      previous.map(notification =>
+        notification.id === notificationId
+          ? {
+              ...notification,
+              read,
+              readAt: optimisticReadAt
+            }
+          : notification
+      )
+    );
+    setUnreadNotificationCount(previous =>
+      Math.max(0, previous + (read ? -1 : 1))
+    );
+    try {
+      const data = await apiRequest(
+        `/api/notifications/${notificationId}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ read })
+        }
+      );
+      setNotifications(previous =>
+        previous.map(notification =>
+          notification.id === notificationId
+            ? data.notification
+            : notification
+        )
+      );
+      setUnreadNotificationCount(Number(data.unreadCount || 0));
+      versionRef.current = Number(data.version || versionRef.current);
+      return data.notification;
+    } catch (error) {
+      await refreshNotifications({ silent: true });
+      showToast('Meldung nicht gespeichert', error.message, 'warning');
+      return null;
+    }
+  }, [notifications, refreshNotifications, showToast]);
+
+  const markAllNotificationsRead = useCallback(async () => {
+    if (!unreadNotificationCount) return true;
+    const readAt = Date.now();
+    setNotifications(previous =>
+      previous.map(notification => ({
+        ...notification,
+        read: true,
+        readAt: notification.readAt || readAt
+      }))
+    );
+    setUnreadNotificationCount(0);
+    try {
+      const data = await apiRequest('/api/notifications/read-all', {
+        method: 'POST'
+      });
+      versionRef.current = Number(data.version || versionRef.current);
+      return true;
+    } catch (error) {
+      await refreshNotifications({ silent: true });
+      showToast('Meldungen nicht gespeichert', error.message, 'warning');
+      return false;
+    }
+  }, [
+    refreshNotifications,
+    showToast,
+    unreadNotificationCount
+  ]);
 
   useEffect(() => {
     let cancelled = false;
@@ -438,6 +554,8 @@ export function FamilyProvider({ children }) {
     setActiveMemberIdState(data.activeMemberId || '');
     setResources(EMPTY_RESOURCES);
     setFamilyRelationships([]);
+    setNotifications([]);
+    setUnreadNotificationCount(0);
     setIntegrations(EMPTY_INTEGRATIONS);
     setWebPush(initialWebPushState());
     setAuthStatus('authenticated');
@@ -458,6 +576,8 @@ export function FamilyProvider({ children }) {
     setActiveMemberIdState('');
     setResources(EMPTY_RESOURCES);
     setFamilyRelationships([]);
+    setNotifications([]);
+    setUnreadNotificationCount(0);
     setIntegrations(EMPTY_INTEGRATIONS);
     setWebPush(initialWebPushState());
     setActiveTab('dashboard');
@@ -739,6 +859,115 @@ export function FamilyProvider({ children }) {
     return true;
   }, [showToast]);
 
+  const addCalendarSubscription = useCallback(subscription =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/calendar/subscriptions', {
+        method: 'POST',
+        body: JSON.stringify(subscription)
+      });
+      await refreshBootstrap({ silent: true });
+      if (data.warning) {
+        showToast(
+          'Kalenderquelle gespeichert',
+          `Die erste Aktualisierung ist noch fehlgeschlagen: ${data.warning}`,
+          'warning'
+        );
+      } else {
+        showToast(
+          'Kalender verbunden',
+          `${data.subscription.name} wurde mit ${data.records.length} Terminen eingelesen.`,
+          'success'
+        );
+      }
+      return data.subscription;
+    }, 'Kalender konnte nicht verbunden werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
+  const updateCalendarSubscription = useCallback((subscriptionId, changes) =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/calendar/subscriptions/${subscriptionId}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify(changes)
+        }
+      );
+      await refreshBootstrap({ silent: true });
+      showToast(
+        data.warning ? 'Kalender gespeichert' : 'Kalender aktualisiert',
+        data.warning || 'Die Kalenderquelle wurde aktualisiert.',
+        data.warning ? 'warning' : 'success'
+      );
+      return data.subscription;
+    }, 'Kalender konnte nicht geändert werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
+  const syncCalendarSubscription = useCallback(subscriptionId =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/calendar/subscriptions/${subscriptionId}/sync`,
+        { method: 'POST' }
+      );
+      await refreshBootstrap({ silent: true });
+      showToast(
+        'Kalender ist aktuell',
+        `${data.records.length} Termine wurden abgeglichen.`,
+        'success'
+      );
+      return data.subscription;
+    }, 'Kalender konnte nicht aktualisiert werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
+  const syncAllCalendarSubscriptions = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/calendar/subscriptions/sync-all',
+        { method: 'POST' }
+      );
+      await refreshBootstrap({ silent: true });
+      const failed = data.results.filter(result => !result.success).length;
+      showToast(
+        failed ? 'Abgleich teilweise fertig' : 'Alle Kalender sind aktuell',
+        failed
+          ? `${failed} Kalender konnten gerade nicht erreicht werden.`
+          : `${data.results.length} Kalenderquellen wurden abgeglichen.`,
+        failed ? 'warning' : 'success'
+      );
+      return data.results;
+    }, 'Kalender konnten nicht aktualisiert werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
+  const deleteCalendarSubscription = useCallback(subscriptionId =>
+    withActionError(async () => {
+      await apiRequest(
+        `/api/calendar/subscriptions/${subscriptionId}`,
+        { method: 'DELETE' }
+      );
+      await refreshBootstrap({ silent: true });
+      showToast(
+        'Kalenderquelle entfernt',
+        'Die dazugehörigen Termine wurden aus dem Familienplaner entfernt.',
+        'info'
+      );
+      return true;
+    }, 'Kalenderquelle konnte nicht entfernt werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
   const addEvent = useCallback(eventData =>
     withActionError(async () => {
       const event = await createResource('events', {
@@ -969,6 +1198,17 @@ export function FamilyProvider({ children }) {
         method: 'POST'
       });
       updateResourceState('tasks', data.task);
+      if (data.nextTask) {
+        updateResourceState('tasks', data.nextTask);
+      }
+      if (data.removedNextTaskId) {
+        setResources(previous => ({
+          ...previous,
+          tasks: previous.tasks.filter(
+            task => task.id !== data.removedNextTaskId
+          )
+        }));
+      }
       if (data.member) {
         setMembers(previous =>
           previous.map(member =>
@@ -994,7 +1234,9 @@ export function FamilyProvider({ children }) {
       } else if (data.task.completed) {
         showToast(
           'Sterne verdient!',
-          `+${data.task.stars || 10} Sterne für "${data.task.title}".`,
+          data.nextTask
+            ? `+${data.task.stars || 10} Sterne – die nächste Wiederholung ist für ${data.nextTask.dueDate} geplant.`
+            : `+${data.task.stars || 10} Sterne für "${data.task.title}".`,
           'star'
         );
       }
@@ -1008,6 +1250,9 @@ export function FamilyProvider({ children }) {
         body: JSON.stringify({ approved })
       });
       updateResourceState('tasks', data.task);
+      if (data.nextTask) {
+        updateResourceState('tasks', data.nextTask);
+      }
       if (data.member) {
         setMembers(previous =>
           previous.map(member =>
@@ -1019,7 +1264,9 @@ export function FamilyProvider({ children }) {
       showToast(
         approved ? 'Aufgabe bestätigt' : 'Noch einmal versuchen',
         approved
-          ? `"${data.task.title}" ist freigegeben – die Sterne wurden gutgeschrieben.`
+          ? data.nextTask
+            ? `"${data.task.title}" ist bestätigt. Die nächste Wiederholung wurde eingeplant.`
+            : `"${data.task.title}" ist freigegeben – die Sterne wurden gutgeschrieben.`
           : `"${data.task.title}" ist wieder als offen markiert.`,
         approved ? 'star' : 'info'
       );
@@ -1601,6 +1848,11 @@ export function FamilyProvider({ children }) {
     testWebPush,
     fetchPushDevices,
     removePushDevice,
+    notifications,
+    unreadNotificationCount,
+    refreshNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
     shoppingItems: resources.shoppingItems,
     toggleShoppingSelected,
     toggleShoppingInCart,
@@ -1611,6 +1863,12 @@ export function FamilyProvider({ children }) {
     addRecipe,
     deleteRecipe,
     events: resources.events,
+    calendarSubscriptions,
+    addCalendarSubscription,
+    updateCalendarSubscription,
+    syncCalendarSubscription,
+    syncAllCalendarSubscriptions,
+    deleteCalendarSubscription,
     addEvent,
     deleteEvent,
     importICS,
