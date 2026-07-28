@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.0': {
+    version: '1.7.0',
+    eyebrow: 'Neu: echte Android-Benachrichtigungen',
+    title: 'LX meldet sich jetzt auch im Hintergrund',
+    intro:
+      'Wichtige Familienmeldungen erreichen die Android-App jetzt als richtige Systembenachrichtigung – auch wenn LX gerade nicht geöffnet ist.',
+    highlights: [
+      {
+        id: 'native-android-push',
+        title: 'Meldungen auch bei geschlossener App',
+        description:
+          'Chatnachrichten, Termine, Erinnerungen und weitere wichtige Ereignisse erscheinen direkt in der Android-Benachrichtigungsleiste.'
+      },
+      {
+        id: 'profile-notifications',
+        title: 'Passend zum aktiven Profil',
+        description:
+          'Jedes Gerät wird mit dem gewählten Familienprofil verbunden. Die bekannten Benachrichtigungsschalter bestimmen weiterhin, was ankommen darf.'
+      },
+      {
+        id: 'useful-categories',
+        title: 'Dringendes ist klar erkennbar',
+        description:
+          'Kalender, Chat, Aufgaben, Problemmeldungen und das Befinden von Kindern erhalten passende Benachrichtigungskategorien und Prioritäten.'
+      },
+      {
+        id: 'direct-navigation',
+        title: 'Antippen und direkt nachsehen',
+        description:
+          'Ein Tipp auf eine Meldung öffnet LX und führt möglichst direkt zum betroffenen Bereich.'
+      }
+    ],
+    closing:
+      'Alle Familieninhalte und Einstellungen bleiben erhalten. Die Android-App muss für diese Funktion einmal aktualisiert werden.'
+  },
   '1.6.0': {
     version: '1.6.0',
     eyebrow: 'Neu: eure eigene Family Cloud',

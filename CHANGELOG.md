@@ -2,6 +2,29 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.0] – 2026-07-28
+
+### Native Android-Benachrichtigungen
+
+- Firebase Cloud Messaging als echter nativer Push-Kanal für die Android-App
+- Benachrichtigungen erreichen das Gerät auch bei geschlossener App
+- profil- und gerätegebundene Registrierung ohne manuelle Token-Eingabe
+- gemeinsame Ereignis-Pipeline für Chat, Kalender, Erinnerungen, Aufgaben,
+  Problemmeldungen, Kinderbefinden und weitere wichtige Familienereignisse
+- getrennte Android-Kanäle und Prioritäten für allgemeine, dringende, Chat-,
+  Kalender- und Aufgabenmeldungen
+- Antippen einer Meldung öffnet möglichst direkt den passenden Bereich
+- Einstellungen für native App-Benachrichtigungen in Profil und Elternzentrale
+
+### Sicherheit und Betrieb
+
+- Serverauthentifizierung über einen privaten, von Git ausgeschlossenen
+  Firebase-Dienstschlüssel
+- Android-Build bricht verständlich ab, wenn die passende
+  `google-services.json` fehlt
+- automatische Datenbankmigration für dauerhaft gespeicherte native Geräte
+- Browser-Push und Gotify bleiben als unabhängige, optionale Kanäle erhalten
+
 ## [1.6.0] – 2026-07-28
 
 ### Family Cloud
