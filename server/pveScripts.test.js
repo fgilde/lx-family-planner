@@ -8,7 +8,8 @@ const projectRoot = process.cwd();
 const scriptPaths = [
   path.join(projectRoot, 'scripts', 'pve-helper.sh'),
   path.join(projectRoot, 'scripts', 'pve-guest-install.sh'),
-  path.join(projectRoot, 'scripts', 'pve-manage.sh')
+  path.join(projectRoot, 'scripts', 'pve-manage.sh'),
+  path.join(projectRoot, 'scripts', 'docker-update.sh')
 ];
 const scripts = Object.fromEntries(
   scriptPaths.map(file => [
@@ -83,6 +84,18 @@ test('PVE management command reuses protected update and backup paths', () => {
   assert.match(manager, /PUBLIC_APP_URL/);
   assert.match(manager, /docker compose/);
   assert.doesNotMatch(manager, /git reset|pct destroy|rm\s+-rf/);
+});
+
+test('Linux Docker updates do not require Node.js on the host', () => {
+  const updateScript = fs.readFileSync(
+    path.join(projectRoot, 'scripts', 'docker-update.sh'),
+    'utf8'
+  );
+  assert.match(updateScript, /grep -oP/);
+  assert.doesNotMatch(
+    updateScript,
+    /expected_version="\$\(node\s+-p/
+  );
 });
 
 test('Docker and PVE builds retain the signed public Android package', () => {

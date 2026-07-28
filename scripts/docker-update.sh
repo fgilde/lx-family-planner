@@ -92,7 +92,7 @@ else
   echo "1/6 Git-Aktualisierung übersprungen."
 fi
 
-expected_version="$(node -p "require('./package.json').version")"
+expected_version="$(grep -oP '"version":\s*"\K[^"]+' package.json || true)"
 if [[ -z "$expected_version" ]]; then
   echo "Die Versionsnummer der neuen Programmversion konnte nicht gelesen werden." >&2
   exit 1
