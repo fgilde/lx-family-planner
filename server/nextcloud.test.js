@@ -24,14 +24,18 @@ const {
   updateRecord
 } = databaseModule;
 const {
+  ensureNextcloudCalendar,
   ensureNextcloudFolder,
   inspectNextcloud,
+  provisionNextcloudUser,
+  revokeNextcloudAppPassword,
   syncNextcloudEvents,
   uploadNextcloudFile
 } = await import('./nextcloud.js');
 
 const remoteEvents = new Map();
 const uploadedFiles = new Map();
+const provisionedUsers = new Map();
 let etagCounter = 1;
 const calendarHref = '/remote.php/dav/calendars/family/family/';
 
@@ -71,6 +75,82 @@ const davServer = createServer(async (req, res) => {
       maintenance: false,
       version: '34.0.0',
       versionstring: '34.0.0'
+    }));
+    return;
+  }
+  if (
+    req.method === 'GET' &&
+    req.url?.startsWith('/ocs/v2.php/cloud/users?format=json&search=')
+  ) {
+    const search = new URL(req.url, 'http://localhost')
+      .searchParams.get('search');
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({
+      ocs: {
+        meta: { status: 'ok', statuscode: 200 },
+        data: {
+          users: [...provisionedUsers.keys()].filter(user => user === search)
+        }
+      }
+    }));
+    return;
+  }
+  if (
+    req.method === 'POST' &&
+    req.url === '/ocs/v2.php/cloud/users?format=json'
+  ) {
+    const values = new URLSearchParams(body.toString('utf8'));
+    provisionedUsers.set(values.get('userid'), {
+      displayName: values.get('displayName'),
+      password: values.get('password')
+    });
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({
+      ocs: {
+        meta: { status: 'ok', statuscode: 200 },
+        data: { id: values.get('userid') }
+      }
+    }));
+    return;
+  }
+  if (
+    req.method === 'PUT' &&
+    req.url?.startsWith('/ocs/v2.php/cloud/users/')
+  ) {
+    const userId = decodeURIComponent(
+      req.url.split('/').at(-1).split('?')[0]
+    );
+    const values = new URLSearchParams(body.toString('utf8'));
+    provisionedUsers.get(userId).password = values.get('value');
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({
+      ocs: {
+        meta: { status: 'ok', statuscode: 200 },
+        data: []
+      }
+    }));
+    return;
+  }
+  if (req.url === '/ocs/v2.php/core/getapppassword?format=json') {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({
+      ocs: {
+        meta: { status: 'ok', statuscode: 200 },
+        data: { apppassword: 'generated-app-password' }
+      }
+    }));
+    return;
+  }
+  if (
+    req.method === 'DELETE' &&
+    req.url === '/ocs/v2.php/core/apppassword?format=json'
+  ) {
+    res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({
+      ocs: {
+        meta: { status: 'ok', statuscode: 200 },
+        data: []
+      }
     }));
     return;
   }
@@ -272,4 +352,47 @@ test('Nextcloud discovery, WebDAV files and two-way calendar sync stay safe', as
   });
   assert.equal(deletion.deletedRemote, 1);
   assert.equal(remoteEvents.has(remoteHref), false);
+});
+
+test('bundled Nextcloud users receive isolated renewable app credentials', async () => {
+  const first = await provisionNextcloudUser({
+    baseUrl: connection.baseUrl,
+    adminUsername: 'familyadmin',
+    adminPassword: 'admin-password',
+    userId: 'lx-family-test',
+    displayName: 'LX Family · Test',
+    password: 'a'.repeat(32),
+    appVersion: 'test'
+  });
+  assert.deepEqual(first, {
+    userId: 'lx-family-test',
+    displayName: 'LX Family · Test',
+    appPassword: 'generated-app-password'
+  });
+  assert.equal(
+    provisionedUsers.get('lx-family-test').displayName,
+    'LX Family · Test'
+  );
+
+  await provisionNextcloudUser({
+    baseUrl: connection.baseUrl,
+    adminUsername: 'familyadmin',
+    adminPassword: 'admin-password',
+    userId: 'lx-family-test',
+    displayName: 'LX Family · Test',
+    password: 'b'.repeat(32),
+    appVersion: 'test'
+  });
+  assert.equal(
+    provisionedUsers.get('lx-family-test').password,
+    'b'.repeat(32)
+  );
+
+  const calendars = await ensureNextcloudCalendar(
+    connection,
+    'family',
+    'LX Family'
+  );
+  assert.equal(calendars.length, 1);
+  assert.equal(await revokeNextcloudAppPassword(connection), true);
 });

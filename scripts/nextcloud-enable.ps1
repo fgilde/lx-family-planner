@@ -121,10 +121,41 @@ if (-not $NoStart) {
     if ($LASTEXITCODE -ne 0) {
       throw 'Der Docker-Stack konnte nicht gestartet werden.'
     }
+
+    Write-Host 'Die Nextcloud-Ersteinrichtung wird abgeschlossen ...'
+    $ready = $false
+    for ($attempt = 1; $attempt -le 60; $attempt++) {
+      $status = & docker compose exec -T --user www-data nextcloud `
+        php occ status --output=json 2>$null
+      if ($LASTEXITCODE -eq 0 -and ($status -join '') -match '"installed":true') {
+        $ready = $true
+        break
+      }
+      Start-Sleep -Seconds 5
+    }
+    if (-not $ready) {
+      & docker compose ps
+      throw 'Nextcloud wurde nicht innerhalb von fünf Minuten bereit.'
+    }
+
+    $enabledApps = & docker compose exec -T --user www-data nextcloud `
+      php occ app:list --enabled 2>$null
+    if (($enabledApps -join "`n") -notmatch '(?m)^\s*-\s+calendar:') {
+      Write-Host 'Die Nextcloud-Kalenderoberfläche wird installiert ...'
+      & docker compose exec -T --user www-data nextcloud `
+        php occ app:install calendar --no-interaction
+      if ($LASTEXITCODE -ne 0) {
+        Write-Warning (
+          'Die zusätzliche Kalenderoberfläche konnte noch nicht installiert ' +
+          'werden. Der CalDAV-Abgleich von LX Family bleibt verfügbar.'
+        )
+      }
+    }
+    & docker compose exec -T --user www-data nextcloud `
+      php occ background:cron | Out-Null
   } finally {
     Pop-Location
   }
   $hostName = if ($localAddress) { $localAddress } else { 'localhost' }
-  Write-Host "Nextcloud startet unter: http://${hostName}:$Port"
-  Write-Host 'Der erste Start kann zwei bis fünf Minuten dauern.'
+  Write-Host "Nextcloud ist vollständig bereit: http://${hostName}:$Port"
 }

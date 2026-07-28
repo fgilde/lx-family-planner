@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.9.0': {
+    version: '1.9.0',
+    eyebrow: 'Die Family Cloud richtet sich jetzt selbst ein',
+    title: 'Nextcloud funktioniert ohne Passwort-Puzzle',
+    intro:
+      'Die mitgelieferte Nextcloud kann jetzt direkt aus der Elternzentrale verbunden werden. LX Family erstellt dabei automatisch einen geschützten Cloud-Bereich, einen Familienkalender und den Dateiordner.',
+    highlights: [
+      {
+        id: 'nextcloud-one-click',
+        title: 'Ein Klick statt Zugangsdaten kopieren',
+        description:
+          'Bei der Docker-Cloud genügt die Browser-Adresse. Benutzerkonto und App-Passwort entstehen automatisch.'
+      },
+      {
+        id: 'nextcloud-family-isolation',
+        title: 'Jede Familie bleibt getrennt',
+        description:
+          'Für jede angemeldete Familie wird ein eigener Nextcloud-Benutzer mit eigenem Kalender und Dateibereich angelegt.'
+      },
+      {
+        id: 'nextcloud-calendar-ready',
+        title: 'Kalender sofort startklar',
+        description:
+          'Falls noch kein Kalender existiert, legt LX Family automatisch einen passenden Familienkalender an.'
+      },
+      {
+        id: 'nextcloud-reliable-start',
+        title: 'Sicherer Docker-Start',
+        description:
+          'Das Aktivierungsskript wartet auf die vollständige Einrichtung und ergänzt auf Wunsch die Nextcloud-Kalenderoberfläche.'
+      }
+    ],
+    closing:
+      'Das Update verändert keine Familieninhalte. Vorhandene Kalender, Profile, Aufgaben und Einstellungen bleiben erhalten.'
+  },
   '1.8.1': {
     version: '1.8.1',
     eyebrow: 'Das neue App-Symbol hat jetzt Luft',

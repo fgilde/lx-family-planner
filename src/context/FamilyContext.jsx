@@ -2316,6 +2316,33 @@ export function FamilyProvider({ children }) {
     withActionError
   ]);
 
+  const setupBundledNextcloud = useCallback(payload =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/integrations/nextcloud/bundled-setup',
+        {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        }
+      );
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      await refreshBootstrap({ silent: true });
+      showToast(
+        'Family Cloud ist startklar',
+        'Dein Familienkonto, Kalender und Cloud-Ordner wurden automatisch eingerichtet.',
+        'success'
+      );
+      return data;
+    }, 'Family Cloud konnte nicht automatisch eingerichtet werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
   const updateNextcloud = useCallback(changes =>
     withActionError(async () => {
       const data = await apiRequest('/api/integrations/nextcloud', {
@@ -2909,6 +2936,7 @@ export function FamilyProvider({ children }) {
     callHomeAssistantAction,
     nextcloudIntegration: integrations.nextcloud,
     setupNextcloud,
+    setupBundledNextcloud,
     updateNextcloud,
     testNextcloud,
     syncNextcloud,

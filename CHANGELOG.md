@@ -2,6 +2,23 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.9.0] – 2026-07-29
+
+### Vollautomatische Family Cloud
+
+- mitgelieferte Nextcloud auf dem Produktionsserver aktiviert
+- automatische Einrichtung direkt aus der Elternzentrale
+- getrenntes Nextcloud-Konto pro Familie statt gemeinsamem Administratorkonto
+- zufälliges Startkennwort und widerrufbares App-Passwort werden serverseitig
+  erzeugt; nur das App-Passwort wird verschlüsselt in LX gespeichert
+- eigener Familienkalender wird angelegt, wenn noch keiner vorhanden ist
+- Familienordner und erster Zwei-Wege-Kalenderabgleich werden sofort vorbereitet
+- Trennen der Verbindung widerruft das verwendete App-Passwort in Nextcloud
+- manuelle Verbindung zu einer vorhandenen Nextcloud bleibt erhalten
+- Docker-Helfer wartet auf den vollständigen Nextcloud-Start und versucht,
+  die offizielle Kalenderoberfläche zu ergänzen
+- automatische Tests für Kontotrennung und erneuerbare Cloud-Zugänge ergänzt
+
 ## [1.8.1] – 2026-07-29
 
 ### App-Icon mit sicherem Abstand

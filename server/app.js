@@ -122,11 +122,14 @@ import {
   sendFirebaseNotification
 } from './firebasePush.js';
 import {
+  ensureNextcloudCalendar,
   ensureNextcloudFolder,
   inspectNextcloud,
   nextcloudBrowserFolderUrl,
   normalizeNextcloudBaseUrl,
   normalizeNextcloudFolder,
+  provisionNextcloudUser,
+  revokeNextcloudAppPassword,
   syncNextcloudEvents,
   uploadNextcloudFile
 } from './nextcloud.js';
@@ -1971,6 +1974,31 @@ function safeNextcloudBrowserFolderUrl(publicBaseUrl, folder) {
   } catch {
     return '';
   }
+}
+
+function bundledNextcloudAdmin() {
+  const username = cleanText(
+    process.env.NEXTCLOUD_ADMIN_USER,
+    'familyadmin',
+    300
+  );
+  const password = cleanText(
+    process.env.NEXTCLOUD_ADMIN_PASSWORD,
+    '',
+    1000
+  );
+  if (
+    !password ||
+    password === 'disabled-profile' ||
+    password.startsWith('change-me')
+  ) {
+    return null;
+  }
+  return {
+    baseUrl: 'http://nextcloud',
+    username,
+    password
+  };
 }
 
 function integrationStatus(familyId, member = null) {
@@ -6444,6 +6472,134 @@ export function createApp() {
   });
 
   app.post(
+    '/api/integrations/nextcloud/bundled-setup',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const bundled = bundledNextcloudAdmin();
+      if (!bundled) {
+        return res.status(503).json({
+          success: false,
+          error:
+            'Die mitgelieferte Family Cloud ist auf diesem Server noch nicht aktiviert.'
+        });
+      }
+      const family = getFamily(req.session.familyId);
+      const publicBaseUrl = normalizeNextcloudBaseUrl(
+        req.body?.publicBaseUrl,
+        'Nextcloud-Adresse für Browser'
+      );
+      const folder = normalizeNextcloudFolder(
+        req.body?.folder || 'LX Family'
+      );
+      const userId =
+        `lx-${createHash('sha256')
+          .update(req.session.familyId)
+          .digest('hex')
+          .slice(0, 20)}`;
+      const displayName = cleanText(
+        `LX Family · ${family?.familyName || 'Familie'}`,
+        'LX Family',
+        200
+      );
+      const provisioned = await provisionNextcloudUser({
+        baseUrl: bundled.baseUrl,
+        adminUsername: bundled.username,
+        adminPassword: bundled.password,
+        userId,
+        displayName,
+        password: randomBytes(48).toString('base64url'),
+        appVersion: APP_VERSION
+      });
+      const connection = {
+        baseUrl: bundled.baseUrl,
+        username: provisioned.userId,
+        appPassword: provisioned.appPassword,
+        appVersion: APP_VERSION
+      };
+      let inspection = await inspectNextcloud(connection);
+      if (
+        !inspection.calendars.some(calendar =>
+          calendar.components.includes('VEVENT')
+        )
+      ) {
+        await ensureNextcloudCalendar(
+          connection,
+          inspection.userId,
+          'LX Family'
+        );
+        inspection = await inspectNextcloud(connection);
+      }
+      await ensureNextcloudFolder(
+        connection,
+        inspection.userId,
+        folder
+      );
+      const eventCalendarHref =
+        inspection.calendars.find(calendar =>
+          calendar.components.includes('VEVENT')
+        )?.href || '';
+      if (!eventCalendarHref) {
+        throw Object.assign(
+          new Error(
+            'Nextcloud konnte keinen Familienkalender bereitstellen.'
+          ),
+          { statusCode: 502 }
+        );
+      }
+      const existing = getIntegration(
+        req.session.familyId,
+        'nextcloud'
+      );
+      const config = {
+        ...(existing?.config || {}),
+        enabled: true,
+        baseUrl: bundled.baseUrl,
+        publicBaseUrl,
+        host: new URL(publicBaseUrl).host,
+        userId: inspection.userId,
+        displayName: inspection.displayName || displayName,
+        nextcloudVersion: inspection.version,
+        calendars: inspection.calendars,
+        eventCalendarHref,
+        eventSyncEnabled: true,
+        defaultMemberId: 'all',
+        includeGrandparents: Boolean(req.body?.includeGrandparents),
+        folder,
+        backupEnabled: true,
+        backupHour: Math.max(
+          0,
+          Math.min(23, Number(req.body?.backupHour ?? 3))
+        ),
+        lastSyncError: '',
+        lastBackupError: ''
+      };
+      saveIntegration(
+        req.session.familyId,
+        'nextcloud',
+        config,
+        encryptJson({
+          username: provisioned.userId,
+          appPassword: provisioned.appPassword
+        })
+      );
+      const syncStats = await performNextcloudSync(
+        req.session.familyId
+      );
+      publishFamilyChange(req.session.familyId, 'nextcloud');
+      res.status(existing ? 200 : 201).json({
+        success: true,
+        integration: integrationStatus(
+          req.session.familyId,
+          req.activeMember
+        ).nextcloud,
+        syncStats,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
     '/api/integrations/nextcloud/setup',
     requireAuth,
     requireAdult,
@@ -6475,7 +6631,19 @@ export function createApp() {
         appPassword,
         appVersion: APP_VERSION
       };
-      const inspection = await inspectNextcloud(connection);
+      let inspection = await inspectNextcloud(connection);
+      if (
+        !inspection.calendars.some(calendar =>
+          calendar.components.includes('VEVENT')
+        )
+      ) {
+        await ensureNextcloudCalendar(
+          connection,
+          inspection.userId,
+          'LX Family'
+        );
+        inspection = await inspectNextcloud(connection);
+      }
       await ensureNextcloudFolder(
         connection,
         inspection.userId,
@@ -6789,7 +6957,16 @@ export function createApp() {
     '/api/integrations/nextcloud',
     requireAuth,
     requireAdult,
-    (req, res) => {
+    async (req, res) => {
+      const integration = getIntegration(
+        req.session.familyId,
+        'nextcloud'
+      );
+      if (integration) {
+        await revokeNextcloudAppPassword(
+          nextcloudConnection(integration)
+        );
+      }
       deleteIntegration(req.session.familyId, 'nextcloud');
       publishFamilyChange(req.session.familyId, 'nextcloud');
       res.json({

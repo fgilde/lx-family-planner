@@ -56,6 +56,7 @@ export default function NextcloudSettings() {
     members,
     nextcloudIntegration,
     setupNextcloud,
+    setupBundledNextcloud,
     updateNextcloud,
     testNextcloud,
     syncNextcloud,
@@ -122,13 +123,19 @@ export default function NextcloudSettings() {
   const connect = async event => {
     event.preventDefault();
     setBusy('connect');
-    const result = await setupNextcloud({
-      ...form,
-      eventSyncEnabled: true,
-      backupEnabled: true,
-      defaultMemberId: 'all',
-      backupHour: 3
-    });
+    const result = dockerMode
+      ? await setupBundledNextcloud({
+          publicBaseUrl: form.publicBaseUrl,
+          folder: form.folder,
+          backupHour: 3
+        })
+      : await setupNextcloud({
+          ...form,
+          eventSyncEnabled: true,
+          backupEnabled: true,
+          defaultMemberId: 'all',
+          backupHour: 3
+        });
     setBusy('');
     if (result) {
       setForm(previous => ({ ...previous, appPassword: '' }));
@@ -228,31 +235,34 @@ export default function NextcloudSettings() {
           <div className="nextcloud-security-note">
             <ShieldCheck size={22} />
             <span>
-              <strong>Ein widerrufbares App-Passwort verwenden</strong>
-              Dein normales Nextcloud-Passwort wird nicht benötigt. Das
-              App-Passwort liegt verschlüsselt auf eurem LX-Family-Server.
+              <strong>
+                {dockerMode
+                  ? 'Eigenes Cloud-Konto nur für eure Familie'
+                  : 'Ein widerrufbares App-Passwort verwenden'}
+              </strong>
+              {dockerMode
+                ? 'LX Family erstellt Konto, Kalender und App-Passwort automatisch. Andere Familien erhalten getrennte Cloud-Bereiche.'
+                : 'Dein normales Nextcloud-Passwort wird nicht benötigt. Das App-Passwort liegt verschlüsselt auf eurem LX-Family-Server.'}
             </span>
           </div>
 
           <div className="nextcloud-form-grid">
-            <label>
-              <span>Adresse für LX Family</span>
-              <input
-                value={form.baseUrl}
-                onChange={event => setForm(previous => ({
-                  ...previous,
-                  baseUrl: event.target.value
-                }))}
-                placeholder="http://nextcloud"
-                inputMode="url"
-                required
-              />
-              <small>
-                {dockerMode
-                  ? 'Der interne Docker-Name ist bereits richtig.'
-                  : 'Vom LX-Family-Server aus erreichbare Adresse.'}
-              </small>
-            </label>
+            {!dockerMode && (
+              <label>
+                <span>Adresse für LX Family</span>
+                <input
+                  value={form.baseUrl}
+                  onChange={event => setForm(previous => ({
+                    ...previous,
+                    baseUrl: event.target.value
+                  }))}
+                  placeholder="https://cloud.example.de"
+                  inputMode="url"
+                  required
+                />
+                <small>Vom LX-Family-Server aus erreichbare Adresse.</small>
+              </label>
+            )}
             <label>
               <span>Adresse für eure Browser</span>
               <input
@@ -267,42 +277,46 @@ export default function NextcloudSettings() {
               />
               <small>Diese Adresse öffnet später euren Familienordner.</small>
             </label>
-            <label>
-              <span>Nextcloud-Benutzer</span>
-              <input
-                value={form.username}
-                onChange={event => setForm(previous => ({
-                  ...previous,
-                  username: event.target.value
-                }))}
-                autoComplete="username"
-                placeholder="familie"
-                required
-              />
-            </label>
-            <label>
-              <span><KeyRound size={14} /> App-Passwort</span>
-              <input
-                type="password"
-                value={form.appPassword}
-                onChange={event => setForm(previous => ({
-                  ...previous,
-                  appPassword: event.target.value
-                }))}
-                autoComplete="new-password"
-                placeholder="Nur für LX Family erzeugen"
-                required
-              />
-              {settingsUrl && (
-                <a
-                  href={settingsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  In Nextcloud erstellen <ExternalLink size={12} />
-                </a>
-              )}
-            </label>
+            {!dockerMode && (
+              <>
+                <label>
+                  <span>Nextcloud-Benutzer</span>
+                  <input
+                    value={form.username}
+                    onChange={event => setForm(previous => ({
+                      ...previous,
+                      username: event.target.value
+                    }))}
+                    autoComplete="username"
+                    placeholder="familie"
+                    required
+                  />
+                </label>
+                <label>
+                  <span><KeyRound size={14} /> App-Passwort</span>
+                  <input
+                    type="password"
+                    value={form.appPassword}
+                    onChange={event => setForm(previous => ({
+                      ...previous,
+                      appPassword: event.target.value
+                    }))}
+                    autoComplete="new-password"
+                    placeholder="Nur für LX Family erzeugen"
+                    required
+                  />
+                  {settingsUrl && (
+                    <a
+                      href={settingsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      In Nextcloud erstellen <ExternalLink size={12} />
+                    </a>
+                  )}
+                </label>
+              </>
+            )}
             <label className="nextcloud-folder-field">
               <span><FolderHeart size={14} /> Familienordner</span>
               <input
@@ -326,7 +340,9 @@ export default function NextcloudSettings() {
               : <Sparkles size={18} />}
             {busy === 'connect'
               ? 'Family Cloud wird vorbereitet …'
-              : 'Verbinden & sicher einrichten'}
+              : dockerMode
+                ? 'Family Cloud automatisch einrichten'
+                : 'Verbinden & sicher einrichten'}
           </button>
         </form>
       ) : (

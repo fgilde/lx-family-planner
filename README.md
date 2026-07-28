@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.8.1</strong> ·
+  <strong>Aktuelle Version: 1.9.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -187,24 +187,39 @@ Das Hilfsskript:
 1. aktiviert das optionale Docker-Profil `nextcloud`,
 2. erzeugt getrennte, zufällige Kennwörter für Nextcloud, MariaDB und Redis,
 3. ergänzt Servername und Heimnetz-IP als vertrauenswürdige Adressen,
-4. startet Nextcloud samt Datenbank, Redis und Cron-Dienst.
+4. startet Nextcloud samt Datenbank, Redis und Cron-Dienst,
+5. wartet auf die vollständige Einrichtung und ergänzt nach Möglichkeit die
+   offizielle Nextcloud-Kalenderoberfläche.
 
 Der erste Start kann zwei bis fünf Minuten dauern. Standardmäßig ist Nextcloud
 anschließend unter `http://IP-DES-SERVERS:8080` erreichbar. Benutzer und
 einmaliges Startpasswort zeigt das Hilfsskript an; beides steht zusätzlich in
 der lokalen, von Git ausgeschlossenen `.env`.
 
-Für den laufenden Familienbetrieb empfiehlt sich ein eigener Nextcloud-Benutzer
-statt des Administratorkontos. Im Nextcloud-Profil unter
-**Persönliche Einstellungen → Sicherheit** ein neues App-Passwort nur für
-`LX Family` erzeugen. In LX werden anschließend eingetragen:
+Danach in **Elternzentrale → Family Cloud → Mit LX Family Docker** nur prüfen,
+ob die vorgeschlagene Browser-Adresse stimmt, und auf
+**Family Cloud automatisch einrichten** drücken. LX erstellt serverseitig:
+
+- einen eigenen, getrennten Nextcloud-Benutzer für diese Familie,
+- ein zufälliges Kennwort und ein widerrufbares App-Passwort,
+- einen Familienkalender sowie den Familienordner,
+- den ersten sicheren Zwei-Wege-Abgleich.
+
+Das Administratorkonto wird nicht als Familienkonto verwendet. Auch mehrere
+Familien auf demselben Portal erhalten dadurch getrennte Cloud-Bereiche. Das
+zufällige Startkennwort wird nach der Einrichtung nicht in LX gespeichert; nur
+das App-Passwort liegt mit `APP_SECRET` verschlüsselt in SQLite.
+
+Für eine bereits vorhandene Nextcloud bleibt die manuelle Verbindung erhalten.
+Im Nextcloud-Profil unter **Persönliche Einstellungen → Sicherheit** dafür ein
+neues App-Passwort nur für `LX Family` erzeugen:
 
 | Feld | Mitgelieferte Docker-Cloud | Vorhandene Nextcloud |
 | --- | --- | --- |
-| Adresse für LX Family | `http://nextcloud` | vom LX-Server erreichbare URL |
+| Adresse für LX Family | automatisch `http://nextcloud` | vom LX-Server erreichbare URL |
 | Adresse für Browser | `http://SERVER-IP:8080` | öffentliche oder Heimnetz-URL |
-| Benutzer | eigener Nextcloud-Benutzer | Nextcloud-Benutzer |
-| App-Passwort | neu erzeugtes App-Passwort | neu erzeugtes App-Passwort |
+| Benutzer | automatisch pro Familie | Nextcloud-Benutzer |
+| App-Passwort | automatisch erzeugt | neu erzeugtes App-Passwort |
 
 Die interne Adresse wird nur vom Backend verwendet. Zugangsdaten gelangen
 nicht an den Browser und werden mit `APP_SECRET` verschlüsselt in SQLite

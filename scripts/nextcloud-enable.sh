@@ -92,5 +92,35 @@ if [[ "$no_start" != "true" ]]; then
   cd "$project_root"
   docker compose up -d --build
   echo "Nextcloud startet unter: http://${local_address:-localhost}:$port"
-  echo "Der erste Start kann zwei bis fünf Minuten dauern."
+  echo "Die Ersteinrichtung wird abgeschlossen ..."
+
+  ready="false"
+  for _ in $(seq 1 60); do
+    if docker compose exec -T --user www-data nextcloud \
+      php occ status --output=json 2>/dev/null |
+      grep -q '"installed":true'; then
+      ready="true"
+      break
+    fi
+    sleep 5
+  done
+  if [[ "$ready" != "true" ]]; then
+    echo "Nextcloud wurde nicht innerhalb von fünf Minuten bereit." >&2
+    docker compose ps
+    exit 1
+  fi
+
+  if ! docker compose exec -T --user www-data nextcloud \
+    php occ app:list --enabled 2>/dev/null |
+    grep -qE '^[[:space:]]*-[[:space:]]+calendar:'; then
+    echo "Die Nextcloud-Kalenderoberfläche wird installiert ..."
+    if ! docker compose exec -T --user www-data nextcloud \
+      php occ app:install calendar --no-interaction; then
+      echo "Hinweis: Die zusätzliche Kalenderoberfläche konnte noch nicht installiert werden."
+      echo "Der CalDAV-Abgleich von LX Family bleibt trotzdem verfügbar."
+    fi
+  fi
+  docker compose exec -T --user www-data nextcloud \
+    php occ background:cron >/dev/null
+  echo "Nextcloud ist vollständig bereit: http://${local_address:-localhost}:$port"
 fi

@@ -323,6 +323,193 @@ export async function discoverNextcloudCalendars(connection, userId) {
     .map(({ isCalendar, ...calendar }) => calendar);
 }
 
+function escapeXml(value) {
+  return clean(value, '', 300)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;');
+}
+
+export async function ensureNextcloudCalendar(
+  connection,
+  userId,
+  displayName = 'LX Family'
+) {
+  const existing = await discoverNextcloudCalendars(connection, userId);
+  if (existing.some(calendar => calendar.components.includes('VEVENT'))) {
+    return existing;
+  }
+
+  const calendarHref =
+    `/remote.php/dav/calendars/${encodeURIComponent(userId)}/lx-family/`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<c:mkcalendar xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:a="http://apple.com/ns/ical/">
+  <d:set>
+    <d:prop>
+      <d:displayname>${escapeXml(displayName)}</d:displayname>
+      <a:calendar-color>#15998b</a:calendar-color>
+      <c:supported-calendar-component-set>
+        <c:comp name="VEVENT"/>
+      </c:supported-calendar-component-set>
+    </d:prop>
+  </d:set>
+</c:mkcalendar>`;
+  await nextcloudRequest(connection, calendarHref, {
+    method: 'MKCALENDAR',
+    headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+    body,
+    expectedStatuses: [201, 405]
+  });
+  return discoverNextcloudCalendars(connection, userId);
+}
+
+function parseOcsJson(text) {
+  let response;
+  try {
+    response = JSON.parse(text)?.ocs;
+  } catch {
+    response = null;
+  }
+  if (!response) {
+    throw httpError('Nextcloud hat eine unlesbare OCS-Antwort gesendet.');
+  }
+  const statusCode = Number(response.meta?.statuscode || 0);
+  const status = clean(response.meta?.status).toLowerCase();
+  if (
+    status === 'failure' ||
+    (statusCode && statusCode !== 100 && statusCode !== 200)
+  ) {
+    throw httpError(
+      clean(
+        response.meta?.message,
+        'Nextcloud konnte das Familienkonto nicht vorbereiten.',
+        300
+      ),
+      statusCode === 102 ? 409 : 502
+    );
+  }
+  return response.data;
+}
+
+async function ocsJsonRequest(connection, pathname, options = {}) {
+  const { text } = await nextcloudRequest(connection, pathname, {
+    ...options,
+    headers: {
+      Accept: 'application/json',
+      ...(options.headers || {})
+    },
+    expectedStatuses: options.expectedStatuses || [200, 201]
+  });
+  return parseOcsJson(text);
+}
+
+export async function provisionNextcloudUser({
+  baseUrl,
+  adminUsername,
+  adminPassword,
+  userId,
+  displayName,
+  password,
+  appVersion = '1'
+}) {
+  const normalizedUserId = clean(userId, '', 64).toLowerCase();
+  const normalizedDisplayName = clean(displayName, 'LX Family', 200);
+  const normalizedPassword = clean(password, '', 1000);
+  if (
+    !/^[a-z0-9][a-z0-9._-]{2,63}$/.test(normalizedUserId) ||
+    normalizedPassword.length < 24
+  ) {
+    throw httpError('Das automatische Nextcloud-Konto ist ungültig.', 400);
+  }
+
+  const adminConnection = {
+    baseUrl,
+    username: clean(adminUsername, '', 300),
+    appPassword: clean(adminPassword, '', 1000),
+    appVersion
+  };
+  const userPath =
+    `ocs/v2.php/cloud/users/${encodeURIComponent(normalizedUserId)}?format=json`;
+  const search = await ocsJsonRequest(
+    adminConnection,
+    `ocs/v2.php/cloud/users?format=json&search=${encodeURIComponent(
+      normalizedUserId
+    )}&limit=100`
+  );
+  const exists = Array.isArray(search?.users) &&
+    search.users.some(user => clean(user).toLowerCase() === normalizedUserId);
+
+  if (exists) {
+    await ocsJsonRequest(adminConnection, userPath, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        key: 'password',
+        value: normalizedPassword
+      }).toString()
+    });
+  } else {
+    await ocsJsonRequest(
+      adminConnection,
+      'ocs/v2.php/cloud/users?format=json',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          userid: normalizedUserId,
+          password: normalizedPassword,
+          displayName: normalizedDisplayName
+        }).toString()
+      }
+    );
+  }
+
+  const userConnection = {
+    baseUrl,
+    username: normalizedUserId,
+    appPassword: normalizedPassword,
+    appVersion
+  };
+  const appPasswordData = await ocsJsonRequest(
+    userConnection,
+    'ocs/v2.php/core/getapppassword?format=json'
+  );
+  const appPassword = clean(
+    appPasswordData?.apppassword || appPasswordData?.appPassword,
+    '',
+    1000
+  );
+  if (!appPassword) {
+    throw httpError(
+      'Nextcloud hat kein App-Passwort für LX Family erstellt.'
+    );
+  }
+  return {
+    userId: normalizedUserId,
+    displayName: normalizedDisplayName,
+    appPassword
+  };
+}
+
+export async function revokeNextcloudAppPassword(connection) {
+  try {
+    await nextcloudRequest(
+      connection,
+      'ocs/v2.php/core/apppassword?format=json',
+      {
+        method: 'DELETE',
+        headers: { Accept: 'application/json' },
+        expectedStatuses: [200]
+      }
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function inspectNextcloud(connection) {
   const { text: statusText } = await nextcloudRequest(
     connection,
