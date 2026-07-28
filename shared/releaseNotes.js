@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.9.1': {
+    version: '1.9.1',
+    eyebrow: 'Der Familienordner ist jetzt wirklich erreichbar',
+    title: 'Cloud-Zugang sicher anzeigen und kopieren',
+    intro:
+      'Die automatische Family Cloud richtet nicht nur Kalender und Sicherungen ein. Erwachsene können jetzt auch die zugehörigen Nextcloud-Anmeldedaten gezielt öffnen und den Familienordner direkt verwenden.',
+    highlights: [
+      {
+        id: 'cloud-login-access',
+        title: 'Zugang nur auf ausdrücklichen Klick',
+        description:
+          'Benutzername und Passwort erscheinen ausschließlich in der Elternzentrale unter „Verbindung verwalten“.'
+      },
+      {
+        id: 'cloud-copy',
+        title: 'Einfach auf Tablet und Handy kopieren',
+        description:
+          'Beide Werte besitzen einen eigenen Kopieren-Knopf und funktionieren auch im lokalen Heimnetz.'
+      },
+      {
+        id: 'cloud-no-browser-storage',
+        title: 'Nicht im Browser gespeichert',
+        description:
+          'Der Cloud-Zugang wird erst bei Bedarf vom Server geladen und beim Schließen der Ansicht wieder verworfen.'
+      },
+      {
+        id: 'cloud-full-flow-tested',
+        title: 'Kompletter Live-Ablauf geprüft',
+        description:
+          'Konto, Kalender, Ordner, Verbindungstest und Widerruf wurden gegen Nextcloud 34 getestet.'
+      }
+    ],
+    closing:
+      'Alle Familieninhalte, Einstellungen und bestehenden Nextcloud-Daten bleiben beim Update erhalten.'
+  },
   '1.9.0': {
     version: '1.9.0',
     eyebrow: 'Die Family Cloud richtet sich jetzt selbst ein',

@@ -1,7 +1,7 @@
 {
-    "versionName":  "1.9.0",
-    "versionCode":  19,
+    "versionName":  "1.9.1",
+    "versionCode":  20,
     "buildKind":  "release",
-    "builtAt":  "2026-07-28T23:38:25.8545747Z",
-    "sha256":  "885acdfb5c7910fcf86c4f7506ffc03b69ef243e9320dede9f731140ea87195c"
+    "builtAt":  "2026-07-28T23:47:10.0879735Z",
+    "sha256":  "d4d59cde0694940c7b409ba4f3fed8fdf840dcb6ee9bc4ee441489ea8b853ad3"
 }

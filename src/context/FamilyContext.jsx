@@ -2343,6 +2343,14 @@ export function FamilyProvider({ children }) {
     withActionError
   ]);
 
+  const getBundledNextcloudAccess = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/integrations/nextcloud/access'
+      );
+      return data.access;
+    }, 'Cloud-Zugang konnte nicht geladen werden'), [withActionError]);
+
   const updateNextcloud = useCallback(changes =>
     withActionError(async () => {
       const data = await apiRequest('/api/integrations/nextcloud', {
@@ -2937,6 +2945,7 @@ export function FamilyProvider({ children }) {
     nextcloudIntegration: integrations.nextcloud,
     setupNextcloud,
     setupBundledNextcloud,
+    getBundledNextcloudAccess,
     updateNextcloud,
     testNextcloud,
     syncNextcloud,

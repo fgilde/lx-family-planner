@@ -16501,6 +16501,54 @@ body:has(.modal-backdrop) .problem-report-launcher {
   padding-top: 10px;
 }
 
+.nextcloud-connection-details > .nextcloud-access-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border-color));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-card));
+}
+
+.nextcloud-access-card > span {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.nextcloud-access-card > span:first-child {
+  grid-column: 1 / -1;
+}
+
+.nextcloud-access-card > span:first-child code {
+  grid-column: 1 / -1;
+}
+
+.nextcloud-access-card strong {
+  grid-column: 1 / -1;
+  color: var(--text-main);
+  font-size: .59rem;
+}
+
+.nextcloud-access-card code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 8px 9px;
+  border-radius: 9px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  font-size: .62rem;
+}
+
+.nextcloud-access-card > small {
+  grid-column: 1 / -1;
+  line-height: 1.45;
+}
+
 .nextcloud-connection-details button.danger {
   color: #bb433d;
   border-color: color-mix(in srgb, #c54d46 32%, var(--border-color));
@@ -16552,6 +16600,10 @@ body:has(.modal-backdrop) .problem-report-launcher {
   .nextcloud-actions > button,
   .nextcloud-connect-button {
     width: 100%;
+  }
+
+  .nextcloud-connection-details > .nextcloud-access-card {
+    grid-template-columns: 1fr;
   }
 }
 

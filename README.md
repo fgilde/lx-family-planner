@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.9.0</strong> ·
+  <strong>Aktuelle Version: 1.9.1</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -207,8 +207,10 @@ ob die vorgeschlagene Browser-Adresse stimmt, und auf
 
 Das Administratorkonto wird nicht als Familienkonto verwendet. Auch mehrere
 Familien auf demselben Portal erhalten dadurch getrennte Cloud-Bereiche. Das
-zufällige Startkennwort wird nach der Einrichtung nicht in LX gespeichert; nur
-das App-Passwort liegt mit `APP_SECRET` verschlüsselt in SQLite.
+zufällige Web-Kennwort und das App-Passwort liegen mit `APP_SECRET`
+verschlüsselt in SQLite. Erwachsene können den Web-Zugang bei Bedarf unter
+**Verbindung verwalten → Cloud-Zugang anzeigen** gezielt laden und kopieren;
+die Antwort wird nicht im Browser-Cache gespeichert.
 
 Für eine bereits vorhandene Nextcloud bleibt die manuelle Verbindung erhalten.
 Im Nextcloud-Profil unter **Persönliche Einstellungen → Sicherheit** dafür ein

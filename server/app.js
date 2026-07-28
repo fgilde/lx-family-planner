@@ -2064,6 +2064,7 @@ function integrationStatus(familyId, member = null) {
           return {
             connected: true,
             enabled: config.enabled !== false,
+            bundled: Boolean(config.bundled),
             eventSyncEnabled: config.eventSyncEnabled !== false,
             backupEnabled: Boolean(config.backupEnabled),
             lastSyncAt: Number(config.lastSyncAt || 0),
@@ -2104,6 +2105,7 @@ function integrationStatus(familyId, member = null) {
       : {
           connected: false,
           enabled: false,
+          bundled: false,
           eventSyncEnabled: false,
           backupEnabled: false,
           lastSyncAt: 0,
@@ -6502,13 +6504,14 @@ export function createApp() {
         'LX Family',
         200
       );
+      const loginPassword = randomBytes(48).toString('base64url');
       const provisioned = await provisionNextcloudUser({
         baseUrl: bundled.baseUrl,
         adminUsername: bundled.username,
         adminPassword: bundled.password,
         userId,
         displayName,
-        password: randomBytes(48).toString('base64url'),
+        password: loginPassword,
         appVersion: APP_VERSION
       });
       const connection = {
@@ -6554,6 +6557,7 @@ export function createApp() {
       const config = {
         ...(existing?.config || {}),
         enabled: true,
+        bundled: true,
         baseUrl: bundled.baseUrl,
         publicBaseUrl,
         host: new URL(publicBaseUrl).host,
@@ -6580,7 +6584,8 @@ export function createApp() {
         config,
         encryptJson({
           username: provisioned.userId,
-          appPassword: provisioned.appPassword
+          appPassword: provisioned.appPassword,
+          loginPassword
         })
       );
       const syncStats = await performNextcloudSync(
@@ -6595,6 +6600,44 @@ export function createApp() {
         ).nextcloud,
         syncStats,
         version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.get(
+    '/api/integrations/nextcloud/access',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const integration = getIntegration(
+        req.session.familyId,
+        'nextcloud'
+      );
+      if (!integration?.config?.bundled) {
+        return res.status(404).json({
+          success: false,
+          error:
+            'Für diese Verbindung verwaltest du den Nextcloud-Zugang selbst.'
+        });
+      }
+      const secret = decryptJson(integration.secretEncrypted);
+      if (!secret.username || !secret.loginPassword) {
+        return res.status(409).json({
+          success: false,
+          error:
+            'Für diese ältere Verbindung ist noch kein Web-Zugang gespeichert. Bitte Family Cloud einmal trennen und automatisch neu verbinden.'
+        });
+      }
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({
+        success: true,
+        access: {
+          username: secret.username,
+          password: secret.loginPassword,
+          url:
+            integration.config.publicBaseUrl ||
+            integration.config.baseUrl
+        }
       });
     }
   );
@@ -6679,6 +6722,7 @@ export function createApp() {
       const config = {
         ...(existing?.config || {}),
         enabled: true,
+        bundled: false,
         baseUrl,
         publicBaseUrl,
         host: new URL(publicBaseUrl).host,

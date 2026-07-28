@@ -6,6 +6,7 @@ import {
   Cloud,
   CloudCog,
   CloudUpload,
+  Copy,
   ExternalLink,
   FolderHeart,
   HardDrive,
@@ -54,9 +55,11 @@ const STAT_LABELS = {
 export default function NextcloudSettings() {
   const {
     members,
+    showToast,
     nextcloudIntegration,
     setupNextcloud,
     setupBundledNextcloud,
+    getBundledNextcloudAccess,
     updateNextcloud,
     testNextcloud,
     syncNextcloud,
@@ -85,6 +88,7 @@ export default function NextcloudSettings() {
   });
   const [busy, setBusy] = useState('');
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+  const [cloudAccess, setCloudAccess] = useState(null);
 
   const eventCalendars = useMemo(
     () => (nextcloudIntegration?.calendars || []).filter(calendar =>
@@ -163,6 +167,46 @@ export default function NextcloudSettings() {
     await disconnectNextcloud();
     setBusy('');
     setConfirmDisconnect(false);
+    setCloudAccess(null);
+  };
+
+  const revealCloudAccess = async () => {
+    if (cloudAccess) {
+      setCloudAccess(null);
+      return;
+    }
+    setBusy('access');
+    const access = await getBundledNextcloudAccess();
+    setBusy('');
+    if (access) setCloudAccess(access);
+  };
+
+  const copyAccessValue = async (value, label) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const field = document.createElement('textarea');
+        field.value = value;
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.appendChild(field);
+        field.select();
+        document.execCommand('copy');
+        field.remove();
+      }
+      showToast(
+        `${label} kopiert`,
+        'Du kannst den Wert jetzt in Nextcloud einfügen.',
+        'success'
+      );
+    } catch {
+      showToast(
+        'Kopieren nicht möglich',
+        'Markiere den Wert bitte direkt im Feld.',
+        'warning'
+      );
+    }
   };
 
   const settingsUrl = (() => {
@@ -576,6 +620,18 @@ export default function NextcloudSettings() {
           <details className="nextcloud-connection-details">
             <summary>Verbindung verwalten</summary>
             <div>
+              {nextcloudIntegration.bundled && (
+                <button
+                  type="button"
+                  onClick={revealCloudAccess}
+                  disabled={Boolean(busy)}
+                >
+                  <KeyRound size={15} />
+                  {cloudAccess
+                    ? 'Cloud-Zugang ausblenden'
+                    : 'Cloud-Zugang anzeigen'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => run('test', testNextcloud)}
@@ -596,6 +652,46 @@ export default function NextcloudSettings() {
                   : 'Family Cloud trennen'}
               </button>
             </div>
+            {cloudAccess && (
+              <div className="nextcloud-access-card">
+                <span>
+                  <strong>Nextcloud-Adresse</strong>
+                  <code>{cloudAccess.url}</code>
+                </span>
+                <span>
+                  <strong>Benutzername</strong>
+                  <code>{cloudAccess.username}</code>
+                  <button
+                    type="button"
+                    onClick={() => copyAccessValue(
+                      cloudAccess.username,
+                      'Benutzername'
+                    )}
+                  >
+                    <Copy size={14} />
+                    Kopieren
+                  </button>
+                </span>
+                <span>
+                  <strong>Passwort</strong>
+                  <code>{cloudAccess.password}</code>
+                  <button
+                    type="button"
+                    onClick={() => copyAccessValue(
+                      cloudAccess.password,
+                      'Passwort'
+                    )}
+                  >
+                    <Copy size={14} />
+                    Kopieren
+                  </button>
+                </span>
+                <small>
+                  Diese Daten werden nur auf deinen ausdrücklichen Klick
+                  geladen und nicht im Browser gespeichert.
+                </small>
+              </div>
+            )}
           </details>
         </div>
       )}

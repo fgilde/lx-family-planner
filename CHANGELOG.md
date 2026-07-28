@@ -2,6 +2,18 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.9.1] – 2026-07-29
+
+### Direkter Zugriff auf den automatisch angelegten Familienordner
+
+- automatisch erzeugtes Web-Kennwort wird zusammen mit dem App-Passwort
+  verschlüsselt im jeweiligen Familienbereich gespeichert
+- Erwachsene können Nextcloud-Adresse, Benutzername und Kennwort gezielt unter
+  **Verbindung verwalten → Cloud-Zugang anzeigen** öffnen
+- einzelne Kopierknöpfe mit Fallback für lokale HTTP-Heimnetze
+- Antwort mit Zugangsdaten wird ausdrücklich nicht zwischengespeichert
+- Zugang wird im Browser erst auf Klick geladen und beim Trennen verworfen
+
 ## [1.9.0] – 2026-07-29
 
 ### Vollautomatische Family Cloud
