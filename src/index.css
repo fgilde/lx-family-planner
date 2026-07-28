@@ -8766,6 +8766,25 @@ textarea {
   background: var(--primary-color);
 }
 
+.webpush-activation-error {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+  margin-top: 9px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border-color));
+  border-radius: 14px;
+  color: color-mix(in srgb, var(--danger) 82%, var(--text-main));
+  background: color-mix(in srgb, var(--danger) 10%, var(--bg-card));
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.webpush-activation-error strong {
+  font-size: 0.8rem;
+}
+
 .webpush-rule-grid {
   position: relative;
   z-index: 1;

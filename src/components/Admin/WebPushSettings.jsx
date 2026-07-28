@@ -50,6 +50,16 @@ const RULES = NOTIFICATION_EVENT_DEFINITIONS.map(definition => ({
   icon: RULE_ICONS[definition.key] || BellRing
 }));
 
+const NATIVE_ACTIVATION_LABELS = {
+  server: 'Server wird geprüft …',
+  android: 'Android wird vorbereitet …',
+  channels: 'Meldungen werden eingerichtet …',
+  permission: 'Berechtigung wird geprüft …',
+  'permission-request': 'Bitte Android-Abfrage bestätigen …',
+  firebase: 'Gerät wird bei Firebase angemeldet …',
+  save: 'Gerät wird gespeichert …'
+};
+
 export default function WebPushSettings() {
   const {
     activeMember,
@@ -255,23 +265,34 @@ export default function WebPushSettings() {
       )}
 
       {status === 'ready' && (
-        <div className="webpush-ready-card">
-          <div>
-            <Smartphone size={25} />
-            <span>
-              <strong>Dieses Gerät für {activeMember?.name} anmelden</strong>
-              <small>
-                {isNative
-                  ? 'Ein Klick – die Android-Abfrage erscheint nur einmal.'
-                  : 'Ein Klick – kein Token und keine zusätzliche App.'}
-              </small>
-            </span>
+        <>
+          <div className="webpush-ready-card">
+            <div>
+              <Smartphone size={25} />
+              <span>
+                <strong>Dieses Gerät für {activeMember?.name} anmelden</strong>
+                <small>
+                  {isNative
+                    ? 'Ein Klick – die Android-Abfrage erscheint nur einmal.'
+                    : 'Ein Klick – kein Token und keine zusätzliche App.'}
+                </small>
+              </span>
+            </div>
+            <button type="button" onClick={activate} disabled={Boolean(push.busy)}>
+              <BellRing size={17} />
+              {push.busy === 'enable'
+                ? NATIVE_ACTIVATION_LABELS[push.activationStep] ||
+                  'Wird verbunden …'
+                : 'Benachrichtigungen einschalten'}
+            </button>
           </div>
-          <button type="button" onClick={activate} disabled={Boolean(push.busy)}>
-            <BellRing size={17} />
-            {push.busy === 'enable' ? 'Wird verbunden …' : 'Benachrichtigungen einschalten'}
-          </button>
-        </div>
+          {isNative && push.activationError && (
+            <div className="webpush-activation-error" role="alert">
+              <strong>Verbindung nicht abgeschlossen</strong>
+              <span>{push.activationError}</span>
+            </div>
+          )}
+        </>
       )}
 
       {status === 'connected' && (

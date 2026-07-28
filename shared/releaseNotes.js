@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.4': {
+    version: '1.7.4',
+    eyebrow: 'Android-Push zeigt jetzt genau, was passiert',
+    title: 'Kein Verbindungsschritt kann mehr endlos hängen',
+    intro:
+      'LX überwacht jetzt den gesamten Android-Verbindungsweg – vom Start des Push-Moduls bis zum Speichern auf dem Familienserver. Statt eines endlosen Ladekreises seht ihr den aktuellen Schritt und bei einem Problem eine verständliche Ursache.',
+    highlights: [
+      {
+        id: 'native-stage-status',
+        title: 'Aktueller Schritt sichtbar',
+        description:
+          'Beim Einschalten steht direkt am Knopf, ob LX gerade Android, die Berechtigung, Firebase oder den Familienserver prüft.'
+      },
+      {
+        id: 'native-all-stage-watchdogs',
+        title: 'Jeder Schritt ist abgesichert',
+        description:
+          'Auch ein Hänger vor der eigentlichen Firebase-Anmeldung wird nun automatisch erkannt und beendet.'
+      },
+      {
+        id: 'native-persistent-error',
+        title: 'Fehler bleibt lesbar',
+        description:
+          'Die genaue Meldung bleibt unter dem Verbindungsbereich stehen und verschwindet nicht zusammen mit einer kurzen Einblendung.'
+      },
+      {
+        id: 'native-safe-data',
+        title: 'Familiendaten bleiben unverändert',
+        description:
+          'Das Update ändert nur die Android-Geräteanmeldung; Profile, Termine, Chats und Einstellungen bleiben erhalten.'
+      }
+    ],
+    closing:
+      'Installiert Version 1.7.4 einfach über die vorhandene LX App. Ein Löschen der App ist nicht nötig.'
+  },
   '1.7.3': {
     version: '1.7.3',
     eyebrow: 'Push-Anmeldung bleibt nicht mehr hängen',

@@ -22,7 +22,8 @@ import {
   nativePushCapability,
   nativePushPermission,
   registerNativePush,
-  unregisterNativePush
+  unregisterNativePush,
+  withNativePushTimeout
 } from '../hooks/useNativePushNotifications';
 import { APP_VERSION } from '../appVersion';
 import {
@@ -103,6 +104,8 @@ function initialNativePushState() {
     serverReason: '',
     statusError: '',
     permissionError: '',
+    activationError: '',
+    activationStep: '',
     defaults: {},
     currentDeviceId: '',
     devices: []
@@ -1103,25 +1106,53 @@ export function FamilyProvider({ children }) {
   }, []);
 
   const enableNativePush = useCallback(async (preferences = {}) => {
-    setNativePush(previous => ({ ...previous, busy: 'enable' }));
+    setNativePush(previous => ({
+      ...previous,
+      busy: 'enable',
+      activationError: '',
+      activationStep: 'server'
+    }));
     try {
-      const status = nativePush.serverConfigured
-        ? nativePush
-        : await refreshNativePushStatus();
+      const status = await withNativePushTimeout(
+        nativePush.serverConfigured
+          ? Promise.resolve(nativePush)
+          : refreshNativePushStatus(),
+        15_000,
+        'Der Familienserver antwortet bei der Push-Prüfung nicht. Prüfe die Server-Adresse und versuche es erneut.'
+      );
       if (!status?.serverConfigured && !status?.server?.configured) {
         throw new Error(
           'Der Server ist noch nicht mit Firebase Cloud Messaging verbunden.'
         );
       }
-      const token = await registerNativePush({ requestPermission: true });
-      const device = await saveNativePushDevice(token, {
-        ...(status.defaults || nativePush.defaults || {}),
-        ...preferences
-      });
+      const token = await withNativePushTimeout(
+        registerNativePush({
+          requestPermission: true,
+          onStage: activationStep => {
+            setNativePush(previous => ({ ...previous, activationStep }));
+          }
+        }),
+        45_000,
+        'Die Android-Anmeldung wurde nach 45 Sekunden beendet. Beende LX vollständig, öffne die App erneut und versuche es noch einmal.'
+      );
+      setNativePush(previous => ({
+        ...previous,
+        activationStep: 'save'
+      }));
+      const device = await withNativePushTimeout(
+        saveNativePushDevice(token, {
+          ...(status.defaults || nativePush.defaults || {}),
+          ...preferences
+        }),
+        15_000,
+        'Der Geräteschlüssel ist vorhanden, aber der Familienserver antwortet beim Speichern nicht.'
+      );
       setNativePush(previous => ({
         ...previous,
         permission: 'granted',
-        busy: ''
+        busy: '',
+        activationError: '',
+        activationStep: ''
       }));
       showToast(
         'Android-Benachrichtigungen sind an',
@@ -1133,7 +1164,11 @@ export function FamilyProvider({ children }) {
       setNativePush(previous => ({
         ...previous,
         permission: error.permission || previous.permission,
-        busy: ''
+        busy: '',
+        activationError:
+          error?.message ||
+          'Die Android-Benachrichtigungen konnten nicht aktiviert werden.',
+        activationStep: ''
       }));
       showToast('Aktivierung nicht möglich', error.message, 'warning');
       return null;

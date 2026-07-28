@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   createNativeInstallationId,
   launchNativePushRegistration,
-  nativePushPermissionNeedsPrompt
+  nativePushPermissionNeedsPrompt,
+  withNativePushTimeout
 } from '../src/hooks/useNativePushNotifications.js';
 
 test('native Android push requests both supported prompt states', () => {
@@ -38,4 +39,18 @@ test('native registration launch never waits for a stuck plugin call', () => {
   );
   assert.equal(started, true);
   assert.equal(result, undefined);
+});
+
+test('native push timeout rejects any stuck setup stage', async () => {
+  const neverSettles = new Promise(() => {});
+  await assert.rejects(
+    withNativePushTimeout(
+      neverSettles,
+      5,
+      'Android setup timed out.'
+    ),
+    error =>
+      error.code === 'native-push-timeout' &&
+      error.message === 'Android setup timed out.'
+  );
 });

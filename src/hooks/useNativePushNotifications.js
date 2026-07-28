@@ -2,10 +2,40 @@ import { isCapacitorNative } from '../utils/apiConfig.js';
 
 const INSTALLATION_ID_KEY = 'lx_native_push_installation_id';
 const REGISTRATION_TIMEOUT_MS = 20_000;
+const NATIVE_STEP_TIMEOUT_MS = 10_000;
+const PERMISSION_REQUEST_TIMEOUT_MS = 30_000;
 
 let pluginPromise;
 let listenersPromise;
 let pendingRegistration = null;
+
+export function withNativePushTimeout(
+  operation,
+  timeoutMs,
+  message = 'Android hat nicht rechtzeitig geantwortet.'
+) {
+  const task =
+    typeof operation === 'function'
+      ? Promise.resolve().then(operation)
+      : Promise.resolve(operation);
+  return new Promise((resolve, reject) => {
+    const timeout = globalThis.setTimeout(() => {
+      const error = new Error(message);
+      error.code = 'native-push-timeout';
+      reject(error);
+    }, timeoutMs);
+    task.then(
+      value => {
+        globalThis.clearTimeout(timeout);
+        resolve(value);
+      },
+      error => {
+        globalThis.clearTimeout(timeout);
+        reject(error);
+      }
+    );
+  });
+}
 
 function dispatchNativePushEvent(name, detail) {
   window.dispatchEvent(new CustomEvent(name, { detail }));
@@ -16,7 +46,11 @@ async function nativePushPlugin() {
   pluginPromise ||= import('@capacitor/push-notifications').then(
     module => module.PushNotifications
   );
-  return pluginPromise;
+  return withNativePushTimeout(
+    pluginPromise,
+    NATIVE_STEP_TIMEOUT_MS,
+    'Das Android-Push-Modul antwortet nicht. Beende LX vollständig und öffne die App erneut.'
+  );
 }
 
 async function ensureNativePushListeners() {
@@ -57,31 +91,39 @@ async function ensureNativePushListeners() {
       })
     ]);
   }
-  await listenersPromise;
+  await withNativePushTimeout(
+    listenersPromise,
+    NATIVE_STEP_TIMEOUT_MS,
+    'Android konnte den Benachrichtigungsdienst nicht starten. Beende LX vollständig und öffne die App erneut.'
+  );
   return plugin;
 }
 
 async function ensureNotificationChannels(plugin) {
-  await Promise.all([
-    plugin.createChannel({
-      id: 'lx_family_updates',
-      name: 'Familienmeldungen',
-      description: 'Nachrichten, Termine, Aufgaben und Familienereignisse',
-      importance: 4,
-      visibility: 0,
-      vibration: true,
-      sound: 'default'
-    }),
-    plugin.createChannel({
-      id: 'lx_family_urgent',
-      name: 'Dringende Familienmeldungen',
-      description: 'Dringende Hilfe-Anfragen und zeitkritische Erinnerungen',
-      importance: 5,
-      visibility: 0,
-      vibration: true,
-      sound: 'default'
-    })
-  ]);
+  await withNativePushTimeout(
+    Promise.all([
+      plugin.createChannel({
+        id: 'lx_family_updates',
+        name: 'Familienmeldungen',
+        description: 'Nachrichten, Termine, Aufgaben und Familienereignisse',
+        importance: 4,
+        visibility: 0,
+        vibration: true,
+        sound: 'default'
+      }),
+      plugin.createChannel({
+        id: 'lx_family_urgent',
+        name: 'Dringende Familienmeldungen',
+        description: 'Dringende Hilfe-Anfragen und zeitkritische Erinnerungen',
+        importance: 5,
+        visibility: 0,
+        vibration: true,
+        sound: 'default'
+      })
+    ]),
+    NATIVE_STEP_TIMEOUT_MS,
+    'Android konnte die Benachrichtigungskanäle nicht anlegen. Prüfe die App-Benachrichtigungen in den Android-Einstellungen.'
+  );
 }
 
 export function nativePushCapability() {
@@ -117,7 +159,11 @@ export function createNativeInstallationId() {
 export async function nativePushPermission() {
   const plugin = await ensureNativePushListeners();
   if (!plugin) return 'unsupported';
-  const status = await plugin.checkPermissions();
+  const status = await withNativePushTimeout(
+    plugin.checkPermissions(),
+    NATIVE_STEP_TIMEOUT_MS,
+    'Android antwortet nicht auf die Berechtigungsprüfung. Beende LX vollständig und öffne die App erneut.'
+  );
   return status.receive;
 }
 
@@ -134,21 +180,34 @@ export function launchNativePushRegistration(plugin, onError) {
 }
 
 export async function registerNativePush({
-  requestPermission = false
+  requestPermission = false,
+  onStage
 } = {}) {
+  onStage?.('android');
   const plugin = await ensureNativePushListeners();
   if (!plugin) {
     throw new Error(
       'Echte Android-Benachrichtigungen sind nur in der App verfügbar.'
     );
   }
+  onStage?.('channels');
   await ensureNotificationChannels(plugin);
-  let permission = await plugin.checkPermissions();
+  onStage?.('permission');
+  let permission = await withNativePushTimeout(
+    plugin.checkPermissions(),
+    NATIVE_STEP_TIMEOUT_MS,
+    'Android antwortet nicht auf die Berechtigungsprüfung. Beende LX vollständig und öffne die App erneut.'
+  );
   if (
     nativePushPermissionNeedsPrompt(permission.receive) &&
     requestPermission
   ) {
-    permission = await plugin.requestPermissions();
+    onStage?.('permission-request');
+    permission = await withNativePushTimeout(
+      plugin.requestPermissions(),
+      PERMISSION_REQUEST_TIMEOUT_MS,
+      'Die Android-Berechtigungsabfrage wurde nicht abgeschlossen. Erlaube Benachrichtigungen in den App-Einstellungen und versuche es erneut.'
+    );
   }
   if (permission.receive !== 'granted') {
     const error = new Error(
@@ -160,6 +219,7 @@ export async function registerNativePush({
     throw error;
   }
 
+  onStage?.('firebase');
   if (pendingRegistration) {
     return pendingRegistration.promise;
   }

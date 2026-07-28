@@ -2,6 +2,17 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.4] – 2026-07-28
+
+### Gesamte Android-Push-Anmeldung gegen Hänger abgesichert
+
+- jeder native Einzelschritt besitzt jetzt eine feste Zeitgrenze
+- der Knopf zeigt während der Anmeldung den aktuellen Arbeitsschritt
+- auch Serverprüfung und Speichern des Geräteschlüssels können die Oberfläche
+  nicht mehr unbegrenzt blockieren
+- eine konkrete Fehlermeldung bleibt direkt in der Elternzentrale sichtbar
+- die vorhandenen Familien- und App-Daten bleiben unverändert
+
 ## [1.7.3] – 2026-07-28
 
 ### Kein endloses „Wird verbunden …“ mehr
