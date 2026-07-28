@@ -1,68 +1,57 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   BellRing,
+  Bug,
   CalendarClock,
   Check,
+  ClipboardCheck,
   Clock3,
+  Coins,
   ExternalLink,
+  Flag,
+  Gift,
+  GraduationCap,
+  HeartHandshake,
+  HeartPulse,
   MessageCircleMore,
+  Network,
   RadioTower,
   Send,
   ShieldCheck,
   Smartphone,
   Trophy,
-  Unplug
+  Unplug,
+  Vote
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import {
+  DEFAULT_GOTIFY_RULES,
+  NOTIFICATION_EVENT_DEFINITIONS
+} from '../../../shared/notificationEvents';
 
-const DEFAULT_RULES = {
-  groupChat: true,
-  directMessages: false,
-  taskApproval: true,
-  taskCompleted: true,
-  events: true,
-  moodHelp: true,
-  includeMessageText: false
+const RULE_ICONS = {
+  groupChat: MessageCircleMore,
+  directMessages: ShieldCheck,
+  events: CalendarClock,
+  taskAssigned: ClipboardCheck,
+  taskApproval: Clock3,
+  taskCompleted: Trophy,
+  moodUpdates: HeartPulse,
+  moodHelp: BellRing,
+  problemReports: Bug,
+  encouragements: HeartHandshake,
+  familyPolls: Vote,
+  familyMissions: Flag,
+  schoolItems: GraduationCap,
+  rewards: Gift,
+  pocketMoney: Coins,
+  familyConnections: Network
 };
 
-const RULE_OPTIONS = [
-  {
-    key: 'groupChat',
-    title: 'Familienchat',
-    description: 'Neue Nachrichten in der gemeinsamen Gruppe',
-    icon: MessageCircleMore
-  },
-  {
-    key: 'directMessages',
-    title: 'Direktnachrichten',
-    description: 'Auch private Chats als Push senden',
-    icon: ShieldCheck
-  },
-  {
-    key: 'taskApproval',
-    title: 'Aufgaben prüfen',
-    description: 'Wenn ein Kind eine Aufgabe fertig meldet',
-    icon: Clock3
-  },
-  {
-    key: 'taskCompleted',
-    title: 'Aufgaben geschafft',
-    description: 'Wenn ein Kind Sterne verdient',
-    icon: Trophy
-  },
-  {
-    key: 'events',
-    title: 'Terminerinnerungen',
-    description: 'Bevor ein eingetragener Termin beginnt',
-    icon: CalendarClock
-  },
-  {
-    key: 'moodHelp',
-    title: 'Brauche Nähe',
-    description: 'Hohe Priorität beim Familienkompass',
-    icon: BellRing
-  }
-];
+const RULE_OPTIONS = NOTIFICATION_EVENT_DEFINITIONS.map(definition => ({
+  ...definition,
+  icon: RULE_ICONS[definition.key] || BellRing
+}));
 
 function suggestedPlannerUrl() {
   const current = new URL(window.location.origin);
@@ -88,7 +77,7 @@ export default function GotifySettings() {
     plannerUrl: gotifyIntegration?.plannerUrl || suggestedPlannerUrl()
   });
   const [rules, setRules] = useState({
-    ...DEFAULT_RULES,
+    ...DEFAULT_GOTIFY_RULES,
     ...(gotifyIntegration?.rules || {})
   });
   const [busy, setBusy] = useState('');
@@ -97,7 +86,7 @@ export default function GotifySettings() {
   useEffect(() => {
     if (!gotifyIntegration) return;
     setRules({
-      ...DEFAULT_RULES,
+      ...DEFAULT_GOTIFY_RULES,
       ...(gotifyIntegration.rules || {})
     });
     setForm(previous => ({

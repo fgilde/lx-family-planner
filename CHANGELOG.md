@@ -2,6 +2,37 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.3.1] – 2026-07-28
+
+### Neu
+
+- ein gemeinsamer Benachrichtigungskatalog für Browser-Push, Posteingang und
+  Gotify
+- Meldungen für normale und dringende Kinder-Gefühlslagen
+- Meldungen für neue und bearbeitete Problemmeldungen
+- Benachrichtigungen bei neuen, geänderten und abgesagten Terminen
+- Hinweise zu Familienverbindungen, Freigaben und gemeinsamen Terminen
+- Meldungen für Belohnungen, Taschengeld, Schule, Routinen und
+  Familienmissionen
+
+### Verbessert
+
+- Empfänger werden passend zum Profil bestimmt; verwaltete Profile und
+  Haustiere informieren die zuständigen Erwachsenen
+- Ruhezeiten werden nur noch von ausdrücklich dringenden Ereignissen
+  übergangen
+- sämtliche Meldungsarten sind pro Browsergerät sowie für Gotify einzeln
+  einstellbar
+- der Familien-Posteingang zeigt alle neuen Meldungsarten mit passenden
+  Symbolen und direkten Zielen
+
+### Update und Daten
+
+- keine neue Datenmigration erforderlich
+- bestehende Push-Geräte und ihre Einstellungen werden um neue Standardregeln
+  ergänzt, ohne gespeicherte Auswahl zu verlieren
+- alle Familieninhalte und Integrationen bleiben unverändert erhalten
+
 ## [1.3.0] – 2026-07-28
 
 ### Neu

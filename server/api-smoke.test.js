@@ -377,7 +377,7 @@ test('native API access only accepts trusted app origins', async () => {
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.3.0');
+  assert.equal(health.body.version, '1.3.1');
   const appRelease = await request('/api/app/version');
   assert.equal(typeof appRelease.body.versionName, 'string');
   assert.equal(Number.isInteger(appRelease.body.versionCode), true);
@@ -426,8 +426,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.3.0');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.3.0');
+  assert.equal(bootstrap.body.appVersion, '1.3.1');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.3.1');
   assert.ok(bootstrap.body.releaseNotes.highlights.length >= 4);
   assert.equal(bootstrap.body.members.length, 5);
   assert.equal(
@@ -442,10 +442,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.3.0');
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.3.1');
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.3.0'
+    '1.3.1'
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -459,7 +459,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.3.0');
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.3.1');
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -577,6 +577,33 @@ test('family flow stays isolated, authorized and internally consistent', async (
     }
   );
   assert.deepEqual(updatedReminderEvent.body.record.reminders, [30, 10]);
+
+  const childNotificationEvent = await request(
+    '/api/resources/events',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Kindergeburtstag',
+        date: '2026-08-06',
+        time: '15:00',
+        memberId: childOne.id
+      })
+    },
+    201
+  );
+  await request(
+    `/api/resources/events/${childNotificationEvent.body.record.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ time: '16:00' })
+    }
+  );
+  await request(
+    `/api/resources/events/${childNotificationEvent.body.record.id}`,
+    { method: 'DELETE', headers: authenticatedHeaders }
+  );
 
   const managedTask = await request(
     '/api/resources/tasks',
@@ -846,6 +873,37 @@ test('family flow stays isolated, authorized and internally consistent', async (
     ),
     true
   );
+  for (const kind of ['created', 'updated', 'deleted']) {
+    assert.equal(
+      childOneBootstrap.body.notifications.some(
+        notification =>
+          notification.eventKey === 'events' &&
+          notification.dedupeKey ===
+            `event-${kind}-${childNotificationEvent.body.record.id}`
+      ),
+      true
+    );
+  }
+  const moodUpdate = await request(
+    '/api/resources/moodCheckins',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ mood: 'okay' })
+    },
+    201
+  );
+  const moodHelp = await request(
+    '/api/resources/moodCheckins',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ mood: 'hilfe' })
+    },
+    201
+  );
+  assert.equal(moodUpdate.body.record.memberId, childOne.id);
+  assert.equal(moodHelp.body.record.memberId, childOne.id);
   await request(
     '/api/calendar/subscriptions',
     {
@@ -936,6 +994,22 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(adultNotifications.body.unreadCount > 0, true);
+  assert.equal(
+    adultNotifications.body.notifications.some(
+      notification =>
+        notification.eventKey === 'moodUpdates' &&
+        notification.dedupeKey === `mood-${moodUpdate.body.record.id}`
+    ),
+    true
+  );
+  assert.equal(
+    adultNotifications.body.notifications.some(
+      notification =>
+        notification.eventKey === 'moodHelp' &&
+        notification.dedupeKey === `mood-${moodHelp.body.record.id}`
+    ),
+    true
+  );
   const unreadNotification = adultNotifications.body.notifications.find(
     notification => !notification.read
   );
@@ -1095,7 +1169,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.3.0');
+  assert.equal(problemReport.body.report.appVersion, '1.3.1');
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },
@@ -1109,6 +1183,19 @@ test('family flow stays isolated, authorized and internally consistent', async (
       familyPassword: password
     })
   });
+  const adultProblemNotifications = await request(
+    '/api/notifications',
+    { headers: authenticatedHeaders }
+  );
+  assert.equal(
+    adultProblemNotifications.body.notifications.some(
+      notification =>
+        notification.eventKey === 'problemReports' &&
+        notification.dedupeKey ===
+          `problem-new-${problemReport.body.report.id}`
+    ),
+    true
+  );
   const problemReports = await request('/api/problem-reports', {
     headers: authenticatedHeaders
   });
@@ -1122,6 +1209,31 @@ test('family flow stays isolated, authorized and internally consistent', async (
     }
   );
   assert.equal(resolvedProblem.body.report.status, 'resolved');
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: childOne.id })
+  });
+  const reporterNotifications = await request('/api/notifications', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(
+    reporterNotifications.body.notifications.some(
+      notification =>
+        notification.eventKey === 'problemReports' &&
+        notification.dedupeKey ===
+          `problem-resolved-${problemReport.body.report.id}`
+    ),
+    true
+  );
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({
+      memberId: adult.id,
+      familyPassword: password
+    })
+  });
 
   const pushStatus = await request('/api/push/status', {
     headers: authenticatedHeaders
@@ -1129,6 +1241,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(pushStatus.body.devices.length, 0);
   assert.ok(pushStatus.body.publicKey.length > 60);
   assert.equal(pushStatus.body.defaults.directMessages, true);
+  assert.equal(pushStatus.body.defaults.moodUpdates, true);
+  assert.equal(pushStatus.body.defaults.problemReports, true);
+  assert.equal(pushStatus.body.defaults.familyConnections, true);
+  assert.equal(pushStatus.body.defaults.pocketMoney, true);
   assert.equal(pushStatus.body.defaults.showPreviews, false);
 
   const pushRegistration = await request(
@@ -1673,6 +1789,19 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   assert.equal(relationshipRequest.body.relationship.status, 'pending');
 
+  const incomingConnectionNotifications = await request(
+    '/api/notifications',
+    { headers: secondHeaders }
+  );
+  assert.equal(
+    incomingConnectionNotifications.body.notifications.some(
+      notification =>
+        notification.eventKey === 'familyConnections' &&
+        notification.dedupeKey ===
+          `family-connection-request-${relationshipRequest.body.relationship.id}`
+    ),
+    true
+  );
   const incomingRelationships = await request('/api/family/relationships', {
     headers: secondHeaders
   });
@@ -1689,6 +1818,19 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: secondHeaders,
       body: JSON.stringify({ status: 'accepted' })
     }
+  );
+  const acceptedConnectionNotifications = await request(
+    '/api/notifications',
+    { headers: authenticatedHeaders }
+  );
+  assert.equal(
+    acceptedConnectionNotifications.body.notifications.some(
+      notification =>
+        notification.eventKey === 'familyConnections' &&
+        notification.dedupeKey ===
+          `family-connection-accepted-${relationshipRequest.body.relationship.id}`
+    ),
+    true
   );
   const acceptedRelationships = await request('/api/family/relationships', {
     headers: authenticatedHeaders

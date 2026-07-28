@@ -1,13 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   BellRing,
+  Bug,
   CalendarDays,
   Check,
+  Coins,
   ClipboardCheck,
+  Flag,
+  Gift,
   GraduationCap,
+  HeartPulse,
   LockKeyhole,
   MessageCircleHeart,
   MessageCircleMore,
+  Network,
   Send,
   ShieldCheck,
   Smartphone,
@@ -16,69 +22,31 @@ import {
   Vote
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import { NOTIFICATION_EVENT_DEFINITIONS } from '../../../shared/notificationEvents';
 
-const RULES = [
-  {
-    key: 'groupChat',
-    title: 'Familienchat',
-    description: 'Nachrichten an alle',
-    icon: MessageCircleMore
-  },
-  {
-    key: 'directMessages',
-    title: 'Direktnachrichten',
-    description: 'Nur für das passende Profil',
-    icon: ShieldCheck
-  },
-  {
-    key: 'taskAssigned',
-    title: 'Neue Aufgaben',
-    description: 'Neue Missionen und Pflichten',
-    icon: ClipboardCheck
-  },
-  {
-    key: 'taskApproval',
-    title: 'Aufgaben prüfen',
-    description: 'Erledigt-Meldungen der Kinder',
-    icon: ShieldCheck
-  },
-  {
-    key: 'taskCompleted',
-    title: 'Geschaffte Aufgaben',
-    description: 'Sterne und Erfolge der Kinder',
-    icon: Trophy
-  },
-  {
-    key: 'events',
-    title: 'Termine & Erinnerungen',
-    description: 'Neue Einträge und bevorstehende Termine',
-    icon: CalendarDays
-  },
-  {
-    key: 'moodHelp',
-    title: 'Brauche Nähe',
-    description: 'Dringender Familienkompass-Hinweis',
-    icon: BellRing
-  },
-  {
-    key: 'encouragements',
-    title: 'Mutmacher',
-    description: 'Liebe Nachrichten der Familie',
-    icon: MessageCircleHeart
-  },
-  {
-    key: 'familyPolls',
-    title: 'Abstimmungen',
-    description: 'Neue Familienentscheidungen',
-    icon: Vote
-  },
-  {
-    key: 'schoolItems',
-    title: 'Schule',
-    description: 'Hausaufgaben und Klassenarbeiten',
-    icon: GraduationCap
-  }
-];
+const RULE_ICONS = {
+  groupChat: MessageCircleMore,
+  directMessages: ShieldCheck,
+  events: CalendarDays,
+  taskAssigned: ClipboardCheck,
+  taskApproval: ShieldCheck,
+  taskCompleted: Trophy,
+  moodUpdates: HeartPulse,
+  moodHelp: BellRing,
+  problemReports: Bug,
+  encouragements: MessageCircleHeart,
+  familyPolls: Vote,
+  familyMissions: Flag,
+  schoolItems: GraduationCap,
+  rewards: Gift,
+  pocketMoney: Coins,
+  familyConnections: Network
+};
+
+const RULES = NOTIFICATION_EVENT_DEFINITIONS.map(definition => ({
+  ...definition,
+  icon: RULE_ICONS[definition.key] || BellRing
+}));
 
 export default function WebPushSettings() {
   const {

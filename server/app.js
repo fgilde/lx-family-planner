@@ -24,6 +24,10 @@ import {
   normalizeEventReminders,
   selectDueEventReminder
 } from '../shared/eventReminders.js';
+import {
+  DEFAULT_GOTIFY_RULES,
+  DEFAULT_WEB_PUSH_PREFERENCES
+} from '../shared/notificationEvents.js';
 import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 import { loadBringCatalog } from './bringCatalog.js';
 import { importRecipeFromUrl } from './recipeImporter.js';
@@ -209,28 +213,6 @@ const YOUTUBE_HOSTS = new Set([
   'www.youtubekids.com'
 ]);
 const SPOTIFY_HOSTS = new Set(['open.spotify.com']);
-const DEFAULT_GOTIFY_RULES = Object.freeze({
-  groupChat: true,
-  directMessages: false,
-  taskApproval: true,
-  taskCompleted: true,
-  events: true,
-  moodHelp: true,
-  includeMessageText: false
-});
-const DEFAULT_WEB_PUSH_PREFERENCES = Object.freeze({
-  groupChat: true,
-  directMessages: true,
-  taskAssigned: true,
-  taskApproval: true,
-  taskCompleted: true,
-  events: true,
-  moodHelp: true,
-  encouragements: true,
-  familyPolls: true,
-  schoolItems: true,
-  showPreviews: false
-});
 const HOME_ASSISTANT_VISIBLE_DOMAINS = new Set([
   'binary_sensor',
   'button',
@@ -850,6 +832,7 @@ async function sendWebPushEvent(
     url = '/',
     tag = eventKey,
     priority = 'normal',
+    allowDuringQuietHours = false,
     ttl = 900
   }
 ) {
@@ -866,7 +849,7 @@ async function sendWebPushEvent(
     );
   const urgentAllowed =
     familySettings?.urgentDuringQuietHours !== false &&
-    (priority === 'high' || eventKey === 'moodHelp');
+    (allowDuringQuietHours || eventKey === 'moodHelp');
   if (quietNow && !urgentAllowed) {
     return { sent: 0, failed: 0, quiet: true };
   }
@@ -987,6 +970,55 @@ function queueWebPushEvent(familyId, eventKey, payload) {
   return createdNotifications;
 }
 
+function signedInMemberIds(familyId) {
+  return getMembers(familyId)
+    .filter(member => member.role !== 'pet' && !isManagedMember(member))
+    .map(member => member.id);
+}
+
+function adultMemberIds(familyId) {
+  return getMembers(familyId)
+    .filter(member => isAdultMember(member) && !isManagedMember(member))
+    .map(member => member.id);
+}
+
+function childMemberIds(familyId) {
+  return getMembers(familyId)
+    .filter(
+      member =>
+        !isManagedMember(member) &&
+        ['child', 'teen'].includes(member.role)
+    )
+    .map(member => member.id);
+}
+
+function profileNotificationRecipientIds(familyId, memberId) {
+  if (!memberId || memberId === 'all') return signedInMemberIds(familyId);
+  const member = getMember(familyId, memberId);
+  if (!member) return [];
+  if (isManagedMember(member) || member.role === 'pet') {
+    return adultMemberIds(familyId);
+  }
+  return [member.id];
+}
+
+function queueNotificationChannels(
+  familyId,
+  eventKey,
+  pushPayload,
+  gotifyPayload = null
+) {
+  const notifications = queueWebPushEvent(
+    familyId,
+    eventKey,
+    pushPayload
+  );
+  if (gotifyPayload) {
+    queueGotifyNotification(familyId, eventKey, gotifyPayload);
+  }
+  return notifications;
+}
+
 function eventReminderRecipientMemberIds(familyId, event) {
   const members = getMembers(familyId);
   const signedInMembers = members.filter(
@@ -1009,6 +1041,170 @@ function eventReminderRecipientMemberIds(familyId, event) {
       .map(member => member.id);
   }
   return [target.id];
+}
+
+const MOOD_NOTIFICATION_COPY = Object.freeze({
+  super: {
+    label: 'super',
+    title: 'hat gerade richtig gute Laune',
+    detail: 'Im Familienkompass wurde „Super!“ ausgewählt.'
+  },
+  gut: {
+    label: 'gut',
+    title: 'fühlt sich gut',
+    detail: 'Im Familienkompass wurde „Gut“ ausgewählt.'
+  },
+  okay: {
+    label: 'geht so',
+    title: 'fühlt sich gerade nur okay',
+    detail: 'Im Familienkompass wurde „Geht so“ ausgewählt.'
+  },
+  hilfe: {
+    label: 'braucht Nähe',
+    title: 'braucht gerade Nähe',
+    detail: 'Im Familienkompass wurde „Brauche Nähe“ ausgewählt.'
+  }
+});
+
+function notifyMoodCheckin(req, record) {
+  const member = getMember(req.session.familyId, record.memberId);
+  if (!member || !['child', 'teen'].includes(member.role)) return;
+  const copy =
+    MOOD_NOTIFICATION_COPY[record.mood] ||
+    MOOD_NOTIFICATION_COPY.okay;
+  const urgent = record.mood === 'hilfe';
+  const eventKey = urgent ? 'moodHelp' : 'moodUpdates';
+  queueNotificationChannels(
+    req.session.familyId,
+    eventKey,
+    {
+      recipientMemberIds: adultMemberIds(req.session.familyId),
+      excludeMemberIds: [member.id],
+      title: `${member.name} ${copy.title}`,
+      body: copy.detail,
+      privateTitle: urgent
+        ? 'Ein Kind braucht gerade Nähe'
+        : 'Neue Gefühlslage im Familienkompass',
+      privateBody: urgent
+        ? 'Bitte schau zeitnah in den Familienplaner.'
+        : 'Ein Kind hat seine Gefühlslage eingetragen.',
+      url: '/?view=dashboard',
+      tag: `mood-${record.id}`,
+      priority: urgent ? 'high' : 'normal',
+      allowDuringQuietHours: urgent,
+      ttl: urgent ? 300 : 1800
+    },
+    {
+      title: `${member.name} ${copy.title}`,
+      message: urgent
+        ? `${copy.detail} Schau bitte zeitnah nach.`
+        : copy.detail,
+      priority: urgent ? 8 : 4
+    }
+  );
+}
+
+function calendarEventBody(event, prefix = '') {
+  const date = new Date(`${event.date}T12:00:00`);
+  const dateLabel = Number.isFinite(date.getTime())
+    ? date.toLocaleDateString('de-DE', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit'
+      })
+    : '';
+  const timeLabel =
+    !event.allDay && event.time ? `${event.time} Uhr` : 'ganztägig';
+  const details = [dateLabel, timeLabel, event.location]
+    .filter(Boolean)
+    .join(' · ');
+  return [prefix, event.title, details].filter(Boolean).join(' · ');
+}
+
+function euroAmount(amountCents) {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR'
+  }).format(Number(amountCents || 0) / 100);
+}
+
+function calendarEventWasMateriallyChanged(before, after) {
+  return [
+    'title',
+    'date',
+    'time',
+    'endTime',
+    'allDay',
+    'location',
+    'memberId'
+  ].some(key => JSON.stringify(before?.[key]) !== JSON.stringify(after?.[key]));
+}
+
+function notifyCalendarChange(
+  req,
+  event,
+  {
+    kind = 'created',
+    previous = null
+  } = {}
+) {
+  if (
+    kind === 'updated' &&
+    !calendarEventWasMateriallyChanged(previous, event)
+  ) {
+    return;
+  }
+  const copy = {
+    created: {
+      title: 'Neuer Termin',
+      prefix: '',
+      privateBody: 'Im Familienkalender gibt es einen neuen Termin.'
+    },
+    updated: {
+      title: 'Termin wurde geändert',
+      prefix: 'Geändert',
+      privateBody: 'Ein Termin im Familienkalender wurde geändert.'
+    },
+    deleted: {
+      title: 'Termin wurde abgesagt',
+      prefix: 'Abgesagt',
+      privateBody: 'Ein Termin im Familienkalender wurde abgesagt.'
+    }
+  }[kind];
+  if (!copy) return;
+  const body = calendarEventBody(event, copy.prefix);
+  const recipientMemberIds = [
+    ...new Set([
+      ...eventReminderRecipientMemberIds(req.session.familyId, event),
+      ...(
+        kind === 'updated' && previous
+          ? eventReminderRecipientMemberIds(
+              req.session.familyId,
+              previous
+            )
+          : []
+      )
+    ])
+  ];
+  queueNotificationChannels(
+    req.session.familyId,
+    'events',
+    {
+      recipientMemberIds,
+      excludeMemberIds: [req.session.memberId],
+      title: copy.title,
+      body,
+      privateTitle: copy.title,
+      privateBody: copy.privateBody,
+      url: '/?view=calendar',
+      tag: `event-${kind}-${event.sharedEventId || event.id}`
+    },
+    {
+      title: copy.title,
+      message: body,
+      priority: kind === 'deleted' ? 6 : 4
+    }
+  );
 }
 
 function notifyChatViaWebPush(req, record) {
@@ -1040,81 +1236,197 @@ function notifyChatViaWebPush(req, record) {
   });
 }
 
-function notifyCreatedResourceViaWebPush(req, type, record) {
+function notifyCreatedResource(req, type, record) {
   const actorMemberId = req.session.memberId;
   if (type === 'tasks' && record.memberId) {
-    queueWebPushEvent(req.session.familyId, 'taskAssigned', {
-      recipientMemberIds: [record.memberId],
-      excludeMemberIds: [actorMemberId],
-      title: 'Neue Mission für dich',
-      body: cleanText(record.title, 'Eine neue Aufgabe wartet auf dich.', 240),
-      privateBody: 'Eine neue Aufgabe wartet im Familienplaner auf dich.',
-      url: '/?view=tasks',
-      tag: `task-${record.id}`
-    });
+    queueNotificationChannels(
+      req.session.familyId,
+      'taskAssigned',
+      {
+        recipientMemberIds: profileNotificationRecipientIds(
+          req.session.familyId,
+          record.memberId
+        ),
+        excludeMemberIds: [actorMemberId],
+        title: 'Neue Mission für dich',
+        body: cleanText(
+          record.title,
+          'Eine neue Aufgabe wartet auf dich.',
+          240
+        ),
+        privateBody: 'Eine neue Aufgabe wartet im Familienplaner auf dich.',
+        url: '/?view=tasks',
+        tag: `task-${record.id}`
+      },
+      {
+        title: 'Neue Familienaufgabe',
+        message: cleanText(
+          record.title,
+          'Eine neue Aufgabe wurde eingetragen.',
+          240
+        ),
+        priority: 3
+      }
+    );
   }
   if (type === 'events') {
-    queueWebPushEvent(req.session.familyId, 'events', {
-      excludeMemberIds: [actorMemberId],
-      title: 'Neuer Familientermin',
-      body: cleanText(record.title, 'Ein neuer Termin wurde eingetragen.', 240),
-      privateBody: 'Im Familienkalender gibt es einen neuen Termin.',
-      url: '/?view=calendar',
-      tag: `event-${record.id}`
-    });
+    notifyCalendarChange(req, record, { kind: 'created' });
   }
   if (type === 'encouragements' && record.memberId) {
-    queueWebPushEvent(req.session.familyId, 'encouragements', {
-      recipientMemberIds: [record.memberId],
-      excludeMemberIds: [actorMemberId],
-      title: `${record.icon || '💛'} Ein Mutmacher für dich`,
-      body: cleanText(record.message, 'Deine Familie denkt an dich.', 240),
-      privateBody: 'In deiner Kinderwelt wartet ein neuer Mutmacher.',
-      url: '/?view=dashboard',
-      tag: `encouragement-${record.id}`
-    });
+    queueNotificationChannels(
+      req.session.familyId,
+      'encouragements',
+      {
+        recipientMemberIds: profileNotificationRecipientIds(
+          req.session.familyId,
+          record.memberId
+        ),
+        excludeMemberIds: [actorMemberId],
+        title: `${record.icon || '💛'} Ein Mutmacher für dich`,
+        body: cleanText(
+          record.message,
+          'Deine Familie denkt an dich.',
+          240
+        ),
+        privateBody: 'In deiner Kinderwelt wartet ein neuer Mutmacher.',
+        url: '/?view=dashboard',
+        tag: `encouragement-${record.id}`
+      },
+      {
+        title: 'Ein neuer Mutmacher',
+        message: 'In der Kinderwelt wurde ein Mutmacher hinterlegt.',
+        priority: 3
+      }
+    );
   }
   if (type === 'familyPolls') {
-    queueWebPushEvent(req.session.familyId, 'familyPolls', {
-      excludeMemberIds: [actorMemberId],
-      title: 'Neue Familien-Abstimmung',
-      body: cleanText(record.question, 'Deine Stimme ist gefragt.', 240),
-      privateBody: 'Im Familienplaner wartet eine neue Abstimmung.',
-      url: '/?view=family-life',
-      tag: `poll-${record.id}`
-    });
+    queueNotificationChannels(
+      req.session.familyId,
+      'familyPolls',
+      {
+        excludeMemberIds: [actorMemberId],
+        title: 'Neue Familien-Abstimmung',
+        body: cleanText(
+          record.question,
+          'Deine Stimme ist gefragt.',
+          240
+        ),
+        privateBody: 'Im Familienplaner wartet eine neue Abstimmung.',
+        url: '/?view=family-life',
+        tag: `poll-${record.id}`
+      },
+      {
+        title: 'Neue Familien-Abstimmung',
+        message: cleanText(
+          record.question,
+          'Deine Stimme ist gefragt.',
+          240
+        ),
+        priority: 3
+      }
+    );
   }
   if (type === 'schoolItems' && record.memberId) {
-    queueWebPushEvent(req.session.familyId, 'schoolItems', {
-      recipientMemberIds: [record.memberId],
-      excludeMemberIds: [actorMemberId],
-      title:
-        record.kind === 'exam'
-          ? 'Neue Klassenarbeit eingetragen'
-          : 'Neuer Schuleintrag',
-      body: cleanText(record.title, 'Im Schulbereich gibt es etwas Neues.', 240),
-      privateBody: 'Im Schulbereich gibt es etwas Neues.',
-      url: '/?view=family-life',
-      tag: `school-${record.id}`
-    });
+    const title =
+      record.kind === 'exam'
+        ? 'Neue Klassenarbeit eingetragen'
+        : 'Neuer Schuleintrag';
+    queueNotificationChannels(
+      req.session.familyId,
+      'schoolItems',
+      {
+        recipientMemberIds: profileNotificationRecipientIds(
+          req.session.familyId,
+          record.memberId
+        ),
+        excludeMemberIds: [actorMemberId],
+        title,
+        body: cleanText(
+          record.title,
+          'Im Schulbereich gibt es etwas Neues.',
+          240
+        ),
+        privateBody: 'Im Schulbereich gibt es etwas Neues.',
+        url: '/?view=family-life',
+        tag: `school-${record.id}`
+      },
+      {
+        title,
+        message: cleanText(
+          record.title,
+          'Im Schulbereich gibt es etwas Neues.',
+          240
+        ),
+        priority: record.kind === 'exam' ? 5 : 3
+      }
+    );
   }
-  if (type === 'moodCheckins' && record.mood === 'hilfe') {
-    const requester = getMember(req.session.familyId, actorMemberId);
-  const adultIds = getMembers(req.session.familyId)
-    .filter(isAdultMember)
-      .map(member => member.id);
-    queueWebPushEvent(req.session.familyId, 'moodHelp', {
-      recipientMemberIds: adultIds,
-      excludeMemberIds: [actorMemberId],
-      title: `${requester?.name || 'Jemand'} braucht Nähe`,
-      body: 'Im Familienkompass wurde „Brauche Nähe“ ausgewählt.',
-      privateTitle: 'Ein Familienmitglied braucht Nähe',
-      privateBody: 'Bitte schau kurz in den Familienplaner.',
-      url: '/?view=dashboard',
-      tag: `mood-${record.id}`,
-      priority: 'high',
-      ttl: 300
-    });
+  if (type === 'familyMissions') {
+    const recipients = Array.isArray(record.memberIds)
+      ? record.memberIds.flatMap(memberId =>
+          profileNotificationRecipientIds(req.session.familyId, memberId)
+        )
+      : signedInMemberIds(req.session.familyId);
+    queueNotificationChannels(
+      req.session.familyId,
+      'familyMissions',
+      {
+        recipientMemberIds: [...new Set(recipients)],
+        excludeMemberIds: [actorMemberId],
+        title: 'Neue Familienmission',
+        body: cleanText(
+          record.title,
+          'Eine neue gemeinsame Mission wartet.',
+          240
+        ),
+        privateBody: 'Im Familienplaner wartet eine neue Familienmission.',
+        url: '/?view=family-life',
+        tag: `family-mission-${record.id}`
+      },
+      {
+        title: 'Neue Familienmission',
+        message: cleanText(
+          record.title,
+          'Eine neue gemeinsame Mission wartet.',
+          240
+        ),
+        priority: 3
+      }
+    );
+  }
+  if (type === 'rewards') {
+    const recipients = record.forMemberId
+      ? profileNotificationRecipientIds(
+          req.session.familyId,
+          record.forMemberId
+        )
+      : childMemberIds(req.session.familyId);
+    queueNotificationChannels(
+      req.session.familyId,
+      'rewards',
+      {
+        recipientMemberIds: recipients,
+        excludeMemberIds: [actorMemberId],
+        title: 'Neue Belohnung im Shop',
+        body: cleanText(
+          record.title,
+          'Eine neue Belohnung wartet auf dich.',
+          240
+        ),
+        privateBody: 'Im Belohnungsshop gibt es etwas Neues.',
+        url: '/?view=tasks',
+        tag: `reward-new-${record.id}`
+      },
+      {
+        title: 'Neue Belohnung',
+        message: cleanText(
+          record.title,
+          'Eine neue Belohnung wurde angelegt.',
+          240
+        ),
+        priority: 3
+      }
+    );
   }
 }
 
@@ -1141,6 +1453,28 @@ function notifyTaskCompleted(req, result, actorMemberId) {
     url: '/?view=tasks',
     tag: `task-complete-${result.task.id}`
   });
+  if (result.task.createdByExternalFamilyId) {
+    queueNotificationChannels(
+      result.task.createdByExternalFamilyId,
+      'taskCompleted',
+      {
+        recipientMemberIds: adultMemberIds(
+          result.task.createdByExternalFamilyId
+        ),
+        title: `${result.member?.name || 'Jemand'} hat deine Aufgabe geschafft`,
+        body: result.task.title,
+        privateBody:
+          'Eine Aufgabe für eine verbundene Familie wurde bestätigt.',
+        url: '/?view=admin',
+        tag: `external-task-complete-${result.task.id}`
+      },
+      {
+        title: 'Aufgabe in verbundener Familie geschafft',
+        message: `${result.member?.name || 'Jemand'}: ${result.task.title}`,
+        priority: 3
+      }
+    );
+  }
   if (
     result.nextTask?.memberId &&
     result.nextTask.memberId !== result.task.memberId
@@ -2346,6 +2680,7 @@ export function createApp() {
               url: '/?view=calendar',
               tag,
               priority: due.reminderMinutes <= 10 ? 'high' : 'normal',
+              allowDuringQuietHours: due.reminderMinutes <= 10,
               ttl: Math.max(300, Math.min(86_400, due.reminderMinutes * 60))
             });
             queueGotifyNotification(family.id, 'events', {
@@ -2985,6 +3320,31 @@ export function createApp() {
       }
     );
     publishFamilyChange(req.session.familyId, 'problem-reports');
+    const reporter = getMember(
+      req.session.familyId,
+      req.session.memberId
+    );
+    queueNotificationChannels(
+      req.session.familyId,
+      'problemReports',
+      {
+        recipientMemberIds: adultMemberIds(req.session.familyId),
+        excludeMemberIds: [req.session.memberId],
+        title: 'Neue Problemmeldung',
+        body: `${reporter?.name || 'Jemand'}: ${report.title}`,
+        privateTitle: 'Neue Problemmeldung',
+        privateBody:
+          'In der Elternzentrale wartet eine neue Meldung.',
+        url: '/?view=admin',
+        tag: `problem-new-${report.id}`,
+        priority: 'high'
+      },
+      {
+        title: 'Neue Problemmeldung',
+        message: `${reporter?.name || 'Jemand'}: ${report.title}`,
+        priority: 6
+      }
+    );
     res.status(201).json({ success: true, report });
   });
 
@@ -3024,6 +3384,31 @@ export function createApp() {
         });
       }
       publishFamilyChange(req.session.familyId, 'problem-reports');
+      const resolved = status === 'resolved';
+      queueNotificationChannels(
+        req.session.familyId,
+        'problemReports',
+        {
+          recipientMemberIds: [report.memberId].filter(Boolean),
+          excludeMemberIds: [req.session.memberId],
+          title: resolved
+            ? 'Deine Meldung wurde erledigt'
+            : 'Deine Meldung ist wieder offen',
+          body: report.title,
+          privateTitle: 'Rückmeldung zu deiner Problemmeldung',
+          privateBody:
+            'Der Status einer Meldung im Familienplaner wurde geändert.',
+          url: '/?view=dashboard',
+          tag: `problem-${status}-${report.id}`
+        },
+        {
+          title: resolved
+            ? 'Problemmeldung erledigt'
+            : 'Problemmeldung wieder geöffnet',
+          message: report.title,
+          priority: 3
+        }
+      );
       res.json({ success: true, report });
     }
   );
@@ -3315,6 +3700,27 @@ export function createApp() {
       relationType,
       req.session.memberId
     );
+    const sourceFamily = getFamily(req.session.familyId);
+    publishFamilyChange(req.session.familyId, 'family-relationships');
+    publishFamilyChange(targetFamilyId, 'family-relationships');
+    queueNotificationChannels(
+      targetFamilyId,
+      'familyConnections',
+      {
+        recipientMemberIds: adultMemberIds(targetFamilyId),
+        title: 'Neue Familienanfrage',
+        body: `${sourceFamily.familyName} möchte das Familiennetz verbinden.`,
+        privateBody:
+          'Im Familiennetz wartet eine neue Verbindungsanfrage.',
+        url: '/?view=admin',
+        tag: `family-connection-request-${relationship.id}`
+      },
+      {
+        title: 'Neue Familienanfrage',
+        message: `${sourceFamily.familyName} möchte das Familiennetz verbinden.`,
+        priority: 5
+      }
+    );
     res.status(201).json({
       success: true,
       relationship,
@@ -3335,6 +3741,10 @@ export function createApp() {
           error: 'Bitte die Anfrage annehmen oder ablehnen.'
         });
       }
+      const pendingRelationship = getFamilyRelationship(
+        req.session.familyId,
+        req.params.relationshipId
+      );
       const relationship = respondFamilyRelationship(
         req.session.familyId,
         req.params.relationshipId,
@@ -3347,6 +3757,46 @@ export function createApp() {
           error: 'Die offene Familienanfrage wurde nicht gefunden.'
         });
       }
+      const requesterFamilyId =
+        pendingRelationship?.otherFamily?.id;
+      const responderFamily = getFamily(req.session.familyId);
+      if (requesterFamilyId) {
+        publishFamilyChange(
+          requesterFamilyId,
+          'family-relationships'
+        );
+        queueNotificationChannels(
+          requesterFamilyId,
+          'familyConnections',
+          {
+            recipientMemberIds: adultMemberIds(requesterFamilyId),
+            title:
+              status === 'accepted'
+                ? 'Familienanfrage angenommen'
+                : 'Familienanfrage abgelehnt',
+            body:
+              status === 'accepted'
+                ? `${responderFamily.familyName} ist jetzt mit euch verbunden.`
+                : `${responderFamily.familyName} hat die Anfrage abgelehnt.`,
+            privateBody:
+              'Im Familiennetz hat sich der Status einer Anfrage geändert.',
+            url: '/?view=admin',
+            tag: `family-connection-${status}-${req.params.relationshipId}`
+          },
+          {
+            title:
+              status === 'accepted'
+                ? 'Familiennetz verbunden'
+                : 'Familienanfrage abgelehnt',
+            message:
+              status === 'accepted'
+                ? `${responderFamily.familyName} ist jetzt mit euch verbunden.`
+                : `${responderFamily.familyName} hat die Anfrage abgelehnt.`,
+            priority: 4
+          }
+        );
+      }
+      publishFamilyChange(req.session.familyId, 'family-relationships');
       res.json({
         success: true,
         relationship,
@@ -3361,6 +3811,10 @@ export function createApp() {
     requireAuth,
     requireAdult,
     (req, res) => {
+      const relationship = getFamilyRelationship(
+        req.session.familyId,
+        req.params.relationshipId
+      );
       if (
         !deleteFamilyRelationship(
           req.session.familyId,
@@ -3372,6 +3826,30 @@ export function createApp() {
           error: 'Die Familienverknüpfung wurde nicht gefunden.'
         });
       }
+      const otherFamilyId = relationship?.otherFamily?.id;
+      const actorFamily = getFamily(req.session.familyId);
+      if (otherFamilyId) {
+        publishFamilyChange(otherFamilyId, 'family-relationships');
+        queueNotificationChannels(
+          otherFamilyId,
+          'familyConnections',
+          {
+            recipientMemberIds: adultMemberIds(otherFamilyId),
+            title: 'Familienverbindung beendet',
+            body: `${actorFamily.familyName} hat die Verbindung entfernt.`,
+            privateBody:
+              'Eine Verbindung im Familiennetz wurde beendet.',
+            url: '/?view=admin',
+            tag: `family-connection-deleted-${req.params.relationshipId}`
+          },
+          {
+            title: 'Familienverbindung beendet',
+            message: `${actorFamily.familyName} hat die Verbindung entfernt.`,
+            priority: 4
+          }
+        );
+      }
+      publishFamilyChange(req.session.familyId, 'family-relationships');
       res.json({
         success: true,
         relationships: listFamilyRelationships(req.session.familyId),
@@ -3406,6 +3884,27 @@ export function createApp() {
       publishFamilyChange(
         relationship.otherFamily.id,
         'family-relationship-grants'
+      );
+      const actorFamily = getFamily(req.session.familyId);
+      queueNotificationChannels(
+        relationship.otherFamily.id,
+        'familyConnections',
+        {
+          recipientMemberIds: adultMemberIds(
+            relationship.otherFamily.id
+          ),
+          title: 'Freigaben im Familiennetz geändert',
+          body: `${actorFamily.familyName} hat die gemeinsamen Freigaben angepasst.`,
+          privateBody:
+            'Die Freigaben einer Familienverbindung wurden geändert.',
+          url: '/?view=admin',
+          tag: `family-connection-grants-${relationship.id}-${Date.now()}`
+        },
+        {
+          title: 'Familiennetz aktualisiert',
+          message: `${actorFamily.familyName} hat die gemeinsamen Freigaben angepasst.`,
+          priority: 3
+        }
       );
       res.json({
         success: true,
@@ -3449,14 +3948,23 @@ export function createApp() {
       const ownerFamily = getFamily(req.session.familyId);
       event.sharedWithFamilies.forEach(family => {
         publishFamilyChange(family.id, 'shared-events');
-        queueWebPushEvent(family.id, 'events', {
-          title: `Einladung von ${ownerFamily.familyName}`,
-          body: event.title,
-          privateBody:
-            'Eine verbundene Familie hat einen gemeinsamen Termin eingetragen.',
-          url: '/?view=calendar',
-          tag: `shared-event-${event.sharedEventId}`
-        });
+        queueNotificationChannels(
+          family.id,
+          'events',
+          {
+            title: `Einladung von ${ownerFamily.familyName}`,
+            body: calendarEventBody(event),
+            privateBody:
+              'Eine verbundene Familie hat einen gemeinsamen Termin eingetragen.',
+            url: '/?view=calendar',
+            tag: `shared-event-${event.sharedEventId}`
+          },
+          {
+            title: `Einladung von ${ownerFamily.familyName}`,
+            message: calendarEventBody(event),
+            priority: 4
+          }
+        );
       });
       publishFamilyChange(req.session.familyId, 'shared-events');
       res.status(201).json({
@@ -3482,9 +3990,30 @@ export function createApp() {
           error: 'Der gemeinsame Termin wurde nicht gefunden.'
         });
       }
-      result.recipientFamilyIds.forEach(familyId =>
-        publishFamilyChange(familyId, 'shared-events')
-      );
+      const ownerFamily = getFamily(req.session.familyId);
+      result.recipientFamilyIds.forEach(familyId => {
+        publishFamilyChange(familyId, 'shared-events');
+        queueNotificationChannels(
+          familyId,
+          'events',
+          {
+            title: 'Gemeinsamer Termin abgesagt',
+            body: calendarEventBody(result.event, 'Abgesagt'),
+            privateBody:
+              'Eine verbundene Familie hat einen gemeinsamen Termin abgesagt.',
+            url: '/?view=calendar',
+            tag: `shared-event-deleted-${result.event.sharedEventId}`,
+            priority: 'high'
+          },
+          {
+            title: 'Gemeinsamer Termin abgesagt',
+            message: `${ownerFamily.familyName}: ${calendarEventBody(
+              result.event
+            )}`,
+            priority: 6
+          }
+        );
+      });
       publishFamilyChange(req.session.familyId, 'shared-events');
       res.json({
         success: true,
@@ -3551,14 +4080,23 @@ export function createApp() {
         createdAt: Date.now()
       });
       publishFamilyChange(targetFamilyId, 'tasks');
-      queueWebPushEvent(targetFamilyId, 'taskAssigned', {
-        recipientMemberIds: [targetMember.id],
-        title: `Neue Aufgabe von ${req.activeMember.name}`,
-        body: task.title,
-        privateBody: 'Im Familienplaner wartet eine neue Aufgabe.',
-        url: '/?view=tasks',
-        tag: `task-${task.id}`
-      });
+      queueNotificationChannels(
+        targetFamilyId,
+        'taskAssigned',
+        {
+          recipientMemberIds: [targetMember.id],
+          title: `Neue Aufgabe von ${req.activeMember.name}`,
+          body: task.title,
+          privateBody: 'Im Familienplaner wartet eine neue Aufgabe.',
+          url: '/?view=tasks',
+          tag: `task-${task.id}`
+        },
+        {
+          title: `Neue Aufgabe von ${req.activeMember.name}`,
+          message: `${targetMember.name}: ${task.title}`,
+          priority: 3
+        }
+      );
       res.status(201).json({ success: true, task });
     }
   );
@@ -3611,6 +4149,24 @@ export function createApp() {
         createdAt: Date.now()
       });
       publishFamilyChange(targetFamilyId, 'rewards');
+      queueNotificationChannels(
+        targetFamilyId,
+        'rewards',
+        {
+          recipientMemberIds: [targetMember.id],
+          title: `Neue Belohnung von ${req.activeMember.name}`,
+          body: reward.title,
+          privateBody:
+            'Im Belohnungsshop wartet etwas Neues auf dich.',
+          url: '/?view=tasks',
+          tag: `reward-new-${reward.id}`
+        },
+        {
+          title: `Neue Belohnung von ${req.activeMember.name}`,
+          message: `${targetMember.name}: ${reward.title}`,
+          priority: 3
+        }
+      );
       res.status(201).json({ success: true, reward });
     }
   );
@@ -3667,6 +4223,28 @@ export function createApp() {
         }
       );
       publishFamilyChange(targetFamilyId, 'pocketMoneyTransactions');
+      const amount = euroAmount(result.transaction.amountCents);
+      queueNotificationChannels(
+        targetFamilyId,
+        'pocketMoney',
+        {
+          recipientMemberIds: [targetMember.id],
+          title:
+            result.transaction.amountCents > 0
+              ? 'Taschengeld bekommen'
+              : 'Taschengeld geändert',
+          body: `${amount} · ${result.transaction.note}`,
+          privateBody:
+            'In deinem Taschengeldkonto gibt es eine neue Buchung.',
+          url: '/?view=family-life',
+          tag: `pocket-money-${result.transaction.id}`
+        },
+        {
+          title: `Taschengeld für ${targetMember.name}`,
+          message: `${amount} · ${result.transaction.note}`,
+          priority: 3
+        }
+      );
       res.status(201).json({ success: true, ...result });
     }
   );
@@ -4014,18 +4592,9 @@ export function createApp() {
       notifyChatViaGotify(req, record);
       notifyChatViaWebPush(req, record);
     }
-    notifyCreatedResourceViaWebPush(req, req.params.type, record);
-    if (
-      req.params.type === 'moodCheckins' &&
-      record.mood === 'hilfe'
-    ) {
-      const member = getMember(req.session.familyId, req.session.memberId);
-      queueGotifyNotification(req.session.familyId, 'moodHelp', {
-        title: `${member?.name || 'Ein Familienmitglied'} braucht Nähe`,
-        message:
-          'Im Familienkompass wurde „Brauche Nähe“ ausgewählt. Schau bitte kurz nach.',
-        priority: 8
-      });
+    notifyCreatedResource(req, req.params.type, record);
+    if (req.params.type === 'moodCheckins') {
+      notifyMoodCheckin(req, record);
     }
     publishFamilyChange(req.session.familyId, req.params.type);
     res.status(201).json({
@@ -4164,6 +4733,12 @@ export function createApp() {
     if (!record) {
       return res.status(404).json({ success: false, error: 'Eintrag nicht gefunden.' });
     }
+    if (req.params.type === 'events') {
+      notifyCalendarChange(req, record, {
+        kind: 'updated',
+        previous: existingEvent
+      });
+    }
     publishFamilyChange(req.session.familyId, req.params.type);
     res.json({
       success: true,
@@ -4174,13 +4749,14 @@ export function createApp() {
 
   app.delete('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
+    let existingEvent = null;
     if (req.params.type === 'events') {
-      const existing = getRecord(
+      existingEvent = getRecord(
         req.session.familyId,
         'events',
         req.params.id
       );
-      if (isCalendarSubscriptionEvent(existing)) {
+      if (isCalendarSubscriptionEvent(existingEvent)) {
         return res.status(409).json({
           success: false,
           error:
@@ -4209,6 +4785,9 @@ export function createApp() {
     }
     if (!deleteRecord(req.session.familyId, req.params.type, req.params.id)) {
       return res.status(404).json({ success: false, error: 'Eintrag nicht gefunden.' });
+    }
+    if (existingEvent) {
+      notifyCalendarChange(req, existingEvent, { kind: 'deleted' });
     }
     publishFamilyChange(req.session.familyId, req.params.type);
     res.json({
@@ -4275,12 +4854,34 @@ export function createApp() {
       routine.id,
       { completions: trimmedCompletions }
     );
+    const completedToday =
+      completed.size === (routine.steps?.length || 0);
+    if (completedToday && !isAdult) {
+      queueNotificationChannels(
+        req.session.familyId,
+        'taskCompleted',
+        {
+          recipientMemberIds: adultMemberIds(req.session.familyId),
+          excludeMemberIds: [member.id],
+          title: `${member.name} hat die Tagesroutine geschafft`,
+          body: routine.title,
+          privateBody:
+            'Eine Kinder-Routine wurde vollständig erledigt.',
+          url: '/?view=family-life',
+          tag: `routine-complete-${routine.id}-${date}`
+        },
+        {
+          title: `${member.name} hat die Tagesroutine geschafft`,
+          message: routine.title,
+          priority: 3
+        }
+      );
+    }
     publishFamilyChange(req.session.familyId, 'dailyRoutines');
     res.json({
       success: true,
       record,
-      completedToday:
-        completed.size === (routine.steps?.length || 0),
+      completedToday,
       version: getFamilyVersion(req.session.familyId)
     });
   });
@@ -4319,6 +4920,27 @@ export function createApp() {
       item.id,
       { completed: !item.completed, completedAt: !item.completed ? Date.now() : null }
     );
+    if (record.completed && !isAdult) {
+      queueNotificationChannels(
+        req.session.familyId,
+        'schoolItems',
+        {
+          recipientMemberIds: adultMemberIds(req.session.familyId),
+          excludeMemberIds: [member.id],
+          title: `${member.name} hat etwas für die Schule erledigt`,
+          body: item.title,
+          privateBody:
+            'Ein Schuleintrag wurde als erledigt markiert.',
+          url: '/?view=family-life',
+          tag: `school-complete-${item.id}`
+        },
+        {
+          title: `${member.name} hat etwas für die Schule erledigt`,
+          message: item.title,
+          priority: 3
+        }
+      );
+    }
     publishFamilyChange(req.session.familyId, 'schoolItems');
     res.json({
       success: true,
@@ -4414,7 +5036,8 @@ export function createApp() {
         });
       }
       const completed = new Set(mission.completedMemberIds || []);
-      if (completed.has(memberId)) completed.delete(memberId);
+      const wasCompleted = completed.has(memberId);
+      if (wasCompleted) completed.delete(memberId);
       else completed.add(memberId);
       const record = updateRecord(
         req.session.familyId,
@@ -4422,6 +5045,37 @@ export function createApp() {
         mission.id,
         { completedMemberIds: [...completed] }
       );
+      if (!wasCompleted) {
+        const completedMember = getMember(
+          req.session.familyId,
+          memberId
+        );
+        const recipients = [
+          ...adultMemberIds(req.session.familyId),
+          ...(mission.memberIds || []).flatMap(id =>
+            profileNotificationRecipientIds(req.session.familyId, id)
+          )
+        ];
+        queueNotificationChannels(
+          req.session.familyId,
+          'familyMissions',
+          {
+            recipientMemberIds: [...new Set(recipients)],
+            excludeMemberIds: [active.id],
+            title: `${completedMember?.name || 'Jemand'} hat eine Familienmission geschafft`,
+            body: mission.title,
+            privateBody:
+              'Bei einer Familienmission gibt es einen neuen Erfolg.',
+            url: '/?view=family-life',
+            tag: `family-mission-complete-${mission.id}-${memberId}`
+          },
+          {
+            title: 'Familienmission geschafft',
+            message: `${completedMember?.name || 'Jemand'}: ${mission.title}`,
+            priority: 3
+          }
+        );
+      }
       publishFamilyChange(req.session.familyId, 'familyMissions');
       res.json({
         success: true,
@@ -4456,6 +5110,29 @@ export function createApp() {
         }
       );
       publishFamilyChange(req.session.familyId, 'pocketMoneyTransactions');
+      const amount = euroAmount(result.transaction.amountCents);
+      queueNotificationChannels(
+        req.session.familyId,
+        'pocketMoney',
+        {
+          recipientMemberIds: [memberId],
+          excludeMemberIds: [req.activeMember.id],
+          title:
+            result.transaction.amountCents > 0
+              ? 'Taschengeld bekommen'
+              : 'Taschengeld geändert',
+          body: `${amount} · ${result.transaction.note}`,
+          privateBody:
+            'In deinem Taschengeldkonto gibt es eine neue Buchung.',
+          url: '/?view=family-life',
+          tag: `pocket-money-${result.transaction.id}`
+        },
+        {
+          title: `Taschengeld für ${result.member.name}`,
+          message: `${amount} · ${result.transaction.note}`,
+          priority: 3
+        }
+      );
       res.status(201).json({
         success: true,
         ...result,
@@ -4650,16 +5327,26 @@ export function createApp() {
       if (approved) {
         notifyTaskCompleted(req, result, req.activeMember.id);
       } else {
-        queueWebPushEvent(req.session.familyId, 'taskApproval', {
-          recipientMemberIds: [task.memberId],
-          excludeMemberIds: [req.activeMember.id],
-          title: 'Bitte schau noch einmal nach',
-          body: `"${task.title}" wurde noch nicht bestätigt.`,
-          privateTitle: 'Eine Aufgabe braucht noch einen Versuch',
-          privateBody: 'Im Familienplaner wartet eine Mission wieder auf dich.',
-          url: '/?view=tasks',
-          tag: `task-rejected-${task.id}`
-        });
+        queueNotificationChannels(
+          req.session.familyId,
+          'taskApproval',
+          {
+            recipientMemberIds: [task.memberId],
+            excludeMemberIds: [req.activeMember.id],
+            title: 'Bitte schau noch einmal nach',
+            body: `"${task.title}" wurde noch nicht bestätigt.`,
+            privateTitle: 'Eine Aufgabe braucht noch einen Versuch',
+            privateBody:
+              'Im Familienplaner wartet eine Mission wieder auf dich.',
+            url: '/?view=tasks',
+            tag: `task-rejected-${task.id}`
+          },
+          {
+            title: 'Aufgabe braucht noch einen Versuch',
+            message: task.title,
+            priority: 4
+          }
+        );
       }
       publishFamilyChange(req.session.familyId, 'tasks');
       res.json({
@@ -4702,6 +5389,53 @@ export function createApp() {
         error: 'Belohnung oder Profil nicht gefunden.'
       });
     }
+    const recipientMemberIds = [
+      result.member.id,
+      ...adultMemberIds(req.session.familyId)
+    ];
+    queueNotificationChannels(
+      req.session.familyId,
+      'rewards',
+      {
+        recipientMemberIds: [...new Set(recipientMemberIds)],
+        excludeMemberIds: [activeMember?.id],
+        title: `${result.member.name} hat eine Belohnung eingelöst`,
+        body: result.reward.title,
+        privateTitle: 'Eine Belohnung wurde eingelöst',
+        privateBody:
+          'Im Belohnungsshop wurde eine Belohnung eingelöst.',
+        url: '/?view=tasks',
+        tag: `reward-redeemed-${result.reward.id}-${Date.now()}`
+      },
+      {
+        title: `${result.member.name} hat eine Belohnung eingelöst`,
+        message: result.reward.title,
+        priority: 5
+      }
+    );
+    if (result.reward.createdByExternalFamilyId) {
+      queueNotificationChannels(
+        result.reward.createdByExternalFamilyId,
+        'rewards',
+        {
+          recipientMemberIds: adultMemberIds(
+            result.reward.createdByExternalFamilyId
+          ),
+          title: `${result.member.name} hat deine Belohnung eingelöst`,
+          body: result.reward.title,
+          privateBody:
+            'Eine Belohnung in einer verbundenen Familie wurde eingelöst.',
+          url: '/?view=admin',
+          tag: `external-reward-redeemed-${result.reward.id}-${Date.now()}`
+        },
+        {
+          title: 'Belohnung in verbundener Familie eingelöst',
+          message: `${result.member.name}: ${result.reward.title}`,
+          priority: 4
+        }
+      );
+    }
+    publishFamilyChange(req.session.familyId, 'rewards');
     res.json({
       success: true,
       ...result,

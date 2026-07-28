@@ -1602,6 +1602,7 @@ export function deleteSharedFamilyEvent(ownerFamilyId, eventId) {
     `)
     .get(eventId, ownerFamilyId);
   if (!existing) return false;
+  const event = parseJsonObject(existing.data_json);
   const recipients = database
     .prepare(`
       SELECT family_id
@@ -1616,7 +1617,14 @@ export function deleteSharedFamilyEvent(ownerFamilyId, eventId) {
       .run(eventId);
     bumpFamilyVersion(ownerFamilyId);
     recipients.forEach(familyId => bumpFamilyVersion(familyId));
-    return { recipientFamilyIds: recipients };
+    return {
+      recipientFamilyIds: recipients,
+      event: {
+        ...event,
+        id: existing.id,
+        sharedEventId: existing.id
+      }
+    };
   });
 }
 

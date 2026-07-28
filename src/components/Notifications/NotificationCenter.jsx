@@ -3,17 +3,26 @@ import { createPortal } from 'react-dom';
 import {
   ArrowUpRight,
   Bell,
+  Bug,
   CalendarDays,
   CheckCheck,
   CheckCircle2,
   ClipboardCheck,
+  Coins,
+  Flag,
+  Gift,
+  GraduationCap,
   HeartHandshake,
+  HeartPulse,
   Inbox,
   MessageCircle,
+  MessageCircleHeart,
+  Network,
   ShoppingBasket,
   Sparkles,
   SunMedium,
   UtensilsCrossed,
+  Vote,
   X
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
@@ -27,6 +36,7 @@ const VIEW_NAMES = new Set([
   'board',
   'shopping',
   'meals',
+  'family-life',
   'admin'
 ]);
 
@@ -65,6 +75,51 @@ const NOTIFICATION_META = {
     label: 'Familienkompass',
     icon: HeartHandshake,
     tone: 'care'
+  },
+  moodUpdates: {
+    label: 'Gefühlslage',
+    icon: HeartPulse,
+    tone: 'care'
+  },
+  problemReports: {
+    label: 'Problemmeldung',
+    icon: Bug,
+    tone: 'approval'
+  },
+  encouragements: {
+    label: 'Mutmacher',
+    icon: MessageCircleHeart,
+    tone: 'care'
+  },
+  familyPolls: {
+    label: 'Familien-Abstimmung',
+    icon: Vote,
+    tone: 'calendar'
+  },
+  familyMissions: {
+    label: 'Familienmission',
+    icon: Flag,
+    tone: 'success'
+  },
+  schoolItems: {
+    label: 'Schule',
+    icon: GraduationCap,
+    tone: 'task'
+  },
+  rewards: {
+    label: 'Belohnung',
+    icon: Gift,
+    tone: 'success'
+  },
+  pocketMoney: {
+    label: 'Taschengeld',
+    icon: Coins,
+    tone: 'success'
+  },
+  familyConnections: {
+    label: 'Familiennetz',
+    icon: Network,
+    tone: 'calendar'
   }
 };
 

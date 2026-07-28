@@ -24,6 +24,7 @@ import {
   getStoredServerUrl,
   isCapacitorNative
 } from '../utils/apiConfig';
+import { DEFAULT_GOTIFY_RULES } from '../../shared/notificationEvents';
 
 const FamilyContext = createContext(null);
 
@@ -54,14 +55,7 @@ const EMPTY_INTEGRATIONS = {
   bring: { connected: false },
   gotify: {
     connected: false,
-    rules: {
-      groupChat: true,
-      directMessages: false,
-      taskCompleted: true,
-      events: true,
-      moodHelp: true,
-      includeMessageText: false
-    }
+    rules: { ...DEFAULT_GOTIFY_RULES }
   },
   homeAssistant: {
     connected: false,

@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.3.1': {
+    version: '1.3.1',
+    eyebrow: 'Neu im Familienplaner',
+    title: 'Nichts Wichtiges mehr verpassen',
+    intro:
+      'Benachrichtigungen begleiten jetzt den ganzen Familienalltag – gezielt für die richtigen Profile und ohne unnötige Meldungsflut.',
+    highlights: [
+      {
+        id: 'notification-coverage',
+        title: 'Mehr wichtige Meldungen',
+        description:
+          'Chat, Termine, Problemmeldungen, Gefühlslage der Kinder, Familiennetz, Schule, Belohnungen und Taschengeld melden sich jetzt zuverlässig.'
+      },
+      {
+        id: 'calendar-changes',
+        title: 'Kalender bleibt aktuell',
+        description:
+          'Neue, geänderte und abgesagte Termine sowie eure gewählten Erinnerungszeitpunkte erreichen automatisch die betroffenen Profile.'
+      },
+      {
+        id: 'child-care',
+        title: 'Kinder im Blick',
+        description:
+          'Erwachsene erfahren von neuen Gefühlslagen, erledigten Schulsachen, Tagesroutinen und Familienmissionen. „Brauche Nähe“ bleibt besonders dringend.'
+      },
+      {
+        id: 'notification-control',
+        title: 'Alles selbst einstellbar',
+        description:
+          'Jede Meldungsart lässt sich pro Profil und Gerät für Browser-Push sowie zentral für Gotify ein- oder ausschalten.'
+      }
+    ],
+    closing:
+      'Bestehende Geräte, Push-Einstellungen, Termine und alle anderen Familiendaten bleiben erhalten.'
+  },
   '1.3.0': {
     version: '1.3.0',
     eyebrow: 'Neu im Familienplaner',

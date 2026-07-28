@@ -29,6 +29,7 @@ import {
   roleForPosition
 } from '../constants/roles';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../utils/imageFallback';
+import { NOTIFICATION_EVENT_DEFINITIONS } from '../../shared/notificationEvents';
 
 const COLOR_PRESETS = [
   '#246B58',
@@ -49,6 +50,9 @@ const EMPTY_FORM = {
   pin: '',
   isManaged: false
 };
+
+const PROFILE_NOTIFICATION_RULES =
+  NOTIFICATION_EVENT_DEFINITIONS.map(({ key, title }) => [key, title]);
 
 export default function ProfileModal() {
   const {
@@ -553,15 +557,7 @@ export default function ProfileModal() {
               {notificationsEnabled && (
                 <>
                   <div className="profile-notification-options">
-                    {[
-                      ['groupChat', 'Familienchat'],
-                      ['directMessages', 'Direktnachrichten'],
-                      ['taskAssigned', 'Neue Aufgaben'],
-                      ['taskApproval', 'Aufgaben-Prüfung'],
-                      ['taskCompleted', 'Bestätigte Aufgaben'],
-                      ['events', 'Termine & Erinnerungen'],
-                      ['moodHelp', 'Familienkompass']
-                    ].map(([key, label]) => (
+                    {PROFILE_NOTIFICATION_RULES.map(([key, label]) => (
                       <label key={key}>
                         <input
                           type="checkbox"
