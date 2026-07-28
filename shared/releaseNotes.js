@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.5.0': {
+    version: '1.5.0',
+    eyebrow: 'Neu für euren Heimserver',
+    title: 'LX lässt sich jetzt besonders einfach auf Proxmox installieren',
+    intro:
+      'Für Proxmox VE gibt es jetzt einen geführten Installer mit sicheren Voreinstellungen, automatischem Docker-Setup und eigener Verwaltung.',
+    highlights: [
+      {
+        id: 'pve-one-liner',
+        title: 'Ein Befehl genügt',
+        description:
+          'Der neue Proxmox-Helper erstellt einen fertigen LX-Container und führt verständlich durch die Einrichtung.'
+      },
+      {
+        id: 'pve-safe-container',
+        title: 'Sicherer eigener Container',
+        description:
+          'LX läuft getrennt in einem unprivilegierten Debian-Container. Vorhandene Container werden nicht überschrieben.'
+      },
+      {
+        id: 'pve-management',
+        title: 'Einfache Verwaltung',
+        description:
+          'Updates, Backups, Status, Protokolle und die öffentliche Adresse lassen sich über ein gemeinsames LX-Kommando verwalten.'
+      },
+      {
+        id: 'docker-apk-delivery',
+        title: 'Android-App vollständig dabei',
+        description:
+          'Neue Docker- und Proxmox-Installationen liefern die signierte Android-App jetzt zuverlässig über Download und QR-Code aus.'
+      }
+    ],
+    closing:
+      'Bestehende Familieninhalte und Einstellungen bleiben beim normalen Update erhalten.'
+  },
   '1.4.1': {
     version: '1.4.1',
     eyebrow: 'Kleine App-Verbesserung',

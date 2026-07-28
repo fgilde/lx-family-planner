@@ -378,10 +378,10 @@ test('native API access only accepts trusted app origins', async () => {
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.4.1');
+  assert.equal(health.body.version, '1.5.0');
   const appRelease = await request('/api/app/version');
-  assert.equal(appRelease.body.versionName, '1.4.1');
-  assert.equal(appRelease.body.versionCode, 6);
+  assert.equal(appRelease.body.versionName, '1.5.0');
+  assert.equal(appRelease.body.versionCode, 7);
   assert.equal(appRelease.body.apkUrl, '/apk/latest.apk');
   assert.equal(
     appRelease.body.publicApkUrl,
@@ -429,8 +429,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.4.1');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.4.1');
+  assert.equal(bootstrap.body.appVersion, '1.5.0');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.5.0');
   assert.ok(bootstrap.body.releaseNotes.highlights.length >= 4);
   assert.equal(bootstrap.body.members.length, 5);
   assert.equal(
@@ -445,10 +445,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.4.1');
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.5.0');
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.4.1'
+    '1.5.0'
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -462,7 +462,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.4.1');
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.5.0');
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -1172,7 +1172,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.4.1');
+  assert.equal(problemReport.body.report.appVersion, '1.5.0');
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },

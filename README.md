@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.4.1</strong> ·
+  <strong>Aktuelle Version: 1.5.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -212,6 +212,61 @@ docker compose down
 
 Die aktiven Daten liegen in `data/`, Sicherungen in `backups/`. Beide Ordner
 werden absichtlich nicht in Git aufgenommen.
+
+## Proxmox VE Helper-Script
+
+Für Proxmox VE gibt es einen eigenen One-Liner. Er wird in der
+**Proxmox-Host-Shell als root** ausgeführt und erstellt einen neuen,
+unprivilegierten Debian-LXC:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-helper.sh)"
+```
+
+Vor dem Ausführen kann das Skript vollständig angesehen werden:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-helper.sh | less
+```
+
+Ein Trockenlauf prüft PVE, Speicher, Netzwerk und alle gewählten Werte, erstellt
+aber noch keinen Container:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-helper.sh)" -- --dry-run
+```
+
+Die Standardinstallation verwendet:
+
+- Proxmox VE 8.4 oder neuer
+- Debian 13, mit automatischem Rückfall auf Debian 12
+- unprivilegierten LXC mit `nesting` und `keyctl`
+- 2 CPU-Kerne, 2 GB RAM, 512 MB Swap und 8 GB Speicher
+- DHCP an `vmbr0` und Port `3001`
+- Docker Engine aus dem offiziellen Docker-Repository
+- zufällig erzeugtes App-Geheimnis und persistente Daten im LXC
+
+Im erweiterten Modus lassen sich Container-ID, Speicher, Netzwerk, Ressourcen,
+Port und öffentliche LX-Adresse anpassen. Eine bereits vergebene Container-ID
+wird niemals überschrieben. Bei einem Installationsfehler bleibt der neue
+Container zur Diagnose erhalten.
+
+Nach der Installation:
+
+```bash
+pct enter CONTAINER_ID
+lx-family status
+lx-family update
+lx-family backup
+lx-family logs
+lx-family restart
+lx-family domain https://familie.example.de
+lx-family doctor
+```
+
+Der Helper ist für eine **neue Installation** gedacht. Für den Umzug einer
+bestehenden Familie zuerst ein Datenbank-Backup erstellen und dieses
+anschließend bewusst in die neue Instanz übernehmen.
 
 ## Bequem und sicher aktualisieren
 

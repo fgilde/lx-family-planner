@@ -18,3 +18,5 @@ android
 *.aab
 *.jks
 *.keystore
+!public/apk/
+!public/apk/latest.apk

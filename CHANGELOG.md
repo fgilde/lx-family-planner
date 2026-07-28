@@ -2,6 +2,24 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.5.0] – 2026-07-28
+
+### Proxmox VE
+
+- neuer One-Liner für einen unprivilegierten Debian-12/13-LXC
+- Standard- und erweiterter Modus für Ressourcen, Speicher und Netzwerk
+- automatische Installation von Docker Engine und LX Family Planner
+- sichere Bestätigung vor der Container-Erstellung und kein automatisches
+  Löschen bei Fehlern
+- Container-Verwaltung über `lx-family` mit Update, Backup, Logs, Domain,
+  Neustart und Diagnose
+
+### Docker
+
+- die signierte Android-APK bleibt jetzt ausdrücklich im Docker-Build-Kontext
+- neue Docker- und PVE-Installationen liefern App-Download und QR-Code
+  vollständig aus
+
 ## [1.4.1] – 2026-07-28
 
 ### Behoben
