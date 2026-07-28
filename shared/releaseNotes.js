@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.2': {
+    version: '1.7.2',
+    eyebrow: 'Android-Push klar erkannt',
+    title: 'LX zeigt jetzt immer den richtigen Verbindungsstatus',
+    intro:
+      'Der Familienserver meldet seine Firebase-Verbindung nun direkt beim Start der App. Ein Problem auf dem Handy kann deshalb nicht mehr wie eine fehlende Servereinrichtung aussehen.',
+    highlights: [
+      {
+        id: 'bootstrap-firebase-status',
+        title: 'Serverstatus direkt beim Start',
+        description:
+          'Die bereits funktionierende Familienverbindung liefert gleichzeitig den bestätigten Firebase-Status.'
+      },
+      {
+        id: 'honest-push-errors',
+        title: 'Verständliche Fehlermeldungen',
+        description:
+          'Falls das Handy den Push-Status nicht abrufen kann, zeigt LX die wirkliche Ursache statt eines falschen Firebase-Hinweises.'
+      },
+      {
+        id: 'compatible-installation-id',
+        title: 'Auch für ältere Android-WebViews',
+        description:
+          'Die lokale Gerätekennung funktioniert jetzt auch dann, wenn eine moderne Browserfunktion auf dem Handy noch fehlt.'
+      },
+      {
+        id: 'retry-native-status',
+        title: 'Direkt erneut prüfen',
+        description:
+          'In der Elternzentrale lässt sich die Verbindung nach einem Fehler mit einem Knopfdruck neu abfragen.'
+      }
+    ],
+    closing:
+      'Alle Profile, Inhalte und Einstellungen bleiben erhalten. Die Android-App muss einmal auf Version 1.7.2 aktualisiert werden.'
+  },
   '1.7.1': {
     version: '1.7.1',
     eyebrow: 'Android-Push ist jetzt startklar',

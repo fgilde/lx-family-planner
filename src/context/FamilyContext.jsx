@@ -27,10 +27,10 @@ import {
 import { APP_VERSION } from '../appVersion';
 import {
   buildApiUrl,
-  getStoredSessionToken,
   setStoredSessionToken,
   getStoredServerUrl,
-  isCapacitorNative
+  isCapacitorNative,
+  plannerApiRequest
 } from '../utils/apiConfig';
 import { DEFAULT_GOTIFY_RULES } from '../../shared/notificationEvents';
 
@@ -99,8 +99,9 @@ function initialNativePushState() {
     permission: capability.supported ? 'prompt' : 'unsupported',
     loading: capability.supported,
     busy: '',
-    serverConfigured: false,
+    serverConfigured: null,
     serverReason: '',
+    statusError: '',
     permissionError: '',
     defaults: {},
     currentDeviceId: '',
@@ -141,44 +142,7 @@ export const FUNNY_COMIC_AVATARS = [
   }
 ];
 
-async function apiRequest(url, options = {}) {
-  const targetUrl = buildApiUrl(url);
-  const serverUrl = getStoredServerUrl();
-  const headers = new Headers(options.headers || {});
-  if (options.body && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-  if (isCapacitorNative() && !headers.has('X-LX-Client')) {
-    headers.set('X-LX-Client', 'native');
-  }
-  const token = getStoredSessionToken();
-  if (token && !headers.has('X-Session-Token')) {
-    headers.set('X-Session-Token', token);
-  }
-  const credentials = serverUrl ? 'include' : 'same-origin';
-  const response = await fetch(targetUrl, {
-    credentials,
-    ...options,
-    headers
-  });
-  let data = null;
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
-  if (data?.sessionToken) {
-    setStoredSessionToken(data.sessionToken);
-  }
-  if (!response.ok) {
-    const error = new Error(
-      data?.error || 'Die Anfrage konnte nicht verarbeitet werden.'
-    );
-    error.status = response.status;
-    throw error;
-  }
-  return data;
-}
+const apiRequest = plannerApiRequest;
 
 function resourceWithDefaults(resources) {
   return Object.fromEntries(
@@ -268,6 +232,14 @@ export function FamilyProvider({ children }) {
     setIntegrations(data.integrations || EMPTY_INTEGRATIONS);
     setAppVersion(data.appVersion || APP_VERSION);
     setReleaseNotes(data.releaseNotes || null);
+    if (data.nativePushServer) {
+      setNativePush(previous => ({
+        ...previous,
+        serverConfigured: Boolean(data.nativePushServer.configured),
+        serverReason: data.nativePushServer.reason || '',
+        statusError: ''
+      }));
+    }
     setActiveMemberIdState(data.activeMemberId || '');
     versionRef.current = Number(data.version || 0);
   }, []);
@@ -1026,7 +998,8 @@ export function FamilyProvider({ children }) {
     setNativePush(previous => ({
       ...previous,
       ...capability,
-      loading: !silent
+      loading: !silent,
+      statusError: ''
     }));
     if (authStatus !== 'authenticated' || !activeMemberIdState) {
       setNativePush(previous => ({
@@ -1038,11 +1011,20 @@ export function FamilyProvider({ children }) {
       return null;
     }
     try {
+      let installationId = '';
+      try {
+        installationId = nativeInstallationId();
+      } catch {
+        installationId = '';
+      }
+      const statusQuery = installationId
+        ? `?installationId=${encodeURIComponent(
+            installationId
+          )}&fresh=${Date.now()}`
+        : `?fresh=${Date.now()}`;
       const [data, permissionResult] = await Promise.all([
         apiRequest(
-          `/api/native-push/status?installationId=${encodeURIComponent(
-            nativeInstallationId()
-          )}&fresh=${Date.now()}`,
+          `/api/native-push/status${statusQuery}`,
           { cache: 'no-store' }
         ),
         nativePushPermission()
@@ -1070,6 +1052,7 @@ export function FamilyProvider({ children }) {
         loading: false,
         serverConfigured: next.serverConfigured,
         serverReason: next.serverReason,
+        statusError: '',
         defaults: data.defaults || {},
         currentDeviceId: data.currentDeviceId || '',
         devices: data.devices || []
@@ -1078,7 +1061,10 @@ export function FamilyProvider({ children }) {
     } catch (error) {
       setNativePush(previous => ({
         ...previous,
-        loading: false
+        loading: false,
+        statusError:
+          error?.message ||
+          'Der Android-Push-Status konnte nicht geladen werden.'
       }));
       if (!silent) {
         showToast(

@@ -2,6 +2,19 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.2] – 2026-07-28
+
+### Android-Push-Status eindeutig und robust
+
+- der bestätigte Firebase-Serverstatus wird bereits mit dem normalen
+  Familien-Startabruf geliefert
+- ein Fehler bei Gerätekennung oder Android-Berechtigung kann nicht mehr
+  fälschlich als fehlender Firebase-Dienstschlüssel erscheinen
+- ein gemeinsamer API-Weg verhindert unterschiedliche Cache- und
+  Sitzungsbehandlung
+- ältere Android-WebViews erhalten eine kompatible lokale Gerätekennung
+- die Elternzentrale zeigt echte Abruffehler und bietet „Erneut prüfen“ an
+
 ## [1.7.1] – 2026-07-28
 
 ### Android-Push zuverlässig aktivieren

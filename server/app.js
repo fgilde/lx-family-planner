@@ -3706,6 +3706,7 @@ export function createApp() {
       activeMemberId: req.session.memberId,
       appVersion: APP_VERSION,
       releaseNotes,
+      nativePushServer: publicFirebasePushStatus(),
       integrations: integrationStatus(req.session.familyId, member)
     });
   });

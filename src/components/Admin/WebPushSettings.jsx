@@ -14,6 +14,7 @@ import {
   MessageCircleHeart,
   MessageCircleMore,
   Network,
+  RefreshCw,
   Send,
   ShieldCheck,
   Smartphone,
@@ -114,7 +115,9 @@ export default function WebPushSettings() {
 
   const status = useMemo(() => {
     if (!push.supported) return 'unavailable';
-    if (isNative && !push.serverConfigured) return 'server-missing';
+    if (push.loading) return 'loading';
+    if (isNative && push.serverConfigured === false) return 'server-missing';
+    if (isNative && push.serverConfigured !== true) return 'status-error';
     if (push.permission === 'denied') return 'denied';
     if (currentDevice) return 'connected';
     return 'ready';
@@ -183,6 +186,37 @@ export default function WebPushSettings() {
               ab und installiere danach die mit demselben Firebase-Projekt gebaute
               LX App. Der Schlüssel gehört niemals ins Git-Repository.
             </small>
+          </div>
+        </div>
+      )}
+
+      {status === 'loading' && (
+        <div className="webpush-prerequisite">
+          <RefreshCw className="spin" size={24} />
+          <div>
+            <strong>Android-Verbindung wird geprüft</strong>
+            <p>LX fragt den aktuellen Firebase-Status beim Familienserver ab.</p>
+          </div>
+        </div>
+      )}
+
+      {status === 'status-error' && (
+        <div className="webpush-prerequisite denied">
+          <RefreshCw size={24} />
+          <div>
+            <strong>Status konnte nicht geprüft werden</strong>
+            <p>
+              {push.statusError ||
+                'Die App hat noch keine Antwort vom Familienserver erhalten.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => refreshNativePushStatus()}
+              disabled={Boolean(push.busy || push.loading)}
+            >
+              <RefreshCw size={16} />
+              Erneut prüfen
+            </button>
           </div>
         </div>
       )}

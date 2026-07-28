@@ -97,10 +97,21 @@ export function nativePushCapability() {
 export function nativeInstallationId() {
   let installationId = localStorage.getItem(INSTALLATION_ID_KEY) || '';
   if (!installationId) {
-    installationId = `lx-android-${crypto.randomUUID()}`;
+    installationId = createNativeInstallationId();
     localStorage.setItem(INSTALLATION_ID_KEY, installationId);
   }
   return installationId;
+}
+
+export function createNativeInstallationId() {
+  const randomUuid = globalThis.crypto?.randomUUID?.();
+  if (randomUuid) return `lx-android-${randomUuid}`;
+  const fallback = [
+    Date.now().toString(36),
+    Math.random().toString(36).slice(2),
+    Math.random().toString(36).slice(2)
+  ].join('-');
+  return `lx-android-${fallback}`;
 }
 
 export async function nativePushPermission() {
