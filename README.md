@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.7.2</strong> ·
+  <strong>Aktuelle Version: 1.7.3</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 

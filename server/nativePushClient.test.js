@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createNativeInstallationId,
+  launchNativePushRegistration,
   nativePushPermissionNeedsPrompt
 } from '../src/hooks/useNativePushNotifications.js';
 
@@ -21,4 +22,20 @@ test('native Android installations always receive a valid local id', () => {
     installationId,
     /^lx-android-[a-z0-9][a-z0-9._:-]{15,119}$/i
   );
+});
+
+test('native registration launch never waits for a stuck plugin call', () => {
+  let started = false;
+  const neverSettles = new Promise(() => {});
+  const result = launchNativePushRegistration(
+    {
+      register() {
+        started = true;
+        return neverSettles;
+      }
+    },
+    () => {}
+  );
+  assert.equal(started, true);
+  assert.equal(result, undefined);
 });

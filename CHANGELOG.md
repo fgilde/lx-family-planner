@@ -2,6 +2,17 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.3] – 2026-07-28
+
+### Kein endloses „Wird verbunden …“ mehr
+
+- die Android-Firebase-Registrierung blockiert den eigenen Zeitwächter nicht
+  mehr
+- spätestens nach 20 Sekunden erscheint entweder die erfolgreiche Anmeldung
+  oder die konkrete Android-/Firebase-Ursache
+- automatischer Test simuliert einen vollständig festhängenden nativen
+  Registrierungsaufruf
+
 ## [1.7.2] – 2026-07-28
 
 ### Android-Push-Status eindeutig und robust

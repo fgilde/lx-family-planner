@@ -125,6 +125,14 @@ export function nativePushPermissionNeedsPrompt(permission) {
   return ['prompt', 'prompt-with-rationale'].includes(permission);
 }
 
+export function launchNativePushRegistration(plugin, onError) {
+  try {
+    Promise.resolve(plugin.register()).catch(onError);
+  } catch (error) {
+    onError(error);
+  }
+}
+
 export async function registerNativePush({
   requestPermission = false
 } = {}) {
@@ -181,14 +189,11 @@ export async function registerNativePush({
       rejectRegistration(error);
     }
   };
-  try {
-    await plugin.register();
-  } catch (error) {
+  launchNativePushRegistration(plugin, error => {
     const pending = pendingRegistration;
     pendingRegistration = null;
     pending?.reject(error);
-    throw error;
-  }
+  });
   return promise;
 }
 

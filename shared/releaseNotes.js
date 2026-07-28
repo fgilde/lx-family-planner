@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.3': {
+    version: '1.7.3',
+    eyebrow: 'Push-Anmeldung bleibt nicht mehr hängen',
+    title: 'LX gibt jetzt immer eine klare Rückmeldung',
+    intro:
+      'Wenn Android oder Google Play bei der Geräteanmeldung nicht antwortet, wartet LX nicht mehr endlos. Nach spätestens 20 Sekunden seht ihr die konkrete Ursache.',
+    highlights: [
+      {
+        id: 'native-registration-watchdog',
+        title: 'Kein endloses Verbinden',
+        description:
+          'Der Zeitwächter läuft jetzt unabhängig vom internen Android-Aufruf.'
+      },
+      {
+        id: 'native-registration-result',
+        title: 'Klare Rückmeldung',
+        description:
+          'Die Anmeldung ist entweder erfolgreich oder nennt nach spätestens 20 Sekunden den nächsten sinnvollen Prüfschritt.'
+      },
+      {
+        id: 'stuck-plugin-test',
+        title: 'Festhängen automatisch getestet',
+        description:
+          'Ein neuer Test bildet einen nativen Aufruf nach, der überhaupt nicht antwortet.'
+      },
+      {
+        id: 'unchanged-family-data',
+        title: 'Familiendaten bleiben unberührt',
+        description:
+          'Die Korrektur betrifft ausschließlich die Android-Geräteanmeldung.'
+      }
+    ],
+    closing:
+      'Die vorhandene App bitte direkt auf Version 1.7.3 aktualisieren; vorheriges Löschen ist nicht nötig.'
+  },
   '1.7.2': {
     version: '1.7.2',
     eyebrow: 'Android-Push klar erkannt',
