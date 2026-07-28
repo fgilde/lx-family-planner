@@ -26,6 +26,10 @@ const PROTECTED_TABLES = [
   },
   { name: 'calendar_subscriptions', key: ['id'] },
   { name: 'integrations', key: ['family_id', 'provider'] },
+  {
+    name: 'integration_sync_items',
+    key: ['family_id', 'provider', 'item_type', 'local_id']
+  },
   { name: 'family_relationships', key: ['id'] },
   { name: 'shared_family_events', key: ['id'] },
   {

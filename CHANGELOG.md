@@ -2,6 +2,37 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.6.0] – 2026-07-28
+
+### Family Cloud
+
+- optionale Nextcloud-Anbindung in der Elternzentrale
+- konfliktbewusste Zwei-Wege-Synchronisation für den Familienkalender
+- stabile Zuordnung von lokalen und entfernten Terminen einschließlich
+  Änderungen und Löschungen
+- frei wählbarer Nextcloud-Kalender und Standardprofil für externe Termine
+- getrennte Option für Termine aus „Zuhause Oma & Opa“
+- eigener Familienordner über WebDAV
+- manuelle und tägliche, familiengetrennte AES-256-GCM-Backups in Nextcloud
+- Zugang ausschließlich über ein widerrufbares App-Passwort; der Schlüssel
+  bleibt verschlüsselt im Backend
+
+### Docker und Proxmox
+
+- optionales Nextcloud-34-Profil mit MariaDB, Redis und Cron
+- sichere Aktivierung über `Nextcloud-Aktivieren.cmd`,
+  `scripts/nextcloud-enable.sh` oder `lx-family nextcloud`
+- zufällige Kennwörter und automatisch ergänzte vertrauenswürdige Heimnetz-
+  Adressen
+- Nextcloud-Daten liegen in unabhängigen Docker-Volumes und bleiben bei
+  normalen LX-Updates erhalten
+
+### Zuverlässigkeit
+
+- neue Datenbankmigration für dauerhafte Cloud-Synchronisationszuordnungen
+- Konflikttest, DAV-Dateitest und Löschabgleich in der automatischen Testsuite
+- Update-Integritätsprüfung umfasst jetzt auch Cloud-Zuordnungen
+
 ## [1.5.0] – 2026-07-28
 
 ### Proxmox VE

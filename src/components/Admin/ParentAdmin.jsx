@@ -35,6 +35,7 @@ import {
 } from '../../utils/imageFallback';
 import GotifySettings from './GotifySettings';
 import HomeAssistantSettings from './HomeAssistantSettings';
+import NextcloudSettings from './NextcloudSettings';
 import ProblemReportsPanel from './ProblemReportsPanel';
 import WebPushSettings from './WebPushSettings';
 
@@ -514,6 +515,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <WebPushSettings />
         <GotifySettings />
         <HomeAssistantSettings />
+        <NextcloudSettings />
         <ProblemReportsPanel />
 
         <section className="admin-panel admin-media-panel">

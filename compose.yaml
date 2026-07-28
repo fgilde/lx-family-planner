@@ -32,3 +32,125 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+
+  nextcloud-db:
+    image: mariadb:11.4
+    profiles: ["nextcloud"]
+    restart: unless-stopped
+    command:
+      - --transaction-isolation=READ-COMMITTED
+      - --binlog-format=ROW
+    environment:
+      MARIADB_DATABASE: nextcloud
+      MARIADB_USER: nextcloud
+      MARIADB_PASSWORD: "${NEXTCLOUD_DB_PASSWORD:-disabled-profile}"
+      MARIADB_ROOT_PASSWORD: "${NEXTCLOUD_DB_ROOT_PASSWORD:-disabled-profile}"
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - nextcloud-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  nextcloud-redis:
+    image: redis:7-alpine
+    profiles: ["nextcloud"]
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - "${NEXTCLOUD_REDIS_PASSWORD:-disabled-profile}"
+    volumes:
+      - nextcloud-redis:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "$${NEXTCLOUD_REDIS_PASSWORD}" ping | grep PONG
+      interval: 10s
+      timeout: 4s
+      retries: 10
+    environment:
+      NEXTCLOUD_REDIS_PASSWORD: "${NEXTCLOUD_REDIS_PASSWORD:-disabled-profile}"
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  nextcloud:
+    image: nextcloud:34-apache
+    profiles: ["nextcloud"]
+    restart: unless-stopped
+    depends_on:
+      nextcloud-db:
+        condition: service_healthy
+      nextcloud-redis:
+        condition: service_healthy
+    ports:
+      - "${NEXTCLOUD_PORT:-8080}:80"
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: "${NEXTCLOUD_DB_PASSWORD:-disabled-profile}"
+      REDIS_HOST: nextcloud-redis
+      REDIS_HOST_PASSWORD: "${NEXTCLOUD_REDIS_PASSWORD:-disabled-profile}"
+      NEXTCLOUD_ADMIN_USER: "${NEXTCLOUD_ADMIN_USER:-familyadmin}"
+      NEXTCLOUD_ADMIN_PASSWORD: "${NEXTCLOUD_ADMIN_PASSWORD:-disabled-profile}"
+      NEXTCLOUD_TRUSTED_DOMAINS: "${NEXTCLOUD_TRUSTED_DOMAINS:-localhost nextcloud}"
+      PHP_MEMORY_LIMIT: "${NEXTCLOUD_PHP_MEMORY_LIMIT:-512M}"
+      PHP_UPLOAD_LIMIT: "${NEXTCLOUD_PHP_UPLOAD_LIMIT:-2G}"
+      TZ: "${TZ:-Europe/Berlin}"
+    volumes:
+      - nextcloud-html:/var/www/html
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://127.0.0.1/status.php | grep -q '"installed":true'
+      interval: 20s
+      timeout: 8s
+      start_period: 90s
+      retries: 15
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  nextcloud-cron:
+    image: nextcloud:34-apache
+    profiles: ["nextcloud"]
+    restart: unless-stopped
+    entrypoint: /cron.sh
+    depends_on:
+      nextcloud:
+        condition: service_healthy
+    volumes:
+      - nextcloud-html:/var/www/html
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  nextcloud-db:
+  nextcloud-redis:
+  nextcloud-html:

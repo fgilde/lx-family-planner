@@ -206,6 +206,25 @@ database.exec(`
     PRIMARY KEY (family_id, provider)
   );
 
+  CREATE TABLE IF NOT EXISTS integration_sync_items (
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    item_type TEXT NOT NULL,
+    local_id TEXT NOT NULL,
+    remote_href TEXT NOT NULL,
+    remote_etag TEXT NOT NULL DEFAULT '',
+    local_hash TEXT NOT NULL DEFAULT '',
+    remote_hash TEXT NOT NULL DEFAULT '',
+    last_synced_at INTEGER NOT NULL,
+    PRIMARY KEY (family_id, provider, item_type, local_id),
+    UNIQUE(family_id, provider, item_type, remote_href)
+  );
+
+  CREATE INDEX IF NOT EXISTS integration_sync_items_remote_idx
+    ON integration_sync_items(
+      family_id, provider, item_type, remote_href
+    );
+
   CREATE TABLE IF NOT EXISTS family_relationships (
     id TEXT PRIMARY KEY,
     requester_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
@@ -443,6 +462,28 @@ applySchemaMigration(6, 'Zuverlässige Terminerinnerungen', () => {
     );
     CREATE INDEX IF NOT EXISTS event_reminder_deliveries_cleanup_idx
       ON event_reminder_deliveries(delivered_at);
+  `);
+});
+
+applySchemaMigration(7, 'Stabile Synchronisationszuordnung für Cloud-Dienste', () => {
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS integration_sync_items (
+      family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL,
+      item_type TEXT NOT NULL,
+      local_id TEXT NOT NULL,
+      remote_href TEXT NOT NULL,
+      remote_etag TEXT NOT NULL DEFAULT '',
+      local_hash TEXT NOT NULL DEFAULT '',
+      remote_hash TEXT NOT NULL DEFAULT '',
+      last_synced_at INTEGER NOT NULL,
+      PRIMARY KEY (family_id, provider, item_type, local_id),
+      UNIQUE(family_id, provider, item_type, remote_href)
+    );
+    CREATE INDEX IF NOT EXISTS integration_sync_items_remote_idx
+      ON integration_sync_items(
+        family_id, provider, item_type, remote_href
+      );
   `);
 });
 
@@ -2295,6 +2336,23 @@ export function getIntegration(familyId, provider) {
   };
 }
 
+export function listIntegrationsByProvider(provider) {
+  return database
+    .prepare(`
+      SELECT * FROM integrations
+      WHERE provider = ?
+      ORDER BY updated_at ASC
+    `)
+    .all(provider)
+    .map(row => ({
+      familyId: row.family_id,
+      provider: row.provider,
+      config: JSON.parse(row.config_json || '{}'),
+      secretEncrypted: row.secret_encrypted,
+      updatedAt: row.updated_at
+    }));
+}
+
 export function saveIntegration(familyId, provider, config, secretEncrypted) {
   const now = Date.now();
   database
@@ -2313,6 +2371,12 @@ export function saveIntegration(familyId, provider, config, secretEncrypted) {
 }
 
 export function deleteIntegration(familyId, provider) {
+  database
+    .prepare(`
+      DELETE FROM integration_sync_items
+      WHERE family_id = ? AND provider = ?
+    `)
+    .run(familyId, provider);
   const changes = database
     .prepare(`
       DELETE FROM integrations
@@ -2321,6 +2385,105 @@ export function deleteIntegration(familyId, provider) {
     .run(familyId, provider).changes;
   if (changes > 0) bumpFamilyVersion(familyId);
   return changes > 0;
+}
+
+function mapIntegrationSyncItem(row) {
+  if (!row) return null;
+  return {
+    familyId: row.family_id,
+    provider: row.provider,
+    itemType: row.item_type,
+    localId: row.local_id,
+    remoteHref: row.remote_href,
+    remoteEtag: row.remote_etag,
+    localHash: row.local_hash,
+    remoteHash: row.remote_hash,
+    lastSyncedAt: row.last_synced_at
+  };
+}
+
+export function listIntegrationSyncItems(familyId, provider, itemType) {
+  return database
+    .prepare(`
+      SELECT * FROM integration_sync_items
+      WHERE family_id = ? AND provider = ? AND item_type = ?
+      ORDER BY last_synced_at ASC
+    `)
+    .all(familyId, provider, itemType)
+    .map(mapIntegrationSyncItem);
+}
+
+export function saveIntegrationSyncItem(
+  familyId,
+  provider,
+  itemType,
+  {
+    localId,
+    remoteHref,
+    remoteEtag = '',
+    localHash = '',
+    remoteHash = ''
+  }
+) {
+  const now = Date.now();
+  database
+    .prepare(`
+      INSERT INTO integration_sync_items(
+        family_id, provider, item_type, local_id, remote_href,
+        remote_etag, local_hash, remote_hash, last_synced_at
+      )
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(family_id, provider, item_type, local_id) DO UPDATE SET
+        remote_href = excluded.remote_href,
+        remote_etag = excluded.remote_etag,
+        local_hash = excluded.local_hash,
+        remote_hash = excluded.remote_hash,
+        last_synced_at = excluded.last_synced_at
+    `)
+    .run(
+      familyId,
+      provider,
+      itemType,
+      localId,
+      remoteHref,
+      remoteEtag,
+      localHash,
+      remoteHash,
+      now
+    );
+  return mapIntegrationSyncItem(
+    database
+      .prepare(`
+        SELECT * FROM integration_sync_items
+        WHERE family_id = ? AND provider = ?
+          AND item_type = ? AND local_id = ?
+      `)
+      .get(familyId, provider, itemType, localId)
+  );
+}
+
+export function deleteIntegrationSyncItem(
+  familyId,
+  provider,
+  itemType,
+  localId
+) {
+  return database
+    .prepare(`
+      DELETE FROM integration_sync_items
+      WHERE family_id = ? AND provider = ?
+        AND item_type = ? AND local_id = ?
+    `)
+    .run(familyId, provider, itemType, localId).changes > 0;
+}
+
+export function deleteIntegrationSyncItems(familyId, provider) {
+  return database
+    .prepare(`
+      DELETE FROM integration_sync_items
+      WHERE family_id = ? AND provider = ?
+    `)
+    .run(familyId, provider).changes;
 }
 
 function mapProblemReport(row) {

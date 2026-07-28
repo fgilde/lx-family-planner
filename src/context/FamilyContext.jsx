@@ -61,6 +61,12 @@ const EMPTY_INTEGRATIONS = {
     connected: false,
     enabled: false,
     selectedEntities: []
+  },
+  nextcloud: {
+    connected: false,
+    enabled: false,
+    eventSyncEnabled: false,
+    backupEnabled: false
   }
 };
 
@@ -1948,6 +1954,132 @@ export function FamilyProvider({ children }) {
       return data.entities || [];
     }, 'Gerät konnte nicht gesteuert werden'), [withActionError]);
 
+  const setupNextcloud = useCallback(payload =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/nextcloud/setup', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      await refreshBootstrap({ silent: true });
+      showToast(
+        'Family Cloud verbunden',
+        'Kalender, Familienordner und sichere Backups sind bereit.',
+        'success'
+      );
+      return data;
+    }, 'Nextcloud konnte nicht verbunden werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
+  const updateNextcloud = useCallback(changes =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/nextcloud', {
+        method: 'PATCH',
+        body: JSON.stringify(changes)
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Family Cloud gespeichert',
+        'Die Nextcloud-Regeln sind jetzt aktiv.',
+        'success'
+      );
+      return data.integration;
+    }, 'Nextcloud-Einstellungen konnten nicht gespeichert werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const testNextcloud = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/nextcloud/test', {
+        method: 'POST'
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast('Family Cloud erreichbar', data.message, 'success');
+      return data;
+    }, 'Nextcloud antwortet nicht'), [showToast, withActionError]);
+
+  const syncNextcloud = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/nextcloud/sync', {
+        method: 'POST'
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      await refreshBootstrap({ silent: true });
+      const changed = Object.values(data.stats || {})
+        .reduce((sum, value) => sum + Number(value || 0), 0);
+      showToast(
+        'Kalender synchronisiert',
+        changed
+          ? `${changed} Änderungen wurden sicher abgeglichen.`
+          : 'LX Family und Nextcloud waren bereits auf demselben Stand.',
+        'success'
+      );
+      return data;
+    }, 'Nextcloud-Kalender konnte nicht synchronisiert werden'), [
+    refreshBootstrap,
+    showToast,
+    withActionError
+  ]);
+
+  const backupToNextcloud = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/nextcloud/backup', {
+        method: 'POST'
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Cloud-Sicherung erstellt',
+        `${data.backup?.fileName || 'Das Familienarchiv'} liegt verschlüsselt in Nextcloud.`,
+        'success'
+      );
+      return data;
+    }, 'Cloud-Sicherung konnte nicht erstellt werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const disconnectNextcloud = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/nextcloud', {
+        method: 'DELETE'
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        nextcloud: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Family Cloud getrennt',
+        'Lokale Familieneinträge bleiben vollständig erhalten.',
+        'info'
+      );
+      return true;
+    }), [showToast, withActionError]);
+
   const addChatMessage = useCallback(message =>
     withActionError(() => createResource('chatMessages', {
       id: makeId('message'),
@@ -2431,6 +2563,13 @@ export function FamilyProvider({ children }) {
     disconnectHomeAssistant,
     refreshHomeAssistantStates,
     callHomeAssistantAction,
+    nextcloudIntegration: integrations.nextcloud,
+    setupNextcloud,
+    updateNextcloud,
+    testNextcloud,
+    syncNextcloud,
+    backupToNextcloud,
+    disconnectNextcloud,
     webPush,
     refreshWebPushStatus,
     enableWebPush,

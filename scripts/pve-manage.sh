@@ -59,6 +59,7 @@ LX Family Planner – Verwaltung
   lx-family stop             Anwendung anhalten
   lx-family start            Anwendung starten
   lx-family domain [URL]     Öffentliche Adresse anzeigen oder setzen
+  lx-family nextcloud        Nextcloud sicher aktivieren und mitstarten
   lx-family doctor           Docker, Speicher und API prüfen
   lx-family config           Lokale Einstellungen bearbeiten
   lx-family help             Diese Übersicht anzeigen
@@ -186,6 +187,10 @@ main() {
       ;;
     domain)
       set_domain "${2:-}"
+      ;;
+    nextcloud)
+      cd "$APP_DIR"
+      bash scripts/nextcloud-enable.sh
       ;;
     doctor)
       run_doctor

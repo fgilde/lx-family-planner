@@ -15899,6 +15899,643 @@ body:has(.modal-backdrop) .problem-report-launcher {
   }
 }
 
+/* Family Cloud · Nextcloud */
+.nextcloud-settings-panel {
+  grid-column: 1 / -1;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 93% -8%,
+      color-mix(in srgb, #1d9e91 18%, transparent),
+      transparent 35%
+    ),
+    linear-gradient(
+      128deg,
+      color-mix(in srgb, var(--bg-card) 94%, #0b6f72),
+      var(--bg-card) 64%
+    );
+}
+
+.nextcloud-settings-panel::before {
+  position: absolute;
+  z-index: -1;
+  top: -72px;
+  right: 8%;
+  width: 190px;
+  height: 190px;
+  border: 1px solid color-mix(in srgb, #31a99e 15%, transparent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 28px color-mix(in srgb, #31a99e 5%, transparent),
+    0 0 0 64px color-mix(in srgb, #31a99e 3%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.nextcloud-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.nextcloud-heading h2 {
+  margin: 3px 0 2px;
+  color: var(--text-main);
+  font-size: 1.42rem;
+}
+
+.nextcloud-heading p {
+  max-width: 690px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .72rem;
+  line-height: 1.55;
+}
+
+.nextcloud-orbit {
+  position: relative;
+  width: 51px;
+  height: 51px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, #2aa99e 42%, var(--border-color));
+  border-radius: 17px;
+  color: #ecfffd;
+  background: linear-gradient(145deg, #075b61, #20a394);
+  box-shadow: 0 13px 28px rgba(4, 87, 88, .24);
+}
+
+.nextcloud-orbit i {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--bg-card);
+  border-radius: 50%;
+  background: #f4b942;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #f4b942 17%, transparent);
+}
+
+.nextcloud-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  font-size: .65rem;
+  font-weight: 850;
+  backdrop-filter: blur(10px);
+}
+
+.nextcloud-state > i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9aa6a5;
+}
+
+.nextcloud-state.online {
+  color: color-mix(in srgb, #159a7d 78%, var(--text-main));
+  border-color: color-mix(in srgb, #22ae8c 38%, var(--border-color));
+  background: color-mix(in srgb, #22ae8c 9%, var(--bg-card));
+}
+
+.nextcloud-state.online > i {
+  background: #21b78f;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #21b78f 17%, transparent);
+}
+
+.nextcloud-connect,
+.nextcloud-workspace {
+  display: grid;
+  gap: 15px;
+}
+
+.nextcloud-mode-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.nextcloud-mode-picker > button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--bg-subtle) 72%, var(--bg-card));
+  text-align: left;
+  cursor: pointer;
+}
+
+.nextcloud-mode-picker > button.active {
+  border-color: color-mix(in srgb, #1f9f93 52%, var(--border-color));
+  background: color-mix(in srgb, #1f9f93 9%, var(--bg-card));
+  box-shadow: inset 3px 0 #1f9f93;
+}
+
+.nextcloud-mode-picker > button > svg:first-child {
+  color: #198d84;
+}
+
+.nextcloud-mode-picker > button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.nextcloud-mode-picker strong {
+  font-size: .74rem;
+}
+
+.nextcloud-mode-picker small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: .61rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nextcloud-mode-picker > button > svg:last-child {
+  color: #15967f;
+}
+
+.nextcloud-security-note,
+.nextcloud-error-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.nextcloud-security-note {
+  color: color-mix(in srgb, #14796f 76%, var(--text-main));
+  border: 1px solid color-mix(in srgb, #2c9f93 26%, var(--border-color));
+  background: color-mix(in srgb, #2c9f93 7%, var(--bg-card));
+}
+
+.nextcloud-security-note span,
+.nextcloud-error-note span {
+  display: grid;
+  gap: 2px;
+  color: var(--text-muted);
+  font-size: .64rem;
+  line-height: 1.45;
+}
+
+.nextcloud-security-note strong,
+.nextcloud-error-note strong {
+  color: var(--text-main);
+  font-size: .7rem;
+}
+
+.nextcloud-form-grid,
+.nextcloud-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.nextcloud-form-grid > label,
+.nextcloud-settings-grid > label {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.nextcloud-form-grid label > span,
+.nextcloud-settings-grid label > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-main);
+  font-size: .67rem;
+  font-weight: 850;
+}
+
+.nextcloud-form-grid input,
+.nextcloud-settings-grid input,
+.nextcloud-settings-grid select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  font: inherit;
+  font-size: .72rem;
+  outline: none;
+}
+
+.nextcloud-form-grid input:focus,
+.nextcloud-settings-grid input:focus,
+.nextcloud-settings-grid select:focus {
+  border-color: #249c91;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #249c91 13%, transparent);
+}
+
+.nextcloud-form-grid small {
+  color: var(--text-muted);
+  font-size: .59rem;
+}
+
+.nextcloud-form-grid a {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: color-mix(in srgb, #168b82 80%, var(--text-main));
+  font-size: .6rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.nextcloud-folder-field {
+  grid-column: 1 / -1;
+}
+
+.nextcloud-connect-button {
+  min-height: 45px;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 17px;
+  border: 0;
+  border-radius: 13px;
+  color: #f4fffe;
+  background: linear-gradient(135deg, #08676a, #1a9d8d);
+  box-shadow: 0 11px 25px rgba(5, 102, 102, .22);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.nextcloud-account-strip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, #269d91 28%, var(--border-color));
+  border-radius: 17px;
+  background: color-mix(in srgb, #269d91 7%, var(--bg-card));
+}
+
+.nextcloud-account-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #ecfffd;
+  background: linear-gradient(145deg, #075d63, #20a293);
+}
+
+.nextcloud-account-strip > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+}
+
+.nextcloud-account-strip small {
+  color: var(--text-muted);
+  font-size: .58rem;
+  font-weight: 750;
+}
+
+.nextcloud-account-strip strong {
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: .82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nextcloud-account-strip em {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: .6rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nextcloud-account-strip > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  font-size: .65rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.nextcloud-error-note {
+  color: #cb7130;
+  border: 1px solid color-mix(in srgb, #d97832 35%, var(--border-color));
+  background: color-mix(in srgb, #e28740 10%, var(--bg-card));
+}
+
+.nextcloud-capability-grid,
+.nextcloud-pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.nextcloud-capability-grid > article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--bg-subtle) 72%, var(--bg-card));
+}
+
+.nextcloud-capability-grid > article > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #168d83;
+  background: color-mix(in srgb, #269d91 12%, var(--bg-card));
+}
+
+.nextcloud-capability-grid article > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.nextcloud-capability-grid strong {
+  font-size: .72rem;
+}
+
+.nextcloud-capability-grid small {
+  color: var(--text-muted);
+  font-size: .6rem;
+}
+
+.nextcloud-switch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.nextcloud-switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.nextcloud-switch i {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 24%, var(--bg-subtle));
+  transition: background .2s ease;
+}
+
+.nextcloud-switch i::after {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+  content: "";
+  transition: transform .2s ease;
+}
+
+.nextcloud-switch input:checked + i {
+  background: #169888;
+}
+
+.nextcloud-switch input:checked + i::after {
+  transform: translateX(18px);
+}
+
+.nextcloud-grandparents-option {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--bg-subtle) 64%, var(--bg-card));
+  cursor: pointer;
+}
+
+.nextcloud-grandparents-option > span:nth-of-type(1) {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #b16f25;
+  background: color-mix(in srgb, #d18b35 12%, var(--bg-card));
+}
+
+.nextcloud-grandparents-option > span:last-child {
+  display: grid;
+  gap: 2px;
+  color: var(--text-muted);
+  font-size: .61rem;
+  line-height: 1.45;
+}
+
+.nextcloud-grandparents-option strong {
+  color: var(--text-main);
+  font-size: .68rem;
+}
+
+.nextcloud-pulse-grid > article {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: #178e83;
+  background: var(--bg-card);
+}
+
+.nextcloud-pulse-grid article > div {
+  display: grid;
+}
+
+.nextcloud-pulse-grid small {
+  color: var(--text-muted);
+  font-size: .57rem;
+}
+
+.nextcloud-pulse-grid strong {
+  color: var(--text-main);
+  font-size: .68rem;
+}
+
+.nextcloud-sync-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.nextcloud-sync-stats > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  font-size: .58rem;
+  font-weight: 750;
+}
+
+.nextcloud-sync-stats strong {
+  color: #168e83;
+}
+
+.nextcloud-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nextcloud-actions > button,
+.nextcloud-connection-details button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  font-size: .65rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.nextcloud-actions > .admin-primary-button {
+  color: var(--on-primary, #fff);
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.nextcloud-connect-button:disabled,
+.nextcloud-actions button:disabled,
+.nextcloud-connection-details button:disabled {
+  opacity: .58;
+  cursor: wait;
+}
+
+.nextcloud-connection-details {
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.nextcloud-connection-details summary {
+  width: fit-content;
+  padding-top: 12px;
+  font-size: .61rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nextcloud-connection-details > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+}
+
+.nextcloud-connection-details button.danger {
+  color: #bb433d;
+  border-color: color-mix(in srgb, #c54d46 32%, var(--border-color));
+  background: color-mix(in srgb, #c54d46 7%, var(--bg-card));
+}
+
+@media (max-width: 760px) {
+  .nextcloud-settings-panel {
+    padding: 17px;
+  }
+
+  .nextcloud-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .nextcloud-state {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .nextcloud-mode-picker,
+  .nextcloud-form-grid,
+  .nextcloud-settings-grid,
+  .nextcloud-capability-grid,
+  .nextcloud-pulse-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nextcloud-folder-field {
+    grid-column: auto;
+  }
+
+  .nextcloud-account-strip {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .nextcloud-account-strip > a {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nextcloud-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .nextcloud-actions > button,
+  .nextcloud-connect-button {
+    width: 100%;
+  }
+}
+
 /* Belohnungen: klare Piktogramme statt einer beliebigen Emoji-Wolke */
 .visually-hidden {
   position: absolute !important;

@@ -12,6 +12,9 @@
 - Elternzentrale und kindgerechte Medienlinks
 - Familiennetz und Beziehungen zwischen Familienkonten
 - Bring!-, ICS-, Gotify- und profilgebundene Web-Push-Anbindung
+- Home-Assistant-Dashboard mit Profilfreigaben und sicheren Aktionen
+- optionale Nextcloud-Family-Cloud mit Zwei-Wege-Kalender, Familienordner und
+  verschlüsselten, familiengetrennten Sicherungen
 - profilgetrenntes Meldungszentrum mit gelesen/ungelesen und 90-Tage-Verlauf
 - persönlicher Familien-Posteingang mit live erzeugtem Tagesüberblick
 - verschlüsselte, stündlich aktualisierte ICS-Kalenderabonnements mit
@@ -35,9 +38,10 @@
    „Start“ ordnet der Server den Telegram-Chat dem Profil zu. Benachrichtigungen,
    Ruhezeiten und Inhalte bleiben pro Profil steuerbar.
 
-3. **Automatisierte Sicherung samt Wiederherstellungsprobe**  
-   Backups regelmäßig erstellen, auf ein zweites Ziel kopieren und in einer
-   isolierten Testdatenbank automatisch wiederherstellen.
+3. **Geführte Cloud-Wiederherstellung**
+   Die bereits automatisch in Nextcloud gespeicherten Familienarchive
+   auswählen, prüfen und zunächst in einer isolierten Testdatenbank
+   wiederherstellen.
 
 4. **Offline-fähige Kernfunktionen**
    Kalender, Einkauf und Aufgaben bleiben ohne Verbindung lesbar. Änderungen
@@ -72,7 +76,8 @@
 - Taschengeld mit freigegebenen Sparzielen
 - Familienalbum aus erledigten Ausflügen und besonderen Momenten
 - saisonale Haushalts-Checklisten
-- bidirektionale CalDAV-/Google-/Outlook-Synchronisation mit Schreibzugriff
+- direkte Google-/Outlook-Kontokopplung zusätzlich zum vorhandenen
+  CalDAV-/Nextcloud-Schreibzugriff
 - barrierearme Großelternansicht mit besonders großen Bedienelementen
 
 ## Produktprinzipien

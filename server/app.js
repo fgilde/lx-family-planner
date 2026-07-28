@@ -76,6 +76,7 @@ import {
   listEventReminderDeliveries,
   listEnabledCalendarSubscriptions,
   listFamilyRelationships,
+  listIntegrationsByProvider,
   listInboxNotifications,
   listProblemReports,
   listPushSubscriptions,
@@ -106,6 +107,15 @@ import {
   upsertRecords,
   verifySecret
 } from './database.js';
+import {
+  ensureNextcloudFolder,
+  inspectNextcloud,
+  nextcloudBrowserFolderUrl,
+  normalizeNextcloudBaseUrl,
+  normalizeNextcloudFolder,
+  syncNextcloudEvents,
+  uploadNextcloudFile
+} from './nextcloud.js';
 
 const SESSION_COOKIE = 'lx_session';
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30;
@@ -138,6 +148,10 @@ const CALENDAR_SYNC_INTERVAL_MS = Math.max(
 ) * 60 * 1000;
 const CALENDAR_FETCH_TIMEOUT_MS = 12_000;
 const CALENDAR_MAX_BYTES = 2 * 1024 * 1024;
+const NEXTCLOUD_SYNC_INTERVAL_MS = Math.max(
+  5,
+  Number(process.env.NEXTCLOUD_SYNC_INTERVAL_MINUTES || 15)
+) * 60 * 1000;
 const EVENT_REMINDER_INTERVAL_MS = Math.max(
   15,
   Number(process.env.EVENT_REMINDER_INTERVAL_SECONDS || 30)
@@ -165,6 +179,8 @@ const CORS_ALLOWED_ORIGINS = new Set([
 ]);
 const pendingBringLogins = new Map();
 const authAttempts = new Map();
+const nextcloudSyncLocks = new Map();
+const nextcloudBackupLocks = new Map();
 
 const ROLE_TYPES = new Set([
   'adult',
@@ -1793,10 +1809,19 @@ async function selectedHomeAssistantStates(familyId, member) {
     .filter(Boolean);
 }
 
+function safeNextcloudBrowserFolderUrl(publicBaseUrl, folder) {
+  try {
+    return nextcloudBrowserFolderUrl(publicBaseUrl, folder);
+  } catch {
+    return '';
+  }
+}
+
 function integrationStatus(familyId, member = null) {
   const bring = getIntegration(familyId, 'bring');
   const gotify = getIntegration(familyId, 'gotify');
   const homeAssistant = getIntegration(familyId, 'home-assistant');
+  const nextcloud = getIntegration(familyId, 'nextcloud');
   return {
     bring: bring
       ? {
@@ -1847,8 +1872,261 @@ function integrationStatus(familyId, member = null) {
           connected: false,
           enabled: false,
           selectedEntities: []
+        },
+    nextcloud: nextcloud
+      ? (() => {
+          const config = nextcloud.config || {};
+          const adultView = !member || isAdultMember(member);
+          return {
+            connected: true,
+            enabled: config.enabled !== false,
+            eventSyncEnabled: config.eventSyncEnabled !== false,
+            backupEnabled: Boolean(config.backupEnabled),
+            lastSyncAt: Number(config.lastSyncAt || 0),
+            lastSyncError: cleanText(config.lastSyncError, '', 300),
+            lastSyncStats: ensureObject(config.lastSyncStats),
+            lastBackupAt: Number(config.lastBackupAt || 0),
+            lastBackupError: cleanText(config.lastBackupError, '', 300),
+            backupHour: Math.max(
+              0,
+              Math.min(23, Number(config.backupHour ?? 3))
+            ),
+            updatedAt: nextcloud.updatedAt,
+            ...(adultView
+              ? {
+                  baseUrl: config.baseUrl || '',
+                  publicBaseUrl: config.publicBaseUrl || config.baseUrl || '',
+                  host: config.host || '',
+                  userId: config.userId || '',
+                  displayName: config.displayName || config.userId || '',
+                  nextcloudVersion: config.nextcloudVersion || '',
+                  calendars: Array.isArray(config.calendars)
+                    ? config.calendars
+                    : [],
+                  eventCalendarHref: config.eventCalendarHref || '',
+                  defaultMemberId: config.defaultMemberId || 'all',
+                  includeGrandparents: Boolean(config.includeGrandparents),
+                  folder: config.folder || 'LX Family',
+                  browserFolderUrl: config.publicBaseUrl
+                    ? safeNextcloudBrowserFolderUrl(
+                        config.publicBaseUrl,
+                        config.folder || 'LX Family'
+                      )
+                    : ''
+                }
+              : {})
+          };
+        })()
+      : {
+          connected: false,
+          enabled: false,
+          eventSyncEnabled: false,
+          backupEnabled: false,
+          lastSyncAt: 0,
+          lastSyncError: '',
+          lastBackupAt: 0,
+          lastBackupError: ''
         }
   };
+}
+
+function nextcloudConnection(integration) {
+  const secret = decryptJson(integration.secretEncrypted);
+  return {
+    baseUrl: integration.config.baseUrl,
+    username: secret.username,
+    appPassword: secret.appPassword,
+    appVersion: APP_VERSION
+  };
+}
+
+function nextcloudBackupBundle(familyId) {
+  const family = getFamily(familyId);
+  const resources = Object.fromEntries(
+    [...RECORD_TYPES].map(type => [type, listRecords(familyId, type)])
+  );
+  return {
+    format: 'lx-family-cloud-backup',
+    formatVersion: 1,
+    appVersion: APP_VERSION,
+    createdAt: new Date().toISOString(),
+    family,
+    members: getMembers(familyId),
+    resources,
+    calendarSubscriptions: listCalendarSubscriptions(familyId)
+  };
+}
+
+async function performNextcloudSyncUnlocked(familyId, existing = null) {
+  const integration = existing || getIntegration(familyId, 'nextcloud');
+  if (
+    !integration ||
+    integration.config?.enabled === false ||
+    integration.config?.eventSyncEnabled === false
+  ) {
+    return null;
+  }
+  try {
+    const stats = await syncNextcloudEvents({
+      familyId,
+      connection: nextcloudConnection(integration),
+      calendarHref: integration.config.eventCalendarHref,
+      defaultMemberId: integration.config.defaultMemberId || 'all',
+      includeGrandparents: Boolean(
+        integration.config.includeGrandparents
+      ),
+      timeZone: process.env.TZ || 'Europe/Berlin',
+      memberIds: getMembers(familyId).map(member => member.id)
+    });
+    saveIntegration(
+      familyId,
+      'nextcloud',
+      {
+        ...integration.config,
+        lastSyncAt: Date.now(),
+        lastSyncError: '',
+        lastSyncStats: stats
+      },
+      integration.secretEncrypted
+    );
+    return stats;
+  } catch (error) {
+    saveIntegration(
+      familyId,
+      'nextcloud',
+      {
+        ...integration.config,
+        lastSyncAt: Date.now(),
+        lastSyncError: cleanText(
+          error.message,
+          'Nextcloud-Synchronisation fehlgeschlagen.',
+          300
+        )
+      },
+      integration.secretEncrypted
+    );
+    throw error;
+  }
+}
+
+async function performNextcloudSync(familyId, existing = null) {
+  const running = nextcloudSyncLocks.get(familyId);
+  if (running) return running;
+  const operation = performNextcloudSyncUnlocked(familyId, existing);
+  nextcloudSyncLocks.set(familyId, operation);
+  try {
+    return await operation;
+  } finally {
+    if (nextcloudSyncLocks.get(familyId) === operation) {
+      nextcloudSyncLocks.delete(familyId);
+    }
+  }
+}
+
+async function performNextcloudBackupUnlocked(familyId, existing = null) {
+  const integration = existing || getIntegration(familyId, 'nextcloud');
+  if (!integration || integration.config?.enabled === false) {
+    return null;
+  }
+  try {
+    const bundle = nextcloudBackupBundle(familyId);
+    const encrypted = encryptJson(bundle);
+    const date = new Date().toISOString().replace(/[:.]/g, '-');
+    const baseName = `lx-family-${date}`;
+    const folder = `${integration.config.folder || 'LX Family'}/Backups`;
+    const connection = nextcloudConnection(integration);
+    const backup = await uploadNextcloudFile(
+      connection,
+      integration.config.userId,
+      folder,
+      `${baseName}.lxbackup`,
+      Buffer.from(encrypted, 'utf8'),
+      'application/octet-stream'
+    );
+    const manifest = {
+      format: bundle.format,
+      formatVersion: bundle.formatVersion,
+      appVersion: APP_VERSION,
+      createdAt: bundle.createdAt,
+      familyId,
+      encrypted: true,
+      encryption: 'AES-256-GCM',
+      file: backup.fileName,
+      sha256: createHash('sha256').update(encrypted).digest('hex')
+    };
+    await uploadNextcloudFile(
+      connection,
+      integration.config.userId,
+      folder,
+      `${baseName}.manifest.json`,
+      Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`, 'utf8'),
+      'application/json; charset=utf-8'
+    );
+    saveIntegration(
+      familyId,
+      'nextcloud',
+      {
+        ...integration.config,
+        lastBackupAt: Date.now(),
+        lastBackupAttemptAt: Date.now(),
+        lastBackupError: ''
+      },
+      integration.secretEncrypted
+    );
+    return { fileName: backup.fileName, createdAt: bundle.createdAt };
+  } catch (error) {
+    saveIntegration(
+      familyId,
+      'nextcloud',
+      {
+        ...integration.config,
+        lastBackupAttemptAt: Date.now(),
+        lastBackupError: cleanText(
+          error.message,
+          'Nextcloud-Sicherung fehlgeschlagen.',
+          300
+        )
+      },
+      integration.secretEncrypted
+    );
+    throw error;
+  }
+}
+
+async function performNextcloudBackup(familyId, existing = null) {
+  const running = nextcloudBackupLocks.get(familyId);
+  if (running) return running;
+  const operation = performNextcloudBackupUnlocked(familyId, existing);
+  nextcloudBackupLocks.set(familyId, operation);
+  try {
+    return await operation;
+  } finally {
+    if (nextcloudBackupLocks.get(familyId) === operation) {
+      nextcloudBackupLocks.delete(familyId);
+    }
+  }
+}
+
+function nextcloudBackupIsDue(integration, now = new Date()) {
+  if (
+    !integration?.config?.backupEnabled ||
+    integration.config?.enabled === false
+  ) {
+    return false;
+  }
+  const wantedHour = Math.max(
+    0,
+    Math.min(23, Number(integration.config.backupHour ?? 3))
+  );
+  const lastBackupAt = Number(integration.config.lastBackupAt || 0);
+  const lastBackupAttemptAt = Number(
+    integration.config.lastBackupAttemptAt || 0
+  );
+  return (
+    now.getHours() >= wantedHour &&
+    now.getTime() - lastBackupAt >= 20 * 60 * 60 * 1000 &&
+    now.getTime() - lastBackupAttemptAt >= 60 * 60 * 1000
+  );
 }
 
 function normalizeGotifyBaseUrl(value) {
@@ -2645,6 +2923,34 @@ export function createApp() {
       reason
     });
   };
+  const nextcloudSyncDebounces = new Map();
+  const queueNextcloudEventSync = familyId => {
+    if (nextcloudSyncDebounces.has(familyId)) {
+      clearTimeout(nextcloudSyncDebounces.get(familyId));
+    }
+    const timer = setTimeout(async () => {
+      nextcloudSyncDebounces.delete(familyId);
+      const integration = getIntegration(familyId, 'nextcloud');
+      if (
+        !integration ||
+        integration.config?.enabled === false ||
+        integration.config?.eventSyncEnabled === false
+      ) {
+        return;
+      }
+      try {
+        await performNextcloudSync(familyId, integration);
+        publishFamilyChange(familyId, 'nextcloud-events');
+      } catch (error) {
+        console.warn(
+          `Direkte Nextcloud-Synchronisation für Familie ${familyId} ist fehlgeschlagen:`,
+          error.message
+        );
+      }
+    }, 2000);
+    timer.unref();
+    nextcloudSyncDebounces.set(familyId, timer);
+  };
   let eventReminderSweepRunning = false;
   app.locals.runEventReminderSweep = async (now = Date.now()) => {
     if (eventReminderSweepRunning) {
@@ -2722,6 +3028,63 @@ export function createApp() {
       return { skipped: false, delivered };
     } finally {
       eventReminderSweepRunning = false;
+    }
+  };
+  let nextcloudSweepRunning = false;
+  app.locals.runNextcloudSweep = async (now = new Date()) => {
+    if (nextcloudSweepRunning) return { skipped: true };
+    nextcloudSweepRunning = true;
+    try {
+      const integrations = listIntegrationsByProvider('nextcloud')
+        .slice(0, 100);
+      for (const integration of integrations) {
+        if (integration.config?.enabled === false) continue;
+        if (integration.config?.eventSyncEnabled !== false) {
+          try {
+            const stats = await performNextcloudSync(
+              integration.familyId,
+              integration
+            );
+            if (
+              stats &&
+              Object.values(stats).some(value => Number(value) > 0)
+            ) {
+              publishFamilyChange(
+                integration.familyId,
+                'nextcloud-events'
+              );
+            }
+          } catch (error) {
+            console.warn(
+              `Nextcloud-Kalender für Familie ${integration.familyId} konnte nicht synchronisiert werden:`,
+              error.message
+            );
+          }
+        }
+        const refreshed =
+          getIntegration(integration.familyId, 'nextcloud') ||
+          integration;
+        if (nextcloudBackupIsDue(refreshed, now)) {
+          try {
+            await performNextcloudBackup(
+              integration.familyId,
+              refreshed
+            );
+            publishFamilyChange(
+              integration.familyId,
+              'nextcloud-backup'
+            );
+          } catch (error) {
+            console.warn(
+              `Nextcloud-Sicherung für Familie ${integration.familyId} ist fehlgeschlagen:`,
+              error.message
+            );
+          }
+        }
+      }
+      return { skipped: false };
+    } finally {
+      nextcloudSweepRunning = false;
     }
   };
   const stopHomeAssistantSocket = familyId => {
@@ -2849,6 +3212,10 @@ export function createApp() {
   };
   app.locals.stopHomeAssistantSockets = () => {
     [...homeAssistantSockets.keys()].forEach(stopHomeAssistantSocket);
+  };
+  app.locals.stopNextcloudSyncDebounces = () => {
+    nextcloudSyncDebounces.forEach(timer => clearTimeout(timer));
+    nextcloudSyncDebounces.clear();
   };
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
@@ -4631,6 +4998,9 @@ export function createApp() {
       notifyMoodCheckin(req, record);
     }
     publishFamilyChange(req.session.familyId, req.params.type);
+    if (req.params.type === 'events') {
+      queueNextcloudEventSync(req.session.familyId);
+    }
     res.status(201).json({
       success: true,
       record,
@@ -4774,6 +5144,9 @@ export function createApp() {
       });
     }
     publishFamilyChange(req.session.familyId, req.params.type);
+    if (req.params.type === 'events') {
+      queueNextcloudEventSync(req.session.familyId);
+    }
     res.json({
       success: true,
       record,
@@ -4822,6 +5195,7 @@ export function createApp() {
     }
     if (existingEvent) {
       notifyCalendarChange(req, existingEvent, { kind: 'deleted' });
+      queueNextcloudEventSync(req.session.familyId);
     }
     publishFamilyChange(req.session.familyId, req.params.type);
     res.json({
@@ -5644,6 +6018,368 @@ export function createApp() {
   });
 
   app.post(
+    '/api/integrations/nextcloud/setup',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const baseUrl = normalizeNextcloudBaseUrl(
+        req.body?.baseUrl,
+        'Interne Nextcloud-Adresse'
+      );
+      const publicBaseUrl = normalizeNextcloudBaseUrl(
+        req.body?.publicBaseUrl || baseUrl,
+        'Nextcloud-Adresse für Browser'
+      );
+      const username = requireText(
+        req.body?.username,
+        'Nextcloud-Benutzer',
+        300
+      );
+      const appPassword = requireText(
+        req.body?.appPassword,
+        'Nextcloud-App-Passwort',
+        1000
+      );
+      const folder = normalizeNextcloudFolder(
+        req.body?.folder || 'LX Family'
+      );
+      const connection = {
+        baseUrl,
+        username,
+        appPassword,
+        appVersion: APP_VERSION
+      };
+      const inspection = await inspectNextcloud(connection);
+      await ensureNextcloudFolder(
+        connection,
+        inspection.userId,
+        folder
+      );
+      const eventCalendars = inspection.calendars.filter(calendar =>
+        calendar.components.includes('VEVENT')
+      );
+      const requestedCalendar = cleanText(
+        req.body?.eventCalendarHref,
+        '',
+        2000
+      );
+      const eventCalendarHref = eventCalendars.some(
+        calendar => calendar.href === requestedCalendar
+      )
+        ? requestedCalendar
+        : eventCalendars[0]?.href || '';
+      const requestedMemberId = cleanText(
+        req.body?.defaultMemberId,
+        'all',
+        100
+      );
+      const defaultMemberId =
+        requestedMemberId === 'all' ||
+        Boolean(getMember(req.session.familyId, requestedMemberId))
+          ? requestedMemberId
+          : 'all';
+      const existing = getIntegration(
+        req.session.familyId,
+        'nextcloud'
+      );
+      const config = {
+        ...(existing?.config || {}),
+        enabled: true,
+        baseUrl,
+        publicBaseUrl,
+        host: new URL(publicBaseUrl).host,
+        userId: inspection.userId,
+        displayName: inspection.displayName,
+        nextcloudVersion: inspection.version,
+        calendars: inspection.calendars,
+        eventCalendarHref,
+        eventSyncEnabled:
+          Boolean(eventCalendarHref) &&
+          req.body?.eventSyncEnabled !== false,
+        defaultMemberId,
+        includeGrandparents: Boolean(req.body?.includeGrandparents),
+        folder,
+        backupEnabled: req.body?.backupEnabled !== false,
+        backupHour: Math.max(
+          0,
+          Math.min(23, Number(req.body?.backupHour ?? 3))
+        ),
+        lastSyncError: '',
+        lastBackupError: ''
+      };
+      saveIntegration(
+        req.session.familyId,
+        'nextcloud',
+        config,
+        encryptJson({ username, appPassword })
+      );
+      let syncStats = null;
+      if (config.eventSyncEnabled && req.body?.syncNow !== false) {
+        syncStats = await performNextcloudSync(req.session.familyId);
+      }
+      publishFamilyChange(req.session.familyId, 'nextcloud');
+      res.status(existing ? 200 : 201).json({
+        success: true,
+        integration: integrationStatus(
+          req.session.familyId,
+          req.activeMember
+        ).nextcloud,
+        syncStats,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.patch(
+    '/api/integrations/nextcloud',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const integration = getIntegration(
+        req.session.familyId,
+        'nextcloud'
+      );
+      if (!integration) {
+        return res.status(404).json({
+          success: false,
+          error: 'Nextcloud ist noch nicht verbunden.'
+        });
+      }
+      const calendars = Array.isArray(integration.config.calendars)
+        ? integration.config.calendars
+        : [];
+      const requestedCalendar = Object.hasOwn(
+        req.body || {},
+        'eventCalendarHref'
+      )
+        ? cleanText(req.body.eventCalendarHref, '', 2000)
+        : integration.config.eventCalendarHref;
+      if (
+        requestedCalendar &&
+        !calendars.some(
+          calendar =>
+            calendar.href === requestedCalendar &&
+            calendar.components?.includes('VEVENT')
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: 'Dieser Kalender ist in Nextcloud nicht mehr verfügbar.'
+        });
+      }
+      const requestedMemberId = Object.hasOwn(
+        req.body || {},
+        'defaultMemberId'
+      )
+        ? cleanText(req.body.defaultMemberId, 'all', 100)
+        : integration.config.defaultMemberId || 'all';
+      if (
+        requestedMemberId !== 'all' &&
+        !getMember(req.session.familyId, requestedMemberId)
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: 'Das gewählte Standardprofil wurde nicht gefunden.'
+        });
+      }
+      const folder = Object.hasOwn(req.body || {}, 'folder')
+        ? normalizeNextcloudFolder(req.body.folder)
+        : integration.config.folder || 'LX Family';
+      const publicBaseUrl = Object.hasOwn(
+        req.body || {},
+        'publicBaseUrl'
+      )
+        ? normalizeNextcloudBaseUrl(
+            req.body.publicBaseUrl,
+            'Nextcloud-Adresse für Browser'
+          )
+        : integration.config.publicBaseUrl;
+      const config = {
+        ...integration.config,
+        enabled: Object.hasOwn(req.body || {}, 'enabled')
+          ? Boolean(req.body.enabled)
+          : integration.config.enabled !== false,
+        publicBaseUrl,
+        host: new URL(publicBaseUrl).host,
+        eventCalendarHref: requestedCalendar,
+        eventSyncEnabled: Object.hasOwn(
+          req.body || {},
+          'eventSyncEnabled'
+        )
+          ? Boolean(req.body.eventSyncEnabled && requestedCalendar)
+          : integration.config.eventSyncEnabled !== false,
+        defaultMemberId: requestedMemberId,
+        includeGrandparents: Object.hasOwn(
+          req.body || {},
+          'includeGrandparents'
+        )
+          ? Boolean(req.body.includeGrandparents)
+          : Boolean(integration.config.includeGrandparents),
+        folder,
+        backupEnabled: Object.hasOwn(req.body || {}, 'backupEnabled')
+          ? Boolean(req.body.backupEnabled)
+          : Boolean(integration.config.backupEnabled),
+        backupHour: Object.hasOwn(req.body || {}, 'backupHour')
+          ? Math.max(0, Math.min(23, Number(req.body.backupHour)))
+          : Number(integration.config.backupHour ?? 3)
+      };
+      await ensureNextcloudFolder(
+        nextcloudConnection(integration),
+        integration.config.userId,
+        folder
+      );
+      saveIntegration(
+        req.session.familyId,
+        'nextcloud',
+        config,
+        integration.secretEncrypted
+      );
+      publishFamilyChange(req.session.familyId, 'nextcloud');
+      res.json({
+        success: true,
+        integration: integrationStatus(
+          req.session.familyId,
+          req.activeMember
+        ).nextcloud,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/integrations/nextcloud/test',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const integration = getIntegration(
+        req.session.familyId,
+        'nextcloud'
+      );
+      if (!integration) {
+        return res.status(404).json({
+          success: false,
+          error: 'Nextcloud ist noch nicht verbunden.'
+        });
+      }
+      const inspection = await inspectNextcloud(
+        nextcloudConnection(integration)
+      );
+      await ensureNextcloudFolder(
+        nextcloudConnection(integration),
+        inspection.userId,
+        integration.config.folder || 'LX Family'
+      );
+      const availableHrefs = new Set(
+        inspection.calendars.map(calendar => calendar.href)
+      );
+      saveIntegration(
+        req.session.familyId,
+        'nextcloud',
+        {
+          ...integration.config,
+          userId: inspection.userId,
+          displayName: inspection.displayName,
+          nextcloudVersion: inspection.version,
+          calendars: inspection.calendars,
+          eventCalendarHref: availableHrefs.has(
+            integration.config.eventCalendarHref
+          )
+            ? integration.config.eventCalendarHref
+            : inspection.calendars.find(
+                calendar => calendar.components.includes('VEVENT')
+              )?.href || '',
+          lastSyncError: '',
+          lastBackupError: ''
+        },
+        integration.secretEncrypted
+      );
+      res.json({
+        success: true,
+        message:
+          `Nextcloud ${inspection.version} antwortet. ` +
+          `${inspection.calendars.length} Kalender gefunden.`,
+        integration: integrationStatus(
+          req.session.familyId,
+          req.activeMember
+        ).nextcloud,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/integrations/nextcloud/sync',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      if (!getIntegration(req.session.familyId, 'nextcloud')) {
+        return res.status(404).json({
+          success: false,
+          error: 'Nextcloud ist noch nicht verbunden.'
+        });
+      }
+      const stats = await performNextcloudSync(req.session.familyId);
+      publishFamilyChange(req.session.familyId, 'events');
+      res.json({
+        success: true,
+        stats,
+        integration: integrationStatus(
+          req.session.familyId,
+          req.activeMember
+        ).nextcloud,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/integrations/nextcloud/backup',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      if (!getIntegration(req.session.familyId, 'nextcloud')) {
+        return res.status(404).json({
+          success: false,
+          error: 'Nextcloud ist noch nicht verbunden.'
+        });
+      }
+      const backup = await performNextcloudBackup(
+        req.session.familyId
+      );
+      publishFamilyChange(req.session.familyId, 'nextcloud-backup');
+      res.json({
+        success: true,
+        backup,
+        integration: integrationStatus(
+          req.session.familyId,
+          req.activeMember
+        ).nextcloud,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.delete(
+    '/api/integrations/nextcloud',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      deleteIntegration(req.session.familyId, 'nextcloud');
+      publishFamilyChange(req.session.familyId, 'nextcloud');
+      res.json({
+        success: true,
+        integration: {
+          connected: false,
+          enabled: false,
+          eventSyncEnabled: false,
+          backupEnabled: false
+        },
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
     '/api/integrations/gotify/setup',
     requireAuth,
     requireAdult,
@@ -6397,6 +7133,10 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void app.locals.runEventReminderSweep();
   }, EVENT_REMINDER_INTERVAL_MS);
   eventReminderTimer.unref();
+  const nextcloudSyncTimer = setInterval(() => {
+    void app.locals.runNextcloudSweep();
+  }, NEXTCLOUD_SYNC_INTERVAL_MS);
+  nextcloudSyncTimer.unref();
   const initialCalendarSync = setTimeout(() => {
     void syncAllCalendarSubscriptions();
   }, 20_000);
@@ -6405,12 +7145,19 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void app.locals.runEventReminderSweep();
   }, 5_000);
   initialEventReminderSweep.unref();
+  const initialNextcloudSweep = setTimeout(() => {
+    void app.locals.runNextcloudSweep();
+  }, 35_000);
+  initialNextcloudSweep.unref();
   server.on('close', () => {
     clearInterval(calendarSyncTimer);
     clearInterval(eventReminderTimer);
+    clearInterval(nextcloudSyncTimer);
     clearTimeout(initialCalendarSync);
     clearTimeout(initialEventReminderSweep);
+    clearTimeout(initialNextcloudSweep);
     app.locals.stopHomeAssistantSockets?.();
+    app.locals.stopNextcloudSyncDebounces?.();
   });
   return server;
 }

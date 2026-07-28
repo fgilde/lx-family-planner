@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.6.0': {
+    version: '1.6.0',
+    eyebrow: 'Neu: eure eigene Family Cloud',
+    title: 'LX Family und Nextcloud arbeiten jetzt zusammen',
+    intro:
+      'Kalender, Familienordner und verschlüsselte Sicherungen lassen sich direkt in der Elternzentrale verbinden – auf Wunsch mit einer mitgelieferten Nextcloud.',
+    highlights: [
+      {
+        id: 'nextcloud-docker',
+        title: 'Nextcloud einfach mitstarten',
+        description:
+          'Ein Hilfsskript richtet Nextcloud, Datenbank und Zwischenspeicher mit zufälligen Kennwörtern im vorhandenen Docker-Stack ein.'
+      },
+      {
+        id: 'nextcloud-calendar',
+        title: 'Kalender in beide Richtungen',
+        description:
+          'Neue, geänderte und gelöschte Termine werden automatisch abgeglichen. Bei gleichzeitigen Änderungen bleibt eine Konfliktkopie erhalten.'
+      },
+      {
+        id: 'nextcloud-backup',
+        title: 'Sichere Familienarchive',
+        description:
+          'Jede Familie erhält ein eigenes verschlüsseltes Cloud-Backup. Andere Familienkonten auf demselben Server werden nicht mitgesichert.'
+      },
+      {
+        id: 'family-cloud-center',
+        title: 'Alles verständlich an einem Ort',
+        description:
+          'Kalender, Profilzuordnung, Oma-und-Opa-Termine, Sicherungszeit und Verbindungsstatus werden in der neuen Family-Cloud-Karte verwaltet.'
+      }
+    ],
+    closing:
+      'Vorhandene Termine und Einstellungen bleiben erhalten; Nextcloud ist vollständig optional.'
+  },
   '1.5.0': {
     version: '1.5.0',
     eyebrow: 'Neu für euren Heimserver',

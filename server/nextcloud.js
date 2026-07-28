@@ -1,0 +1,945 @@
+import { createHash, randomUUID } from 'crypto';
+import { promises as dns } from 'dns';
+import { isIP } from 'net';
+import { XMLParser } from 'fast-xml-parser';
+import { parseICalendar } from '../shared/icsCalendar.js';
+import {
+  deleteIntegrationSyncItem,
+  deleteRecord,
+  listIntegrationSyncItems,
+  listRecords,
+  saveIntegrationSyncItem,
+  upsertRecord
+} from './database.js';
+
+const PROVIDER = 'nextcloud';
+const REQUEST_TIMEOUT_MS = 15_000;
+const MAX_RESPONSE_BYTES = 8 * 1024 * 1024;
+const MAX_CALENDAR_ITEMS = 5000;
+const XML = new XMLParser({
+  ignoreAttributes: false,
+  removeNSPrefix: true,
+  parseTagValue: false,
+  trimValues: true
+});
+
+function asArray(value) {
+  if (value === undefined || value === null) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function clean(value, fallback = '', max = 1000) {
+  const result = String(value ?? '').trim();
+  return (result || fallback).slice(0, max);
+}
+
+function httpError(message, statusCode = 502) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+export function normalizeNextcloudBaseUrl(value, label = 'Nextcloud-Adresse') {
+  let url;
+  try {
+    url = new URL(clean(value, '', 2000));
+  } catch {
+    throw httpError(`${label} ist ungültig.`, 400);
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw httpError(`${label} muss mit http:// oder https:// beginnen.`, 400);
+  }
+  if (url.username || url.password || url.search || url.hash) {
+    throw httpError(
+      `${label} darf keine Zugangsdaten oder Parameter enthalten.`,
+      400
+    );
+  }
+  url.pathname = url.pathname.replace(/\/+$/, '');
+  return url.href.replace(/\/$/, '');
+}
+
+export function normalizeNextcloudFolder(value) {
+  const pieces = clean(value, 'LX Family', 500)
+    .replaceAll('\\', '/')
+    .split('/')
+    .map(piece => piece.trim())
+    .filter(Boolean);
+  if (
+    !pieces.length ||
+    pieces.length > 8 ||
+    pieces.some(piece => piece === '.' || piece === '..')
+  ) {
+    throw httpError('Der Nextcloud-Ordner ist ungültig.', 400);
+  }
+  return pieces.join('/');
+}
+
+function buildApiUrl(baseUrl, pathname) {
+  const base = new URL(`${baseUrl.replace(/\/+$/, '')}/`);
+  const relative = clean(pathname).replace(/^\/+/, '');
+  return new URL(relative, base);
+}
+
+function buildRemoteUrl(baseUrl, href) {
+  return new URL(clean(href), `${baseUrl.replace(/\/+$/, '')}/`);
+}
+
+function ipv4Parts(address) {
+  if (isIP(address) !== 4) return null;
+  return address.split('.').map(Number);
+}
+
+function blockedAddress(address) {
+  const normalized = clean(address).toLowerCase();
+  const mapped = normalized.startsWith('::ffff:')
+    ? normalized.slice(7)
+    : normalized;
+  const parts = ipv4Parts(mapped);
+  if (parts) {
+    const [first, second] = parts;
+    if (
+      first === 0 ||
+      first >= 224 ||
+      (first === 169 && second === 254)
+    ) {
+      return true;
+    }
+    if (first === 127) {
+      return process.env.NODE_ENV !== 'test';
+    }
+    return false;
+  }
+  if (isIP(normalized) === 6) {
+    if (normalized === '::1') return process.env.NODE_ENV !== 'test';
+    return (
+      normalized === '::' ||
+      normalized.startsWith('fe8') ||
+      normalized.startsWith('fe9') ||
+      normalized.startsWith('fea') ||
+      normalized.startsWith('feb') ||
+      normalized.startsWith('ff')
+    );
+  }
+  return false;
+}
+
+async function validateTarget(url) {
+  let addresses;
+  try {
+    addresses = isIP(url.hostname)
+      ? [{ address: url.hostname }]
+      : await dns.lookup(url.hostname, { all: true, verbatim: true });
+  } catch {
+    throw httpError('Der Nextcloud-Server konnte nicht gefunden werden.', 400);
+  }
+  if (!addresses.length || addresses.some(entry => blockedAddress(entry.address))) {
+    throw httpError(
+      'Diese Nextcloud-Adresse zeigt auf eine gesperrte Geräteadresse.',
+      400
+    );
+  }
+}
+
+async function readLimitedText(response) {
+  const announced = Number(response.headers.get('content-length') || 0);
+  if (announced > MAX_RESPONSE_BYTES) {
+    throw httpError('Die Antwort von Nextcloud ist zu groß.', 413);
+  }
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_RESPONSE_BYTES) {
+      await reader.cancel();
+      throw httpError('Die Antwort von Nextcloud ist zu groß.', 413);
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+function authorizationHeader(username, appPassword) {
+  return `Basic ${Buffer.from(
+    `${username}:${appPassword}`,
+    'utf8'
+  ).toString('base64')}`;
+}
+
+export async function nextcloudRequest(
+  connection,
+  pathname,
+  {
+    method = 'GET',
+    headers = {},
+    body,
+    expectedStatuses = [200],
+    remoteHref = false
+  } = {}
+) {
+  const url = remoteHref
+    ? buildRemoteUrl(connection.baseUrl, pathname)
+    : buildApiUrl(connection.baseUrl, pathname);
+  await validateTarget(url);
+  let response;
+  try {
+    response = await fetch(url, {
+      method,
+      redirect: 'error',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      headers: {
+        Authorization: authorizationHeader(
+          connection.username,
+          connection.appPassword
+        ),
+        'User-Agent': `LX-Family-Planner/${connection.appVersion || '1'}`,
+        'OCS-APIRequest': 'true',
+        ...headers
+      },
+      body
+    });
+  } catch (error) {
+    if (error?.statusCode) throw error;
+    throw httpError(
+      'Nextcloud ist unter dieser Adresse gerade nicht erreichbar.'
+    );
+  }
+  const text = response.status === 204 ? '' : await readLimitedText(response);
+  if (!expectedStatuses.includes(response.status)) {
+    const message =
+      response.status === 401 || response.status === 403
+        ? 'Nextcloud hat Benutzername oder App-Passwort abgelehnt.'
+        : response.status === 404
+          ? 'Die angeforderte Nextcloud-Funktion wurde nicht gefunden.'
+          : `Nextcloud meldet Fehler ${response.status}.`;
+    const error = httpError(message, response.status === 401 ? 401 : 502);
+    error.remoteStatus = response.status;
+    error.responseText = text.slice(0, 1000);
+    throw error;
+  }
+  return { response, text, url };
+}
+
+function propFromResponse(response) {
+  for (const propstat of asArray(response?.propstat)) {
+    const status = clean(propstat?.status);
+    if (!status || status.includes(' 200 ')) return propstat?.prop || {};
+  }
+  return {};
+}
+
+function calendarComponents(prop) {
+  const componentSet = prop?.['supported-calendar-component-set'];
+  return asArray(componentSet?.comp)
+    .map(component => clean(component?.['@_name']).toUpperCase())
+    .filter(Boolean);
+}
+
+function hasResourceType(prop, type) {
+  const resources = prop?.resourcetype;
+  return Boolean(resources && Object.hasOwn(resources, type));
+}
+
+function parseMultiStatus(text) {
+  let parsed;
+  try {
+    parsed = XML.parse(text);
+  } catch {
+    throw httpError('Nextcloud hat eine unlesbare DAV-Antwort gesendet.');
+  }
+  return asArray(parsed?.multistatus?.response);
+}
+
+export async function fetchNextcloudAccount(connection) {
+  const { text } = await nextcloudRequest(
+    connection,
+    'ocs/v2.php/cloud/user?format=json',
+    {
+      headers: { Accept: 'application/json' }
+    }
+  );
+  let data;
+  try {
+    data = JSON.parse(text)?.ocs?.data;
+  } catch {
+    data = null;
+  }
+  const userId = clean(data?.id, '', 200);
+  if (!userId) {
+    throw httpError(
+      'Nextcloud hat keine eindeutige Benutzerkennung zurückgegeben.'
+    );
+  }
+  return {
+    userId,
+    displayName: clean(data?.displayname, userId, 200),
+    email: clean(data?.email, '', 300)
+  };
+}
+
+export async function discoverNextcloudCalendars(connection, userId) {
+  const calendarHome = `/remote.php/dav/calendars/${encodeURIComponent(
+    userId
+  )}/`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:a="http://apple.com/ns/ical/">
+  <d:prop>
+    <d:displayname/>
+    <d:resourcetype/>
+    <c:supported-calendar-component-set/>
+    <a:calendar-color/>
+    <d:getetag/>
+  </d:prop>
+</d:propfind>`;
+  const { text } = await nextcloudRequest(connection, calendarHome, {
+    method: 'PROPFIND',
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      Depth: '1'
+    },
+    body,
+    expectedStatuses: [207]
+  });
+  return parseMultiStatus(text)
+    .map(response => {
+      const prop = propFromResponse(response);
+      return {
+        href: clean(response?.href, '', 2000),
+        name: clean(prop?.displayname, 'Kalender', 200),
+        color: clean(prop?.['calendar-color'], '#2563eb', 30),
+        components: calendarComponents(prop),
+        isCalendar: hasResourceType(prop, 'calendar')
+      };
+    })
+    .filter(calendar => calendar.href && calendar.isCalendar)
+    .filter(calendar =>
+      calendar.components.includes('VEVENT') ||
+      calendar.components.includes('VTODO')
+    )
+    .map(({ isCalendar, ...calendar }) => calendar);
+}
+
+export async function inspectNextcloud(connection) {
+  const { text: statusText } = await nextcloudRequest(
+    connection,
+    'status.php',
+    { headers: { Accept: 'application/json' } }
+  );
+  let status;
+  try {
+    status = JSON.parse(statusText);
+  } catch {
+    throw httpError('Unter dieser Adresse läuft keine kompatible Nextcloud.');
+  }
+  if (!status?.installed || status?.maintenance) {
+    throw httpError(
+      status?.maintenance
+        ? 'Nextcloud befindet sich gerade im Wartungsmodus.'
+        : 'Nextcloud ist noch nicht fertig eingerichtet.'
+    );
+  }
+  const account = await fetchNextcloudAccount(connection);
+  const calendars = await discoverNextcloudCalendars(
+    connection,
+    account.userId
+  );
+  return {
+    ...account,
+    version: clean(status.versionstring, status.version, 80),
+    calendars
+  };
+}
+
+function encodedFilePath(userId, folder = '') {
+  const pieces = [
+    'remote.php',
+    'dav',
+    'files',
+    encodeURIComponent(userId),
+    ...normalizeNextcloudFolder(folder)
+      .split('/')
+      .map(piece => encodeURIComponent(piece))
+  ];
+  return pieces.join('/');
+}
+
+export async function ensureNextcloudFolder(connection, userId, folder) {
+  const pieces = normalizeNextcloudFolder(folder).split('/');
+  let current = '';
+  for (const piece of pieces) {
+    current = current ? `${current}/${piece}` : piece;
+    await nextcloudRequest(
+      connection,
+      encodedFilePath(userId, current),
+      {
+        method: 'MKCOL',
+        expectedStatuses: [201, 405]
+      }
+    );
+  }
+  return normalizeNextcloudFolder(folder);
+}
+
+export async function uploadNextcloudFile(
+  connection,
+  userId,
+  folder,
+  fileName,
+  content,
+  contentType = 'application/octet-stream'
+) {
+  await ensureNextcloudFolder(connection, userId, folder);
+  const safeName = clean(fileName, `datei-${Date.now()}`, 240)
+    .replace(/[\\/:*?"<>|]/g, '-');
+  const path = `${encodedFilePath(userId, folder)}/${encodeURIComponent(
+    safeName
+  )}`;
+  const { response } = await nextcloudRequest(connection, path, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': contentType,
+      'OC-Total-Length': String(Buffer.byteLength(content))
+    },
+    body: content,
+    expectedStatuses: [201, 204]
+  });
+  return {
+    fileName: safeName,
+    etag: clean(response.headers.get('etag'), '', 300)
+  };
+}
+
+function unfoldIcs(value = '') {
+  return String(value)
+    .replace(/\r\n[ \t]/g, '')
+    .replace(/\n[ \t]/g, '')
+    .replace(/\r[ \t]/g, '');
+}
+
+function customIcsValue(content, name) {
+  const match = unfoldIcs(content).match(
+    new RegExp(`(?:^|\\r?\\n)${name}(?:;[^:]*)?:(.*?)(?:\\r?\\n|$)`, 'i')
+  );
+  return clean(match?.[1], '', 1000)
+    .replace(/\\n/gi, '\n')
+    .replace(/\\,/g, ',')
+    .replace(/\\;/g, ';')
+    .replace(/\\\\/g, '\\');
+}
+
+function escapeIcs(value = '') {
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\r?\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;');
+}
+
+function icsStamp(date = new Date()) {
+  return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
+function icsDate(value) {
+  return clean(value).replaceAll('-', '');
+}
+
+function icsTime(value) {
+  return `${clean(value, '09:00').replace(':', '')}00`;
+}
+
+function addOneDay(date) {
+  const result = new Date(`${date}T12:00:00Z`);
+  result.setUTCDate(result.getUTCDate() + 1);
+  return result.toISOString().slice(0, 10);
+}
+
+function serializeEvent(event, uid, timeZone) {
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'CALSCALE:GREGORIAN',
+    'PRODID:-//LX Family Planner//Family Cloud//DE',
+    'BEGIN:VEVENT',
+    `UID:${escapeIcs(uid)}`,
+    `DTSTAMP:${icsStamp()}`,
+    `LAST-MODIFIED:${icsStamp()}`
+  ];
+  if (event.allDay || !event.time) {
+    lines.push(`DTSTART;VALUE=DATE:${icsDate(event.date)}`);
+    lines.push(
+      `DTEND;VALUE=DATE:${icsDate(event.endDate || addOneDay(event.date))}`
+    );
+  } else {
+    lines.push(
+      `DTSTART;TZID=${escapeIcs(timeZone)}:${icsDate(event.date)}T${icsTime(
+        event.time
+      )}`
+    );
+    if (event.endDate || event.endTime) {
+      lines.push(
+        `DTEND;TZID=${escapeIcs(timeZone)}:${icsDate(
+          event.endDate || event.date
+        )}T${icsTime(event.endTime || event.time)}`
+      );
+    }
+  }
+  lines.push(`SUMMARY:${escapeIcs(event.title || 'Familientermin')}`);
+  if (event.location) lines.push(`LOCATION:${escapeIcs(event.location)}`);
+  if (event.notes) lines.push(`DESCRIPTION:${escapeIcs(event.notes)}`);
+  if (event.category) lines.push(`CATEGORIES:${escapeIcs(event.category)}`);
+  lines.push(`X-LX-FAMILY-ID:${escapeIcs(event.familyId || '')}`);
+  lines.push(`X-LX-EVENT-ID:${escapeIcs(event.id || '')}`);
+  lines.push(`X-LX-MEMBER-ID:${escapeIcs(event.memberId || 'all')}`);
+  lines.push(`X-LX-HOUSEHOLD:${escapeIcs(event.household || 'familie')}`);
+  lines.push('END:VEVENT', 'END:VCALENDAR', '');
+  return lines.join('\r\n');
+}
+
+function eventContentHash(event) {
+  return createHash('sha256')
+    .update(JSON.stringify({
+      title: clean(event?.title),
+      date: clean(event?.date),
+      time: clean(event?.time),
+      allDay: Boolean(event?.allDay),
+      endDate: clean(event?.endDate),
+      endTime: clean(event?.endTime),
+      location: clean(event?.location),
+      notes: clean(event?.notes),
+      category: clean(event?.category),
+      memberId: clean(event?.memberId, 'all'),
+      household: clean(event?.household, 'familie')
+    }))
+    .digest('hex');
+}
+
+function remoteEvent(
+  resource,
+  familyId,
+  defaultMemberId,
+  timeZone,
+  allowedMemberIds
+) {
+  const parsed = parseICalendar(resource.calendarData, {
+    targetTimeZone: timeZone,
+    rangeStart: Date.now() - 45 * 86_400_000,
+    rangeEnd: Date.now() + 10 * 365 * 86_400_000,
+    maxEvents: 1
+  })[0];
+  if (!parsed) return null;
+  const remoteMemberId = customIcsValue(
+    resource.calendarData,
+    'X-LX-MEMBER-ID'
+  );
+  return {
+    ...parsed,
+    familyId,
+    memberId:
+      remoteMemberId &&
+      (remoteMemberId === 'all' || allowedMemberIds?.has(remoteMemberId))
+        ? remoteMemberId
+        : defaultMemberId || 'all',
+    household:
+      customIcsValue(resource.calendarData, 'X-LX-HOUSEHOLD') || 'familie',
+    category:
+      customIcsValue(resource.calendarData, 'CATEGORIES') ||
+      'Nextcloud',
+    nextcloudUid: parsed.uid,
+    nextcloudHref: resource.href,
+    nextcloudManaged: true,
+    source: 'nextcloud',
+    readOnly: false
+  };
+}
+
+function eligibleLocalEvent(event, includeGrandparents) {
+  return Boolean(
+    event?.id &&
+    event?.title &&
+    event?.date &&
+    !event.readOnly &&
+    !event.sharedEventId &&
+    !event.sharedOwnerFamilyId &&
+    event.nextcloudExcluded !== true &&
+    (includeGrandparents || (event.household || 'familie') === 'familie') &&
+    !String(event.source || '').startsWith('calendar-subscription:')
+  );
+}
+
+async function listRemoteEvents(connection, calendarHref) {
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+  <d:prop>
+    <d:getetag/>
+    <c:calendar-data/>
+  </d:prop>
+  <c:filter>
+    <c:comp-filter name="VCALENDAR">
+      <c:comp-filter name="VEVENT"/>
+    </c:comp-filter>
+  </c:filter>
+</c:calendar-query>`;
+  const { text } = await nextcloudRequest(connection, calendarHref, {
+    method: 'REPORT',
+    remoteHref: true,
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      Depth: '1'
+    },
+    body,
+    expectedStatuses: [207]
+  });
+  const records = parseMultiStatus(text)
+    .slice(0, MAX_CALENDAR_ITEMS)
+    .map(response => {
+      const prop = propFromResponse(response);
+      return {
+        href: clean(response?.href, '', 2000),
+        etag: clean(prop?.getetag, '', 300),
+        calendarData: clean(prop?.['calendar-data'], '', MAX_RESPONSE_BYTES)
+      };
+    })
+    .filter(item => item.href && /BEGIN:VEVENT/i.test(item.calendarData));
+  return records;
+}
+
+function remoteFileName(uid) {
+  return `${createHash('sha256').update(uid).digest('hex').slice(0, 40)}.ics`;
+}
+
+function appendRemoteFile(calendarHref, uid) {
+  return `${calendarHref.replace(/\/+$/, '')}/${remoteFileName(uid)}`;
+}
+
+async function putRemoteEvent(
+  connection,
+  calendarHref,
+  event,
+  currentHref,
+  currentEtag,
+  timeZone
+) {
+  const uid =
+    clean(event.nextcloudUid) ||
+    `${createHash('sha256')
+      .update(`${event.familyId}:${event.id}`)
+      .digest('hex')}@lx-family`;
+  const href = currentHref || appendRemoteFile(calendarHref, uid);
+  const headers = {
+    'Content-Type': 'text/calendar; charset=utf-8'
+  };
+  if (currentEtag) headers['If-Match'] = currentEtag;
+  else headers['If-None-Match'] = '*';
+  const content = serializeEvent(event, uid, timeZone);
+  const { response } = await nextcloudRequest(connection, href, {
+    method: 'PUT',
+    remoteHref: true,
+    headers,
+    body: content,
+    expectedStatuses: [201, 204]
+  });
+  return {
+    href,
+    uid,
+    etag: clean(response.headers.get('etag'), currentEtag, 300),
+    remoteHash: eventContentHash(event)
+  };
+}
+
+async function deleteRemoteEvent(connection, href) {
+  try {
+    await nextcloudRequest(connection, href, {
+      method: 'DELETE',
+      remoteHref: true,
+      expectedStatuses: [204, 404]
+    });
+  } catch (error) {
+    if (error.remoteStatus !== 404) throw error;
+  }
+}
+
+function saveEventMapping(familyId, event, remote) {
+  const localHash = eventContentHash(event);
+  saveIntegrationSyncItem(familyId, PROVIDER, 'events', {
+    localId: event.id,
+    remoteHref: remote.href,
+    remoteEtag: remote.etag,
+    localHash,
+    remoteHash: remote.remoteHash || localHash
+  });
+}
+
+export async function syncNextcloudEvents({
+  familyId,
+  connection,
+  calendarHref,
+  defaultMemberId = 'all',
+  includeGrandparents = false,
+  timeZone = 'Europe/Berlin',
+  memberIds = []
+}) {
+  if (!calendarHref) {
+    throw httpError('Bitte wähle zuerst einen Nextcloud-Kalender aus.', 400);
+  }
+  const stats = {
+    imported: 0,
+    exported: 0,
+    updatedLocal: 0,
+    updatedRemote: 0,
+    deletedLocal: 0,
+    deletedRemote: 0,
+    conflicts: 0
+  };
+  const allowedMemberIds = new Set(memberIds);
+  const remoteResources = await listRemoteEvents(connection, calendarHref);
+  const remoteByHref = new Map(
+    remoteResources.map(resource => [resource.href, resource])
+  );
+  const mappings = listIntegrationSyncItems(
+    familyId,
+    PROVIDER,
+    'events'
+  );
+  const mappingByLocal = new Map(
+    mappings.map(mapping => [mapping.localId, mapping])
+  );
+  const mappedRemoteHrefs = new Set(mappings.map(mapping => mapping.remoteHref));
+  let localEvents = listRecords(familyId, 'events').filter(event =>
+    eligibleLocalEvent(event, includeGrandparents)
+  );
+  let localById = new Map(localEvents.map(event => [event.id, event]));
+
+  for (const mapping of mappings) {
+    let local = localById.get(mapping.localId);
+    const remoteResource = remoteByHref.get(mapping.remoteHref);
+    if (!local) {
+      if (remoteResource) {
+        await deleteRemoteEvent(connection, mapping.remoteHref);
+        stats.deletedRemote += 1;
+      }
+      deleteIntegrationSyncItem(
+        familyId,
+        PROVIDER,
+        'events',
+        mapping.localId
+      );
+      continue;
+    }
+    if (!remoteResource) {
+      const localHash = eventContentHash(local);
+      if (localHash === mapping.localHash) {
+        deleteRecord(familyId, 'events', local.id);
+        localById.delete(local.id);
+        stats.deletedLocal += 1;
+        deleteIntegrationSyncItem(
+          familyId,
+          PROVIDER,
+          'events',
+          local.id
+        );
+      } else {
+        const pushed = await putRemoteEvent(
+          connection,
+          calendarHref,
+          local,
+          mapping.remoteHref,
+          '',
+          timeZone
+        );
+        local = upsertRecord(familyId, 'events', {
+          ...local,
+          nextcloudUid: pushed.uid,
+          nextcloudHref: pushed.href,
+          nextcloudManaged: true
+        });
+        saveEventMapping(familyId, local, pushed);
+        stats.updatedRemote += 1;
+      }
+      continue;
+    }
+    const remote = remoteEvent(
+      remoteResource,
+      familyId,
+      defaultMemberId,
+      timeZone,
+      allowedMemberIds
+    );
+    if (!remote) continue;
+    const localHash = eventContentHash(local);
+    const remoteHash = eventContentHash(remote);
+    const localChanged = localHash !== mapping.localHash;
+    const remoteChanged =
+      remoteResource.etag !== mapping.remoteEtag ||
+      remoteHash !== mapping.remoteHash;
+
+    if (localChanged && remoteChanged && localHash !== remoteHash) {
+      const conflict = upsertRecord(familyId, 'events', {
+        ...remote,
+        id: `nextcloud-conflict-${randomUUID()}`,
+        title: `${remote.title} · Konflikt aus Nextcloud`,
+        nextcloudExcluded: true,
+        nextcloudConflictOf: local.id
+      });
+      localEvents.push(conflict);
+      const pushed = await putRemoteEvent(
+        connection,
+        calendarHref,
+        local,
+        mapping.remoteHref,
+        remoteResource.etag,
+        timeZone
+      );
+      saveEventMapping(familyId, local, pushed);
+      stats.conflicts += 1;
+      stats.updatedRemote += 1;
+      continue;
+    }
+    if (remoteChanged && !localChanged) {
+      const merged = upsertRecord(familyId, 'events', {
+        ...local,
+        ...remote,
+        id: local.id,
+        familyId,
+        reminders: local.reminders || [],
+        nextcloudHref: remoteResource.href
+      });
+      saveEventMapping(familyId, merged, {
+        href: remoteResource.href,
+        etag: remoteResource.etag,
+        remoteHash
+      });
+      localById.set(merged.id, merged);
+      stats.updatedLocal += 1;
+      continue;
+    }
+    if (localChanged && !remoteChanged) {
+      const pushed = await putRemoteEvent(
+        connection,
+        calendarHref,
+        local,
+        mapping.remoteHref,
+        remoteResource.etag,
+        timeZone
+      );
+      local = upsertRecord(familyId, 'events', {
+        ...local,
+        nextcloudUid: pushed.uid,
+        nextcloudHref: pushed.href,
+        nextcloudManaged: true
+      });
+      saveEventMapping(familyId, local, pushed);
+      stats.updatedRemote += 1;
+      continue;
+    }
+    saveEventMapping(familyId, local, {
+      href: remoteResource.href,
+      etag: remoteResource.etag,
+      remoteHash
+    });
+  }
+
+  localEvents = listRecords(familyId, 'events').filter(event =>
+    eligibleLocalEvent(event, includeGrandparents)
+  );
+  for (const local of localEvents) {
+    if (mappingByLocal.has(local.id) || local.nextcloudExcluded) continue;
+    const recoveredResource = remoteResources.find(resource =>
+      !mappedRemoteHrefs.has(resource.href) &&
+      customIcsValue(resource.calendarData, 'X-LX-EVENT-ID') === local.id
+    );
+    if (recoveredResource) {
+      const recovered = remoteEvent(
+        recoveredResource,
+        familyId,
+        defaultMemberId,
+        timeZone,
+        allowedMemberIds
+      );
+      const pushed = await putRemoteEvent(
+        connection,
+        calendarHref,
+        local,
+        recoveredResource.href,
+        recoveredResource.etag,
+        timeZone
+      );
+      const updated = upsertRecord(familyId, 'events', {
+        ...local,
+        nextcloudUid: recovered?.nextcloudUid || pushed.uid,
+        nextcloudHref: pushed.href,
+        nextcloudManaged: true
+      });
+      saveEventMapping(familyId, updated, pushed);
+      mappedRemoteHrefs.add(pushed.href);
+      stats.updatedRemote += 1;
+      continue;
+    }
+    const pushed = await putRemoteEvent(
+      connection,
+      calendarHref,
+      local,
+      '',
+      '',
+      timeZone
+    );
+    const updated = upsertRecord(familyId, 'events', {
+      ...local,
+      nextcloudUid: pushed.uid,
+      nextcloudHref: pushed.href,
+      nextcloudManaged: true
+    });
+    saveEventMapping(familyId, updated, pushed);
+    mappedRemoteHrefs.add(pushed.href);
+    stats.exported += 1;
+  }
+
+  const occupiedLocalIds = new Set(
+    listRecords(familyId, 'events').map(event => event.id)
+  );
+  for (const resource of remoteResources) {
+    if (mappedRemoteHrefs.has(resource.href)) continue;
+    const remote = remoteEvent(
+      resource,
+      familyId,
+      defaultMemberId,
+      timeZone,
+      allowedMemberIds
+    );
+    if (!remote) continue;
+    const requestedId = customIcsValue(
+      resource.calendarData,
+      'X-LX-EVENT-ID'
+    );
+    const id = requestedId && !occupiedLocalIds.has(requestedId)
+      ? requestedId
+      : `nextcloud-event-${createHash('sha256')
+        .update(resource.href)
+        .digest('hex')
+        .slice(0, 28)}`;
+    const inserted = upsertRecord(familyId, 'events', {
+      ...remote,
+      id,
+      familyId
+    });
+    occupiedLocalIds.add(inserted.id);
+    saveEventMapping(familyId, inserted, {
+      href: resource.href,
+      etag: resource.etag,
+      remoteHash: eventContentHash(remote)
+    });
+    stats.imported += 1;
+  }
+
+  return stats;
+}
+
+export function nextcloudBrowserFolderUrl(publicBaseUrl, folder) {
+  const url = new URL(`${normalizeNextcloudBaseUrl(publicBaseUrl)}/`);
+  url.pathname = `${url.pathname.replace(/\/+$/, '')}/index.php/apps/files/`;
+  url.searchParams.set('dir', `/${normalizeNextcloudFolder(folder)}`);
+  return url.toString();
+}

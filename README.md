@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.5.0</strong> ·
+  <strong>Aktuelle Version: 1.6.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -66,6 +66,8 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   Sterne, Belohnungen und Taschengeld der Enkelkinder
 - native Home-Assistant-Kacheln mit Live-Status, sicheren Aktionen,
   Profilfreigaben und großer Tablet-Ansicht
+- optionale Family Cloud mit Nextcloud, Zwei-Wege-Kalenderabgleich,
+  Familienordner und verschlüsselten Sicherungen
 - Elternzentrale für Profile, Aufgaben, Punktestände, freigegebene YouTube-/
   Spotify-Widgets und Geräte
 - eigene Kinderoberfläche mit Raketen-, Einhorn-, Feen-, Dino-, Sonnen- und
@@ -139,6 +141,92 @@ http://192.168.178.50:8123
 
 Eine `.local`-Adresse funktioniert abhängig vom Docker- und Netzwerksystem
 nicht immer zuverlässig.
+
+### Family Cloud mit Nextcloud
+
+Nextcloud wird in der **Elternzentrale → Family Cloud** verbunden. LX Family
+bleibt dabei die führende Stelle für Profile, Kinderfreigaben, Aufgabenpunkte
+und Belohnungen. Nextcloud übernimmt:
+
+- einen frei wählbaren Kalender mit automatischem Abgleich in beide Richtungen,
+- einen gemeinsamen Ordner für die Familie,
+- tägliche und manuelle, verschlüsselte Familien-Backups.
+
+Termine werden nicht nur kopiert. Änderungen und Löschungen werden dauerhaft
+zugeordnet. Wenn derselbe Termin zwischen zwei Abgleichen in beiden Systemen
+geändert wurde, gewinnt die lokale Fassung und LX legt zusätzlich eine klar
+markierte Nextcloud-Konfliktkopie ab. Dadurch geht keine Fassung unbemerkt
+verloren.
+
+Aufgaben und Kinderpunkte bleiben bewusst in LX Family: Ein in Nextcloud
+abgehakter Task darf das Vier-Augen-Prinzip für Kinder nicht umgehen.
+
+#### Nextcloud zusammen mit Docker starten
+
+Unter Windows genügt nach dem normalen LX-Start ein Doppelklick auf:
+
+```text
+Nextcloud-Aktivieren.cmd
+```
+
+Unter Linux:
+
+```bash
+./scripts/nextcloud-enable.sh
+```
+
+In einer Installation über den Proxmox-Helper:
+
+```bash
+lx-family nextcloud
+```
+
+Das Hilfsskript:
+
+1. aktiviert das optionale Docker-Profil `nextcloud`,
+2. erzeugt getrennte, zufällige Kennwörter für Nextcloud, MariaDB und Redis,
+3. ergänzt Servername und Heimnetz-IP als vertrauenswürdige Adressen,
+4. startet Nextcloud samt Datenbank, Redis und Cron-Dienst.
+
+Der erste Start kann zwei bis fünf Minuten dauern. Standardmäßig ist Nextcloud
+anschließend unter `http://IP-DES-SERVERS:8080` erreichbar. Benutzer und
+einmaliges Startpasswort zeigt das Hilfsskript an; beides steht zusätzlich in
+der lokalen, von Git ausgeschlossenen `.env`.
+
+Für den laufenden Familienbetrieb empfiehlt sich ein eigener Nextcloud-Benutzer
+statt des Administratorkontos. Im Nextcloud-Profil unter
+**Persönliche Einstellungen → Sicherheit** ein neues App-Passwort nur für
+`LX Family` erzeugen. In LX werden anschließend eingetragen:
+
+| Feld | Mitgelieferte Docker-Cloud | Vorhandene Nextcloud |
+| --- | --- | --- |
+| Adresse für LX Family | `http://nextcloud` | vom LX-Server erreichbare URL |
+| Adresse für Browser | `http://SERVER-IP:8080` | öffentliche oder Heimnetz-URL |
+| Benutzer | eigener Nextcloud-Benutzer | Nextcloud-Benutzer |
+| App-Passwort | neu erzeugtes App-Passwort | neu erzeugtes App-Passwort |
+
+Die interne Adresse wird nur vom Backend verwendet. Zugangsdaten gelangen
+nicht an den Browser und werden mit `APP_SECRET` verschlüsselt in SQLite
+gespeichert.
+
+#### Daten und Updates
+
+Die Nextcloud-Daten liegen in den drei unabhängigen Docker-Volumes
+`nextcloud-html`, `nextcloud-db` und `nextcloud-redis`. Normale LX-Updates
+erstellen oder entfernen diese Volumes nicht. Auch `docker compose down`
+behält sie. **Nicht** `docker compose down -v` verwenden, weil `-v` die
+Nextcloud-Volumes ausdrücklich löscht.
+
+Die `.env` und insbesondere `APP_SECRET` müssen zusammen mit den normalen
+Serversicherungen aufbewahrt werden. Ohne denselben `APP_SECRET` können die
+verschlüsselten LX-Family-Archive und Integrationstokens nach einer
+Neuinstallation nicht entschlüsselt werden.
+
+Eine bereits vorhandene Nextcloud muss nicht im LX-Docker-Stack laufen. Lokale
+Heimnetz-Adressen sind für diese ausdrücklich eingerichtete Integration
+erlaubt; Link-Local-, Multicast- und Geräte-Metadaten-Adressen bleiben
+serverseitig gesperrt. Für Zugriff außerhalb des Heimnetzes werden HTTPS und
+ein sauber konfigurierter Reverse Proxy empfohlen.
 
 ## Weg 1: Mit Docker starten (empfohlen)
 
@@ -575,15 +663,16 @@ dort geöffnet werden.
 - Passwörter und Profil-PINs werden nicht im Klartext gespeichert.
 - Sitzungen verwenden ein `HttpOnly`-Cookie.
 - Familien und Direktnachrichten werden serverseitig voneinander isoliert.
-- Bring!-Zugangsdaten, private Kalenderlinks und Push-Schlüssel werden mit
-  `APP_SECRET` verschlüsselt.
+- Bring!- und Nextcloud-Zugangsdaten, private Kalenderlinks und Push-Schlüssel
+  werden mit `APP_SECRET` verschlüsselt.
 - Der Docker-Container läuft ohne Root-Rechte, mit schreibgeschütztem
   Dateisystem, ohne Linux-Capabilities und mit `no-new-privileges`.
 - Ohne `AGENT_API_KEY` bleibt die optionale Agent-Schnittstelle deaktiviert.
 - SQLite läuft im WAL-Modus und kritische Punktebuchungen sind transaktional.
 
 Wichtig: Wer `APP_SECRET` später ändert, muss verschlüsselte Integrationen wie
-Bring! erneut verbinden.
+Bring! und Nextcloud erneut verbinden. Vorhandene `.lxbackup`-Archive benötigen
+ebenfalls den ursprünglichen Schlüssel.
 
 ## Backups
 
@@ -610,6 +699,12 @@ Sicherungen sollten regelmäßig zusätzlich auf ein anderes Gerät oder Medium
 kopiert werden. Ein Backup ist erst dann ein gutes Backup, wenn die
 Wiederherstellung einmal getestet wurde.
 
+Mit verbundener Family Cloud legt LX zusätzlich ein verschlüsseltes,
+familiengetrenntes `.lxbackup` samt Prüfsummenmanifest unter
+`LX Family/Backups` in Nextcloud ab. Dieses Archiv ersetzt nicht die lokale
+Komplettsicherung des Servers, sorgt aber dafür, dass die Inhalte einer Familie
+außerhalb des LX-Datenvolumes liegen.
+
 ## Konfiguration
 
 Die Vorlage liegt in `.env.example`.
@@ -623,6 +718,11 @@ Die Vorlage liegt in `.env.example`.
 | `DATABASE_FILE` | abweichender Pfad zur SQLite-Datenbank |
 | `LEGACY_DATABASE_FILE` | optionaler JSON-Altbestand für die erste Migration |
 | `EVENT_REMINDER_INTERVAL_SECONDS` | Prüfintervall für fällige Terminerinnerungen |
+| `NEXTCLOUD_SYNC_INTERVAL_MINUTES` | regelmäßiger DAV-Abgleich, Standard `15` |
+| `COMPOSE_PROFILES` | mit Wert `nextcloud` die mitgelieferte Family Cloud starten |
+| `NEXTCLOUD_PORT` | Port der mitgelieferten Nextcloud, Standard `8080` |
+| `NEXTCLOUD_*_PASSWORD` | vom Aktivierungsskript zufällig erzeugte Cloud-, Datenbank- und Redis-Schlüssel |
+| `NEXTCLOUD_TRUSTED_DOMAINS` | erlaubte Browsernamen und Heimnetz-Adressen für Nextcloud |
 | `CORS_ALLOWED_ORIGINS` | zusätzliche, vertrauenswürdige Ursprünge für eine getrennt gehostete oder native Oberfläche |
 | `AGENT_API_KEY` | aktiviert optional die geschützte Agent-API |
 | `VAPID_*` | optionale feste Web-Push-Schlüssel |
