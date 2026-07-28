@@ -2686,7 +2686,7 @@ export function createApp() {
             queueGotifyNotification(family.id, 'events', {
               title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 140)}`,
               message: body,
-              priority: due.reminderMinutes <= 10 ? 7 : 4
+              priority: due.reminderMinutes <= 10 ? 8 : 4
             });
             markEventReminderDeliveries(
               family.id,
