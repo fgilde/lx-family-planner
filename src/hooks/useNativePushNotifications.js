@@ -1,3 +1,4 @@
+import { PushNotifications } from '@capacitor/push-notifications';
 import { isCapacitorNative } from '../utils/apiConfig.js';
 
 const INSTALLATION_ID_KEY = 'lx_native_push_installation_id';
@@ -5,7 +6,6 @@ const REGISTRATION_TIMEOUT_MS = 20_000;
 const NATIVE_STEP_TIMEOUT_MS = 10_000;
 const PERMISSION_REQUEST_TIMEOUT_MS = 30_000;
 
-let pluginPromise;
 let listenersPromise;
 let pendingRegistration = null;
 
@@ -41,16 +41,9 @@ function dispatchNativePushEvent(name, detail) {
   window.dispatchEvent(new CustomEvent(name, { detail }));
 }
 
-async function nativePushPlugin() {
+function nativePushPlugin() {
   if (!isCapacitorNative()) return null;
-  pluginPromise ||= import('@capacitor/push-notifications').then(
-    module => module.PushNotifications
-  );
-  return withNativePushTimeout(
-    pluginPromise,
-    NATIVE_STEP_TIMEOUT_MS,
-    'Das Android-Push-Modul antwortet nicht. Beende LX vollständig und öffne die App erneut.'
-  );
+  return PushNotifications;
 }
 
 async function ensureNativePushListeners() {

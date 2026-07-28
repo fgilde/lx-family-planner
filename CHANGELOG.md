@@ -2,6 +2,15 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.5] – 2026-07-28
+
+### Android-Push-Modul fest in die App integriert
+
+- das Push-Modul wird nicht mehr als separate Laufzeitdatei nachgeladen
+- der auf dem betroffenen Android-Gerät erkannte Modul-Ladehänger entfällt
+- alle nachfolgenden Diagnose- und Zeitgrenzen aus Version 1.7.4 bleiben aktiv
+- vorhandene Profile, Anmeldung und Familiendaten bleiben erhalten
+
 ## [1.7.4] – 2026-07-28
 
 ### Gesamte Android-Push-Anmeldung gegen Hänger abgesichert

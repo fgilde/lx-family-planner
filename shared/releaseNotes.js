@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.5': {
+    version: '1.7.5',
+    eyebrow: 'Android-Push ist direkt in der App verankert',
+    title: 'Das Push-Modul muss nicht mehr nachgeladen werden',
+    intro:
+      'Die neue Diagnose hat gezeigt, dass einzelne Android-Geräte beim separaten Nachladen des Push-Moduls hängen bleiben. LX liefert dieses Modul jetzt fest mit der App aus und kann sofort darauf zugreifen.',
+    highlights: [
+      {
+        id: 'bundled-native-push',
+        title: 'Push-Modul sofort verfügbar',
+        description:
+          'Die Android-Funktion steckt direkt im Hauptprogramm und benötigt beim Einschalten keine zusätzliche interne Datei mehr.'
+      },
+      {
+        id: 'no-runtime-module-load',
+        title: 'Kein Ladehänger mehr',
+        description:
+          'Der auf dem betroffenen Handy eindeutig erkannte Modul-Ladeschritt wurde vollständig entfernt.'
+      },
+      {
+        id: 'continued-stage-diagnostics',
+        title: 'Diagnose bleibt aktiv',
+        description:
+          'Alle folgenden Schritte zeigen weiterhin ihren Status und brechen bei einer fehlenden Android-Antwort verständlich ab.'
+      },
+      {
+        id: 'update-over-existing-app',
+        title: 'Einfach darüber installieren',
+        description:
+          'Profile, Anmeldung und Familiendaten bleiben beim Update auf Version 1.7.5 erhalten.'
+      }
+    ],
+    closing:
+      'Installiert Version 1.7.5 über die vorhandene LX App und schaltet die Android-Benachrichtigungen danach erneut ein.'
+  },
   '1.7.4': {
     version: '1.7.4',
     eyebrow: 'Android-Push zeigt jetzt genau, was passiert',

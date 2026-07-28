@@ -1,4 +1,4 @@
-const CACHE = 'lx-familie-v1.7.4';
+const CACHE = 'lx-familie-v1.7.5';
 const STATIC = ['/', '/manifest.json', '/icon.svg', '/icon.png'];
 
 self.addEventListener('install', event => {
