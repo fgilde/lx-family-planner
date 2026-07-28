@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFamily } from '../../context/FamilyContext';
 import { UtensilsCrossed, ShoppingBag, Edit3, BookOpen, Trash2, X } from 'lucide-react';
 import RecipeBook from './RecipeBook';
+import { recipeShareTargetFromUrl } from '../../../shared/recipeShareTarget.js';
 
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
@@ -14,7 +15,11 @@ export default function MealPlanner() {
     savedRecipes,
     activeHousehold
   } = useFamily();
-  const [subTab, setSubTab] = useState('plan'); // 'plan' or 'recipes'
+  const [subTab, setSubTab] = useState(() =>
+    recipeShareTargetFromUrl(window.location.href).isShareTarget
+      ? 'recipes'
+      : 'plan'
+  ); // 'plan' or 'recipes'
   
   // Quick Pick Modal
   const [selectedMealSlot, setSelectedMealSlot] = useState(null); // { day, meal }

@@ -11935,6 +11935,7 @@ textarea {
 }
 
 .calendar-event-delete,
+.calendar-event-reminder-button,
 .calendar-event-readonly {
   width: 35px;
   height: 35px;
@@ -11948,6 +11949,29 @@ textarea {
   color: var(--danger);
   background: var(--bg-card);
   cursor: pointer;
+}
+
+.calendar-event-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-event-reminder-button {
+  color: var(--event-color);
+  background: color-mix(in srgb, var(--event-color) 9%, var(--bg-card));
+  cursor: pointer;
+}
+
+.calendar-event-reminder-button:hover,
+.calendar-event-delete:hover {
+  transform: translateY(-1px);
+  border-color: currentColor;
+}
+
+.calendar-event-details .calendar-event-reminders {
+  color: var(--event-color);
+  font-weight: 850;
 }
 
 .calendar-event-readonly {
@@ -16097,6 +16121,846 @@ body:has(.modal-backdrop) .problem-report-launcher {
   }
 
   .release-notes-confirm {
+    width: 100%;
+  }
+}
+
+/* Termin-Wecker: eine kleine Zeitlinie statt eines technischen Einstellblocks */
+.event-reminder-picker {
+  min-width: 0;
+  display: grid;
+  gap: 13px;
+  margin: 4px 0 16px;
+  padding: 15px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--primary) 23%,
+    var(--border-color)
+  );
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      circle at 95% 0,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 36%
+    ),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--primary) 6%, var(--bg-card)),
+      var(--bg-card) 56%
+    );
+}
+
+.event-reminder-picker legend {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.event-reminder-picker-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px 13px 5px 13px;
+  color: var(--on-primary);
+  background: linear-gradient(
+    145deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 62%, var(--accent))
+  );
+  box-shadow: 0 8px 18px color-mix(
+    in srgb,
+    var(--primary) 22%,
+    transparent
+  );
+  transform: rotate(-3deg);
+}
+
+.event-reminder-picker legend > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.event-reminder-picker legend strong {
+  color: var(--text-main);
+  font-size: 0.84rem;
+}
+
+.event-reminder-picker legend small {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+}
+
+.event-reminder-picker legend > b {
+  min-width: 34px;
+  padding: 5px 8px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--primary) 18%,
+    var(--border-color)
+  );
+  border-radius: 999px;
+  color: var(--primary);
+  background: var(--bg-elevated);
+  font-size: 0.64rem;
+  text-align: center;
+}
+
+.event-reminder-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.event-reminder-options > button {
+  min-width: 0;
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.event-reminder-options > button > span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+}
+
+.event-reminder-options > button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 48%,
+    var(--border-color)
+  );
+}
+
+.event-reminder-options > button.is-selected {
+  color: var(--text-main);
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 62%,
+    var(--border-color)
+  );
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-elevated));
+  box-shadow: inset 0 0 0 1px color-mix(
+    in srgb,
+    var(--primary) 12%,
+    transparent
+  );
+}
+
+.event-reminder-options > button.is-selected > span {
+  color: var(--on-primary);
+  background: var(--primary);
+}
+
+.event-reminder-options > button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.event-reminder-picker > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.event-reminder-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  overflow-y: auto;
+  background: color-mix(in srgb, #071712 68%, transparent);
+  backdrop-filter: blur(13px) saturate(0.88);
+}
+
+.event-reminder-dialog {
+  width: min(690px, 100%);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--primary) 28%,
+    var(--border-color)
+  );
+  border-radius: 29px;
+  color: var(--text-main);
+  background:
+    radial-gradient(
+      circle at 88% 0,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 32%
+    ),
+    var(--bg-elevated);
+  box-shadow: 0 34px 100px rgba(5, 22, 17, 0.38);
+}
+
+.event-reminder-dialog > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 13px;
+  padding: 23px 23px 17px;
+}
+
+.event-reminder-dialog-mark {
+  width: 49px;
+  height: 49px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px 17px 7px 17px;
+  color: var(--on-primary);
+  background: linear-gradient(
+    145deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 52%, var(--accent))
+  );
+  box-shadow: 0 11px 24px color-mix(
+    in srgb,
+    var(--primary) 26%,
+    transparent
+  );
+}
+
+.event-reminder-dialog > header > div {
+  min-width: 0;
+}
+
+.event-reminder-dialog > header > div > span {
+  color: var(--primary);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.event-reminder-dialog h2 {
+  margin: 3px 0 4px;
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-reminder-dialog header p {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.event-reminder-dialog > header > button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-main);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.event-reminder-dialog > .event-reminder-picker {
+  margin: 0 22px 14px;
+}
+
+.event-reminder-dialog > aside {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  margin: 0 22px 20px;
+  padding: 12px 13px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--primary) 18%,
+    var(--border-color)
+  );
+  border-radius: 15px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--bg-card));
+}
+
+.event-reminder-dialog > aside > span {
+  display: grid;
+  gap: 3px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.event-reminder-dialog > aside strong {
+  color: var(--text-main);
+  font-size: 0.72rem;
+}
+
+.event-reminder-dialog > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding: 17px 22px 22px;
+  border-top: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-subtle) 74%, var(--bg-elevated));
+  border-radius: 0 0 28px 28px;
+}
+
+.event-reminder-dialog > footer button {
+  min-height: 43px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 13px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.event-reminder-cancel {
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  background: var(--bg-card);
+}
+
+.event-reminder-save {
+  border: 1px solid var(--primary);
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 10px 22px color-mix(
+    in srgb,
+    var(--primary) 22%,
+    transparent
+  );
+}
+
+.event-reminder-dialog button:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
+@media (max-width: 620px) {
+  .event-reminder-options {
+    grid-template-columns: 1fr;
+  }
+
+  .event-reminder-layer {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .event-reminder-dialog {
+    width: 100%;
+    max-height: 94dvh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 27px 27px 0 0;
+  }
+
+  .event-reminder-dialog > header {
+    gap: 10px;
+    padding: 19px 15px 14px;
+  }
+
+  .event-reminder-dialog > .event-reminder-picker {
+    margin: 0 13px 12px;
+  }
+
+  .event-reminder-dialog > aside {
+    margin: 0 13px 14px;
+  }
+
+  .event-reminder-dialog > footer {
+    position: sticky;
+    bottom: 0;
+    padding: 13px 14px calc(13px + env(safe-area-inset-bottom));
+    border-radius: 0;
+  }
+
+  .event-reminder-dialog > footer button {
+    flex: 1;
+  }
+
+  .calendar-event-actions {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+}
+
+.recipe-share-arrival {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  margin: -5px -5px 22px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, #df3658 25%, var(--border-color));
+  border-radius: 17px;
+  color: #c72f50;
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, #df3658 9%, var(--bg-card)),
+      color-mix(in srgb, #f18a4f 8%, var(--bg-card))
+    );
+}
+
+.recipe-share-arrival > span:first-child {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px 13px 5px 13px;
+  color: #fff;
+  background: linear-gradient(145deg, #df3658, #ee774d);
+  box-shadow: 0 8px 18px rgba(196, 45, 79, 0.2);
+}
+
+.recipe-share-arrival > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.recipe-share-arrival strong {
+  color: var(--text-main);
+  font-size: 0.78rem;
+}
+
+.recipe-share-arrival small {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  line-height: 1.4;
+}
+
+.recipe-share-pulse {
+  width: 17px;
+  height: 17px;
+  border: 2px solid color-mix(in srgb, #df3658 22%, transparent);
+  border-top-color: #df3658;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+.recipe-share-howto {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  margin: 0 0 17px;
+  padding: 11px 12px;
+  border: 1px dashed color-mix(
+    in srgb,
+    var(--primary) 35%,
+    var(--border-color)
+  );
+  border-radius: 14px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-card));
+}
+
+.recipe-share-howto span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.recipe-share-howto strong,
+.recipe-share-howto b {
+  color: var(--text-main);
+}
+
+.app-update-banner {
+  position: relative;
+  z-index: 42000;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 11px;
+  padding: 10px max(15px, calc((100vw - 1180px) / 2));
+  color: #fff8e6;
+  background:
+    radial-gradient(circle at 80% -80%, rgba(255, 255, 255, 0.3), transparent 46%),
+    linear-gradient(110deg, #a84d18, #d47720 54%, #a84917);
+  box-shadow: 0 8px 25px rgba(78, 35, 12, 0.2);
+}
+
+.app-update-mark {
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px 13px 5px 13px;
+  color: #91390e;
+  background: #fff4cf;
+}
+
+.app-update-banner > div {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.app-update-banner strong {
+  color: #fff;
+  font-size: 0.77rem;
+}
+
+.app-update-banner small {
+  color: #ffe8bd;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.app-update-banner > a {
+  min-height: 37px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 12px;
+  color: #7c2f0c;
+  background: #fff8e6;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-decoration: none;
+  box-shadow: 0 7px 16px rgba(84, 32, 8, 0.18);
+}
+
+.app-update-banner > button {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  color: #fff4d6;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .app-update-banner {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 10px 11px;
+  }
+
+  .app-update-banner > a {
+    grid-column: 1 / -1;
+  }
+
+  .app-update-banner > button {
+    grid-column: 3;
+    grid-row: 1;
+  }
+}
+
+/* Serverwahl der Android-App: eigenständige Ebene, damit kein Theme-Menü sie
+   überdecken kann. */
+.server-config-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 65000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  overflow-y: auto;
+  background: color-mix(in srgb, #071712 72%, transparent);
+  backdrop-filter: blur(14px) saturate(0.85);
+}
+
+.server-config-dialog {
+  width: min(580px, 100%);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--primary) 28%,
+    var(--border-color)
+  );
+  border-radius: 28px;
+  color: var(--text-main);
+  background:
+    radial-gradient(
+      circle at 92% 0,
+      color-mix(in srgb, var(--accent) 13%, transparent),
+      transparent 34%
+    ),
+    var(--bg-elevated);
+  box-shadow: 0 36px 100px rgba(5, 22, 17, 0.42);
+}
+
+.server-config-dialog > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 13px;
+  padding: 23px 23px 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.server-config-mark {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px 17px 7px 17px;
+  color: var(--on-primary);
+  background: linear-gradient(
+    145deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 54%, var(--accent))
+  );
+  box-shadow: 0 11px 24px color-mix(
+    in srgb,
+    var(--primary) 25%,
+    transparent
+  );
+}
+
+.server-config-dialog > header > div {
+  min-width: 0;
+}
+
+.server-config-dialog > header > div > span {
+  color: var(--primary);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.server-config-dialog h2 {
+  margin: 2px 0 3px;
+  font-family: var(--font-heading);
+  font-size: clamp(1.4rem, 4vw, 1.95rem);
+}
+
+.server-config-dialog header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.server-config-dialog > header > button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-main);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.server-config-content {
+  display: grid;
+  gap: 10px;
+  padding: 22px 23px;
+}
+
+.server-config-content > label {
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.server-config-input {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  color: var(--primary);
+  background: var(--bg-card);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.server-config-input:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(
+    in srgb,
+    var(--primary) 13%,
+    transparent
+  );
+}
+
+.server-config-input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--text-main);
+  background: transparent;
+}
+
+.server-config-content > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.server-config-content code {
+  display: inline-block;
+  margin: 0 4px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  color: var(--primary);
+  background: var(--bg-subtle);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.64rem;
+}
+
+.server-config-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  margin-top: 5px;
+  padding: 11px 12px;
+  border: 1px solid;
+  border-radius: 13px;
+  font-size: 0.69rem;
+  line-height: 1.45;
+}
+
+.server-config-status.is-success {
+  color: #16825e;
+  border-color: color-mix(in srgb, #16825e 30%, var(--border-color));
+  background: color-mix(in srgb, #16825e 7%, var(--bg-card));
+}
+
+.server-config-status.is-error {
+  color: #c03e58;
+  border-color: color-mix(in srgb, #c03e58 30%, var(--border-color));
+  background: color-mix(in srgb, #c03e58 7%, var(--bg-card));
+}
+
+.server-config-dialog > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 17px 23px 22px;
+  border-top: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-subtle) 74%, var(--bg-elevated));
+  border-radius: 0 0 27px 27px;
+}
+
+.server-config-dialog > footer > div {
+  display: flex;
+  gap: 8px;
+}
+
+.server-config-dialog footer button {
+  min-height: 42px;
+  padding: 8px 13px;
+  border-radius: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.server-config-test,
+.server-config-cancel {
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  background: var(--bg-card);
+}
+
+.server-config-save {
+  border: 1px solid var(--primary);
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 9px 20px color-mix(
+    in srgb,
+    var(--primary) 21%,
+    transparent
+  );
+}
+
+.server-config-dialog button:disabled {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+@media (max-width: 620px) {
+  .server-config-layer {
+    place-items: end center;
+    padding: 0;
+  }
+
+  .server-config-dialog {
+    width: 100%;
+    max-height: 94dvh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 27px 27px 0 0;
+  }
+
+  .server-config-dialog > header,
+  .server-config-content {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .server-config-dialog > footer {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 13px 15px calc(13px + env(safe-area-inset-bottom));
+    border-radius: 0;
+  }
+
+  .server-config-dialog > footer > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .server-config-dialog footer button {
     width: 100%;
   }
 }

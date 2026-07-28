@@ -341,17 +341,61 @@ test('dashboard layouts remain complete, ordered and never fully hidden', () => 
   );
 });
 
+test('native API access only accepts trusted app origins', async () => {
+  const allowed = await fetch(`${baseUrl}/api/health`, {
+    method: 'OPTIONS',
+    headers: {
+      origin: 'http://localhost',
+      'access-control-request-method': 'GET',
+      'access-control-request-headers': 'x-lx-client'
+    }
+  });
+  assert.equal(allowed.status, 204);
+  assert.equal(
+    allowed.headers.get('access-control-allow-origin'),
+    'http://localhost'
+  );
+  assert.match(
+    allowed.headers.get('access-control-allow-headers'),
+    /X-LX-Client/
+  );
+
+  const rejected = await fetch(`${baseUrl}/api/health`, {
+    method: 'OPTIONS',
+    headers: {
+      origin: 'https://not-the-family-app.example',
+      'access-control-request-method': 'GET'
+    }
+  });
+  assert.equal(rejected.status, 403);
+  assert.equal(
+    rejected.headers.get('access-control-allow-origin'),
+    null
+  );
+});
+
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.2.0');
+  assert.equal(health.body.version, '1.3.0');
+  const appRelease = await request('/api/app/version');
+  assert.equal(typeof appRelease.body.versionName, 'string');
+  assert.equal(Number.isInteger(appRelease.body.versionCode), true);
+  assert.equal(
+    appRelease.body.apkUrl === null ||
+      appRelease.body.apkUrl === '/apk/latest.apk',
+    true
+  );
 
   const password = 'qa-family-4711';
   const registration = await request(
     '/api/public/register',
     {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        'x-lx-client': 'native'
+      },
       body: JSON.stringify({
         familyName: 'QA Testfamilie',
         badge: 'Automatischer Test',
@@ -367,6 +411,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
+  assert.match(registration.body.sessionToken, /^[a-z0-9_-]{32,}$/i);
   const cookie = registration.response.headers
     .get('set-cookie')
     .split(';')[0];
@@ -381,8 +426,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.2.0');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.2.0');
+  assert.equal(bootstrap.body.appVersion, '1.3.0');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.3.0');
   assert.ok(bootstrap.body.releaseNotes.highlights.length >= 4);
   assert.equal(bootstrap.body.members.length, 5);
   assert.equal(
@@ -397,10 +442,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.2.0');
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.3.0');
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.2.0'
+    '1.3.0'
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -414,7 +459,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.2.0');
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.3.0');
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -484,6 +529,54 @@ test('family flow stays isolated, authorized and internally consistent', async (
     201
   );
   assert.equal(managedEvent.body.record.memberId, managedProfile.id);
+
+  const reminderEvent = await request(
+    '/api/resources/events',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Zahnarzt',
+        date: '2026-08-03',
+        time: '14:00',
+        location: 'Praxis am Park',
+        memberId: adult.id,
+        reminders: [10, 60, 1440, 60, -5]
+      })
+    },
+    201
+  );
+  assert.deepEqual(
+    reminderEvent.body.record.reminders,
+    [1440, 60, 10]
+  );
+  const reminderNow = new Date('2026-08-03T13:00:00').getTime();
+  const firstReminderSweep =
+    await app.locals.runEventReminderSweep(reminderNow);
+  assert.equal(firstReminderSweep.delivered, 1);
+  const repeatedReminderSweep =
+    await app.locals.runEventReminderSweep(reminderNow);
+  assert.equal(repeatedReminderSweep.delivered, 0);
+  const reminderNotifications = await request('/api/notifications', {
+    headers: authenticatedHeaders
+  });
+  const reminderNotification =
+    reminderNotifications.body.notifications.find(
+      notification =>
+        notification.dedupeKey.startsWith('event-reminder-') &&
+        notification.title.includes('Zahnarzt')
+    );
+  assert.ok(reminderNotification);
+  assert.match(reminderNotification.body, /1 Stunde/);
+  const updatedReminderEvent = await request(
+    `/api/resources/events/${reminderEvent.body.record.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ reminders: [30, 10] })
+    }
+  );
+  assert.deepEqual(updatedReminderEvent.body.record.reminders, [30, 10]);
 
   const managedTask = await request(
     '/api/resources/tasks',
@@ -1002,7 +1095,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.2.0');
+  assert.equal(problemReport.body.report.appVersion, '1.3.0');
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },
@@ -1653,12 +1746,14 @@ test('family flow stays isolated, authorized and internally consistent', async (
         title: 'Familiengrillen',
         date: '2026-08-16',
         time: '16:00',
+        reminders: [1440, 60],
         recipientFamilyIds: [registration.body.family.id]
       })
     },
     201
   );
   assert.equal(sharedEvent.body.event.readOnly, false);
+  assert.deepEqual(sharedEvent.body.event.reminders, [1440, 60]);
   const sharedRecipientBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });

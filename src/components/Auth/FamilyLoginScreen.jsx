@@ -6,6 +6,7 @@ import {
   KeyRound,
   LockKeyhole,
   Plus,
+  Server,
   ShieldCheck,
   Sparkles,
   Users
@@ -20,7 +21,7 @@ import {
   handleImgError
 } from '../../utils/imageFallback';
 
-export default function FamilyLoginScreen({ onStartOnboarding }) {
+export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
   const {
     authStatus,
     familiesList,
@@ -303,13 +304,26 @@ export default function FamilyLoginScreen({ onStartOnboarding }) {
           </form>
 
           <div className="auth-divider"><span>oder</span></div>
-          <button
-            type="button"
-            className="auth-secondary"
-            onClick={onStartOnboarding}
-          >
-            <Plus size={18} /> Neue Familie anlegen
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="auth-secondary flex-1"
+              onClick={onStartOnboarding}
+            >
+              <Plus size={18} /> Neue Familie anlegen
+            </button>
+            {onOpenServerConfig && (
+              <button
+                type="button"
+                className="auth-secondary"
+                onClick={onOpenServerConfig}
+                title="Server-Adresse / IP-Verbindung einstellen"
+                style={{ padding: '0 12px' }}
+              >
+                <Server size={18} />
+              </button>
+            )}
+          </div>
         </div>
       </main>
     </div>

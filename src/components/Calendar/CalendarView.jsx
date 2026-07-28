@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import {
   Calendar as CalendarIcon,
   CalendarPlus,
+  BellRing,
   ChevronRight,
   Cloud,
   Download,
@@ -25,6 +26,11 @@ import {
   handleImgError
 } from '../../utils/imageFallback';
 import CalendarSubscriptionManager from './CalendarSubscriptionManager';
+import EventReminderDialog from './EventReminderDialog';
+import {
+  formatReminderLead,
+  normalizeEventReminders
+} from '../../../shared/eventReminders.js';
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -57,6 +63,7 @@ export default function CalendarView() {
   const {
     events,
     deleteEvent,
+    updateEvent,
     members,
     activeMember,
     calendarSubscriptions,
@@ -69,6 +76,7 @@ export default function CalendarView() {
   const [selectedMemberFilter, setSelectedMemberFilter] = useState('all');
   const [showPast, setShowPast] = useState(false);
   const [isSourcesOpen, setIsSourcesOpen] = useState(false);
+  const [selectedReminderEvent, setSelectedReminderEvent] = useState(null);
   const todayKey = localDateKey();
   const canManage = canManageFamily(activeMember);
 
@@ -270,6 +278,9 @@ export default function CalendarView() {
                     );
                     const accent =
                       event.sourceColor || member?.color || 'var(--primary)';
+                    const reminders = normalizeEventReminders(
+                      event.reminders
+                    );
                     return (
                       <article
                         key={event.id}
@@ -328,6 +339,20 @@ export default function CalendarView() {
                                   }`
                                 : 'Ganze Familie'}
                             </span>
+                            {reminders.length > 0 && (
+                              <span className="calendar-event-reminders">
+                                <BellRing size={13} />
+                                {reminders
+                                  .slice(0, 2)
+                                  .map(minutes =>
+                                    formatReminderLead(minutes, true)
+                                  )
+                                  .join(' · ')}
+                                {reminders.length > 2
+                                  ? ` +${reminders.length - 2}`
+                                  : ''}
+                              </span>
+                            )}
                           </div>
                           {event.notes && <p>{event.notes}</p>}
                         </div>
@@ -340,15 +365,30 @@ export default function CalendarView() {
                             <Cloud size={16} />
                           </span>
                         ) : (
-                          <button
-                            type="button"
-                            className="calendar-event-delete"
-                            onClick={() => deleteEvent(event.id)}
-                            title="Termin löschen"
-                            aria-label={`${event.title} löschen`}
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <div className="calendar-event-actions">
+                            {!event.sharedEventId && (
+                              <button
+                                type="button"
+                                className="calendar-event-reminder-button"
+                                onClick={() =>
+                                  setSelectedReminderEvent(event)
+                                }
+                                title="Erinnerungen bearbeiten"
+                                aria-label={`Erinnerungen für ${event.title} bearbeiten`}
+                              >
+                                <BellRing size={16} />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="calendar-event-delete"
+                              onClick={() => deleteEvent(event.id)}
+                              title="Termin löschen"
+                              aria-label={`${event.title} löschen`}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         )}
                         <ChevronRight
                           className="calendar-event-chevron"
@@ -368,6 +408,13 @@ export default function CalendarView() {
       <CalendarSubscriptionManager
         isOpen={isSourcesOpen}
         onClose={() => setIsSourcesOpen(false)}
+      />
+      <EventReminderDialog
+        event={selectedReminderEvent}
+        onClose={() => setSelectedReminderEvent(null)}
+        onSave={(event, reminders) =>
+          updateEvent(event.id, { reminders })
+        }
       />
     </div>
   );

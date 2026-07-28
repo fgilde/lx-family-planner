@@ -158,6 +158,23 @@ database.exec(`
   CREATE INDEX IF NOT EXISTS inbox_notifications_unread_idx
     ON inbox_notifications(family_id, member_id, read_at);
 
+  CREATE TABLE IF NOT EXISTS event_reminder_deliveries (
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    event_id TEXT NOT NULL,
+    event_start_key TEXT NOT NULL,
+    reminder_minutes INTEGER NOT NULL,
+    delivered_at INTEGER NOT NULL,
+    PRIMARY KEY (
+      family_id,
+      event_id,
+      event_start_key,
+      reminder_minutes
+    )
+  );
+
+  CREATE INDEX IF NOT EXISTS event_reminder_deliveries_cleanup_idx
+    ON event_reminder_deliveries(delivered_at);
+
   CREATE TABLE IF NOT EXISTS calendar_subscriptions (
     id TEXT PRIMARY KEY,
     family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
@@ -407,6 +424,26 @@ applySchemaMigration(5, 'Gelesene Versionshinweise pro Profil', () => {
       ADD COLUMN last_seen_release_version TEXT NOT NULL DEFAULT '';
     `);
   }
+});
+
+applySchemaMigration(6, 'Zuverlässige Terminerinnerungen', () => {
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS event_reminder_deliveries (
+      family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      event_id TEXT NOT NULL,
+      event_start_key TEXT NOT NULL,
+      reminder_minutes INTEGER NOT NULL,
+      delivered_at INTEGER NOT NULL,
+      PRIMARY KEY (
+        family_id,
+        event_id,
+        event_start_key,
+        reminder_minutes
+      )
+    );
+    CREATE INDEX IF NOT EXISTS event_reminder_deliveries_cleanup_idx
+      ON event_reminder_deliveries(delivered_at);
+  `);
 });
 
 function withTransaction(work) {
@@ -1955,6 +1992,78 @@ export function markAllInboxNotificationsRead(familyId, memberId) {
     .run(Date.now(), familyId, memberId);
   if (result.changes > 0) bumpFamilyVersion(familyId);
   return result.changes;
+}
+
+export function listEventReminderDeliveries(
+  familyId,
+  eventId,
+  eventStartKey
+) {
+  return database
+    .prepare(`
+      SELECT reminder_minutes
+      FROM event_reminder_deliveries
+      WHERE family_id = ?
+        AND event_id = ?
+        AND event_start_key = ?
+    `)
+    .all(familyId, eventId, eventStartKey)
+    .map(row => Number(row.reminder_minutes));
+}
+
+export function markEventReminderDeliveries(
+  familyId,
+  eventId,
+  eventStartKey,
+  reminderMinutes,
+  deliveredAt = Date.now()
+) {
+  const insert = database.prepare(`
+    INSERT INTO event_reminder_deliveries(
+      family_id,
+      event_id,
+      event_start_key,
+      reminder_minutes,
+      delivered_at
+    )
+    VALUES(?, ?, ?, ?, ?)
+    ON CONFLICT(
+      family_id,
+      event_id,
+      event_start_key,
+      reminder_minutes
+    ) DO NOTHING
+  `);
+  return withTransaction(() =>
+    [...new Set((reminderMinutes || []).map(Number))]
+      .filter(Number.isInteger)
+      .reduce(
+        (created, minutes) =>
+          created + Number(
+            insert.run(
+              familyId,
+              eventId,
+              eventStartKey,
+              minutes,
+              deliveredAt
+            ).changes || 0
+          ),
+        0
+      )
+  );
+}
+
+export function pruneEventReminderDeliveries(
+  before = Date.now() - 1000 * 60 * 60 * 24 * 90
+) {
+  return Number(
+    database
+      .prepare(`
+        DELETE FROM event_reminder_deliveries
+        WHERE delivered_at < ?
+      `)
+      .run(Number(before)).changes || 0
+  );
 }
 
 function mapCalendarSubscriptionRow(row, { includeSecret = false } = {}) {

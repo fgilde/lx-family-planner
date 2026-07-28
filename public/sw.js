@@ -1,5 +1,5 @@
-const CACHE = 'lx-familie-v1.2.0';
-const STATIC = ['/', '/manifest.json', '/icon.svg'];
+const CACHE = 'lx-familie-v1.3.0';
+const STATIC = ['/', '/manifest.json', '/icon.svg', '/icon.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(STATIC)));
@@ -64,7 +64,7 @@ self.addEventListener('push', event => {
   const title = payload.title || 'LX Family Planner';
   const options = {
     body: payload.body || 'Im Familienplaner gibt es etwas Neues.',
-    icon: payload.icon || '/icon.svg',
+    icon: payload.icon || '/icon.png',
     tag: payload.tag || `lx-family-${Date.now()}`,
     timestamp: Number(payload.timestamp || Date.now()),
     renotify: true,

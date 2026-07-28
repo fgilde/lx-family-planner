@@ -2,16 +2,49 @@
   "name": "LX Family Planner",
   "short_name": "LX Familie",
   "description": "Familienplaner mit Kalender, Einkauf, Essen, Aufgaben und mehr",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f5f1e8",
   "theme_color": "#246b58",
   "icons": [
     {
+      "src": "/icon.png",
+      "sizes": "504x504",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/share-recipe",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Rezept importieren",
+      "short_name": "Rezeptimport",
+      "description": "Einen Rezept-Link direkt ins Familienkochbuch übernehmen",
+      "url": "/share-recipe",
+      "icons": [
+        {
+          "src": "/icon.png",
+          "sizes": "504x504",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

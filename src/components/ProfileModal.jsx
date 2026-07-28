@@ -559,7 +559,7 @@ export default function ProfileModal() {
                       ['taskAssigned', 'Neue Aufgaben'],
                       ['taskApproval', 'Aufgaben-Prüfung'],
                       ['taskCompleted', 'Bestätigte Aufgaben'],
-                      ['events', 'Termine'],
+                      ['events', 'Termine & Erinnerungen'],
                       ['moodHelp', 'Familienkompass']
                     ].map(([key, label]) => (
                       <label key={key}>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X } from 'lucide-react';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server } from 'lucide-react';
 import { isChildProfile, isPetProfile } from '../constants/roles';
 import FamilyEditModal from './FamilyTree/FamilyEditModal';
 import PlanLocationHelp from './PlanLocationHelp';
@@ -31,7 +31,7 @@ const PET_THEMES = [
   { id: 'midnight', name: 'Nachtpfote', description: 'sanft & dunkel', icon: '🌙', color: '#164f49', accent: '#e0a65b' }
 ];
 
-export default function Header({ onLogout, unreadChatCount = 0 }) {
+export default function Header({ onLogout, onOpenServerConfig, unreadChatCount = 0 }) {
   const {
     theme, setTheme,
     activeTab, setActiveTab,
@@ -243,6 +243,17 @@ export default function Header({ onLogout, unreadChatCount = 0 }) {
             </span>
           )}
         </div>
+
+        {/* Server IP Config Button */}
+        {onOpenServerConfig && (
+          <button
+            className="icon-circle-btn"
+            onClick={onOpenServerConfig}
+            title="Server-Verbindung / IP einstellen"
+          >
+            <Server size={18} />
+          </button>
+        )}
 
         {/* Logout / Switch Family Button */}
         <button

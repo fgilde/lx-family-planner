@@ -24,7 +24,10 @@ import FamilyLifeHub from './components/FamilyLife/FamilyLifeHub';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
 import ProblemReportButton from './components/ProblemReportButton';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
+import ServerConfigModal from './components/ServerConfigModal';
+import AppUpdateBanner from './components/AppUpdateBanner';
 import { isPetProfile } from './constants/roles';
+import { isCapacitorNative } from './utils/apiConfig';
 
 function MainContent() {
   const {
@@ -42,7 +45,11 @@ function MainContent() {
   useEffect(() => {
     if (authStatus !== 'authenticated') return;
     const url = new URL(window.location.href);
-    const requestedView = url.searchParams.get('view');
+    const isRecipeShareTarget =
+      url.pathname.replace(/\/+$/, '') === '/share-recipe';
+    const requestedView = isRecipeShareTarget
+      ? 'meals'
+      : url.searchParams.get('view');
     const allowedViews = new Set([
       'dashboard',
       'chat',
@@ -60,6 +67,7 @@ function MainContent() {
       ) {
         setActiveTab(requestedView);
       }
+      if (isRecipeShareTarget) return;
       url.searchParams.delete('view');
       window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
     }
@@ -74,6 +82,9 @@ function MainContent() {
       setActiveTab('dashboard');
     }
   }, [activeMember, activeTab, authStatus, setActiveTab]);
+
+  const [isServerConfigOpen, setIsServerConfigOpen] = useState(false);
+  const canConfigureServer = isCapacitorNative();
 
   if (authStatus === 'loading') {
     return (
@@ -96,9 +107,21 @@ function MainContent() {
 
   if (authStatus !== 'authenticated') {
     return (
-      <FamilyLoginScreen
-        onStartOnboarding={() => setIsCreatingNewFamily(true)}
-      />
+      <>
+        <FamilyLoginScreen
+          onStartOnboarding={() => setIsCreatingNewFamily(true)}
+          onOpenServerConfig={
+            canConfigureServer
+              ? () => setIsServerConfigOpen(true)
+              : undefined
+          }
+        />
+        <ServerConfigModal
+          isOpen={isServerConfigOpen}
+          onClose={() => setIsServerConfigOpen(false)}
+          onSave={() => window.location.reload()}
+        />
+      </>
     );
   }
 
@@ -109,7 +132,15 @@ function MainContent() {
         <span className="theme-spark">✧</span>
         <span className="theme-spark">•</span>
       </div>
-      <Header onLogout={logout} />
+      <AppUpdateBanner />
+      <Header
+        onLogout={logout}
+        onOpenServerConfig={
+          canConfigureServer
+            ? () => setIsServerConfigOpen(true)
+            : undefined
+        }
+      />
       <Navigation onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
       <NotificationPermissionBanner />
 
@@ -137,6 +168,11 @@ function MainContent() {
       <QuickAddModal />
       <BringAccountModal />
       <ReleaseNotesModal />
+      <ServerConfigModal
+        isOpen={isServerConfigOpen}
+        onClose={() => setIsServerConfigOpen(false)}
+        onSave={() => window.location.reload()}
+      />
       <ProblemReportButton />
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
     </div>

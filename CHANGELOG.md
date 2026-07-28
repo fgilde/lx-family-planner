@@ -2,6 +2,26 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.3.0] – 2026-07-28
+
+### Neu
+
+- mehrere frei kombinierbare Erinnerungszeitpunkte pro Kalendertermin
+- serverseitige Zustellung über Familien-Posteingang, Web-Push und Gotify
+- Android-App und installierte PWA als Teilen-Ziel für Chefkoch, Pinterest und
+  andere Rezept-Apps
+- automatischer Rezeptimport aus einem geteilten Link
+- auswählbare Server-Adresse in der Android-App für Heimnetz und eigene Domain
+
+### Zuverlässigkeit
+
+- dauerhafte Duplikatkontrolle für Terminerinnerungen
+- nach Serverpausen wird nur die sinnvollste fällige Erinnerung nachgeholt
+- verwaltete Personen- und Haustiertermine erinnern die zuständigen Erwachsenen
+- feste Zeitzone `Europe/Berlin` als Docker-Standard
+- automatische Datenbankmigration auf Schema 6
+- native Server-Anmeldungen über zugelassene Ursprünge abgesichert
+
 ## [1.2.0] – 2026-07-28
 
 ### Neu

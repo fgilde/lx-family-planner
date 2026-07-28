@@ -3,6 +3,8 @@ node_modules/
 dist/
 coverage/
 .vite/
+*.apk
+*.aab
 
 # Local secrets and environment files
 .env
@@ -10,6 +12,9 @@ coverage/
 !.env.example
 *.pem
 *.key
+*.jks
+*.keystore
+android/keystore.properties
 
 # Runtime databases and user data
 data/
@@ -34,6 +39,8 @@ pnpm-debug.log*
 scratch/
 tmp/
 temp/
+scripts/generate_android_icons.py
+scripts/generate_new_android_icons.py
 
 # Local tools and editor state
 .codex/

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.2.0</strong> ·
+  <strong>Aktuelle Version: 1.3.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -42,11 +42,12 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   für Oma, Opa oder betreute Personen; mit Kalender und Aufgaben, aber ohne
   Chat, Punkte oder Profilwechsel
 - kinderleichte Bubble-Profilauswahl und optionaler Profil-PIN
-- Kalender, Müllkalender, ICS-Dateiimport und automatisch aktualisierte
-  Kalender-Abos
+- Kalender mit mehreren Erinnerungen pro Termin, Müllkalender, ICS-Dateiimport
+  und automatisch aktualisierte Kalender-Abos
 - gemeinsamer Familienchat und geschützte Direktnachrichten
 - Einkaufslisten mit großem, alltagstauglichem Produktkatalog und Bring!-Anbindung
-- Wochen-Speiseplan, Rezeptbuch, sicherer Web- und Pinterest-Import und Kochmodus
+- Wochen-Speiseplan, Rezeptbuch, direkter Android-Teilen-Import, sicherer Web-
+  und Pinterest-Import und Kochmodus
 - Aufgaben, Sterne und Belohnungsshop
 - Familienreise mit Morgen-/Abendroutinen, Wochenrückblick, Abzeichen,
   Mutmachern und gemeinsamen Missionen
@@ -92,8 +93,9 @@ Profilwechsel ausgeblendet. Im Kalender, in der Aufgabenplanung und in der
 Elternzentrale kann es trotzdem wie jede andere Person ausgewählt werden.
 
 Diese Profile sind für reine Organisation gedacht. Sie erhalten keinen Chat,
-keine Benachrichtigungen, keine Kinderpunkte und keinen eigenen Zugang zum
-Familienplaner.
+keine eigenen Push-Geräte, keine Kinderpunkte und keinen eigenen Zugang zum
+Familienplaner. Terminerinnerungen für ein verwaltetes Profil gehen automatisch
+an die zuständigen Erwachsenen.
 
 ### Familienkonten sicher miteinander verbinden
 
@@ -368,6 +370,26 @@ Link-Local- und Loopback-Adressen bleiben trotzdem gesperrt. Das
 Aktualisierungsintervall lässt sich mit
 `CALENDAR_SYNC_INTERVAL_MINUTES=60` anpassen.
 
+## Terminerinnerungen
+
+Beim Anlegen eines Termins lassen sich mehrere Erinnerungen kombinieren, zum
+Beispiel **1 Tag**, **10 Stunden**, **1 Stunde** und **10 Minuten vorher**.
+Eigene Termine können später über das Glockensymbol im Kalender angepasst
+werden.
+
+Die Prüfung läuft auf dem Server und nicht nur im geöffneten Browser:
+
+- der Hinweis erscheint im Familien-Posteingang,
+- Geräte mit aktiviertem Web-Push erhalten eine Systemmeldung,
+- ein verbundener Gotify-Server kann die Erinnerung ebenfalls zustellen,
+- bereits verschickte Erinnerungen werden in SQLite vermerkt und nicht doppelt
+  gesendet,
+- nach einer kurzen Serverpause wird nur der sinnvollste noch offene Hinweis
+  nachgeholt.
+
+Docker verwendet standardmäßig `Europe/Berlin`. Eine andere Zeitzone kann über
+`TZ` in der `.env` gesetzt werden.
+
 ## Rezepte aus dem Web importieren
 
 Der Rezept-Finder liest öffentliche HTTPS-Seiten mit Schema.org- oder
@@ -381,6 +403,53 @@ Zum Schutz des Heimnetzes öffnet der Import keine privaten oder lokalen
 Netzwerkadressen, keine Links mit eingebetteten Zugangsdaten und keine Seiten
 hinter einem Login. Portale, die automatisierte Aufrufe vollständig blockieren,
 müssen weiterhin manuell ins Kochbuch übertragen werden.
+
+### Rezept direkt aus Chefkoch oder Pinterest teilen
+
+Sowohl die installierte LX-PWA als auch die Android-App registrieren sich auf
+unterstützten Android-Geräten als Teilen-Ziel. Danach funktioniert der Ablauf
+ohne Kopieren:
+
+1. LX Family Planner über die HTTPS-Adresse öffnen.
+2. Im Browser **Zum Startbildschirm hinzufügen** beziehungsweise **App
+   installieren** wählen.
+3. In Chefkoch, Pinterest oder einer anderen Rezept-App **Teilen** öffnen.
+4. **LX Familie** auswählen.
+
+LX öffnet das Kochbuch, liest den geteilten Link und startet den sicheren
+Rezeptimport. Die Funktion ist von der Web-Share-Target-Unterstützung des
+Geräts abhängig; auf Android mit der LX-App oder einer installierten
+Chromium-PWA ist sie am zuverlässigsten. Ohne Installation bleibt das Einfügen
+eines Links im Rezept-Finder weiterhin möglich.
+
+### Android-App bauen
+
+Für einen lokalen Test-Build genügt unter Windows:
+
+```powershell
+npm run build:apk
+```
+
+Das fertige Paket liegt anschließend als `LX-Family-Planner.apk` im
+Projektordner. Ohne Signaturvariablen entsteht bewusst ein Debug-Paket. Für
+eine weitergebbare Release-Datei werden diese Variablen nur lokal gesetzt:
+
+```text
+LX_ANDROID_KEYSTORE
+LX_ANDROID_STORE_PASSWORD
+LX_ANDROID_KEY_ALIAS
+LX_ANDROID_KEY_PASSWORD
+```
+
+Keystore, Passwörter und erzeugte APK-Dateien werden nicht in Git aufgenommen.
+In der App kann über das Server-Symbol eine andere HTTPS-Domain oder eine
+Heimnetz-IP ausgewählt werden.
+
+Ein signierter Build wird zusätzlich nach `data/apk/latest.apk` kopiert. Läuft
+der Familienplaner aus demselben Projektordner beziehungsweise mit dem
+Docker-Volume `data/`, weist eine ältere Android-App automatisch auf die neue
+Version hin. Debug-Pakete werden von einem Produktionsserver nicht als Update
+angeboten.
 
 ## Benachrichtigungen
 
@@ -476,6 +545,8 @@ Die Vorlage liegt in `.env.example`.
 | `HOST_PORT` | Port des Docker-Hosts, Standard `3001` |
 | `DATABASE_FILE` | abweichender Pfad zur SQLite-Datenbank |
 | `LEGACY_DATABASE_FILE` | optionaler JSON-Altbestand für die erste Migration |
+| `EVENT_REMINDER_INTERVAL_SECONDS` | Prüfintervall für fällige Terminerinnerungen |
+| `CORS_ALLOWED_ORIGINS` | zusätzliche, vertrauenswürdige Ursprünge für eine getrennt gehostete oder native Oberfläche |
 | `AGENT_API_KEY` | aktiviert optional die geschützte Agent-API |
 | `VAPID_*` | optionale feste Web-Push-Schlüssel |
 

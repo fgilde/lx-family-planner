@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.3.0': {
+    version: '1.3.0',
+    eyebrow: 'Neu im Familienplaner',
+    title: 'Pünktlich sein, lecker teilen',
+    intro:
+      'Dieses Update erinnert euch rechtzeitig an Termine und bringt geteilte Rezepte ohne Umwege ins Familienkochbuch.',
+    highlights: [
+      {
+        id: 'event-reminders',
+        title: 'Mehrere Erinnerungen pro Termin',
+        description:
+          'Wählt zum Beispiel einen Tag, zehn Stunden, eine Stunde und zehn Minuten vorher. Jeder Termin kann seine eigenen Zeitpunkte bekommen.'
+      },
+      {
+        id: 'reliable-alerts',
+        title: 'Erinnerungen auch im Hintergrund',
+        description:
+          'Hinweise landen im Familien-Posteingang, als Web-Push und bei verbundener Einrichtung auch auf Gotify.'
+      },
+      {
+        id: 'recipe-sharing',
+        title: 'Von Chefkoch direkt zu LX',
+        description:
+          'Auf Android kann die installierte LX-App Rezept-Links aus Chefkoch, Pinterest und anderen Apps über das Teilen-Menü übernehmen.'
+      },
+      {
+        id: 'safe-scheduling',
+        title: 'Keine doppelten Wecker',
+        description:
+          'Der Server merkt sich bereits versendete Erinnerungen und holt nach einem Neustart nur den sinnvollsten noch offenen Hinweis nach.'
+      }
+    ],
+    closing:
+      'Alle vorhandenen Termine, Rezepte, Profile und Einstellungen bleiben erhalten.'
+  },
   '1.2.0': {
     version: '1.2.0',
     eyebrow: 'Neu im Familienplaner',

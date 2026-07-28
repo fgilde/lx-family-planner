@@ -17,6 +17,13 @@ import {
   webPushCapability
 } from '../hooks/useWebNotifications';
 import { APP_VERSION } from '../appVersion';
+import {
+  buildApiUrl,
+  getStoredSessionToken,
+  setStoredSessionToken,
+  getStoredServerUrl,
+  isCapacitorNative
+} from '../utils/apiConfig';
 
 const FamilyContext = createContext(null);
 
@@ -51,6 +58,7 @@ const EMPTY_INTEGRATIONS = {
       groupChat: true,
       directMessages: false,
       taskCompleted: true,
+      events: true,
       moodHelp: true,
       includeMessageText: false
     }
@@ -110,12 +118,22 @@ export const FUNNY_COMIC_AVATARS = [
 ];
 
 async function apiRequest(url, options = {}) {
+  const targetUrl = buildApiUrl(url);
+  const serverUrl = getStoredServerUrl();
   const headers = new Headers(options.headers || {});
   if (options.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
-  const response = await fetch(url, {
-    credentials: 'same-origin',
+  if (isCapacitorNative() && !headers.has('X-LX-Client')) {
+    headers.set('X-LX-Client', 'native');
+  }
+  const token = getStoredSessionToken();
+  if (token && !headers.has('X-Session-Token')) {
+    headers.set('X-Session-Token', token);
+  }
+  const credentials = serverUrl ? 'include' : 'same-origin';
+  const response = await fetch(targetUrl, {
+    credentials,
     ...options,
     headers
   });
@@ -124,6 +142,9 @@ async function apiRequest(url, options = {}) {
     data = await response.json();
   } catch {
     data = null;
+  }
+  if (data?.sessionToken) {
+    setStoredSessionToken(data.sessionToken);
   }
   if (!response.ok) {
     const error = new Error(
@@ -508,7 +529,10 @@ export function FamilyProvider({ children }) {
 
   useEffect(() => {
     if (authStatus !== 'authenticated') return undefined;
-    const source = new EventSource('/api/live');
+    if (getStoredServerUrl()) return undefined;
+    const source = new EventSource(buildApiUrl('/api/live'), {
+      withCredentials: false
+    });
     const onFamilyUpdate = async event => {
       let nextVersion = 0;
       try {
@@ -675,6 +699,7 @@ export function FamilyProvider({ children }) {
     setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
     setActiveTab('dashboard');
+    setStoredSessionToken('');
     localStorage.removeItem('lx_active_member');
   }, []);
 
@@ -1124,6 +1149,23 @@ export function FamilyProvider({ children }) {
       showToast,
       withActionError
     ]);
+
+  const updateEvent = useCallback((eventId, changes) =>
+    withActionError(async () => {
+      const event = await patchResource('events', eventId, changes);
+      showToast(
+        'Terminerinnerungen gespeichert',
+        event.reminders?.length
+          ? `"${event.title}" erinnert dich jetzt zu ${event.reminders.length} Zeitpunkten.`
+          : `Für "${event.title}" sind die Erinnerungen ausgeschaltet.`,
+        'success'
+      );
+      return event;
+    }, 'Terminerinnerungen konnten nicht gespeichert werden'), [
+    patchResource,
+    showToast,
+    withActionError
+  ]);
 
   const deleteEvent = useCallback(eventId =>
     withActionError(async () => {
@@ -2425,6 +2467,7 @@ export function FamilyProvider({ children }) {
     syncAllCalendarSubscriptions,
     deleteCalendarSubscription,
     addEvent,
+    updateEvent,
     deleteEvent,
     importICS,
     exportICS,

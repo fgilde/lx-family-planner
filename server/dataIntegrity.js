@@ -15,6 +15,15 @@ const PROTECTED_TABLES = [
   { name: 'family_records', key: ['family_id', 'type', 'id'] },
   { name: 'push_subscriptions', key: ['id'] },
   { name: 'inbox_notifications', key: ['id'] },
+  {
+    name: 'event_reminder_deliveries',
+    key: [
+      'family_id',
+      'event_id',
+      'event_start_key',
+      'reminder_minutes'
+    ]
+  },
   { name: 'calendar_subscriptions', key: ['id'] },
   { name: 'integrations', key: ['family_id', 'provider'] },
   { name: 'family_relationships', key: ['id'] },

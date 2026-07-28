@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFamily } from '../context/FamilyContext';
 import {
   X,
@@ -13,6 +13,7 @@ import {
   getPositionLabel,
   isManagedProfile
 } from '../constants/roles';
+import EventReminderPicker from './Calendar/EventReminderPicker';
 
 export default function QuickAddModal() {
   const {
@@ -31,6 +32,8 @@ export default function QuickAddModal() {
   const [memberId, setMemberId] = useState(activeMemberId);
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
+  const [reminders, setReminders] = useState([60]);
+  const [saving, setSaving] = useState(false);
   
   // Shopping specific
   const [category, setCategory] = useState('Obst & Gemüse');
@@ -50,51 +53,66 @@ export default function QuickAddModal() {
       relationship.grantsFromOther?.sharedCalendar
   );
 
+  useEffect(() => {
+    if (!isQuickAddOpen) return;
+    setType(quickAddDefaultType || 'event');
+    setMemberId(activeMemberId || 'all');
+  }, [activeMemberId, isQuickAddOpen, quickAddDefaultType]);
+
   if (!isQuickAddOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || saving) return;
 
-    if (type === 'event') {
-      addEvent({
-        title,
-        date,
-        time,
-        memberId,
-        location,
-        notes,
-        category: 'Allgemein',
-        recipientFamilyIds
-      });
-    } else if (type === 'shopping') {
-      addShoppingItem({
-        name: title,
-        category,
-        quantity,
-        icon: '🛒'
-      });
-    } else if (type === 'task') {
-      addTask({
-        title,
-        memberId,
-        stars: taskIsForManagedProfile ? 0 : Number(stars),
-        category: 'Haushalt'
-      });
-    } else if (type === 'note') {
-      addNote({
-        title,
-        content: notes || title,
-        color: noteColor
-      });
+    setSaving(true);
+    try {
+      let created = null;
+      if (type === 'event') {
+        created = await addEvent({
+          title,
+          date,
+          time,
+          memberId,
+          location,
+          notes,
+          category: 'Allgemein',
+          reminders,
+          recipientFamilyIds
+        });
+      } else if (type === 'shopping') {
+        created = await addShoppingItem({
+          name: title,
+          category,
+          quantity,
+          icon: '🛒'
+        });
+      } else if (type === 'task') {
+        created = await addTask({
+          title,
+          memberId,
+          stars: taskIsForManagedProfile ? 0 : Number(stars),
+          category: 'Haushalt'
+        });
+      } else if (type === 'note') {
+        created = await addNote({
+          title,
+          content: notes || title,
+          color: noteColor
+        });
+      }
+      if (!created) return;
+
+      // Reset & close
+      setTitle('');
+      setLocation('');
+      setNotes('');
+      setReminders([60]);
+      setRecipientFamilyIds([]);
+      setIsQuickAddOpen(false);
+    } finally {
+      setSaving(false);
     }
-
-    // Reset & close
-    setTitle('');
-    setLocation('');
-    setNotes('');
-    setRecipientFamilyIds([]);
-    setIsQuickAddOpen(false);
   };
 
   return (
@@ -167,6 +185,10 @@ export default function QuickAddModal() {
                   <input type="time" className="form-input" value={time} onChange={e => setTime(e.target.value)} />
                 </div>
               </div>
+              <EventReminderPicker
+                value={reminders}
+                onChange={setReminders}
+              />
               <div className="form-group">
                 <label className="form-label">Für wer?</label>
                 <select className="form-select" value={memberId} onChange={e => setMemberId(e.target.value)}>
@@ -278,10 +300,20 @@ export default function QuickAddModal() {
           )}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-            <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-              Hinzufügen
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{ flex: 1 }}
+              disabled={saving}
+            >
+              {saving ? 'Wird gespeichert …' : 'Hinzufügen'}
             </button>
-            <button type="button" className="btn-secondary" onClick={() => setIsQuickAddOpen(false)}>
+            <button
+              type="button"
+              className="btn-secondary"
+              disabled={saving}
+              onClick={() => setIsQuickAddOpen(false)}
+            >
               Abbrechen
             </button>
           </div>

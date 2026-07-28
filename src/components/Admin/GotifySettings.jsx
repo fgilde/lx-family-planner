@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   BellRing,
+  CalendarClock,
   Check,
   Clock3,
   ExternalLink,
@@ -19,6 +20,7 @@ const DEFAULT_RULES = {
   directMessages: false,
   taskApproval: true,
   taskCompleted: true,
+  events: true,
   moodHelp: true,
   includeMessageText: false
 };
@@ -47,6 +49,12 @@ const RULE_OPTIONS = [
     title: 'Aufgaben geschafft',
     description: 'Wenn ein Kind Sterne verdient',
     icon: Trophy
+  },
+  {
+    key: 'events',
+    title: 'Terminerinnerungen',
+    description: 'Bevor ein eingetragener Termin beginnt',
+    icon: CalendarClock
   },
   {
     key: 'moodHelp',

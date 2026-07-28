@@ -1,7 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFamily } from '../../context/FamilyContext';
 import CookingModeModal from './CookingModeModal';
-import { BookOpen, Plus, Download, Trash2, Clock, Users, Play, Globe2, ImageOff, ShoppingBag } from 'lucide-react';
+import {
+  BookOpen,
+  Plus,
+  Download,
+  Trash2,
+  Clock,
+  Users,
+  Play,
+  Globe2,
+  ImageOff,
+  ShoppingBag,
+  Share2,
+  Smartphone,
+  CheckCircle2
+} from 'lucide-react';
+import { recipeShareTargetFromUrl } from '../../../shared/recipeShareTarget.js';
+import { plannerApiRequest } from '../../utils/apiConfig.js';
 
 function RecipeImage({ src, alt }) {
   const [failed, setFailed] = useState(false);
@@ -26,14 +42,25 @@ function RecipeImage({ src, alt }) {
 
 export default function RecipeBook() {
   const { savedRecipes, addRecipe, deleteRecipe, addMealIngredientsToShopping, showToast } = useFamily();
+  const initialShareTarget = useRef(
+    recipeShareTargetFromUrl(window.location.href)
+  );
+  const shareImportStarted = useRef(false);
 
-  const [activeTab, setActiveTab] = useState('browse'); // 'browse', 'import', 'manual'
+  const [activeTab, setActiveTab] = useState(
+    initialShareTarget.current.isShareTarget ? 'import' : 'browse'
+  ); // 'browse', 'import', 'manual'
   const [cookingRecipe, setCookingRecipe] = useState(null);
 
   // Import State
-  const [urlInput, setUrlInput] = useState('');
+  const [urlInput, setUrlInput] = useState(
+    initialShareTarget.current.url
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [sharedImport, setSharedImport] = useState(
+    initialShareTarget.current.isShareTarget
+  );
 
   // Manual Form State
   const [manualTitle, setManualTitle] = useState('');
@@ -41,12 +68,9 @@ export default function RecipeBook() {
   const [manualServings, setManualServings] = useState('4 Portionen');
   const [manualImage, setManualImage] = useState('');
 
-  // Handle public recipe pages and recipe-rich Pinterest pins.
-  const handleImportUrl = async (e) => {
-    e.preventDefault();
-    if (!urlInput.trim()) return;
-
-    let targetUrl = urlInput.trim();
+  const importRecipeUrl = async rawUrl => {
+    if (!rawUrl.trim()) return null;
+    let targetUrl = rawUrl.trim();
     if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
       targetUrl = 'https://' + targetUrl;
     }
@@ -55,33 +79,56 @@ export default function RecipeBook() {
     setError(null);
 
     try {
-      const res = await fetch('/api/recipes/import', {
+      const data = await plannerApiRequest('/api/recipes/import', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: targetUrl })
       });
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
+      if (data.error) {
         throw new Error(data.error || 'Rezept konnte nicht importiert werden.');
       }
 
-      await addRecipe(data.recipe);
+      const saved = await addRecipe(data.recipe);
+      if (!saved) {
+        throw new Error('Das Rezept konnte nicht im Kochbuch gespeichert werden.');
+      }
       setUrlInput('');
       setActiveTab('browse');
+      setSharedImport(false);
       const warning = Array.isArray(data.warnings) ? data.warnings[0] : '';
       showToast(
         warning ? 'Rezept importiert – bitte prüfen' : '🎉 Rezept importiert!',
         warning || `"${data.recipe.title}" wurde erfolgreich importiert!`,
         warning ? 'info' : 'success'
       );
+      return saved;
     } catch (err) {
       setError(err.message);
       showToast('⚠️ Import-Fehler', err.message, 'error');
+      return null;
     } finally {
       setLoading(false);
     }
   };
+
+  // Handle public recipe pages and recipe-rich Pinterest pins.
+  const handleImportUrl = async (e) => {
+    e.preventDefault();
+    await importRecipeUrl(urlInput);
+  };
+
+  useEffect(() => {
+    const payload = initialShareTarget.current;
+    if (!payload.isShareTarget || shareImportStarted.current) return;
+    shareImportStarted.current = true;
+    window.history.replaceState({}, '', '/?view=meals');
+    if (!payload.url) {
+      setError(
+        'Die geteilte App hat keinen Rezept-Link mitgegeben. Füge den Link bitte unten ein.'
+      );
+      return;
+    }
+    void importRecipeUrl(payload.url);
+  }, []);
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
@@ -198,6 +245,21 @@ export default function RecipeBook() {
       {/* TAB 2: CHEFKOCH / WEB IMPORT */}
       {activeTab === 'import' && (
         <div className="card recipe-import-card">
+          {sharedImport && (
+            <div className="recipe-share-arrival">
+              <span><Share2 size={19} /></span>
+              <div>
+                <strong>Direkt vom Handy geteilt</strong>
+                <small>
+                  LX übernimmt den Rezept-Link und legt das Gericht automatisch
+                  in eurem Kochbuch ab.
+                </small>
+              </div>
+              {loading
+                ? <span className="recipe-share-pulse" aria-label="Import läuft" />
+                : <CheckCircle2 size={18} />}
+            </div>
+          )}
           <div className="recipe-import-mark">
             <Globe2 size={25} />
           </div>
@@ -217,6 +279,16 @@ export default function RecipeBook() {
             <span>Kitchen Stories</span>
             <span>Essen &amp; Trinken</span>
             <span>weitere Rezeptseiten</span>
+          </div>
+
+          <div className="recipe-share-howto">
+            <Smartphone size={19} />
+            <span>
+              <strong>Ohne Kopieren auf Android:</strong>
+              Installiere LX einmal als App. Danach kannst du bei Chefkoch,
+              Pinterest und anderen Apps über <b>Teilen → LX Familie</b>
+              importieren.
+            </span>
           </div>
 
           <form onSubmit={handleImportUrl}>

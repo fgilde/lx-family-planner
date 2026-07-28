@@ -18,6 +18,12 @@ import {
   TASK_REPEAT_RULES,
   normalizeTaskDate
 } from '../shared/taskRecurrence.js';
+import {
+  eventReminderMessage,
+  eventStartKey,
+  normalizeEventReminders,
+  selectDueEventReminder
+} from '../shared/eventReminders.js';
 import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 import { loadBringCatalog } from './bringCatalog.js';
 import { importRecipeFromUrl } from './recipeImporter.js';
@@ -63,6 +69,7 @@ import {
   getSession,
   listPublicFamilies,
   listCalendarSubscriptions,
+  listEventReminderDeliveries,
   listEnabledCalendarSubscriptions,
   listFamilyRelationships,
   listInboxNotifications,
@@ -79,7 +86,9 @@ import {
   setAppMeta,
   setSessionMember,
   markAllInboxNotificationsRead,
+  markEventReminderDeliveries,
   markInboxNotificationRead,
+  pruneEventReminderDeliveries,
   reviewTaskRecord,
   toggleTaskRecord,
   updateCalendarSubscription,
@@ -125,6 +134,20 @@ const CALENDAR_SYNC_INTERVAL_MS = Math.max(
 ) * 60 * 1000;
 const CALENDAR_FETCH_TIMEOUT_MS = 12_000;
 const CALENDAR_MAX_BYTES = 2 * 1024 * 1024;
+const EVENT_REMINDER_INTERVAL_MS = Math.max(
+  15,
+  Number(process.env.EVENT_REMINDER_INTERVAL_SECONDS || 30)
+) * 1000;
+const CORS_ALLOWED_ORIGINS = new Set([
+  'capacitor://localhost',
+  'http://localhost',
+  'https://localhost',
+  'https://familie.laxxx-lab.de',
+  ...String(process.env.CORS_ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(origin => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+]);
 const pendingBringLogins = new Map();
 const authAttempts = new Map();
 
@@ -191,6 +214,7 @@ const DEFAULT_GOTIFY_RULES = Object.freeze({
   directMessages: false,
   taskApproval: true,
   taskCompleted: true,
+  events: true,
   moodHelp: true,
   includeMessageText: false
 });
@@ -436,6 +460,22 @@ function clearSessionCookie(secure = false) {
   ];
   if (secure) attributes.push('Secure');
   return attributes.join('; ');
+}
+
+function isAllowedCorsOrigin(req, origin) {
+  if (!origin) return false;
+  const normalizedOrigin = String(origin).trim().replace(/\/+$/, '');
+  const requestOrigin = `${req.protocol}://${req.get('host')}`;
+  return (
+    normalizedOrigin === requestOrigin ||
+    CORS_ALLOWED_ORIGINS.has(normalizedOrigin)
+  );
+}
+
+function nativeSessionTokenPayload(req, sessionToken) {
+  return req.headers['x-lx-client'] === 'native'
+    ? { sessionToken }
+    : {};
 }
 
 function encryptJson(value) {
@@ -920,20 +960,55 @@ function queueWebPushEvent(familyId, eventKey, payload) {
     .filter(member => !requestedRecipients || requestedRecipients.has(member.id))
     .filter(member => !excluded.has(member.id))
     .map(member => member.id);
-  createInboxNotifications(familyId, inboxMemberIds, {
+  const createdNotifications = createInboxNotifications(
+    familyId,
+    inboxMemberIds,
+    {
     eventKey,
     title: payload.title,
     body: payload.body,
     url: payload.url,
     priority: payload.priority,
     dedupeKey: payload.tag
-  });
-  void sendWebPushEvent(familyId, eventKey, payload).catch(error => {
+    }
+  );
+  if (!createdNotifications.length) return [];
+  void sendWebPushEvent(familyId, eventKey, {
+    ...payload,
+    recipientMemberIds: [
+      ...new Set(createdNotifications.map(entry => entry.memberId))
+    ]
+  }).catch(error => {
     console.error(
       'Browser-Benachrichtigung fehlgeschlagen:',
       error.message
     );
   });
+  return createdNotifications;
+}
+
+function eventReminderRecipientMemberIds(familyId, event) {
+  const members = getMembers(familyId);
+  const signedInMembers = members.filter(
+    member => !isManagedMember(member) && member.role !== 'pet'
+  );
+  if (
+    event?.sharedOwnerFamilyId &&
+    event.sharedOwnerFamilyId !== familyId
+  ) {
+    return signedInMembers.map(member => member.id);
+  }
+  if (!event?.memberId || event.memberId === 'all') {
+    return signedInMembers.map(member => member.id);
+  }
+  const target = members.find(member => member.id === event.memberId);
+  if (!target) return signedInMembers.map(member => member.id);
+  if (isManagedMember(target) || target.role === 'pet') {
+    return signedInMembers
+      .filter(isAdultMember)
+      .map(member => member.id);
+  }
+  return [target.id];
 }
 
 function notifyChatViaWebPush(req, record) {
@@ -1121,7 +1196,11 @@ function clearAuthAttempts(req) {
 }
 
 function sessionMiddleware(req, _res, next) {
-  const token = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  const cookieToken = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  const headerToken =
+    req.headers['x-session-token'] ||
+    req.headers.authorization?.replace(/^Bearer\s+/i, '');
+  const token = cookieToken || headerToken;
   req.sessionToken = token || null;
   req.session = token ? getSession(token) : null;
   next();
@@ -1840,6 +1919,54 @@ function cleanTime(value, fallback = '') {
   return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : fallback;
 }
 
+function sanitizeCalendarEvent(req, value, existing = null) {
+  const input = ensureObject(value);
+  const date = cleanDate(input.date, '');
+  if (!date) {
+    const error = new Error('Bitte wähle ein gültiges Termindatum.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const memberId = cleanText(input.memberId, 'all', 100) || 'all';
+  const targetMember =
+    memberId === 'all'
+      ? null
+      : getMember(req.session.familyId, memberId);
+  if (memberId !== 'all' && !targetMember) {
+    const error = new Error('Das ausgewählte Familienprofil wurde nicht gefunden.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (
+    targetMember?.isManaged &&
+    !isAdultMember(
+      req.activeMember ||
+      getMember(req.session.familyId, req.session.memberId)
+    )
+  ) {
+    const error = new Error(
+      'Termine für verwaltete Profile werden von einem Erwachsenen eingetragen.'
+    );
+    error.statusCode = 403;
+    throw error;
+  }
+  const allDay = Boolean(input.allDay);
+  return {
+    ...(existing || {}),
+    ...input,
+    title: requireText(input.title, 'Termintitel', 240),
+    date,
+    time: allDay ? '' : cleanTime(input.time, ''),
+    endTime: allDay ? '' : cleanTime(input.endTime, ''),
+    allDay,
+    memberId,
+    location: cleanText(input.location, '', 300),
+    notes: cleanText(input.notes, '', 2000),
+    category: cleanText(input.category, 'Allgemein', 80),
+    reminders: normalizeEventReminders(input.reminders)
+  };
+}
+
 function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
   const input = ensureObject(value);
   const now = Date.now();
@@ -2173,6 +2300,84 @@ export function createApp() {
       reason
     });
   };
+  let eventReminderSweepRunning = false;
+  app.locals.runEventReminderSweep = async (now = Date.now()) => {
+    if (eventReminderSweepRunning) {
+      return { skipped: true, delivered: 0 };
+    }
+    eventReminderSweepRunning = true;
+    let delivered = 0;
+    try {
+      for (const family of listPublicFamilies()) {
+        const events = getBootstrap(family.id).resources.events;
+        for (const event of events) {
+          if (!normalizeEventReminders(event.reminders).length) continue;
+          const startKey = eventStartKey(event);
+          const eventId = String(event.sharedEventId || event.id || '');
+          if (!eventId) continue;
+          try {
+            const previousDeliveries = listEventReminderDeliveries(
+              family.id,
+              eventId,
+              startKey
+            );
+            const due = selectDueEventReminder(
+              event,
+              previousDeliveries,
+              now
+            );
+            if (!due) continue;
+            const body = eventReminderMessage(event, now);
+            const tag = [
+              'event-reminder',
+              eventId,
+              due.startKey,
+              due.reminderMinutes
+            ].join('-');
+            const notifications = queueWebPushEvent(family.id, 'events', {
+              recipientMemberIds: eventReminderRecipientMemberIds(
+                family.id,
+                event
+              ),
+              title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 180)}`,
+              body,
+              privateTitle: 'Terminerinnerung',
+              privateBody: 'Ein Termin beginnt bald.',
+              url: '/?view=calendar',
+              tag,
+              priority: due.reminderMinutes <= 10 ? 'high' : 'normal',
+              ttl: Math.max(300, Math.min(86_400, due.reminderMinutes * 60))
+            });
+            queueGotifyNotification(family.id, 'events', {
+              title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 140)}`,
+              message: body,
+              priority: due.reminderMinutes <= 10 ? 7 : 4
+            });
+            markEventReminderDeliveries(
+              family.id,
+              eventId,
+              due.startKey,
+              due.consumedReminderMinutes,
+              now
+            );
+            delivered += 1;
+            if (notifications.length) {
+              publishFamilyChange(family.id, 'event-reminder');
+            }
+          } catch (error) {
+            console.error(
+              `Terminerinnerung ${eventId} konnte nicht verarbeitet werden:`,
+              error.message
+            );
+          }
+        }
+      }
+      pruneEventReminderDeliveries();
+      return { skipped: false, delivered };
+    } finally {
+      eventReminderSweepRunning = false;
+    }
+  };
   const stopHomeAssistantSocket = familyId => {
     const current = homeAssistantSockets.get(familyId);
     if (!current) return;
@@ -2302,6 +2507,21 @@ export function createApp() {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
   app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    const corsAllowed = isAllowedCorsOrigin(req, origin);
+    if (origin && corsAllowed) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client'
+      );
+      res.append('Vary', 'Origin');
+    }
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(corsAllowed ? 204 : 403);
+    }
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
@@ -2327,6 +2547,93 @@ export function createApp() {
       version: APP_VERSION,
       database: 'sqlite',
       timestamp: new Date().toISOString()
+    });
+  });
+
+  function findLatestApkPath() {
+    const candidates = [
+      path.join(process.cwd(), 'data/apk/latest.apk'),
+      path.join(process.cwd(), 'data/apk/LX-Family-Planner.apk'),
+      path.join(process.cwd(), 'public/apk/LX-Family-Planner.apk'),
+      path.join(process.cwd(), 'public/apk/latest.apk'),
+      path.join(process.cwd(), 'dist/apk/LX-Family-Planner.apk'),
+      path.join(process.cwd(), 'dist/apk/latest.apk'),
+      path.join(process.cwd(), 'LX-Family-Planner.apk'),
+      path.join(process.cwd(), 'dist/LX-Family-Planner.apk')
+    ];
+    for (const file of candidates) {
+      if (fs.existsSync(file)) return file;
+    }
+    return null;
+  }
+
+  function readApkMetadata(apkFile) {
+    const candidates = apkFile
+      ? [path.join(path.dirname(apkFile), 'version.json')]
+      : [];
+    for (const file of [...new Set(candidates)]) {
+      try {
+        const metadata = JSON.parse(
+          fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '')
+        );
+        return {
+          versionName: cleanText(
+            metadata.versionName,
+            APP_VERSION,
+            40
+          ),
+          versionCode: Math.max(0, Number(metadata.versionCode) || 0),
+          buildKind:
+            metadata.buildKind === 'release' ? 'release' : 'debug',
+          builtAt: cleanText(metadata.builtAt, '', 80),
+          sha256: /^[a-f0-9]{64}$/i.test(metadata.sha256 || '')
+            ? metadata.sha256.toLowerCase()
+            : ''
+        };
+      } catch {
+        // Try the next local metadata file.
+      }
+    }
+    return {
+      versionName: APP_VERSION,
+      versionCode: 0,
+      buildKind: 'debug',
+      builtAt: '',
+      sha256: ''
+    };
+  }
+
+  function availableApkRelease() {
+    const file = findLatestApkPath();
+    if (!file) return null;
+    const metadata = readApkMetadata(file);
+    if (IS_PRODUCTION && metadata.buildKind !== 'release') {
+      return null;
+    }
+    return { file, metadata };
+  }
+
+  app.get('/api/app/version', (_req, res) => {
+    const release = availableApkRelease();
+    const metadata = release?.metadata || {
+      versionName: APP_VERSION,
+      versionCode: 0,
+      buildKind: '',
+      builtAt: '',
+      sha256: ''
+    };
+
+    res.json({
+      success: true,
+      versionName: metadata.versionName,
+      versionCode: metadata.versionCode,
+      apkUrl: release ? '/apk/latest.apk' : null,
+      releasedAt:
+        metadata.builtAt ||
+        (release
+          ? fs.statSync(release.file).mtime.toISOString()
+          : null),
+      sha256: metadata.sha256 || null
     });
   });
 
@@ -2383,7 +2690,8 @@ export function createApp() {
       family: result.family,
       members: result.members,
       activeMemberId: initialMember?.id || null,
-      session: publicSessionPayload(session)
+      session: publicSessionPayload(session),
+      ...nativeSessionTokenPayload(req, sessionToken)
     });
   });
 
@@ -2411,7 +2719,8 @@ export function createApp() {
       success: true,
       family: getFamily(familyId),
       members: getBootstrap(familyId).members,
-      session: publicSessionPayload(session)
+      session: publicSessionPayload(session),
+      ...nativeSessionTokenPayload(req, sessionToken)
     });
   });
 
@@ -3130,6 +3439,7 @@ export function createApp() {
           notes: cleanText(input.notes, '', 2000),
           category: cleanText(input.category, 'Familienzeit', 80),
           memberId: cleanText(input.memberId, 'all', 100),
+          reminders: normalizeEventReminders(input.reminders),
           household: 'familie',
           createdByMemberId: req.activeMember.id,
           createdByName: req.activeMember.name
@@ -3644,6 +3954,9 @@ export function createApp() {
     if (req.params.type === 'rewards') {
       input = sanitizeRewardRecord(req.session.familyId, input);
     }
+    if (req.params.type === 'events') {
+      input = sanitizeCalendarEvent(req, input);
+    }
     if (req.params.type === 'tasks') {
       const creator = getMember(req.session.familyId, req.session.memberId);
       const memberId = requireText(input.memberId, 'Zielprofil', 100);
@@ -3692,25 +4005,6 @@ export function createApp() {
         createdAt: Number(input.createdAt) || Date.now()
       };
     }
-    if (req.params.type === 'events' && input.memberId) {
-      const targetMember = getMember(
-        req.session.familyId,
-        cleanText(input.memberId, '', 100)
-      );
-      const activeMember = req.session.memberId
-        ? getMember(req.session.familyId, req.session.memberId)
-        : null;
-      if (
-        targetMember?.isManaged &&
-        !isAdultMember(activeMember)
-      ) {
-        return res.status(403).json({
-          success: false,
-          error:
-            'Termine für verwaltete Profile werden von einem Erwachsenen eingetragen.'
-        });
-      }
-    }
     const record = createRecord(
       req.session.familyId,
       req.params.type,
@@ -3743,13 +4037,14 @@ export function createApp() {
 
   app.patch('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
+    let existingEvent = null;
     if (req.params.type === 'events') {
-      const existing = getRecord(
+      existingEvent = getRecord(
         req.session.familyId,
         'events',
         req.params.id
       );
-      if (isCalendarSubscriptionEvent(existing)) {
+      if (isCalendarSubscriptionEvent(existingEvent)) {
         return res.status(409).json({
           success: false,
           error:
@@ -3820,6 +4115,21 @@ export function createApp() {
         req.session.familyId,
         ensureObject(req.body),
         existing
+      );
+    } else if (req.params.type === 'events') {
+      if (!existingEvent) {
+        return res.status(404).json({
+          success: false,
+          error: 'Termin nicht gefunden.'
+        });
+      }
+      changes = sanitizeCalendarEvent(
+        req,
+        {
+          ...existingEvent,
+          ...ensureObject(req.body)
+        },
+        existingEvent
       );
     } else if (FAMILY_LIFE_TYPES.has(req.params.type)) {
       const existing = getRecord(
@@ -5234,6 +5544,25 @@ export function createApp() {
     res.status(201).json({ success: true, record });
   });
 
+  const serveApkFile = (_req, res) => {
+    const release = availableApkRelease();
+    if (!release) {
+      return res
+        .status(404)
+        .send('Keine freigegebene APK-Datei auf dem Server hinterlegt.');
+    }
+    res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+    res.setHeader('Content-Disposition', 'attachment; filename="LX-Family-Planner.apk"');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.sendFile(release.file);
+  };
+
+  app.get('/apk', serveApkFile);
+  app.get('/app', serveApkFile);
+  app.get('/apk/latest.apk', serveApkFile);
+  app.get('/apk/LX-Family-Planner.apk', serveApkFile);
+  app.get('/LX-Family-Planner.apk', serveApkFile);
+
   const distPath = path.join(process.cwd(), 'dist');
   if (fs.existsSync(distPath)) {
     app.use(express.static(distPath, {
@@ -5296,13 +5625,23 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void syncAllCalendarSubscriptions();
   }, CALENDAR_SYNC_INTERVAL_MS);
   calendarSyncTimer.unref();
+  const eventReminderTimer = setInterval(() => {
+    void app.locals.runEventReminderSweep();
+  }, EVENT_REMINDER_INTERVAL_MS);
+  eventReminderTimer.unref();
   const initialCalendarSync = setTimeout(() => {
     void syncAllCalendarSubscriptions();
   }, 20_000);
   initialCalendarSync.unref();
+  const initialEventReminderSweep = setTimeout(() => {
+    void app.locals.runEventReminderSweep();
+  }, 5_000);
+  initialEventReminderSweep.unref();
   server.on('close', () => {
     clearInterval(calendarSyncTimer);
+    clearInterval(eventReminderTimer);
     clearTimeout(initialCalendarSync);
+    clearTimeout(initialEventReminderSweep);
     app.locals.stopHomeAssistantSockets?.();
   });
   return server;

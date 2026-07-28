@@ -13,3 +13,8 @@ family_planner.sqlite-wal
 node_modules
 scratch
 *.log
+android
+*.apk
+*.aab
+*.jks
+*.keystore

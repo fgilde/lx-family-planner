@@ -50,8 +50,8 @@ const RULES = [
   },
   {
     key: 'events',
-    title: 'Familientermine',
-    description: 'Neue Kalendereinträge',
+    title: 'Termine & Erinnerungen',
+    description: 'Neue Einträge und bevorstehende Termine',
     icon: CalendarDays
   },
   {
