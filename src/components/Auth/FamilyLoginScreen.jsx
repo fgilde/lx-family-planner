@@ -20,6 +20,7 @@ import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import AndroidAppDownload from './AndroidAppDownload';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
   const {
@@ -236,6 +237,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
       </section>
 
       <main className="auth-action-panel">
+        <div className="auth-action-stack">
         <div className="auth-card auth-card-wide">
           <div className="auth-card-heading">
             <div className="auth-icon"><Users size={24} /></div>
@@ -324,6 +326,8 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
               </button>
             )}
           </div>
+        </div>
+        <AndroidAppDownload />
         </div>
       </main>
     </div>

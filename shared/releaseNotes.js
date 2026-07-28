@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.4.0': {
+    version: '1.4.0',
+    eyebrow: 'Neu im Familienplaner',
+    title: 'Die Familien-App ist da',
+    intro:
+      'LX lässt sich jetzt direkt von eurer Startseite als richtige Android-App installieren – ohne App-Store und passend zu eurem eigenen Server.',
+    highlights: [
+      {
+        id: 'android-download',
+        title: 'Direkter App-Download',
+        description:
+          'Auf der öffentlichen Startseite findet ihr einen klaren Download-Knopf mit aktueller Version und Dateigröße.'
+      },
+      {
+        id: 'qr-download',
+        title: 'Einfach per QR-Code',
+        description:
+          'Öffnet die Startseite am Computer, scannt den Code mit dem Handy und ladet die App direkt herunter.'
+      },
+      {
+        id: 'signed-updates',
+        title: 'Sicher signierte Updates',
+        description:
+          'Die Android-App wird dauerhaft mit demselben privaten Schlüssel signiert, damit spätere Versionen sauber über die bestehende App installiert werden können.'
+      },
+      {
+        id: 'self-hosted-app',
+        title: 'Bleibt bei euch',
+        description:
+          'APK, QR-Code und Download laufen über euren LX-Server. Ein externer App-Store ist nicht nötig.'
+      }
+    ],
+    closing:
+      'Alle Profile, Benachrichtigungen und Familiendaten bleiben erhalten.'
+  },
   '1.3.1': {
     version: '1.3.1',
     eyebrow: 'Neu im Familienplaner',

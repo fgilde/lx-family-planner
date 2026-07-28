@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.3.1</strong> ·
+  <strong>Aktuelle Version: 1.4.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -422,17 +422,31 @@ Geräts abhängig; auf Android mit der LX-App oder einer installierten
 Chromium-PWA ist sie am zuverlässigsten. Ohne Installation bleibt das Einfügen
 eines Links im Rezept-Finder weiterhin möglich.
 
-### Android-App bauen
+### Android-App herunterladen und bauen
 
-Für einen lokalen Test-Build genügt unter Windows:
+Auf der öffentlichen Anmeldeseite zeigt LX automatisch die aktuelle
+Android-App mit Versionsnummer, Dateigröße, Download-Knopf und QR-Code an. Der
+QR-Code verweist immer auf die eigene Planer-Adresse, zum Beispiel
+`https://familie.example.de/apk/latest.apk`.
+
+Für einen neuen App-Build genügt unter Windows:
 
 ```powershell
 npm run build:apk
 ```
 
 Das fertige Paket liegt anschließend als `LX-Family-Planner.apk` im
-Projektordner. Ohne Signaturvariablen entsteht bewusst ein Debug-Paket. Für
-eine weitergebbare Release-Datei werden diese Variablen nur lokal gesetzt:
+Projektordner. Beim ersten Durchlauf erzeugt das Skript automatisch einen
+privaten Release-Schlüssel unter `data/android-signing/`. Danach verwendet
+jeder Build denselben Schlüssel, damit Android spätere Versionen als Update
+akzeptiert.
+
+> **Wichtig:** `data/android-signing/` einmal sicher außerhalb des Servers
+> sichern. Geht dieser Schlüssel verloren, können bestehende App-Installationen
+> nicht mehr mit einer neu signierten APK aktualisiert werden.
+
+Eine vorhandene professionelle Signatur kann stattdessen über diese lokalen
+Variablen vorgegeben werden:
 
 ```text
 LX_ANDROID_KEYSTORE
@@ -441,15 +455,17 @@ LX_ANDROID_KEY_ALIAS
 LX_ANDROID_KEY_PASSWORD
 ```
 
-Keystore, Passwörter und erzeugte APK-Dateien werden nicht in Git aufgenommen.
-In der App kann über das Server-Symbol eine andere HTTPS-Domain oder eine
+Keystore und Passwörter werden nicht in Git aufgenommen. Die fertige,
+signierte APK wird zusätzlich unter `public/apk/latest.apk` bereitgestellt und
+ist damit Bestandteil des nächsten Docker- beziehungsweise Server-Updates. In
+der App kann über das Server-Symbol eine andere HTTPS-Domain oder eine
 Heimnetz-IP ausgewählt werden.
 
-Ein signierter Build wird zusätzlich nach `data/apk/latest.apk` kopiert. Läuft
-der Familienplaner aus demselben Projektordner beziehungsweise mit dem
+Der Build wird außerdem nach `data/apk/latest.apk` kopiert. Läuft der
+Familienplaner aus demselben Projektordner beziehungsweise mit dem
 Docker-Volume `data/`, weist eine ältere Android-App automatisch auf die neue
-Version hin. Debug-Pakete werden von einem Produktionsserver nicht als Update
-angeboten.
+Version hin. Produktionsserver bieten ausschließlich signierte Release-Pakete
+an.
 
 ## Benachrichtigungen
 

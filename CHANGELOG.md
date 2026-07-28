@@ -2,6 +2,24 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.4.0] – 2026-07-28
+
+### Neu
+
+- öffentlicher Android-App-Download direkt auf der Anmeldeseite
+- dynamischer QR-Code zum APK-Download über die eigene LX-Adresse
+- Anzeige von App-Version, Dateigröße und Android-Mindestversion
+- automatisch wiederverwendete Release-Signatur für installierbare Updates
+- signierte APK wird als Bestandteil des Docker- und Server-Releases
+  ausgeliefert
+
+### Sicherheit und Betrieb
+
+- der private Signierschlüssel bleibt ausschließlich im ignorierten
+  `data/android-signing`-Ordner
+- Produktionsserver bieten weiterhin nur signierte Release-APKs an
+- vorhandene Familien- und App-Daten werden durch das Update nicht verändert
+
 ## [1.3.1] – 2026-07-28
 
 ### Neu

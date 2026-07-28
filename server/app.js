@@ -2885,7 +2885,7 @@ export function createApp() {
     });
   });
 
-  function findLatestApkPath() {
+  function findApkCandidates() {
     const candidates = [
       path.join(process.cwd(), 'data/apk/latest.apk'),
       path.join(process.cwd(), 'data/apk/LX-Family-Planner.apk'),
@@ -2896,10 +2896,7 @@ export function createApp() {
       path.join(process.cwd(), 'LX-Family-Planner.apk'),
       path.join(process.cwd(), 'dist/LX-Family-Planner.apk')
     ];
-    for (const file of candidates) {
-      if (fs.existsSync(file)) return file;
-    }
-    return null;
+    return [...new Set(candidates)].filter(file => fs.existsSync(file));
   }
 
   function readApkMetadata(apkFile) {
@@ -2939,13 +2936,23 @@ export function createApp() {
   }
 
   function availableApkRelease() {
-    const file = findLatestApkPath();
-    if (!file) return null;
-    const metadata = readApkMetadata(file);
-    if (IS_PRODUCTION && metadata.buildKind !== 'release') {
-      return null;
-    }
-    return { file, metadata };
+    const releases = findApkCandidates()
+      .map(file => ({
+        file,
+        metadata: readApkMetadata(file),
+        stats: fs.statSync(file)
+      }))
+      .filter(
+        release =>
+          !IS_PRODUCTION || release.metadata.buildKind === 'release'
+      )
+      .sort((left, right) => {
+        const byVersion =
+          right.metadata.versionCode - left.metadata.versionCode;
+        if (byVersion !== 0) return byVersion;
+        return right.stats.mtimeMs - left.stats.mtimeMs;
+      });
+    return releases[0] || null;
   }
 
   app.get('/api/app/version', (_req, res) => {
@@ -2963,10 +2970,12 @@ export function createApp() {
       versionName: metadata.versionName,
       versionCode: metadata.versionCode,
       apkUrl: release ? '/apk/latest.apk' : null,
+      buildKind: release ? metadata.buildKind : null,
+      fileSizeBytes: release ? release.stats.size : null,
       releasedAt:
         metadata.builtAt ||
         (release
-          ? fs.statSync(release.file).mtime.toISOString()
+          ? release.stats.mtime.toISOString()
           : null),
       sha256: metadata.sha256 || null
     });

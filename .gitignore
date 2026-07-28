@@ -5,6 +5,8 @@ coverage/
 .vite/
 *.apk
 *.aab
+!public/apk/
+!public/apk/latest.apk
 
 # Local secrets and environment files
 .env

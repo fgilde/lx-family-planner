@@ -2147,6 +2147,24 @@ textarea {
   position: relative;
 }
 
+.auth-action-stack {
+  width: min(100%, 680px);
+  display: grid;
+  gap: 16px;
+}
+
+.auth-action-stack > .auth-card {
+  padding: clamp(24px, 3vw, 32px);
+}
+
+.auth-action-stack > .auth-card .auth-card-heading {
+  margin-bottom: 18px;
+}
+
+.auth-action-stack > .auth-card .family-choice-grid {
+  max-height: 225px;
+}
+
 .auth-back {
   border: 0;
   background: transparent;
@@ -2174,7 +2192,235 @@ textarea {
 }
 
 .auth-card-wide {
-  width: min(100%, 680px);
+  width: 100%;
+}
+
+.android-download-card {
+  width: 100%;
+  min-height: 176px;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr) 128px;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  color: #f9f5eb;
+  border: 1px solid rgba(246, 216, 178, 0.2);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 87% 10%, rgba(240, 197, 143, 0.2), transparent 28%),
+    linear-gradient(135deg, #143d34 0%, #1b5547 54%, #173e34 100%);
+  box-shadow: 0 18px 38px rgba(22, 56, 48, 0.2);
+  isolation: isolate;
+}
+
+.android-download-card::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 190px;
+  height: 190px;
+  right: 82px;
+  bottom: -146px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 24px rgba(255, 255, 255, 0.025),
+    0 0 0 52px rgba(255, 255, 255, 0.018);
+}
+
+.android-download-card.is-loading {
+  min-height: 82px;
+  grid-template-columns: auto 1fr;
+  color: rgba(249, 245, 235, 0.78);
+  font-weight: 750;
+}
+
+.android-download-phone {
+  width: 68px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  position: relative;
+  color: #173e34;
+  border: 4px solid #f6d8b2;
+  border-radius: 19px;
+  background:
+    linear-gradient(150deg, #fffdf8, #f4e8d6);
+  box-shadow:
+    0 16px 28px rgba(5, 22, 18, 0.24),
+    inset 0 0 0 1px rgba(23, 62, 52, 0.08);
+  transform: rotate(-4deg);
+}
+
+.android-download-phone::after {
+  content: '';
+  width: 18px;
+  height: 3px;
+  position: absolute;
+  bottom: 7px;
+  border-radius: 99px;
+  background: rgba(23, 62, 52, 0.28);
+}
+
+.android-download-phone-speaker {
+  width: 21px;
+  height: 4px;
+  position: absolute;
+  top: 7px;
+  border-radius: 99px;
+  background: rgba(23, 62, 52, 0.3);
+}
+
+.android-download-app-mark {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  color: #fffdf8;
+  border-radius: 11px 11px 4px 11px;
+  background: #d87058;
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.android-download-copy {
+  min-width: 0;
+}
+
+.android-download-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f0c58f;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.android-download-copy h3 {
+  margin: 5px 0 4px;
+  color: #fffdf8;
+  font-size: clamp(1.18rem, 2vw, 1.52rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.android-download-copy p {
+  margin: 0;
+  max-width: 390px;
+  color: rgba(249, 245, 235, 0.68);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.android-download-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  margin-top: 8px;
+}
+
+.android-download-facts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(249, 245, 235, 0.76);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.android-download-facts span:not(:last-child)::after {
+  content: '•';
+  margin-left: 6px;
+  color: rgba(240, 197, 143, 0.55);
+}
+
+.android-download-button {
+  min-height: 39px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 11px;
+  padding: 8px 14px;
+  color: #173e34;
+  border: 1px solid #f6d8b2;
+  border-radius: 12px;
+  background: #f6d8b2;
+  box-shadow: 0 9px 19px rgba(8, 30, 24, 0.18);
+  font-size: 0.77rem;
+  font-weight: 850;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.android-download-button:hover {
+  color: #173e34;
+  background: #ffe8cb;
+  box-shadow: 0 13px 24px rgba(8, 30, 24, 0.25);
+  transform: translateY(-2px);
+}
+
+.android-download-button:focus-visible {
+  outline: 3px solid rgba(240, 197, 143, 0.44);
+  outline-offset: 3px;
+}
+
+.android-download-qr {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.android-download-qr > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(249, 245, 235, 0.74);
+  font-size: 0.62rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.android-download-qr-frame {
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 18px;
+  background: #fffdf8;
+  box-shadow: 0 12px 25px rgba(5, 22, 18, 0.22);
+}
+
+.android-download-qr-frame::after {
+  content: 'LX';
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: #fff;
+  border: 3px solid #fffdf8;
+  border-radius: 8px;
+  background: #d87058;
+  font-family: var(--font-heading);
+  font-size: 0.58rem;
+  font-weight: 900;
+  transform: translate(-50%, -50%);
 }
 
 .auth-card-heading {
@@ -4452,6 +4698,10 @@ textarea {
     padding-top: 70px;
   }
 
+  .auth-action-stack {
+    width: min(100%, 720px);
+  }
+
   .member-builder-fields {
     grid-template-columns: 1fr 1fr;
   }
@@ -4489,6 +4739,54 @@ textarea {
   .auth-card {
     padding: 22px 16px;
     border-radius: 24px;
+  }
+
+  .android-download-card {
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 14px;
+    padding: 17px;
+    border-radius: 24px;
+  }
+
+  .android-download-phone {
+    width: 54px;
+    height: 94px;
+    border-width: 3px;
+    border-radius: 16px;
+  }
+
+  .android-download-qr {
+    grid-column: 1 / -1;
+    width: 100%;
+    grid-template-columns: 1fr auto;
+    justify-items: start;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.16);
+  }
+
+  .android-download-qr-frame {
+    width: 100px;
+    height: 100px;
+  }
+
+  .android-download-qr-frame svg {
+    width: 90px;
+    height: 90px;
+  }
+
+  .android-download-qr > span {
+    max-width: 120px;
+    align-self: center;
+    font-size: 0.7rem;
+    text-align: left;
+  }
+
+  .android-download-copy p {
+    font-size: 0.72rem;
+  }
+
+  .android-download-facts span:not(:last-child)::after {
+    display: none;
   }
 
   .profile-choice-grid {
