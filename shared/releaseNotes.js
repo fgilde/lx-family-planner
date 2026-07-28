@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.7': {
+    version: '1.7.7',
+    eyebrow: 'Capacitor-Hänger gezielt behoben',
+    title: 'Android kann die Push-Einrichtung jetzt wirklich abschließen',
+    intro:
+      'Die genaue Analyse hat einen offenen Fehler in Capacitor 8 sichtbar gemacht: Android-Pluginobjekte wurden versehentlich wie wartende Vorgänge behandelt und blieben deshalb bei „Android wird vorbereitet“ hängen. LX umgeht diesen Framework-Fehler jetzt sicher.',
+    highlights: [
+      {
+        id: 'capacitor-thenable-workaround',
+        title: 'Framework-Fehler sauber umgangen',
+        description:
+          'Das Android-Plugin wird nicht mehr selbst durch einen asynchronen Rückgabewert transportiert.'
+      },
+      {
+        id: 'listeners-ready',
+        title: 'Listener werden vollständig eingerichtet',
+        description:
+          'Benachrichtigungsempfang und Antippen einer Meldung können nun vor der Firebase-Anmeldung korrekt starten.'
+      },
+      {
+        id: 'thenable-regression-test',
+        title: 'Der konkrete Fehler ist getestet',
+        description:
+          'Ein automatischer Test bildet genau den fehlerhaften Capacitor-Proxy nach und verhindert eine spätere Rückkehr des Hängers.'
+      },
+      {
+        id: 'direct-native-token-retained',
+        title: 'Direkter Firebase-Weg bleibt aktiv',
+        description:
+          'Nach der Android-Vorbereitung liefert die native LX-Brücke den Geräteschlüssel direkt oder nennt die genaue Geräteursache.'
+      }
+    ],
+    closing:
+      'Installiert Version 1.7.7 über die vorhandene App. Profile, Anmeldung und Familiendaten bleiben erhalten.'
+  },
   '1.7.6': {
     version: '1.7.6',
     eyebrow: 'Firebase antwortet jetzt direkt',

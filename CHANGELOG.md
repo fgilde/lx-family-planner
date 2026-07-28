@@ -2,6 +2,18 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.7] – 2026-07-29
+
+### Offenen Capacitor-Thenable-Fehler umgangen
+
+- Ursache des Hängers bei „Android wird vorbereitet“ anhand des offenen
+  Capacitor-Issues #8472 verifiziert
+- Capacitor-Plugin-Proxys überschreiten keine Promise-/Async-Grenze mehr
+- Listener-Einrichtung verwendet einen sicheren einfachen Objekt-Container
+- Regressionstest simuliert exakt die fehlerhafte Thenable-Erkennung
+- direkte native Firebase-Diagnose und Token-Rückgabe aus Version 1.7.6 bleiben
+  erhalten
+
 ## [1.7.6] – 2026-07-29
 
 ### Direkte native Firebase-Token-Brücke

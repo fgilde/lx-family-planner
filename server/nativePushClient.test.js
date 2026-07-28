@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   createNativeInstallationId,
+  nativePluginContainer,
   nativePushPermissionNeedsPrompt,
   withNativePushTimeout
 } from '../src/hooks/useNativePushNotifications.js';
@@ -38,6 +39,25 @@ test('native push timeout rejects any stuck setup stage', async () => {
       error.code === 'native-push-timeout' &&
       error.message === 'Android setup timed out.'
   );
+});
+
+test('Capacitor plugin proxies never pass through Promise thenable adoption', async () => {
+  let thenReads = 0;
+  const pluginProxy = new Proxy(
+    {},
+    {
+      get(target, property) {
+        if (property === 'then') {
+          thenReads += 1;
+          return () => {};
+        }
+        return Reflect.get(target, property);
+      }
+    }
+  );
+  const wrapped = await Promise.resolve(nativePluginContainer(pluginProxy));
+  assert.equal(thenReads, 0);
+  assert.equal(wrapped.plugin, pluginProxy);
 });
 
 test('Android app requests the Firebase token through the direct native bridge', () => {

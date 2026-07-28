@@ -47,9 +47,15 @@ function nativePushPlugin() {
   return PushNotifications;
 }
 
+export function nativePluginContainer(plugin) {
+  // Capacitor issue #8472: plugin proxies expose a callable `.then` and must
+  // never cross a Promise/async boundary without a plain-object container.
+  return { plugin };
+}
+
 async function ensureNativePushListeners() {
-  const plugin = await nativePushPlugin();
-  if (!plugin) return null;
+  const plugin = nativePushPlugin();
+  if (!plugin) return nativePluginContainer(null);
   if (!listenersPromise) {
     listenersPromise = Promise.all([
       plugin.addListener('registration', token => {
@@ -82,7 +88,7 @@ async function ensureNativePushListeners() {
     NATIVE_STEP_TIMEOUT_MS,
     'Android konnte den Benachrichtigungsdienst nicht starten. Beende LX vollständig und öffne die App erneut.'
   );
-  return plugin;
+  return nativePluginContainer(plugin);
 }
 
 async function ensureNotificationChannels(plugin) {
@@ -143,7 +149,7 @@ export function createNativeInstallationId() {
 }
 
 export async function nativePushPermission() {
-  const plugin = await ensureNativePushListeners();
+  const { plugin } = await ensureNativePushListeners();
   if (!plugin) return 'unsupported';
   const status = await withNativePushTimeout(
     plugin.checkPermissions(),
@@ -195,7 +201,7 @@ export async function registerNativePush({
   onStage
 } = {}) {
   onStage?.('android');
-  const plugin = await ensureNativePushListeners();
+  const { plugin } = await ensureNativePushListeners();
   if (!plugin) {
     throw new Error(
       'Echte Android-Benachrichtigungen sind nur in der App verfügbar.'
@@ -235,7 +241,7 @@ export async function registerNativePush({
 }
 
 export async function unregisterNativePush() {
-  const plugin = await ensureNativePushListeners();
+  const { plugin } = await ensureNativePushListeners();
   if (plugin) await plugin.unregister();
 }
 
