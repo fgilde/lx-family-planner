@@ -2,13 +2,15 @@
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets" / "app-icon-master.png"
 PUBLIC = ROOT / "public"
 ANDROID_RES = ROOT / "android" / "app" / "src" / "main" / "res"
+ICON_BACKGROUND = (6, 81, 60, 255)
+SAFE_ART_SCALE = 0.82
 
 ANDROID_SIZES = {
     "mipmap-mdpi": 48,
@@ -28,6 +30,28 @@ def square_source() -> Image.Image:
         method=Image.Resampling.LANCZOS,
         centering=(0.5, 0.5),
     )
+
+
+def add_launcher_safe_area(source: Image.Image) -> Image.Image:
+    """Inset the complete artwork so Android mask and parallax never clip it."""
+    edge = source.width
+    art_edge = round(edge * SAFE_ART_SCALE)
+    offset = (edge - art_edge) // 2
+    background = Image.new("RGBA", source.size, ICON_BACKGROUND)
+    composed = background.copy()
+    composed.paste(
+        source.resize((art_edge, art_edge), Image.Resampling.LANCZOS),
+        (offset, offset),
+    )
+
+    # Feather the generated green border into the matching launcher background.
+    mask = Image.new("L", source.size, 0)
+    ImageDraw.Draw(mask).rectangle(
+        (offset, offset, offset + art_edge, offset + art_edge),
+        fill=255,
+    )
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=max(2, edge * 0.012)))
+    return Image.composite(composed, background, mask)
 
 
 def save_web_icons(source: Image.Image) -> None:
@@ -76,7 +100,7 @@ def save_android_icons(source: Image.Image) -> None:
 
 
 if __name__ == "__main__":
-    master = square_source()
+    master = add_launcher_safe_area(square_source())
     save_web_icons(master)
     save_android_icons(master)
     print("LX Family web and Android icons generated.")

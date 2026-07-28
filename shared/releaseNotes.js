@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.8.1': {
+    version: '1.8.1',
+    eyebrow: 'Das neue App-Symbol hat jetzt Luft',
+    title: 'Keine abgeschnittenen Logo-Kanten mehr',
+    intro:
+      'Einige Android-Geräte vergrößern App-Symbole zusätzlich. Das LX-Motiv sitzt jetzt kleiner in einer großzügigen Sicherheitszone und bleibt bei runden, eckigen und herstellereigenen Formen vollständig sichtbar.',
+    highlights: [
+      {
+        id: 'launcher-safe-area',
+        title: 'Mehr Abstand zu allen Kanten',
+        description:
+          'Das eigentliche Kalender- und Familienmotiv wurde sauber auf 82 Prozent verkleinert.'
+      },
+      {
+        id: 'adaptive-icon-masks',
+        title: 'Für alle Android-Formen vorbereitet',
+        description:
+          'Runde Icons, Squircles und adaptive Launcher-Masken schneiden das Motiv nicht mehr an.'
+      },
+      {
+        id: 'consistent-web-icon',
+        title: 'Auch im Browser einheitlich',
+        description:
+          'Web-App, Startbildschirm und Android verwenden dieselbe neue Sicherheitszone.'
+      },
+      {
+        id: 'icon-update-only',
+        title: 'Familieninhalte bleiben unberührt',
+        description:
+          'Die Korrektur ändert nur Darstellung und App-Version – alle Daten und Einstellungen bleiben erhalten.'
+      }
+    ],
+    closing:
+      'Installiert Version 1.8.1 über die vorhandene App. Profile, Benachrichtigungen und Familieninhalte bleiben erhalten.'
+  },
   '1.8.0': {
     version: '1.8.0',
     eyebrow: 'Kalender erinnert jetzt im richtigen Moment',

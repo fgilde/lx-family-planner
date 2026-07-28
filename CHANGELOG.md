@@ -2,6 +2,16 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.8.1] – 2026-07-29
+
+### App-Icon mit sicherem Abstand
+
+- Kalender- und Familienmotiv auf 82 Prozent verkleinert
+- rundherum eine farblich passende Sicherheitszone ergänzt
+- Übergang zwischen Motivfläche und Icon-Hintergrund weich ausgeblendet
+- normale, runde und adaptive Android-Icons neu erzeugt
+- Android-Version auf Code 18 erhöht, damit Geräte das Icon-Update erkennen
+
 ## [1.8.0] – 2026-07-29
 
 ### Flexible Erinnerungen und neuer App-Auftritt
