@@ -142,6 +142,17 @@ const EVENT_REMINDER_INTERVAL_MS = Math.max(
   15,
   Number(process.env.EVENT_REMINDER_INTERVAL_SECONDS || 30)
 ) * 1000;
+const PUBLIC_APP_URL = (() => {
+  try {
+    const configuredUrl = new URL(
+      String(process.env.PUBLIC_APP_URL || '').trim()
+    );
+    if (!['http:', 'https:'].includes(configuredUrl.protocol)) return '';
+    return configuredUrl.origin;
+  } catch {
+    return '';
+  }
+})();
 const CORS_ALLOWED_ORIGINS = new Set([
   'capacitor://localhost',
   'http://localhost',
@@ -2955,7 +2966,7 @@ export function createApp() {
     return releases[0] || null;
   }
 
-  app.get('/api/app/version', (_req, res) => {
+  app.get('/api/app/version', (req, res) => {
     const release = availableApkRelease();
     const metadata = release?.metadata || {
       versionName: APP_VERSION,
@@ -2964,12 +2975,26 @@ export function createApp() {
       builtAt: '',
       sha256: ''
     };
+    const requestOrigin = `${req.protocol}://${req.get('host')}`;
+    const publicAppOrigin = PUBLIC_APP_URL || requestOrigin;
+    let publicApkUrl = null;
+    if (release) {
+      try {
+        publicApkUrl = new URL(
+          '/apk/latest.apk',
+          publicAppOrigin
+        ).href;
+      } catch {
+        publicApkUrl = null;
+      }
+    }
 
     res.json({
       success: true,
       versionName: metadata.versionName,
       versionCode: metadata.versionCode,
       apkUrl: release ? '/apk/latest.apk' : null,
+      publicApkUrl,
       buildKind: release ? metadata.buildKind : null,
       fileSizeBytes: release ? release.stats.size : null,
       releasedAt:

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.4.0</strong> ·
+  <strong>Aktuelle Version: 1.4.1</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -429,6 +429,11 @@ Android-App mit Versionsnummer, Dateigröße, Download-Knopf und QR-Code an. Der
 QR-Code verweist immer auf die eigene Planer-Adresse, zum Beispiel
 `https://familie.example.de/apk/latest.apk`.
 
+Bei einem Aufruf über `localhost` wird bewusst kein QR-Code angezeigt, weil
+`localhost` auf dem Handy das Handy selbst bezeichnet. Für lokale Tests die
+Heimnetz-IP des Servers verwenden oder `PUBLIC_APP_URL` in `.env` auf die
+öffentliche HTTPS-Adresse setzen.
+
 Für einen neuen App-Build genügt unter Windows:
 
 ```powershell
@@ -559,6 +564,7 @@ Die Vorlage liegt in `.env.example`.
 | `APP_SECRET` | Pflicht in Produktion; verschlüsselt sensible lokale Daten |
 | `PORT` | interner Server-Port, Standard `3001` |
 | `HOST_PORT` | Port des Docker-Hosts, Standard `3001` |
+| `PUBLIC_APP_URL` | öffentliche HTTPS-Adresse für App-Download und QR-Code |
 | `DATABASE_FILE` | abweichender Pfad zur SQLite-Datenbank |
 | `LEGACY_DATABASE_FILE` | optionaler JSON-Altbestand für die erste Migration |
 | `EVENT_REMINDER_INTERVAL_SECONDS` | Prüfintervall für fällige Terminerinnerungen |

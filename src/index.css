@@ -2423,6 +2423,31 @@ textarea {
   transform: translate(-50%, -50%);
 }
 
+.android-download-local-hint {
+  width: 116px;
+  min-height: 116px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  border-radius: 18px;
+  color: rgba(249, 245, 235, 0.76);
+  background: rgba(8, 40, 32, 0.28);
+  text-align: center;
+}
+
+.android-download-local-hint strong {
+  color: #fff3e1;
+  font-size: 0.68rem;
+}
+
+.android-download-local-hint small {
+  font-size: 0.58rem;
+  line-height: 1.35;
+}
+
 .auth-card-heading {
   display: flex;
   align-items: center;
@@ -4779,6 +4804,17 @@ textarea {
     align-self: center;
     font-size: 0.7rem;
     text-align: left;
+  }
+
+  .android-download-local-hint {
+    width: min(100%, 220px);
+    min-height: 92px;
+    justify-self: end;
+    text-align: left;
+  }
+
+  .android-download-local-hint small {
+    font-size: 0.64rem;
   }
 
   .android-download-copy p {

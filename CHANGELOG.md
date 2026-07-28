@@ -2,6 +2,21 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.4.1] – 2026-07-28
+
+### Behoben
+
+- QR-Codes werden nicht mehr mit einer für Handys unbrauchbaren
+  `localhost`-Adresse erzeugt
+- die API liefert zusätzlich eine vollständige öffentliche APK-Adresse
+- lokale Vorschauen erklären stattdessen, wie LX über Heimnetz oder öffentliche
+  Domain geöffnet werden kann
+
+### Konfiguration
+
+- neue optionale Variable `PUBLIC_APP_URL` für die feste öffentliche
+  Planer-Adresse
+
 ## [1.4.0] – 2026-07-28
 
 ### Neu

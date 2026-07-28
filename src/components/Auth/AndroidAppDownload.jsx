@@ -5,7 +5,8 @@ import {
   QrCode,
   RefreshCw,
   ShieldCheck,
-  Smartphone
+  Smartphone,
+  Wifi
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
@@ -16,6 +17,22 @@ import {
 function readableSize(bytes) {
   const megabytes = Number(bytes || 0) / 1024 / 1024;
   return megabytes > 0 ? `${megabytes.toFixed(1)} MB` : '';
+}
+
+function isLoopbackDownloadUrl(value) {
+  try {
+    const hostname = new URL(value).hostname.toLowerCase();
+    return (
+      hostname === 'localhost' ||
+      hostname.endsWith('.localhost') ||
+      hostname === '0.0.0.0' ||
+      hostname === '::1' ||
+      hostname === '[::1]' ||
+      hostname.startsWith('127.')
+    );
+  } catch {
+    return true;
+  }
 }
 
 export default function AndroidAppDownload() {
@@ -39,14 +56,21 @@ export default function AndroidAppDownload() {
           return;
         }
         const relativeDownloadUrl = buildApiUrl(data.apkUrl);
+        const downloadUrl = new URL(
+          relativeDownloadUrl,
+          window.location.origin
+        ).href;
+        const qrDownloadUrl = new URL(
+          data.publicApkUrl || downloadUrl,
+          window.location.origin
+        ).href;
         setRelease({
           versionName: data.versionName,
           versionCode: Number(data.versionCode) || 0,
           size: readableSize(data.fileSizeBytes),
-          downloadUrl: new URL(
-            relativeDownloadUrl,
-            window.location.origin
-          ).href
+          downloadUrl,
+          qrDownloadUrl,
+          qrAvailable: !isLoopbackDownloadUrl(qrDownloadUrl)
         });
         setStatus('ready');
       } catch {
@@ -115,19 +139,38 @@ export default function AndroidAppDownload() {
         </a>
       </div>
 
-      <div className="android-download-qr">
-        <span><QrCode size={13} /> Mit dem Handy scannen</span>
-        <div className="android-download-qr-frame">
-          <QRCodeSVG
-            value={release.downloadUrl}
-            size={104}
-            level="Q"
-            marginSize={1}
-            bgColor="#fffdf8"
-            fgColor="#173e34"
-            title="QR-Code zum Download der LX Family Planner Android-App"
-          />
-        </div>
+      <div
+        className={`android-download-qr ${
+          release.qrAvailable ? '' : 'is-local'
+        }`}
+      >
+        {release.qrAvailable ? (
+          <>
+            <span><QrCode size={13} /> Mit dem Handy scannen</span>
+            <div className="android-download-qr-frame">
+              <QRCodeSVG
+                value={release.qrDownloadUrl}
+                size={104}
+                level="Q"
+                marginSize={1}
+                bgColor="#fffdf8"
+                fgColor="#173e34"
+                title="QR-Code zum Download der LX Family Planner Android-App"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <span><Wifi size={13} /> Auf dem Handy öffnen</span>
+            <div className="android-download-local-hint">
+              <strong>Lokale Vorschau</strong>
+              <small>
+                Öffne LX über die Heimnetz-IP oder eure öffentliche Adresse.
+                Dann erscheint hier der passende QR-Code.
+              </small>
+            </div>
+          </>
+        )}
       </div>
     </aside>
   );

@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.4.1': {
+    version: '1.4.1',
+    eyebrow: 'Kleine App-Verbesserung',
+    title: 'Der QR-Code führt jetzt sicher zum richtigen Server',
+    intro:
+      'Der App-Download erkennt jetzt, ob LX über eure echte Adresse oder nur als lokale Vorschau geöffnet wurde.',
+    highlights: [
+      {
+        id: 'public-qr-address',
+        title: 'Richtige Download-Adresse',
+        description:
+          'Auf eurer öffentlichen Startseite führt der QR-Code direkt zur Android-App auf eurem LX-Server.'
+      },
+      {
+        id: 'localhost-protection',
+        title: 'Kein falscher Localhost-Code',
+        description:
+          'In einer lokalen Vorschau wird kein QR-Code mehr gezeigt, der auf dem Handy ins Leere führen würde.'
+      },
+      {
+        id: 'home-network-qr',
+        title: 'Funktioniert auch im Heimnetz',
+        description:
+          'Öffnet ihr LX über die Heimnetz-Adresse des Servers, kann diese Adresse direkt mit dem Handy gescannt werden.'
+      },
+      {
+        id: 'configurable-public-url',
+        title: 'Öffentliche Adresse fest einstellbar',
+        description:
+          'Der Server kann seine öffentliche LX-Adresse nun ausdrücklich für Downloads und QR-Codes verwenden.'
+      }
+    ],
+    closing:
+      'Der normale Download-Knopf bleibt auch in der lokalen Vorschau verfügbar.'
+  },
   '1.4.0': {
     version: '1.4.0',
     eyebrow: 'Neu im Familienplaner',
