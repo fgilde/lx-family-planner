@@ -44,7 +44,6 @@ scratch/
 tmp/
 temp/
 scripts/generate_android_icons.py
-scripts/generate_new_android_icons.py
 
 # Local tools and editor state
 .codex/

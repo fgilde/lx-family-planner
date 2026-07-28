@@ -1,21 +1,106 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  Bell,
+  BellOff,
+  Plus,
+  Trash2,
+  Upload,
+  X
+} from 'lucide-react';
+import {
+  formatReminderLead,
+  normalizeTrashReminders,
+  TRASH_DEFAULT_REMINDERS
+} from '../../../shared/eventReminders.js';
 import { useFamily } from '../../context/FamilyContext';
-import { Trash2, Upload, Plus, Calendar, AlertTriangle, CheckCircle, Bell } from 'lucide-react';
 import { parseICSContent } from '../../utils/icsUtils';
+import EventReminderDialog from './EventReminderDialog';
+import EventReminderPicker from './EventReminderPicker';
 
 const TRASH_TYPES = [
-  { id: 'rest', name: 'Restmüll (Schwarze Tonne)', color: '#374151', bgColor: '#f3f4f6', icon: '🗑️' },
-  { id: 'papier', name: 'Altpapier (Blaue Tonne)', color: '#2563eb', bgColor: '#eff6ff', icon: '📦' },
-  { id: 'bio', name: 'Biomüll (Braune/Grüne Tonne)', color: '#15803d', bgColor: '#f0fdf4', icon: '🍎' },
-  { id: 'gelb', name: 'Gelber Sack / Wertstoff', color: '#d97706', bgColor: '#fffbe6', icon: '🟡' }
+  {
+    id: 'rest',
+    name: 'Restmüll (Schwarze Tonne)',
+    color: '#4b5563',
+    icon: '🗑️'
+  },
+  {
+    id: 'papier',
+    name: 'Altpapier (Blaue Tonne)',
+    color: '#2563eb',
+    icon: '📦'
+  },
+  {
+    id: 'bio',
+    name: 'Biomüll (Braune/Grüne Tonne)',
+    color: '#15803d',
+    icon: '🍎'
+  },
+  {
+    id: 'gelb',
+    name: 'Gelber Sack / Wertstoff',
+    color: '#d97706',
+    icon: '🟡'
+  }
 ];
 
 export const INITIAL_TRASH_EVENTS = [
-  { id: 'trsh-1', title: 'Restmüll (Schwarze Tonne)', date: new Date(Date.now() + 86400000 * 1).toISOString().split('T')[0], type: 'rest' },
-  { id: 'trsh-2', title: 'Altpapier (Blaue Tonne)', date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0], type: 'papier' },
-  { id: 'trsh-3', title: 'Biomüll (Braune Tonne)', date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0], type: 'bio' },
-  { id: 'trsh-4', title: 'Gelber Sack', date: new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0], type: 'gelb' }
+  {
+    id: 'trsh-1',
+    title: 'Restmüll (Schwarze Tonne)',
+    date: new Date(Date.now() + 86_400_000).toISOString().split('T')[0],
+    type: 'rest',
+    reminders: [...TRASH_DEFAULT_REMINDERS]
+  },
+  {
+    id: 'trsh-2',
+    title: 'Altpapier (Blaue Tonne)',
+    date: new Date(Date.now() + 86_400_000 * 3).toISOString().split('T')[0],
+    type: 'papier',
+    reminders: [...TRASH_DEFAULT_REMINDERS]
+  },
+  {
+    id: 'trsh-3',
+    title: 'Biomüll (Braune Tonne)',
+    date: new Date(Date.now() + 86_400_000 * 5).toISOString().split('T')[0],
+    type: 'bio',
+    reminders: [...TRASH_DEFAULT_REMINDERS]
+  },
+  {
+    id: 'trsh-4',
+    title: 'Gelber Sack',
+    date: new Date(Date.now() + 86_400_000 * 7).toISOString().split('T')[0],
+    type: 'gelb',
+    reminders: [...TRASH_DEFAULT_REMINDERS]
+  }
 ];
+
+function detectTrashType(title) {
+  const normalized = String(title || '').toLocaleLowerCase('de-DE');
+  if (normalized.includes('papier') || normalized.includes('blau')) {
+    return 'papier';
+  }
+  if (
+    normalized.includes('bio') ||
+    normalized.includes('braun') ||
+    normalized.includes('grün')
+  ) {
+    return 'bio';
+  }
+  if (
+    normalized.includes('gelb') ||
+    normalized.includes('wertstoff') ||
+    normalized.includes('sack')
+  ) {
+    return 'gelb';
+  }
+  return 'rest';
+}
+
+function localTrashDate(date) {
+  return new Date(`${date}T12:00:00`);
+}
 
 export default function TrashCalendarView() {
   const {
@@ -23,203 +108,286 @@ export default function TrashCalendarView() {
     trashEvents,
     addTrashEvent,
     addTrashEvents,
+    updateTrashEvent,
     deleteTrashEvent,
     activeHousehold
   } = useFamily();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('Restmüll (Schwarze Tonne)');
-  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newDate, setNewDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
   const [newType, setNewType] = useState('rest');
+  const [newReminders, setNewReminders] = useState([
+    ...TRASH_DEFAULT_REMINDERS
+  ]);
+  const [reminderEvent, setReminderEvent] = useState(null);
 
-  // Import .ics trash calendar file from local municipal service
-  const handleImportTrashICS = (e) => {
-    const file = e.target.files[0];
+  const upcomingTrash = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return trashEvents
+      .filter(
+        item =>
+          item.date >= today &&
+          (item.household || 'familie') === activeHousehold
+      )
+      .sort((left, right) => left.date.localeCompare(right.date));
+  }, [activeHousehold, trashEvents]);
+
+  const closeAddDialog = () => {
+    setIsAddOpen(false);
+    setNewReminders([...TRASH_DEFAULT_REMINDERS]);
+  };
+
+  const handleImportTrashICS = event => {
+    const file = event.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = async (event) => {
-      const parsed = parseICSContent(event.target.result);
-      if (parsed.length > 0) {
-        const importedTrash = parsed.map(evt => {
-          const titleLower = evt.title.toLowerCase();
-          let type = 'rest';
-          if (titleLower.includes('papier') || titleLower.includes('blau')) type = 'papier';
-          else if (titleLower.includes('bio') || titleLower.includes('braun') || titleLower.includes('grün')) type = 'bio';
-          else if (titleLower.includes('gelb') || titleLower.includes('wertstoff') || titleLower.includes('sack')) type = 'gelb';
-
-          return {
-            id: `trsh-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-            title: evt.title,
-            date: evt.date,
-            type
-          };
-        });
-
-        await addTrashEvents(importedTrash);
-        showToast('📥 Müllkalender Importiert', `${importedTrash.length} Abholtermine aus der .ics Datei übernommen!`, 'success');
-      } else {
-        showToast('⚠️ Import Fehler', 'Keine Müll-Termine in der .ics Datei gefunden.', 'warning');
+    reader.onload = async loadEvent => {
+      const parsed = parseICSContent(loadEvent.target.result);
+      if (!parsed.length) {
+        showToast(
+          'Import nicht möglich',
+          'In dieser Datei wurden keine Mülltermine gefunden.',
+          'warning'
+        );
+        return;
       }
+
+      const importedTrash = parsed.map(entry => ({
+        id: `trsh-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title: entry.title,
+        date: entry.date,
+        type: detectTrashType(entry.title),
+        reminders: [...TRASH_DEFAULT_REMINDERS]
+      }));
+      const result = await addTrashEvents(importedTrash);
+      if (!result) return;
+      showToast(
+        'Müllkalender importiert',
+        `${importedTrash.length} Abholtermine wurden übernommen und erinnern standardmäßig einen Tag vorher.`,
+        'success'
+      );
+      event.target.value = '';
     };
     reader.readAsText(file);
   };
 
-  const handleAddManual = async (e) => {
-    e.preventDefault();
-    const newEntry = {
+  const handleAddManual = async event => {
+    event.preventDefault();
+    const result = await addTrashEvent({
       id: `trsh-${Date.now()}`,
       title: newTitle,
       date: newDate,
-      type: newType
-    };
-    await addTrashEvent(newEntry);
-    setIsAddOpen(false);
-    showToast('🗑️ Mülltermin eingetragen', `Abholung für ${newDate} gespeichert.`, 'success');
+      type: newType,
+      reminders: newReminders
+    });
+    if (!result) return;
+    closeAddDialog();
+    showToast(
+      'Mülltermin eingetragen',
+      `Die Abholung am ${localTrashDate(newDate).toLocaleDateString('de-DE')} ist gespeichert.`,
+      'success'
+    );
   };
 
-  const handleDelete = (id) => {
-    deleteTrashEvent(id);
+  const saveTrashReminders = async (event, reminders) => {
+    const result = await updateTrashEvent(event.id, { reminders });
+    if (result) {
+      showToast(
+        reminders.length ? 'Erinnerung gespeichert' : 'Erinnerung ausgeschaltet',
+        reminders.length
+          ? `LX erinnert ${reminders
+              .map(minutes => formatReminderLead(minutes))
+              .join(', ')}.`
+          : `Für ${event.title} wird keine Erinnerung gesendet.`,
+        'success'
+      );
+    }
+    return result;
   };
 
-  // Filter sorted upcoming trash dates
-  const todayStr = new Date().toISOString().split('T')[0];
-  const upcomingTrash = trashEvents
-    .filter(
-      item =>
-        item.date >= todayStr &&
-        (item.household || 'familie') === activeHousehold
-    )
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const nextPickup = upcomingTrash[0];
+  const nextType = nextPickup
+    ? TRASH_TYPES.find(type => type.id === nextPickup.type) || TRASH_TYPES[0]
+    : null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header Bar */}
-      <div className="card" style={{ padding: 20 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Trash2 size={26} style={{ color: 'var(--text-main)' }} />
+    <div className="trash-calendar">
+      <section className="card trash-calendar-header">
+        <div className="trash-calendar-heading">
+          <span className="trash-calendar-heading-mark">
+            <Trash2 size={25} />
+          </span>
+          <div>
+            <h2 className="card-title">Digitaler Müllkalender</h2>
+            <p>
+              Importiere die .ics-Datei eures Entsorgers oder trage eine
+              Abholung selbst ein. LX erinnert standardmäßig am Vortag.
+            </p>
+          </div>
+        </div>
+
+        <div className="trash-calendar-actions">
+          <label className="btn-secondary trash-calendar-import">
+            <Upload size={16} /> Müllkalender importieren
+            <input
+              type="file"
+              accept=".ics,text/calendar"
+              onChange={handleImportTrashICS}
+            />
+          </label>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => setIsAddOpen(true)}
+          >
+            <Plus size={16} /> Termin eintragen
+          </button>
+        </div>
+      </section>
+
+      {nextPickup ? (
+        <section className="trash-next-pickup">
+          <div className="trash-next-pickup-main">
+            <span className="trash-next-pickup-icon">{nextType.icon}</span>
             <div>
-              <h2 className="card-title" style={{ margin: 0 }}>Digitaler Müllkalender</h2>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Verpasse keine Abholung mehr. Importiere den Jahres-Müllkalender eures Entsorgers per `.ics` Datei!
+              <span>Nächste Müllabfuhr</span>
+              <h3>{nextPickup.title}</h3>
+              <p>
+                {localTrashDate(nextPickup.date).toLocaleDateString('de-DE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long'
+                })}
               </p>
             </div>
           </div>
+          <div className="trash-next-pickup-callout">Tonne rausstellen</div>
+        </section>
+      ) : null}
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            {/* Import ICS File */}
-            <label className="btn-secondary" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Upload size={16} /> Müllkalender (.ics) Importieren
-              <input type="file" accept=".ics" onChange={handleImportTrashICS} style={{ display: 'none' }} />
-            </label>
-
-            <button className="btn-primary" onClick={() => setIsAddOpen(true)}>
-              <Plus size={16} /> Termin manuell eintragen
-            </button>
+      <section className="card trash-schedule">
+        <header>
+          <div>
+            <span>Abholplan</span>
+            <h3>Anstehende Termine</h3>
           </div>
-        </div>
-      </div>
+          <b>{upcomingTrash.length}</b>
+        </header>
 
-      {/* Next Pickup Alert Card */}
-      {upcomingTrash.length > 0 && (
-        <div style={{
-          background: 'linear-gradient(135deg, #1e2923, #0f1715)',
-          color: 'white',
-          padding: 20,
-          borderRadius: 'var(--radius-lg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: 'var(--shadow-md)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: '2.5rem' }}>
-              {TRASH_TYPES.find(t => t.id === upcomingTrash[0].type)?.icon || '🗑️'}
-            </div>
-            <div>
-              <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', fontWeight: 800, color: '#f59e0b', letterSpacing: 1 }}>
-                Nächste Müllabfuhr
-              </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>
-                {upcomingTrash[0].title}
-              </div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.9, marginTop: 2 }}>
-                📅 Am {new Date(upcomingTrash[0].date).toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </div>
-            </div>
-          </div>
-
-          <span className="badge" style={{ background: '#f59e0b', color: '#1e2923', fontWeight: 800, fontSize: '0.9rem', padding: '8px 16px' }}>
-            Tonne raustellen!
-          </span>
-        </div>
-      )}
-
-      {/* Upcoming Trash Schedule List */}
-      <div className="card">
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: 16, color: 'var(--text-main)' }}>
-          Anstehende Abholtermine ({upcomingTrash.length})
-        </h3>
-
-        {upcomingTrash.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted)' }}>
-            Keine Mülltermine vorhanden. Lade eure `.ics` Datei vom Entsorgungsbetrieb hoch!
+        {!upcomingTrash.length ? (
+          <div className="trash-schedule-empty">
+            <span>🗓️</span>
+            <strong>Noch keine Abholtermine</strong>
+            <p>Lade die .ics-Datei eures Entsorgers hoch.</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="trash-schedule-list">
             {upcomingTrash.map(item => {
-              const typeObj = TRASH_TYPES.find(t => t.id === item.type) || TRASH_TYPES[0];
-              const dateObj = new Date(item.date);
-              const formattedDate = dateObj.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-
+              const type =
+                TRASH_TYPES.find(entry => entry.id === item.type) ||
+                TRASH_TYPES[0];
+              const reminders = normalizeTrashReminders(item.reminders);
               return (
-                <div
+                <article
                   key={item.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '14px 18px',
-                    borderRadius: 'var(--radius-md)',
-                    background: typeObj.bgColor,
-                    borderLeft: `6px solid ${typeObj.color}`
-                  }}
+                  className="trash-schedule-row"
+                  style={{ '--trash-color': type.color }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <span style={{ fontSize: '1.8rem' }}>{typeObj.icon}</span>
-                    <div>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem', color: typeObj.color }}>
-                        {item.title}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                        📅 {formattedDate}
-                      </div>
-                    </div>
+                  <span className="trash-schedule-icon">{type.icon}</span>
+                  <div className="trash-schedule-copy">
+                    <strong>{item.title}</strong>
+                    <span>
+                      {localTrashDate(item.date).toLocaleDateString('de-DE', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                    <button
+                      type="button"
+                      className={
+                        reminders.length
+                          ? 'trash-reminder-summary is-active'
+                          : 'trash-reminder-summary'
+                      }
+                      onClick={() =>
+                        setReminderEvent({
+                          ...item,
+                          allDay: true,
+                          reminderKind: 'trash',
+                          reminders
+                        })
+                      }
+                    >
+                      {reminders.length ? (
+                        <Bell size={13} />
+                      ) : (
+                        <BellOff size={13} />
+                      )}
+                      {reminders.length
+                        ? reminders
+                            .map(minutes => formatReminderLead(minutes, true))
+                            .join(' · ')
+                        : 'Erinnerung aus'}
+                    </button>
                   </div>
-
-                  <button
-                    className="icon-circle-btn"
-                    style={{ width: 32, height: 32, color: '#ef4444' }}
-                    onClick={() => handleDelete(item.id)}
-                    title="Termin entfernen"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                  <div className="trash-schedule-row-actions">
+                    <button
+                      type="button"
+                      className="icon-circle-btn"
+                      onClick={() =>
+                        setReminderEvent({
+                          ...item,
+                          allDay: true,
+                          reminderKind: 'trash',
+                          reminders
+                        })
+                      }
+                      title="Erinnerung ändern"
+                      aria-label={`Erinnerung für ${item.title} ändern`}
+                    >
+                      <Bell size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-circle-btn trash-delete-button"
+                      onClick={() => deleteTrashEvent(item.id)}
+                      title="Termin entfernen"
+                      aria-label={`${item.title} entfernen`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </article>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Manual Add Trash Modal */}
-      {isAddOpen && (
-        <div className="modal-backdrop" onClick={() => setIsAddOpen(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
-            <div className="card-header" style={{ marginBottom: 16 }}>
-              <h2 className="card-title">Mülltermin manuell eintragen</h2>
-              <button className="icon-circle-btn" onClick={() => setIsAddOpen(false)}>
+      {isAddOpen
+        ? createPortal(
+          <div className="modal-backdrop" onClick={closeAddDialog}>
+          <div
+            className="modal-card trash-add-dialog"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="card-header">
+              <div>
+                <span className="trash-dialog-eyebrow">Neue Abholung</span>
+                <h2 className="card-title">Mülltermin eintragen</h2>
+              </div>
+              <button
+                type="button"
+                className="icon-circle-btn"
+                onClick={closeAddDialog}
+                aria-label="Schließen"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -230,14 +398,18 @@ export default function TrashCalendarView() {
                 <select
                   className="form-select"
                   value={newType}
-                  onChange={e => {
-                    setNewType(e.target.value);
-                    const t = TRASH_TYPES.find(item => item.id === e.target.value);
-                    if (t) setNewTitle(t.name);
+                  onChange={event => {
+                    setNewType(event.target.value);
+                    const type = TRASH_TYPES.find(
+                      item => item.id === event.target.value
+                    );
+                    if (type) setNewTitle(type.name);
                   }}
                 >
-                  {TRASH_TYPES.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                  {TRASH_TYPES.map(type => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -248,7 +420,7 @@ export default function TrashCalendarView() {
                   type="text"
                   className="form-input"
                   value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
+                  onChange={event => setNewTitle(event.target.value)}
                   required
                 />
               </div>
@@ -259,23 +431,36 @@ export default function TrashCalendarView() {
                   type="date"
                   className="form-input"
                   value={newDate}
-                  onChange={e => setNewDate(e.target.value)}
+                  onChange={event => setNewDate(event.target.value)}
                   required
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-                <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  Termin Speichern
-                </button>
-                <button type="button" className="btn-secondary" onClick={() => setIsAddOpen(false)}>
+              <EventReminderPicker
+                value={newReminders}
+                onChange={setNewReminders}
+              />
+
+              <div className="trash-add-actions">
+                <button type="button" className="btn-secondary" onClick={closeAddDialog}>
                   Abbrechen
+                </button>
+                <button type="submit" className="btn-primary">
+                  Termin speichern
                 </button>
               </div>
             </form>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )
+        : null}
+
+      <EventReminderDialog
+        event={reminderEvent}
+        onClose={() => setReminderEvent(null)}
+        onSave={saveTrashReminders}
+      />
     </div>
   );
 }

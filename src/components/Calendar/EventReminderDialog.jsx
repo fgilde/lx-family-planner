@@ -36,6 +36,7 @@ export default function EventReminderDialog({
   }, [onClose, saving]);
 
   if (!event) return null;
+  const isTrashReminder = event.reminderKind === 'trash';
 
   const submit = async formEvent => {
     formEvent.preventDefault();
@@ -63,7 +64,7 @@ export default function EventReminderDialog({
             <CalendarClock size={25} />
           </span>
           <div>
-            <span>Termin-Wecker</span>
+            <span>{isTrashReminder ? 'Abhol-Wecker' : 'Termin-Wecker'}</span>
             <h2>{event.title}</h2>
             <p>
               {new Date(`${event.date}T12:00:00`).toLocaleDateString(
@@ -108,8 +109,8 @@ export default function EventReminderDialog({
                     .join(' · ')
                 : 'Keine Erinnerung aktiv'}
             </strong>
-            Web-Push muss im jeweiligen Profil einmal aktiviert sein. Der
-            Hinweis erscheint zusätzlich im Familien-Posteingang.
+            Benachrichtigungen müssen im jeweiligen Profil einmal aktiviert
+            sein. Der Hinweis erscheint zusätzlich im Familien-Posteingang.
           </span>
         </aside>
 

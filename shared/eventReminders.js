@@ -2,10 +2,12 @@ export const EVENT_REMINDER_OPTIONS = Object.freeze([
   { minutes: 10_080, label: '1 Woche vorher', shortLabel: '1 Woche' },
   { minutes: 2_880, label: '2 Tage vorher', shortLabel: '2 Tage' },
   { minutes: 1_440, label: '1 Tag vorher', shortLabel: '1 Tag' },
+  { minutes: 720, label: '12 Stunden vorher', shortLabel: '12 Std.' },
   { minutes: 600, label: '10 Stunden vorher', shortLabel: '10 Std.' },
   { minutes: 120, label: '2 Stunden vorher', shortLabel: '2 Std.' },
   { minutes: 60, label: '1 Stunde vorher', shortLabel: '1 Std.' },
   { minutes: 30, label: '30 Minuten vorher', shortLabel: '30 Min.' },
+  { minutes: 15, label: '15 Minuten vorher', shortLabel: '15 Min.' },
   { minutes: 10, label: '10 Minuten vorher', shortLabel: '10 Min.' },
   { minutes: 5, label: '5 Minuten vorher', shortLabel: '5 Min.' },
   { minutes: 0, label: 'Wenn es losgeht', shortLabel: 'Zum Start' }
@@ -14,6 +16,7 @@ export const EVENT_REMINDER_OPTIONS = Object.freeze([
 const MAX_REMINDERS_PER_EVENT = 8;
 const MAX_REMINDER_MINUTES = 60 * 24 * 7;
 const EVENT_GRACE_MS = 5 * 60 * 1000;
+export const TRASH_DEFAULT_REMINDERS = Object.freeze([1_440]);
 
 export function normalizeEventReminders(value, fallback = []) {
   const source = Array.isArray(value) ? value : fallback;
@@ -29,6 +32,23 @@ export function normalizeEventReminders(value, fallback = []) {
   )]
     .sort((left, right) => right - left)
     .slice(0, MAX_REMINDERS_PER_EVENT);
+}
+
+export function normalizeTrashReminders(value) {
+  return normalizeEventReminders(
+    value,
+    TRASH_DEFAULT_REMINDERS
+  );
+}
+
+export function trashReminderEvent(record) {
+  return {
+    ...(record || {}),
+    allDay: true,
+    time: '',
+    memberId: 'all',
+    reminders: normalizeTrashReminders(record?.reminders)
+  };
 }
 
 export function eventStartKey(event) {
@@ -125,4 +145,24 @@ export function eventReminderMessage(event, now = Date.now()) {
   }
   const location = String(event?.location || '').trim();
   return location ? `${timing} · ${location}` : timing;
+}
+
+export function trashReminderCopy(record, reminderMinutes) {
+  const title = String(record?.title || '').trim() || 'Müllabfuhr';
+  if (Number(reminderMinutes) === 1_440) {
+    return {
+      title: `🗑️ Morgen: ${title}`,
+      body: `Morgen wird ${title} abgeholt. Bitte rechtzeitig rausstellen.`
+    };
+  }
+  if (Number(reminderMinutes) === 0) {
+    return {
+      title: `🗑️ Heute: ${title}`,
+      body: `${title} wird heute abgeholt.`
+    };
+  }
+  return {
+    title: `🗑️ Erinnerung: ${title}`,
+    body: `Abholung ${formatReminderLead(reminderMinutes)}. Bitte rechtzeitig rausstellen.`
+  };
 }

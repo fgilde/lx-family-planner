@@ -1803,7 +1803,7 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  z-index: 200;
+  z-index: 2200;
 }
 
 .modal-card {
@@ -17951,6 +17951,383 @@ body:has(.modal-backdrop) .problem-report-launcher {
   }
 
   .server-config-dialog footer button {
+    width: 100%;
+  }
+}
+
+/* Waste calendar: shared reminder language, legible in every theme. */
+.trash-calendar {
+  display: grid;
+  gap: 18px;
+}
+
+.trash-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px;
+}
+
+.trash-calendar-heading,
+.trash-calendar-actions,
+.trash-next-pickup,
+.trash-next-pickup-main,
+.trash-schedule > header,
+.trash-schedule-row,
+.trash-schedule-row-actions,
+.trash-add-actions {
+  display: flex;
+  align-items: center;
+}
+
+.trash-calendar-heading {
+  min-width: 0;
+  gap: 12px;
+}
+
+.trash-calendar-heading-mark {
+  display: grid;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  border-radius: 16px;
+  color: var(--primary);
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--primary) 16%, var(--bg-card)),
+      var(--bg-card)
+    );
+}
+
+.trash-calendar-heading .card-title,
+.trash-calendar-heading p {
+  margin: 0;
+}
+
+.trash-calendar-heading p {
+  max-width: 690px;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.trash-calendar-actions {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.trash-calendar-import {
+  cursor: pointer;
+}
+
+.trash-calendar-import input {
+  display: none;
+}
+
+.trash-next-pickup {
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  color: #fffdf7;
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(105, 198, 161, 0.2),
+      transparent 34%
+    ),
+    linear-gradient(135deg, #174f41, #102820);
+  box-shadow: var(--shadow-md);
+}
+
+.trash-next-pickup-main {
+  min-width: 0;
+  gap: 16px;
+}
+
+.trash-next-pickup-icon {
+  display: grid;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 19px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 1.85rem;
+}
+
+.trash-next-pickup-main div > span {
+  color: #f3b63f;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.trash-next-pickup h3,
+.trash-next-pickup p {
+  margin: 0;
+}
+
+.trash-next-pickup h3 {
+  margin-top: 3px;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+}
+
+.trash-next-pickup p {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.9rem;
+}
+
+.trash-next-pickup-callout {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border-radius: 999px;
+  color: #173126;
+  background: #f3b63f;
+  font-size: 0.83rem;
+  font-weight: 900;
+}
+
+.trash-schedule {
+  padding: 20px;
+}
+
+.trash-schedule > header {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.trash-schedule > header span,
+.trash-dialog-eyebrow {
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.trash-schedule > header h3 {
+  margin: 2px 0 0;
+  color: var(--text-main);
+  font-size: 1.16rem;
+}
+
+.trash-schedule > header b {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-card));
+}
+
+.trash-schedule-list {
+  display: grid;
+  gap: 10px;
+}
+
+.trash-schedule-row {
+  --trash-color: var(--primary);
+  position: relative;
+  gap: 14px;
+  padding: 13px 14px;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(in srgb, var(--trash-color) 22%, var(--border-color));
+  border-left: 5px solid var(--trash-color);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--trash-color) 10%, var(--bg-card)),
+      var(--bg-card) 44%
+    );
+}
+
+.trash-schedule-icon {
+  display: grid;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--trash-color) 12%, var(--bg-card));
+  font-size: 1.45rem;
+}
+
+.trash-schedule-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.trash-schedule-copy > strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trash-schedule-copy > span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.trash-reminder-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.trash-reminder-summary.is-active {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border-color));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-card));
+}
+
+.trash-schedule-row-actions {
+  gap: 7px;
+}
+
+.trash-delete-button {
+  color: var(--danger);
+}
+
+.trash-schedule-empty {
+  display: grid;
+  min-height: 190px;
+  place-items: center;
+  align-content: center;
+  padding: 28px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.trash-schedule-empty > span {
+  margin-bottom: 7px;
+  font-size: 2rem;
+}
+
+.trash-schedule-empty strong {
+  color: var(--text-main);
+}
+
+.trash-schedule-empty p {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
+}
+
+.trash-add-dialog {
+  width: min(720px, calc(100vw - 30px));
+  max-width: 720px;
+  max-height: min(860px, 92dvh);
+  overflow-y: auto;
+}
+
+.trash-add-dialog .card-header {
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.trash-add-actions {
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+@media (min-width: 680px) {
+  .event-reminder-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .trash-calendar-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trash-calendar-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trash-calendar-actions > * {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .trash-calendar-heading {
+    align-items: flex-start;
+  }
+
+  .trash-calendar-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .trash-next-pickup {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trash-next-pickup-callout {
+    margin-left: 72px;
+  }
+
+  .trash-schedule {
+    padding: 15px;
+  }
+
+  .trash-schedule-row {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 10px;
+  }
+
+  .trash-schedule-row-actions {
+    flex-direction: column;
+  }
+
+  .trash-add-dialog {
+    width: 100%;
+    max-height: 94dvh;
+    border-radius: 25px 25px 0 0;
+  }
+
+  .trash-add-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .trash-add-actions button {
     width: 100%;
   }
 }

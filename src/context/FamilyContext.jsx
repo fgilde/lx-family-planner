@@ -2454,6 +2454,12 @@ export function FamilyProvider({ children }) {
       }))
     )), [activeHouseholdState, bulkCreateResources, withActionError]);
 
+  const updateTrashEvent = useCallback((id, changes) =>
+    withActionError(() => patchResource('trashEvents', id, changes)), [
+      patchResource,
+      withActionError
+    ]);
+
   const deleteTrashEvent = useCallback(id =>
     withActionError(() => removeResource('trashEvents', id)), [
       removeResource,
@@ -2986,6 +2992,7 @@ export function FamilyProvider({ children }) {
     trashEvents: resources.trashEvents,
     addTrashEvent,
     addTrashEvents,
+    updateTrashEvent,
     deleteTrashEvent,
     moodCheckins: resources.moodCheckins,
     addMoodCheckin,

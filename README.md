@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/icon.svg" alt="LX Family Planner" width="92">
+  <img src="public/icon-192.png" alt="LX Family Planner" width="92">
 </p>
 
 <h1 align="center">LX Family Planner</h1>
@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.7.7</strong> ·
+  <strong>Aktuelle Version: 1.8.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 

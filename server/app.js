@@ -22,7 +22,10 @@ import {
   eventReminderMessage,
   eventStartKey,
   normalizeEventReminders,
-  selectDueEventReminder
+  normalizeTrashReminders,
+  selectDueEventReminder,
+  trashReminderCopy,
+  trashReminderEvent
 } from '../shared/eventReminders.js';
 import {
   DEFAULT_GOTIFY_RULES,
@@ -2743,6 +2746,27 @@ function sanitizeCalendarEvent(req, value, existing = null) {
   };
 }
 
+function sanitizeTrashEvent(value, existing = null) {
+  const input = ensureObject(value);
+  const date = cleanDate(input.date, '');
+  if (!date) {
+    const error = new Error('Bitte wähle ein gültiges Abholdatum.');
+    error.statusCode = 400;
+    throw error;
+  }
+  return {
+    ...(existing || {}),
+    ...input,
+    title: requireText(input.title, 'Bezeichnung', 240),
+    date,
+    type: cleanText(input.type, 'rest', 40),
+    household: cleanText(input.household, 'familie', 100),
+    reminders: Object.hasOwn(input, 'reminders')
+      ? normalizeTrashReminders(input.reminders)
+      : normalizeTrashReminders(existing?.reminders)
+  };
+}
+
 function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
   const input = ensureObject(value);
   const now = Date.now();
@@ -3113,11 +3137,54 @@ export function createApp() {
     let delivered = 0;
     try {
       for (const family of listPublicFamilies()) {
-        const events = getBootstrap(family.id).resources.events;
-        for (const event of events) {
+        const resources = getBootstrap(family.id).resources;
+        const reminderCandidates = [
+          ...(resources.events || []).map(event => ({
+            event,
+            eventId: String(event.sharedEventId || event.id || ''),
+            recipientMemberIds: eventReminderRecipientMemberIds(
+              family.id,
+              event
+            ),
+            notificationCopy: () => ({
+              title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 180)}`,
+              body: eventReminderMessage(event, now),
+              privateTitle: 'Terminerinnerung',
+              privateBody: 'Ein Termin beginnt bald.'
+            }),
+            url: '/?view=calendar',
+            tagPrefix: 'event-reminder',
+            publishReason: 'event-reminder'
+          })),
+          ...(resources.trashEvents || []).map(record => {
+            const event = trashReminderEvent(record);
+            return {
+              event,
+              eventId: `trash-${String(record.id || '')}`,
+              recipientMemberIds: signedInMemberIds(family.id),
+              notificationCopy: reminderMinutes => ({
+                ...trashReminderCopy(record, reminderMinutes),
+                privateTitle: 'Müllabfuhr-Erinnerung',
+                privateBody: 'Eine Müllabholung steht an.'
+              }),
+              url: '/?view=trash',
+              tagPrefix: 'trash-reminder',
+              publishReason: 'trash-reminder'
+            };
+          })
+        ];
+        for (const candidate of reminderCandidates) {
+          const {
+            event,
+            eventId,
+            recipientMemberIds,
+            notificationCopy,
+            publishReason,
+            tagPrefix,
+            url
+          } = candidate;
           if (!normalizeEventReminders(event.reminders).length) continue;
           const startKey = eventStartKey(event);
-          const eventId = String(event.sharedEventId || event.id || '');
           if (!eventId) continue;
           try {
             const previousDeliveries = listEventReminderDeliveries(
@@ -3131,31 +3198,28 @@ export function createApp() {
               now
             );
             if (!due) continue;
-            const body = eventReminderMessage(event, now);
+            const copy = notificationCopy(due.reminderMinutes);
             const tag = [
-              'event-reminder',
+              tagPrefix,
               eventId,
               due.startKey,
               due.reminderMinutes
             ].join('-');
             const notifications = queueWebPushEvent(family.id, 'events', {
-              recipientMemberIds: eventReminderRecipientMemberIds(
-                family.id,
-                event
-              ),
-              title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 180)}`,
-              body,
-              privateTitle: 'Terminerinnerung',
-              privateBody: 'Ein Termin beginnt bald.',
-              url: '/?view=calendar',
+              recipientMemberIds,
+              title: copy.title,
+              body: copy.body,
+              privateTitle: copy.privateTitle,
+              privateBody: copy.privateBody,
+              url,
               tag,
               priority: due.reminderMinutes <= 10 ? 'high' : 'normal',
               allowDuringQuietHours: due.reminderMinutes <= 10,
               ttl: Math.max(300, Math.min(86_400, due.reminderMinutes * 60))
             });
             queueGotifyNotification(family.id, 'events', {
-              title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 140)}`,
-              message: body,
+              title: copy.title,
+              message: copy.body,
               priority: due.reminderMinutes <= 10 ? 8 : 4
             });
             markEventReminderDeliveries(
@@ -3167,7 +3231,7 @@ export function createApp() {
             );
             delivered += 1;
             if (notifications.length) {
-              publishFamilyChange(family.id, 'event-reminder');
+              publishFamilyChange(family.id, publishReason);
             }
           } catch (error) {
             console.error(
@@ -5040,10 +5104,18 @@ export function createApp() {
         error: 'Eine Datensatzliste wird benötigt.'
       });
     }
+    const inputRecords = req.body.records
+      .slice(0, 500)
+      .map(record => ensureObject(record))
+      .map(record =>
+        req.params.type === 'trashEvents'
+          ? sanitizeTrashEvent(record)
+          : record
+      );
     const records = upsertRecords(
       req.session.familyId,
       req.params.type,
-      req.body.records.slice(0, 500).map(record => ensureObject(record))
+      inputRecords
     );
     const version = getFamilyVersion(req.session.familyId);
     if (records.length) {
@@ -5089,6 +5161,9 @@ export function createApp() {
     }
     if (req.params.type === 'events') {
       input = sanitizeCalendarEvent(req, input);
+    }
+    if (req.params.type === 'trashEvents') {
+      input = sanitizeTrashEvent(input);
     }
     if (req.params.type === 'tasks') {
       const creator = getMember(req.session.familyId, req.session.memberId);
@@ -5165,6 +5240,7 @@ export function createApp() {
   app.patch('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
     let existingEvent = null;
+    let existingTrashEvent = null;
     if (req.params.type === 'events') {
       existingEvent = getRecord(
         req.session.familyId,
@@ -5178,6 +5254,13 @@ export function createApp() {
             'Dieser Termin wird von einer Kalenderquelle verwaltet und ist schreibgeschützt.'
         });
       }
+    }
+    if (req.params.type === 'trashEvents') {
+      existingTrashEvent = getRecord(
+        req.session.familyId,
+        'trashEvents',
+        req.params.id
+      );
     }
     if (req.params.type === 'chatMessages') {
       const existing = getRecord(
@@ -5257,6 +5340,20 @@ export function createApp() {
           ...ensureObject(req.body)
         },
         existingEvent
+      );
+    } else if (req.params.type === 'trashEvents') {
+      if (!existingTrashEvent) {
+        return res.status(404).json({
+          success: false,
+          error: 'Abholtermin nicht gefunden.'
+        });
+      }
+      changes = sanitizeTrashEvent(
+        {
+          ...existingTrashEvent,
+          ...ensureObject(req.body)
+        },
+        existingTrashEvent
       );
     } else if (FAMILY_LIFE_TYPES.has(req.params.type)) {
       const existing = getRecord(

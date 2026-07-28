@@ -1,5 +1,11 @@
-const CACHE = 'lx-familie-v1.7.7';
-const STATIC = ['/', '/manifest.json', '/icon.svg', '/icon.png'];
+const CACHE = 'lx-familie-v1.8.0';
+const STATIC = [
+  '/',
+  '/manifest.json',
+  '/icon.png',
+  '/icon-192.png',
+  '/icon-512.png'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(STATIC)));

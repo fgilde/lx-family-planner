@@ -2,6 +2,20 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.8.0] – 2026-07-29
+
+### Flexible Erinnerungen und neuer App-Auftritt
+
+- Kalendertermine unterstützen mehrere auswählbare Erinnerungszeitpunkte
+- zusätzliche Presets für 15 Minuten und 12 Stunden
+- Mülltermine erinnern standardmäßig einen Tag vorher um 09:00 Uhr
+- importierte und bereits vorhandene Abholtermine erhalten den sicheren
+  Vortags-Standard automatisch
+- Müll-Erinnerungen lassen sich pro Abholung ändern oder ganz ausschalten
+- Android-, Browser- und Gotify-Auslieferung verwenden dieselbe Kalenderregel
+- neuer App-Icon-Entwurf für Android, Web-App, Manifest und README
+- automatische Tests sichern Standard, Abschalten und doppelte Zustellung ab
+
 ## [1.7.7] – 2026-07-29
 
 ### Offenen Capacitor-Thenable-Fehler umgangen

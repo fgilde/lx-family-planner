@@ -7,7 +7,10 @@ import {
   eventStartTimestamp,
   formatReminderLead,
   normalizeEventReminders,
-  selectDueEventReminder
+  normalizeTrashReminders,
+  selectDueEventReminder,
+  trashReminderCopy,
+  trashReminderEvent
 } from '../shared/eventReminders.js';
 import { recipeShareTargetFromUrl } from '../shared/recipeShareTarget.js';
 import { normalizeServerUrl } from '../src/utils/apiConfig.js';
@@ -65,6 +68,22 @@ test('all-day calendar reminders use a predictable morning time', () => {
     reminders: [60]
   };
   assert.equal(eventStartKey(event), '2026-08-04T09:00');
+});
+
+test('trash pickup reminders default to the previous morning and can be disabled', () => {
+  assert.deepEqual(normalizeTrashReminders(undefined), [1440]);
+  assert.deepEqual(normalizeTrashReminders([]), []);
+  const event = trashReminderEvent({
+    title: 'Hausmüll',
+    date: '2026-08-04'
+  });
+  assert.equal(event.allDay, true);
+  assert.equal(eventStartKey(event), '2026-08-04T09:00');
+  assert.deepEqual(event.reminders, [1440]);
+  assert.deepEqual(trashReminderCopy(event, 1440), {
+    title: '🗑️ Morgen: Hausmüll',
+    body: 'Morgen wird Hausmüll abgeholt. Bitte rechtzeitig rausstellen.'
+  });
 });
 
 test('recipe share targets extract links from app share text', () => {

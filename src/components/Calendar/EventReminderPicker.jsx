@@ -28,8 +28,8 @@ export default function EventReminderPicker({
           <BellRing size={17} />
         </span>
         <span>
-          <strong>Erinnerungen</strong>
-          <small>Mehrere Zeitpunkte sind möglich</small>
+          <strong>Wann soll LX erinnern?</strong>
+          <small>Wähle einen oder mehrere Zeitpunkte</small>
         </span>
         <b>{selected.length || 'Aus'}</b>
       </legend>
@@ -61,8 +61,8 @@ export default function EventReminderPicker({
 
       <p>
         {selected.length
-          ? 'LX erinnert das ausgewählte Profil auf allen freigeschalteten Geräten.'
-          : 'Ohne Auswahl wird für diesen Termin keine Erinnerung gesendet.'}
+          ? 'LX erinnert auf allen für das Profil freigeschalteten Geräten.'
+          : 'Ohne Auswahl wird für diesen Eintrag keine Erinnerung gesendet.'}
       </p>
     </fieldset>
   );

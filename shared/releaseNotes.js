@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.8.0': {
+    version: '1.8.0',
+    eyebrow: 'Kalender erinnert jetzt im richtigen Moment',
+    title: 'Flexible Terminwecker und Müllabfuhr am Vortag',
+    intro:
+      'Für Termine lassen sich jetzt mehrere Erinnerungen wie in einem großen Kalender auswählen. Mülltermine erinnern automatisch einen Tag vorher, damit die richtige Tonne rechtzeitig draußen steht.',
+    highlights: [
+      {
+        id: 'flexible-calendar-reminders',
+        title: 'Mehrere Erinnerungen pro Termin',
+        description:
+          'Zum Beispiel 1 Tag, 1 Stunde und 10 Minuten vorher – einzeln oder gemeinsam.'
+      },
+      {
+        id: 'trash-reminder-default',
+        title: '„Morgen Hausmüll“ automatisch',
+        description:
+          'Neue, importierte und bereits vorhandene Abholtermine erinnern standardmäßig am Vortag.'
+      },
+      {
+        id: 'trash-reminder-controls',
+        title: 'Jede Abholung bleibt einstellbar',
+        description:
+          'Die Glocke am Mülltermin öffnet die Auswahl. Erinnerungen können geändert oder ganz ausgeschaltet werden.'
+      },
+      {
+        id: 'new-family-app-icon',
+        title: 'Neues LX-App-Symbol',
+        description:
+          'Haus, Kalender und Familie bilden jetzt ein klares gemeinsames Symbol auf Android und im Browser.'
+      }
+    ],
+    closing:
+      'Server und Android-App können normal aktualisiert werden. Alle Profile, Termine, Importe und Einstellungen bleiben erhalten.'
+  },
   '1.7.7': {
     version: '1.7.7',
     eyebrow: 'Capacitor-Hänger gezielt behoben',
