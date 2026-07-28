@@ -2,6 +2,16 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.6] – 2026-07-29
+
+### Direkte native Firebase-Token-Brücke
+
+- eigener nativer Android-Weg liefert den Firebase-Geräteschlüssel direkt
+- Firebase-Konfiguration und Google Play-Dienste werden vorab geprüft
+- der unzuverlässige ereignisbasierte Rückweg des Standard-Plugins entfällt
+- Netzwerk-, Firebase- und Play-Services-Probleme werden konkret angezeigt
+- der allgemeine 45-Sekunden-Abbruch verdeckt keine eigentliche Ursache mehr
+
 ## [1.7.5] – 2026-07-28
 
 ### Android-Push-Modul fest in die App integriert

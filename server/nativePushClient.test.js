@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   createNativeInstallationId,
-  launchNativePushRegistration,
   nativePushPermissionNeedsPrompt,
   withNativePushTimeout
 } from '../src/hooks/useNativePushNotifications.js';
@@ -25,22 +26,6 @@ test('native Android installations always receive a valid local id', () => {
   );
 });
 
-test('native registration launch never waits for a stuck plugin call', () => {
-  let started = false;
-  const neverSettles = new Promise(() => {});
-  const result = launchNativePushRegistration(
-    {
-      register() {
-        started = true;
-        return neverSettles;
-      }
-    },
-    () => {}
-  );
-  assert.equal(started, true);
-  assert.equal(result, undefined);
-});
-
 test('native push timeout rejects any stuck setup stage', async () => {
   const neverSettles = new Promise(() => {});
   await assert.rejects(
@@ -52,5 +37,29 @@ test('native push timeout rejects any stuck setup stage', async () => {
     error =>
       error.code === 'native-push-timeout' &&
       error.message === 'Android setup timed out.'
+  );
+});
+
+test('Android app requests the Firebase token through the direct native bridge', () => {
+  const pluginSource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      'android/app/src/main/java/com/lxfamily/planner/LXNativePushPlugin.java'
+    ),
+    'utf8'
+  );
+  const activitySource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      'android/app/src/main/java/com/lxfamily/planner/MainActivity.java'
+    ),
+    'utf8'
+  );
+  assert.match(pluginSource, /@CapacitorPlugin\(name = "LXNativePush"\)/);
+  assert.match(pluginSource, /FirebaseMessaging\s*\.getInstance\(\)/);
+  assert.match(pluginSource, /\.getToken\(\)/);
+  assert.ok(
+    activitySource.indexOf('registerPlugin(LXNativePushPlugin.class)') <
+      activitySource.indexOf('super.onCreate(savedInstanceState)')
   );
 });

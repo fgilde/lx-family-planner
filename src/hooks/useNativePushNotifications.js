@@ -1,3 +1,4 @@
+import { registerPlugin } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { isCapacitorNative } from '../utils/apiConfig.js';
 
@@ -7,7 +8,7 @@ const NATIVE_STEP_TIMEOUT_MS = 10_000;
 const PERMISSION_REQUEST_TIMEOUT_MS = 30_000;
 
 let listenersPromise;
-let pendingRegistration = null;
+const LXNativePush = registerPlugin('LXNativePush');
 
 export function withNativePushTimeout(
   operation,
@@ -52,10 +53,6 @@ async function ensureNativePushListeners() {
   if (!listenersPromise) {
     listenersPromise = Promise.all([
       plugin.addListener('registration', token => {
-        if (pendingRegistration) {
-          pendingRegistration.resolve(token.value);
-          pendingRegistration = null;
-        }
         dispatchNativePushEvent('lx-native-push-token', {
           token: token.value
         });
@@ -64,10 +61,6 @@ async function ensureNativePushListeners() {
         const message =
           error?.error ||
           'Die Android-App konnte sich nicht für Push anmelden.';
-        if (pendingRegistration) {
-          pendingRegistration.reject(new Error(message));
-          pendingRegistration = null;
-        }
         dispatchNativePushEvent('lx-native-push-error', { message });
       }),
       plugin.addListener('pushNotificationReceived', notification => {
@@ -164,12 +157,37 @@ export function nativePushPermissionNeedsPrompt(permission) {
   return ['prompt', 'prompt-with-rationale'].includes(permission);
 }
 
-export function launchNativePushRegistration(plugin, onError) {
-  try {
-    Promise.resolve(plugin.register()).catch(onError);
-  } catch (error) {
-    onError(error);
+async function directNativePushToken() {
+  const diagnostics = await withNativePushTimeout(
+    LXNativePush.diagnose(),
+    NATIVE_STEP_TIMEOUT_MS,
+    'Android konnte den Zustand der Google Play-Dienste nicht prüfen.'
+  );
+  if (!diagnostics?.firebaseConfigured) {
+    throw new Error(
+      diagnostics?.firebaseError
+        ? `Firebase ist in der Android-App nicht bereit: ${diagnostics.firebaseError}`
+        : 'Firebase ist in der Android-App nicht eingerichtet.'
+    );
   }
+  if (!diagnostics?.playServicesAvailable) {
+    throw new Error(
+      `Google Play-Dienste sind auf diesem Gerät nicht bereit: ${
+        diagnostics?.playServicesMessage || 'unbekannter Zustand'
+      }. Aktualisiere die Google Play-Dienste und versuche es erneut.`
+    );
+  }
+  const tokenResult = await withNativePushTimeout(
+    LXNativePush.getToken(),
+    REGISTRATION_TIMEOUT_MS,
+    `Firebase hat keinen Geräteschlüssel geliefert. Google Play-Dienste sind verfügbar; prüfe VPN, Firewall und privates DNS auf dem Handy.`
+  );
+  const token = String(tokenResult?.value || '').trim();
+  if (!token) {
+    throw new Error('Firebase hat einen leeren Geräteschlüssel geliefert.');
+  }
+  dispatchNativePushEvent('lx-native-push-token', { token });
+  return token;
 }
 
 export async function registerNativePush({
@@ -213,41 +231,7 @@ export async function registerNativePush({
   }
 
   onStage?.('firebase');
-  if (pendingRegistration) {
-    return pendingRegistration.promise;
-  }
-  let resolveRegistration;
-  let rejectRegistration;
-  const promise = new Promise((resolve, reject) => {
-    resolveRegistration = resolve;
-    rejectRegistration = reject;
-  });
-  const timeout = window.setTimeout(() => {
-    if (!pendingRegistration) return;
-    pendingRegistration = null;
-    rejectRegistration(
-      new Error(
-        'Firebase hat keinen Geräteschlüssel geliefert. Prüfe die App-Konfiguration.'
-      )
-    );
-  }, REGISTRATION_TIMEOUT_MS);
-  pendingRegistration = {
-    promise,
-    resolve(value) {
-      window.clearTimeout(timeout);
-      resolveRegistration(value);
-    },
-    reject(error) {
-      window.clearTimeout(timeout);
-      rejectRegistration(error);
-    }
-  };
-  launchNativePushRegistration(plugin, error => {
-    const pending = pendingRegistration;
-    pendingRegistration = null;
-    pending?.reject(error);
-  });
-  return promise;
+  return directNativePushToken();
 }
 
 export async function unregisterNativePush() {

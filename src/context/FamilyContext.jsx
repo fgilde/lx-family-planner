@@ -1125,16 +1125,12 @@ export function FamilyProvider({ children }) {
           'Der Server ist noch nicht mit Firebase Cloud Messaging verbunden.'
         );
       }
-      const token = await withNativePushTimeout(
-        registerNativePush({
-          requestPermission: true,
-          onStage: activationStep => {
-            setNativePush(previous => ({ ...previous, activationStep }));
-          }
-        }),
-        45_000,
-        'Die Android-Anmeldung wurde nach 45 Sekunden beendet. Beende LX vollständig, öffne die App erneut und versuche es noch einmal.'
-      );
+      const token = await registerNativePush({
+        requestPermission: true,
+        onStage: activationStep => {
+          setNativePush(previous => ({ ...previous, activationStep }));
+        }
+      });
       setNativePush(previous => ({
         ...previous,
         activationStep: 'save'

@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.6': {
+    version: '1.7.6',
+    eyebrow: 'Firebase antwortet jetzt direkt',
+    title: 'LX holt den Android-Geräteschlüssel ohne Umweg',
+    intro:
+      'Die bisherige Android-Erweiterung meldete das Firebase-Ergebnis auf dem betroffenen Handy nicht zuverlässig an die Oberfläche zurück. Eine eigene native LX-Brücke liefert den Geräteschlüssel jetzt direkt und prüft vorher Firebase sowie die Google Play-Dienste.',
+    highlights: [
+      {
+        id: 'direct-fcm-token',
+        title: 'Direkte Firebase-Anmeldung',
+        description:
+          'Der Geräteschlüssel wird direkt im nativen Android-Code abgerufen und als Ergebnis an LX zurückgegeben.'
+      },
+      {
+        id: 'play-services-diagnostics',
+        title: 'Google Play wird geprüft',
+        description:
+          'Fehlende oder veraltete Google Play-Dienste werden sofort verständlich benannt.'
+      },
+      {
+        id: 'real-fcm-errors',
+        title: 'Echte Ursache statt Zeitablauf',
+        description:
+          'Firebase-Fehler und mögliche Netzwerkblockaden erscheinen direkt im Verbindungsbereich.'
+      },
+      {
+        id: 'safe-upgrade-176',
+        title: 'Daten bleiben erhalten',
+        description:
+          'Version 1.7.6 kann über die vorhandene App installiert werden; Profile, Anmeldung und Familieninhalte bleiben bestehen.'
+      }
+    ],
+    closing:
+      'Installiert Version 1.7.6 über die vorhandene LX App und startet die Push-Anmeldung danach erneut.'
+  },
   '1.7.5': {
     version: '1.7.5',
     eyebrow: 'Android-Push ist direkt in der App verankert',
