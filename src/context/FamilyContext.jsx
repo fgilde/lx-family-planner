@@ -16,6 +16,14 @@ import {
   subscribeBrowser,
   webPushCapability
 } from '../hooks/useWebNotifications';
+import {
+  friendlyNativeDeviceName,
+  nativeInstallationId,
+  nativePushCapability,
+  nativePushPermission,
+  registerNativePush,
+  unregisterNativePush
+} from '../hooks/useNativePushNotifications';
 import { APP_VERSION } from '../appVersion';
 import {
   buildApiUrl,
@@ -78,6 +86,21 @@ function initialWebPushState() {
     loading: true,
     busy: '',
     publicKey: '',
+    defaults: {},
+    currentDeviceId: '',
+    devices: []
+  };
+}
+
+function initialNativePushState() {
+  const capability = nativePushCapability();
+  return {
+    ...capability,
+    permission: capability.supported ? 'prompt' : 'unsupported',
+    loading: capability.supported,
+    busy: '',
+    serverConfigured: false,
+    serverReason: '',
     defaults: {},
     currentDeviceId: '',
     devices: []
@@ -190,6 +213,7 @@ export function FamilyProvider({ children }) {
   const [homeAssistantEntities, setHomeAssistantEntities] = useState([]);
   const [homeAssistantLoading, setHomeAssistantLoading] = useState(false);
   const [webPush, setWebPush] = useState(initialWebPushState);
+  const [nativePush, setNativePush] = useState(initialNativePushState);
   const [bringCatalog, setBringCatalog] = useState({
     sections: [],
     total: 0,
@@ -267,6 +291,7 @@ export function FamilyProvider({ children }) {
         setReleaseNotes(null);
         setHomeAssistantEntities([]);
         setWebPush(initialWebPushState());
+        setNativePush(initialNativePushState());
       } else if (!silent) {
         showToast('Aktualisierung fehlgeschlagen', error.message, 'error');
       }
@@ -675,6 +700,7 @@ export function FamilyProvider({ children }) {
     setReleaseNotes(null);
     setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
+    setNativePush(initialNativePushState());
     setAuthStatus('authenticated');
     await refreshPublicFamilies();
     await refreshBootstrap({ silent: true });
@@ -698,6 +724,7 @@ export function FamilyProvider({ children }) {
     setIntegrations(EMPTY_INTEGRATIONS);
     setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
+    setNativePush(initialNativePushState());
     setActiveTab('dashboard');
     setStoredSessionToken('');
     localStorage.removeItem('lx_active_member');
@@ -982,6 +1009,282 @@ export function FamilyProvider({ children }) {
     }
   }, [showToast]);
 
+  const refreshNativePushStatus = useCallback(async (
+    { silent = false } = {}
+  ) => {
+    const capability = nativePushCapability();
+    if (!capability.supported) {
+      setNativePush(previous => ({
+        ...previous,
+        ...capability,
+        permission: 'unsupported',
+        loading: false
+      }));
+      return null;
+    }
+    setNativePush(previous => ({
+      ...previous,
+      ...capability,
+      loading: !silent
+    }));
+    if (authStatus !== 'authenticated' || !activeMemberIdState) {
+      setNativePush(previous => ({
+        ...previous,
+        loading: false,
+        currentDeviceId: '',
+        devices: []
+      }));
+      return null;
+    }
+    try {
+      const [permission, data] = await Promise.all([
+        nativePushPermission(),
+        apiRequest(
+          `/api/native-push/status?installationId=${encodeURIComponent(
+            nativeInstallationId()
+          )}`
+        )
+      ]);
+      const next = {
+        ...data,
+        permission,
+        serverConfigured: Boolean(data.server?.configured),
+        serverReason: data.server?.reason || ''
+      };
+      setNativePush(previous => ({
+        ...previous,
+        ...capability,
+        permission,
+        loading: false,
+        serverConfigured: next.serverConfigured,
+        serverReason: next.serverReason,
+        defaults: data.defaults || {},
+        currentDeviceId: data.currentDeviceId || '',
+        devices: data.devices || []
+      }));
+      return next;
+    } catch (error) {
+      setNativePush(previous => ({
+        ...previous,
+        loading: false
+      }));
+      if (!silent) {
+        showToast(
+          'Android-Benachrichtigungen nicht erreichbar',
+          error.message,
+          'warning'
+        );
+      }
+      return null;
+    }
+  }, [activeMemberIdState, authStatus, showToast]);
+
+  const saveNativePushDevice = useCallback(async (
+    token,
+    preferences
+  ) => {
+    const data = await apiRequest('/api/native-push/devices', {
+      method: 'POST',
+      body: JSON.stringify({
+        installationId: nativeInstallationId(),
+        token,
+        deviceName: friendlyNativeDeviceName(),
+        appVersion: APP_VERSION,
+        preferences
+      })
+    });
+    setNativePush(previous => ({
+      ...previous,
+      currentDeviceId: data.device.id,
+      devices: [
+        data.device,
+        ...previous.devices.filter(device => device.id !== data.device.id)
+      ]
+    }));
+    return data.device;
+  }, []);
+
+  const enableNativePush = useCallback(async (preferences = {}) => {
+    setNativePush(previous => ({ ...previous, busy: 'enable' }));
+    try {
+      const status = nativePush.serverConfigured
+        ? nativePush
+        : await refreshNativePushStatus();
+      if (!status?.serverConfigured && !status?.server?.configured) {
+        throw new Error(
+          'Der Server ist noch nicht mit Firebase Cloud Messaging verbunden.'
+        );
+      }
+      const token = await registerNativePush({ requestPermission: true });
+      const device = await saveNativePushDevice(token, {
+        ...(status.defaults || nativePush.defaults || {}),
+        ...preferences
+      });
+      setNativePush(previous => ({
+        ...previous,
+        permission: 'granted',
+        busy: ''
+      }));
+      showToast(
+        'Android-Benachrichtigungen sind an',
+        `Die LX App meldet sich jetzt für ${activeMember?.name || 'dich'}.`,
+        'success'
+      );
+      return device;
+    } catch (error) {
+      setNativePush(previous => ({
+        ...previous,
+        permission: error.permission || previous.permission,
+        busy: ''
+      }));
+      showToast('Aktivierung nicht möglich', error.message, 'warning');
+      return null;
+    }
+  }, [
+    activeMember?.name,
+    nativePush,
+    refreshNativePushStatus,
+    saveNativePushDevice,
+    showToast
+  ]);
+
+  const disableNativePush = useCallback(async () => {
+    setNativePush(previous => ({ ...previous, busy: 'disable' }));
+    try {
+      const data = await apiRequest('/api/native-push/devices', {
+        method: 'DELETE',
+        body: JSON.stringify({
+          installationId: nativeInstallationId()
+        })
+      });
+      if (data.unregisterApp) {
+        await unregisterNativePush();
+      }
+      setNativePush(previous => ({
+        ...previous,
+        busy: '',
+        currentDeviceId: '',
+        devices: previous.devices.filter(
+          device => device.id !== previous.currentDeviceId
+        )
+      }));
+      showToast(
+        'App-Benachrichtigungen ausgeschaltet',
+        `Dieses Gerät meldet sich nicht mehr für ${
+          activeMember?.name || 'dieses Profil'
+        }.`,
+        'info'
+      );
+      return true;
+    } catch (error) {
+      setNativePush(previous => ({ ...previous, busy: '' }));
+      showToast('Ausschalten nicht möglich', error.message, 'warning');
+      return false;
+    }
+  }, [activeMember?.name, showToast]);
+
+  const updateNativePushPreferences = useCallback(async preferences => {
+    setNativePush(previous => ({ ...previous, busy: 'save' }));
+    try {
+      if (!nativePush.currentDeviceId) {
+        throw new Error('Diese App ist für das Profil noch nicht angemeldet.');
+      }
+      const currentDevice = nativePush.devices.find(
+        device => device.id === nativePush.currentDeviceId
+      );
+      const token = await registerNativePush();
+      const device = await saveNativePushDevice(token, {
+        ...nativePush.defaults,
+        ...(currentDevice?.preferences || {}),
+        ...preferences
+      });
+      setNativePush(previous => ({ ...previous, busy: '' }));
+      showToast(
+        'App-Benachrichtigungen gespeichert',
+        'Deine Auswahl gilt sofort auf diesem Android-Gerät.',
+        'success'
+      );
+      return device;
+    } catch (error) {
+      setNativePush(previous => ({ ...previous, busy: '' }));
+      showToast('Speichern nicht möglich', error.message, 'warning');
+      return null;
+    }
+  }, [
+    nativePush.currentDeviceId,
+    nativePush.defaults,
+    nativePush.devices,
+    saveNativePushDevice,
+    showToast
+  ]);
+
+  const testNativePush = useCallback(async () => {
+    setNativePush(previous => ({ ...previous, busy: 'test' }));
+    try {
+      await apiRequest('/api/native-push/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          installationId: nativeInstallationId()
+        })
+      });
+      setNativePush(previous => ({ ...previous, busy: '' }));
+      showToast(
+        'Android-Test wurde gesendet',
+        'Die Meldung sollte gleich im Android-Benachrichtigungsbereich erscheinen.',
+        'success'
+      );
+      return true;
+    } catch (error) {
+      setNativePush(previous => ({ ...previous, busy: '' }));
+      showToast('Android-Test fehlgeschlagen', error.message, 'warning');
+      return false;
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    if (
+      !isCapacitorNative() ||
+      authStatus !== 'authenticated' ||
+      !activeMemberIdState
+    ) {
+      return undefined;
+    }
+    let cancelled = false;
+    const restoreNativePush = async () => {
+      const status = await refreshNativePushStatus({ silent: true });
+      if (
+        cancelled ||
+        !status?.serverConfigured ||
+        status.permission !== 'granted' ||
+        !status.currentDeviceId
+      ) {
+        return;
+      }
+      try {
+        const currentDevice = status.devices.find(
+          device => device.id === status.currentDeviceId
+        );
+        const token = await registerNativePush();
+        if (cancelled) return;
+        await saveNativePushDevice(
+          token,
+          currentDevice?.preferences || status.defaults
+        );
+      } catch {
+        // Die bestehende Einstellung bleibt erhalten; die UI zeigt den Status.
+      }
+    };
+    restoreNativePush();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeMemberIdState,
+    authStatus,
+    refreshNativePushStatus,
+    saveNativePushDevice
+  ]);
+
   const fetchPushDevices = useCallback(async () => {
     const data = await apiRequest('/api/push/devices');
     return data.devices || [];
@@ -990,6 +1293,12 @@ export function FamilyProvider({ children }) {
   const removePushDevice = useCallback(async deviceId => {
     await apiRequest(`/api/push/devices/${deviceId}`, { method: 'DELETE' });
     setWebPush(previous => ({
+      ...previous,
+      currentDeviceId:
+        previous.currentDeviceId === deviceId ? '' : previous.currentDeviceId,
+      devices: previous.devices.filter(device => device.id !== deviceId)
+    }));
+    setNativePush(previous => ({
       ...previous,
       currentDeviceId:
         previous.currentDeviceId === deviceId ? '' : previous.currentDeviceId,
@@ -2576,6 +2885,12 @@ export function FamilyProvider({ children }) {
     disableWebPush,
     updateWebPushPreferences,
     testWebPush,
+    nativePush,
+    refreshNativePushStatus,
+    enableNativePush,
+    disableNativePush,
+    updateNativePushPreferences,
+    testNativePush,
     fetchPushDevices,
     removePushDevice,
     notifications,

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import { NOTIFICATION_EVENT_DEFINITIONS } from '../../../shared/notificationEvents';
+import { isCapacitorNative } from '../../utils/apiConfig';
 
 const RULE_ICONS = {
   groupChat: MessageCircleMore,
@@ -56,14 +57,27 @@ export default function WebPushSettings() {
     disableWebPush,
     updateWebPushPreferences,
     testWebPush,
+    nativePush,
+    enableNativePush,
+    disableNativePush,
+    updateNativePushPreferences,
+    testNativePush,
     fetchPushDevices,
     removePushDevice
   } = useFamily();
+  const isNative = isCapacitorNative();
+  const push = isNative ? nativePush : webPush;
+  const enablePush = isNative ? enableNativePush : enableWebPush;
+  const disablePush = isNative ? disableNativePush : disableWebPush;
+  const updatePushPreferences = isNative
+    ? updateNativePushPreferences
+    : updateWebPushPreferences;
+  const testPush = isNative ? testNativePush : testWebPush;
   const currentDevice =
-    webPush.devices.find(device => device.id === webPush.currentDeviceId) ||
+    push.devices.find(device => device.id === push.currentDeviceId) ||
     null;
   const [preferences, setPreferences] = useState({
-    ...webPush.defaults,
+    ...push.defaults,
     ...(currentDevice?.preferences || {})
   });
   const [familyDevices, setFamilyDevices] = useState([]);
@@ -83,28 +97,35 @@ export default function WebPushSettings() {
 
   useEffect(() => {
     setPreferences({
-      ...webPush.defaults,
+      ...push.defaults,
       ...(currentDevice?.preferences || {})
     });
-  }, [currentDevice?.id, currentDevice?.updatedAt, webPush.defaults]);
+  }, [currentDevice?.id, currentDevice?.updatedAt, push.defaults]);
 
   useEffect(() => {
     loadDevices();
   }, [loadDevices]);
 
   const status = useMemo(() => {
-    if (!webPush.supported) return 'unavailable';
-    if (webPush.permission === 'denied') return 'denied';
+    if (!push.supported) return 'unavailable';
+    if (isNative && !push.serverConfigured) return 'server-missing';
+    if (push.permission === 'denied') return 'denied';
     if (currentDevice) return 'connected';
     return 'ready';
-  }, [currentDevice, webPush.permission, webPush.supported]);
+  }, [
+    currentDevice,
+    isNative,
+    push.permission,
+    push.serverConfigured,
+    push.supported
+  ]);
 
   const toggle = key => {
     setPreferences(previous => ({ ...previous, [key]: !previous[key] }));
   };
 
   const activate = async () => {
-    const device = await enableWebPush(preferences);
+    const device = await enablePush(preferences);
     if (device) await loadDevices();
   };
 
@@ -123,17 +144,42 @@ export default function WebPushSettings() {
       <header className="webpush-heading">
         <div className="webpush-mark"><BellRing size={23} /></div>
         <div>
-          <span className="admin-section-kicker">Ohne Zusatz-App</span>
-          <h2>Browser-Benachrichtigungen</h2>
+          <span className="admin-section-kicker">
+            {isNative ? 'Direkt von Android' : 'Ohne Zusatz-App'}
+          </span>
+          <h2>
+            {isNative
+              ? 'Android-App-Benachrichtigungen'
+              : 'Browser-Benachrichtigungen'}
+          </h2>
           <p>
-            Jedes Handy oder Tablet meldet sich einmal für ein Familienprofil
-            an. Schlüssel und technische Daten bleiben unsichtbar.
+            {isNative
+              ? 'Die LX App meldet dieses Android-Gerät einmal für ein Profil an. Danach kommen Meldungen auch bei geschlossener App.'
+              : 'Jedes Handy oder Tablet meldet sich einmal für ein Familienprofil an. Schlüssel und technische Daten bleiben unsichtbar.'}
           </p>
         </div>
         {status === 'connected' && (
           <span className="webpush-connected"><Check size={14} /> Dieses Gerät ist an</span>
         )}
       </header>
+
+      {status === 'server-missing' && (
+        <div className="webpush-prerequisite">
+          <LockKeyhole size={24} />
+          <div>
+            <strong>Firebase-Verbindung fehlt noch</strong>
+            <p>
+              Der LX-Server besitzt noch keinen privaten Firebase-Dienstschlüssel.
+              Deshalb kann er Android momentan nicht erreichen.
+            </p>
+            <small>
+              Lege den Dienstschlüssel ausschließlich im Datenordner des Servers
+              ab und installiere danach die mit demselben Firebase-Projekt gebaute
+              LX App. Der Schlüssel gehört niemals ins Git-Repository.
+            </small>
+          </div>
+        </div>
+      )}
 
       {status === 'unavailable' && (
         <div className="webpush-prerequisite">
@@ -146,9 +192,9 @@ export default function WebPushSettings() {
             </strong>
             <p>{webPush.message}</p>
             <small>
-              Eine Android-App ist dafür nicht nötig. Öffne den Planer über
-              eine vertrauenswürdige HTTPS-Adresse, füge ihn auf Android zum
-              Startbildschirm hinzu und aktiviere danach dieses Gerät.
+              {isNative
+                ? 'Installiere die aktuelle LX Android-App, um native Benachrichtigungen zu verwenden.'
+                : 'Öffne den Planer über eine vertrauenswürdige HTTPS-Adresse, füge ihn auf Android zum Startbildschirm hinzu und aktiviere danach dieses Gerät.'}
             </small>
           </div>
         </div>
@@ -160,8 +206,9 @@ export default function WebPushSettings() {
           <div>
             <strong>Im Browser ausgeschaltet</strong>
             <p>
-              Erlaube Benachrichtigungen in den Website-Einstellungen deines
-              Browsers und öffne den Planer danach erneut.
+              {isNative
+                ? 'Erlaube Benachrichtigungen unter Android → Apps → LX Family Planner → Benachrichtigungen.'
+                : 'Erlaube Benachrichtigungen in den Website-Einstellungen deines Browsers und öffne den Planer danach erneut.'}
             </p>
           </div>
         </div>
@@ -173,12 +220,16 @@ export default function WebPushSettings() {
             <Smartphone size={25} />
             <span>
               <strong>Dieses Gerät für {activeMember?.name} anmelden</strong>
-              <small>Ein Klick – kein Token und keine zusätzliche App.</small>
+              <small>
+                {isNative
+                  ? 'Ein Klick – die Android-Abfrage erscheint nur einmal.'
+                  : 'Ein Klick – kein Token und keine zusätzliche App.'}
+              </small>
             </span>
           </div>
-          <button type="button" onClick={activate} disabled={Boolean(webPush.busy)}>
+          <button type="button" onClick={activate} disabled={Boolean(push.busy)}>
             <BellRing size={17} />
-            {webPush.busy === 'enable' ? 'Wird verbunden …' : 'Benachrichtigungen einschalten'}
+            {push.busy === 'enable' ? 'Wird verbunden …' : 'Benachrichtigungen einschalten'}
           </button>
         </div>
       )}
@@ -189,9 +240,9 @@ export default function WebPushSettings() {
             <Check size={16} />
             <span>
               <strong>Bereit für Hintergrund-Push</strong>
-              Für die zuverlässigste Zustellung auf Android den Planer über
-              „Zum Startbildschirm hinzufügen“ installieren und
-              Benachrichtigungen in den Android-App-Einstellungen erlauben.
+              {isNative
+                ? 'Android zeigt Familienmeldungen im Systembereich und auf Wunsch auf dem Sperrbildschirm – auch wenn LX geschlossen ist.'
+                : 'Für die zuverlässigste Zustellung auf Android den Planer über „Zum Startbildschirm hinzufügen“ installieren und Benachrichtigungen in den Android-App-Einstellungen erlauben.'}
             </span>
           </div>
           <div className="webpush-rule-grid">
@@ -232,29 +283,29 @@ export default function WebPushSettings() {
             <button
               type="button"
               className="admin-primary-button"
-              disabled={Boolean(webPush.busy)}
-              onClick={() => updateWebPushPreferences(preferences)}
+              disabled={Boolean(push.busy)}
+              onClick={() => updatePushPreferences(preferences)}
             >
               <Check size={16} />
-              {webPush.busy === 'save' ? 'Speichert …' : 'Auswahl speichern'}
+              {push.busy === 'save' ? 'Speichert …' : 'Auswahl speichern'}
             </button>
             <button
               type="button"
-              disabled={Boolean(webPush.busy)}
-              onClick={testWebPush}
+              disabled={Boolean(push.busy)}
+              onClick={testPush}
             >
               <Send size={16} />
-              {webPush.busy === 'test' ? 'Sendet …' : 'Test senden'}
+              {push.busy === 'test' ? 'Sendet …' : 'Test senden'}
             </button>
             <button
               type="button"
               className="disconnect"
-              disabled={Boolean(webPush.busy)}
+              disabled={Boolean(push.busy)}
               onClick={async () => {
-                if (await disableWebPush()) await loadDevices();
+                if (await disablePush()) await loadDevices();
               }}
             >
-              <BellRing size={16} /> Auf diesem Gerät ausschalten
+              <BellRing size={16} /> Für dieses Profil ausschalten
             </button>
           </div>
         </>
@@ -278,7 +329,9 @@ export default function WebPushSettings() {
               <span className="webpush-device-icon"><Smartphone size={18} /></span>
               <div>
                 <strong>{device.deviceName}</strong>
-                <small>{device.memberName} · zuletzt aktualisiert {
+                <small>{
+                  device.transport === 'android' ? 'Android-App' : 'Browser'
+                } · {device.memberName} · zuletzt aktualisiert {
                   new Date(device.updatedAt).toLocaleDateString('de-DE')
                 }</small>
               </div>
@@ -293,7 +346,7 @@ export default function WebPushSettings() {
           ))}
           {!loadingDevices && !familyDevices.length && (
             <div className="admin-inline-empty">
-              <Smartphone size={18} /> Noch kein Browser angemeldet.
+              <Smartphone size={18} /> Noch kein Familiengerät angemeldet.
             </div>
           )}
         </div>

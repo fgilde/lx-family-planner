@@ -3,6 +3,32 @@ $ErrorActionPreference = "Stop"
 Write-Host "Building LX Family Planner Android APK ..." -ForegroundColor Cyan
 Set-Location "$PSScriptRoot\.."
 
+$googleServicesFile = "android\app\google-services.json"
+if (-not (Test-Path -LiteralPath $googleServicesFile)) {
+    throw @"
+Native Android push is not configured.
+Download google-services.json for package com.lxfamily.planner from Firebase
+and save it as android\app\google-services.json.
+See README.md: Native Android-Benachrichtigungen.
+"@
+}
+try {
+    $googleServices = Get-Content -LiteralPath $googleServicesFile -Raw |
+        ConvertFrom-Json
+    $androidClient = @(
+        $googleServices.client |
+            Where-Object {
+                $_.client_info.android_client_info.package_name -eq
+                    "com.lxfamily.planner"
+            }
+    )
+    if (-not $androidClient.Count) {
+        throw "Firebase file does not contain com.lxfamily.planner."
+    }
+} catch {
+    throw "google-services.json is invalid: $($_.Exception.Message)"
+}
+
 Write-Host "[1/3] Building Web Assets with Vite ..." -ForegroundColor Yellow
 npm run build
 if ($LASTEXITCODE -ne 0) {

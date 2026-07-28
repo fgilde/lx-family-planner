@@ -46,12 +46,16 @@ import {
   createRecord,
   createSession,
   countPushSubscriptionsByEndpoint,
+  countNativePushProfilesForInstallation,
   deleteFamily,
   deleteCalendarSubscription,
   deleteFamilyRelationship,
   deleteIntegration,
   deleteSharedFamilyEvent,
   deleteMember,
+  deleteNativePushDevice,
+  deleteNativePushDeviceById,
+  deleteNativePushDevicesByToken,
   deletePushSubscription,
   deletePushSubscriptionById,
   deletePushSubscriptionsByEndpoint,
@@ -79,6 +83,7 @@ import {
   listIntegrationsByProvider,
   listInboxNotifications,
   listProblemReports,
+  listNativePushDevices,
   listPushSubscriptions,
   listRecords,
   redeemRewardRecord,
@@ -87,6 +92,7 @@ import {
   respondFamilyRelationship,
   relationshipAllows,
   saveIntegration,
+  saveNativePushDevice,
   savePushSubscription,
   setAppMeta,
   setSessionMember,
@@ -107,6 +113,11 @@ import {
   upsertRecords,
   verifySecret
 } from './database.js';
+import {
+  isExpiredFirebaseTarget,
+  publicFirebasePushStatus,
+  sendFirebaseNotification
+} from './firebasePush.js';
 import {
   ensureNextcloudFolder,
   inspectNextcloud,
@@ -838,11 +849,27 @@ function getVapidConfig() {
 function publicPushDevice(subscription) {
   return {
     id: subscription.id,
+    transport: 'browser',
     memberId: subscription.memberId,
     deviceName: subscription.deviceName,
     preferences: normalizePushPreferences(subscription.preferences),
     createdAt: subscription.createdAt,
     updatedAt: subscription.updatedAt
+  };
+}
+
+function publicNativePushDevice(device) {
+  return {
+    id: device.id,
+    transport: 'android',
+    memberId: device.memberId,
+    installationId: device.installationId,
+    platform: device.platform,
+    deviceName: device.deviceName,
+    appVersion: device.appVersion,
+    preferences: normalizePushPreferences(device.preferences),
+    createdAt: device.createdAt,
+    updatedAt: device.updatedAt
   };
 }
 
@@ -960,6 +987,121 @@ async function sendWebPushEvent(
   return { sent, failed };
 }
 
+async function sendNativePushEvent(
+  familyId,
+  eventKey,
+  {
+    recipientMemberIds = null,
+    excludeMemberIds = [],
+    title,
+    body,
+    privateTitle = title,
+    privateBody = 'Im Familienplaner gibt es etwas Neues.',
+    url = '/',
+    tag = eventKey,
+    priority = 'normal',
+    allowDuringQuietHours = false,
+    ttl = 900
+  }
+) {
+  if (!publicFirebasePushStatus().configured) {
+    return { sent: 0, failed: 0, configured: false };
+  }
+  const familySettings = getRecord(
+    familyId,
+    'familySettings',
+    'family-settings'
+  );
+  const quietNow =
+    familySettings?.quietHoursEnabled &&
+    isWithinTimeWindow(
+      familySettings.quietStart || '20:00',
+      familySettings.quietEnd || '07:00'
+    );
+  const urgentAllowed =
+    familySettings?.urgentDuringQuietHours !== false &&
+    (allowDuringQuietHours || eventKey === 'moodHelp');
+  if (quietNow && !urgentAllowed) {
+    return { sent: 0, failed: 0, quiet: true, configured: true };
+  }
+
+  const recipients = recipientMemberIds
+    ? new Set(recipientMemberIds.filter(Boolean))
+    : null;
+  const excluded = new Set(excludeMemberIds.filter(Boolean));
+  const devicesByToken = new Map();
+  listNativePushDevices(familyId)
+    .filter(device => {
+      const preferences = normalizePushPreferences(device.preferences);
+      return (
+        (!eventKey || preferences[eventKey]) &&
+        (!recipients || recipients.has(device.memberId)) &&
+        !excluded.has(device.memberId)
+      );
+    })
+    .forEach(device => {
+      const existing = devicesByToken.get(device.token);
+      if (
+        !existing ||
+        (
+          normalizePushPreferences(existing.preferences).showPreviews &&
+          !normalizePushPreferences(device.preferences).showPreviews
+        )
+      ) {
+        devicesByToken.set(device.token, device);
+      }
+    });
+  const devices = [...devicesByToken.values()];
+  if (!devices.length) {
+    return { sent: 0, failed: 0, configured: true };
+  }
+
+  const results = await Promise.allSettled(
+    devices.map(async device => {
+      const preferences = normalizePushPreferences(device.preferences);
+      const revealDetails = preferences.showPreviews;
+      try {
+        await sendFirebaseNotification({
+          token: device.token,
+          title: revealDetails ? title : privateTitle,
+          body: revealDetails ? body : privateBody,
+          tag,
+          priority,
+          visibility: revealDetails ? 'public' : 'private',
+          ttl,
+          data: {
+            url,
+            eventKey: eventKey || 'test',
+            tag: tag || eventKey || 'lx-family',
+            memberId: device.memberId,
+            timestamp: Date.now()
+          }
+        });
+        return true;
+      } catch (error) {
+        if (isExpiredFirebaseTarget(error)) {
+          deleteNativePushDevicesByToken(device.token);
+          return false;
+        }
+        throw error;
+      }
+    })
+  );
+  const sent = results.filter(
+    result => result.status === 'fulfilled' && result.value
+  ).length;
+  const failed = results.length - sent;
+  results
+    .filter(result => result.status === 'rejected')
+    .forEach(result => {
+      console.error(
+        'Android-Benachrichtigung fehlgeschlagen:',
+        result.reason?.message || result.reason
+      );
+    });
+  return { sent, failed, configured: true };
+}
+
 function queueWebPushEvent(familyId, eventKey, payload) {
   const excluded = new Set((payload.excludeMemberIds || []).filter(Boolean));
   const requestedRecipients = payload.recipientMemberIds
@@ -991,6 +1133,17 @@ function queueWebPushEvent(familyId, eventKey, payload) {
   }).catch(error => {
     console.error(
       'Browser-Benachrichtigung fehlgeschlagen:',
+      error.message
+    );
+  });
+  void sendNativePushEvent(familyId, eventKey, {
+    ...payload,
+    recipientMemberIds: [
+      ...new Set(createdNotifications.map(entry => entry.memberId))
+    ]
+  }).catch(error => {
+    console.error(
+      'Android-Benachrichtigung fehlgeschlagen:',
       error.message
     );
   });
@@ -5875,6 +6028,167 @@ export function createApp() {
     });
   });
 
+  app.get('/api/native-push/status', requireAuth, (req, res) => {
+    if (!req.session.memberId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Bitte zuerst ein Familienprofil auswählen.'
+      });
+    }
+    const installationId = cleanText(
+      req.query?.installationId,
+      '',
+      120
+    );
+    const devices = listNativePushDevices(req.session.familyId, {
+      memberId: req.session.memberId
+    });
+    const currentDevice = installationId
+      ? devices.find(device => device.installationId === installationId)
+      : null;
+    res.json({
+      success: true,
+      server: publicFirebasePushStatus(),
+      defaults: { ...DEFAULT_WEB_PUSH_PREFERENCES },
+      currentDeviceId: currentDevice?.id || '',
+      devices: devices.map(publicNativePushDevice)
+    });
+  });
+
+  app.post('/api/native-push/devices', requireAuth, (req, res) => {
+    if (!req.session.memberId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Bitte zuerst ein Familienprofil auswählen.'
+      });
+    }
+    const firebaseStatus = publicFirebasePushStatus();
+    if (!firebaseStatus.configured) {
+      return res.status(503).json({
+        success: false,
+        error:
+          'Android-Push ist auf diesem Server noch nicht eingerichtet.',
+        server: firebaseStatus
+      });
+    }
+    const input = ensureObject(req.body);
+    const installationId = requireText(
+      input.installationId,
+      'App-Gerätekennung',
+      120
+    );
+    if (!/^[a-z0-9][a-z0-9._:-]{15,119}$/i.test(installationId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Die App-Gerätekennung ist ungültig.'
+      });
+    }
+    const token = requireText(input.token, 'Firebase-Geräteschlüssel', 4096);
+    if (token.length < 20 || /\s/.test(token)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Der Firebase-Geräteschlüssel ist ungültig.'
+      });
+    }
+    const existing = listNativePushDevices(req.session.familyId, {
+      memberId: req.session.memberId,
+      installationId
+    })[0];
+    const saved = saveNativePushDevice({
+      familyId: req.session.familyId,
+      memberId: req.session.memberId,
+      installationId,
+      token,
+      platform: 'android',
+      deviceName: cleanText(input.deviceName, 'Android-Gerät', 100),
+      appVersion: cleanText(input.appVersion, APP_VERSION, 30),
+      preferences: normalizePushPreferences(
+        Object.hasOwn(input, 'preferences')
+          ? input.preferences
+          : existing?.preferences
+      )
+    });
+    res.status(existing ? 200 : 201).json({
+      success: true,
+      device: publicNativePushDevice(saved)
+    });
+  });
+
+  app.delete('/api/native-push/devices', requireAuth, (req, res) => {
+    if (!req.session.memberId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Bitte zuerst ein Familienprofil auswählen.'
+      });
+    }
+    const installationId = requireText(
+      req.body?.installationId,
+      'App-Gerätekennung',
+      120
+    );
+    deleteNativePushDevice(
+      req.session.familyId,
+      req.session.memberId,
+      installationId
+    );
+    res.json({
+      success: true,
+      unregisterApp:
+        countNativePushProfilesForInstallation(
+          req.session.familyId,
+          installationId
+        ) === 0
+    });
+  });
+
+  app.post('/api/native-push/test', requireAuth, async (req, res) => {
+    if (!req.session.memberId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Bitte zuerst ein Familienprofil auswählen.'
+      });
+    }
+    if (!publicFirebasePushStatus().configured) {
+      return res.status(503).json({
+        success: false,
+        error:
+          'Android-Push ist auf diesem Server noch nicht eingerichtet.'
+      });
+    }
+    const installationId = requireText(
+      req.body?.installationId,
+      'App-Gerätekennung',
+      120
+    );
+    const device = listNativePushDevices(req.session.familyId, {
+      memberId: req.session.memberId,
+      installationId
+    })[0];
+    if (!device) {
+      return res.status(409).json({
+        success: false,
+        error: 'Diese App ist für das Profil noch nicht angemeldet.'
+      });
+    }
+    const member = getMember(req.session.familyId, req.session.memberId);
+    await sendFirebaseNotification({
+      token: device.token,
+      title: `Hallo ${member?.name || ''}!`,
+      body: 'Die Android-App kann dir jetzt zuverlässig Bescheid sagen.',
+      tag: `native-push-test-${device.id}`,
+      priority: 'high',
+      ttl: 300,
+      data: {
+        url: '/?view=dashboard',
+        eventKey: 'test',
+        tag: `native-push-test-${device.id}`,
+        memberId: device.memberId,
+        timestamp: Date.now()
+      }
+    });
+    res.json({ success: true, sent: 1 });
+  });
+
   app.post('/api/push/subscriptions', requireAuth, (req, res) => {
     if (!req.session.memberId) {
       return res.status(403).json({
@@ -5978,12 +6292,22 @@ export function createApp() {
     const membersById = new Map(
       getMembers(req.session.familyId).map(member => [member.id, member])
     );
-    const devices = listPushSubscriptions(req.session.familyId).map(
+    const browserDevices = listPushSubscriptions(req.session.familyId).map(
       subscription => ({
         ...publicPushDevice(subscription),
         memberName:
           membersById.get(subscription.memberId)?.name || 'Familienprofil'
       })
+    );
+    const nativeDevices = listNativePushDevices(req.session.familyId).map(
+      device => ({
+        ...publicNativePushDevice(device),
+        memberName:
+          membersById.get(device.memberId)?.name || 'Familienprofil'
+      })
+    );
+    const devices = [...nativeDevices, ...browserDevices].sort(
+      (left, right) => right.updatedAt - left.updatedAt
     );
     res.json({ success: true, devices });
   });
@@ -5994,6 +6318,9 @@ export function createApp() {
     requireAdult,
     (req, res) => {
       const deleted = deletePushSubscriptionById(
+        req.session.familyId,
+        req.params.deviceId
+      ) || deleteNativePushDeviceById(
         req.session.familyId,
         req.params.deviceId
       );

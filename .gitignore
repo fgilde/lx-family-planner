@@ -17,6 +17,8 @@ coverage/
 *.jks
 *.keystore
 android/keystore.properties
+android/app/google-services.json
+firebase-service-account.json
 
 # Runtime databases and user data
 data/

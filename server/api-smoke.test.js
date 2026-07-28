@@ -17,7 +17,12 @@ process.env.PUBLIC_APP_URL = 'https://familie.example.test/vorschau';
 
 const [
   { createApp },
-  { database },
+  {
+    database,
+    deleteNativePushDevice,
+    listNativePushDevices,
+    saveNativePushDevice
+  },
   { normalizeBringCatalog },
   { getInstructionDurationMinutes, parseInstructionSteps },
   { parseICalendar },
@@ -435,6 +440,52 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(bootstrap.body.members.length, 5);
   assert.equal(
     bootstrap.body.family.grandparentsHouseholdEnabled,
+    true
+  );
+  const nativePushStatus = await request('/api/native-push/status', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(nativePushStatus.body.server.configured, false);
+  assert.equal(
+    nativePushStatus.body.server.reason,
+    'missing-service-account'
+  );
+  assert.deepEqual(nativePushStatus.body.devices, []);
+  await request(
+    '/api/native-push/devices',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        installationId: 'lx-android-1234567890abcdef',
+        token: 'fcm-test-token-1234567890abcdef',
+        deviceName: 'Test Android-App'
+      })
+    },
+    503
+  );
+  const storedNativeDevice = saveNativePushDevice({
+    familyId: registration.body.family.id,
+    memberId: adult.id,
+    installationId: 'lx-android-1234567890abcdef',
+    token: 'fcm-test-token-1234567890abcdef',
+    deviceName: 'Test Android-App',
+    appVersion: '1.7.0',
+    preferences: { groupChat: true, showPreviews: false }
+  });
+  assert.equal(storedNativeDevice.platform, 'android');
+  assert.equal(
+    listNativePushDevices(registration.body.family.id, {
+      memberId: adult.id
+    })[0].preferences.showPreviews,
+    false
+  );
+  assert.equal(
+    deleteNativePushDevice(
+      registration.body.family.id,
+      adult.id,
+      'lx-android-1234567890abcdef'
+    ),
     true
   );
 

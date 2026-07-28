@@ -73,7 +73,8 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
 - eigene Kinderoberfläche mit Raketen-, Einhorn-, Feen-, Dino-, Sonnen- und
   Heldenwelt
 - Erwachsenen-Themes von Waldruhe und Küstenruhe bis Backstage und Neon Nacht
-- profilgebundene Browser-Benachrichtigungen und optionale Gotify-Anbindung
+- echte profilgebundene Android-App-Benachrichtigungen, Browser-Push und
+  optionale Gotify-Anbindung
 - einstellbare Benachrichtigungsruhe und Medienzeiten für Kinderprofile
 - schnell erreichbare Notfallkarte mit elterngeschützter Bearbeitung
 - dauerhaftes, profilgetrenntes Meldungszentrum mit gelesen/ungelesen
@@ -583,6 +584,30 @@ Für einen neuen App-Build genügt unter Windows:
 npm run build:apk
 ```
 
+Damit die APK echte Android-Benachrichtigungen empfangen kann, muss vorher
+einmal Firebase Cloud Messaging eingerichtet werden:
+
+1. In der [Firebase Console](https://console.firebase.google.com/) ein Projekt
+   anlegen.
+2. Im Projekt eine Android-App mit dem Paketnamen
+   `com.lxfamily.planner` registrieren.
+3. Die heruntergeladene `google-services.json` unter
+   `android/app/google-services.json` ablegen.
+4. Unter **Projekteinstellungen → Dienstkonten** einen privaten
+   Dienstkontoschlüssel erzeugen und als
+   `data/firebase-service-account.json` auf dem LX-Server ablegen.
+5. Den Server neu starten und danach `npm run build:apk` ausführen.
+
+Beide Dateien müssen aus demselben Firebase-Projekt stammen. Das Build-Skript
+bricht bewusst ab, wenn die Android-Datei fehlt oder den falschen Paketnamen
+enthält; dadurch wird keine scheinbar fertige APK ohne funktionierenden
+Android-Push verteilt.
+
+`firebase-service-account.json` ist geheim und bleibt ausschließlich im
+persistenten `data/`-Ordner. `google-services.json` enthält nur die
+App-Projektzuordnung, bleibt in diesem Projekt aber ebenfalls lokal. Beide
+Pfade stehen in `.gitignore`.
+
 Das fertige Paket liegt anschließend als `LX-Family-Planner.apk` im
 Projektordner. Beim ersten Durchlauf erzeugt das Skript automatisch einen
 privaten Release-Schlüssel unter `data/android-signing/`. Danach verwendet
@@ -617,6 +642,44 @@ an.
 
 ## Benachrichtigungen
 
+### Native Android-App-Benachrichtigungen
+
+Die herunterladbare LX Android-App verwendet Firebase Cloud Messaging. Das ist
+ein eigener nativer Kanal und kein Browser-Push in einer WebView. Meldungen
+erscheinen deshalb im Android-Benachrichtigungsbereich, wenn die App im
+Hintergrund liegt oder geschlossen ist.
+
+Beim ersten Einschalten erklärt LX die Funktion und öffnet anschließend die
+Android-Systemabfrage. Diese Abfrage erscheint pro App-Installation nur
+einmal. Die eigentliche Auswahl wird getrennt pro Familienprofil und Gerät auf
+dem LX-Server gespeichert und kann in den Profileinstellungen oder der
+Elternzentrale jederzeit geändert werden.
+
+Native Meldungen verwenden dieselben Regeln wie der Familien-Posteingang:
+Chat, Direktnachrichten, Termine und Erinnerungen, Aufgaben,
+Elternbestätigungen, Stimmungen und Hilfe-Anfragen, Problemmeldungen,
+Belohnungen, Taschengeld, Schule, Abstimmungen, Missionen und Familiennetz.
+Familienruhe und die private Sperrbildschirm-Vorschau gelten ebenfalls. Beim
+Antippen öffnet die App direkt die passende Ansicht.
+
+Für Docker ist keine zusätzliche Freigabe nötig: `./data` ist bereits als
+persistentes Volume eingebunden. Nach dem Ablegen von
+`data/firebase-service-account.json` genügt:
+
+```bash
+docker compose up -d --build family-planner
+```
+
+Ohne Docker wird derselbe Standardpfad verwendet. Alternativ kann
+`FIREBASE_SERVICE_ACCOUNT_FILE` in `.env` auf einen anderen lokalen Pfad
+zeigen. Der private Schlüssel wird nie an die Android-App oder einen Browser
+ausgeliefert.
+
+Voraussetzung auf dem Handy sind Google Play-Dienste. Wenn eine App in Android
+manuell **Beenden erzwingen** gesetzt wird, stellt Android Benachrichtigungen
+erst nach dem nächsten Öffnen wieder zu. Normales Wegwischen aus der
+App-Übersicht ist kein Problem.
+
 ### Browser-Push
 
 Browser-Benachrichtigungen werden pro Familienprofil und Gerät gespeichert. Ein
@@ -637,13 +700,12 @@ den Browsern dafür nicht. Empfohlen ist ein Reverse Proxy wie Caddy, Traefik
 oder nginx vor Port `3001`. Die Adresse kann über internes DNS trotzdem auf das
 Heimnetz beschränkt bleiben.
 
-Auf Android ist dafür keine eigene native App erforderlich: Chrome und andere
-kompatible Browser empfangen Web Push über den Service Worker auch dann, wenn
-der Familienplaner gerade nicht geöffnet ist. Für die zuverlässigste
-Zustellung den Planer über die HTTPS-Adresse öffnen, über **Zum
-Startbildschirm hinzufügen** installieren und anschließend in der
-Elternzentrale das aktuelle Gerät für das gewünschte Profil anmelden. Zusätzlich
-müssen Android-Benachrichtigungen für die installierte Web-App erlaubt sein.
+Als Alternative zur APK können Chrome und andere kompatible Browser Web Push
+über den Service Worker empfangen. Dafür den Planer über die HTTPS-Adresse
+öffnen, über **Zum Startbildschirm hinzufügen** installieren und anschließend
+in der Elternzentrale das aktuelle Gerät für das gewünschte Profil anmelden.
+Dieser Browserweg bleibt verfügbar, ist aber von Browser und
+Energiespareinstellungen abhängiger als der native App-Kanal.
 
 Auf iPhone und iPad muss die App zuerst zum Home-Bildschirm hinzugefügt und von
 dort geöffnet werden.
@@ -718,6 +780,8 @@ Die Vorlage liegt in `.env.example`.
 | `DATABASE_FILE` | abweichender Pfad zur SQLite-Datenbank |
 | `LEGACY_DATABASE_FILE` | optionaler JSON-Altbestand für die erste Migration |
 | `EVENT_REMINDER_INTERVAL_SECONDS` | Prüfintervall für fällige Terminerinnerungen |
+| `FIREBASE_SERVICE_ACCOUNT_FILE` | optionaler Pfad zum privaten FCM-Dienstschlüssel; Standard `data/firebase-service-account.json` |
+| `FIREBASE_PROJECT_ID` | optional; Firebase-Projektkennung, normalerweise aus dem Dienstschlüssel gelesen |
 | `NEXTCLOUD_SYNC_INTERVAL_MINUTES` | regelmäßiger DAV-Abgleich, Standard `15` |
 | `COMPOSE_PROFILES` | mit Wert `nextcloud` die mitgelieferte Family Cloud starten |
 | `NEXTCLOUD_PORT` | Port der mitgelieferten Nextcloud, Standard `8080` |

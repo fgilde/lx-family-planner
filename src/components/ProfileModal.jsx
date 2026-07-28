@@ -30,6 +30,7 @@ import {
 } from '../constants/roles';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../utils/imageFallback';
 import { NOTIFICATION_EVENT_DEFINITIONS } from '../../shared/notificationEvents';
+import { isCapacitorNative } from '../utils/apiConfig';
 
 const COLOR_PRESETS = [
   '#246B58',
@@ -68,6 +69,11 @@ export default function ProfileModal() {
     disableWebPush,
     updateWebPushPreferences,
     testWebPush,
+    nativePush,
+    enableNativePush,
+    disableNativePush,
+    updateNativePushPreferences,
+    testNativePush,
     isProfileModalOpen,
     setIsProfileModalOpen,
     showToast
@@ -81,6 +87,14 @@ export default function ProfileModal() {
   const [busy, setBusy] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const modalBodyRef = useRef(null);
+  const isNative = isCapacitorNative();
+  const push = isNative ? nativePush : webPush;
+  const enablePush = isNative ? enableNativePush : enableWebPush;
+  const disablePush = isNative ? disableNativePush : disableWebPush;
+  const updatePushPreferences = isNative
+    ? updateNativePushPreferences
+    : updateWebPushPreferences;
+  const testPush = isNative ? testNativePush : testWebPush;
 
   useEffect(() => {
     if (!isProfileModalOpen) return undefined;
@@ -107,14 +121,14 @@ export default function ProfileModal() {
   const canManage = canManageFamily(activeMember);
   const selectableMembers = members.filter(member => !isManagedProfile(member));
   const managedMembers = members.filter(isManagedProfile);
-  const currentPushDevice = webPush.devices.find(
-    device => device.id === webPush.currentDeviceId
+  const currentPushDevice = push.devices.find(
+    device => device.id === push.currentDeviceId
   );
   const pushPreferences = {
-    ...webPush.defaults,
+    ...push.defaults,
     ...(currentPushDevice?.preferences || {})
   };
-  const notificationsEnabled = Boolean(webPush.currentDeviceId);
+  const notificationsEnabled = Boolean(push.currentDeviceId);
   const activeProfileIsPet = isPetProfile(activeMember);
   const close = () => {
     setMode('list');
@@ -534,9 +548,13 @@ export default function ProfileModal() {
                   }`}
                   role="switch"
                   aria-checked={notificationsEnabled}
-                  disabled={Boolean(webPush.busy) || !webPush.supported}
+                  disabled={
+                    Boolean(push.busy) ||
+                    !push.supported ||
+                    (isNative && !push.serverConfigured)
+                  }
                   onClick={() =>
-                    notificationsEnabled ? disableWebPush() : enableWebPush()
+                    notificationsEnabled ? disablePush() : enablePush()
                   }
                 >
                   <span />
@@ -544,13 +562,20 @@ export default function ProfileModal() {
                 </button>
               </div>
 
-              {!webPush.supported && (
-                <p className="profile-notification-note">{webPush.message}</p>
+              {!push.supported && (
+                <p className="profile-notification-note">{push.message}</p>
               )}
-              {webPush.permission === 'denied' && (
+              {isNative && !push.serverConfigured && (
                 <p className="profile-notification-note warning">
-                  Der Browser blockiert Meldungen. Bitte erlaube sie einmal in den
-                  Website-Einstellungen des Browsers.
+                  Native Android-Meldungen sind auf dem Server noch nicht
+                  eingerichtet. Die Anleitung findest du in der Elternzentrale.
+                </p>
+              )}
+              {push.permission === 'denied' && (
+                <p className="profile-notification-note warning">
+                  {isNative
+                    ? 'Android blockiert Meldungen. Bitte erlaube sie unter Apps → LX Family Planner → Benachrichtigungen.'
+                    : 'Der Browser blockiert Meldungen. Bitte erlaube sie einmal in den Website-Einstellungen des Browsers.'}
                 </p>
               )}
 
@@ -562,9 +587,9 @@ export default function ProfileModal() {
                         <input
                           type="checkbox"
                           checked={Boolean(pushPreferences[key])}
-                          disabled={Boolean(webPush.busy)}
+                          disabled={Boolean(push.busy)}
                           onChange={event =>
-                            updateWebPushPreferences({
+                            updatePushPreferences({
                               [key]: event.target.checked
                             })
                           }
@@ -576,9 +601,9 @@ export default function ProfileModal() {
                       <input
                         type="checkbox"
                         checked={Boolean(pushPreferences.showPreviews)}
-                        disabled={Boolean(webPush.busy)}
+                        disabled={Boolean(push.busy)}
                         onChange={event =>
-                          updateWebPushPreferences({
+                          updatePushPreferences({
                             showPreviews: event.target.checked
                           })
                         }
@@ -589,8 +614,8 @@ export default function ProfileModal() {
                   <button
                     type="button"
                     className="profile-notification-test"
-                    disabled={Boolean(webPush.busy)}
-                    onClick={testWebPush}
+                    disabled={Boolean(push.busy)}
+                    onClick={testPush}
                   >
                     <Send size={15} /> Testmeldung senden
                   </button>

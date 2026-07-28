@@ -137,6 +137,27 @@ database.exec(`
   CREATE INDEX IF NOT EXISTS push_subscriptions_family_idx
     ON push_subscriptions(family_id, member_id);
 
+  CREATE TABLE IF NOT EXISTS native_push_devices (
+    id TEXT PRIMARY KEY,
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    installation_id TEXT NOT NULL,
+    token TEXT NOT NULL,
+    platform TEXT NOT NULL DEFAULT 'android',
+    device_name TEXT NOT NULL DEFAULT 'Android-Gerät',
+    app_version TEXT NOT NULL DEFAULT '',
+    preferences_json TEXT NOT NULL DEFAULT '{}',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    UNIQUE(family_id, member_id, installation_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS native_push_devices_family_idx
+    ON native_push_devices(family_id, member_id);
+
+  CREATE INDEX IF NOT EXISTS native_push_devices_installation_idx
+    ON native_push_devices(family_id, installation_id);
+
   CREATE TABLE IF NOT EXISTS inbox_notifications (
     id TEXT PRIMARY KEY,
     family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
@@ -484,6 +505,29 @@ applySchemaMigration(7, 'Stabile Synchronisationszuordnung für Cloud-Dienste', 
       ON integration_sync_items(
         family_id, provider, item_type, remote_href
       );
+  `);
+});
+
+applySchemaMigration(8, 'Native Android-Push-Geräte pro Profil', () => {
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS native_push_devices (
+      id TEXT PRIMARY KEY,
+      family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+      installation_id TEXT NOT NULL,
+      token TEXT NOT NULL,
+      platform TEXT NOT NULL DEFAULT 'android',
+      device_name TEXT NOT NULL DEFAULT 'Android-Gerät',
+      app_version TEXT NOT NULL DEFAULT '',
+      preferences_json TEXT NOT NULL DEFAULT '{}',
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      UNIQUE(family_id, member_id, installation_id)
+    );
+    CREATE INDEX IF NOT EXISTS native_push_devices_family_idx
+      ON native_push_devices(family_id, member_id);
+    CREATE INDEX IF NOT EXISTS native_push_devices_installation_idx
+      ON native_push_devices(family_id, installation_id);
   `);
 });
 
@@ -1879,6 +1923,163 @@ export function countPushSubscriptionsByEndpoint(endpoint) {
         WHERE endpoint = ?
       `)
       .get(endpoint)?.count || 0
+  );
+}
+
+function mapNativePushDeviceRow(row) {
+  if (!row) return null;
+  let preferences = {};
+  try {
+    preferences = JSON.parse(row.preferences_json || '{}');
+  } catch {
+    preferences = {};
+  }
+  return {
+    id: row.id,
+    familyId: row.family_id,
+    memberId: row.member_id,
+    installationId: row.installation_id,
+    token: row.token,
+    platform: row.platform,
+    deviceName: row.device_name,
+    appVersion: row.app_version,
+    preferences,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+export function listNativePushDevices(
+  familyId,
+  { memberId, installationId } = {}
+) {
+  const clauses = ['family_id = ?'];
+  const values = [familyId];
+  if (memberId) {
+    clauses.push('member_id = ?');
+    values.push(memberId);
+  }
+  if (installationId) {
+    clauses.push('installation_id = ?');
+    values.push(installationId);
+  }
+  return database
+    .prepare(`
+      SELECT * FROM native_push_devices
+      WHERE ${clauses.join(' AND ')}
+      ORDER BY updated_at DESC
+    `)
+    .all(...values)
+    .map(mapNativePushDeviceRow);
+}
+
+export function saveNativePushDevice({
+  familyId,
+  memberId,
+  installationId,
+  token,
+  platform = 'android',
+  deviceName = 'Android-Gerät',
+  appVersion = '',
+  preferences = {}
+}) {
+  const now = Date.now();
+  const id = `native-push-${randomUUID()}`;
+  return withTransaction(() => {
+    database
+      .prepare(`
+        UPDATE native_push_devices
+        SET token = ?, platform = ?, device_name = ?,
+            app_version = ?, updated_at = ?
+        WHERE family_id = ? AND installation_id = ?
+      `)
+      .run(
+        token,
+        platform,
+        deviceName,
+        appVersion,
+        now,
+        familyId,
+        installationId
+      );
+    database
+      .prepare(`
+        INSERT INTO native_push_devices(
+          id, family_id, member_id, installation_id, token, platform,
+          device_name, app_version, preferences_json, created_at, updated_at
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(family_id, member_id, installation_id) DO UPDATE SET
+          token = excluded.token,
+          platform = excluded.platform,
+          device_name = excluded.device_name,
+          app_version = excluded.app_version,
+          preferences_json = excluded.preferences_json,
+          updated_at = excluded.updated_at
+      `)
+      .run(
+        id,
+        familyId,
+        memberId,
+        installationId,
+        token,
+        platform,
+        deviceName,
+        appVersion,
+        JSON.stringify(preferences || {}),
+        now,
+        now
+      );
+    return mapNativePushDeviceRow(
+      database
+        .prepare(`
+          SELECT * FROM native_push_devices
+          WHERE family_id = ? AND member_id = ? AND installation_id = ?
+        `)
+        .get(familyId, memberId, installationId)
+    );
+  });
+}
+
+export function deleteNativePushDevice(
+  familyId,
+  memberId,
+  installationId
+) {
+  return database
+    .prepare(`
+      DELETE FROM native_push_devices
+      WHERE family_id = ? AND member_id = ? AND installation_id = ?
+    `)
+    .run(familyId, memberId, installationId).changes > 0;
+}
+
+export function deleteNativePushDeviceById(familyId, deviceId) {
+  return database
+    .prepare(`
+      DELETE FROM native_push_devices
+      WHERE family_id = ? AND id = ?
+    `)
+    .run(familyId, deviceId).changes > 0;
+}
+
+export function deleteNativePushDevicesByToken(token) {
+  return database
+    .prepare('DELETE FROM native_push_devices WHERE token = ?')
+    .run(token).changes;
+}
+
+export function countNativePushProfilesForInstallation(
+  familyId,
+  installationId
+) {
+  return Number(
+    database
+      .prepare(`
+        SELECT COUNT(*) AS count FROM native_push_devices
+        WHERE family_id = ? AND installation_id = ?
+      `)
+      .get(familyId, installationId)?.count || 0
   );
 }
 

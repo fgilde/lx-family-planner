@@ -14,6 +14,7 @@ const PROTECTED_TABLES = [
   { name: 'members', key: ['id'] },
   { name: 'family_records', key: ['family_id', 'type', 'id'] },
   { name: 'push_subscriptions', key: ['id'] },
+  { name: 'native_push_devices', key: ['id'] },
   { name: 'inbox_notifications', key: ['id'] },
   {
     name: 'event_reminder_deliveries',

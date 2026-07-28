@@ -83,6 +83,59 @@ function MainContent() {
     }
   }, [activeMember, activeTab, authStatus, setActiveTab]);
 
+  useEffect(() => {
+    if (authStatus !== 'authenticated') return undefined;
+    const openNativeNotification = event => {
+      const notification = event.detail || {};
+      const data = notification.data || notification;
+      try {
+        const target = new URL(data.url || '/', window.location.origin);
+        const requestedView = target.searchParams.get('view') || 'dashboard';
+        const allowedViews = new Set([
+          'dashboard',
+          'chat',
+          'calendar',
+          'tasks',
+          'board',
+          'shopping',
+          'meals',
+          'family-life',
+          'admin'
+        ]);
+        if (!allowedViews.has(requestedView)) return;
+        if (
+          isPetProfile(activeMember) &&
+          !['dashboard', 'calendar'].includes(requestedView)
+        ) {
+          return;
+        }
+        const chatTarget = target.searchParams.get('chat');
+        if (requestedView === 'chat' && chatTarget) {
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set('chat', chatTarget);
+          window.history.replaceState(
+            {},
+            '',
+            `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`
+          );
+        }
+        setActiveTab(requestedView);
+      } catch {
+        // Eine Meldung ohne gültiges Ziel öffnet einfach die aktuelle Ansicht.
+      }
+    };
+    window.addEventListener(
+      'lx-native-notification-open',
+      openNativeNotification
+    );
+    return () => {
+      window.removeEventListener(
+        'lx-native-notification-open',
+        openNativeNotification
+      );
+    };
+  }, [activeMember, authStatus, setActiveTab]);
+
   const [isServerConfigOpen, setIsServerConfigOpen] = useState(false);
   const canConfigureServer = isCapacitorNative();
 
