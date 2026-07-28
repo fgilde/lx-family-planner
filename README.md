@@ -8,6 +8,11 @@
   Der private Familienraum für Kalender, Aufgaben, Einkauf, Essen, Chat und all die kleinen Dinge dazwischen.
 </p>
 
+<p align="center">
+  <strong>Aktuelle Version: 1.2.0</strong> ·
+  <a href="CHANGELOG.md">Was ist neu?</a>
+</p>
+
 Der LX Family Planner ist eine selbst gehostete Familien-App für das eigene
 Heimnetz. Erwachsene bekommen einen ruhigen, vollständigen Überblick. Kinder
 sehen eine vereinfachte Erlebniswelt mit Missionen, Sternen und eigenen
@@ -33,21 +38,41 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
 ## Das ist enthalten
 
 - Familienkonten mit Profilen für Mama, Papa, Kind, Oma, Opa und weitere Rollen
+- beliebig viele verwaltete Organisationsprofile ohne eigene Anmeldung, etwa
+  für Oma, Opa oder betreute Personen; mit Kalender und Aufgaben, aber ohne
+  Chat, Punkte oder Profilwechsel
 - kinderleichte Bubble-Profilauswahl und optionaler Profil-PIN
 - Kalender, Müllkalender, ICS-Dateiimport und automatisch aktualisierte
   Kalender-Abos
 - gemeinsamer Familienchat und geschützte Direktnachrichten
 - Einkaufslisten mit großem, alltagstauglichem Produktkatalog und Bring!-Anbindung
-- Wochen-Speiseplan, Rezeptbuch, Rezeptimport und Kochmodus
+- Wochen-Speiseplan, Rezeptbuch, sicherer Web- und Pinterest-Import und Kochmodus
 - Aufgaben, Sterne und Belohnungsshop
+- Familienreise mit Morgen-/Abendroutinen, Wochenrückblick, Abzeichen,
+  Mutmachern und gemeinsamen Missionen
+- geschütztes Taschengeldbuch mit Sparzielen und optionaler
+  Sterne-zu-Taschengeld-Umwandlung
+- Schulbereich mit Stundenplan, Hausaufgaben, Klassenarbeiten und
+  Schulranzen-Checkliste
+- Familien-Abstimmungen mit einer Stimme pro Profil
+- faire Aufgabenrotation: wiederkehrende Pflichten wechseln automatisch
+  zwischen ausgewählten Familienmitgliedern
 - Vier-Augen-Prinzip: Kinder melden eine Aufgabe als erledigt, der Ersteller
   bestätigt sie und erst danach werden Sterne gutgeschrieben
-- Pinnwand, Familiennetz und Stammbaum zwischen angemeldeten Familien
-- Elternzentrale für Kinderprofile, Aufgaben, Punkte, Medienlinks und Geräte
+- Pinnwand, detailliertes Familiennetz und Stammbaum zwischen angemeldeten
+  Familien
+- einzeln bestätigte Familienfreigaben für gemeinsame Termine, Aufgaben,
+  Sterne, Belohnungen und Taschengeld der Enkelkinder
+- native Home-Assistant-Kacheln mit Live-Status, sicheren Aktionen,
+  Profilfreigaben und großer Tablet-Ansicht
+- Elternzentrale für Profile, Aufgaben, Punktestände, freigegebene YouTube-/
+  Spotify-Widgets und Geräte
 - eigene Kinderoberfläche mit Raketen-, Einhorn-, Feen-, Dino-, Sonnen- und
   Heldenwelt
 - Erwachsenen-Themes von Waldruhe und Küstenruhe bis Backstage und Neon Nacht
 - profilgebundene Browser-Benachrichtigungen und optionale Gotify-Anbindung
+- einstellbare Benachrichtigungsruhe und Medienzeiten für Kinderprofile
+- schnell erreichbare Notfallkarte mit elterngeschützter Bearbeitung
 - dauerhaftes, profilgetrenntes Meldungszentrum mit gelesen/ungelesen
 - Familien-Posteingang mit persönlichem Tagesüberblick für Termine, Aufgaben,
   Essen und Einkauf
@@ -56,6 +81,62 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   Tablet-Anordnung, Sichtbarkeit und kompakter Ansicht
 - eigenständiger Tablet Mode mit acht Kacheln für das Querformat
 - responsive Darstellung für PC, Tablet und Smartphone
+- globaler „Problem melden“-Knopf mit lokaler Verwaltung in der Elternzentrale
+- sichtbare Produktversion in den Familieneinstellungen und im Systemstatus
+
+### Profile ohne eigenen Zugang
+
+Erwachsene können in der Profilverwaltung bei einem neuen Profil **Nur von uns
+verwaltet** auswählen. Das Profil bleibt anschließend aus der Anmeldung und dem
+Profilwechsel ausgeblendet. Im Kalender, in der Aufgabenplanung und in der
+Elternzentrale kann es trotzdem wie jede andere Person ausgewählt werden.
+
+Diese Profile sind für reine Organisation gedacht. Sie erhalten keinen Chat,
+keine Benachrichtigungen, keine Kinderpunkte und keinen eigenen Zugang zum
+Familienplaner.
+
+### Familienkonten sicher miteinander verbinden
+
+Großeltern mit einem eigenen Familienkonto werden über **Euer Familiennetz**
+eingeladen. Nach der gegenseitigen Bestätigung legt jede Familie selbst fest,
+was die andere Seite darf:
+
+- Einladungen zu gemeinsam sichtbaren Terminen
+- Aufgaben für Kinder und Teenager
+- Sternpunkte und eigene Belohnungen
+- Taschengeldbuchungen
+
+Private Kalendertermine, Chats, Pinnwandbilder und Zugangsdaten werden dabei
+nicht geteilt. Aufgaben eines verbundenen Großelternkontos müssen weiterhin
+von einem Erwachsenen im Familienkonto des Kindes bestätigt werden.
+
+### Home Assistant
+
+Home Assistant wird in der **Elternzentrale** verbunden. Benötigt werden die
+interne Adresse der Home-Assistant-Instanz und ein langlebiger Zugriffsschlüssel
+aus dem Home-Assistant-Profil. Danach werden nur die ausdrücklich ausgewählten
+Geräte und Sensoren als Dashboard-Kacheln angezeigt.
+
+Eltern können pro Entität festlegen:
+
+- nur anzeigen oder auch bedienen,
+- welche Kinderprofile die Kachel sehen dürfen,
+- ob die Integration vorübergehend aktiv ist.
+
+Türschlösser und Alarmanlagen werden nicht freigegeben. Garagentore und
+Einfahrten bleiben Erwachsenen vorbehalten und verlangen eine zusätzliche
+Bestätigung. Der Zugriffsschlüssel wird verschlüsselt im Backend gespeichert
+und niemals an den Browser ausgeliefert.
+
+Bei Docker sollte als Adresse vorzugsweise die feste Heimnetz-IP verwendet
+werden, zum Beispiel:
+
+```text
+http://192.168.178.50:8123
+```
+
+Eine `.local`-Adresse funktioniert abhängig vom Docker- und Netzwerksystem
+nicht immer zuverlässig.
 
 ## Weg 1: Mit Docker starten (empfohlen)
 
@@ -197,8 +278,8 @@ npm run audit
 ```
 
 Die `.env` darf bei einem Update nicht ersetzt werden. Insbesondere
-`APP_SECRET` muss gleich bleiben, weil damit Bring!, Gotify, private
-Kalenderlinks und Push-Schlüssel verschlüsselt werden.
+`APP_SECRET` muss gleich bleiben, weil damit Bring!, Gotify, Home Assistant,
+private Kalenderlinks und Push-Schlüssel verschlüsselt werden.
 
 ### Was erhalten bleibt
 
@@ -206,11 +287,17 @@ Der Docker-Updater behält den Ordner `data/` als unabhängiges Volume. Das
 Prüfmanifest kontrolliert unter anderem:
 
 - Familienkonten, Profile, Rollen, PINs, Sterne und Profil-Themes
+- Routinen, Taschengeldbuchungen, Sparziele, Schuleinträge und Abstimmungen
+- Familien-Missionen, Mutmacher, Abzeichenfortschritt und Kinder-Begleiter
+- Ruhezeiten, Medienzeitfenster und Notfallkontakte
 - Kalendertermine, Aufgaben, Einkauf, Speisepläne und Mülltermine
 - importierte Rezepte einschließlich Zutaten, Zubereitung und Bildern
 - Pinnwandnotizen und Pinnwandbilder
-- Chat, Familiennetz, Medienlinks und Dashboard-Inhalte
-- Kalender-Abos, Bring!, Gotify und deren verschlüsselte Konfiguration
+- Chat, Familiennetz, Familienfreigaben, gemeinsame Termine, Medienlinks und
+  Dashboard-Inhalte
+- Kalender-Abos, Bring!, Gotify, Home Assistant und deren verschlüsselte
+  Konfiguration
+- lokal gespeicherte Problemmeldungen und ihr Bearbeitungsstatus
 - Push-Geräte, Benachrichtigungseinstellungen und Familien-Posteingang
 
 Gerätespezifische Komfortwerte wie das zuletzt aktive Profil, der ausgewählte
@@ -281,6 +368,20 @@ Link-Local- und Loopback-Adressen bleiben trotzdem gesperrt. Das
 Aktualisierungsintervall lässt sich mit
 `CALENDAR_SYNC_INTERVAL_MINUTES=60` anpassen.
 
+## Rezepte aus dem Web importieren
+
+Der Rezept-Finder liest öffentliche HTTPS-Seiten mit Schema.org- oder
+h-recipe-Daten. Dadurch funktionieren neben Chefkoch, Lecker und vielen
+weiteren Rezeptportalen auch Pinterest-Pins, die auf eine öffentliche
+Original-Rezeptseite verweisen. Bei Pins mit direkt hinterlegten Zutaten wird
+der lesbare Inhalt übernommen und gegebenenfalls mit einem Prüfhinweis
+gekennzeichnet.
+
+Zum Schutz des Heimnetzes öffnet der Import keine privaten oder lokalen
+Netzwerkadressen, keine Links mit eingebetteten Zugangsdaten und keine Seiten
+hinter einem Login. Portale, die automatisierte Aufrufe vollständig blockieren,
+müssen weiterhin manuell ins Kochbuch übertragen werden.
+
 ## Benachrichtigungen
 
 ### Browser-Push
@@ -302,6 +403,14 @@ HTTPS-Adresse. Eine reine Heimnetz-Adresse wie `http://192.168.x.x:3001` genügt
 den Browsern dafür nicht. Empfohlen ist ein Reverse Proxy wie Caddy, Traefik
 oder nginx vor Port `3001`. Die Adresse kann über internes DNS trotzdem auf das
 Heimnetz beschränkt bleiben.
+
+Auf Android ist dafür keine eigene native App erforderlich: Chrome und andere
+kompatible Browser empfangen Web Push über den Service Worker auch dann, wenn
+der Familienplaner gerade nicht geöffnet ist. Für die zuverlässigste
+Zustellung den Planer über die HTTPS-Adresse öffnen, über **Zum
+Startbildschirm hinzufügen** installieren und anschließend in der
+Elternzentrale das aktuelle Gerät für das gewünschte Profil anmelden. Zusätzlich
+müssen Android-Benachrichtigungen für die installierte Web-App erlaubt sein.
 
 Auf iPhone und iPad muss die App zuerst zum Home-Bildschirm hinzugefügt und von
 dort geöffnet werden.
@@ -368,7 +477,6 @@ Die Vorlage liegt in `.env.example`.
 | `DATABASE_FILE` | abweichender Pfad zur SQLite-Datenbank |
 | `LEGACY_DATABASE_FILE` | optionaler JSON-Altbestand für die erste Migration |
 | `AGENT_API_KEY` | aktiviert optional die geschützte Agent-API |
-| `RECIPE_HOSTS` | zusätzliche erlaubte Hosts für den Rezeptimport |
 | `VAPID_*` | optionale feste Web-Push-Schlüssel |
 
 ## Qualität prüfen

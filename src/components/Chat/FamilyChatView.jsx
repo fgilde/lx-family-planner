@@ -9,7 +9,10 @@ import {
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import { compressImageDataUrl } from '../../utils/imageCompressor';
-import { getPositionLabel } from '../../constants/roles';
+import {
+  getPositionLabel,
+  isManagedProfile
+} from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
@@ -45,7 +48,9 @@ export default function FamilyChatView() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const chatMembers = members.filter(member => member.role !== 'pet');
+  const chatMembers = members.filter(
+    member => member.role !== 'pet' && !isManagedProfile(member)
+  );
   const chatPartners = chatMembers.filter(
     member => member.id !== activeMember?.id
   );

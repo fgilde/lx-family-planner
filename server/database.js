@@ -29,7 +29,16 @@ const RECORD_TYPES = new Set([
   'familyTree',
   'dashboardLinks',
   'trashEvents',
-  'moodCheckins'
+  'moodCheckins',
+  'dailyRoutines',
+  'savingsGoals',
+  'pocketMoneyTransactions',
+  'schoolItems',
+  'familyPolls',
+  'encouragements',
+  'familyMissions',
+  'familySettings',
+  'kidProfiles'
 ]);
 
 const database = new DatabaseSync(DATABASE_FILE);
@@ -72,6 +81,8 @@ database.exec(`
     theme TEXT NOT NULL DEFAULT 'light',
     stars INTEGER NOT NULL DEFAULT 0 CHECK(stars >= 0),
     pin_hash TEXT,
+    is_managed INTEGER NOT NULL DEFAULT 0
+      CHECK(is_managed IN (0, 1)),
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
   );
@@ -190,6 +201,8 @@ database.exec(`
     ),
     requested_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
     responded_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+    requester_grants_json TEXT NOT NULL DEFAULT '{}',
+    target_grants_json TEXT NOT NULL DEFAULT '{}',
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     CHECK(requester_family_id <> target_family_id),
@@ -201,6 +214,43 @@ database.exec(`
 
   CREATE INDEX IF NOT EXISTS family_relationships_target_idx
     ON family_relationships(target_family_id, status);
+
+  CREATE TABLE IF NOT EXISTS shared_family_events (
+    id TEXT PRIMARY KEY,
+    owner_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    created_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+    data_json TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS shared_family_event_recipients (
+    event_id TEXT NOT NULL REFERENCES shared_family_events(id) ON DELETE CASCADE,
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    PRIMARY KEY (event_id, family_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS shared_family_event_family_idx
+    ON shared_family_event_recipients(family_id, event_id);
+
+  CREATE TABLE IF NOT EXISTS problem_reports (
+    id TEXT PRIMARY KEY,
+    family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    page TEXT NOT NULL DEFAULT '',
+    app_version TEXT NOT NULL DEFAULT '',
+    client_info TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'open'
+      CHECK(status IN ('open', 'resolved')),
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS problem_reports_family_idx
+    ON problem_reports(family_id, status, created_at DESC);
 `);
 
 function applySchemaMigration(version, name, work) {
@@ -284,6 +334,79 @@ applySchemaMigration(2, 'Push-Geräte pro Familienprofil', () => {
     CREATE INDEX push_subscriptions_family_idx
       ON push_subscriptions(family_id, member_id);
   `);
+});
+
+applySchemaMigration(3, 'Verwaltete Profile ohne Anmeldung', () => {
+  const memberColumns = database.prepare('PRAGMA table_info(members)').all();
+  if (!memberColumns.some(column => column.name === 'is_managed')) {
+    database.exec(`
+      ALTER TABLE members
+      ADD COLUMN is_managed INTEGER NOT NULL DEFAULT 0
+        CHECK(is_managed IN (0, 1));
+    `);
+  }
+});
+
+applySchemaMigration(4, 'Familienfreigaben, gemeinsame Termine und Problemberichte', () => {
+  const relationshipColumns = database
+    .prepare('PRAGMA table_info(family_relationships)')
+    .all();
+  if (!relationshipColumns.some(column => column.name === 'requester_grants_json')) {
+    database.exec(`
+      ALTER TABLE family_relationships
+      ADD COLUMN requester_grants_json TEXT NOT NULL DEFAULT '{}';
+    `);
+  }
+  if (!relationshipColumns.some(column => column.name === 'target_grants_json')) {
+    database.exec(`
+      ALTER TABLE family_relationships
+      ADD COLUMN target_grants_json TEXT NOT NULL DEFAULT '{}';
+    `);
+  }
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS shared_family_events (
+      id TEXT PRIMARY KEY,
+      owner_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      created_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+      data_json TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS shared_family_event_recipients (
+      event_id TEXT NOT NULL REFERENCES shared_family_events(id) ON DELETE CASCADE,
+      family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      PRIMARY KEY (event_id, family_id)
+    );
+    CREATE INDEX IF NOT EXISTS shared_family_event_family_idx
+      ON shared_family_event_recipients(family_id, event_id);
+    CREATE TABLE IF NOT EXISTS problem_reports (
+      id TEXT PRIMARY KEY,
+      family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+      category TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      page TEXT NOT NULL DEFAULT '',
+      app_version TEXT NOT NULL DEFAULT '',
+      client_info TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'open'
+        CHECK(status IN ('open', 'resolved')),
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS problem_reports_family_idx
+      ON problem_reports(family_id, status, created_at DESC);
+  `);
+});
+
+applySchemaMigration(5, 'Gelesene Versionshinweise pro Profil', () => {
+  const memberColumns = database.prepare('PRAGMA table_info(members)').all();
+  if (!memberColumns.some(column => column.name === 'last_seen_release_version')) {
+    database.exec(`
+      ALTER TABLE members
+      ADD COLUMN last_seen_release_version TEXT NOT NULL DEFAULT '';
+    `);
+  }
 });
 
 function withTransaction(work) {
@@ -376,6 +499,8 @@ function mapMemberRow(row) {
     theme: row.theme,
     stars: row.stars,
     hasPin: Boolean(row.pin_hash),
+    isManaged: Number(row.is_managed || 0) === 1,
+    lastSeenReleaseVersion: row.last_seen_release_version || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -447,7 +572,9 @@ export function listPublicFamilies() {
       f.updated_at,
       COUNT(m.id) AS members_count
     FROM families f
-    LEFT JOIN members m ON m.family_id = f.id
+    LEFT JOIN members m
+      ON m.family_id = f.id
+      AND m.is_managed = 0
     GROUP BY f.id
     ORDER BY f.created_at ASC
   `).all();
@@ -532,9 +659,9 @@ function insertMember(familyId, member, now = Date.now()) {
     .prepare(`
       INSERT INTO members(
         id, family_id, name, role, position, avatar, color, bg_color,
-        theme, stars, pin_hash, created_at, updated_at
+        theme, stars, pin_hash, is_managed, created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -547,7 +674,8 @@ function insertMember(familyId, member, now = Date.now()) {
       member.bgColor || '#eff6ff',
       member.theme || (role === 'child' ? 'adventure' : 'light'),
       Math.max(0, Number(member.stars || 0)),
-      member.pin ? hashSecret(member.pin) : null,
+      member.isManaged ? null : (member.pin ? hashSecret(member.pin) : null),
+      member.isManaged ? 1 : 0,
       now,
       now
     );
@@ -569,6 +697,9 @@ export function updateMember(familyId, memberId, changes) {
   const nextPinHash = Object.prototype.hasOwnProperty.call(changes, 'pin')
     ? (changes.pin ? hashSecret(changes.pin) : null)
     : existing.pin_hash;
+  const nextIsManaged = Object.prototype.hasOwnProperty.call(changes, 'isManaged')
+    ? (changes.isManaged ? 1 : 0)
+    : Number(existing.is_managed || 0);
 
   return withTransaction(() => {
     database
@@ -583,6 +714,7 @@ export function updateMember(familyId, memberId, changes) {
           theme = ?,
           stars = ?,
           pin_hash = ?,
+          is_managed = ?,
           updated_at = ?
         WHERE family_id = ? AND id = ?
       `)
@@ -595,13 +727,107 @@ export function updateMember(familyId, memberId, changes) {
         changes.bgColor ?? existing.bg_color,
         changes.theme ?? existing.theme,
         Math.max(0, Number(changes.stars ?? existing.stars)),
-        nextPinHash,
+        nextIsManaged ? null : nextPinHash,
+        nextIsManaged,
         now,
         familyId,
         memberId
       );
+    if (nextIsManaged) {
+      database
+        .prepare(`
+          UPDATE sessions
+          SET member_id = NULL
+          WHERE family_id = ? AND member_id = ?
+        `)
+        .run(familyId, memberId);
+    }
     bumpFamilyVersion(familyId);
     return getMember(familyId, memberId);
+  });
+}
+
+export function acknowledgeMemberReleaseNotes(
+  familyId,
+  memberId,
+  appVersion
+) {
+  const now = Date.now();
+  const result = database
+    .prepare(`
+      UPDATE members
+      SET last_seen_release_version = ?, updated_at = ?
+      WHERE family_id = ? AND id = ?
+    `)
+    .run(String(appVersion || ''), now, familyId, memberId);
+  return result.changes > 0 ? getMember(familyId, memberId) : null;
+}
+
+export function createPocketMoneyTransaction(
+  familyId,
+  memberId,
+  transaction
+) {
+  const existing = getMemberAuthRow(familyId, memberId);
+  if (!existing || !['child', 'teen'].includes(existing.role)) {
+    const error = new Error('Das ausgewählte Kinderprofil wurde nicht gefunden.');
+    error.statusCode = 404;
+    throw error;
+  }
+  const amountCents = Math.trunc(Number(transaction.amountCents || 0));
+  const starCost = Math.max(0, Math.trunc(Number(transaction.starCost || 0)));
+  if (!amountCents || Math.abs(amountCents) > 1_000_000) {
+    const error = new Error('Bitte einen gültigen Taschengeldbetrag eingeben.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (starCost > Number(existing.stars || 0)) {
+    const error = new Error('Für diese Umwandlung fehlen noch Sterne.');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  return withTransaction(() => {
+    const now = Date.now();
+    if (starCost) {
+      database
+        .prepare(`
+          UPDATE members
+          SET stars = stars - ?, updated_at = ?
+          WHERE family_id = ? AND id = ?
+        `)
+        .run(starCost, now, familyId, memberId);
+    }
+    const normalized = normalizeRecord(
+      'pocketMoneyTransactions',
+      {
+        ...transaction,
+        memberId,
+        amountCents,
+        starCost,
+        createdAt: Number(transaction.createdAt || now)
+      },
+      familyId
+    );
+    database
+      .prepare(`
+        INSERT INTO family_records(
+          family_id, type, id, data_json, created_at, updated_at
+        )
+        VALUES(?, 'pocketMoneyTransactions', ?, ?, ?, ?)
+      `)
+      .run(
+        familyId,
+        normalized.id,
+        JSON.stringify(normalized),
+        now,
+        now
+      );
+    bumpFamilyVersion(familyId);
+    return {
+      transaction: normalized,
+      member: getMember(familyId, memberId)
+    };
   });
 }
 
@@ -840,8 +1066,38 @@ function relationshipFamilySummary(row, prefix) {
   };
 }
 
+const DEFAULT_RELATIONSHIP_GRANTS = Object.freeze({
+  sharedCalendar: true,
+  tasks: false,
+  rewards: false,
+  pocketMoney: false
+});
+
+function parseJsonObject(value, fallback = {}) {
+  try {
+    const parsed = JSON.parse(value || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed
+      : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeRelationshipGrants(value = {}) {
+  const input = value && typeof value === 'object' ? value : {};
+  return Object.fromEntries(
+    Object.entries(DEFAULT_RELATIONSHIP_GRANTS).map(([key, fallback]) => [
+      key,
+      Object.hasOwn(input, key) ? Boolean(input[key]) : fallback
+    ])
+  );
+}
+
 function relationshipMemberSummaries(familyId) {
-  return getMembers(familyId).map(member => ({
+  return getMembers(familyId)
+    .filter(member => !member.isManaged)
+    .map(member => ({
     id: member.id,
     name: member.name,
     role: member.role,
@@ -849,7 +1105,7 @@ function relationshipMemberSummaries(familyId) {
     avatar: member.avatar,
     color: member.color,
     bgColor: member.bgColor
-  }));
+    }));
 }
 
 function mapRelationshipRow(row, familyId) {
@@ -865,6 +1121,13 @@ function mapRelationshipRow(row, familyId) {
     requesterFamily.members = [];
     targetFamily.members = [];
   }
+  const requesterGrants = normalizeRelationshipGrants(
+    parseJsonObject(row.requester_grants_json)
+  );
+  const targetGrants = normalizeRelationshipGrants(
+    parseJsonObject(row.target_grants_json)
+  );
+  const currentIsRequester = row.requester_family_id === familyId;
   return {
     id: row.id,
     relationType: row.relation_type,
@@ -873,7 +1136,9 @@ function mapRelationshipRow(row, familyId) {
     requesterFamily,
     targetFamily,
     otherFamily:
-      row.requester_family_id === familyId ? targetFamily : requesterFamily,
+      currentIsRequester ? targetFamily : requesterFamily,
+    grantsToOther: currentIsRequester ? requesterGrants : targetGrants,
+    grantsFromOther: currentIsRequester ? targetGrants : requesterGrants,
     requestedByMemberId: row.requested_by_member_id,
     respondedByMemberId: row.responded_by_member_id,
     createdAt: row.created_at,
@@ -890,7 +1155,7 @@ const RELATIONSHIP_SELECT = `
     requester.badge AS requester_badge,
     (
       SELECT COUNT(*) FROM members
-      WHERE family_id = requester.id
+      WHERE family_id = requester.id AND is_managed = 0
     ) AS requester_members_count,
     target.id AS target_id,
     target.name AS target_name,
@@ -898,7 +1163,7 @@ const RELATIONSHIP_SELECT = `
     target.badge AS target_badge,
     (
       SELECT COUNT(*) FROM members
-      WHERE family_id = target.id
+      WHERE family_id = target.id AND is_managed = 0
     ) AS target_members_count
   FROM family_relationships relationship
   JOIN families requester ON requester.id = relationship.requester_family_id
@@ -918,6 +1183,90 @@ export function listFamilyRelationships(familyId) {
     `)
     .all(familyId, familyId)
     .map(row => mapRelationshipRow(row, familyId));
+}
+
+export function getFamilyRelationship(familyId, relationshipId) {
+  const row = database
+    .prepare(`
+      ${RELATIONSHIP_SELECT}
+      WHERE relationship.id = ?
+        AND (
+          relationship.requester_family_id = ?
+          OR relationship.target_family_id = ?
+        )
+    `)
+    .get(relationshipId, familyId, familyId);
+  return mapRelationshipRow(row, familyId);
+}
+
+export function updateFamilyRelationshipGrants(
+  familyId,
+  relationshipId,
+  changes
+) {
+  const existing = database
+    .prepare(`
+      SELECT * FROM family_relationships
+      WHERE id = ?
+        AND status = 'accepted'
+        AND (requester_family_id = ? OR target_family_id = ?)
+    `)
+    .get(relationshipId, familyId, familyId);
+  if (!existing) return null;
+
+  const currentIsRequester = existing.requester_family_id === familyId;
+  const column = currentIsRequester
+    ? 'requester_grants_json'
+    : 'target_grants_json';
+  const current = normalizeRelationshipGrants(
+    parseJsonObject(existing[column])
+  );
+  const next = normalizeRelationshipGrants({
+    ...current,
+    ...(changes || {})
+  });
+  database
+    .prepare(`
+      UPDATE family_relationships
+      SET ${column} = ?, updated_at = ?
+      WHERE id = ?
+    `)
+    .run(JSON.stringify(next), Date.now(), relationshipId);
+  bumpFamilyVersion(existing.requester_family_id);
+  bumpFamilyVersion(existing.target_family_id);
+  return getFamilyRelationship(familyId, relationshipId);
+}
+
+export function relationshipAllows(
+  ownerFamilyId,
+  otherFamilyId,
+  permission
+) {
+  const existing = database
+    .prepare(`
+      SELECT * FROM family_relationships
+      WHERE status = 'accepted'
+        AND (
+          (requester_family_id = ? AND target_family_id = ?)
+          OR
+          (requester_family_id = ? AND target_family_id = ?)
+        )
+    `)
+    .get(
+      ownerFamilyId,
+      otherFamilyId,
+      otherFamilyId,
+      ownerFamilyId
+    );
+  if (!existing) return false;
+  const grants = normalizeRelationshipGrants(
+    parseJsonObject(
+      existing.requester_family_id === ownerFamilyId
+        ? existing.requester_grants_json
+        : existing.target_grants_json
+    )
+  );
+  return Boolean(grants[permission]);
 }
 
 export function createFamilyRelationshipRequest(
@@ -1083,6 +1432,157 @@ export function deleteFamilyRelationship(familyId, relationshipId) {
   });
 }
 
+function sharedEventRecipients(eventId) {
+  return database
+    .prepare(`
+      SELECT family.id, family.name, family.avatar
+      FROM shared_family_event_recipients recipient
+      JOIN families family ON family.id = recipient.family_id
+      WHERE recipient.event_id = ?
+      ORDER BY family.name COLLATE NOCASE
+    `)
+    .all(eventId)
+    .map(row => ({
+      id: row.id,
+      familyName: row.name,
+      familyAvatar: row.avatar
+    }));
+}
+
+function mapSharedFamilyEvent(row, familyId) {
+  const data = parseJsonObject(row.data_json);
+  const owner = row.owner_family_id === familyId;
+  return {
+    ...data,
+    id: owner ? row.id : `shared-${row.id}`,
+    memberId: owner ? (data.memberId || 'all') : 'all',
+    household: owner ? (data.household || 'familie') : 'familie',
+    readOnly: !owner,
+    sharedEventId: row.id,
+    sharedOwnerFamilyId: row.owner_family_id,
+    sharedOwnerFamilyName: row.owner_family_name,
+    sharedWithFamilies: sharedEventRecipients(row.id),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+export function listSharedFamilyEvents(familyId) {
+  return database
+    .prepare(`
+      SELECT event.*, owner.name AS owner_family_name
+      FROM shared_family_events event
+      JOIN families owner ON owner.id = event.owner_family_id
+      WHERE event.owner_family_id = ?
+        OR EXISTS (
+          SELECT 1
+          FROM shared_family_event_recipients recipient
+          WHERE recipient.event_id = event.id
+            AND recipient.family_id = ?
+        )
+      ORDER BY event.created_at DESC
+    `)
+    .all(familyId, familyId)
+    .map(row => mapSharedFamilyEvent(row, familyId));
+}
+
+export function createSharedFamilyEvent(
+  ownerFamilyId,
+  createdByMemberId,
+  event,
+  recipientFamilyIds
+) {
+  const recipients = [
+    ...new Set(
+      (recipientFamilyIds || [])
+        .map(value => String(value || '').trim())
+        .filter(value => value && value !== ownerFamilyId)
+    )
+  ].slice(0, 12);
+  if (!recipients.length) {
+    const error = new Error('Wähle mindestens eine verbundene Familie aus.');
+    error.statusCode = 400;
+    throw error;
+  }
+  recipients.forEach(targetFamilyId => {
+    if (
+      !relationshipAllows(
+        targetFamilyId,
+        ownerFamilyId,
+        'sharedCalendar'
+      )
+    ) {
+      const error = new Error(
+        'Eine ausgewählte Familie hat gemeinsame Termine nicht freigegeben.'
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+  });
+  const now = Date.now();
+  const id = String(event.id || `shared-event-${randomUUID()}`);
+  return withTransaction(() => {
+    database
+      .prepare(`
+        INSERT INTO shared_family_events(
+          id, owner_family_id, created_by_member_id,
+          data_json, created_at, updated_at
+        )
+        VALUES(?, ?, ?, ?, ?, ?)
+      `)
+      .run(
+        id,
+        ownerFamilyId,
+        createdByMemberId || null,
+        JSON.stringify({ ...event, id }),
+        now,
+        now
+      );
+    const insertRecipient = database.prepare(`
+      INSERT INTO shared_family_event_recipients(event_id, family_id)
+      VALUES(?, ?)
+    `);
+    recipients.forEach(familyId => insertRecipient.run(id, familyId));
+    bumpFamilyVersion(ownerFamilyId);
+    recipients.forEach(familyId => bumpFamilyVersion(familyId));
+    const row = database
+      .prepare(`
+        SELECT event.*, owner.name AS owner_family_name
+        FROM shared_family_events event
+        JOIN families owner ON owner.id = event.owner_family_id
+        WHERE event.id = ?
+      `)
+      .get(id);
+    return mapSharedFamilyEvent(row, ownerFamilyId);
+  });
+}
+
+export function deleteSharedFamilyEvent(ownerFamilyId, eventId) {
+  const existing = database
+    .prepare(`
+      SELECT * FROM shared_family_events
+      WHERE id = ? AND owner_family_id = ?
+    `)
+    .get(eventId, ownerFamilyId);
+  if (!existing) return false;
+  const recipients = database
+    .prepare(`
+      SELECT family_id
+      FROM shared_family_event_recipients
+      WHERE event_id = ?
+    `)
+    .all(eventId)
+    .map(row => row.family_id);
+  return withTransaction(() => {
+    database
+      .prepare('DELETE FROM shared_family_events WHERE id = ?')
+      .run(eventId);
+    bumpFamilyVersion(ownerFamilyId);
+    recipients.forEach(familyId => bumpFamilyVersion(familyId));
+    return { recipientFamilyIds: recipients };
+  });
+}
+
 export function replaceRecordsBySource(familyId, type, source, records) {
   assertRecordType(type);
   return withTransaction(() => {
@@ -1113,6 +1613,10 @@ export function getBootstrap(familyId) {
   for (const type of RECORD_TYPES) {
     resources[type] = listRecords(familyId, type);
   }
+  resources.events = [
+    ...resources.events,
+    ...listSharedFamilyEvents(familyId)
+  ];
   return {
     family: getFamily(familyId),
     members: getMembers(familyId),
@@ -1702,11 +2206,93 @@ export function deleteIntegration(familyId, provider) {
   return changes > 0;
 }
 
+function mapProblemReport(row) {
+  return row
+    ? {
+        id: row.id,
+        familyId: row.family_id,
+        memberId: row.member_id,
+        category: row.category,
+        title: row.title,
+        description: row.description,
+        page: row.page,
+        appVersion: row.app_version,
+        clientInfo: row.client_info,
+        status: row.status,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }
+    : null;
+}
+
+export function createProblemReport(familyId, memberId, report) {
+  const now = Date.now();
+  const id = String(report.id || `problem-${randomUUID()}`);
+  database
+    .prepare(`
+      INSERT INTO problem_reports(
+        id, family_id, member_id, category, title, description,
+        page, app_version, client_info, status, created_at, updated_at
+      )
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?)
+    `)
+    .run(
+      id,
+      familyId,
+      memberId || null,
+      String(report.category || 'problem'),
+      String(report.title || ''),
+      String(report.description || ''),
+      String(report.page || ''),
+      String(report.appVersion || ''),
+      String(report.clientInfo || ''),
+      now,
+      now
+    );
+  return mapProblemReport(
+    database.prepare('SELECT * FROM problem_reports WHERE id = ?').get(id)
+  );
+}
+
+export function listProblemReports(familyId, { limit = 50 } = {}) {
+  return database
+    .prepare(`
+      SELECT *
+      FROM problem_reports
+      WHERE family_id = ?
+      ORDER BY
+        CASE status WHEN 'open' THEN 0 ELSE 1 END,
+        created_at DESC
+      LIMIT ?
+    `)
+    .all(familyId, Math.max(1, Math.min(200, Number(limit) || 50)))
+    .map(mapProblemReport);
+}
+
+export function updateProblemReportStatus(familyId, reportId, status) {
+  const result = database
+    .prepare(`
+      UPDATE problem_reports
+      SET status = ?, updated_at = ?
+      WHERE family_id = ? AND id = ?
+    `)
+    .run(status, Date.now(), familyId, reportId);
+  if (!result.changes) return null;
+  return mapProblemReport(
+    database
+      .prepare(`
+        SELECT * FROM problem_reports
+        WHERE family_id = ? AND id = ?
+      `)
+      .get(familyId, reportId)
+  );
+}
+
 function updateTaskMemberStars(familyId, task, direction) {
   if (!task.memberId || !direction) return null;
   const existingMember = getMemberAuthRow(familyId, task.memberId);
   if (!existingMember) return null;
-  const points = Math.max(0, Number(task.stars || 10));
+  const points = Math.max(0, Number(task.stars ?? 10));
   const nextStars = Math.max(
     0,
     Number(existingMember.stars || 0) + direction * points
@@ -1736,12 +2322,30 @@ function createNextRecurringTask(familyId, task) {
   );
   if (duplicate) return duplicate;
 
+  const rotationMemberIds = Array.isArray(task.rotationMemberIds)
+    ? task.rotationMemberIds.filter(memberId =>
+        Boolean(getMember(familyId, memberId))
+      )
+    : [];
+  const currentRotationIndex = Math.max(
+    0,
+    rotationMemberIds.indexOf(task.memberId)
+  );
+  const nextRotationIndex = rotationMemberIds.length > 1
+    ? (currentRotationIndex + 1) % rotationMemberIds.length
+    : currentRotationIndex;
+  const nextMemberId =
+    rotationMemberIds[nextRotationIndex] || task.memberId;
+
   const nextTask = {
     ...task,
     id: `task-${randomUUID()}`,
     seriesId,
     occurrenceDate: nextDueDate,
     dueDate: nextDueDate,
+    memberId: nextMemberId,
+    rotationMemberIds,
+    rotationIndex: nextRotationIndex,
     previousOccurrenceId: task.id,
     completed: false,
     completionStatus: 'open',

@@ -7,6 +7,7 @@ backup_directory="$project_root/backups"
 database_file="$data_directory/family_planner.sqlite"
 active_image="lx-family-planner:local"
 rollback_image="lx-family-planner:rollback"
+expected_version=""
 previous_image_id=""
 backup_file=""
 service_stopped="false"
@@ -15,10 +16,13 @@ cd "$project_root"
 
 wait_for_planner() {
   local attempts="${1:-40}"
+  local expected_version="${2:-}"
   local attempt
   for ((attempt = 0; attempt < attempts; attempt += 1)); do
-    if docker compose exec -T family-planner node -e \
-      "fetch('http://127.0.0.1:3001/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))" \
+    if docker compose exec -T \
+      -e "EXPECTED_VERSION=$expected_version" \
+      family-planner node -e \
+      "fetch('http://127.0.0.1:3001/api/health').then(async r=>{const h=await r.json();if(!r.ok||!h.success||(process.env.EXPECTED_VERSION&&h.version!==process.env.EXPECTED_VERSION))process.exit(1)}).catch(()=>process.exit(1))" \
       >/dev/null 2>&1; then
       return 0
     fi
@@ -88,6 +92,12 @@ else
   echo "1/6 Git-Aktualisierung übersprungen."
 fi
 
+expected_version="$(node -p "require('./package.json').version")"
+if [[ -z "$expected_version" ]]; then
+  echo "Die Versionsnummer der neuen Programmversion konnte nicht gelesen werden." >&2
+  exit 1
+fi
+
 echo "2/6 Bisherige Version für eine Rückkehr sichern ..."
 docker tag "$previous_image_id" "$rollback_image"
 
@@ -115,7 +125,7 @@ docker compose run --rm --no-deps family-planner \
 echo "5/6 Neue Version starten ..."
 docker compose up -d --no-build --remove-orphans
 service_stopped="false"
-if ! wait_for_planner 40; then
+if ! wait_for_planner 40 "$expected_version"; then
   docker compose logs --tail 100 family-planner
   false
 fi
@@ -128,4 +138,5 @@ docker compose exec -T family-planner \
 trap - ERR
 echo
 echo "Update erfolgreich."
+echo "Version: $expected_version"
 echo "Sicherung: $backup_file"

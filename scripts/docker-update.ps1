@@ -13,6 +13,7 @@ $environmentFile = Join-Path $projectRoot '.env'
 $databaseFile = Join-Path $dataDirectory 'family_planner.sqlite'
 $rollbackImage = 'lx-family-planner:rollback'
 $activeImage = 'lx-family-planner:local'
+$expectedVersion = ''
 
 function Invoke-Checked {
   param(
@@ -48,7 +49,8 @@ function Get-EnvironmentValue {
 function Wait-FamilyPlanner {
   param(
     [Parameter(Mandatory = $true)][string]$HostPort,
-    [int]$Attempts = 40
+    [int]$Attempts = 40,
+    [string]$ExpectedVersion = ''
   )
 
   for ($attempt = 0; $attempt -lt $Attempts; $attempt += 1) {
@@ -57,7 +59,13 @@ function Wait-FamilyPlanner {
         -Uri "http://127.0.0.1:$HostPort/api/health" `
         -Method Get `
         -TimeoutSec 2
-      if ($health.success -eq $true) {
+      if (
+        $health.success -eq $true -and
+        (
+          -not $ExpectedVersion -or
+          [string]$health.version -eq $ExpectedVersion
+        )
+      ) {
         return $true
       }
     } catch {
@@ -153,6 +161,14 @@ Das Update wurde sicherheitshalber abgebrochen. Bitte diese Änderungen zuerst s
     Write-Host '1/6 Git-Aktualisierung übersprungen.'
   }
 
+  $expectedVersion = (
+    Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') |
+      ConvertFrom-Json
+  ).version
+  if (-not $expectedVersion) {
+    throw 'Die Versionsnummer der neuen Programmversion konnte nicht gelesen werden.'
+  }
+
   Write-Host '2/6 Bisherige Version für eine Rückkehr sichern ...'
   Invoke-Checked `
     -Command 'docker' `
@@ -215,9 +231,13 @@ Das Update wurde sicherheitshalber abgebrochen. Bitte diese Änderungen zuerst s
     -FailureMessage 'Die neue Version konnte nicht gestartet werden.'
   $serviceStopped = $false
 
-  if (-not (Wait-FamilyPlanner -HostPort $hostPort)) {
+  if (-not (
+    Wait-FamilyPlanner `
+      -HostPort $hostPort `
+      -ExpectedVersion $expectedVersion
+  )) {
     docker compose logs --tail 100 family-planner
-    throw 'Die neue Version hat den Gesundheitscheck nicht bestanden.'
+    throw "Die erwartete Version $expectedVersion hat den Gesundheitscheck nicht bestanden."
   }
 
   Write-Host '6/6 Familieninhalte und Einstellungen vergleichen ...'
@@ -233,6 +253,7 @@ Das Update wurde sicherheitshalber abgebrochen. Bitte diese Änderungen zuerst s
 
   Write-Host ''
   Write-Host 'Update erfolgreich.'
+  Write-Host "Version: $expectedVersion"
   Write-Host "Sicherung: $backupFile"
   Write-Host "Familienplaner: http://localhost:$hostPort"
 } catch {

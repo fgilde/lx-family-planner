@@ -18,6 +18,7 @@ import {
   DEFAULT_MEMBER_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import FamilyConnectionAccess from './FamilyConnectionAccess';
 
 const RELATION_OPTIONS = [
   {
@@ -421,6 +422,10 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
               </div>
             </section>
           </div>
+
+          {canManageFamily(activeMember) && accepted.length > 0 && (
+            <FamilyConnectionAccess relationships={accepted} />
+          )}
         </div>
       </div>
     </div>

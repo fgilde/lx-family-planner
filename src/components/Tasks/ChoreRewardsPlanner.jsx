@@ -17,9 +17,15 @@ import {
   CalendarDays,
   Repeat2
 } from 'lucide-react';
-import { canManageFamily, getPositionLabel, isChildProfile } from '../../constants/roles';
+import {
+  canManageFamily,
+  getPositionLabel,
+  isChildProfile,
+  isManagedProfile
+} from '../../constants/roles';
+import RewardIcon, { DEFAULT_REWARD_ICON } from './RewardIcon';
+import RewardIconPicker from './RewardIconPicker';
 
-const REWARD_ICONS = ['🍦', '🎮', '🍿', '🎪', '🍕', '🚀', '🎁', '🛹', '🎳', '🍔', '🎨', '🏖️'];
 const REPEAT_LABELS = {
   none: 'Einmalig',
   daily: 'Jeden Tag',
@@ -63,14 +69,21 @@ export default function ChoreRewardsPlanner() {
     currentLocalDate
   );
   const [taskRepeatRule, setTaskRepeatRule] = useState('none');
+  const [taskRotationEnabled, setTaskRotationEnabled] = useState(false);
+  const [taskRotationMemberIds, setTaskRotationMemberIds] = useState([]);
 
   // Reward Creator / Editor State
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
   const [editingReward, setEditingReward] = useState(null);
   const [rewardTitle, setRewardTitle] = useState('');
   const [rewardCost, setRewardCost] = useState(50);
-  const [rewardIcon, setRewardIcon] = useState('🍦');
+  const [rewardIcon, setRewardIcon] = useState(DEFAULT_REWARD_ICON);
+  const [rewardIconImage, setRewardIconImage] = useState('');
   const [rewardForMemberId, setRewardForMemberId] = useState('all');
+  const selectedTaskMember = members.find(
+    member => member.id === taskMemberId
+  );
+  const taskIsForManagedProfile = isManagedProfile(selectedTaskMember);
 
   const handleCreateTask = (e) => {
     e.preventDefault();
@@ -79,13 +92,24 @@ export default function ChoreRewardsPlanner() {
     addTask({
       title: taskTitle,
       memberId: taskMemberId,
-      stars: Number(taskStars),
+      stars: taskIsForManagedProfile ? 0 : Number(taskStars),
       category: taskCategory,
       dueDate: taskDueDate,
-      repeatRule: taskRepeatRule
+      repeatRule: taskRepeatRule,
+      rotationMemberIds:
+        !taskIsForManagedProfile &&
+        taskRotationEnabled &&
+        taskRepeatRule !== 'none'
+          ? [
+              taskMemberId,
+              ...taskRotationMemberIds.filter(id => id !== taskMemberId)
+            ]
+          : []
     });
 
     setTaskTitle('');
+    setTaskRotationEnabled(false);
+    setTaskRotationMemberIds([]);
     setIsAddTaskOpen(false);
   };
 
@@ -93,7 +117,8 @@ export default function ChoreRewardsPlanner() {
     setEditingReward(null);
     setRewardTitle('');
     setRewardCost(50);
-    setRewardIcon('🍦');
+    setRewardIcon(DEFAULT_REWARD_ICON);
+    setRewardIconImage('');
     setRewardForMemberId('all');
     setIsRewardModalOpen(true);
   };
@@ -102,7 +127,8 @@ export default function ChoreRewardsPlanner() {
     setEditingReward(reward);
     setRewardTitle(reward.title);
     setRewardCost(reward.costStars);
-    setRewardIcon(reward.icon || '🎁');
+    setRewardIcon(reward.icon || DEFAULT_REWARD_ICON);
+    setRewardIconImage(reward.iconImage || '');
     setRewardForMemberId(reward.forMemberId || 'all');
     setIsRewardModalOpen(true);
   };
@@ -116,6 +142,7 @@ export default function ChoreRewardsPlanner() {
         title: rewardTitle,
         costStars: Number(rewardCost),
         icon: rewardIcon,
+        iconImage: rewardIconImage,
         forMemberId: rewardForMemberId
       });
     } else {
@@ -123,6 +150,7 @@ export default function ChoreRewardsPlanner() {
         title: rewardTitle,
         costStars: Number(rewardCost),
         icon: rewardIcon,
+        iconImage: rewardIconImage,
         forMemberId: rewardForMemberId
       });
     }
@@ -210,16 +238,26 @@ export default function ChoreRewardsPlanner() {
                   </div>
                 </div>
 
-                <div style={{ background: 'color-mix(in srgb, var(--warning) 11%, var(--bg-elevated))', border: '1px solid color-mix(in srgb, var(--warning) 35%, var(--border-color))', color: 'var(--warning)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontWeight: 800, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Star size={18} fill="#f59e0b" /> {member.stars || 0}★
-                </div>
+                {isManagedProfile(member) ? (
+                  <div className="task-managed-badge">
+                    <ShieldCheck size={16} /> Nur organisiert
+                  </div>
+                ) : (
+                  <div style={{ background: 'color-mix(in srgb, var(--warning) 11%, var(--bg-elevated))', border: '1px solid color-mix(in srgb, var(--warning) 35%, var(--border-color))', color: 'var(--warning)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontWeight: 800, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <Star size={18} fill="#f59e0b" /> {member.stars || 0}★
+                  </div>
+                )}
               </div>
 
               {/* Task Items */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {memberTasks.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Keine Aufgaben für {member.name.split(' ')[0]} zugeteilt.
+                    Keine Aufgaben für{' '}
+                    {isManagedProfile(member)
+                      ? member.name
+                      : member.name.split(' ')[0]}{' '}
+                    zugeteilt.
                   </div>
                 ) : (
                   memberTasks.map(task => {
@@ -292,12 +330,20 @@ export default function ChoreRewardsPlanner() {
                                         'Wiederkehrend'}
                                     </span>
                                   )}
+                                {task.rotationMemberIds?.length > 1 && (
+                                  <span title="Wechselt bei jeder Wiederholung">
+                                    <RotateCcw size={12} />
+                                    Fairer Wechsel ({task.rotationMemberIds.length})
+                                  </span>
+                                )}
                               </span>
                             )}
                           </span>
-                          <span className="task-star-value">
-                            <Star size={14} fill="#f59e0b" /> +{task.stars}
-                          </span>
+                          {!isManagedProfile(member) && Number(task.stars) > 0 && (
+                            <span className="task-star-value">
+                              <Star size={14} fill="#f59e0b" /> +{task.stars}
+                            </span>
+                          )}
                         </button>
 
                         {canReview && (
@@ -354,7 +400,12 @@ export default function ChoreRewardsPlanner() {
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span style={{ fontSize: '2rem' }}>{reward.icon || '🎁'}</span>
+                    <RewardIcon
+                      value={reward.icon}
+                      image={reward.iconImage}
+                      label={reward.title}
+                      size="large"
+                    />
                     
                     {/* Edit & Delete Action Buttons for Parents */}
                     {isParent && (
@@ -410,7 +461,7 @@ export default function ChoreRewardsPlanner() {
       {/* CREATE / EDIT REWARD MODAL */}
       {isRewardModalOpen && (
         <div className="modal-backdrop" onClick={() => setIsRewardModalOpen(false)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
+          <div className="modal-card reward-editor-modal" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
               <h2 className="card-title">
                 {editingReward ? 'Belohnung bearbeiten' : 'Neue Belohnung anlegen'}
@@ -462,24 +513,15 @@ export default function ChoreRewardsPlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Wunsch-Icon wählen</label>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  {REWARD_ICONS.map(ic => (
-                    <button
-                      key={ic}
-                      type="button"
-                      onClick={() => setRewardIcon(ic)}
-                      style={{
-                        fontSize: '1.5rem', width: 44, height: 44, borderRadius: 'var(--radius-md)',
-                        border: `2px solid ${rewardIcon === ic ? 'var(--primary)' : 'var(--border-color)'}`,
-                        background: rewardIcon === ic ? 'var(--bg-subtle)' : 'var(--bg-card)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {ic}
-                    </button>
-                  ))}
-                </div>
+                <span className="form-label">Bild der Belohnung</span>
+                <RewardIconPicker
+                  value={rewardIcon}
+                  image={rewardIconImage}
+                  onChange={({ icon, iconImage }) => {
+                    setRewardIcon(icon);
+                    setRewardIconImage(iconImage);
+                  }}
+                />
               </div>
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
@@ -523,7 +565,10 @@ export default function ChoreRewardsPlanner() {
                 <label className="form-label">Zuteilen an</label>
                 <select className="form-select" value={taskMemberId} onChange={e => setTaskMemberId(e.target.value)}>
                   {members.map(m => (
-                    <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({getPositionLabel(m)}
+                      {isManagedProfile(m) ? ', verwaltet' : ''})
+                    </option>
                   ))}
                 </select>
               </div>
@@ -565,6 +610,65 @@ export default function ChoreRewardsPlanner() {
                     </select>
                   </label>
                 </div>
+                {taskRepeatRule !== 'none' && !taskIsForManagedProfile && (
+                  <div className="task-rotation-editor">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={taskRotationEnabled}
+                        onChange={event => {
+                          setTaskRotationEnabled(event.target.checked);
+                          if (event.target.checked) {
+                            setTaskRotationMemberIds(previous => [
+                              ...new Set([taskMemberId, ...previous])
+                            ]);
+                          }
+                        }}
+                      />
+                      <span>
+                        <strong>Fair zwischen Profilen wechseln</strong>
+                        <small>
+                          Nach jeder bestätigten Wiederholung ist automatisch
+                          die nächste Person dran.
+                        </small>
+                      </span>
+                    </label>
+                    {taskRotationEnabled && (
+                      <div className="task-rotation-members">
+                        {members
+                          .filter(
+                            member =>
+                              member.role !== 'pet' &&
+                              !isManagedProfile(member)
+                          )
+                          .map(member => {
+                            const selected =
+                              member.id === taskMemberId ||
+                              taskRotationMemberIds.includes(member.id);
+                            return (
+                              <button
+                                key={member.id}
+                                type="button"
+                                className={selected ? 'selected' : ''}
+                                onClick={() => {
+                                  if (member.id === taskMemberId) return;
+                                  setTaskRotationMemberIds(previous =>
+                                    previous.includes(member.id)
+                                      ? previous.filter(id => id !== member.id)
+                                      : [...previous, member.id]
+                                  );
+                                }}
+                              >
+                                <span>{member.name.slice(0, 1)}</span>
+                                {member.name}
+                                {selected && <Check size={13} />}
+                              </button>
+                            );
+                          })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -583,18 +687,31 @@ export default function ChoreRewardsPlanner() {
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Sterne-Belohnung (+ Sterne)</label>
-                <input
-                  type="number"
-                  min="5"
-                  step="5"
-                  className="form-input"
-                  value={taskStars}
-                  onChange={e => setTaskStars(e.target.value)}
-                  required
-                />
-              </div>
+              {taskIsForManagedProfile ? (
+                <div className="managed-task-form-note">
+                  <ShieldCheck size={18} />
+                  <span>
+                    <strong>Organisationsaufgabe</strong>
+                    <small>
+                      Für verwaltete Profile gibt es keine Sterne und keine
+                      eigene Erledigt-Meldung.
+                    </small>
+                  </span>
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">Sterne-Belohnung (+ Sterne)</label>
+                  <input
+                    type="number"
+                    min="5"
+                    step="5"
+                    className="form-input"
+                    value={taskStars}
+                    onChange={e => setTaskStars(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>

@@ -5,6 +5,12 @@ export const POSITION_OPTIONS = [
   { value: 'teenager', label: 'Teenager', role: 'teen', emoji: '🎧' },
   { value: 'oma', label: 'Oma', role: 'senior', emoji: '🫶' },
   { value: 'opa', label: 'Opa', role: 'senior', emoji: '🌿' },
+  {
+    value: 'betreute_person',
+    label: 'Betreute Person',
+    role: 'member',
+    emoji: '🤲'
+  },
   { value: 'tante', label: 'Tante', role: 'adult', emoji: '✨' },
   { value: 'onkel', label: 'Onkel', role: 'adult', emoji: '🧭' },
   { value: 'patin', label: 'Patin', role: 'adult', emoji: '💛' },
@@ -44,7 +50,7 @@ export function roleForPosition(position) {
 }
 
 export function isChildProfile(member) {
-  return member?.role === 'child';
+  return member?.role === 'child' && !isManagedProfile(member);
 }
 
 export function isPetProfile(member) {
@@ -52,9 +58,19 @@ export function isPetProfile(member) {
 }
 
 export function isYoungProfile(member) {
-  return member?.role === 'child' || member?.role === 'teen';
+  return (
+    !isManagedProfile(member) &&
+    (member?.role === 'child' || member?.role === 'teen')
+  );
+}
+
+export function isManagedProfile(member) {
+  return Boolean(member?.isManaged);
 }
 
 export function canManageFamily(member) {
-  return member?.role === 'adult' || member?.role === 'senior';
+  return (
+    !isManagedProfile(member) &&
+    (member?.role === 'adult' || member?.role === 'senior')
+  );
 }

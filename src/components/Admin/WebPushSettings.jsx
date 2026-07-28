@@ -4,13 +4,16 @@ import {
   CalendarDays,
   Check,
   ClipboardCheck,
+  GraduationCap,
   LockKeyhole,
+  MessageCircleHeart,
   MessageCircleMore,
   Send,
   ShieldCheck,
   Smartphone,
   Trash2,
-  Trophy
+  Trophy,
+  Vote
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 
@@ -56,6 +59,24 @@ const RULES = [
     title: 'Brauche Nähe',
     description: 'Dringender Familienkompass-Hinweis',
     icon: BellRing
+  },
+  {
+    key: 'encouragements',
+    title: 'Mutmacher',
+    description: 'Liebe Nachrichten der Familie',
+    icon: MessageCircleHeart
+  },
+  {
+    key: 'familyPolls',
+    title: 'Abstimmungen',
+    description: 'Neue Familienentscheidungen',
+    icon: Vote
+  },
+  {
+    key: 'schoolItems',
+    title: 'Schule',
+    description: 'Hausaufgaben und Klassenarbeiten',
+    icon: GraduationCap
   }
 ];
 
@@ -150,11 +171,16 @@ export default function WebPushSettings() {
         <div className="webpush-prerequisite">
           <LockKeyhole size={24} />
           <div>
-            <strong>Noch ein sicherer Schritt</strong>
+            <strong>
+              {webPush.reason === 'secure-context'
+                ? 'HTTPS fehlt – deshalb kommt kein Hintergrund-Push'
+                : 'Noch ein sicherer Schritt'}
+            </strong>
             <p>{webPush.message}</p>
             <small>
-              Gotify arbeitet weiter. Für Browser-Push muss der Planer über
-              eine HTTPS-Adresse geöffnet werden.
+              Eine Android-App ist dafür nicht nötig. Öffne den Planer über
+              eine vertrauenswürdige HTTPS-Adresse, füge ihn auf Android zum
+              Startbildschirm hinzu und aktiviere danach dieses Gerät.
             </small>
           </div>
         </div>
@@ -191,6 +217,15 @@ export default function WebPushSettings() {
 
       {status === 'connected' && (
         <>
+          <div className="webpush-background-note">
+            <Check size={16} />
+            <span>
+              <strong>Bereit für Hintergrund-Push</strong>
+              Für die zuverlässigste Zustellung auf Android den Planer über
+              „Zum Startbildschirm hinzufügen“ installieren und
+              Benachrichtigungen in den Android-App-Einstellungen erlauben.
+            </span>
+          </div>
           <div className="webpush-rule-grid">
             {RULES.map(rule => {
               const Icon = rule.icon;

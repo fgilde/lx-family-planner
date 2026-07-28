@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   BellOff,
   BellRing,
+  CalendarDays,
   Check,
   ChevronDown,
+  ClipboardList,
   Edit3,
   KeyRound,
   Lock,
@@ -22,6 +24,7 @@ import {
   POSITION_OPTIONS,
   canManageFamily,
   getPositionLabel,
+  isManagedProfile,
   isPetProfile,
   roleForPosition
 } from '../constants/roles';
@@ -43,7 +46,8 @@ const EMPTY_FORM = {
   role: 'child',
   color: '#E0A52E',
   avatar: FUNNY_COMIC_AVATARS[0]?.url || '',
-  pin: ''
+  pin: '',
+  isManaged: false
 };
 
 export default function ProfileModal() {
@@ -97,6 +101,8 @@ export default function ProfileModal() {
   if (!isProfileModalOpen) return null;
 
   const canManage = canManageFamily(activeMember);
+  const selectableMembers = members.filter(member => !isManagedProfile(member));
+  const managedMembers = members.filter(isManagedProfile);
   const currentPushDevice = webPush.devices.find(
     device => device.id === webPush.currentDeviceId
   );
@@ -158,9 +164,9 @@ export default function ProfileModal() {
     }
   };
 
-  const beginAdd = () => {
+  const beginAdd = (isManaged = false) => {
     setEditingMemberId(null);
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, isManaged });
     setShowNotifications(false);
     setMode('form');
   };
@@ -175,7 +181,8 @@ export default function ProfileModal() {
       role: member.role || 'member',
       color: member.color || COLOR_PRESETS[0],
       avatar: member.avatar || FUNNY_COMIC_AVATARS[0]?.url || '',
-      pin: ''
+      pin: '',
+      isManaged: isManagedProfile(member)
     });
     setShowNotifications(false);
     setMode('form');
@@ -188,7 +195,8 @@ export default function ProfileModal() {
     updateForm({
       position,
       role,
-      theme: role === 'child' ? 'adventure' : 'light'
+      theme: role === 'child' ? 'adventure' : 'light',
+      ...(role === 'pet' ? { isManaged: false } : {})
     });
   };
 
@@ -335,7 +343,7 @@ export default function ProfileModal() {
               zu wechseln.
             </p>
             <div className="profile-switch-grid" role="list">
-              {members.map((member, index) => {
+              {selectableMembers.map((member, index) => {
                 const isActive = member.id === activeMemberId;
                 const canEdit = canManage || member.id === activeMemberId;
                 return (
@@ -405,6 +413,57 @@ export default function ProfileModal() {
               })}
             </div>
 
+            {canManage && managedMembers.length > 0 && (
+              <section className="managed-profile-section">
+                <header>
+                  <span className="managed-profile-heading-icon">
+                    <ClipboardList size={19} />
+                  </span>
+                  <div>
+                    <strong>Von euch verwaltet</strong>
+                    <small>
+                      Ohne Anmeldung · für Termine und Aufgaben
+                    </small>
+                  </div>
+                  <span className="managed-profile-count">
+                    {managedMembers.length}
+                  </span>
+                </header>
+                <div className="managed-profile-list">
+                  {managedMembers.map(member => (
+                    <article
+                      key={member.id}
+                      style={{ '--member-color': member.color || '#246B58' }}
+                    >
+                      <img
+                        src={member.avatar || DEFAULT_FAMILY_AVATAR}
+                        onError={handleImgError}
+                        alt=""
+                      />
+                      <span>
+                        <strong>{member.name}</strong>
+                        <small>
+                          {getPositionLabel(member)} · kein eigener Zugang
+                        </small>
+                      </span>
+                      <span className="managed-profile-capabilities">
+                        <i title="Termine"><CalendarDays size={14} /></i>
+                        <i title="Aufgaben"><ClipboardList size={14} /></i>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={event => beginEdit(member, event)}
+                        aria-label={`${member.name} bearbeiten`}
+                        title={`${member.name} bearbeiten`}
+                      >
+                        <Edit3 size={15} />
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <div className={`profile-tools ${activeProfileIsPet ? 'pet-active' : ''}`}>
               {!activeProfileIsPet && (
                 <button
@@ -442,7 +501,7 @@ export default function ProfileModal() {
                 <button
                   type="button"
                   className="auth-secondary profile-add"
-                  onClick={beginAdd}
+                  onClick={() => beginAdd(false)}
                 >
                   <Plus size={18} /> Mitglied hinzufügen
                 </button>
@@ -556,6 +615,55 @@ export default function ProfileModal() {
             </div>
 
             <div className="profile-editor-fields">
+              {canManage && form.role !== 'pet' && (
+                <fieldset className="profile-access-choice">
+                  <legend className="form-label">Wie wird das Profil genutzt?</legend>
+                  <label className={!form.isManaged ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="profile-access"
+                      checked={!form.isManaged}
+                      onChange={() => updateForm({ isManaged: false })}
+                      disabled={editingMemberId === activeMemberId}
+                    />
+                    <span className="profile-access-icon"><UserRound size={19} /></span>
+                    <span>
+                      <strong>Mit eigener Anmeldung</strong>
+                      <small>
+                        Erscheint beim Profilwechsel und kann den Planer selbst öffnen.
+                      </small>
+                    </span>
+                  </label>
+                  <label className={form.isManaged ? 'selected managed' : ''}>
+                    <input
+                      type="radio"
+                      name="profile-access"
+                      checked={form.isManaged}
+                      onChange={() => updateForm({ isManaged: true, pin: '' })}
+                      disabled={editingMemberId === activeMemberId}
+                    />
+                    <span className="profile-access-icon"><ClipboardList size={19} /></span>
+                    <span>
+                      <strong>Nur von uns verwaltet</strong>
+                      <small>
+                        Für Oma, Opa oder betreute Personen ohne eigenen Zugang.
+                      </small>
+                    </span>
+                  </label>
+                </fieldset>
+              )}
+              {form.isManaged && (
+                <div className="managed-profile-editor-note">
+                  <CalendarDays size={20} />
+                  <span>
+                    <strong>Organisationsprofil ohne Anmeldung</strong>
+                    <small>
+                      Das Profil erscheint in Kalendern und Aufgaben, aber nicht
+                      bei der Anmeldung, im Profilwechsel oder im Chat.
+                    </small>
+                  </span>
+                </div>
+              )}
               {form.role === 'pet' && (
                 <div className="pet-profile-editor-note">
                   <PawPrint size={20} />
@@ -637,7 +745,7 @@ export default function ProfileModal() {
                 </div>
               </div>
 
-              {form.role !== 'pet' && (
+              {form.role !== 'pet' && !form.isManaged && (
                 <label className="form-group">
                   <span className="form-label">
                     {editingMemberId ? 'Neue Profil-PIN (optional)' : 'Profil-PIN (optional)'}

@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
 import { useFamily } from '../context/FamilyContext';
-import { X, Calendar, ShoppingBag, CheckSquare, Pin } from 'lucide-react';
+import {
+  X,
+  Calendar,
+  ShoppingBag,
+  CheckSquare,
+  Pin,
+  HeartHandshake
+} from 'lucide-react';
+import {
+  canManageFamily,
+  getPositionLabel,
+  isManagedProfile
+} from '../constants/roles';
 
 export default function QuickAddModal() {
   const {
     isQuickAddOpen, setIsQuickAddOpen,
     quickAddDefaultType, setQuickAddDefaultType,
-    members, activeMemberId,
+    members, activeMemberId, activeMember, familyRelationships,
     addEvent, addShoppingItem, addTask, addNote
   } = useFamily();
 
@@ -29,6 +41,14 @@ export default function QuickAddModal() {
   
   // Note specific
   const [noteColor, setNoteColor] = useState('#fef08a');
+  const [recipientFamilyIds, setRecipientFamilyIds] = useState([]);
+  const selectedMember = members.find(member => member.id === memberId);
+  const taskIsForManagedProfile = isManagedProfile(selectedMember);
+  const shareableFamilies = familyRelationships.filter(
+    relationship =>
+      relationship.status === 'accepted' &&
+      relationship.grantsFromOther?.sharedCalendar
+  );
 
   if (!isQuickAddOpen) return null;
 
@@ -44,7 +64,8 @@ export default function QuickAddModal() {
         memberId,
         location,
         notes,
-        category: 'Allgemein'
+        category: 'Allgemein',
+        recipientFamilyIds
       });
     } else if (type === 'shopping') {
       addShoppingItem({
@@ -57,7 +78,7 @@ export default function QuickAddModal() {
       addTask({
         title,
         memberId,
-        stars: Number(stars),
+        stars: taskIsForManagedProfile ? 0 : Number(stars),
         category: 'Haushalt'
       });
     } else if (type === 'note') {
@@ -72,6 +93,7 @@ export default function QuickAddModal() {
     setTitle('');
     setLocation('');
     setNotes('');
+    setRecipientFamilyIds([]);
     setIsQuickAddOpen(false);
   };
 
@@ -150,7 +172,10 @@ export default function QuickAddModal() {
                 <select className="form-select" value={memberId} onChange={e => setMemberId(e.target.value)}>
                   <option value="all">Alle (Gemeinsam)</option>
                   {members.map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                      {isManagedProfile(m) ? ' · verwaltet' : ''}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -158,12 +183,51 @@ export default function QuickAddModal() {
                 <label className="form-label">Ort (optional)</label>
                 <input type="text" className="form-input" placeholder="z. B. Dr. Weber, Schule" value={location} onChange={e => setLocation(e.target.value)} />
               </div>
+              {canManageFamily(activeMember) && shareableFamilies.length > 0 && (
+                <div className="shared-event-picker">
+                  <span>
+                    <HeartHandshake size={15} />
+                    Verbundene Familien einladen
+                  </span>
+                  <div>
+                    {shareableFamilies.map(relationship => {
+                      const family = relationship.otherFamily;
+                      const selected = recipientFamilyIds.includes(family.id);
+                      return (
+                        <button
+                          type="button"
+                          key={relationship.id}
+                          className={selected ? 'active' : ''}
+                          onClick={() => setRecipientFamilyIds(previous =>
+                            selected
+                              ? previous.filter(id => id !== family.id)
+                              : [...previous, family.id]
+                          )}
+                        >
+                          <span>{family.familyName.slice(0, 1)}</span>
+                          {family.familyName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <small>
+                    Der Termin erscheint bei allen ausgewählten Familien,
+                    private Termine bleiben getrennt.
+                  </small>
+                </div>
+              )}
             </>
           )}
 
           {/* Shopping Fields */}
           {type === 'shopping' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: taskIsForManagedProfile ? '1fr' : '1fr 1fr',
+                gap: 12
+              }}
+            >
               <div className="form-group">
                 <label className="form-label">Kategorie</label>
                 <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
@@ -189,14 +253,19 @@ export default function QuickAddModal() {
                 <label className="form-label">Zugewiesen an</label>
                 <select className="form-select" value={memberId} onChange={e => setMemberId(e.target.value)}>
                   {members.map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
+                    <option key={m.id} value={m.id}>
+                      {m.name} ({getPositionLabel(m)}
+                      {isManagedProfile(m) ? ', verwaltet' : ''})
+                    </option>
                   ))}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Sterne-Punkte</label>
-                <input type="number" min="5" max="100" step="5" className="form-input" value={stars} onChange={e => setStars(e.target.value)} />
-              </div>
+              {!taskIsForManagedProfile && (
+                <div className="form-group">
+                  <label className="form-label">Sterne-Punkte</label>
+                  <input type="number" min="5" max="100" step="5" className="form-input" value={stars} onChange={e => setStars(e.target.value)} />
+                </div>
+              )}
             </div>
           )}
 

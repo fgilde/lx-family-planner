@@ -11,7 +11,10 @@ import {
   Users
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
-import { getPositionLabel } from '../../constants/roles';
+import {
+  getPositionLabel,
+  isManagedProfile
+} from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
@@ -38,6 +41,11 @@ export default function FamilyLoginScreen({ onStartOnboarding }) {
     () => familiesList.find(family => family.id === selectedFamilyId),
     [familiesList, selectedFamilyId]
   );
+  const loginMembers = useMemo(
+    () => members.filter(member => !isManagedProfile(member)),
+    [members]
+  );
+  const managedProfilesCount = members.length - loginMembers.length;
   const selectedMember = members.find(member => member.id === selectedMemberId);
   const isProfileStep = authStatus === 'profile-required';
 
@@ -109,7 +117,13 @@ export default function FamilyLoginScreen({ onStartOnboarding }) {
             />
             <div>
               <strong>{familyAccount?.familyName}</strong>
-              <span>{members.length} Profile verbunden</span>
+              <span>
+                {loginMembers.length}{' '}
+                {loginMembers.length === 1 ? 'Profil' : 'Profile'} mit Zugang
+                {managedProfilesCount > 0
+                  ? ` · ${managedProfilesCount} verwaltet`
+                  : ''}
+              </span>
             </div>
           </div>
         </section>
@@ -129,7 +143,7 @@ export default function FamilyLoginScreen({ onStartOnboarding }) {
 
             <form onSubmit={handleProfileLogin}>
               <div className="profile-choice-grid">
-                {members.map(member => (
+                {loginMembers.map(member => (
                   <button
                     type="button"
                     key={member.id}
@@ -252,7 +266,8 @@ export default function FamilyLoginScreen({ onStartOnboarding }) {
                   <span>
                     <strong>{family.familyName}</strong>
                     <small>
-                      {family.badge || 'Familie'} · {family.membersCount || 0} Profile
+                      {family.badge || 'Familie'} · {family.membersCount || 0}{' '}
+                      {family.membersCount === 1 ? 'Profil' : 'Profile'}
                     </small>
                   </span>
                 </button>

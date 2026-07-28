@@ -28,6 +28,9 @@ export default function ToastNotification({ toast, onClose }) {
     info: '#2563eb'
   };
 
+  const toastTextColor = '#17352f';
+  const toastMutedColor = '#48645d';
+
   return (
     <div
       style={{
@@ -52,11 +55,11 @@ export default function ToastNotification({ toast, onClose }) {
 
       <div style={{ flex: 1 }}>
         {toast.title && (
-          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: 2 }}>
+          <div style={{ fontWeight: 800, fontSize: '0.95rem', color: toastTextColor, marginBottom: 2 }}>
             {toast.title}
           </div>
         )}
-        <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
+        <div style={{ fontSize: '0.9rem', color: toastMutedColor, lineHeight: 1.4 }}>
           {toast.message}
         </div>
       </div>
@@ -66,7 +69,7 @@ export default function ToastNotification({ toast, onClose }) {
         style={{
           background: 'none',
           border: 'none',
-          color: 'var(--text-muted)',
+          color: toastMutedColor,
           cursor: 'pointer',
           padding: 4
         }}

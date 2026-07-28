@@ -15,7 +15,7 @@ import { compressImageDataUrl } from '../../utils/imageCompressor';
 import { DEFAULT_FAMILY_AVATAR } from '../../utils/imageFallback';
 
 export default function FamilyEditModal({ family, isOpen, onClose }) {
-  const { updateFamilyAccount, deleteFamily } = useFamily();
+  const { appVersion, updateFamilyAccount, deleteFamily } = useFamily();
   const [familyName, setFamilyName] = useState('');
   const [badge, setBadge] = useState('');
   const [familyAvatar, setFamilyAvatar] = useState('');
@@ -184,6 +184,11 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
                 />
               </div>
             </label>
+
+            <div className="family-version-strip">
+              <span>LX Family Planner</span>
+              <strong>Version {appVersion}</strong>
+            </div>
 
             <div className="modal-actions family-settings-actions">
               <button className="auth-primary" disabled={busy}>

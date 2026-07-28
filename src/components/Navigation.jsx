@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFamily } from '../context/FamilyContext';
-import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint } from 'lucide-react';
+import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake } from 'lucide-react';
 import { canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
 
 export default function Navigation({ onOpenFamilyTree }) {
@@ -34,12 +34,14 @@ export default function Navigation({ onOpenFamilyTree }) {
     { id: 'shopping', label: 'Bring! Einkauf', icon: ShoppingBag, badge: shoppingCount > 0 ? shoppingCount : null },
     { id: 'meals', label: 'Essensplan', icon: UtensilsCrossed },
     { id: 'tasks', label: 'Aufgaben & Sterne', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : null },
+    { id: 'family-life', label: 'Familienreise', icon: HeartHandshake },
     { id: 'board', label: 'Pinnwand', icon: Pin }
   ];
 
   const childTabs = [
     { id: 'dashboard', label: 'Mein Abenteuer', icon: UserCheck },
     { id: 'tasks', label: 'Missionen & Sterne', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : null },
+    { id: 'family-life', label: 'Meine Reise', icon: HeartHandshake },
     { id: 'calendar', label: 'Familienkalender', icon: Calendar },
     { id: 'chat', label: 'Familienfunk', icon: MessageSquare },
     { id: 'board', label: 'Pinnwand', icon: Pin }

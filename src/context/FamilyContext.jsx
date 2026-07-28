@@ -16,6 +16,7 @@ import {
   subscribeBrowser,
   webPushCapability
 } from '../hooks/useWebNotifications';
+import { APP_VERSION } from '../appVersion';
 
 const FamilyContext = createContext(null);
 
@@ -31,7 +32,16 @@ const EMPTY_RESOURCES = {
   familyTree: [],
   dashboardLinks: [],
   trashEvents: [],
-  moodCheckins: []
+  moodCheckins: [],
+  dailyRoutines: [],
+  savingsGoals: [],
+  pocketMoneyTransactions: [],
+  schoolItems: [],
+  familyPolls: [],
+  encouragements: [],
+  familyMissions: [],
+  familySettings: [],
+  kidProfiles: []
 };
 const EMPTY_INTEGRATIONS = {
   bring: { connected: false },
@@ -44,6 +54,11 @@ const EMPTY_INTEGRATIONS = {
       moodHelp: true,
       includeMessageText: false
     }
+  },
+  homeAssistant: {
+    connected: false,
+    enabled: false,
+    selectedEntities: []
   }
 };
 
@@ -149,6 +164,10 @@ export function FamilyProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [integrations, setIntegrations] = useState(EMPTY_INTEGRATIONS);
+  const [appVersion, setAppVersion] = useState(APP_VERSION);
+  const [releaseNotes, setReleaseNotes] = useState(null);
+  const [homeAssistantEntities, setHomeAssistantEntities] = useState([]);
+  const [homeAssistantLoading, setHomeAssistantLoading] = useState(false);
   const [webPush, setWebPush] = useState(initialWebPushState);
   const [bringCatalog, setBringCatalog] = useState({
     sections: [],
@@ -201,6 +220,8 @@ export function FamilyProvider({ children }) {
       Number(data.unreadNotificationCount || 0)
     );
     setIntegrations(data.integrations || EMPTY_INTEGRATIONS);
+    setAppVersion(data.appVersion || APP_VERSION);
+    setReleaseNotes(data.releaseNotes || null);
     setActiveMemberIdState(data.activeMemberId || '');
     versionRef.current = Number(data.version || 0);
   }, []);
@@ -222,6 +243,8 @@ export function FamilyProvider({ children }) {
         setNotifications([]);
         setUnreadNotificationCount(0);
         setIntegrations(EMPTY_INTEGRATIONS);
+        setReleaseNotes(null);
+        setHomeAssistantEntities([]);
         setWebPush(initialWebPushState());
       } else if (!silent) {
         showToast('Aktualisierung fehlgeschlagen', error.message, 'error');
@@ -229,6 +252,39 @@ export function FamilyProvider({ children }) {
       return null;
     }
   }, [applyBootstrap, showToast]);
+
+  const refreshHomeAssistantStates = useCallback(async ({
+    silent = false
+  } = {}) => {
+    if (
+      authStatus !== 'authenticated' ||
+      !integrations.homeAssistant?.connected ||
+      integrations.homeAssistant?.enabled === false
+    ) {
+      setHomeAssistantEntities([]);
+      return [];
+    }
+    setHomeAssistantLoading(true);
+    try {
+      const data = await apiRequest(
+        '/api/integrations/home-assistant/states'
+      );
+      setHomeAssistantEntities(data.entities || []);
+      return data.entities || [];
+    } catch (error) {
+      if (!silent) {
+        showToast('Hausstatus nicht erreichbar', error.message, 'warning');
+      }
+      return [];
+    } finally {
+      setHomeAssistantLoading(false);
+    }
+  }, [
+    authStatus,
+    integrations.homeAssistant?.connected,
+    integrations.homeAssistant?.enabled,
+    showToast
+  ]);
 
   const refreshNotifications = useCallback(async ({ silent = false } = {}) => {
     if (authStatus !== 'authenticated' || !activeMemberIdState) {
@@ -474,12 +530,47 @@ export function FamilyProvider({ children }) {
         liveRefreshRef.current = false;
       }
     };
+    const onHomeAssistantUpdate = () => {
+      void refreshHomeAssistantStates({ silent: true });
+    };
     source.addEventListener('family-update', onFamilyUpdate);
+    source.addEventListener(
+      'home-assistant-update',
+      onHomeAssistantUpdate
+    );
     return () => {
       source.removeEventListener('family-update', onFamilyUpdate);
+      source.removeEventListener(
+        'home-assistant-update',
+        onHomeAssistantUpdate
+      );
       source.close();
     };
-  }, [authStatus, refreshBootstrap]);
+  }, [authStatus, refreshBootstrap, refreshHomeAssistantStates]);
+
+  useEffect(() => {
+    if (
+      authStatus !== 'authenticated' ||
+      !integrations.homeAssistant?.connected ||
+      integrations.homeAssistant?.enabled === false
+    ) {
+      setHomeAssistantEntities([]);
+      return undefined;
+    }
+    void refreshHomeAssistantStates({ silent: true });
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void refreshHomeAssistantStates({ silent: true });
+      }
+    }, 45_000);
+    return () => window.clearInterval(timer);
+  }, [
+    authStatus,
+    integrations.homeAssistant?.connected,
+    integrations.homeAssistant?.enabled,
+    integrations.homeAssistant?.updatedAt,
+    refreshHomeAssistantStates
+  ]);
 
   useEffect(() => {
     const nextTheme = activeMember?.theme || theme || 'light';
@@ -557,6 +648,8 @@ export function FamilyProvider({ children }) {
     setNotifications([]);
     setUnreadNotificationCount(0);
     setIntegrations(EMPTY_INTEGRATIONS);
+    setReleaseNotes(null);
+    setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
     setAuthStatus('authenticated');
     await refreshPublicFamilies();
@@ -579,10 +672,36 @@ export function FamilyProvider({ children }) {
     setNotifications([]);
     setUnreadNotificationCount(0);
     setIntegrations(EMPTY_INTEGRATIONS);
+    setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
     setActiveTab('dashboard');
     localStorage.removeItem('lx_active_member');
   }, []);
+
+  const acknowledgeReleaseNotes = useCallback(async () => {
+    if (!releaseNotes) return true;
+    try {
+      const data = await apiRequest('/api/release-notes/acknowledge', {
+        method: 'POST'
+      });
+      if (data.member) {
+        setMembers(previous =>
+          previous.map(member =>
+            member.id === data.member.id ? data.member : member
+          )
+        );
+      }
+      setReleaseNotes(null);
+      return true;
+    } catch (error) {
+      showToast(
+        'Noch nicht gespeichert',
+        'Die Neuigkeiten konnten nicht als gelesen markiert werden. Bitte versuche es noch einmal.',
+        'warning'
+      );
+      return false;
+    }
+  }, [releaseNotes, showToast]);
 
   const setTheme = useCallback(async nextTheme => {
     setThemeState(nextTheme);
@@ -970,6 +1089,27 @@ export function FamilyProvider({ children }) {
 
   const addEvent = useCallback(eventData =>
     withActionError(async () => {
+      const recipientFamilyIds = Array.isArray(eventData.recipientFamilyIds)
+        ? eventData.recipientFamilyIds
+        : [];
+      if (recipientFamilyIds.length) {
+        const data = await apiRequest('/api/family/shared-events', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: makeId('shared-event'),
+            household: 'familie',
+            ...eventData,
+            recipientFamilyIds
+          })
+        });
+        await refreshBootstrap({ silent: true });
+        showToast(
+          'Familientermin geteilt',
+          `"${data.event.title}" ist bei den eingeladenen Familien sichtbar.`,
+          'success'
+        );
+        return data.event;
+      }
       const event = await createResource('events', {
         id: makeId('evt'),
         household: activeHouseholdState,
@@ -977,13 +1117,39 @@ export function FamilyProvider({ children }) {
       });
       showToast('Termin hinzugefügt', `"${event.title}" steht jetzt im Kalender.`, 'success');
       return event;
-    }), [activeHouseholdState, createResource, showToast, withActionError]);
+    }), [
+      activeHouseholdState,
+      createResource,
+      refreshBootstrap,
+      showToast,
+      withActionError
+    ]);
 
   const deleteEvent = useCallback(eventId =>
     withActionError(async () => {
+      const event = resources.events.find(item => item.id === eventId);
+      if (event?.sharedEventId) {
+        await apiRequest(
+          `/api/family/shared-events/${event.sharedEventId}`,
+          { method: 'DELETE' }
+        );
+        await refreshBootstrap({ silent: true });
+        showToast(
+          'Gemeinsamer Termin gelöscht',
+          'Der Termin wurde bei allen eingeladenen Familien entfernt.',
+          'info'
+        );
+        return;
+      }
       await removeResource('events', eventId);
       showToast('Termin gelöscht', 'Der Termin wurde entfernt.', 'info');
-    }), [removeResource, showToast, withActionError]);
+    }), [
+      refreshBootstrap,
+      removeResource,
+      resources.events,
+      showToast,
+      withActionError
+    ]);
 
   const importICS = useCallback(file => {
     const reader = new FileReader();
@@ -1647,6 +1813,105 @@ export function FamilyProvider({ children }) {
       return true;
     }), [showToast, withActionError]);
 
+  const setupHomeAssistant = useCallback(payload =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/integrations/home-assistant/setup',
+        {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        }
+      );
+      setIntegrations(previous => ({
+        ...previous,
+        homeAssistant: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Home Assistant verbunden',
+        `${data.entities?.length || 0} Geräte und Sensoren wurden gefunden.`,
+        'success'
+      );
+      return data;
+    }, 'Home Assistant konnte nicht verbunden werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const fetchHomeAssistantEntities = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/integrations/home-assistant/entities'
+      );
+      return data.entities || [];
+    }, 'Geräteliste konnte nicht geladen werden'), [withActionError]);
+
+  const updateHomeAssistant = useCallback(changes =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/home-assistant', {
+        method: 'PATCH',
+        body: JSON.stringify(changes)
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        homeAssistant: data.integration
+      }));
+      versionRef.current = Number(data.version || versionRef.current);
+      await refreshHomeAssistantStates({ silent: true });
+      showToast(
+        'Haus-Dashboard gespeichert',
+        'Freigaben und Geräteauswahl sind jetzt aktiv.',
+        'success'
+      );
+      return data.integration;
+    }, 'Home-Assistant-Einstellungen konnten nicht gespeichert werden'), [
+    refreshHomeAssistantStates,
+    showToast,
+    withActionError
+  ]);
+
+  const testHomeAssistant = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/integrations/home-assistant/test',
+        { method: 'POST' }
+      );
+      showToast('Verbindung steht', data.message, 'success');
+      return data;
+    }, 'Home Assistant antwortet nicht'), [showToast, withActionError]);
+
+  const disconnectHomeAssistant = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/home-assistant', {
+        method: 'DELETE'
+      });
+      setIntegrations(previous => ({
+        ...previous,
+        homeAssistant: data.integration
+      }));
+      setHomeAssistantEntities([]);
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Home Assistant getrennt',
+        'Der Zugriffsschlüssel wurde aus dem Familienplaner entfernt.',
+        'info'
+      );
+      return true;
+    }), [showToast, withActionError]);
+
+  const callHomeAssistantAction = useCallback((entityId, action, payload = {}) =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        '/api/integrations/home-assistant/actions',
+        {
+          method: 'POST',
+          body: JSON.stringify({ entityId, action, ...payload })
+        }
+      );
+      setHomeAssistantEntities(data.entities || []);
+      return data.entities || [];
+    }, 'Gerät konnte nicht gesteuert werden'), [withActionError]);
+
   const addChatMessage = useCallback(message =>
     withActionError(() => createResource('chatMessages', {
       id: makeId('message'),
@@ -1748,6 +2013,120 @@ export function FamilyProvider({ children }) {
       return true;
     }, 'Verbindung konnte nicht entfernt werden'), [showToast, withActionError]);
 
+  const updateFamilyRelationshipGrants = useCallback(
+    (relationshipId, grants) =>
+      withActionError(async () => {
+        const data = await apiRequest(
+          `/api/family/relationships/${relationshipId}/grants`,
+          {
+            method: 'PATCH',
+            body: JSON.stringify(grants)
+          }
+        );
+        setFamilyRelationships(data.relationships || []);
+        versionRef.current = Number(data.version || versionRef.current);
+        showToast(
+          'Familienfreigaben gespeichert',
+          'Die andere Familie sieht sofort, was sie mitplanen darf.',
+          'success'
+        );
+        return data.relationship;
+      }, 'Familienfreigaben konnten nicht gespeichert werden'),
+    [showToast, withActionError]
+  );
+
+  const addRelatedFamilyTask = useCallback((relationshipId, task) =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/family/relationships/${relationshipId}/tasks`,
+        {
+          method: 'POST',
+          body: JSON.stringify(task)
+        }
+      );
+      showToast(
+        'Aufgabe verschickt',
+        `"${data.task.title}" ist jetzt beim Enkelkind sichtbar.`,
+        'success'
+      );
+      return data.task;
+    }, 'Aufgabe konnte nicht verschickt werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const addRelatedFamilyReward = useCallback((relationshipId, reward) =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/family/relationships/${relationshipId}/rewards`,
+        {
+          method: 'POST',
+          body: JSON.stringify(reward)
+        }
+      );
+      showToast(
+        'Belohnung angelegt',
+        `"${data.reward.title}" wartet jetzt beim Enkelkind.`,
+        'success'
+      );
+      return data.reward;
+    }, 'Belohnung konnte nicht angelegt werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const addRelatedFamilyPocketMoney = useCallback(
+    (relationshipId, transaction) =>
+      withActionError(async () => {
+        const data = await apiRequest(
+          `/api/family/relationships/${relationshipId}/pocket-money`,
+          {
+            method: 'POST',
+            body: JSON.stringify(transaction)
+          }
+        );
+        showToast(
+          'Taschengeld gebucht',
+          'Die Buchung ist jetzt im Familienkonto des Enkelkindes sichtbar.',
+          'success'
+        );
+        return data.transaction;
+      }, 'Taschengeld konnte nicht gebucht werden'),
+    [showToast, withActionError]
+  );
+
+  const submitProblemReport = useCallback(report =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/problem-reports', {
+        method: 'POST',
+        body: JSON.stringify(report)
+      });
+      showToast(
+        'Danke für deine Meldung',
+        'Die Problemdetails wurden sicher im Familienplaner gespeichert.',
+        'success'
+      );
+      return data.report;
+    }, 'Meldung konnte nicht gespeichert werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const fetchProblemReports = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/problem-reports');
+      return data.reports || [];
+    }, 'Problemmeldungen konnten nicht geladen werden'), [withActionError]);
+
+  const updateProblemReport = useCallback((reportId, status) =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/problem-reports/${reportId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status })
+      });
+      return data.report;
+    }, 'Meldungsstatus konnte nicht geändert werden'), [withActionError]);
+
   const addDashboardLink = useCallback(link =>
     withActionError(async () => {
       const created = await createResource('dashboardLinks', {
@@ -1760,7 +2139,7 @@ export function FamilyProvider({ children }) {
         'success'
       );
       return created;
-    }, 'YouTube-Link konnte nicht gespeichert werden'), [
+    }, 'Medien-Widget konnte nicht gespeichert werden'), [
       createResource,
       showToast,
       withActionError
@@ -1777,6 +2156,169 @@ export function FamilyProvider({ children }) {
       return true;
     }), [removeResource, showToast, withActionError]);
 
+  const addFamilyLifeRecord = useCallback((type, record) =>
+    withActionError(async () => {
+      const prefixes = {
+        dailyRoutines: 'routine',
+        savingsGoals: 'saving',
+        schoolItems: 'school',
+        familyPolls: 'poll',
+        encouragements: 'encouragement',
+        familyMissions: 'family-mission',
+        familySettings: 'family-settings',
+        kidProfiles: 'kid-profile'
+      };
+      const created = await createResource(type, {
+        id: record.id || makeId(prefixes[type] || 'family-life'),
+        ...record
+      });
+      showToast(
+        'Gespeichert',
+        'Der Familienalltag wurde aktualisiert.',
+        'success'
+      );
+      return created;
+    }, 'Eintrag konnte nicht gespeichert werden'), [
+      createResource,
+      showToast,
+      withActionError
+    ]);
+
+  const updateFamilyLifeRecord = useCallback((type, id, changes) =>
+    withActionError(async () => {
+      const updated = await patchResource(type, id, changes);
+      showToast('Aktualisiert', 'Die Änderung ist gespeichert.', 'success');
+      return updated;
+    }, 'Eintrag konnte nicht aktualisiert werden'), [
+      patchResource,
+      showToast,
+      withActionError
+    ]);
+
+  const deleteFamilyLifeRecord = useCallback((type, id) =>
+    withActionError(async () => {
+      await removeResource(type, id);
+      showToast('Entfernt', 'Der Eintrag wurde gelöscht.', 'info');
+      return true;
+    }, 'Eintrag konnte nicht gelöscht werden'), [
+      removeResource,
+      showToast,
+      withActionError
+    ]);
+
+  const toggleRoutineStep = useCallback((routineId, stepId, date) =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/routines/${routineId}/toggle`, {
+        method: 'POST',
+        body: JSON.stringify({ stepId, date })
+      });
+      updateResourceState('dailyRoutines', data.record);
+      versionRef.current = Number(data.version || versionRef.current);
+      if (data.completedToday) {
+        showToast(
+          'Routine geschafft!',
+          'Alle Schritte leuchten – großartig gemacht.',
+          'star'
+        );
+      }
+      return data.record;
+    }, 'Routine konnte nicht aktualisiert werden'), [
+      showToast,
+      updateResourceState,
+      withActionError
+    ]);
+
+  const toggleSchoolItem = useCallback(itemId =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/school/${itemId}/toggle`, {
+        method: 'POST'
+      });
+      updateResourceState('schoolItems', data.record);
+      versionRef.current = Number(data.version || versionRef.current);
+      return data.record;
+    }, 'Schuleintrag konnte nicht aktualisiert werden'), [
+      updateResourceState,
+      withActionError
+    ]);
+
+  const voteFamilyPoll = useCallback((pollId, optionId) =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/polls/${pollId}/vote`, {
+        method: 'POST',
+        body: JSON.stringify({ optionId })
+      });
+      updateResourceState('familyPolls', data.record);
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast('Stimme gezählt', 'Deine Familie sieht jetzt deine Wahl.', 'success');
+      return data.record;
+    }, 'Abstimmung konnte nicht gespeichert werden'), [
+      showToast,
+      updateResourceState,
+      withActionError
+    ]);
+
+  const toggleFamilyMission = useCallback((missionId, memberId = '') =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/family-missions/${missionId}/toggle`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ memberId })
+        }
+      );
+      updateResourceState('familyMissions', data.record);
+      versionRef.current = Number(data.version || versionRef.current);
+      return data.record;
+    }, 'Familienmission konnte nicht aktualisiert werden'), [
+      updateResourceState,
+      withActionError
+    ]);
+
+  const addPocketMoneyTransaction = useCallback(payload =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/pocket-money/transactions', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      updateResourceState('pocketMoneyTransactions', data.transaction);
+      setMembers(previous =>
+        previous.map(member =>
+          member.id === data.member.id ? data.member : member
+        )
+      );
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        data.transaction.starCost ? 'Sterne umgewandelt' : 'Taschengeld gebucht',
+        `${data.member.name}s Familienkonto ist aktuell.`,
+        'success'
+      );
+      return data.transaction;
+    }, 'Taschengeld konnte nicht gebucht werden'), [
+      showToast,
+      updateResourceState,
+      withActionError
+    ]);
+
+  const updateKidProfile = useCallback((memberId, changes) =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/kids/${memberId}/style`, {
+        method: 'PUT',
+        body: JSON.stringify(changes)
+      });
+      updateResourceState('kidProfiles', data.record);
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Deine Welt ist bereit',
+        'Dein Begleiter reist jetzt mit dir.',
+        'star'
+      );
+      return data.record;
+    }, 'Kinderwelt konnte nicht gespeichert werden'), [
+      showToast,
+      updateResourceState,
+      withActionError
+    ]);
+
   const bringCredentials = useMemo(() => ({
     mail: integrations.bring?.email || '',
     listUuid: integrations.bring?.listUuid || '',
@@ -1792,6 +2334,9 @@ export function FamilyProvider({ children }) {
   );
 
   const value = {
+    appVersion,
+    releaseNotes,
+    acknowledgeReleaseNotes,
     authStatus,
     loginFamily,
     registerFamily,
@@ -1840,6 +2385,16 @@ export function FamilyProvider({ children }) {
     updateGotifySettings,
     testGotify,
     disconnectGotify,
+    homeAssistantIntegration: integrations.homeAssistant,
+    homeAssistantEntities,
+    homeAssistantLoading,
+    setupHomeAssistant,
+    fetchHomeAssistantEntities,
+    updateHomeAssistant,
+    testHomeAssistant,
+    disconnectHomeAssistant,
+    refreshHomeAssistantStates,
+    callHomeAssistantAction,
     webPush,
     refreshWebPushStatus,
     enableWebPush,
@@ -1898,6 +2453,13 @@ export function FamilyProvider({ children }) {
     requestFamilyRelationship,
     respondFamilyRelationship,
     removeFamilyRelationship,
+    updateFamilyRelationshipGrants,
+    addRelatedFamilyTask,
+    addRelatedFamilyReward,
+    addRelatedFamilyPocketMoney,
+    submitProblemReport,
+    fetchProblemReports,
+    updateProblemReport,
     dashboardLinks: resources.dashboardLinks,
     addDashboardLink,
     deleteDashboardLink,
@@ -1907,6 +2469,24 @@ export function FamilyProvider({ children }) {
     deleteTrashEvent,
     moodCheckins: resources.moodCheckins,
     addMoodCheckin,
+    dailyRoutines: resources.dailyRoutines,
+    savingsGoals: resources.savingsGoals,
+    pocketMoneyTransactions: resources.pocketMoneyTransactions,
+    schoolItems: resources.schoolItems,
+    familyPolls: resources.familyPolls,
+    encouragements: resources.encouragements,
+    familyMissions: resources.familyMissions,
+    familySettings: resources.familySettings,
+    kidProfiles: resources.kidProfiles,
+    addFamilyLifeRecord,
+    updateFamilyLifeRecord,
+    deleteFamilyLifeRecord,
+    toggleRoutineStep,
+    toggleSchoolItem,
+    voteFamilyPoll,
+    toggleFamilyMission,
+    addPocketMoneyTransaction,
+    updateKidProfile,
     isProfileModalOpen,
     setIsProfileModalOpen,
     isQuickAddOpen,

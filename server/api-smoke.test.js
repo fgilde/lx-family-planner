@@ -32,7 +32,8 @@ const [
   import('../src/utils/dashboardLayout.js')
 ]);
 
-const server = createApp().listen(0, '127.0.0.1');
+const app = createApp();
+const server = app.listen(0, '127.0.0.1');
 await new Promise((resolve, reject) => {
   server.once('listening', resolve);
   server.once('error', reject);
@@ -88,6 +89,75 @@ await new Promise((resolve, reject) => {
 });
 const gotifyAddress = gotifyServer.address();
 const gotifyBaseUrl = `http://127.0.0.1:${gotifyAddress.port}`;
+const homeAssistantActions = [];
+const homeAssistantStates = [
+  {
+    entity_id: 'light.kitchen',
+    state: 'off',
+    attributes: {
+      friendly_name: 'Küchenlicht',
+      icon: 'mdi:lightbulb'
+    },
+    last_changed: '2026-07-28T08:00:00Z',
+    last_updated: '2026-07-28T08:00:00Z'
+  },
+  {
+    entity_id: 'sensor.living_temperature',
+    state: '21.4',
+    attributes: {
+      friendly_name: 'Wohnzimmer',
+      unit_of_measurement: '°C',
+      device_class: 'temperature'
+    },
+    last_changed: '2026-07-28T08:00:00Z',
+    last_updated: '2026-07-28T08:00:00Z'
+  }
+];
+const homeAssistantServer = createServer(async (req, res) => {
+  if (req.headers.authorization !== 'Bearer ha-test-token') {
+    res.statusCode = 401;
+    res.end(JSON.stringify({ message: 'unauthorized' }));
+    return;
+  }
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+  res.setHeader('content-type', 'application/json');
+  if (req.method === 'GET' && req.url === '/api/') {
+    res.end(JSON.stringify({ message: 'API running.' }));
+    return;
+  }
+  if (req.method === 'GET' && req.url === '/api/states') {
+    res.end(JSON.stringify(homeAssistantStates));
+    return;
+  }
+  if (req.method === 'GET' && req.url === '/api/states/light.kitchen') {
+    res.end(JSON.stringify(homeAssistantStates[0]));
+    return;
+  }
+  if (
+    req.method === 'POST' &&
+    req.url === '/api/services/light/turn_on'
+  ) {
+    homeAssistantActions.push(body);
+    homeAssistantStates[0] = {
+      ...homeAssistantStates[0],
+      state: 'on'
+    };
+    res.end(JSON.stringify([homeAssistantStates[0]]));
+    return;
+  }
+  res.statusCode = 404;
+  res.end(JSON.stringify({ message: 'not found' }));
+});
+homeAssistantServer.listen(0, '127.0.0.1');
+await new Promise((resolve, reject) => {
+  homeAssistantServer.once('listening', resolve);
+  homeAssistantServer.once('error', reject);
+});
+const homeAssistantAddress = homeAssistantServer.address();
+const homeAssistantBaseUrl =
+  `http://127.0.0.1:${homeAssistantAddress.port}`;
 const calendarFeed = [
   'BEGIN:VCALENDAR',
   'VERSION:2.0',
@@ -139,10 +209,12 @@ async function request(pathname, options = {}, expectedStatus = 200) {
 }
 
 after(async () => {
+  app.locals.stopHomeAssistantSockets?.();
   await Promise.all([
     new Promise(resolve => server.close(resolve)),
     new Promise(resolve => gotifyServer.close(resolve)),
-    new Promise(resolve => calendarServer.close(resolve))
+    new Promise(resolve => calendarServer.close(resolve)),
+    new Promise(resolve => homeAssistantServer.close(resolve))
   ]);
   database.close();
   fs.rmSync(testDirectory, { recursive: true, force: true });
@@ -272,6 +344,7 @@ test('dashboard layouts remain complete, ordered and never fully hidden', () => 
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
+  assert.equal(health.body.version, '1.2.0');
 
   const password = 'qa-family-4711';
   const registration = await request(
@@ -308,11 +381,45 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
+  assert.equal(bootstrap.body.appVersion, '1.2.0');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.2.0');
+  assert.ok(bootstrap.body.releaseNotes.highlights.length >= 4);
   assert.equal(bootstrap.body.members.length, 5);
   assert.equal(
     bootstrap.body.family.grandparentsHouseholdEnabled,
     true
   );
+
+  const acknowledgedReleaseNotes = await request(
+    '/api/release-notes/acknowledge',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders
+    }
+  );
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.2.0');
+  assert.equal(
+    acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
+    '1.2.0'
+  );
+  const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(bootstrapAfterReleaseNotes.body.releaseNotes, null);
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: secondAdult.id })
+  });
+  const secondAdultBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.2.0');
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: adult.id })
+  });
 
   const updatedFamilySettings = await request('/api/family', {
     method: 'PATCH',
@@ -322,6 +429,87 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(
     updatedFamilySettings.body.family.grandparentsHouseholdEnabled,
     false
+  );
+
+  const managedProfileResponse = await request(
+    '/api/members',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        name: 'Oma ohne Zugang',
+        position: 'oma',
+        role: 'senior',
+        isManaged: true,
+        pin: '1234'
+      })
+    },
+    201
+  );
+  const managedProfile = managedProfileResponse.body.member;
+  assert.equal(managedProfile.isManaged, true);
+  assert.equal(managedProfile.hasPin, false);
+
+  await request(
+    '/api/auth/member',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ memberId: managedProfile.id })
+    },
+    403
+  );
+  await request(
+    `/api/members/${adult.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ isManaged: true })
+    },
+    409
+  );
+
+  const managedEvent = await request(
+    '/api/resources/events',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Termin für Oma',
+        date: '2026-08-03',
+        time: '10:30',
+        memberId: managedProfile.id
+      })
+    },
+    201
+  );
+  assert.equal(managedEvent.body.record.memberId, managedProfile.id);
+
+  const managedTask = await request(
+    '/api/resources/tasks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Unterlagen mitnehmen',
+        memberId: managedProfile.id,
+        stars: 50
+      })
+    },
+    201
+  );
+  assert.equal(managedTask.body.record.memberId, managedProfile.id);
+  assert.equal(managedTask.body.record.stars, 0);
+  assert.deepEqual(managedTask.body.record.rotationMemberIds, []);
+
+  const managedBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(
+    managedBootstrap.body.members.find(
+      member => member.id === managedProfile.id
+    )?.isManaged,
+    true
   );
 
   const liveResponse = await fetch(`${baseUrl}/api/live`, {
@@ -438,6 +626,18 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     403
   );
+  await request(
+    '/api/resources/chatMessages',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        text: 'Verwaltete Profile chatten nicht',
+        target: managedProfile.id
+      })
+    },
+    403
+  );
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -517,6 +717,24 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const childOneBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
+  assert.equal(
+    childOneBootstrap.body.members.some(
+      member => member.id === managedProfile.id
+    ),
+    false
+  );
+  assert.equal(
+    childOneBootstrap.body.resources.events.some(
+      event => event.memberId === managedProfile.id
+    ),
+    false
+  );
+  assert.equal(
+    childOneBootstrap.body.resources.tasks.some(
+      entry => entry.memberId === managedProfile.id
+    ),
+    false
+  );
   assert.equal(
     childOneBootstrap.body.resources.chatMessages.some(
       message => message.id === directMessage.body.record.id
@@ -688,6 +906,130 @@ test('family flow stays isolated, authorized and internally consistent', async (
     'Eine neue Nachricht ist da.'
   );
 
+  const homeAssistantSetup = await request(
+    '/api/integrations/home-assistant/setup',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        baseUrl: homeAssistantBaseUrl,
+        token: 'ha-test-token'
+      })
+    },
+    201
+  );
+  assert.equal(homeAssistantSetup.body.integration.connected, true);
+  assert.equal(homeAssistantSetup.body.entities.length, 2);
+  assert.equal(
+    Object.hasOwn(homeAssistantSetup.body.integration, 'token'),
+    false
+  );
+
+  const homeAssistantSelection = await request(
+    '/api/integrations/home-assistant',
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        selectedEntities: [
+          {
+            entityId: 'light.kitchen',
+            name: 'Küchenlicht',
+            allowControl: true,
+            profileIds: [childOne.id]
+          },
+          {
+            entityId: 'sensor.living_temperature',
+            name: 'Wohnzimmer',
+            allowControl: false,
+            profileIds: []
+          }
+        ]
+      })
+    }
+  );
+  assert.equal(
+    homeAssistantSelection.body.integration.selectedEntities.length,
+    2
+  );
+  const adultHomeStates = await request(
+    '/api/integrations/home-assistant/states',
+    { headers: authenticatedHeaders }
+  );
+  assert.equal(adultHomeStates.body.entities.length, 2);
+
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: childOne.id })
+  });
+  const childHomeStates = await request(
+    '/api/integrations/home-assistant/states',
+    { headers: authenticatedHeaders }
+  );
+  assert.deepEqual(
+    childHomeStates.body.entities.map(entity => entity.entityId),
+    ['light.kitchen']
+  );
+  const controlledLight = await request(
+    '/api/integrations/home-assistant/actions',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        entityId: 'light.kitchen',
+        action: 'turn_on'
+      })
+    }
+  );
+  assert.equal(controlledLight.body.entities[0].state, 'on');
+  assert.deepEqual(homeAssistantActions[0], {
+    entity_id: 'light.kitchen'
+  });
+
+  const problemReport = await request(
+    '/api/problem-reports',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        category: 'problem',
+        title: 'Kalenderknopf reagiert nicht',
+        description: 'Beim ersten Tippen passiert nichts.',
+        page: 'calendar',
+        clientInfo: 'Test Browser'
+      })
+    },
+    201
+  );
+  assert.equal(problemReport.body.report.appVersion, '1.2.0');
+  await request(
+    '/api/problem-reports',
+    { headers: authenticatedHeaders },
+    403
+  );
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({
+      memberId: adult.id,
+      familyPassword: password
+    })
+  });
+  const problemReports = await request('/api/problem-reports', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(problemReports.body.reports.length, 1);
+  const resolvedProblem = await request(
+    `/api/problem-reports/${problemReport.body.report.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ status: 'resolved' })
+    }
+  );
+  assert.equal(resolvedProblem.body.report.status, 'resolved');
+
   const pushStatus = await request('/api/push/status', {
     headers: authenticatedHeaders
   });
@@ -827,6 +1169,23 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   assert.equal(dashboardLink.body.record.kind, 'youtube');
 
+  const spotifyWidget = await request(
+    '/api/resources/dashboardLinks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        id: 'spotify-kind-eins',
+        memberId: childOne.id,
+        title: 'Tanzpause',
+        url: 'https://open.spotify.com/playlist/37i9dQZF1DX0Yxoavh5qJV'
+      })
+    },
+    201
+  );
+  assert.equal(spotifyWidget.body.record.kind, 'spotify');
+  assert.equal(spotifyWidget.body.record.color, '#1db954');
+
   await request(
     '/api/resources/dashboardLinks',
     {
@@ -847,14 +1206,29 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   assert.equal(reset.body.member.stars, 0);
 
+  const adultWithPoints = await request(`/api/members/${adult.id}`, {
+    method: 'PATCH',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ stars: 37 })
+  });
+  assert.equal(adultWithPoints.body.member.stars, 37);
+  const adultReset = await request(
+    `/api/admin/members/${adult.id}/reset-stars`,
+    { method: 'POST', headers: authenticatedHeaders }
+  );
+  assert.equal(adultReset.body.member.stars, 0);
+
   const clearedTasks = await request('/api/admin/tasks', {
     method: 'DELETE',
     headers: authenticatedHeaders,
     body: JSON.stringify({ memberId: childOne.id, completedOnly: true })
   });
   assert.equal(clearedTasks.body.deleted, 1);
-  assert.equal(clearedTasks.body.records.length, 1);
-  assert.equal(clearedTasks.body.records[0].dueDate, '2026-08-03');
+  const remainingChildTask = clearedTasks.body.records.find(
+    entry => entry.memberId === childOne.id
+  );
+  assert.equal(Boolean(remainingChildTask), true);
+  assert.equal(remainingChildTask.dueDate, '2026-08-03');
 
   const meal = await request(
     '/api/resources/meals',
@@ -887,6 +1261,12 @@ test('family flow stays isolated, authorized and internally consistent', async (
     childDashboard.body.resources.dashboardLinks[0].title,
     'Die Maus'
   );
+  assert.equal(
+    childDashboard.body.resources.dashboardLinks.some(
+      link => link.kind === 'spotify' && link.title === 'Tanzpause'
+    ),
+    true
+  );
   await request(
     '/api/resources/dashboardLinks',
     {
@@ -905,6 +1285,262 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders,
     body: JSON.stringify({ memberId: adult.id, familyPassword: password })
   });
+
+  const routine = await request(
+    '/api/resources/dailyRoutines',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        title: 'Morgenstart',
+        icon: '☀️',
+        timeOfDay: 'morning',
+        steps: [
+          { id: 'wake-up', title: 'Aufstehen', icon: '1' },
+          { id: 'brush', title: 'Zähne putzen', icon: '2' }
+        ]
+      })
+    },
+    201
+  );
+  assert.equal(routine.body.record.steps.length, 2);
+
+  const schoolItem = await request(
+    '/api/resources/schoolItems',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        kind: 'homework',
+        title: 'Lesen Seite 12',
+        subject: 'Deutsch',
+        date: '2026-07-27'
+      })
+    },
+    201
+  );
+  const poll = await request(
+    '/api/resources/familyPolls',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        question: 'Was essen wir?',
+        options: [
+          { id: 'pizza', label: 'Pizza', emoji: '🍕' },
+          { id: 'pasta', label: 'Nudeln', emoji: '🍝' }
+        ]
+      })
+    },
+    201
+  );
+  const mission = await request(
+    '/api/resources/familyMissions',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Gemeinsam den Tisch decken',
+        memberIds: [childOne.id, childTwo.id],
+        icon: '🤝'
+      })
+    },
+    201
+  );
+  await request(
+    '/api/resources/encouragements',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        message: 'Du schaffst das!',
+        icon: '💛'
+      })
+    },
+    201
+  );
+  await request(
+    '/api/resources/savingsGoals',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        title: 'Neues Fahrrad',
+        targetCents: 15000,
+        icon: '🚲'
+      })
+    },
+    201
+  );
+  const settings = await request(
+    '/api/resources/familySettings',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        id: 'family-settings',
+        quietHoursEnabled: true,
+        quietStart: '20:30',
+        quietEnd: '07:00',
+        mediaScheduleEnabled: true,
+        mediaStart: '15:00',
+        mediaEnd: '19:30',
+        emergencyContacts: [
+          {
+            id: 'doctor',
+            name: 'Kinderarzt',
+            phone: '0123 456789',
+            note: 'Impfpass mitnehmen'
+          }
+        ]
+      })
+    },
+    201
+  );
+  assert.equal(settings.body.record.quietStart, '20:30');
+  assert.equal(settings.body.record.emergencyContacts.length, 1);
+
+  const childWithStars = await request(`/api/members/${childOne.id}`, {
+    method: 'PATCH',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ stars: 40 })
+  });
+  assert.equal(childWithStars.body.member.stars, 40);
+  const pocketTransaction = await request(
+    '/api/pocket-money/transactions',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        amountCents: 250,
+        starCost: 20,
+        note: '20 Sterne umgewandelt'
+      })
+    },
+    201
+  );
+  assert.equal(pocketTransaction.body.transaction.amountCents, 250);
+  assert.equal(pocketTransaction.body.member.stars, 20);
+
+  const rotatingTask = await request(
+    '/api/resources/tasks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Spülmaschine',
+        memberId: childOne.id,
+        rotationMemberIds: [childOne.id, childTwo.id],
+        stars: 5,
+        dueDate: '2026-07-27',
+        repeatRule: 'daily'
+      })
+    },
+    201
+  );
+
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: childOne.id })
+  });
+  await request(
+    '/api/resources/dailyRoutines',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        title: 'Selbst angelegt',
+        steps: [{ id: 'unsafe', title: 'Nicht erlaubt' }]
+      })
+    },
+    403
+  );
+  const routineStep = await request(
+    `/api/routines/${routine.body.record.id}/toggle`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ stepId: 'wake-up' })
+    }
+  );
+  assert.equal(
+    routineStep.body.record.completions[
+      new Date().toLocaleDateString('en-CA')
+    ].includes('wake-up'),
+    true
+  );
+  const checkedSchoolItem = await request(
+    `/api/school/${schoolItem.body.record.id}/toggle`,
+    { method: 'POST', headers: authenticatedHeaders }
+  );
+  assert.equal(checkedSchoolItem.body.record.completed, true);
+  const voted = await request(
+    `/api/polls/${poll.body.record.id}/vote`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ optionId: 'pizza' })
+    }
+  );
+  assert.equal(voted.body.record.votes[childOne.id], 'pizza');
+  const missionProgress = await request(
+    `/api/family-missions/${mission.body.record.id}/toggle`,
+    { method: 'POST', headers: authenticatedHeaders }
+  );
+  assert.equal(
+    missionProgress.body.record.completedMemberIds.includes(childOne.id),
+    true
+  );
+  const kidStyle = await request(
+    `/api/kids/${childOne.id}/style`,
+    {
+      method: 'PUT',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ buddy: '🦊', heroTitle: 'Waldheld' })
+    }
+  );
+  assert.equal(kidStyle.body.record.buddy, '🦊');
+  await request(
+    `/api/tasks/${rotatingTask.body.record.id}/toggle`,
+    { method: 'POST', headers: authenticatedHeaders }
+  );
+
+  await request('/api/auth/member', {
+    method: 'POST',
+    headers: authenticatedHeaders,
+    body: JSON.stringify({ memberId: adult.id, familyPassword: password })
+  });
+  const rotated = await request(
+    `/api/tasks/${rotatingTask.body.record.id}/review`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ approved: true })
+    }
+  );
+  assert.equal(rotated.body.nextTask.memberId, childTwo.id);
+  assert.deepEqual(
+    rotated.body.nextTask.rotationMemberIds,
+    [childOne.id, childTwo.id]
+  );
+
+  const familyLifeBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(familyLifeBootstrap.body.resources.dailyRoutines.length, 1);
+  assert.equal(familyLifeBootstrap.body.resources.schoolItems.length, 1);
+  assert.equal(
+    familyLifeBootstrap.body.resources.pocketMoneyTransactions.length,
+    1
+  );
+  assert.equal(familyLifeBootstrap.body.resources.kidProfiles.length, 1);
 
   const secondPassword = 'qa-family-5722';
   const secondRegistration = await request(
@@ -972,6 +1608,179 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(
     acceptedRelationships.body.relationships[0].otherFamily.members[0].position,
     'mama'
+  );
+  const acceptedFromSecondFamily = await request(
+    '/api/family/relationships',
+    { headers: secondHeaders }
+  );
+  assert.equal(
+    acceptedFromSecondFamily.body.relationships[0].otherFamily.members.some(
+      member => member.id === managedProfile.id
+    ),
+    false
+  );
+
+  const familyGrants = await request(
+    `/api/family/relationships/${relationshipRequest.body.relationship.id}/grants`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        sharedCalendar: true,
+        tasks: true,
+        rewards: true,
+        pocketMoney: true
+      })
+    }
+  );
+  assert.equal(familyGrants.body.relationship.grantsToOther.tasks, true);
+
+  const secondFamilyCapabilities = await request(
+    '/api/family/relationships',
+    { headers: secondHeaders }
+  );
+  assert.equal(
+    secondFamilyCapabilities.body.relationships[0].grantsFromOther.tasks,
+    true
+  );
+
+  const sharedEvent = await request(
+    '/api/family/shared-events',
+    {
+      method: 'POST',
+      headers: secondHeaders,
+      body: JSON.stringify({
+        title: 'Familiengrillen',
+        date: '2026-08-16',
+        time: '16:00',
+        recipientFamilyIds: [registration.body.family.id]
+      })
+    },
+    201
+  );
+  assert.equal(sharedEvent.body.event.readOnly, false);
+  const sharedRecipientBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  const receivedSharedEvent =
+    sharedRecipientBootstrap.body.resources.events.find(
+      event => event.sharedEventId === sharedEvent.body.event.sharedEventId
+    );
+  assert.equal(receivedSharedEvent.readOnly, true);
+  assert.equal(
+    receivedSharedEvent.sharedOwnerFamilyName,
+    secondRegistration.body.family.familyName
+  );
+
+  const externalTask = await request(
+    `/api/family/relationships/${relationshipRequest.body.relationship.id}/tasks`,
+    {
+      method: 'POST',
+      headers: secondHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        title: 'Oma beim Kuchenbacken helfen',
+        dueDate: '2026-08-15',
+        stars: 25
+      })
+    },
+    201
+  );
+  assert.equal(externalTask.body.task.stars, 25);
+  assert.equal(
+    externalTask.body.task.createdByFamilyName,
+    secondRegistration.body.family.familyName
+  );
+
+  const externalReward = await request(
+    `/api/family/relationships/${relationshipRequest.body.relationship.id}/rewards`,
+    {
+      method: 'POST',
+      headers: secondHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        title: 'Zoobesuch mit Oma',
+        costStars: 80,
+        icon: 'custom',
+        iconImage:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+      })
+    },
+    201
+  );
+  assert.equal(externalReward.body.reward.forMemberId, childOne.id);
+  assert.equal(externalReward.body.reward.icon, 'custom');
+  assert.match(externalReward.body.reward.iconImage, /^data:image\/png;base64,/);
+
+  await request(
+    `/api/family/relationships/${relationshipRequest.body.relationship.id}/rewards`,
+    {
+      method: 'POST',
+      headers: secondHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        title: 'Unsicheres Symbol',
+        costStars: 20,
+        icon: 'custom',
+        iconImage:
+          'data:image/svg+xml;base64,PHN2ZyBvbmxvYWQ9ImFsZXJ0KDEpIj48L3N2Zz4='
+      })
+    },
+    400
+  );
+
+  const externalPocketMoney = await request(
+    `/api/family/relationships/${relationshipRequest.body.relationship.id}/pocket-money`,
+    {
+      method: 'POST',
+      headers: secondHeaders,
+      body: JSON.stringify({
+        memberId: childOne.id,
+        amountCents: 500,
+        note: 'Feriengeld'
+      })
+    },
+    201
+  );
+  assert.equal(externalPocketMoney.body.transaction.amountCents, 500);
+
+  const networkBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(
+    networkBootstrap.body.resources.tasks.some(
+      entry => entry.id === externalTask.body.task.id
+    ),
+    true
+  );
+  assert.equal(
+    networkBootstrap.body.resources.rewards.some(
+      entry => entry.id === externalReward.body.reward.id
+    ),
+    true
+  );
+  assert.equal(
+    networkBootstrap.body.resources.pocketMoneyTransactions.some(
+      entry => entry.id === externalPocketMoney.body.transaction.id
+    ),
+    true
+  );
+
+  await request(
+    `/api/family/shared-events/${sharedEvent.body.event.sharedEventId}`,
+    {
+      method: 'DELETE',
+      headers: secondHeaders
+    }
+  );
+  const sharedEventRemoved = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(
+    sharedEventRemoved.body.resources.events.some(
+      event => event.sharedEventId === sharedEvent.body.event.sharedEventId
+    ),
+    false
   );
 
   const deletion = await request('/api/family', {

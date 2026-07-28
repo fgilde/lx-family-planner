@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useFamily } from '../../context/FamilyContext';
 import CookingModeModal from './CookingModeModal';
-import { BookOpen, Plus, Download, Trash2, Clock, Users, Play, ChefHat, Sparkles, AlertCircle, ImageOff, ShoppingBag } from 'lucide-react';
+import { BookOpen, Plus, Download, Trash2, Clock, Users, Play, Globe2, ImageOff, ShoppingBag } from 'lucide-react';
 
 function RecipeImage({ src, alt }) {
   const [failed, setFailed] = useState(false);
@@ -41,7 +41,7 @@ export default function RecipeBook() {
   const [manualServings, setManualServings] = useState('4 Portionen');
   const [manualImage, setManualImage] = useState('');
 
-  // Handle Web Recipe Import (Chefkoch.de, Lecker.de, etc.)
+  // Handle public recipe pages and recipe-rich Pinterest pins.
   const handleImportUrl = async (e) => {
     e.preventDefault();
     if (!urlInput.trim()) return;
@@ -69,7 +69,12 @@ export default function RecipeBook() {
       await addRecipe(data.recipe);
       setUrlInput('');
       setActiveTab('browse');
-      showToast('🎉 Rezept importiert!', `"${data.recipe.title}" wurde erfolgreich importiert!`, 'success');
+      const warning = Array.isArray(data.warnings) ? data.warnings[0] : '';
+      showToast(
+        warning ? 'Rezept importiert – bitte prüfen' : '🎉 Rezept importiert!',
+        warning || `"${data.recipe.title}" wurde erfolgreich importiert!`,
+        warning ? 'info' : 'success'
+      );
     } catch (err) {
       setError(err.message);
       showToast('⚠️ Import-Fehler', err.message, 'error');
@@ -105,7 +110,8 @@ export default function RecipeBook() {
             <BookOpen style={{ color: 'var(--primary)' }} /> Unser Kochbuch & Rezeptwelt
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Rezepte von Chefkoch importieren, eigene Familienrezepte speichern & Schritt-für-Schritt kochen.
+            Rezepte aus Pinterest, Chefkoch und vielen weiteren Portalen
+            importieren, gemeinsam sammeln und Schritt für Schritt kochen.
           </p>
         </div>
 
@@ -121,7 +127,7 @@ export default function RecipeBook() {
             onClick={() => setActiveTab('import')}
             style={{ color: '#059669', borderColor: '#059669' }}
           >
-            <Download size={16} /> Chefkoch Import
+            <Download size={16} /> Rezept importieren
           </button>
           <button
             className={`btn-primary ${activeTab === 'manual' ? 'active' : ''}`}
@@ -191,21 +197,35 @@ export default function RecipeBook() {
 
       {/* TAB 2: CHEFKOCH / WEB IMPORT */}
       {activeTab === 'import' && (
-        <div className="card" style={{ maxWidth: 640, margin: '0 auto', width: '100%', padding: 28 }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Download style={{ color: '#059669' }} /> Rezept von Chefkoch.de importieren
+        <div className="card recipe-import-card">
+          <div className="recipe-import-mark">
+            <Globe2 size={25} />
+          </div>
+          <span className="recipe-import-kicker">Rezept-Finder</span>
+          <h3>
+            Rezept aus dem Web importieren
           </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 18 }}>
-            Füge einfach den Link einer Chefkoch-Rezeptseite ein. Die Zutaten, Zeiten & Schritte werden automatisch extrahiert!
+          <p>
+            Füge den Link zu einem Rezept oder Pinterest-Pin ein. Bilder,
+            Zutaten, Zeiten und Zubereitung werden automatisch übernommen,
+            wenn die Seite Rezeptdaten bereitstellt.
           </p>
+          <div className="recipe-platform-chips" aria-label="Beispiele unterstützter Portale">
+            <span className="pinterest">Pinterest</span>
+            <span>Chefkoch</span>
+            <span>Lecker</span>
+            <span>Kitchen Stories</span>
+            <span>Essen &amp; Trinken</span>
+            <span>weitere Rezeptseiten</span>
+          </div>
 
           <form onSubmit={handleImportUrl}>
             <div className="form-group">
-              <label className="form-label">Chefkoch Rezept-URL</label>
+              <label className="form-label">Öffentlicher Rezept-Link</label>
               <input
                 type="url"
                 className="form-input"
-                placeholder="https://www.chefkoch.de/rezepte/..."
+                placeholder="https://www.pinterest.de/pin/... oder Rezeptseite"
                 value={urlInput}
                 onChange={e => setUrlInput(e.target.value)}
                 required
@@ -224,8 +244,13 @@ export default function RecipeBook() {
               disabled={loading}
               style={{ width: '100%', justifyContent: 'center', background: '#059669', padding: 12 }}
             >
-              {loading ? 'Wird analysiert & importiert...' : 'Rezept jetzt Importieren'}
+              {loading ? 'Rezept wird gelesen …' : 'Rezept jetzt importieren'}
             </button>
+            <small className="recipe-import-help">
+              Private Seiten, Logins und interne Heimnetz-Adressen werden aus
+              Sicherheitsgründen nicht geöffnet. Manche Portale können den
+              automatischen Abruf technisch blockieren.
+            </small>
           </form>
         </div>
       )}

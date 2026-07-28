@@ -6,6 +6,7 @@ import {
   Cloud,
   Download,
   History,
+  HeartHandshake,
   LockKeyhole,
   MapPin,
   Plus,
@@ -15,7 +16,10 @@ import {
   UserRound
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
-import { canManageFamily } from '../../constants/roles';
+import {
+  canManageFamily,
+  isManagedProfile
+} from '../../constants/roles';
 import {
   DEFAULT_MEMBER_AVATAR,
   handleImgError
@@ -187,7 +191,17 @@ export default function CalendarView() {
                 }
                 alt=""
               />
-              {member.name.split(' ')[0]}
+              <span className="calendar-person-name">
+                <span
+                  className="calendar-person-label"
+                  title={member.name}
+                >
+                  {isManagedProfile(member)
+                    ? member.name
+                    : member.name.split(' ')[0]}
+                </span>
+                {isManagedProfile(member) && <small>verwaltet</small>}
+              </span>
             </button>
           ))}
         </div>
@@ -280,10 +294,23 @@ export default function CalendarView() {
                             <h3>{event.title}</h3>
                             {event.readOnly && (
                               <span title="Aus einem Kalenderabo">
-                                <LockKeyhole size={12} />
-                                {event.sourceName || 'Kalenderabo'}
+                                {event.sharedEventId
+                                  ? <HeartHandshake size={12} />
+                                  : <LockKeyhole size={12} />}
+                                {event.sharedEventId
+                                  ? `Von ${event.sharedOwnerFamilyName}`
+                                  : event.sourceName || 'Kalenderabo'}
                               </span>
                             )}
+                            {!event.readOnly &&
+                              event.sharedWithFamilies?.length > 0 && (
+                                <span title="Mit verbundenen Familien geteilt">
+                                  <HeartHandshake size={12} />
+                                  Mit {event.sharedWithFamilies
+                                    .map(family => family.familyName)
+                                    .join(', ')}
+                                </span>
+                              )}
                           </div>
                           <div className="calendar-event-details">
                             {event.location && (
@@ -293,7 +320,13 @@ export default function CalendarView() {
                             )}
                             <span>
                               <UserRound size={13} />
-                              {member?.name || 'Ganze Familie'}
+                              {member
+                                ? `${member.name}${
+                                    isManagedProfile(member)
+                                      ? ' · verwaltet'
+                                      : ''
+                                  }`
+                                : 'Ganze Familie'}
                             </span>
                           </div>
                           {event.notes && <p>{event.notes}</p>}

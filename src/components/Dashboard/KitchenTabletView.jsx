@@ -20,7 +20,10 @@ import { useFamily } from '../../context/FamilyContext';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { isChildProfile } from '../../constants/roles';
 import DashboardCustomizer from './DashboardCustomizer';
-import OrderedDashboardGrid from './OrderedDashboardGrid';
+import OrderedDashboardGrid, {
+  DashboardWidget
+} from './OrderedDashboardGrid';
+import HomeAssistantWidget from './HomeAssistantWidget';
 import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
@@ -82,9 +85,15 @@ const TABLET_WIDGETS = [
     description: 'Profile und Sterne im Überblick',
     icon: Users,
     color: '#b35d6d'
+  },
+  {
+    id: 'home-assistant',
+    label: 'Haussteuerung',
+    description: 'Geräte, Sensoren und Szenen als große Tablet-Kacheln',
+    icon: Home,
+    color: '#2f7c73'
   }
 ];
-const TABLET_WIDGET_IDS = TABLET_WIDGETS.map(widget => widget.id);
 
 function localDateKey(date) {
   const year = date.getFullYear();
@@ -131,6 +140,7 @@ export default function KitchenTabletView() {
     meals,
     members,
     notes,
+    homeAssistantIntegration,
     setActiveTab,
     setIsQuickAddOpen,
     setQuickAddDefaultType,
@@ -142,10 +152,26 @@ export default function KitchenTabletView() {
   } = useFamily();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const availableWidgets = useMemo(
+    () => TABLET_WIDGETS.filter(
+      widget =>
+        widget.id !== 'home-assistant' ||
+        (
+          homeAssistantIntegration?.connected &&
+          homeAssistantIntegration?.enabled !== false &&
+          homeAssistantIntegration?.selectedEntities?.length > 0
+        )
+    ),
+    [
+      homeAssistantIntegration?.connected,
+      homeAssistantIntegration?.enabled,
+      homeAssistantIntegration?.selectedEntities?.length
+    ]
+  );
   const dashboardLayout = useDashboardLayout(
     activeMember?.id,
     'tablet',
-    TABLET_WIDGET_IDS
+    availableWidgets.map(widget => widget.id)
   );
 
   useEffect(() => {
@@ -549,6 +575,13 @@ export default function KitchenTabletView() {
             ))}
           </div>
         </TabletCard>
+
+        <DashboardWidget
+          widgetId="home-assistant"
+          className="tablet-command-card tablet-ha-card"
+        >
+          <HomeAssistantWidget compact title="Haussteuerung" />
+        </DashboardWidget>
       </OrderedDashboardGrid>
 
       <DashboardCustomizer
@@ -561,7 +594,7 @@ export default function KitchenTabletView() {
         resetLayout={dashboardLayout.resetLayout}
         setDensity={dashboardLayout.setDensity}
         toggleWidget={dashboardLayout.toggleWidget}
-        widgets={TABLET_WIDGETS}
+        widgets={availableWidgets}
       />
     </div>
   );

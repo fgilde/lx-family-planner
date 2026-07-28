@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Calendar,
   CheckSquare,
+  Home,
   LayoutDashboard,
   Pin,
   Plus,
@@ -15,6 +16,7 @@ import { useFamily } from '../../context/FamilyContext';
 import { INITIAL_TRASH_EVENTS } from '../Calendar/TrashCalendarView';
 import ChildDashboard from './ChildDashboard';
 import PetDashboard from './PetDashboard';
+import HomeAssistantWidget from './HomeAssistantWidget';
 import DashboardCustomizer from './DashboardCustomizer';
 import OrderedDashboardGrid, {
   DashboardWidget
@@ -68,9 +70,15 @@ const ADULT_WIDGETS = [
     description: 'Die neuesten gemeinsamen Familiennotizen',
     icon: Pin,
     color: '#a65a3f'
+  },
+  {
+    id: 'home-assistant',
+    label: 'Unser Zuhause',
+    description: 'Freigegebene Geräte, Sensoren und Szenen aus Home Assistant',
+    icon: Home,
+    color: '#2f7c73'
   }
 ];
-const ADULT_WIDGET_IDS = ADULT_WIDGETS.map(widget => widget.id);
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -132,15 +140,32 @@ export default function PersonalDashboard() {
     meals,
     shoppingItems,
     trashEvents: savedTrashEvents,
+    homeAssistantIntegration,
     setActiveTab,
     setIsQuickAddOpen,
     activeHousehold
   } = useFamily();
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const availableWidgets = useMemo(
+    () => ADULT_WIDGETS.filter(
+      widget =>
+        widget.id !== 'home-assistant' ||
+        (
+          homeAssistantIntegration?.connected &&
+          homeAssistantIntegration?.enabled !== false &&
+          homeAssistantIntegration?.selectedEntities?.length > 0
+        )
+    ),
+    [
+      homeAssistantIntegration?.connected,
+      homeAssistantIntegration?.enabled,
+      homeAssistantIntegration?.selectedEntities?.length
+    ]
+  );
   const dashboardLayout = useDashboardLayout(
     activeMember?.id,
     'personal',
-    ADULT_WIDGET_IDS
+    availableWidgets.map(widget => widget.id)
   );
 
   const now = new Date();
@@ -485,6 +510,13 @@ export default function PersonalDashboard() {
             </div>
           )}
         </DashboardWidget>
+
+        <DashboardWidget
+          widgetId="home-assistant"
+          className="adult-dashboard-widget ha-dashboard-shell"
+        >
+          <HomeAssistantWidget />
+        </DashboardWidget>
       </OrderedDashboardGrid>
 
       <DashboardCustomizer
@@ -497,7 +529,7 @@ export default function PersonalDashboard() {
         resetLayout={dashboardLayout.resetLayout}
         setDensity={dashboardLayout.setDensity}
         toggleWidget={dashboardLayout.toggleWidget}
-        widgets={ADULT_WIDGETS}
+        widgets={availableWidgets}
       />
     </div>
   );

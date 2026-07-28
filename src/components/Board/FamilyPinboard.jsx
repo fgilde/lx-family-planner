@@ -315,8 +315,8 @@ export default function FamilyPinboard() {
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
                       {hasPhoto && (
                         <button
-                          className="icon-circle-btn"
-                          style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.7)', color: 'var(--primary)' }}
+                          className="icon-circle-btn pinboard-note-action rotate"
+                          style={{ width: 32, height: 32 }}
                           onClick={(e) => toggleFlip(note.id, e)}
                           title="Karte umdrehen"
                         >
@@ -325,8 +325,8 @@ export default function FamilyPinboard() {
                       )}
 
                       <button
-                        className="icon-circle-btn"
-                        style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.7)', color: 'var(--text-main)' }}
+                        className="icon-circle-btn pinboard-note-action"
+                        style={{ width: 32, height: 32 }}
                         onClick={(e) => handleStartEdit(note, e)}
                         title="Notiz bearbeiten"
                       >
@@ -334,8 +334,8 @@ export default function FamilyPinboard() {
                       </button>
 
                       <button
-                        className="icon-circle-btn"
-                        style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.7)', color: '#ef4444' }}
+                        className="icon-circle-btn pinboard-note-action danger"
+                        style={{ width: 32, height: 32 }}
                         onClick={(e) => { e.stopPropagation(); deleteNote(note.id); }}
                         title="Notiz löschen"
                       >
@@ -375,8 +375,8 @@ export default function FamilyPinboard() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: 8 }}>
                       <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>✍️ {note.createdBy}</span>
                       <button
-                        className="btn-secondary"
-                        style={{ padding: '4px 10px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.7)' }}
+                        className="btn-secondary pinboard-card-back-button"
+                        style={{ padding: '4px 10px', fontSize: '0.8rem' }}
                         onClick={(e) => toggleFlip(note.id, e)}
                       >
                         <RotateCw size={12} /> Foto anzeigen

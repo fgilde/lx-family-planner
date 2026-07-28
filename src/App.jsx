@@ -20,7 +20,10 @@ import FamilyLoginScreen from './components/Auth/FamilyLoginScreen';
 import OnboardingWizard from './components/Auth/OnboardingWizard';
 import BringAccountModal from './components/Shopping/BringAccountModal';
 import ParentAdmin from './components/Admin/ParentAdmin';
+import FamilyLifeHub from './components/FamilyLife/FamilyLifeHub';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
+import ProblemReportButton from './components/ProblemReportButton';
+import ReleaseNotesModal from './components/ReleaseNotesModal';
 import { isPetProfile } from './constants/roles';
 
 function MainContent() {
@@ -47,7 +50,8 @@ function MainContent() {
       'tasks',
       'board',
       'shopping',
-      'meals'
+      'meals',
+      'family-life'
     ]);
     if (allowedViews.has(requestedView)) {
       if (
@@ -119,6 +123,7 @@ function MainContent() {
         {activeTab === 'meals' && <MealPlanner />}
         {activeTab === 'tasks' && <ChoreRewardsPlanner />}
         {activeTab === 'board' && <FamilyPinboard />}
+        {activeTab === 'family-life' && <FamilyLifeHub />}
         {activeTab === 'admin' && (
           <ParentAdmin onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
         )}
@@ -131,6 +136,8 @@ function MainContent() {
       <ProfileModal />
       <QuickAddModal />
       <BringAccountModal />
+      <ReleaseNotesModal />
+      <ProblemReportButton />
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
     </div>
   );

@@ -3,9 +3,12 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleGauge,
+  ClipboardList,
   Eraser,
+  Headphones,
   KeyRound,
   Link2,
+  Music2,
   Network,
   PencilLine,
   Plus,
@@ -23,6 +26,7 @@ import {
   POSITION_OPTIONS,
   canManageFamily,
   getPositionLabel,
+  isManagedProfile,
   roleForPosition
 } from '../../constants/roles';
 import {
@@ -30,6 +34,8 @@ import {
   handleImgError
 } from '../../utils/imageFallback';
 import GotifySettings from './GotifySettings';
+import HomeAssistantSettings from './HomeAssistantSettings';
+import ProblemReportsPanel from './ProblemReportsPanel';
 import WebPushSettings from './WebPushSettings';
 
 const YOUNG_POSITIONS = POSITION_OPTIONS.filter(option =>
@@ -52,7 +58,23 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     showToast
   } = useFamily();
   const children = useMemo(
-    () => members.filter(member => ['child', 'teen'].includes(member.role)),
+    () =>
+      members.filter(
+        member =>
+          !isManagedProfile(member) &&
+          ['child', 'teen'].includes(member.role)
+      ),
+    [members]
+  );
+  const rewardMembers = useMemo(
+    () =>
+      members.filter(
+        member => member.role !== 'pet' && !isManagedProfile(member)
+      ),
+    [members]
+  );
+  const managedProfiles = useMemo(
+    () => members.filter(isManagedProfile),
     [members]
   );
   const [selectedChildId, setSelectedChildId] = useState(
@@ -67,6 +89,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
   });
   const [linkForm, setLinkForm] = useState({
     memberId: children[0]?.id || '',
+    kind: 'youtube',
     title: '',
     url: ''
   });
@@ -115,7 +138,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
 
   const pendingTasks = tasks.filter(task => !task.completed).length;
   const completedTasks = tasks.filter(task => task.completed).length;
-  const totalStars = children.reduce(
+  const totalStars = rewardMembers.reduce(
     (sum, member) => sum + Number(member.stars || 0),
     0
   );
@@ -168,8 +191,10 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     setBusy(true);
     const created = await addDashboardLink({
       memberId: linkForm.memberId,
+      kind: linkForm.kind,
       title: linkForm.title.trim(),
-      url
+      url,
+      color: linkForm.kind === 'spotify' ? '#1db954' : '#ff4f55'
     });
     setBusy(false);
     if (created) {
@@ -206,10 +231,66 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             <strong>{totalStars}</strong>
             <span>Sterne gesamt</span>
           </article>
+          <article>
+            <ClipboardList size={19} />
+            <strong>{managedProfiles.length}</strong>
+            <span>Verwaltete Profile</span>
+          </article>
         </div>
       </section>
 
       <div className="admin-layout">
+        <section className="admin-panel admin-managed-panel">
+          <header className="admin-panel-header">
+            <div>
+              <span className="admin-section-kicker">Ohne eigenen Zugang</span>
+              <h2><ClipboardList size={21} /> Verwaltete Profile</h2>
+            </div>
+            <button
+              type="button"
+              className="admin-text-button"
+              onClick={() => setIsProfileModalOpen(true)}
+            >
+              <Plus size={16} /> Profil anlegen
+            </button>
+          </header>
+          <p className="admin-panel-intro">
+            Für Oma, Opa oder betreute Personen: Sie erscheinen bei Terminen
+            und Aufgaben, aber nicht bei der Anmeldung oder im Chat.
+          </p>
+          {managedProfiles.length > 0 ? (
+            <div className="admin-managed-list">
+              {managedProfiles.map(member => (
+                <article
+                  key={member.id}
+                  style={{ '--member-color': member.color || '#246B58' }}
+                >
+                  <img
+                    src={member.avatar || DEFAULT_FAMILY_AVATAR}
+                    onError={handleImgError}
+                    alt=""
+                  />
+                  <span>
+                    <strong>{member.name}</strong>
+                    <small>{getPositionLabel(member)} · ohne Anmeldung</small>
+                  </span>
+                  <b>Planbar</b>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="admin-managed-empty">
+              <ClipboardList size={24} />
+              <span>
+                <strong>Noch niemand eingetragen</strong>
+                <small>
+                  Beim Anlegen „Nur von uns verwaltet“ auswählen.
+                </small>
+              </span>
+            </div>
+          )}
+        </section>
+
         <section className="admin-panel admin-children-panel">
           <header className="admin-panel-header">
             <div>
@@ -256,20 +337,6 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                     <span>Ausgewähltes Profil</span>
                     <strong>{selectedChild?.name}</strong>
                   </div>
-                  <button
-                    type="button"
-                    className="admin-danger-quiet"
-                    disabled={busy || !Number(selectedChild?.stars || 0)}
-                    onClick={() => requestConfirmation(
-                      `reset-${selectedChild.id}`,
-                      () => resetMemberStars(selectedChild.id)
-                    )}
-                  >
-                    <RotateCcw size={15} />
-                    {confirmAction === `reset-${selectedChild.id}`
-                      ? 'Wirklich auf 0 setzen?'
-                      : 'Punkte zurücksetzen'}
-                  </button>
                 </div>
 
                 <div className="admin-form-grid">
@@ -399,19 +466,66 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
           </div>
         </section>
 
-        <WebPushSettings />
-        <GotifySettings />
-
-        <section className="admin-panel admin-youtube-panel">
+        <section className="admin-panel admin-points-panel">
           <header className="admin-panel-header">
             <div>
-              <span className="admin-section-kicker">Kinder-Dashboard</span>
-              <h2><Youtube size={22} /> Lieblingskanäle</h2>
+              <span className="admin-section-kicker">Sternenkonten</span>
+              <h2><Star size={21} fill="currentColor" /> Belohnungspunkte</h2>
             </div>
           </header>
           <p className="admin-panel-intro">
-            Lege geprüfte YouTube-Kanäle als große, kindgerechte Kacheln ab.
-            Kinder können nur die von euch freigegebenen Links öffnen.
+            Setze die Punkte von Kindern und Erwachsenen getrennt zurück.
+            Haustiere sammeln keine Belohnungspunkte.
+          </p>
+          <div className="admin-points-grid">
+            {rewardMembers.map(member => (
+              <article
+                key={member.id}
+                style={{ '--member-color': member.color || '#e0a52e' }}
+              >
+                <img
+                  src={member.avatar || DEFAULT_FAMILY_AVATAR}
+                  onError={handleImgError}
+                  alt=""
+                />
+                <span>
+                  <strong>{member.name}</strong>
+                  <small>{getPositionLabel(member)}</small>
+                </span>
+                <b><Star size={14} fill="currentColor" /> {member.stars || 0}</b>
+                <button
+                  type="button"
+                  disabled={busy || !Number(member.stars || 0)}
+                  onClick={() => requestConfirmation(
+                    `points-${member.id}`,
+                    () => resetMemberStars(member.id)
+                  )}
+                >
+                  <RotateCcw size={14} />
+                  {confirmAction === `points-${member.id}`
+                    ? 'Wirklich auf 0?'
+                    : 'Zurücksetzen'}
+                </button>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <WebPushSettings />
+        <GotifySettings />
+        <HomeAssistantSettings />
+        <ProblemReportsPanel />
+
+        <section className="admin-panel admin-media-panel">
+          <header className="admin-panel-header">
+            <div>
+              <span className="admin-section-kicker">Kinder-Dashboard</span>
+              <h2><Headphones size={22} /> Medien-Lounge</h2>
+            </div>
+          </header>
+          <p className="admin-panel-intro">
+            Lege geprüfte YouTube-Kanäle und Spotify-Playlists als große,
+            kindgerechte Kacheln ab. Sichtbar ist nur, was ihr hier freigebt.
           </p>
           <form className="admin-link-form" onSubmit={addLink}>
             <select
@@ -426,6 +540,18 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
               {children.map(member => (
                 <option value={member.id} key={member.id}>{member.name}</option>
               ))}
+            </select>
+            <select
+              value={linkForm.kind}
+              onChange={event => setLinkForm(previous => ({
+                ...previous,
+                kind: event.target.value,
+                url: ''
+              }))}
+              aria-label="Medienart"
+            >
+              <option value="youtube">▶ YouTube</option>
+              <option value="spotify">♫ Spotify</option>
             </select>
             <input
               value={linkForm.title}
@@ -445,23 +571,38 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                   ...previous,
                   url: event.target.value
                 }))}
-                placeholder="youtube.com/@kanal"
+                placeholder={
+                  linkForm.kind === 'spotify'
+                    ? 'open.spotify.com/playlist/...'
+                    : 'youtube.com/@kanal'
+                }
                 required
               />
             </div>
             <button disabled={busy || !children.length}>
-              <Plus size={17} /> Kanal freigeben
+              <Plus size={17} /> Widget freigeben
             </button>
           </form>
           <div className="admin-link-list">
             {dashboardLinks.map(link => {
               const member = members.find(entry => entry.id === link.memberId);
+              const isSpotify = link.kind === 'spotify';
               return (
-                <article key={link.id}>
-                  <span className="admin-youtube-mark"><Youtube size={19} /></span>
+                <article
+                  key={link.id}
+                  data-kind={isSpotify ? 'spotify' : 'youtube'}
+                >
+                  <span className="admin-media-mark">
+                    {isSpotify
+                      ? <Music2 size={19} />
+                      : <Youtube size={19} />}
+                  </span>
                   <div>
                     <strong>{link.title}</strong>
-                    <small>Auf {member?.name || 'Kinderprofil'}s Dashboard</small>
+                    <small>
+                      {isSpotify ? 'Spotify' : 'YouTube'} · auf{' '}
+                      {member?.name || 'Kinderprofil'}s Dashboard
+                    </small>
                   </div>
                   <button
                     type="button"
@@ -482,7 +623,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             {!dashboardLinks.length && (
               <div className="admin-inline-empty">
                 <Sparkles size={18} />
-                Noch keine Kanäle freigegeben.
+                Noch keine Medien-Widgets freigegeben.
               </div>
             )}
           </div>

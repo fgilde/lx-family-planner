@@ -17,7 +17,13 @@ const PROTECTED_TABLES = [
   { name: 'inbox_notifications', key: ['id'] },
   { name: 'calendar_subscriptions', key: ['id'] },
   { name: 'integrations', key: ['family_id', 'provider'] },
-  { name: 'family_relationships', key: ['id'] }
+  { name: 'family_relationships', key: ['id'] },
+  { name: 'shared_family_events', key: ['id'] },
+  {
+    name: 'shared_family_event_recipients',
+    key: ['event_id', 'family_id']
+  },
+  { name: 'problem_reports', key: ['id'] }
 ];
 
 const OBSERVED_TABLES = [
