@@ -6029,6 +6029,7 @@ export function createApp() {
   });
 
   app.get('/api/native-push/status', requireAuth, (req, res) => {
+    res.setHeader('Cache-Control', 'private, no-store');
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,

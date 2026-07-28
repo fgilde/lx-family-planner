@@ -62,6 +62,7 @@ export default function WebPushSettings() {
     disableNativePush,
     updateNativePushPreferences,
     testNativePush,
+    refreshNativePushStatus,
     fetchPushDevices,
     removePushDevice
   } = useFamily();
@@ -105,6 +106,11 @@ export default function WebPushSettings() {
   useEffect(() => {
     loadDevices();
   }, [loadDevices]);
+
+  useEffect(() => {
+    if (!isNative) return;
+    refreshNativePushStatus({ silent: true });
+  }, [isNative, refreshNativePushStatus]);
 
   const status = useMemo(() => {
     if (!push.supported) return 'unavailable';

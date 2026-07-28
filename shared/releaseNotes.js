@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.7.1': {
+    version: '1.7.1',
+    eyebrow: 'Android-Push ist jetzt startklar',
+    title: 'Die Firebase-Verbindung wird zuverlässig erkannt',
+    intro:
+      'LX prüft Server und Android-Berechtigung jetzt getrennt. Dadurch lässt sich die App auch dann sauber für Meldungen anmelden, wenn Android zunächst eine zusätzliche Rückfrage zeigt.',
+    highlights: [
+      {
+        id: 'accurate-firebase-status',
+        title: 'Kein falscher Firebase-Hinweis mehr',
+        description:
+          'Die Elternzentrale erkennt die eingerichtete Serververbindung unabhängig von der Berechtigungsabfrage des Handys.'
+      },
+      {
+        id: 'fresh-native-status',
+        title: 'Status wird frisch geladen',
+        description:
+          'Beim Öffnen der Benachrichtigungseinstellungen fragt LX den aktuellen Zustand erneut beim Familienserver ab.'
+      },
+      {
+        id: 'android-permission-prompts',
+        title: 'Android-Rückfragen funktionieren',
+        description:
+          'Auch Geräte, die vor der Freigabe noch einen zusätzlichen Hinweis anzeigen, öffnen anschließend den richtigen Systemdialog.'
+      },
+      {
+        id: 'uncached-push-status',
+        title: 'Immer der aktuelle Zustand',
+        description:
+          'LX übernimmt für die Benachrichtigungseinrichtung keine veraltete Serverantwort mehr aus dem Zwischenspeicher.'
+      }
+    ],
+    closing:
+      'Alle Familieninhalte und Einstellungen bleiben erhalten. Für diese Korrektur muss die Android-App einmal auf Version 1.7.1 aktualisiert werden.'
+  },
   '1.7.0': {
     version: '1.7.0',
     eyebrow: 'Neu: echte Android-Benachrichtigungen',

@@ -2,6 +2,18 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.7.1] – 2026-07-28
+
+### Android-Push zuverlässig aktivieren
+
+- Firebase-Serverstatus und Android-Berechtigung werden unabhängig geprüft
+- die Elternzentrale zeigt keinen falschen Hinweis auf eine fehlende
+  Firebase-Verbindung mehr, wenn nur die Android-Abfrage stockt
+- beide von Android unterstützten Berechtigungsdialoge werden korrekt geöffnet
+- Push-Status wird beim Öffnen der Elternzentrale frisch vom Server geladen
+- Statusantworten und API-Abfragen werden nicht mehr aus einem alten Cache
+  übernommen
+
 ## [1.7.0] – 2026-07-28
 
 ### Native Android-Benachrichtigungen

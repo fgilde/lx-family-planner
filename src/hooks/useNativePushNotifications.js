@@ -1,4 +1,4 @@
-import { isCapacitorNative } from '../utils/apiConfig';
+import { isCapacitorNative } from '../utils/apiConfig.js';
 
 const INSTALLATION_ID_KEY = 'lx_native_push_installation_id';
 const REGISTRATION_TIMEOUT_MS = 20_000;
@@ -110,6 +110,10 @@ export async function nativePushPermission() {
   return status.receive;
 }
 
+export function nativePushPermissionNeedsPrompt(permission) {
+  return ['prompt', 'prompt-with-rationale'].includes(permission);
+}
+
 export async function registerNativePush({
   requestPermission = false
 } = {}) {
@@ -121,7 +125,10 @@ export async function registerNativePush({
   }
   await ensureNotificationChannels(plugin);
   let permission = await plugin.checkPermissions();
-  if (permission.receive === 'prompt' && requestPermission) {
+  if (
+    nativePushPermissionNeedsPrompt(permission.receive) &&
+    requestPermission
+  ) {
     permission = await plugin.requestPermissions();
   }
   if (permission.receive !== 'granted') {

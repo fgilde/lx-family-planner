@@ -101,6 +101,7 @@ function initialNativePushState() {
     busy: '',
     serverConfigured: false,
     serverReason: '',
+    permissionError: '',
     defaults: {},
     currentDeviceId: '',
     devices: []
@@ -1037,17 +1038,27 @@ export function FamilyProvider({ children }) {
       return null;
     }
     try {
-      const [permission, data] = await Promise.all([
-        nativePushPermission(),
+      const [data, permissionResult] = await Promise.all([
         apiRequest(
           `/api/native-push/status?installationId=${encodeURIComponent(
             nativeInstallationId()
-          )}`
-        )
+          )}&fresh=${Date.now()}`,
+          { cache: 'no-store' }
+        ),
+        nativePushPermission()
+          .then(permission => ({ permission, error: '' }))
+          .catch(error => ({
+            permission: 'error',
+            error:
+              error?.message ||
+              'Die Android-Berechtigung konnte nicht gelesen werden.'
+          }))
       ]);
+      const permission = permissionResult.permission;
       const next = {
         ...data,
         permission,
+        permissionError: permissionResult.error,
         serverConfigured: Boolean(data.server?.configured),
         serverReason: data.server?.reason || ''
       };
@@ -1055,6 +1066,7 @@ export function FamilyProvider({ children }) {
         ...previous,
         ...capability,
         permission,
+        permissionError: next.permissionError,
         loading: false,
         serverConfigured: next.serverConfigured,
         serverReason: next.serverReason,

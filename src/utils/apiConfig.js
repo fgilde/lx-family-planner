@@ -102,11 +102,18 @@ export async function plannerApiRequest(path, options = {}) {
   if (token && !headers.has('X-Session-Token')) {
     headers.set('X-Session-Token', token);
   }
-  const response = await fetch(buildApiUrl(path), {
+  const requestOptions = {
     credentials: getStoredServerUrl() ? 'include' : 'same-origin',
     ...options,
     headers
-  });
+  };
+  if (
+    requestOptions.cache === undefined &&
+    String(path || '').startsWith('/api/')
+  ) {
+    requestOptions.cache = 'no-store';
+  }
+  const response = await fetch(buildApiUrl(path), requestOptions);
   let data = null;
   try {
     data = await response.json();
