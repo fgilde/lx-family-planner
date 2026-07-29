@@ -33,6 +33,7 @@ import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import MediaCover from '../Dashboard/MediaCover';
 import GotifySettings from './GotifySettings';
 import HomeAssistantSettings from './HomeAssistantSettings';
 import NextcloudSettings from './NextcloudSettings';
@@ -595,9 +596,15 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                   data-kind={isSpotify ? 'spotify' : 'youtube'}
                 >
                   <span className="admin-media-mark">
-                    {isSpotify
-                      ? <Music2 size={19} />
-                      : <Youtube size={19} />}
+                    <MediaCover
+                      link={link}
+                      className="admin-media-cover"
+                      fallback={
+                        isSpotify
+                          ? <Music2 size={19} />
+                          : <Youtube size={19} />
+                      }
+                    />
                   </span>
                   <div>
                     <strong>{link.title}</strong>

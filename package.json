@@ -1,7 +1,7 @@
 {
   "name": "lx-family-planner",
   "private": true,
-  "version": "1.12.1",
+  "version": "1.13.0",
   "type": "module",
   "engines": {
     "node": ">=22.13"
@@ -17,7 +17,7 @@
     "simulate-update": "node --env-file-if-exists=.env server/updateSimulation.js",
     "test": "node --test server/*.test.js",
     "build:apk": "powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
-    "check": "node --check server.js && node --check server/app.js && node --check server/database.js && node --check server/firebasePush.js && npm run test && vite build"
+    "check": "node --check server.js && node --check server/app.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && npm run test && vite build"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.2",

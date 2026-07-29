@@ -2,6 +2,26 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.13.0] – 2026-07-29
+
+### Echte Cover in der Kinder-Medienlounge
+
+- YouTube- und Spotify-Kacheln zeigen jetzt das echte Kanal-, Video-,
+  Playlist- oder Album-Cover statt eines großen Plattform-Symbols
+- Spotify-Metadaten kommen ohne eigenen API-Schlüssel aus der offiziellen
+  oEmbed-Schnittstelle
+- YouTube-Videos verwenden ihr offizielles Thumbnail; bei Kanal-Links liest
+  LX kontrolliert das offizielle Vorschaubild der YouTube-Seite
+- nur HTTPS-Bilder von freigegebenen YouTube- und Spotify-Bildservern werden
+  gespeichert; beliebige externe Cover-Adressen werden verworfen
+- bestehende Medien-Widgets werden nach dem Update automatisch ergänzt und
+  ihre Cover regelmäßig vorsichtig aktualisiert
+- neues bildzentriertes Kartendesign mit lesbarem Verlauf, kompakter
+  Abspielschaltfläche und sauberem Fallback in allen Themes
+- Eltern sehen die Cover bereits in der Medienverwaltung
+- Regressionstests prüfen YouTube-Video-/Kanalbilder, Spotify-oEmbed und die
+  Blockierung fremder Bildserver
+
 ## [1.12.1] – 2026-07-29
 
 ### Chatfotos vollständig im Familienarchiv

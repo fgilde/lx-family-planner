@@ -13,7 +13,6 @@ import {
   Laugh,
   Meh,
   MessageCircle,
-  Music2,
   Palette,
   PiggyBank,
   Play,
@@ -22,8 +21,7 @@ import {
   Star,
   Sun,
   Trophy,
-  Vote,
-  Youtube
+  Vote
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import {
@@ -31,6 +29,7 @@ import {
   handleImgError
 } from '../../utils/imageFallback';
 import HomeAssistantWidget from './HomeAssistantWidget';
+import MediaCover from './MediaCover';
 import RewardIcon from '../Tasks/RewardIcon';
 
 const CHILD_WORLDS = {
@@ -570,13 +569,21 @@ export default function ChildDashboard() {
                       link.color || (isSpotify ? '#1db954' : '#ff4f55')
                   }}
                 >
+                  <MediaCover
+                    link={link}
+                    className="child-media-cover"
+                    fallback={(
+                      <span className="child-media-cover child-media-cover-fallback">
+                        {link.title.trim().charAt(0).toUpperCase() || '♪'}
+                      </span>
+                    )}
+                  />
+                  <span className="child-media-cover-shade" aria-hidden="true" />
                   <span className="child-media-number">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <span className="child-media-play">
-                    {isSpotify
-                      ? <Music2 size={29} />
-                      : <Youtube size={29} fill="currentColor" />}
+                    <Play size={22} fill="currentColor" />
                   </span>
                   <span className="child-media-copy">
                     <small>
@@ -586,8 +593,8 @@ export default function ChildDashboard() {
                     <em>{isSpotify ? 'Musik an' : 'Video starten'}</em>
                   </span>
                   <ExternalLink className="child-media-external" size={18} />
-                  <span className="child-media-decoration" aria-hidden="true">
-                    {isSpotify ? '♫' : '▶'}
+                  <span className="child-media-provider" aria-hidden="true">
+                    {isSpotify ? 'Spotify' : 'YouTube'}
                   </span>
                 </a>
               );

@@ -36,6 +36,10 @@ import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 import { loadBringCatalog } from './bringCatalog.js';
 import { importRecipeFromUrl } from './recipeImporter.js';
 import {
+  resolveMediaPreview,
+  safeCoverUrl
+} from './mediaPreview.js';
+import {
   RECORD_TYPES,
   acknowledgeMemberReleaseNotes,
   countUnreadInboxNotifications,
@@ -3345,9 +3349,43 @@ function sanitizeDashboardLink(req, value) {
     url: url.href,
     kind,
     color,
+    coverUrl: safeCoverUrl(input.coverUrl, kind),
+    coverCheckedAt: Math.max(0, Number(input.coverCheckedAt) || 0),
+    providerTitle: cleanText(input.providerTitle, '', 160),
     description: cleanText(input.description, '', 120),
     createdAt: Number(input.createdAt || Date.now())
   };
+}
+
+async function enrichDashboardLinkPreview(value) {
+  if (process.env.NODE_ENV === 'test') return value;
+  try {
+    const preview = await resolveMediaPreview({
+      kind: value.kind,
+      url: value.url
+    });
+    return {
+      ...value,
+      coverUrl:
+        safeCoverUrl(preview.coverUrl, value.kind) ||
+        safeCoverUrl(value.coverUrl, value.kind),
+      providerTitle: cleanText(
+        preview.providerTitle || value.providerTitle,
+        '',
+        160
+      ),
+      coverCheckedAt: Date.now()
+    };
+  } catch (error) {
+    console.warn(
+      `Medien-Cover für ${value.url} konnte nicht geladen werden:`,
+      error.message
+    );
+    return {
+      ...value,
+      coverCheckedAt: Date.now()
+    };
+  }
 }
 
 const FAMILY_LIFE_TYPES = new Set([
@@ -3802,6 +3840,59 @@ export function createApp() {
       version: getFamilyVersion(familyId),
       reason
     });
+  };
+  let dashboardCoverRefreshRunning = false;
+  app.locals.runDashboardCoverRefresh = async () => {
+    if (dashboardCoverRefreshRunning || process.env.NODE_ENV === 'test') {
+      return { skipped: true, updated: 0, errors: [] };
+    }
+    dashboardCoverRefreshRunning = true;
+    let updated = 0;
+    let processed = 0;
+    const errors = [];
+    const changedFamilies = new Set();
+    const refreshBefore = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    try {
+      for (const family of listPublicFamilies().slice(0, 500)) {
+        const links = listRecords(family.id, 'dashboardLinks')
+          .filter(link =>
+            !safeCoverUrl(link.coverUrl, link.kind) ||
+            Number(link.coverCheckedAt || 0) < refreshBefore
+          );
+        for (const link of links) {
+          if (processed >= 100) break;
+          processed += 1;
+          try {
+            const normalized = sanitizeDashboardLink(
+              { session: { familyId: family.id } },
+              link
+            );
+            const enriched =
+              await enrichDashboardLinkPreview(normalized);
+            updateRecord(family.id, 'dashboardLinks', link.id, {
+              coverUrl: enriched.coverUrl,
+              coverCheckedAt: enriched.coverCheckedAt,
+              providerTitle: enriched.providerTitle
+            });
+            updated += 1;
+            changedFamilies.add(family.id);
+          } catch (error) {
+            errors.push({
+              familyId: family.id,
+              linkId: link.id,
+              error: error.message
+            });
+          }
+        }
+        if (processed >= 100) break;
+      }
+      changedFamilies.forEach(familyId =>
+        publishFamilyChange(familyId, 'dashboard-media-covers')
+      );
+      return { skipped: false, updated, errors };
+    } finally {
+      dashboardCoverRefreshRunning = false;
+    }
   };
   const nextcloudSyncDebounces = new Map();
   const queueNextcloudEventSync = familyId => {
@@ -6695,6 +6786,7 @@ export function createApp() {
     }
     if (req.params.type === 'dashboardLinks') {
       input = sanitizeDashboardLink(req, input);
+      input = await enrichDashboardLinkPreview(input);
     }
     if (FAMILY_LIFE_TYPES.has(req.params.type)) {
       input = sanitizeFamilyLifeRecord(req, req.params.type, input);
@@ -6782,7 +6874,7 @@ export function createApp() {
     });
   });
 
-  app.patch('/api/resources/:type/:id', requireAuth, requireResourceManager, (req, res) => {
+  app.patch('/api/resources/:type/:id', requireAuth, requireResourceManager, async (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
     let existingEvent = null;
     let existingTrashEvent = null;
@@ -6844,10 +6936,10 @@ export function createApp() {
           error: 'Dashboard-Link nicht gefunden.'
         });
       }
-      changes = sanitizeDashboardLink(req, {
+      changes = await enrichDashboardLinkPreview(sanitizeDashboardLink(req, {
         ...existing,
         ...ensureObject(req.body)
-      });
+      }));
     } else if (req.params.type === 'tasks') {
       changes = Object.fromEntries(
         Object.entries(ensureObject(req.body)).filter(
@@ -9389,6 +9481,15 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     });
   }, 15 * 60 * 1000);
   legacyChatPhotoMigrationTimer.unref();
+  const dashboardCoverRefreshTimer = setInterval(() => {
+    void app.locals.runDashboardCoverRefresh().catch(error => {
+      console.warn(
+        'Die regelmäßige Medien-Cover-Prüfung ist fehlgeschlagen:',
+        error.message
+      );
+    });
+  }, 12 * 60 * 60 * 1000);
+  dashboardCoverRefreshTimer.unref();
   const initialCalendarSync = setTimeout(() => {
     void syncAllCalendarSubscriptions();
   }, 20_000);
@@ -9414,17 +9515,28 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     });
   }, 18_000);
   initialLegacyChatPhotoMigration.unref();
+  const initialDashboardCoverRefresh = setTimeout(() => {
+    void app.locals.runDashboardCoverRefresh().catch(error => {
+      console.warn(
+        'Vorhandene Medien-Widgets konnten nicht vollständig ergänzt werden:',
+        error.message
+      );
+    });
+  }, 25_000);
+  initialDashboardCoverRefresh.unref();
   server.on('close', () => {
     clearInterval(calendarSyncTimer);
     clearInterval(eventReminderTimer);
     clearInterval(nextcloudSyncTimer);
     clearInterval(bundledCloudProvisioningTimer);
     clearInterval(legacyChatPhotoMigrationTimer);
+    clearInterval(dashboardCoverRefreshTimer);
     clearTimeout(initialCalendarSync);
     clearTimeout(initialEventReminderSweep);
     clearTimeout(initialNextcloudSweep);
     clearTimeout(initialBundledCloudProvisioning);
     clearTimeout(initialLegacyChatPhotoMigration);
+    clearTimeout(initialDashboardCoverRefresh);
     app.locals.stopHomeAssistantSockets?.();
     app.locals.stopNextcloudSyncDebounces?.();
   });

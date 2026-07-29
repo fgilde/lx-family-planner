@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.12.1</strong> ·
+  <strong>Aktuelle Version: 1.13.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -74,8 +74,8 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   Profilordnern, Ordnerwahl vor Uploads, integrierter Dateiübersicht,
   Drag-and-drop-Upload, Zwei-Wege-Kalenderabgleich und verschlüsselten
   Sicherungen
-- Elternzentrale für Profile, Aufgaben, Punktestände, freigegebene YouTube-/
-  Spotify-Widgets und Geräte
+- Elternzentrale für Profile, Aufgaben, Punktestände und Geräte sowie
+  freigegebene YouTube-/Spotify-Widgets mit echten Medien-Covern
 - eigene Kinderoberfläche mit Raketen-, Einhorn-, Feen-, Dino-, Sonnen- und
   Heldenwelt
 - Erwachsenen-Themes von Waldruhe und Küstenruhe bis Backstage und Neon Nacht

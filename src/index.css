@@ -7682,10 +7682,18 @@ textarea {
   display: grid;
   width: 39px;
   height: 39px;
+  overflow: hidden;
   place-items: center;
   border-radius: 12px;
   color: #fff;
   background: #e0474d;
+}
+
+.admin-media-cover {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .admin-link-list article[data-kind='spotify'] {
@@ -8292,6 +8300,43 @@ textarea {
   isolation: isolate;
 }
 
+.child-media-cover {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 420ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+.child-media-cover-fallback {
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.17);
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.22), transparent 26%),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--media-accent) 88%, #172320),
+      color-mix(in srgb, var(--media-accent) 45%, #101817)
+    );
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 13vw, 8rem);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.child-media-cover-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(5, 10, 10, 0.76), rgba(5, 10, 10, 0.2) 65%),
+    linear-gradient(0deg, rgba(5, 10, 10, 0.7), transparent 68%);
+}
+
 .child-media-grid a[data-kind='spotify'] {
   background:
     radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.16), transparent 25%),
@@ -8303,10 +8348,17 @@ textarea {
   box-shadow: 0 20px 38px color-mix(in srgb, var(--media-accent) 30%, transparent);
 }
 
+.child-media-grid a:hover .child-media-cover,
+.child-media-grid a:focus-visible .child-media-cover {
+  transform: scale(1.045);
+}
+
 .child-media-number {
   grid-column: 1;
   grid-row: 1;
   align-self: start;
+  position: relative;
+  z-index: 2;
   color: rgba(255, 255, 255, 0.62);
   font-size: 0.66rem;
   font-weight: 950;
@@ -8335,6 +8387,8 @@ textarea {
   display: grid;
   min-width: 0;
   align-self: center;
+  position: relative;
+  z-index: 2;
 }
 
 .child-media-grid small {
@@ -8343,6 +8397,7 @@ textarea {
   font-weight: 850;
   letter-spacing: 0.07em;
   text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.42);
 }
 
 .child-media-grid strong {
@@ -8351,6 +8406,7 @@ textarea {
   font-size: 1.06rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
 .child-media-copy em {
@@ -8370,16 +8426,20 @@ textarea {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.child-media-decoration {
+.child-media-provider {
   position: absolute;
-  top: -22px;
-  right: -6px;
-  z-index: -1;
-  color: rgba(255, 255, 255, 0.13);
-  font-size: 7.5rem;
-  font-weight: 950;
-  line-height: 1;
-  transform: rotate(9deg);
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(7, 13, 12, 0.55);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(9px);
 }
 
 @media (max-width: 900px) {

@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.13.0': {
+    version: '1.13.0',
+    eyebrow: 'Die Medien-Lounge bekommt ein Gesicht',
+    title: 'YouTube und Spotify zeigen jetzt ihre echten Cover',
+    intro:
+      'Freigegebene Medien sehen für Kinder jetzt wie eine echte kleine Mediathek aus. Statt großer Plattform-Symbole zeigt LX das passende Kanal-, Video-, Playlist- oder Album-Bild.',
+    highlights: [
+      {
+        id: 'real-media-covers',
+        title: 'Echte Bilder statt Standardsymbol',
+        description:
+          'Die Kacheln verwenden das offizielle Vorschaubild des verknüpften YouTube- oder Spotify-Inhalts.'
+      },
+      {
+        id: 'existing-widget-covers',
+        title: 'Vorhandene Widgets werden ergänzt',
+        description:
+          'Bereits freigegebene Medienlinks erhalten ihre Cover automatisch im Hintergrund. Die Eltern müssen sie nicht neu anlegen.'
+      },
+      {
+        id: 'cover-first-kid-design',
+        title: 'Wie eine kleine Mediathek',
+        description:
+          'Großflächige Cover, ein ruhiger Lesekontrast und eine klare Abspielschaltfläche machen die Kinderansicht aufregender und trotzdem übersichtlich.'
+      },
+      {
+        id: 'safe-cover-sources',
+        title: 'Nur geprüfte Bildquellen',
+        description:
+          'LX akzeptiert ausschließlich verschlüsselte Bildadressen der offiziellen YouTube- und Spotify-Bildserver.'
+      }
+    ],
+    closing:
+      'Wenn ein Dienst vorübergehend kein Bild liefert, bleibt die Kachel mit einem farbigen, gut lesbaren Ersatzmotiv benutzbar.'
+  },
   '1.12.1': {
     version: '1.12.1',
     eyebrow: 'Chatbilder sind jetzt wirklich Cloud-Dateien',
