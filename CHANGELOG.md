@@ -2,6 +2,21 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.10.2] – 2026-07-29
+
+### Selbstheilende Family-Cloud-Konten
+
+- verwaltete Nextcloud-Verknüpfungen werden beim automatischen Cloud-Lauf
+  nicht mehr ungeprüft übersprungen
+- wurde das zugehörige Nextcloud-Konto gelöscht oder ist sein App-Zugang
+  ungültig, richtet LX dasselbe isolierte Familienkonto automatisch neu ein
+- Familienordner, Kalender, App-Passwort und das Speicherlimit werden dabei
+  wiederhergestellt
+- fremde oder manuell verbundene Nextcloud-Instanzen werden von der Reparatur
+  nicht verändert
+- ein Regressionstest bildet das gelöschte Testkonto und die anschließende
+  automatische Wiederherstellung vollständig ab
+
 ## [1.10.1] – 2026-07-29
 
 ### Automatische Nextcloud-Konten und sichtbarer Speicher

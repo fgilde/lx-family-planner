@@ -3427,16 +3427,39 @@ export function createApp() {
   };
   let bundledCloudProvisioning = false;
   app.locals.provisionBundledCloudFamily = async familyId => {
+    const integration = getIntegration(familyId, 'nextcloud');
     if (
       !NEXTCLOUD_AUTO_PROVISION ||
       !bundledNextcloudAdmin() ||
       !bundledNextcloudPublicUrl() ||
-      getIntegration(familyId, 'nextcloud') ||
-      getAppMeta(nextcloudAutoProvisionMetaKey(familyId)) === 'true'
+      (!integration &&
+        getAppMeta(nextcloudAutoProvisionMetaKey(familyId)) === 'true') ||
+      (integration && !integration.config?.bundled)
     ) {
       return { skipped: true, familyId };
     }
-    const result = await provisionBundledNextcloudForFamily(familyId);
+    let repair = false;
+    if (integration) {
+      try {
+        await inspectNextcloud(nextcloudConnection(integration));
+        return {
+          skipped: true,
+          familyId,
+          healthy: true
+        };
+      } catch (error) {
+        if (error.remoteStatus !== 401) {
+          throw error;
+        }
+        repair = true;
+        console.warn(
+          `Das verwaltete Family-Cloud-Konto fÃ¼r Familie ${familyId} fehlt oder besitzt ungÃ¼ltige Zugangsdaten und wird neu eingerichtet.`
+        );
+      }
+    }
+    const result = await provisionBundledNextcloudForFamily(familyId, {
+      replace: repair
+    });
     try {
       await performNextcloudSync(familyId, result.integration);
     } catch (error) {
@@ -3446,7 +3469,11 @@ export function createApp() {
       );
     }
     publishFamilyChange(familyId, 'nextcloud-provisioned');
-    return { skipped: false, familyId };
+    return {
+      skipped: false,
+      familyId,
+      repaired: repair
+    };
   };
   app.locals.runBundledCloudProvisioning = async () => {
     if (bundledCloudProvisioning) {

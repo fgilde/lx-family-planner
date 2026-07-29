@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.10.2': {
+    version: '1.10.2',
+    eyebrow: 'Family Cloud repariert sich jetzt selbst',
+    title: 'Gelöschte Cloud-Konten bleiben nicht mehr hängen',
+    intro:
+      'War in LX noch eine alte Cloud-Verknüpfung gespeichert, obwohl das zugehörige Nextcloud-Konto bereits gelöscht wurde, konnte kein Familienordner geöffnet werden. LX erkennt und behebt diesen Zustand nun automatisch.',
+    highlights: [
+      {
+        id: 'cloud-managed-health-check',
+        title: 'Alte Verknüpfungen werden geprüft',
+        description:
+          'LX kontrolliert verwaltete Familienkonten beim Start und danach regelmäßig, statt eine gespeicherte Verbindung blind als funktionsfähig anzusehen.'
+      },
+      {
+        id: 'cloud-account-self-heal',
+        title: 'Familienkonto wird wiederhergestellt',
+        description:
+          'Fehlt das Konto, entstehen automatisch ein neuer sicherer Zugang, der Familienordner, der Kalender und das vorgesehene Speicherlimit.'
+      },
+      {
+        id: 'cloud-external-safe',
+        title: 'Eigene Clouds bleiben unangetastet',
+        description:
+          'Die Reparatur gilt ausschließlich für die von LX selbst verwaltete Family Cloud. Manuell verbundene Nextcloud-Server werden nicht verändert.'
+      },
+      {
+        id: 'cloud-no-extra-login',
+        title: 'Keine zusätzlichen Anmeldungen',
+        description:
+          'Familienmitglieder öffnen den gemeinsamen Cloud-Bereich weiter direkt in LX und brauchen dafür kein eigenes Nextcloud-Passwort.'
+      }
+    ],
+    closing:
+      'Die Profile einer Familie verwenden weiterhin gemeinsam ihren abgeschotteten Familienbereich. Es sind keine zusätzlichen Nextcloud-Passwörter für Kinder oder verwaltete Profile nötig.'
+  },
   '1.10.1': {
     version: '1.10.1',
     eyebrow: 'Family Cloud ohne manuellen Einrichtungsschritt',

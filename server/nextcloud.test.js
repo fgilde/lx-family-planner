@@ -170,6 +170,11 @@ const davServer = createServer(async (req, res) => {
       : [];
     const accountId = credentials[0] || 'family';
     const account = provisionedUsers.get(accountId);
+    if (accountId.startsWith('lx-') && !account) {
+      res.statusCode = 401;
+      res.end('Unauthorized');
+      return;
+    }
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
       ocs: {
@@ -600,4 +605,16 @@ test('bundled Family Cloud provisions missing family storage automatically', asy
     'family-nextcloud'
   );
   assert.equal(repeated.skipped, true);
+  assert.equal(repeated.healthy, true);
+
+  provisionedUsers.delete(integration.config.userId);
+  const repaired = await app.locals.provisionBundledCloudFamily(
+    'family-nextcloud'
+  );
+  assert.equal(repaired.skipped, false);
+  assert.equal(repaired.repaired, true);
+  assert.equal(
+    provisionedUsers.get(integration.config.userId).quota,
+    '12GB'
+  );
 });
