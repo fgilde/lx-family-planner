@@ -2,6 +2,22 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.12.1] – 2026-07-29
+
+### Chatfotos vollständig im Familienarchiv
+
+- eingebettete Fotos aus älteren App- und Browserständen werden beim Senden
+  automatisch als echte Cloud-Anhänge gespeichert
+- vorhandene eingebettete Chatfotos werden nach einem Update automatisch in
+  `Familie/Chat/Jahr-Monat` verschoben
+- die Nachricht bleibt während der Umstellung vollständig erhalten und
+  verweist danach auf die geschützte Cloud-Datei
+- Chatbilder lassen sich per Tipp in einer großen Vollbildansicht öffnen
+- die Bildansicht funktioniert auf Handy, Tablet und Desktop, liegt sicher
+  über allen Menüs und bietet einen direkten Download
+- Regressionstest deckt ausdrücklich den alten `photo`-Sendeweg und den
+  anschließenden geschützten Dateiabruf ab
+
 ## [1.12.0] – 2026-07-29
 
 ### Native App-Updates und Chat-Anhänge in der Family Cloud

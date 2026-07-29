@@ -421,6 +421,40 @@ function chatAttachmentKind(mimeType, fileName) {
   return 'document';
 }
 
+function decodeLegacyChatPhoto(value) {
+  const match = String(value || '').match(
+    /^data:(image\/(?:jpeg|png|gif|webp|avif));base64,([a-z0-9+/=\r\n]+)$/i
+  );
+  if (!match) {
+    const error = new Error(
+      'Das eingebettete Chatfoto besitzt kein unterstütztes Bildformat.'
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  const content = Buffer.from(match[2].replace(/\s/g, ''), 'base64');
+  if (!content.length || content.length > CHAT_ATTACHMENT_MAX_BYTES) {
+    const error = new Error(
+      'Das eingebettete Chatfoto ist leer oder größer als 100 MB.'
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  const mimeType = match[1].toLowerCase();
+  const extension = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
+    'image/webp': 'webp',
+    'image/avif': 'avif'
+  }[mimeType] || 'jpg';
+  return {
+    content,
+    mimeType,
+    fileName: `Chatfoto-${new Date().toISOString().slice(0, 19).replaceAll(':', '-')}.${extension}`
+  };
+}
+
 function chatAttachmentClaim(familyId, attachment) {
   return createHmac('sha256', ENCRYPTION_KEY)
     .update([
@@ -3889,21 +3923,24 @@ export function createApp() {
       return workspace;
     }
   };
-  const uploadChatAttachment = async (familyId, req) => {
-    let fileName = cleanText(req.headers['x-lx-file-name'], '', 1000);
-    try {
-      fileName = decodeURIComponent(fileName);
-    } catch {
-      // Ein bereits dekodierter Dateiname bleibt verwendbar.
+  const uploadChatAttachmentContent = async (
+    familyId,
+    {
+      fileName,
+      mimeType = 'application/octet-stream',
+      content,
+      chatTarget = 'group'
     }
+  ) => {
+    fileName = cleanText(fileName, '', 1000);
     if (!fileName) {
       const error = new Error('Der Dateiname fehlt.');
       error.statusCode = 400;
       throw error;
     }
-    const content = Buffer.isBuffer(req.body)
-      ? req.body
-      : Buffer.from(req.body || '');
+    content = Buffer.isBuffer(content)
+      ? content
+      : Buffer.from(content || '');
     if (!content.length) {
       const error = new Error('Die ausgewählte Datei ist leer.');
       error.statusCode = 400;
@@ -3914,11 +3951,7 @@ export function createApp() {
       error.statusCode = 413;
       throw error;
     }
-    const chatTarget = cleanText(
-      req.headers['x-lx-chat-target'],
-      'group',
-      100
-    ) || 'group';
+    chatTarget = cleanText(chatTarget, 'group', 100) || 'group';
     if (chatTarget !== 'group') {
       const targetMember = getMember(familyId, chatTarget);
       if (
@@ -3941,11 +3974,7 @@ export function createApp() {
       `${workspace.folder}/${relativeFolder}`
     );
     const originalName = safeCloudName(fileName, 'Datei');
-    const mimeType = cleanText(
-      req.headers['x-lx-file-type'],
-      'application/octet-stream',
-      200
-    );
+    mimeType = cleanText(mimeType, 'application/octet-stream', 200);
     const attachmentId = `attachment-${randomUUID()}`;
     const encrypted = chatTarget !== 'group';
     const protectedContent = encrypted
@@ -3981,6 +4010,97 @@ export function createApp() {
       ...attachment,
       claim: chatAttachmentClaim(familyId, attachment)
     };
+  };
+  const uploadChatAttachment = async (familyId, req) => {
+    let fileName = cleanText(req.headers['x-lx-file-name'], '', 1000);
+    try {
+      fileName = decodeURIComponent(fileName);
+    } catch {
+      // Ein bereits dekodierter Dateiname bleibt verwendbar.
+    }
+    return uploadChatAttachmentContent(familyId, {
+      fileName,
+      mimeType: req.headers['x-lx-file-type'],
+      content: req.body,
+      chatTarget: req.headers['x-lx-chat-target']
+    });
+  };
+  const archiveLegacyChatPhoto = async (familyId, record) => {
+    if (!record?.photo) return record;
+    const target = cleanText(record.target, 'group', 100) || 'group';
+    const existingAttachments = Array.isArray(record.attachments)
+      ? record.attachments
+      : [];
+    if (existingAttachments.length >= CHAT_ATTACHMENT_MAX_COUNT) {
+      const error = new Error(
+        `Pro Nachricht sind höchstens ${CHAT_ATTACHMENT_MAX_COUNT} Anhänge möglich.`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    const legacyPhoto = decodeLegacyChatPhoto(record.photo);
+    const uploaded = await uploadChatAttachmentContent(familyId, {
+      ...legacyPhoto,
+      chatTarget: target
+    });
+    const [archivedPhoto] = sanitizeChatAttachments(
+      [uploaded],
+      familyId,
+      target
+    );
+    return {
+      ...record,
+      photo: '',
+      attachments: [...existingAttachments, archivedPhoto]
+    };
+  };
+  let legacyChatPhotoMigrationRunning = false;
+  app.locals.migrateLegacyChatPhotosForFamily = async familyId => {
+    const messages = listRecords(familyId, 'chatMessages')
+      .filter(message => Boolean(message.photo))
+      .slice(0, 500);
+    let migrated = 0;
+    const errors = [];
+    for (const message of messages) {
+      try {
+        const archived = await archiveLegacyChatPhoto(familyId, message);
+        updateRecord(familyId, 'chatMessages', message.id, {
+          photo: '',
+          attachments: archived.attachments,
+          cloudPhotoMigratedAt: Date.now()
+        });
+        migrated += 1;
+      } catch (error) {
+        errors.push({ messageId: message.id, error: error.message });
+        console.warn(
+          `Chatfoto ${message.id} der Familie ${familyId} konnte nicht in die Cloud verschoben werden:`,
+          error.message
+        );
+      }
+    }
+    if (migrated) publishFamilyChange(familyId, 'chat-photo-migration');
+    return { familyId, migrated, errors };
+  };
+  app.locals.runLegacyChatPhotoMigration = async () => {
+    if (legacyChatPhotoMigrationRunning) {
+      return { skipped: true, migrated: 0, errors: [] };
+    }
+    legacyChatPhotoMigrationRunning = true;
+    let migrated = 0;
+    const errors = [];
+    try {
+      for (const family of listPublicFamilies().slice(0, 500)) {
+        const integration = getIntegration(family.id, 'nextcloud');
+        if (!integration || integration.config?.enabled === false) continue;
+        const result =
+          await app.locals.migrateLegacyChatPhotosForFamily(family.id);
+        migrated += result.migrated;
+        errors.push(...result.errors);
+      }
+      return { skipped: false, migrated, errors };
+    } finally {
+      legacyChatPhotoMigrationRunning = false;
+    }
   };
   const sendChatAttachmentContent = async (
     res,
@@ -5822,7 +5942,7 @@ export function createApp() {
   app.post(
     '/api/family/chat-guests/:invitationId/messages',
     requireAuth,
-    (req, res) => {
+    async (req, res) => {
       const invitation = getFamilyChatGuest(
         req.session.familyId,
         req.params.invitationId
@@ -5853,6 +5973,15 @@ export function createApp() {
           error: 'Die Nachricht ist leer.'
         });
       }
+      const preparedMessage = await archiveLegacyChatPhoto(
+        invitation.hostFamily.id,
+        {
+          text,
+          photo,
+          attachments,
+          target: 'group'
+        }
+      );
       const record = createRecord(
         invitation.hostFamily.id,
         'chatMessages',
@@ -5865,9 +5994,9 @@ export function createApp() {
           senderColor: member.color,
           guestInvitationId: invitation.id,
           guestFamilyId: invitation.guestFamily.id,
-          text,
-          photo,
-          attachments,
+          text: preparedMessage.text,
+          photo: preparedMessage.photo,
+          attachments: preparedMessage.attachments,
           target: 'group',
           timestamp: Date.now()
         }
@@ -6534,7 +6663,7 @@ export function createApp() {
     res.json({ success: true, records, version });
   });
 
-  app.post('/api/resources/:type', requireAuth, requireResourceManager, (req, res) => {
+  app.post('/api/resources/:type', requireAuth, requireResourceManager, async (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
     let input = ensureObject(req.body);
     if (req.params.type === 'pocketMoneyTransactions') {
@@ -6545,6 +6674,10 @@ export function createApp() {
     }
     if (req.params.type === 'chatMessages') {
       input = sessionChatRecord(req, input);
+      input = await archiveLegacyChatPhoto(
+        req.session.familyId,
+        input
+      );
     }
     if (req.params.type === 'moodCheckins') {
       if (!req.session.memberId) {
@@ -8206,6 +8339,10 @@ export function createApp() {
       if (config.eventSyncEnabled && req.body?.syncNow !== false) {
         syncStats = await performNextcloudSync(req.session.familyId);
       }
+      await cloudWorkspaceForFamily(req.session.familyId);
+      await app.locals.migrateLegacyChatPhotosForFamily(
+        req.session.familyId
+      );
       publishFamilyChange(req.session.familyId, 'nextcloud');
       res.status(existing ? 200 : 201).json({
         success: true,
@@ -9243,6 +9380,15 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void app.locals.runBundledCloudProvisioning();
   }, 10 * 60 * 1000);
   bundledCloudProvisioningTimer.unref();
+  const legacyChatPhotoMigrationTimer = setInterval(() => {
+    void app.locals.runLegacyChatPhotoMigration().catch(error => {
+      console.warn(
+        'Die regelmäßige Chatfoto-Cloudprüfung ist fehlgeschlagen:',
+        error.message
+      );
+    });
+  }, 15 * 60 * 1000);
+  legacyChatPhotoMigrationTimer.unref();
   const initialCalendarSync = setTimeout(() => {
     void syncAllCalendarSubscriptions();
   }, 20_000);
@@ -9259,15 +9405,26 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void app.locals.runBundledCloudProvisioning();
   }, 12_000);
   initialBundledCloudProvisioning.unref();
+  const initialLegacyChatPhotoMigration = setTimeout(() => {
+    void app.locals.runLegacyChatPhotoMigration().catch(error => {
+      console.warn(
+        'Vorhandene Chatfotos konnten nicht vollständig in die Cloud verschoben werden:',
+        error.message
+      );
+    });
+  }, 18_000);
+  initialLegacyChatPhotoMigration.unref();
   server.on('close', () => {
     clearInterval(calendarSyncTimer);
     clearInterval(eventReminderTimer);
     clearInterval(nextcloudSyncTimer);
     clearInterval(bundledCloudProvisioningTimer);
+    clearInterval(legacyChatPhotoMigrationTimer);
     clearTimeout(initialCalendarSync);
     clearTimeout(initialEventReminderSweep);
     clearTimeout(initialNextcloudSweep);
     clearTimeout(initialBundledCloudProvisioning);
+    clearTimeout(initialLegacyChatPhotoMigration);
     app.locals.stopHomeAssistantSockets?.();
     app.locals.stopNextcloudSyncDebounces?.();
   });

@@ -723,6 +723,79 @@ test('bundled Family Cloud provisions missing family storage automatically', asy
       archiveContent
     );
 
+    const legacyPhotoBytes = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+      'base64'
+    );
+    const legacyPhotoResponse = await fetch(
+      `${apiBaseUrl}/api/resources/chatMessages`,
+      {
+        method: 'POST',
+        headers: {
+          cookie,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: 'Foto aus einer älteren App-Version',
+          target: 'group',
+          photo: `data:image/png;base64,${legacyPhotoBytes.toString('base64')}`
+        })
+      }
+    );
+    assert.equal(legacyPhotoResponse.status, 201);
+    const legacyPhotoMessage = (await legacyPhotoResponse.json()).record;
+    assert.equal(legacyPhotoMessage.photo, '');
+    assert.equal(legacyPhotoMessage.attachments.length, 1);
+    assert.equal(legacyPhotoMessage.attachments[0].kind, 'image');
+    assert.match(
+      legacyPhotoMessage.attachments[0].cloudPath,
+      /^Familie\/Chat\/\d{4}-\d{2}\//
+    );
+    const legacyPhotoDownload = await fetch(
+      `${apiBaseUrl}/api/chat/messages/${
+        encodeURIComponent(legacyPhotoMessage.id)
+      }/attachments/${
+        encodeURIComponent(legacyPhotoMessage.attachments[0].id)
+      }?inline=true`,
+      { headers: { cookie } }
+    );
+    assert.equal(legacyPhotoDownload.status, 200);
+    assert.match(
+      legacyPhotoDownload.headers.get('content-disposition'),
+      /^inline;/
+    );
+    assert.deepEqual(
+      Buffer.from(await legacyPhotoDownload.arrayBuffer()),
+      legacyPhotoBytes
+    );
+
+    const historicalPhoto = createRecord(
+      'family-nextcloud',
+      'chatMessages',
+      {
+        id: 'historical-legacy-photo',
+        senderId: 'adult-1',
+        senderName: 'Alex',
+        text: 'Dieses Bild lag schon im bisherigen Chat.',
+        target: 'group',
+        timestamp: Date.now() - 60_000,
+        photo: `data:image/png;base64,${legacyPhotoBytes.toString('base64')}`,
+        attachments: []
+      }
+    );
+    assert.ok(historicalPhoto.photo);
+    const migrationResult =
+      await app.locals.migrateLegacyChatPhotosForFamily('family-nextcloud');
+    assert.equal(migrationResult.migrated, 1);
+    const migratedHistoricalPhoto = getRecord(
+      'family-nextcloud',
+      'chatMessages',
+      historicalPhoto.id
+    );
+    assert.equal(migratedHistoricalPhoto.photo, '');
+    assert.equal(migratedHistoricalPhoto.attachments.length, 1);
+    assert.equal(migratedHistoricalPhoto.attachments[0].kind, 'image');
+
     const privateContent = Buffer.from('private-family-document');
     const privateUploadResponse = await fetch(
       `${apiBaseUrl}/api/chat/attachments`,

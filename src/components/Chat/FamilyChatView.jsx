@@ -17,7 +17,8 @@ import {
   Send,
   ShieldCheck,
   Users,
-  X
+  X,
+  ZoomIn
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import {
@@ -119,10 +120,68 @@ async function responseError(response) {
   }
 }
 
+function ChatImageViewer({ image, onClose }) {
+  useEffect(() => {
+    if (!image) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [image, onClose]);
+
+  if (!image) return null;
+
+  return (
+    <div
+      className="chat-image-viewer"
+      role="presentation"
+      onClick={onClose}
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${image.name} groß ansehen`}
+        onClick={event => event.stopPropagation()}
+      >
+        <header>
+          <span>
+            <small>Chatbild</small>
+            <strong>{image.name}</strong>
+          </span>
+          <div>
+            <a href={image.src} download={image.name}>
+              <Download size={17} />
+              <span>Speichern</span>
+            </a>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Bildansicht schließen"
+            >
+              <X size={19} />
+            </button>
+          </div>
+        </header>
+        <div className="chat-image-viewer-stage">
+          <img src={image.src} alt={image.name} />
+        </div>
+        <footer>Zum Schließen außerhalb des Bildes tippen</footer>
+      </section>
+    </div>
+  );
+}
+
 function ChatAttachment({
   attachment,
   guestInvitationId,
   message,
+  onOpenImage,
   showToast
 }) {
   const [source, setSource] = useState('');
@@ -187,11 +246,14 @@ function ChatAttachment({
       <button
         type="button"
         className="chat-attachment-image"
-        onClick={download}
-        title={`${attachment.name} herunterladen`}
+        onClick={() => onOpenImage({
+          src: source,
+          name: attachment.name
+        })}
+        title={`${attachment.name} groß ansehen`}
       >
         <img src={source} alt={attachment.name} />
-        <span><Download size={14} /> {attachment.name}</span>
+        <span><ZoomIn size={14} /> {attachment.name}</span>
       </button>
     );
   }
@@ -284,6 +346,7 @@ export default function FamilyChatView() {
   const [sending, setSending] = useState(false);
   const [uploadLabel, setUploadLabel] = useState('');
   const [guestMessages, setGuestMessages] = useState([]);
+  const [imageViewer, setImageViewer] = useState(null);
   const messagesEndRef = useRef(null);
   const pendingAttachmentsRef = useRef([]);
 
@@ -559,7 +622,8 @@ export default function FamilyChatView() {
   };
 
   return (
-    <div className="family-chat-shell">
+    <>
+      <div className="family-chat-shell">
       <aside className="chat-directory">
         <header className="chat-directory-header">
           <span><MessageCircleMore size={17} /></span>
@@ -713,11 +777,22 @@ export default function FamilyChatView() {
                     </small>
                     <div className="chat-bubble">
                       {message.photo && (
-                        <img
-                          className="chat-legacy-photo"
-                          src={message.photo}
-                          alt="Gesendeter Anhang"
-                        />
+                        <button
+                          type="button"
+                          className="chat-legacy-photo-button"
+                          onClick={() => setImageViewer({
+                            src: message.photo,
+                            name: 'Chatfoto'
+                          })}
+                          title="Chatfoto groß ansehen"
+                        >
+                          <img
+                            className="chat-legacy-photo"
+                            src={message.photo}
+                            alt="Gesendeter Anhang"
+                          />
+                          <span><ZoomIn size={14} /> Groß ansehen</span>
+                        </button>
                       )}
                       {Array.isArray(message.attachments) &&
                         message.attachments.map(attachment => (
@@ -726,6 +801,7 @@ export default function FamilyChatView() {
                             attachment={attachment}
                             guestInvitationId={activeGuestChat?.id}
                             message={message}
+                            onOpenImage={setImageViewer}
                             showToast={showToast}
                           />
                         ))}
@@ -827,6 +903,11 @@ export default function FamilyChatView() {
           </small>
         </form>
       </section>
-    </div>
+      </div>
+      <ChatImageViewer
+        image={imageViewer}
+        onClose={() => setImageViewer(null)}
+      />
+    </>
   );
 }

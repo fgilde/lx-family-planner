@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.12.1': {
+    version: '1.12.1',
+    eyebrow: 'Chatbilder sind jetzt wirklich Cloud-Dateien',
+    title: 'Fotos landen zuverlässig im Familienarchiv',
+    intro:
+      'Auch ältere App- und Browserstände werden jetzt automatisch auf den sicheren Cloud-Weg umgeleitet. Bereits vorhandene Chatfotos räumt LX selbstständig nachträglich ins Familienarchiv.',
+    highlights: [
+      {
+        id: 'legacy-photo-cloud-archive',
+        title: 'Kein Foto bleibt mehr im Chatdatensatz',
+        description:
+          'Eingebettete Bilder werden als echte Dateien unter Familie/Chat gespeichert. Die Nachricht behält nur noch den geschützten Verweis.'
+      },
+      {
+        id: 'existing-photo-migration',
+        title: 'Vorhandene Bilder werden nachgeräumt',
+        description:
+          'Beim Serverstart verschiebt LX bisher eingebettete Chatbilder automatisch in die Cloud, ohne den Verlauf oder die Bildanzeige zu verlieren.'
+      },
+      {
+        id: 'chat-image-lightbox',
+        title: 'Antippen und groß ansehen',
+        description:
+          'Ein Tipp auf ein Chatbild öffnet eine große, übersichtliche Bildansicht mit Download – passend für Handy, Tablet und Desktop.'
+      },
+      {
+        id: 'private-photo-protection',
+        title: 'Private Bilder bleiben privat',
+        description:
+          'Fotos in Direktnachrichten werden wie andere private Anhänge verschlüsselt abgelegt und nur im passenden Chat entschlüsselt.'
+      }
+    ],
+    closing:
+      'Die Reparatur arbeitet im Hintergrund. Familieninhalte und bereits gespeicherte Cloud-Dateien bleiben unverändert.'
+  },
   '1.12.0': {
     version: '1.12.0',
     eyebrow: 'Updates in der App und ein aufgeräumter Datei-Alltag',
