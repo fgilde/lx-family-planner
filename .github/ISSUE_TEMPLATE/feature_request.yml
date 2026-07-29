@@ -1,0 +1,47 @@
+name: Idee vorschlagen
+description: Eine Funktion, Integration oder Verbesserung für Familien.
+title: "[Idee] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: situation
+    attributes:
+      label: Welche Alltagssituation soll einfacher werden?
+      placeholder: Erzähl kurz, wann und für wen die Funktion hilfreich wäre.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Wie stellst du dir die Lösung vor?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Für wen ist die Idee besonders wichtig?
+      multiple: true
+      options:
+        - Erwachsene
+        - Kinder
+        - Teenager
+        - Großeltern
+        - Pflege / verwaltete Profile
+        - Haustierprofile
+        - Alle
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Was nutzt du heute als Ersatz?
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Einordnung
+      options:
+        - label: Die Idee passt zu einem privaten, selbst gehosteten Familienplaner.
+          required: true

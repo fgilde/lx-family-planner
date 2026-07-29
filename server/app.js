@@ -2043,6 +2043,43 @@ function sessionMiddleware(req, _res, next) {
   next();
 }
 
+const DEMO_ALLOWED_MUTATIONS = new Set([
+  '/api/auth/family',
+  '/api/auth/member',
+  '/api/auth/logout',
+  '/api/release-notes/acknowledge'
+]);
+
+function isReadOnlyDemoFamily(familyId) {
+  const configuredFamilyId = String(
+    process.env.DEMO_FAMILY_ID || ''
+  ).trim();
+  return Boolean(
+    configuredFamilyId &&
+    familyId &&
+    configuredFamilyId === familyId
+  );
+}
+
+function protectReadOnlyDemo(req, res, next) {
+  if (
+    !req.session ||
+    !isReadOnlyDemoFamily(req.session.familyId) ||
+    ['GET', 'HEAD', 'OPTIONS'].includes(req.method) ||
+    req.path.startsWith('/api/public/') ||
+    DEMO_ALLOWED_MUTATIONS.has(req.path)
+  ) {
+    return next();
+  }
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(403).json({
+    success: false,
+    readOnlyDemo: true,
+    error:
+      'Die öffentliche Demo ist schreibgeschützt. Schau dich gerne um – Änderungen sind nur in deiner eigenen Installation möglich.'
+  });
+}
+
 function requireAuth(req, res, next) {
   if (!req.session) {
     return res.status(401).json({
@@ -4576,6 +4613,7 @@ export function createApp() {
   });
   app.use(express.json({ limit: JSON_LIMIT }));
   app.use(sessionMiddleware);
+  app.use(protectReadOnlyDemo);
 
   app.get('/api/health', (_req, res) => {
     res.json({
@@ -4886,6 +4924,7 @@ export function createApp() {
       ...bootstrapForSession(req.session),
       activeMemberId: req.session.memberId,
       appVersion: APP_VERSION,
+      readOnlyDemo: isReadOnlyDemoFamily(req.session.familyId),
       releaseNotes,
       nativePushServer: publicFirebasePushStatus(),
       integrations: integrationStatus(req.session.familyId, member)

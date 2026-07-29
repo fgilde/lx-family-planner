@@ -1,39 +1,77 @@
 <p align="center">
-  <img src="public/icon-192.png" alt="LX Family Planner" width="92">
-</p>
-
-<h1 align="center">LX Family Planner</h1>
-
-<p align="center">
-  Der private Familienraum für Kalender, Aufgaben, Einkauf, Essen, Chat und all die kleinen Dinge dazwischen.
+  <img src="docs/readme-hero.svg" alt="LX Family Planner – der selbst gehostete Familienplaner" width="100%">
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.13.0</strong> ·
-  <a href="CHANGELOG.md">Was ist neu?</a>
+  <a href="https://familie.laxxx-lab.de/"><img alt="Live-Demo öffnen" src="https://img.shields.io/badge/LIVE--DEMO-ÖFFNEN-E75D4A?style=for-the-badge"></a>
+  <a href="https://familie.laxxx-lab.de/apk/latest.apk"><img alt="Android-App herunterladen" src="https://img.shields.io/badge/ANDROID--APP-LADEN-176653?style=for-the-badge"></a>
+  <a href="#in-5-minuten-startklar"><img alt="Installation starten" src="https://img.shields.io/badge/IN%205%20MINUTEN-STARTKLAR-E4B76B?style=for-the-badge&labelColor=19332F"></a>
 </p>
 
-Der LX Family Planner ist eine selbst gehostete Familien-App für das eigene
-Heimnetz. Erwachsene bekommen einen ruhigen, vollständigen Überblick. Kinder
-sehen eine vereinfachte Erlebniswelt mit Missionen, Sternen und eigenen
-Themenwelten. Alle Daten bleiben auf dem eigenen Server.
+<p align="center">
+  <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Version 1.13.0" src="https://img.shields.io/badge/version-1.13.0-17483F">
+  <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
+  <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
+</p>
+
+<p align="center">
+  <strong>Ein privates Family OS für Kalender, Aufgaben, Essen, Einkauf, Chat, Cloud und Kinderabenteuer.</strong><br>
+  Läuft auf eurem Server. Gehört eurer Familie.
+</p>
+
+## Ausprobieren – ohne Installation
+
+> [!TIP]
+> **[Live-Demo öffnen](https://familie.laxxx-lab.de/)**<br>
+> Familie: `Demo` · Passwort: `demo`<br>
+> Wähle danach Doris für die Erwachsenenansicht oder Jeremy Pascal für die
+> Kinderwelt. Die öffentliche Demo ist ein gemeinsamer, schreibgeschützter
+> Schauraum – bitte keine persönlichen Daten eingeben.
+
+## Warum LX Family?
+
+| Alles an einem Ort | Kinder machen wirklich mit | Eure Daten bleiben eure |
+| --- | --- | --- |
+| Kalender, Aufgaben, Einkauf, Essen, Chat, Dateien und Erinnerungen greifen ineinander. | Eigene Welten, Missionen, Sterne, Routinen, Sparziele und ein Belohnungsshop statt Erwachsenen-UI in klein. | Self-hosted mit SQLite, Docker, sicheren Backups und optionaler Nextcloud – ohne Werbetracking. |
 
 ## Ein Blick in die App
+
+![Erwachsenen-Dashboard der Demo-Familie](docs/screenshots/demo-dashboard.png)
+
+| Profilauswahl für die ganze Familie | Eigene Kinderwelt |
+| --- | --- |
+| ![Bubble-Profilauswahl der Demo-Familie](docs/screenshots/demo-profilauswahl.png) | ![Kinderprofil im Helden-Theme](docs/screenshots/demo-kinderprofil.png) |
+
+![Tablet Mode im Querformat](docs/screenshots/demo-tablet-modus.png)
+
+<details>
+<summary><strong>Noch mehr ansehen: Mobile Ansicht, Chat und weitere Themes</strong></summary>
+
+| Mobiler Familienchat | Raketenwelt |
+| --- | --- |
+| ![Familienchat auf einem Smartphone](docs/screenshots/chat-mobil.jpg) | ![Kinderprofil im Raketen-Theme](docs/screenshots/kinderprofil-rakete.jpg) |
 
 | Waldruhe | Backstage |
 | --- | --- |
 | ![Erwachsenen-Dashboard im Theme Waldruhe](docs/screenshots/dashboard-waldruhe.jpg) | ![Erwachsenen-Dashboard im Theme Backstage](docs/screenshots/dashboard-backstage.jpg) |
 
-| Kinderprofil | Tablet Mode |
-| --- | --- |
-| ![Kinderprofil im Raketen-Theme](docs/screenshots/kinderprofil-rakete.jpg) | ![Tablet Mode im Querformat](docs/screenshots/tablet-modus.jpg) |
-
-<details>
-<summary>Mobiler Familienchat</summary>
-
-![Familienchat auf einem Smartphone](docs/screenshots/chat-mobil.jpg)
-
 </details>
+
+## In 5 Minuten startklar
+
+```bash
+git clone https://github.com/laxxx-lab/lx-family-planner.git
+cd lx-family-planner
+cp .env.example .env
+sed -i "s/^APP_SECRET=.*/APP_SECRET=$(openssl rand -hex 32)/" .env
+docker compose up -d --build
+```
+
+Danach `http://SERVER-IP:3001` öffnen, Familie anlegen und losplanen. Unter
+Windows erledigt `Start-Familienplaner.cmd` dieselben Schritte bequem per
+Doppelklick. Für Proxmox gibt es weiter unten einen eigenen LXC-Helper.
 
 ## Das ist enthalten
 
@@ -881,6 +919,7 @@ Die Vorlage liegt in `.env.example`.
 | `PORT` | interner Server-Port, Standard `3001` |
 | `HOST_PORT` | Port des Docker-Hosts, Standard `3001` |
 | `PUBLIC_APP_URL` | öffentliche HTTPS-Adresse für App-Download und QR-Code |
+| `DEMO_FAMILY_ID` | optional; schützt genau dieses Familienkonto als öffentliche Nur-Lese-Demo |
 | `DATABASE_FILE` | abweichender Pfad zur SQLite-Datenbank |
 | `LEGACY_DATABASE_FILE` | optionaler JSON-Altbestand für die erste Migration |
 | `EVENT_REMINDER_INTERVAL_SECONDS` | Prüfintervall für fällige Terminerinnerungen |
@@ -950,3 +989,16 @@ Der Planer ist für den privaten, selbst gehosteten Familienbetrieb ausgelegt.
 Vor Aktualisierungen sollte immer ein Backup erstellt werden. Zugang aus dem
 öffentlichen Internet sollte nur über HTTPS, einen Reverse Proxy und eine
 bewusst konfigurierte Zugriffsschicht erfolgen.
+
+## Mitmachen
+
+Ideen und Fehlermeldungen sind willkommen. GitHub bietet dafür vorbereitete
+Formulare, die keine technischen Vorkenntnisse voraussetzen.
+
+- [Änderungen und neue Funktionen](CHANGELOG.md)
+- [Beitragen](CONTRIBUTING.md)
+- [Sicherheitsproblem vertraulich melden](SECURITY.md)
+
+<p align="center">
+  <strong>Gebaut für echte Familien – nicht für Werbeprofile.</strong>
+</p>

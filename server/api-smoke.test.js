@@ -2233,6 +2233,27 @@ test('family flow stays isolated, authorized and internally consistent', async (
     false
   );
 
+  process.env.DEMO_FAMILY_ID = registration.body.family.id;
+  const readOnlyDemoBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(readOnlyDemoBootstrap.body.readOnlyDemo, true);
+  const blockedDemoChange = await request(
+    '/api/resources/notes',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Darf nicht gespeichert werden',
+        content: 'Die öffentliche Demo bleibt unverändert.'
+      })
+    },
+    403
+  );
+  assert.equal(blockedDemoChange.body.readOnlyDemo, true);
+  assert.match(blockedDemoChange.body.error, /schreibgeschützt/i);
+  delete process.env.DEMO_FAMILY_ID;
+
   const deletion = await request('/api/family', {
     method: 'DELETE',
     headers: authenticatedHeaders,

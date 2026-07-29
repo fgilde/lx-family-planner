@@ -1,0 +1,75 @@
+name: Fehler melden
+description: Etwas funktioniert nicht wie erwartet.
+title: "[Fehler] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Melden. Bitte keine Passwörter, Tokens, privaten Schlüssel oder persönlichen Familiendaten einfügen.
+
+  - type: input
+    id: version
+    attributes:
+      label: LX-Version
+      description: Steht in den Familieneinstellungen und im Systemstatus.
+      placeholder: "z. B. 1.13.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Wo tritt der Fehler auf?
+      options:
+        - Browser am PC
+        - Browser am Handy
+        - Browser am Tablet
+        - Android-App
+        - Tablet Mode
+        - Docker / Server
+        - Nextcloud / Family Cloud
+        - Andere Stelle
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Was ist passiert?
+      placeholder: Beschreibe kurz, was du gesehen hast.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: So lässt es sich wiederholen
+      placeholder: |
+        1. Kalender öffnen
+        2. Termin auswählen
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Was sollte stattdessen passieren?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Zusätzliche Hinweise oder Screenshot
+      description: Vor dem Hochladen bitte Namen, Adressen und andere private Inhalte unkenntlich machen.
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Datenschutz
+      options:
+        - label: Ich habe Zugangsdaten und private Familiendaten aus dem Text und aus Screenshots entfernt.
+          required: true
