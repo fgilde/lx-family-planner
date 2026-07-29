@@ -26,15 +26,21 @@ const {
 const {
   ensureNextcloudCalendar,
   ensureNextcloudFolder,
+  createNextcloudFolder,
+  deleteNextcloudEntry,
+  downloadNextcloudFile,
   inspectNextcloud,
+  listNextcloudFiles,
   provisionNextcloudUser,
   revokeNextcloudAppPassword,
   syncNextcloudEvents,
-  uploadNextcloudFile
+  uploadNextcloudFile,
+  uploadNextcloudUserFile
 } = await import('./nextcloud.js');
 
 const remoteEvents = new Map();
 const uploadedFiles = new Map();
+const createdFolders = new Set();
 const provisionedUsers = new Map();
 let etagCounter = 1;
 const calendarHref = '/remote.php/dav/calendars/family/family/';
@@ -202,7 +208,62 @@ const davServer = createServer(async (req, res) => {
     ));
     return;
   }
+  if (
+    req.method === 'PROPFIND' &&
+    req.url?.startsWith('/remote.php/dav/files/')
+  ) {
+    const root = req.url.replace(/\/+$/, '');
+    const prefix = `${root}/`;
+    const responses = [
+      `<d:response>
+        <d:href>${root}/</d:href>
+        <d:propstat><d:prop>
+          <d:displayname>${decodeURIComponent(root.split('/').at(-1))}</d:displayname>
+          <d:resourcetype><d:collection/></d:resourcetype>
+        </d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+      </d:response>`
+    ];
+    for (const folderPath of createdFolders) {
+      if (
+        folderPath !== root &&
+        folderPath.startsWith(prefix) &&
+        !folderPath.slice(prefix.length).includes('/')
+      ) {
+        const name = decodeURIComponent(folderPath.split('/').at(-1));
+        responses.push(`<d:response>
+          <d:href>${folderPath}/</d:href>
+          <d:propstat><d:prop>
+            <d:displayname>${name}</d:displayname>
+            <d:resourcetype><d:collection/></d:resourcetype>
+          </d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+        </d:response>`);
+      }
+    }
+    for (const [filePath, content] of uploadedFiles) {
+      if (
+        filePath.startsWith(prefix) &&
+        !filePath.slice(prefix.length).includes('/')
+      ) {
+        const name = decodeURIComponent(filePath.split('/').at(-1));
+        responses.push(`<d:response>
+          <d:href>${filePath}</d:href>
+          <d:propstat><d:prop>
+            <d:displayname>${name}</d:displayname>
+            <d:resourcetype/>
+            <d:getcontentlength>${content.length}</d:getcontentlength>
+            <d:getcontenttype>image/jpeg</d:getcontenttype>
+            <d:getlastmodified>Wed, 29 Jul 2026 01:00:00 GMT</d:getlastmodified>
+            <d:getetag>"file-view"</d:getetag>
+          </d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+        </d:response>`);
+      }
+    }
+    res.statusCode = 207;
+    res.end(multiStatus(responses));
+    return;
+  }
   if (req.method === 'MKCOL') {
+    createdFolders.add(req.url.replace(/\/+$/, ''));
     res.statusCode = 201;
     res.end();
     return;
@@ -225,8 +286,18 @@ const davServer = createServer(async (req, res) => {
     res.end();
     return;
   }
+  if (
+    req.method === 'GET' &&
+    uploadedFiles.has(req.url)
+  ) {
+    res.setHeader('content-type', 'image/jpeg');
+    res.end(uploadedFiles.get(req.url));
+    return;
+  }
   if (req.method === 'DELETE') {
     remoteEvents.delete(req.url);
+    uploadedFiles.delete(req.url);
+    createdFolders.delete(req.url.replace(/\/+$/, ''));
     res.statusCode = 204;
     res.end();
     return;
@@ -272,6 +343,72 @@ test('Nextcloud discovery, WebDAV files and two-way calendar sync stay safe', as
   assert.equal(
     [...uploadedFiles.values()][0].toString('utf8'),
     'encrypted-family-data'
+  );
+
+  await createNextcloudFolder(
+    connection,
+    'family',
+    'LX Family',
+    '',
+    'Fotos'
+  );
+  const photo = Buffer.from('family-photo');
+  const uploadedPhoto = await uploadNextcloudUserFile(
+    connection,
+    'family',
+    'LX Family',
+    'Fotos',
+    'Sommer.jpg',
+    photo,
+    'image/jpeg'
+  );
+  assert.equal(uploadedPhoto.name, 'Sommer.jpg');
+  assert.equal(uploadedPhoto.path, 'Fotos/Sommer.jpg');
+
+  const fileListing = await listNextcloudFiles(
+    connection,
+    'family',
+    'LX Family',
+    'Fotos'
+  );
+  assert.deepEqual(
+    fileListing.map(entry => ({
+      name: entry.name,
+      type: entry.type,
+      size: entry.size
+    })),
+    [{
+      name: 'Sommer.jpg',
+      type: 'file',
+      size: photo.length
+    }]
+  );
+
+  const downloadedPhoto = await downloadNextcloudFile(
+    connection,
+    'family',
+    'LX Family',
+    'Fotos/Sommer.jpg'
+  );
+  assert.equal(downloadedPhoto.content.toString('utf8'), 'family-photo');
+  assert.equal(downloadedPhoto.contentType, 'image/jpeg');
+
+  await deleteNextcloudEntry(
+    connection,
+    'family',
+    'LX Family',
+    'Fotos/Sommer.jpg'
+  );
+  assert.equal(
+    (
+      await listNextcloudFiles(
+        connection,
+        'family',
+        'LX Family',
+        'Fotos'
+      )
+    ).length,
+    0
   );
 
   const familyId = 'family-nextcloud';

@@ -15,6 +15,7 @@ import {
 const PROVIDER = 'nextcloud';
 const REQUEST_TIMEOUT_MS = 15_000;
 const MAX_RESPONSE_BYTES = 8 * 1024 * 1024;
+const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_CALENDAR_ITEMS = 5000;
 const XML = new XMLParser({
   ignoreAttributes: false,
@@ -71,6 +72,26 @@ export function normalizeNextcloudFolder(value) {
     pieces.some(piece => piece === '.' || piece === '..')
   ) {
     throw httpError('Der Nextcloud-Ordner ist ungültig.', 400);
+  }
+  return pieces.join('/');
+}
+
+export function normalizeNextcloudRelativePath(value = '') {
+  const raw = clean(value, '', 2000).replaceAll('\\', '/');
+  if (!raw) return '';
+  const pieces = raw
+    .split('/')
+    .map(piece => piece.trim())
+    .filter(Boolean);
+  if (
+    pieces.length > 24 ||
+    pieces.some(piece =>
+      piece === '.' ||
+      piece === '..' ||
+      /[\u0000-\u001f]/.test(piece)
+    )
+  ) {
+    throw httpError('Der Cloud-Pfad ist ungültig.', 400);
   }
   return pieces.join('/');
 }
@@ -161,6 +182,28 @@ async function readLimitedText(response) {
     chunks.push(Buffer.from(value));
   }
   return Buffer.concat(chunks).toString('utf8');
+}
+
+async function readLimitedBuffer(response, maximumBytes = MAX_FILE_BYTES) {
+  const announced = Number(response.headers.get('content-length') || 0);
+  if (announced > maximumBytes) {
+    throw httpError('Die Datei ist für die App-Ansicht zu groß.', 413);
+  }
+  if (!response.body) return Buffer.alloc(0);
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > maximumBytes) {
+      await reader.cancel();
+      throw httpError('Die Datei ist für die App-Ansicht zu groß.', 413);
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks);
 }
 
 function authorizationHeader(username, appPassword) {
@@ -541,7 +584,7 @@ export async function inspectNextcloud(connection) {
   };
 }
 
-function encodedFilePath(userId, folder = '') {
+function encodedFilePath(userId, folder = '', relativePath = '') {
   const pieces = [
     'remote.php',
     'dav',
@@ -549,6 +592,10 @@ function encodedFilePath(userId, folder = '') {
     encodeURIComponent(userId),
     ...normalizeNextcloudFolder(folder)
       .split('/')
+      .map(piece => encodeURIComponent(piece)),
+    ...normalizeNextcloudRelativePath(relativePath)
+      .split('/')
+      .filter(Boolean)
       .map(piece => encodeURIComponent(piece))
   ];
   return pieces.join('/');
@@ -597,6 +644,252 @@ export async function uploadNextcloudFile(
   return {
     fileName: safeName,
     etag: clean(response.headers.get('etag'), '', 300)
+  };
+}
+
+function cleanCloudEntryName(value, fallback = 'Datei') {
+  const name = clean(value, fallback, 240)
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-')
+    .replace(/^\.+$/, fallback);
+  return name || fallback;
+}
+
+export async function listNextcloudFiles(
+  connection,
+  userId,
+  folder,
+  relativePath = ''
+) {
+  const rootFolder = normalizeNextcloudFolder(folder);
+  const currentPath = normalizeNextcloudRelativePath(relativePath);
+  await ensureNextcloudFolder(connection, userId, rootFolder);
+  const requestPath = encodedFilePath(userId, rootFolder, currentPath);
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<d:propfind xmlns:d="DAV:">
+  <d:prop>
+    <d:displayname/>
+    <d:resourcetype/>
+    <d:getcontentlength/>
+    <d:getcontenttype/>
+    <d:getlastmodified/>
+    <d:getetag/>
+  </d:prop>
+</d:propfind>`;
+  const { text } = await nextcloudRequest(connection, requestPath, {
+    method: 'PROPFIND',
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      Depth: '1'
+    },
+    body,
+    expectedStatuses: [207]
+  });
+  return parseMultiStatus(text)
+    .slice(1)
+    .map(response => {
+      const prop = propFromResponse(response);
+      const href = clean(response?.href, '', 4000);
+      let hrefName = '';
+      try {
+        const pathname = new URL(href, 'https://nextcloud.invalid').pathname;
+        hrefName = decodeURIComponent(
+          pathname.replace(/\/+$/, '').split('/').pop() || ''
+        );
+      } catch {
+        hrefName = '';
+      }
+      const name = cleanCloudEntryName(
+        prop?.displayname || hrefName,
+        'Datei'
+      );
+      const isFolder = hasResourceType(prop, 'collection');
+      const entryPath = normalizeNextcloudRelativePath(
+        currentPath ? `${currentPath}/${name}` : name
+      );
+      return {
+        name,
+        path: entryPath,
+        type: isFolder ? 'folder' : 'file',
+        mimeType: clean(
+          prop?.getcontenttype,
+          isFolder ? 'inode/directory' : 'application/octet-stream',
+          200
+        ),
+        size: Math.max(0, Number(prop?.getcontentlength || 0)),
+        modifiedAt: prop?.getlastmodified
+          ? new Date(prop.getlastmodified).getTime() || 0
+          : 0,
+        etag: clean(prop?.getetag, '', 300)
+      };
+    })
+    .sort((left, right) =>
+      left.type === right.type
+        ? left.name.localeCompare(right.name, 'de', {
+            numeric: true,
+            sensitivity: 'base'
+          })
+        : left.type === 'folder'
+          ? -1
+          : 1
+    );
+}
+
+export async function createNextcloudFolder(
+  connection,
+  userId,
+  folder,
+  relativePath,
+  name
+) {
+  const safeName = cleanCloudEntryName(name, '');
+  if (!safeName) {
+    throw httpError('Bitte gib dem neuen Ordner einen Namen.', 400);
+  }
+  const currentPath = normalizeNextcloudRelativePath(relativePath);
+  const targetPath = normalizeNextcloudRelativePath(
+    currentPath ? `${currentPath}/${safeName}` : safeName
+  );
+  await ensureNextcloudFolder(connection, userId, folder);
+  await nextcloudRequest(
+    connection,
+    encodedFilePath(userId, folder, targetPath),
+    {
+      method: 'MKCOL',
+      expectedStatuses: [201]
+    }
+  );
+  return {
+    name: safeName,
+    path: targetPath,
+    type: 'folder',
+    mimeType: 'inode/directory',
+    size: 0,
+    modifiedAt: Date.now(),
+    etag: ''
+  };
+}
+
+export async function uploadNextcloudUserFile(
+  connection,
+  userId,
+  folder,
+  relativePath,
+  fileName,
+  content,
+  contentType = 'application/octet-stream'
+) {
+  const currentPath = normalizeNextcloudRelativePath(relativePath);
+  const safeName = cleanCloudEntryName(
+    fileName,
+    `datei-${Date.now()}`
+  );
+  await ensureNextcloudFolder(connection, userId, folder);
+  const parentPath = encodedFilePath(userId, folder, currentPath);
+  const path = `${parentPath}/${encodeURIComponent(safeName)}`;
+  const { response } = await nextcloudRequest(connection, path, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': clean(
+        contentType,
+        'application/octet-stream',
+        200
+      ),
+      'OC-Total-Length': String(Buffer.byteLength(content))
+    },
+    body: content,
+    expectedStatuses: [201, 204]
+  });
+  return {
+    name: safeName,
+    fileName: safeName,
+    path: normalizeNextcloudRelativePath(
+      currentPath ? `${currentPath}/${safeName}` : safeName
+    ),
+    type: 'file',
+    mimeType: clean(
+      contentType,
+      'application/octet-stream',
+      200
+    ),
+    size: Buffer.byteLength(content),
+    modifiedAt: Date.now(),
+    etag: clean(response.headers.get('etag'), '', 300)
+  };
+}
+
+export async function deleteNextcloudEntry(
+  connection,
+  userId,
+  folder,
+  relativePath
+) {
+  const targetPath = normalizeNextcloudRelativePath(relativePath);
+  if (!targetPath) {
+    throw httpError('Der Familienordner selbst kann nicht gelöscht werden.', 400);
+  }
+  await nextcloudRequest(
+    connection,
+    encodedFilePath(userId, folder, targetPath),
+    {
+      method: 'DELETE',
+      expectedStatuses: [204]
+    }
+  );
+  return true;
+}
+
+export async function downloadNextcloudFile(
+  connection,
+  userId,
+  folder,
+  relativePath
+) {
+  const targetPath = normalizeNextcloudRelativePath(relativePath);
+  if (!targetPath) {
+    throw httpError('Bitte wähle eine Datei aus.', 400);
+  }
+  const url = buildApiUrl(
+    connection.baseUrl,
+    encodedFilePath(userId, folder, targetPath)
+  );
+  await validateTarget(url);
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'GET',
+      redirect: 'error',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      headers: {
+        Authorization: authorizationHeader(
+          connection.username,
+          connection.appPassword
+        ),
+        'User-Agent': `LX-Family-Planner/${connection.appVersion || '1'}`
+      }
+    });
+  } catch {
+    throw httpError('Die Datei konnte gerade nicht aus Nextcloud geladen werden.');
+  }
+  if (!response.ok) {
+    throw httpError(
+      response.status === 404
+        ? 'Die Datei wurde nicht gefunden.'
+        : `Nextcloud meldet Fehler ${response.status}.`,
+      response.status === 404 ? 404 : 502
+    );
+  }
+  return {
+    content: await readLimitedBuffer(response),
+    contentType: clean(
+      response.headers.get('content-type'),
+      'application/octet-stream',
+      200
+    ),
+    etag: clean(response.headers.get('etag'), '', 300),
+    fileName: cleanCloudEntryName(
+      targetPath.split('/').pop(),
+      'download'
+    )
   };
 }
 

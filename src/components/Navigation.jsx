@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFamily } from '../context/FamilyContext';
-import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake, Cloud } from 'lucide-react';
+import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake, Cloud, Mail } from 'lucide-react';
 import { canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
 
 export default function Navigation({ onOpenFamilyTree }) {
@@ -10,7 +10,8 @@ export default function Navigation({ onOpenFamilyTree }) {
     shoppingItems,
     tasks,
     activeMember,
-    members
+    members,
+    familyLetters
   } = useFamily();
 
   // Active shopping items selected but not in cart
@@ -25,6 +26,9 @@ export default function Navigation({ onOpenFamilyTree }) {
             !members.some(member => member.id === task.createdByMemberId) ||
             task.createdByMemberId === activeMember?.id)
       ).length;
+  const unreadLetterCount = familyLetters.filter(
+    letter => letter.direction === 'received' && !letter.readAt
+  ).length;
 
   const allTabs = [
     { id: 'dashboard', label: `Mein Bereich (${activeMember?.name?.split(' ')[0] || 'Start'})`, icon: UserCheck },
@@ -61,6 +65,12 @@ export default function Navigation({ onOpenFamilyTree }) {
         ? [
             allTabs[0],
             { id: 'cloud', label: 'Family Cloud', icon: Cloud },
+            {
+              id: 'mail',
+              label: 'Familienpost',
+              icon: Mail,
+              badge: unreadLetterCount > 0 ? unreadLetterCount : null
+            },
             ...allTabs.slice(1),
             { id: 'admin', label: 'Elternzentrale', icon: ShieldCheck }
           ]
@@ -72,7 +82,7 @@ export default function Navigation({ onOpenFamilyTree }) {
           activeMember.allowedModules.includes(tab.id) ||
           (
             canManageFamily(activeMember) &&
-            ['cloud', 'admin'].includes(tab.id)
+            ['cloud', 'mail', 'admin'].includes(tab.id)
           )
       )
     : roleTabs;

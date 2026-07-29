@@ -16,6 +16,22 @@ export const NOTIFICATION_EVENT_DEFINITIONS = Object.freeze([
     gotifyDefault: false
   },
   {
+    key: 'familyMail',
+    group: 'messages',
+    title: 'Familienbriefkasten',
+    description: 'Neue Briefe von verbundenen Familien',
+    webDefault: true,
+    gotifyDefault: true
+  },
+  {
+    key: 'familyChatInvites',
+    group: 'messages',
+    title: 'Chat-Einladungen',
+    description: 'Einladungen in den Chat einer verbundenen Familie',
+    webDefault: true,
+    gotifyDefault: true
+  },
+  {
     key: 'events',
     group: 'calendar',
     title: 'Kalender & Erinnerungen',

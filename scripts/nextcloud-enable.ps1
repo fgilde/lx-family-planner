@@ -89,15 +89,31 @@ $localAddress = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContin
   Sort-Object InterfaceMetric |
   Select-Object -First 1 -ExpandProperty IPAddress
 
-$trustedDomains = @('localhost', 'nextcloud', $env:COMPUTERNAME)
-if ($localAddress) {
-  $trustedDomains += $localAddress
-}
-$trustedDomains = ($trustedDomains | Where-Object { $_ } | Select-Object -Unique) -join ' '
 $publicUrl = Get-EnvironmentValue -Name 'NEXTCLOUD_PUBLIC_URL'
 if (-not $publicUrl -and $localAddress) {
   $publicUrl = "http://${localAddress}:$Port"
 }
+$trustedDomains = @(
+  (Get-EnvironmentValue -Name 'NEXTCLOUD_TRUSTED_DOMAINS') -split '\s+'
+  'localhost'
+  'nextcloud'
+  $env:COMPUTERNAME
+)
+if ($localAddress) {
+  $trustedDomains += $localAddress
+}
+if ($publicUrl) {
+  try {
+    $trustedDomains += ([Uri]$publicUrl).Host
+  } catch {
+    throw 'NEXTCLOUD_PUBLIC_URL ist keine gültige HTTP- oder HTTPS-Adresse.'
+  }
+}
+$trustedDomains = (
+  $trustedDomains |
+    Where-Object { $_ } |
+    Select-Object -Unique
+) -join ' '
 
 Set-EnvironmentValue -Name 'COMPOSE_PROFILES' -Value 'nextcloud'
 Set-EnvironmentValue -Name 'NEXTCLOUD_PORT' -Value ([string]$Port)
@@ -158,11 +174,37 @@ if (-not $NoStart) {
         )
       }
     }
+    if ($publicUrl) {
+      $publicHost = ([Uri]$publicUrl).Host
+      $configuredDomains = @(
+        & docker compose exec -T --user www-data nextcloud `
+          php occ config:system:get trusted_domains 2>$null |
+          Where-Object { $_ }
+      )
+      if ($configuredDomains -notcontains $publicHost) {
+        & docker compose exec -T --user www-data nextcloud `
+          php occ config:system:set trusted_domains `
+          $configuredDomains.Count "--value=$publicHost" | Out-Null
+      }
+      & docker compose exec -T --user www-data nextcloud `
+        php occ config:system:set overwrite.cli.url `
+        "--value=$publicUrl" | Out-Null
+      if (([Uri]$publicUrl).Scheme -eq 'https') {
+        & docker compose exec -T --user www-data nextcloud `
+          php occ config:system:set overwriteprotocol `
+          '--value=https' | Out-Null
+      }
+    }
     & docker compose exec -T --user www-data nextcloud `
       php occ background:cron | Out-Null
   } finally {
     Pop-Location
   }
   $hostName = if ($localAddress) { $localAddress } else { 'localhost' }
-  Write-Host "Nextcloud ist vollständig bereit: http://${hostName}:$Port"
+  $readyUrl = if ($publicUrl) {
+    $publicUrl
+  } else {
+    "http://${hostName}:$Port"
+  }
+  Write-Host "Nextcloud ist vollständig bereit: $readyUrl"
 }

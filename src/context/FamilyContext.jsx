@@ -173,6 +173,8 @@ export function FamilyProvider({ children }) {
   const [resources, setResources] = useState(EMPTY_RESOURCES);
   const [calendarSubscriptions, setCalendarSubscriptions] = useState([]);
   const [familyRelationships, setFamilyRelationships] = useState([]);
+  const [familyLetters, setFamilyLetters] = useState([]);
+  const [familyChatGuests, setFamilyChatGuests] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [integrations, setIntegrations] = useState(EMPTY_INTEGRATIONS);
@@ -226,6 +228,12 @@ export function FamilyProvider({ children }) {
         : []
     );
     setFamilyRelationships(data.familyRelationships || []);
+    setFamilyLetters(
+      Array.isArray(data.familyLetters) ? data.familyLetters : []
+    );
+    setFamilyChatGuests(
+      Array.isArray(data.familyChatGuests) ? data.familyChatGuests : []
+    );
     setNotifications(
       Array.isArray(data.notifications) ? data.notifications : []
     );
@@ -261,6 +269,8 @@ export function FamilyProvider({ children }) {
         setResources(EMPTY_RESOURCES);
         setCalendarSubscriptions([]);
         setFamilyRelationships([]);
+        setFamilyLetters([]);
+        setFamilyChatGuests([]);
         setNotifications([]);
         setUnreadNotificationCount(0);
         setIntegrations(EMPTY_INTEGRATIONS);
@@ -2582,6 +2592,121 @@ export function FamilyProvider({ children }) {
     [showToast, withActionError]
   );
 
+  const refreshFamilyMail = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/family/mail');
+      setFamilyLetters(data.letters || []);
+      versionRef.current = Number(data.version || versionRef.current);
+      return data.letters || [];
+    }, 'Familienpost konnte nicht geladen werden'), [withActionError]);
+
+  const sendFamilyLetter = useCallback(letter =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/family/mail', {
+        method: 'POST',
+        body: JSON.stringify(letter)
+      });
+      setFamilyLetters(data.letters || []);
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Brief eingeworfen',
+        'Die verbundene Familie findet ihn jetzt in ihrem Briefkasten.',
+        'success'
+      );
+      return data.letter;
+    }, 'Brief konnte nicht verschickt werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const updateFamilyLetter = useCallback((letterId, changes) =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/family/mail/${letterId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(changes)
+      });
+      setFamilyLetters(data.letters || []);
+      versionRef.current = Number(data.version || versionRef.current);
+      return data.letter;
+    }, 'Brief konnte nicht aktualisiert werden'), [withActionError]);
+
+  const refreshFamilyChatGuests = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/family/chat-guests');
+      setFamilyChatGuests(data.invitations || []);
+      versionRef.current = Number(data.version || versionRef.current);
+      return data.invitations || [];
+    }, 'Chat-Einladungen konnten nicht geladen werden'), [withActionError]);
+
+  const inviteFamilyChatGuest = useCallback(invitation =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/family/chat-guests', {
+        method: 'POST',
+        body: JSON.stringify(invitation)
+      });
+      setFamilyChatGuests(data.invitations || []);
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        'Chat-Einladung verschickt',
+        'Das ausgewählte Profil entscheidet selbst über den Zugang.',
+        'success'
+      );
+      return data.invitation;
+    }, 'Chat-Einladung konnte nicht verschickt werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const updateFamilyChatGuest = useCallback((invitationId, status) =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/family/chat-guests/${invitationId}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ status })
+        }
+      );
+      setFamilyChatGuests(data.invitations || []);
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        status === 'accepted'
+          ? 'Einladung angenommen'
+          : status === 'revoked'
+            ? 'Gastzugang beendet'
+            : 'Einladung abgelehnt',
+        status === 'accepted'
+          ? 'Der Familienchat erscheint jetzt als eigener Kanal.'
+          : 'Die Freigabe wurde aktualisiert.',
+        status === 'accepted' ? 'success' : 'info'
+      );
+      return data.invitation;
+    }, 'Chat-Freigabe konnte nicht aktualisiert werden'), [
+    showToast,
+    withActionError
+  ]);
+
+  const fetchGuestChatMessages = useCallback(invitationId =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/family/chat-guests/${invitationId}/messages`
+      );
+      return data.messages || [];
+    }, 'Eingeladener Familienchat konnte nicht geladen werden'), [
+    withActionError
+  ]);
+
+  const sendGuestChatMessage = useCallback((invitationId, message) =>
+    withActionError(async () => {
+      const data = await apiRequest(
+        `/api/family/chat-guests/${invitationId}/messages`,
+        {
+          method: 'POST',
+          body: JSON.stringify(message)
+        }
+      );
+      return data.message;
+    }, 'Nachricht konnte nicht gesendet werden'), [withActionError]);
+
   const addRelatedFamilyTask = useCallback((relationshipId, task) =>
     withActionError(async () => {
       const data = await apiRequest(
@@ -3017,6 +3142,16 @@ export function FamilyProvider({ children }) {
     respondFamilyRelationship,
     removeFamilyRelationship,
     updateFamilyRelationshipGrants,
+    familyLetters,
+    refreshFamilyMail,
+    sendFamilyLetter,
+    updateFamilyLetter,
+    familyChatGuests,
+    refreshFamilyChatGuests,
+    inviteFamilyChatGuest,
+    updateFamilyChatGuest,
+    fetchGuestChatMessages,
+    sendGuestChatMessage,
     addRelatedFamilyTask,
     addRelatedFamilyReward,
     addRelatedFamilyPocketMoney,

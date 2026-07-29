@@ -38,6 +38,8 @@ import {
   RECORD_TYPES,
   acknowledgeMemberReleaseNotes,
   countUnreadInboxNotifications,
+  createFamilyChatGuestInvite,
+  createFamilyLetter,
   createCalendarSubscription,
   createInboxNotifications,
   createFamily,
@@ -69,6 +71,7 @@ import {
   getCalendarSubscription,
   getFamily,
   getFamilyAuthRow,
+  getFamilyChatGuest,
   getFamilyRelationship,
   getFamilyVersion,
   getAppMeta,
@@ -83,6 +86,9 @@ import {
   listEventReminderDeliveries,
   listEnabledCalendarSubscriptions,
   listFamilyRelationships,
+  listFamilyChatGuests,
+  listFamilyLetters,
+  listAcceptedChatGuestsForHost,
   listIntegrationsByProvider,
   listInboxNotifications,
   listProblemReports,
@@ -108,6 +114,8 @@ import {
   updateCalendarSubscription,
   updateCalendarSubscriptionSync,
   updateFamily,
+  updateFamilyChatGuestStatus,
+  updateFamilyLetterState,
   updateFamilyRelationshipGrants,
   updateMember,
   updateProblemReportStatus,
@@ -122,16 +130,21 @@ import {
   sendFirebaseNotification
 } from './firebasePush.js';
 import {
+  createNextcloudFolder,
+  deleteNextcloudEntry,
+  downloadNextcloudFile,
   ensureNextcloudCalendar,
   ensureNextcloudFolder,
   inspectNextcloud,
+  listNextcloudFiles,
   nextcloudBrowserFolderUrl,
   normalizeNextcloudBaseUrl,
   normalizeNextcloudFolder,
   provisionNextcloudUser,
   revokeNextcloudAppPassword,
   syncNextcloudEvents,
-  uploadNextcloudFile
+  uploadNextcloudFile,
+  uploadNextcloudUserFile
 } from './nextcloud.js';
 
 const SESSION_COOKIE = 'lx_session';
@@ -1420,6 +1433,30 @@ function notifyChatViaWebPush(req, record) {
     tag: `chat-${record.id}`,
     priority: isGroup ? 'normal' : 'high'
   });
+  const guestFamilyIds = [];
+  if (isGroup) {
+    const hostFamily = getFamily(req.session.familyId);
+    listAcceptedChatGuestsForHost(req.session.familyId).forEach(invitation => {
+      queueNotificationChannels(
+        invitation.guestFamily.id,
+        'groupChat',
+        {
+          recipientMemberIds: [invitation.guestMember.id],
+          title: `${record.senderName} bei ${hostFamily.familyName}`,
+          body,
+          privateTitle: `Neue Nachricht bei ${hostFamily.familyName}`,
+          privateBody: hasPhoto
+            ? 'Im eingeladenen Familienchat wurde ein Foto geteilt.'
+            : 'Im eingeladenen Familienchat gibt es eine neue Nachricht.',
+          url: `/?view=chat&chat=guest:${invitation.id}`,
+          tag: `guest-chat-${invitation.id}-${record.id}`,
+          priority: 'normal'
+        }
+      );
+      guestFamilyIds.push(invitation.guestFamily.id);
+    });
+  }
+  return guestFamilyIds;
 }
 
 function notifyCreatedResource(req, type, record) {
@@ -2156,6 +2193,26 @@ function nextcloudConnection(integration) {
   };
 }
 
+function nextcloudWorkspace(familyId) {
+  const integration = getIntegration(familyId, 'nextcloud');
+  if (!integration || integration.config?.enabled === false) {
+    const error = new Error('Family Cloud ist noch nicht verbunden.');
+    error.statusCode = 404;
+    throw error;
+  }
+  const connection = nextcloudConnection(integration);
+  return {
+    integration,
+    connection,
+    userId:
+      cleanText(integration.config?.userId, '', 300) ||
+      connection.username,
+    folder: normalizeNextcloudFolder(
+      integration.config?.folder || 'LX Family'
+    )
+  };
+}
+
 function nextcloudBackupBundle(familyId) {
   const family = getFamily(familyId);
   const resources = Object.fromEntries(
@@ -2534,6 +2591,17 @@ function visibleChatMessages(records, memberId) {
   });
 }
 
+function visibleFamilyChatGuests(familyId, member) {
+  if (!member || member.role === 'pet') return [];
+  return listFamilyChatGuests(familyId).filter(invitation => {
+    if (isAdultMember(member)) return true;
+    if (invitation.direction === 'host') {
+      return invitation.status === 'accepted';
+    }
+    return invitation.guestMember.id === member.id;
+  });
+}
+
 function bootstrapForSession(session) {
   const bootstrap = getBootstrap(session.familyId);
   const member = session.memberId
@@ -2570,6 +2638,13 @@ function bootstrapForSession(session) {
     }
   }
   bootstrap.familyRelationships = listFamilyRelationships(session.familyId);
+  bootstrap.familyLetters = isAdultMember(member)
+    ? listFamilyLetters(session.familyId, session.memberId)
+    : [];
+  bootstrap.familyChatGuests = visibleFamilyChatGuests(
+    session.familyId,
+    member
+  );
   bootstrap.calendarSubscriptions = listCalendarSubscriptions(
     session.familyId
   ).filter(
@@ -3502,10 +3577,13 @@ export function createApp() {
     if (origin && corsAllowed) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+      );
       res.setHeader(
         'Access-Control-Allow-Headers',
-        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client'
+        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client, X-LX-File-Name, X-LX-File-Type'
       );
       res.append('Vary', 'Origin');
     }
@@ -3522,7 +3600,7 @@ export function createApp() {
     if (IS_PRODUCTION) {
       res.setHeader(
         'Content-Security-Policy',
-        "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self' data:"
+        "default-src 'self'; img-src 'self' data: blob: https:; frame-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self' data:"
       );
     }
     next();
@@ -4594,6 +4672,371 @@ export function createApp() {
     }
   );
 
+  app.get('/api/family/mail', requireAuth, requireAdult, (req, res) => {
+    res.json({
+      success: true,
+      letters: listFamilyLetters(
+        req.session.familyId,
+        req.session.memberId,
+        {
+          includeArchived: req.query.archived === 'true'
+        }
+      ),
+      version: getFamilyVersion(req.session.familyId)
+    });
+  });
+
+  app.post('/api/family/mail', requireAuth, requireAdult, (req, res) => {
+    const input = ensureObject(req.body);
+    const recipientFamilyId = requireText(
+      input.recipientFamilyId,
+      'Empfängerfamilie',
+      100
+    );
+    const relationship = listFamilyRelationships(
+      req.session.familyId
+    ).find(entry =>
+      entry.status === 'accepted' &&
+      entry.otherFamily?.id === recipientFamilyId
+    );
+    if (!relationship) {
+      return res.status(403).json({
+        success: false,
+        error:
+          'Briefe können nur an bestätigte Familienverbindungen geschickt werden.'
+      });
+    }
+    const letter = createFamilyLetter(
+      req.session.familyId,
+      req.session.memberId,
+      recipientFamilyId,
+      {
+        subject: requireText(input.subject, 'Betreff', 120),
+        body: requireText(input.body, 'Brieftext', 6000),
+        replyToId: cleanText(input.replyToId, '', 120)
+      }
+    );
+    const senderFamily = getFamily(req.session.familyId);
+    publishFamilyChange(req.session.familyId, 'family-mail');
+    publishFamilyChange(recipientFamilyId, 'family-mail');
+    queueNotificationChannels(
+      recipientFamilyId,
+      'familyMail',
+      {
+        recipientMemberIds: adultMemberIds(recipientFamilyId),
+        title: `Post von ${senderFamily.familyName}`,
+        body: letter.subject,
+        privateBody: 'Im Familienbriefkasten liegt ein neuer Brief.',
+        url: '/?view=mail',
+        tag: `family-letter-${letter.id}`,
+        priority: 'normal'
+      },
+      {
+        title: `Post von ${senderFamily.familyName}`,
+        message: letter.subject,
+        priority: 4
+      }
+    );
+    res.status(201).json({
+      success: true,
+      letter,
+      letters: listFamilyLetters(
+        req.session.familyId,
+        req.session.memberId
+      ),
+      version: getFamilyVersion(req.session.familyId)
+    });
+  });
+
+  app.patch(
+    '/api/family/mail/:letterId',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const letter = updateFamilyLetterState(
+        req.session.familyId,
+        req.session.memberId,
+        req.params.letterId,
+        {
+          read: Object.hasOwn(req.body || {}, 'read')
+            ? Boolean(req.body.read)
+            : undefined,
+          archived: Object.hasOwn(req.body || {}, 'archived')
+            ? Boolean(req.body.archived)
+            : undefined
+        }
+      );
+      if (!letter) {
+        return res.status(404).json({
+          success: false,
+          error: 'Der Brief wurde nicht gefunden.'
+        });
+      }
+      res.json({
+        success: true,
+        letter,
+        letters: listFamilyLetters(
+          req.session.familyId,
+          req.session.memberId
+        ),
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.get('/api/family/chat-guests', requireAuth, (req, res) => {
+    const member = req.session.memberId
+      ? getMember(req.session.familyId, req.session.memberId)
+      : null;
+    res.json({
+      success: true,
+      invitations: visibleFamilyChatGuests(req.session.familyId, member),
+      version: getFamilyVersion(req.session.familyId)
+    });
+  });
+
+  app.post(
+    '/api/family/chat-guests',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const invitation = createFamilyChatGuestInvite(
+        req.session.familyId,
+        requireText(req.body?.relationshipId, 'Familienverbindung', 120),
+        requireText(req.body?.guestMemberId, 'Gastprofil', 120),
+        req.session.memberId
+      );
+      publishFamilyChange(invitation.hostFamily.id, 'family-chat-guests');
+      publishFamilyChange(invitation.guestFamily.id, 'family-chat-guests');
+      queueNotificationChannels(
+        invitation.guestFamily.id,
+        'familyChatInvites',
+        {
+          recipientMemberIds: [invitation.guestMember.id],
+          title: `Einladung von ${invitation.hostFamily.familyName}`,
+          body: 'Du wurdest in den Familienchat eingeladen.',
+          privateBody: 'Eine verbundene Familie hat dich zum Chat eingeladen.',
+          url: '/?view=mail',
+          tag: `family-chat-invite-${invitation.id}`,
+          priority: 'high'
+        },
+        {
+          title: 'Neue Chat-Einladung',
+          message:
+            `${invitation.guestMember.name} wurde von ` +
+            `${invitation.hostFamily.familyName} eingeladen.`,
+          priority: 5
+        }
+      );
+      res.status(201).json({
+        success: true,
+        invitation,
+        invitations: visibleFamilyChatGuests(
+          req.session.familyId,
+          req.activeMember
+        ),
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.patch(
+    '/api/family/chat-guests/:invitationId',
+    requireAuth,
+    (req, res) => {
+      const invitation = getFamilyChatGuest(
+        req.session.familyId,
+        req.params.invitationId
+      );
+      if (!invitation) {
+        return res.status(404).json({
+          success: false,
+          error: 'Die Chat-Einladung wurde nicht gefunden.'
+        });
+      }
+      const member = getMember(
+        req.session.familyId,
+        req.session.memberId
+      );
+      const requestedStatus = cleanText(req.body?.status, '', 20);
+      let nextStatus = '';
+      if (['accepted', 'declined'].includes(requestedStatus)) {
+        const canRespond =
+          invitation.direction === 'guest' &&
+          invitation.guestMember.id === member?.id;
+        if (!canRespond || invitation.status !== 'pending') {
+          return res.status(403).json({
+            success: false,
+            error: 'Diese Einladung kann von diesem Profil nicht beantwortet werden.'
+          });
+        }
+        nextStatus = requestedStatus;
+      } else if (requestedStatus === 'revoked') {
+        if (
+          invitation.direction !== 'host' ||
+          !isAdultMember(member)
+        ) {
+          return res.status(403).json({
+            success: false,
+            error: 'Nur die einladende Familie kann den Gastzugang beenden.'
+          });
+        }
+        nextStatus = 'revoked';
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: 'Bitte Einladung annehmen, ablehnen oder den Zugang beenden.'
+        });
+      }
+      const updated = updateFamilyChatGuestStatus(
+        req.session.familyId,
+        invitation.id,
+        nextStatus
+      );
+      publishFamilyChange(updated.hostFamily.id, 'family-chat-guests');
+      publishFamilyChange(updated.guestFamily.id, 'family-chat-guests');
+      if (nextStatus === 'accepted') {
+        queueNotificationChannels(
+          updated.hostFamily.id,
+          'familyChatInvites',
+          {
+            recipientMemberIds: adultMemberIds(updated.hostFamily.id),
+            title: `${updated.guestMember.name} ist jetzt im Familienchat`,
+            body: `${updated.guestFamily.familyName} hat die Einladung angenommen.`,
+            privateBody: 'Eine Chat-Einladung wurde angenommen.',
+            url: '/?view=chat',
+            tag: `family-chat-accepted-${updated.id}`
+          }
+        );
+      }
+      res.json({
+        success: true,
+        invitation: updated,
+        invitations: visibleFamilyChatGuests(
+          req.session.familyId,
+          member
+        ),
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.get(
+    '/api/family/chat-guests/:invitationId/messages',
+    requireAuth,
+    (req, res) => {
+      const invitation = getFamilyChatGuest(
+        req.session.familyId,
+        req.params.invitationId
+      );
+      const member = getMember(
+        req.session.familyId,
+        req.session.memberId
+      );
+      const canRead =
+        invitation?.status === 'accepted' &&
+        member?.role !== 'pet' &&
+        (
+          invitation.direction === 'host' ||
+          invitation.guestMember.id === member?.id
+        );
+      if (!canRead) {
+        return res.status(403).json({
+          success: false,
+          error: 'Dieser Gastchat ist für das Profil nicht freigegeben.'
+        });
+      }
+      const messages = listRecords(
+        invitation.hostFamily.id,
+        'chatMessages'
+      )
+        .filter(message =>
+          (message.target === 'group' || !message.target) &&
+          Number(message.timestamp || 0) >= Number(invitation.acceptedAt || 0)
+        )
+        .sort((left, right) =>
+          Number(left.timestamp || 0) - Number(right.timestamp || 0)
+        )
+        .slice(-500);
+      res.json({
+        success: true,
+        invitation,
+        messages
+      });
+    }
+  );
+
+  app.post(
+    '/api/family/chat-guests/:invitationId/messages',
+    requireAuth,
+    (req, res) => {
+      const invitation = getFamilyChatGuest(
+        req.session.familyId,
+        req.params.invitationId
+      );
+      const member = getMember(
+        req.session.familyId,
+        req.session.memberId
+      );
+      if (
+        invitation?.status !== 'accepted' ||
+        invitation.direction !== 'guest' ||
+        invitation.guestMember.id !== member?.id
+      ) {
+        return res.status(403).json({
+          success: false,
+          error: 'Nur das eingeladene Profil kann hier schreiben.'
+        });
+      }
+      const text = cleanText(req.body?.text, '', 4000);
+      const photo = cleanText(req.body?.photo, '', 2_500_000);
+      if (!text && !photo) {
+        return res.status(400).json({
+          success: false,
+          error: 'Die Nachricht ist leer.'
+        });
+      }
+      const record = createRecord(
+        invitation.hostFamily.id,
+        'chatMessages',
+        {
+          id: `guest-message-${randomUUID()}`,
+          senderId: member.id,
+          senderName:
+            `${member.name} · ${invitation.guestFamily.familyName}`,
+          senderAvatar: member.avatar,
+          senderColor: member.color,
+          guestInvitationId: invitation.id,
+          guestFamilyId: invitation.guestFamily.id,
+          text,
+          photo,
+          target: 'group',
+          timestamp: Date.now()
+        }
+      );
+      publishFamilyChange(invitation.hostFamily.id, 'chatMessages');
+      publishFamilyChange(invitation.guestFamily.id, 'guest-chat');
+      queueNotificationChannels(
+        invitation.hostFamily.id,
+        'groupChat',
+        {
+          recipientMemberIds: signedInMemberIds(invitation.hostFamily.id),
+          title: `${member.name} im Familienchat`,
+          body: text || 'Ein Foto wurde geteilt.',
+          privateBody: photo
+            ? 'Ein Chatgast hat ein Foto geteilt.'
+            : 'Ein Chatgast hat eine Nachricht geschickt.',
+          url: '/?view=chat',
+          tag: `guest-chat-message-${record.id}`
+        }
+      );
+      res.status(201).json({
+        success: true,
+        message: record
+      });
+    }
+  );
+
   app.post(
     '/api/family/shared-events',
     requireAuth,
@@ -5280,7 +5723,9 @@ export function createApp() {
     );
     if (req.params.type === 'chatMessages') {
       notifyChatViaGotify(req, record);
-      notifyChatViaWebPush(req, record);
+      notifyChatViaWebPush(req, record).forEach(familyId =>
+        publishFamilyChange(familyId, 'guest-chat')
+      );
     }
     notifyCreatedResource(req, req.params.type, record);
     if (req.params.type === 'moodCheckins') {
@@ -6670,6 +7115,143 @@ export function createApp() {
             integration.config.baseUrl
         }
       });
+    }
+  );
+
+  app.get(
+    '/api/integrations/nextcloud/files',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const workspace = nextcloudWorkspace(req.session.familyId);
+      const currentPath = cleanText(req.query.path, '', 2000);
+      const entries = await listNextcloudFiles(
+        workspace.connection,
+        workspace.userId,
+        workspace.folder,
+        currentPath
+      );
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({
+        success: true,
+        path: currentPath,
+        folder: workspace.folder,
+        entries
+      });
+    }
+  );
+
+  app.get(
+    '/api/integrations/nextcloud/files/content',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const workspace = nextcloudWorkspace(req.session.familyId);
+      const file = await downloadNextcloudFile(
+        workspace.connection,
+        workspace.userId,
+        workspace.folder,
+        cleanText(req.query.path, '', 2000)
+      );
+      const disposition =
+        req.query.inline === 'true' ? 'inline' : 'attachment';
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('Content-Type', file.contentType);
+      res.setHeader('Content-Length', String(file.content.length));
+      res.setHeader(
+        'Content-Disposition',
+        `${disposition}; filename*=UTF-8''${encodeURIComponent(file.fileName)}`
+      );
+      if (file.etag) res.setHeader('ETag', file.etag);
+      res.end(file.content);
+    }
+  );
+
+  app.post(
+    '/api/integrations/nextcloud/files/folder',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const workspace = nextcloudWorkspace(req.session.familyId);
+      const entry = await createNextcloudFolder(
+        workspace.connection,
+        workspace.userId,
+        workspace.folder,
+        cleanText(req.body?.path, '', 2000),
+        requireText(req.body?.name, 'Ordnername', 240)
+      );
+      res.status(201).json({ success: true, entry });
+    }
+  );
+
+  app.put(
+    '/api/integrations/nextcloud/files/file',
+    requireAuth,
+    requireAdult,
+    express.raw({
+      type: 'application/octet-stream',
+      limit: '25mb'
+    }),
+    async (req, res) => {
+      const workspace = nextcloudWorkspace(req.session.familyId);
+      let fileName = cleanText(
+        req.headers['x-lx-file-name'],
+        '',
+        1000
+      );
+      try {
+        fileName = decodeURIComponent(fileName);
+      } catch {
+        // An already decoded ASCII file name remains usable.
+      }
+      if (!fileName) {
+        return res.status(400).json({
+          success: false,
+          error: 'Der Dateiname fehlt.'
+        });
+      }
+      const content = Buffer.isBuffer(req.body)
+        ? req.body
+        : Buffer.from(req.body || '');
+      if (!content.length) {
+        return res.status(400).json({
+          success: false,
+          error: 'Die ausgewählte Datei ist leer.'
+        });
+      }
+      const uploaded = await uploadNextcloudUserFile(
+        workspace.connection,
+        workspace.userId,
+        workspace.folder,
+        cleanText(req.query.path, '', 2000),
+        fileName,
+        content,
+        cleanText(
+          req.headers['x-lx-file-type'],
+          'application/octet-stream',
+          200
+        )
+      );
+      res.status(201).json({
+        success: true,
+        file: uploaded
+      });
+    }
+  );
+
+  app.delete(
+    '/api/integrations/nextcloud/files/entry',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const workspace = nextcloudWorkspace(req.session.familyId);
+      await deleteNextcloudEntry(
+        workspace.connection,
+        workspace.userId,
+        workspace.folder,
+        cleanText(req.query.path, '', 2000)
+      );
+      res.json({ success: true });
     }
   );
 

@@ -369,6 +369,14 @@ test('native API access only accepts trusted app origins', async () => {
     allowed.headers.get('access-control-allow-headers'),
     /X-LX-Client/
   );
+  assert.match(
+    allowed.headers.get('access-control-allow-methods'),
+    /PATCH/
+  );
+  assert.match(
+    allowed.headers.get('access-control-allow-headers'),
+    /X-LX-File-Name/
+  );
 
   const rejected = await fetch(`${baseUrl}/api/health`, {
     method: 'OPTIONS',
@@ -387,10 +395,10 @@ test('native API access only accepts trusted app origins', async () => {
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.9.3');
+  assert.equal(health.body.version, '1.10.0');
   const appRelease = await request('/api/app/version');
-  assert.equal(appRelease.body.versionName, '1.9.3');
-  assert.equal(appRelease.body.versionCode, 22);
+  assert.equal(appRelease.body.versionName, '1.10.0');
+  assert.equal(appRelease.body.versionCode, 23);
   assert.equal(appRelease.body.apkUrl, '/apk/latest.apk');
   assert.equal(
     appRelease.body.publicApkUrl,
@@ -438,8 +446,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.9.3');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.9.3');
+  assert.equal(bootstrap.body.appVersion, '1.10.0');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.10.0');
   assert.equal(bootstrap.body.nativePushServer.configured, false);
   assert.equal(
     bootstrap.body.nativePushServer.reason,
@@ -479,7 +487,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     installationId: 'lx-android-1234567890abcdef',
     token: 'fcm-test-token-1234567890abcdef',
     deviceName: 'Test Android-App',
-    appVersion: '1.9.3',
+    appVersion: '1.10.0',
     preferences: { groupChat: true, showPreviews: false }
   });
   assert.equal(storedNativeDevice.platform, 'android');
@@ -505,10 +513,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.9.3');
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.10.0');
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.9.3'
+    '1.10.0'
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -522,7 +530,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.9.3');
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.10.0');
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -1275,7 +1283,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.9.3');
+  assert.equal(problemReport.body.report.appVersion, '1.10.0');
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },
@@ -1982,6 +1990,103 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   assert.equal(
     secondFamilyCapabilities.body.relationships[0].grantsFromOther.tasks,
+    true
+  );
+
+  const familyLetter = await request(
+    '/api/family/mail',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        recipientFamilyId: secondRegistration.body.family.id,
+        subject: 'Gemeinsamer Sonntag',
+        body: 'Habt ihr Lust auf Kaffee und Kuchen?'
+      })
+    },
+    201
+  );
+  assert.equal(familyLetter.body.letter.direction, 'sent');
+  const receivedMail = await request('/api/family/mail', {
+    headers: secondHeaders
+  });
+  assert.equal(receivedMail.body.letters[0].direction, 'received');
+  assert.equal(receivedMail.body.letters[0].readAt, null);
+  const readMail = await request(
+    `/api/family/mail/${familyLetter.body.letter.id}`,
+    {
+      method: 'PATCH',
+      headers: secondHeaders,
+      body: JSON.stringify({ read: true })
+    }
+  );
+  assert.equal(Boolean(readMail.body.letter.readAt), true);
+
+  const secondAdultId =
+    acceptedRelationships.body.relationships[0].otherFamily.members[0].id;
+  const chatInvitation = await request(
+    '/api/family/chat-guests',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        relationshipId: relationshipRequest.body.relationship.id,
+        guestMemberId: secondAdultId
+      })
+    },
+    201
+  );
+  assert.equal(chatInvitation.body.invitation.status, 'pending');
+  const acceptedChatInvitation = await request(
+    `/api/family/chat-guests/${chatInvitation.body.invitation.id}`,
+    {
+      method: 'PATCH',
+      headers: secondHeaders,
+      body: JSON.stringify({ status: 'accepted' })
+    }
+  );
+  assert.equal(
+    acceptedChatInvitation.body.invitation.status,
+    'accepted'
+  );
+  const hostChatMessage = await request(
+    '/api/resources/chatMessages',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        text: 'Willkommen in unserem Familienchat!',
+        target: 'group'
+      })
+    },
+    201
+  );
+  const guestChatMessages = await request(
+    `/api/family/chat-guests/${chatInvitation.body.invitation.id}/messages`,
+    { headers: secondHeaders }
+  );
+  assert.equal(
+    guestChatMessages.body.messages.some(
+      message => message.id === hostChatMessage.body.record.id
+    ),
+    true
+  );
+  const guestReply = await request(
+    `/api/family/chat-guests/${chatInvitation.body.invitation.id}/messages`,
+    {
+      method: 'POST',
+      headers: secondHeaders,
+      body: JSON.stringify({ text: 'Danke für die Einladung!' })
+    },
+    201
+  );
+  const hostChatBootstrap = await request('/api/bootstrap', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(
+    hostChatBootstrap.body.resources.chatMessages.some(
+      message => message.id === guestReply.body.message.id
+    ),
     true
   );
 

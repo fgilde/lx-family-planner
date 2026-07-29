@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.9.3</strong> ·
+  <strong>Aktuelle Version: 1.10.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -44,7 +44,8 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
 - kinderleichte Bubble-Profilauswahl und optionaler Profil-PIN
 - Kalender mit mehreren Erinnerungen pro Termin, Müllkalender, ICS-Dateiimport
   und automatisch aktualisierte Kalender-Abos
-- gemeinsamer Familienchat und geschützte Direktnachrichten
+- gemeinsamer Familienchat, geschützte Direktnachrichten und bewusst
+  eingeladene Chatgäste aus verbundenen Familien
 - Einkaufslisten mit großem, alltagstauglichem Produktkatalog und Bring!-Anbindung
 - Wochen-Speiseplan, Rezeptbuch, direkter Android-Teilen-Import, sicherer Web-
   und Pinterest-Import und Kochmodus
@@ -62,12 +63,15 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   bestätigt sie und erst danach werden Sterne gutgeschrieben
 - Pinnwand, detailliertes Familiennetz und Stammbaum zwischen angemeldeten
   Familien
+- privater Familienbriefkasten für längere Absprachen zwischen bestätigten
+  Familienverbindungen
 - einzeln bestätigte Familienfreigaben für gemeinsame Termine, Aufgaben,
   Sterne, Belohnungen und Taschengeld der Enkelkinder
 - native Home-Assistant-Kacheln mit Live-Status, sicheren Aktionen,
   Profilfreigaben und großer Tablet-Ansicht
-- optionale Family Cloud mit Nextcloud, Zwei-Wege-Kalenderabgleich,
-  Familienordner und verschlüsselten Sicherungen
+- optionale Family Cloud mit Nextcloud, integrierter Dateiübersicht,
+  Drag-and-drop-Upload, Zwei-Wege-Kalenderabgleich und verschlüsselten
+  Sicherungen
 - Elternzentrale für Profile, Aufgaben, Punktestände, freigegebene YouTube-/
   Spotify-Widgets und Geräte
 - eigene Kinderoberfläche mit Raketen-, Einhorn-, Feen-, Dino-, Sonnen- und
@@ -111,9 +115,19 @@ was die andere Seite darf:
 - Sternpunkte und eigene Belohnungen
 - Taschengeldbuchungen
 
-Private Kalendertermine, Chats, Pinnwandbilder und Zugangsdaten werden dabei
-nicht geteilt. Aufgaben eines verbundenen Großelternkontos müssen weiterhin
-von einem Erwachsenen im Familienkonto des Kindes bestätigt werden.
+Private Kalendertermine, Direktnachrichten, Pinnwandbilder und Zugangsdaten
+werden dabei nicht geteilt. Aufgaben eines verbundenen Großelternkontos müssen
+weiterhin von einem Erwachsenen im Familienkonto des Kindes bestätigt werden.
+
+Bestätigte Familien können sich außerdem unter **Familienpost** private Briefe
+senden und beantworten. Ein Brief ist nur für die Erwachsenenprofile der
+beiden beteiligten Familien sichtbar.
+
+Für den Gruppenchat lässt sich ein einzelnes Erwachsenenprofil gezielt
+einladen, zum Beispiel Oma oder Opa. Das Zielprofil muss die Einladung selbst
+annehmen. Es sieht erst danach neue Gruppennachrichten der einladenden Familie;
+frühere Verläufe und sämtliche Direktnachrichten bleiben verborgen. Die
+einladende Familie kann den Zugang jederzeit wieder beenden.
 
 ### Home Assistant
 
@@ -183,6 +197,13 @@ In einer Installation über den Proxmox-Helper:
 lx-family nextcloud
 ```
 
+Mit bereits eingerichteter Cloudflare- oder Reverse-Proxy-Adresse kann die
+öffentliche Domain direkt mitgegeben werden:
+
+```bash
+lx-family nextcloud https://cloud.example.de
+```
+
 Das Hilfsskript:
 
 1. aktiviert das optionale Docker-Profil `nextcloud`,
@@ -205,6 +226,18 @@ vorgeschlagene Browser-Adresse stimmt, und auf
 - ein zufälliges Kennwort und ein widerrufbares App-Passwort,
 - einen Familienkalender sowie den Familienordner,
 - den ersten sicheren Zwei-Wege-Abgleich.
+
+Sobald die Verbindung steht, erscheint im selben Bereich das
+**Familienarchiv**. Erwachsene können dort direkt in LX:
+
+- Ordner öffnen und neu anlegen,
+- Bilder, PDF- und Textdateien ansehen,
+- mehrere Dateien auswählen oder vom PC in die Fläche ziehen,
+- Dateien herunterladen oder nach einer zweiten Bestätigung löschen.
+
+Uploads sind auf 25 MB pro Datei und 20 Dateien je Durchlauf begrenzt. Der
+Browser erhält kein Nextcloud-App-Passwort: Alle Dateizugriffe laufen durch die
+angemeldete LX-Sitzung und das Backend.
 
 Das Administratorkonto wird nicht als Familienkonto verwendet. Auch mehrere
 Familien auf demselben Portal erhalten dadurch getrennte Cloud-Bereiche. Das
@@ -245,6 +278,19 @@ Für öffentlichen Zugriff empfiehlt sich eine eigene Subdomain, die im
 Reverse-Proxy oder Cloudflare Tunnel auf den internen Nextcloud-Dienst
 `http://SERVER-IP:8080` zeigt. Erst nachdem diese Route wirklich antwortet,
 wird `NEXTCLOUD_PUBLIC_URL` auf die HTTPS-Adresse umgestellt.
+
+Für eine bereits laufende Docker-/PVE-Installation übernimmt das folgende
+Kommando alle erforderlichen Nextcloud-Einstellungen:
+
+```bash
+cd /opt/docker/lx-family-planner
+bash scripts/nextcloud-public-url.sh https://cloud.example.de
+```
+
+Es ergänzt die Domain dauerhaft in `.env` und Nextclouds `trusted_domains`,
+setzt die öffentliche Link-Adresse sowie HTTPS und lädt LX Family mit der
+neuen Browser-Adresse neu. Der Befehl ist wiederholbar und entfernt keine
+bestehenden Vertrauensadressen.
 
 #### Daten und Updates
 

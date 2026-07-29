@@ -66,14 +66,35 @@ local_address="$(
     grep -Ev '^(127\.|169\.254\.|$)' |
     head -n 1 || true
 )"
-trusted_domains="localhost nextcloud $(hostname)"
+trusted_domains="$(get_env NEXTCLOUD_TRUSTED_DOMAINS)"
+for trusted_domain in localhost nextcloud "$(hostname)"; do
+  if ! printf '%s\n' "$trusted_domains" |
+    tr ' ' '\n' |
+    grep -Fxq "$trusted_domain"; then
+    trusted_domains="${trusted_domains:+$trusted_domains }$trusted_domain"
+  fi
+done
 if [[ -n "$local_address" ]]; then
-  trusted_domains="$trusted_domains $local_address"
+  if ! printf '%s\n' "$trusted_domains" |
+    tr ' ' '\n' |
+    grep -Fxq "$local_address"; then
+    trusted_domains="$trusted_domains $local_address"
+  fi
 fi
 
 public_url="$(get_env NEXTCLOUD_PUBLIC_URL)"
 if [[ -z "$public_url" && -n "$local_address" ]]; then
   public_url="http://$local_address:$port"
+fi
+if [[ -n "$public_url" ]]; then
+  public_authority="${public_url#*://}"
+  public_host="${public_authority%%:*}"
+  if [[ -n "$public_host" ]] &&
+    ! printf '%s\n' "$trusted_domains" |
+      tr ' ' '\n' |
+      grep -Fxq "$public_host"; then
+    trusted_domains="$trusted_domains $public_host"
+  fi
 fi
 
 set_env COMPOSE_PROFILES nextcloud
@@ -130,5 +151,10 @@ if [[ "$no_start" != "true" ]]; then
   fi
   docker compose exec -T --user www-data nextcloud \
     php occ background:cron >/dev/null
-  echo "Nextcloud ist vollständig bereit: http://${local_address:-localhost}:$port"
+  if [[ -n "$public_url" ]]; then
+    bash "$project_root/scripts/nextcloud-public-url.sh" \
+      "$public_url" \
+      --no-recreate
+  fi
+  echo "Nextcloud ist vollständig bereit: ${public_url:-http://${local_address:-localhost}:$port}"
 fi

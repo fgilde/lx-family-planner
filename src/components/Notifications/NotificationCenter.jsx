@@ -15,6 +15,7 @@ import {
   HeartHandshake,
   HeartPulse,
   Inbox,
+  Mail,
   MessageCircle,
   MessageCircleHeart,
   Network,
@@ -22,6 +23,7 @@ import {
   Sparkles,
   SunMedium,
   UtensilsCrossed,
+  UserRoundPlus,
   Vote,
   X
 } from 'lucide-react';
@@ -38,6 +40,7 @@ const VIEW_NAMES = new Set([
   'meals',
   'family-life',
   'cloud',
+  'mail',
   'admin'
 ]);
 
@@ -121,6 +124,16 @@ const NOTIFICATION_META = {
     label: 'Familiennetz',
     icon: Network,
     tone: 'calendar'
+  },
+  familyMail: {
+    label: 'Familienpost',
+    icon: Mail,
+    tone: 'chat'
+  },
+  familyChatInvites: {
+    label: 'Chat-Einladung',
+    icon: UserRoundPlus,
+    tone: 'approval'
   }
 };
 

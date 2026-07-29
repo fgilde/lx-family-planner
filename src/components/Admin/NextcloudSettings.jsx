@@ -19,6 +19,7 @@ import {
   UsersRound
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import CloudFileBrowser from './CloudFileBrowser';
 
 function suggestedPublicUrl() {
   const url = new URL(window.location.origin);
@@ -454,6 +455,8 @@ export default function NextcloudSettings() {
               </a>
             )}
           </div>
+
+          <CloudFileBrowser />
 
           {(nextcloudIntegration.lastSyncError ||
             nextcloudIntegration.lastBackupError) && (

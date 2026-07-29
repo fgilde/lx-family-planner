@@ -22,6 +22,7 @@ import BringAccountModal from './components/Shopping/BringAccountModal';
 import ParentAdmin from './components/Admin/ParentAdmin';
 import NextcloudSettings from './components/Admin/NextcloudSettings';
 import FamilyLifeHub from './components/FamilyLife/FamilyLifeHub';
+import FamilyMailbox from './components/FamilyMail/FamilyMailbox';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
 import ProblemReportButton from './components/ProblemReportButton';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
@@ -61,6 +62,7 @@ function MainContent() {
       'meals',
       'family-life',
       'cloud',
+      'mail',
       'admin'
     ]);
     if (allowedViews.has(requestedView)) {
@@ -104,6 +106,7 @@ function MainContent() {
           'meals',
           'family-life',
           'cloud',
+          'mail',
           'admin'
         ]);
         if (!allowedViews.has(requestedView)) return;
@@ -217,6 +220,7 @@ function MainContent() {
             <NextcloudSettings />
           </div>
         )}
+        {activeTab === 'mail' && <FamilyMailbox />}
         {activeTab === 'admin' && (
           <ParentAdmin onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
         )}

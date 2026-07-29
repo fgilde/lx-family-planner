@@ -90,7 +90,7 @@ export function buildApiUrl(path) {
   return `${baseUrl}${cleanPath}`;
 }
 
-export async function plannerApiRequest(path, options = {}) {
+export async function plannerApiFetch(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (options.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
@@ -113,7 +113,11 @@ export async function plannerApiRequest(path, options = {}) {
   ) {
     requestOptions.cache = 'no-store';
   }
-  const response = await fetch(buildApiUrl(path), requestOptions);
+  return fetch(buildApiUrl(path), requestOptions);
+}
+
+export async function plannerApiRequest(path, options = {}) {
+  const response = await plannerApiFetch(path, options);
   let data = null;
   try {
     data = await response.json();

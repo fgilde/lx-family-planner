@@ -2,6 +2,37 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.10.0] – 2026-07-29
+
+### Integrierte Family Cloud, Familienpost und Chatgäste
+
+- Nextcloud-Dateiansicht direkt in LX Family mit Ordnernavigation,
+  Bild-/PDF-/Textvorschau, Download und geschütztem Löschen
+- Mehrfach-Upload per Dateiauswahl und Drag-and-drop bis 25 MB pro Datei
+- Cloud-Dateien werden ausschließlich über die angemeldete LX-Sitzung und den
+  serverseitig verschlüsselten Nextcloud-Zugang übertragen
+- neuer Erwachsenenbereich **Familienpost** für private Briefe zwischen
+  bestätigten Familienverbindungen
+- Briefe unterstützen Antworten, Eingang/Gesendet, gelesen und persönliches
+  Archivieren
+- gezielte Einladung einzelner Erwachsenenprofile wie Oma oder Opa in den
+  Gruppenchat einer verbundenen Familie
+- Chatgast muss selbst zustimmen und sieht ausschließlich Gruppennachrichten
+  ab dem Zeitpunkt der Zustimmung; Direktnachrichten und ältere Verläufe
+  bleiben verborgen
+- Familienpost und Chat-Einladungen an Browser-, Android- und Gotify-
+  Benachrichtigungen angebunden
+- Kalenderänderungen per `PATCH` in Browser und Android wieder freigegeben;
+  dadurch lassen sich Erinnerungszeitpunkte wieder speichern
+- mobiler **Problem melden**-Knopf aus der schwebenden Bedienebene entfernt
+  und als normaler Seitenabschluss dargestellt
+- neues, wiederholbar ausführbares Cloud-Domain-Skript setzt
+  `trusted_domains`, `overwrite.cli.url` und HTTPS korrekt
+- Nextcloud-Aktivierung bewahrt vorhandene vertrauenswürdige Domains statt
+  sie beim erneuten Start zu überschreiben
+- additive Datenbankmigration für Briefe, Lesestatus und Chat-Einladungen;
+  bestehende Familieninhalte bleiben unangetastet
+
 ## [1.9.3] – 2026-07-29
 
 ### Erreichbare Nextcloud-Adresse statt Domain-Port-Mischung

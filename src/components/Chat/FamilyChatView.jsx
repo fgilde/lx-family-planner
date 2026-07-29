@@ -4,6 +4,7 @@ import {
   Lock,
   MessageCircleMore,
   Send,
+  ShieldCheck,
   Users,
   X
 } from 'lucide-react';
@@ -38,7 +39,10 @@ export default function FamilyChatView() {
     activeMember,
     showToast,
     chatMessages: messages,
-    addChatMessage
+    addChatMessage,
+    familyChatGuests,
+    fetchGuestChatMessages,
+    sendGuestChatMessage
   } = useFamily();
   const [activeChatTarget, setActiveChatTarget] = useState(
     () => new URLSearchParams(window.location.search).get('chat') || 'group'
@@ -46,6 +50,7 @@ export default function FamilyChatView() {
   const [inputText, setInputText] = useState('');
   const [chatPhoto, setChatPhoto] = useState(null);
   const [sending, setSending] = useState(false);
+  const [guestMessages, setGuestMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
   const chatMembers = members.filter(
@@ -57,6 +62,16 @@ export default function FamilyChatView() {
   const activeTargetMember = chatMembers.find(
     member => member.id === activeChatTarget
   );
+  const guestChats = familyChatGuests.filter(invitation =>
+    invitation.direction === 'guest' &&
+    invitation.status === 'accepted' &&
+    invitation.guestMember.id === activeMember?.id
+  );
+  const activeGuestChat = activeChatTarget.startsWith('guest:')
+    ? guestChats.find(
+        invitation => `guest:${invitation.id}` === activeChatTarget
+      )
+    : null;
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -66,14 +81,39 @@ export default function FamilyChatView() {
   }, []);
 
   useEffect(() => {
-    if (activeChatTarget !== 'group' && !activeTargetMember) {
+    if (
+      activeChatTarget !== 'group' &&
+      !activeTargetMember &&
+      !activeGuestChat
+    ) {
       setActiveChatTarget('group');
     }
-  }, [activeChatTarget, activeTargetMember]);
+  }, [activeChatTarget, activeGuestChat, activeTargetMember]);
+
+  useEffect(() => {
+    if (!activeGuestChat) {
+      setGuestMessages([]);
+      return undefined;
+    }
+    let cancelled = false;
+    const load = async () => {
+      const loaded = await fetchGuestChatMessages(activeGuestChat.id);
+      if (!cancelled && loaded) setGuestMessages(loaded);
+    };
+    load();
+    const interval = window.setInterval(load, 8000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [activeGuestChat, fetchGuestChatMessages]);
 
   const visibleMessages = useMemo(
-    () => messages
+    () => (activeGuestChat ? guestMessages : messages)
       .filter(message => {
+        if (activeGuestChat) {
+          return message.target === 'group' || !message.target;
+        }
         if (activeChatTarget === 'group') {
           return message.target === 'group' || !message.target;
         }
@@ -90,7 +130,13 @@ export default function FamilyChatView() {
       .sort((left, right) =>
         Number(left.timestamp || 0) - Number(right.timestamp || 0)
       ),
-    [activeChatTarget, activeMember?.id, messages]
+    [
+      activeChatTarget,
+      activeGuestChat,
+      activeMember?.id,
+      guestMessages,
+      messages
+    ]
   );
 
   useEffect(() => {
@@ -101,6 +147,12 @@ export default function FamilyChatView() {
   }, [visibleMessages.length, activeChatTarget]);
 
   const conversationPreview = targetId => {
+    if (targetId.startsWith('guest:')) {
+      const latest = targetId === activeChatTarget
+        ? guestMessages[guestMessages.length - 1]
+        : null;
+      return latest?.text || 'Eingeladener Familienchat';
+    }
     const relevant = messages
       .filter(message => {
         if (targetId === 'group') {
@@ -150,15 +202,23 @@ export default function FamilyChatView() {
     event.preventDefault();
     if ((!inputText.trim() && !chatPhoto) || sending) return;
     setSending(true);
-    const created = await addChatMessage({
+    const payload = {
       text: inputText.trim(),
-      photo: chatPhoto,
-      target: activeChatTarget
-    });
+      photo: chatPhoto
+    };
+    const created = activeGuestChat
+      ? await sendGuestChatMessage(activeGuestChat.id, payload)
+      : await addChatMessage({
+          ...payload,
+          target: activeChatTarget
+        });
     setSending(false);
     if (created) {
       setInputText('');
       setChatPhoto(null);
+      if (activeGuestChat) {
+        setGuestMessages(previous => [...previous, created]);
+      }
     }
   };
 
@@ -208,12 +268,39 @@ export default function FamilyChatView() {
               </span>
             </button>
           ))}
+
+          {guestChats.length > 0 && (
+            <>
+              <div className="chat-directory-label">Eingeladen</div>
+              {guestChats.map(invitation => {
+                const target = `guest:${invitation.id}`;
+                return (
+                  <button
+                    type="button"
+                    key={invitation.id}
+                    className={`chat-channel family-guest-channel ${
+                      activeChatTarget === target ? 'active' : ''
+                    }`}
+                    onClick={() => setActiveChatTarget(target)}
+                  >
+                    <span className="chat-channel-avatar guest">
+                      <Users size={19} />
+                    </span>
+                    <span className="chat-channel-copy">
+                      <strong>{invitation.hostFamily.familyName}</strong>
+                      <small>{conversationPreview(target)}</small>
+                    </span>
+                  </button>
+                );
+              })}
+            </>
+          )}
         </div>
       </aside>
 
       <section className="chat-room">
         <header className="chat-room-header">
-          {activeChatTarget === 'group' ? (
+          {activeChatTarget === 'group' || activeGuestChat ? (
             <span className="chat-room-avatar group"><Users size={21} /></span>
           ) : (
             <img
@@ -227,18 +314,24 @@ export default function FamilyChatView() {
             <small>
               {activeChatTarget === 'group'
                 ? `${chatMembers.length} Familienprofile`
+                : activeGuestChat
+                  ? 'Du bist persönlich eingeladen'
                 : getPositionLabel(activeTargetMember)}
             </small>
             <h1>
               {activeChatTarget === 'group'
                 ? 'Familienchat'
+                : activeGuestChat
+                  ? activeGuestChat.hostFamily.familyName
                 : activeTargetMember?.name}
             </h1>
           </div>
           <span className="chat-privacy-note">
             {activeChatTarget === 'group'
               ? <><Users size={13} /> Für alle sichtbar</>
-              : <><Lock size={13} /> Direktnachricht</>}
+              : activeGuestChat
+                ? <><ShieldCheck size={13} /> Gastzugang ab Zustimmung</>
+                : <><Lock size={13} /> Direktnachricht</>}
           </span>
         </header>
 
@@ -252,6 +345,8 @@ export default function FamilyChatView() {
                 {' '}
                 {activeChatTarget === 'group'
                   ? 'deine Familie'
+                  : activeGuestChat
+                    ? activeGuestChat.hostFamily.familyName
                   : activeTargetMember?.name}.
               </p>
             </div>
@@ -321,6 +416,8 @@ export default function FamilyChatView() {
               placeholder={`Nachricht an ${
                 activeChatTarget === 'group'
                   ? 'die Familie'
+                  : activeGuestChat
+                    ? activeGuestChat.hostFamily.familyName
                   : activeTargetMember?.name
               } …`}
               value={inputText}

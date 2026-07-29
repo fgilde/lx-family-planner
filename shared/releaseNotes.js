@@ -1,4 +1,45 @@
 const RELEASE_NOTES = {
+  '1.10.0': {
+    version: '1.10.0',
+    eyebrow: 'Cloud-Dateien und Familienpost direkt in LX',
+    title: 'Eure Familien werden digital ein Stück näher',
+    intro:
+      'Der Familienordner lässt sich jetzt direkt im Planer benutzen. Verbundene Familien können sich außerdem private Briefe senden und einzelne Erwachsene wie Oma oder Opa bewusst in einen Familienchat einladen.',
+    highlights: [
+      {
+        id: 'cloud-file-view',
+        title: 'Familienordner in der App',
+        description:
+          'Fotos und Dokumente lassen sich ansehen, herunterladen, in Ordner sortieren und per Auswahl oder Ziehen-und-Ablegen hochladen.'
+      },
+      {
+        id: 'family-mailbox',
+        title: 'Privater Familienbriefkasten',
+        description:
+          'Bestätigte Familienverbindungen können längere Absprachen wie einen echten Brief senden, beantworten und archivieren.'
+      },
+      {
+        id: 'consented-chat-guests',
+        title: 'Oma und Opa sicher im Familienchat',
+        description:
+          'Ein eingeladenes Erwachsenenprofil stimmt selbst zu und sieht erst danach neue Gruppennachrichten – niemals ältere Chatverläufe.'
+      },
+      {
+        id: 'mobile-reminders-cloud',
+        title: 'Handy und Kalender repariert',
+        description:
+          'Der Problem-melden-Knopf verdeckt mobil keine Bedienfelder mehr und Terminerinnerungen lassen sich wieder zuverlässig speichern.'
+      },
+      {
+        id: 'cloud-domain-helper',
+        title: 'Cloud-Domain dauerhaft eingerichtet',
+        description:
+          'Die öffentliche Nextcloud-Adresse wird automatisch als vertrauenswürdig gespeichert und bleibt auch bei späteren Updates erhalten.'
+      }
+    ],
+    closing:
+      'Das Update ergänzt die Datenbank nur um neue Bereiche. Profile, Termine, Aufgaben, Cloud-Dateien, Einstellungen und Zugangsdaten bleiben erhalten.'
+  },
   '1.9.3': {
     version: '1.9.3',
     eyebrow: 'Keine erfundenen Cloud-Adressen mehr',

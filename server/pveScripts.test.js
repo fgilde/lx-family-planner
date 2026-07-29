@@ -9,6 +9,7 @@ const scriptPaths = [
   path.join(projectRoot, 'scripts', 'pve-helper.sh'),
   path.join(projectRoot, 'scripts', 'pve-guest-install.sh'),
   path.join(projectRoot, 'scripts', 'pve-manage.sh'),
+  path.join(projectRoot, 'scripts', 'nextcloud-public-url.sh'),
   path.join(projectRoot, 'scripts', 'docker-update.sh')
 ];
 const scripts = Object.fromEntries(
@@ -82,8 +83,19 @@ test('PVE management command reuses protected update and backup paths', () => {
   assert.match(manager, /bash scripts\/docker-update\.sh/);
   assert.match(manager, /node server\/backup\.js/);
   assert.match(manager, /PUBLIC_APP_URL/);
+  assert.match(manager, /nextcloud-public-url\.sh/);
   assert.match(manager, /docker compose/);
   assert.doesNotMatch(manager, /git reset|pct destroy|rm\s+-rf/);
+});
+
+test('Nextcloud public URL helper keeps the domain trusted', () => {
+  const helper = scripts['nextcloud-public-url.sh'];
+  assert.match(helper, /NEXTCLOUD_PUBLIC_URL/);
+  assert.match(helper, /NEXTCLOUD_TRUSTED_DOMAINS/);
+  assert.match(helper, /config:system:set trusted_domains/);
+  assert.match(helper, /config:system:set overwrite\.cli\.url/);
+  assert.match(helper, /config:system:set overwriteprotocol/);
+  assert.doesNotMatch(helper, /config:system:set overwritehost/);
 });
 
 test('Linux Docker updates do not require Node.js on the host', () => {

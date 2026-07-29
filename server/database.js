@@ -308,6 +308,56 @@ database.exec(`
 
   CREATE INDEX IF NOT EXISTS problem_reports_family_idx
     ON problem_reports(family_id, status, created_at DESC);
+
+  CREATE TABLE IF NOT EXISTS family_letters (
+    id TEXT PRIMARY KEY,
+    thread_id TEXT NOT NULL,
+    sender_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    sender_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+    recipient_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    reply_to_id TEXT REFERENCES family_letters(id) ON DELETE SET NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    CHECK(sender_family_id <> recipient_family_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS family_letters_mailbox_idx
+    ON family_letters(recipient_family_id, created_at DESC);
+
+  CREATE INDEX IF NOT EXISTS family_letters_thread_idx
+    ON family_letters(thread_id, created_at ASC);
+
+  CREATE TABLE IF NOT EXISTS family_letter_reads (
+    letter_id TEXT NOT NULL REFERENCES family_letters(id) ON DELETE CASCADE,
+    member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    read_at INTEGER,
+    archived_at INTEGER,
+    PRIMARY KEY (letter_id, member_id)
+  );
+
+  CREATE TABLE IF NOT EXISTS family_chat_guests (
+    id TEXT PRIMARY KEY,
+    relationship_id TEXT NOT NULL
+      REFERENCES family_relationships(id) ON DELETE CASCADE,
+    host_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    guest_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+    guest_member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    invited_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+    status TEXT NOT NULL DEFAULT 'pending'
+      CHECK(status IN ('pending', 'accepted', 'declined', 'revoked')),
+    accepted_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    CHECK(host_family_id <> guest_family_id),
+    UNIQUE(host_family_id, guest_family_id, guest_member_id)
+  );
+
+  CREATE INDEX IF NOT EXISTS family_chat_guests_host_idx
+    ON family_chat_guests(host_family_id, status, updated_at DESC);
+
+  CREATE INDEX IF NOT EXISTS family_chat_guests_guest_idx
+    ON family_chat_guests(guest_family_id, guest_member_id, status);
 `);
 
 function applySchemaMigration(version, name, work) {
@@ -528,6 +578,56 @@ applySchemaMigration(8, 'Native Android-Push-Geräte pro Profil', () => {
       ON native_push_devices(family_id, member_id);
     CREATE INDEX IF NOT EXISTS native_push_devices_installation_idx
       ON native_push_devices(family_id, installation_id);
+  `);
+});
+
+applySchemaMigration(9, 'Familienbriefkasten und eingeladene Chatgaeste', () => {
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS family_letters (
+      id TEXT PRIMARY KEY,
+      thread_id TEXT NOT NULL,
+      sender_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      sender_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+      recipient_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      reply_to_id TEXT REFERENCES family_letters(id) ON DELETE SET NULL,
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      CHECK(sender_family_id <> recipient_family_id)
+    );
+    CREATE INDEX IF NOT EXISTS family_letters_mailbox_idx
+      ON family_letters(recipient_family_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS family_letters_thread_idx
+      ON family_letters(thread_id, created_at ASC);
+
+    CREATE TABLE IF NOT EXISTS family_letter_reads (
+      letter_id TEXT NOT NULL REFERENCES family_letters(id) ON DELETE CASCADE,
+      member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+      read_at INTEGER,
+      archived_at INTEGER,
+      PRIMARY KEY (letter_id, member_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS family_chat_guests (
+      id TEXT PRIMARY KEY,
+      relationship_id TEXT NOT NULL
+        REFERENCES family_relationships(id) ON DELETE CASCADE,
+      host_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      guest_family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      guest_member_id TEXT NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+      invited_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK(status IN ('pending', 'accepted', 'declined', 'revoked')),
+      accepted_at INTEGER,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      CHECK(host_family_id <> guest_family_id),
+      UNIQUE(host_family_id, guest_family_id, guest_member_id)
+    );
+    CREATE INDEX IF NOT EXISTS family_chat_guests_host_idx
+      ON family_chat_guests(host_family_id, status, updated_at DESC);
+    CREATE INDEX IF NOT EXISTS family_chat_guests_guest_idx
+      ON family_chat_guests(guest_family_id, guest_member_id, status);
   `);
 });
 
@@ -1552,6 +1652,416 @@ export function deleteFamilyRelationship(familyId, relationshipId) {
     bumpFamilyVersion(existing.target_family_id);
     return true;
   });
+}
+
+function mapFamilyLetterRow(row, familyId) {
+  if (!row) return null;
+  const sent = row.sender_family_id === familyId;
+  return {
+    id: row.id,
+    threadId: row.thread_id,
+    replyToId: row.reply_to_id || '',
+    direction: sent ? 'sent' : 'received',
+    subject: row.subject,
+    body: row.body,
+    createdAt: Number(row.created_at || 0),
+    readAt: row.read_at ? Number(row.read_at) : null,
+    archivedAt: row.archived_at ? Number(row.archived_at) : null,
+    sender: {
+      familyId: row.sender_family_id,
+      familyName: row.sender_family_name,
+      familyAvatar: row.sender_family_avatar,
+      memberId: row.sender_member_id || '',
+      memberName: row.sender_member_name || 'Familie'
+    },
+    recipient: {
+      familyId: row.recipient_family_id,
+      familyName: row.recipient_family_name,
+      familyAvatar: row.recipient_family_avatar
+    },
+    otherFamily: sent
+      ? {
+          id: row.recipient_family_id,
+          familyName: row.recipient_family_name,
+          familyAvatar: row.recipient_family_avatar
+        }
+      : {
+          id: row.sender_family_id,
+          familyName: row.sender_family_name,
+          familyAvatar: row.sender_family_avatar
+        }
+  };
+}
+
+const FAMILY_LETTER_SELECT = `
+  SELECT
+    letter.*,
+    sender_family.name AS sender_family_name,
+    sender_family.avatar AS sender_family_avatar,
+    sender_member.name AS sender_member_name,
+    recipient_family.name AS recipient_family_name,
+    recipient_family.avatar AS recipient_family_avatar,
+    letter_read.read_at,
+    letter_read.archived_at
+  FROM family_letters letter
+  JOIN families sender_family ON sender_family.id = letter.sender_family_id
+  JOIN families recipient_family
+    ON recipient_family.id = letter.recipient_family_id
+  LEFT JOIN members sender_member ON sender_member.id = letter.sender_member_id
+  LEFT JOIN family_letter_reads letter_read
+    ON letter_read.letter_id = letter.id
+    AND letter_read.member_id = ?
+`;
+
+export function listFamilyLetters(
+  familyId,
+  memberId,
+  { includeArchived = false, limit = 200 } = {}
+) {
+  const rows = database
+    .prepare(`
+      ${FAMILY_LETTER_SELECT}
+      WHERE (
+        letter.sender_family_id = ?
+        OR letter.recipient_family_id = ?
+      )
+      ${includeArchived ? '' : 'AND letter_read.archived_at IS NULL'}
+      ORDER BY letter.created_at DESC
+      LIMIT ?
+    `)
+    .all(memberId, familyId, familyId, Math.max(1, Math.min(500, limit)));
+  return rows.map(row => mapFamilyLetterRow(row, familyId));
+}
+
+export function createFamilyLetter(
+  senderFamilyId,
+  senderMemberId,
+  recipientFamilyId,
+  { subject, body, replyToId = '' }
+) {
+  const reply = replyToId
+    ? database
+        .prepare(`
+          SELECT *
+          FROM family_letters
+          WHERE id = ?
+            AND (
+              sender_family_id = ?
+              OR recipient_family_id = ?
+            )
+        `)
+        .get(replyToId, senderFamilyId, senderFamilyId)
+    : null;
+  if (replyToId && !reply) {
+    const error = new Error('Der beantwortete Brief wurde nicht gefunden.');
+    error.statusCode = 404;
+    throw error;
+  }
+  const id = `family-letter-${randomUUID()}`;
+  const threadId = reply?.thread_id || id;
+  const now = Date.now();
+  return withTransaction(() => {
+    database
+      .prepare(`
+        INSERT INTO family_letters(
+          id, thread_id, sender_family_id, sender_member_id,
+          recipient_family_id, reply_to_id, subject, body, created_at
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      .run(
+        id,
+        threadId,
+        senderFamilyId,
+        senderMemberId || null,
+        recipientFamilyId,
+        reply?.id || null,
+        String(subject || ''),
+        String(body || ''),
+        now
+      );
+    bumpFamilyVersion(senderFamilyId);
+    bumpFamilyVersion(recipientFamilyId);
+    return listFamilyLetters(senderFamilyId, senderMemberId, {
+      includeArchived: true
+    }).find(letter => letter.id === id);
+  });
+}
+
+export function updateFamilyLetterState(
+  familyId,
+  memberId,
+  letterId,
+  { read, archived }
+) {
+  const letter = database
+    .prepare(`
+      SELECT *
+      FROM family_letters
+      WHERE id = ?
+        AND (
+          sender_family_id = ?
+          OR recipient_family_id = ?
+        )
+    `)
+    .get(letterId, familyId, familyId);
+  if (!letter) return null;
+  const existing = database
+    .prepare(`
+      SELECT read_at, archived_at
+      FROM family_letter_reads
+      WHERE letter_id = ? AND member_id = ?
+    `)
+    .get(letterId, memberId);
+  const now = Date.now();
+  const readAt = read === undefined
+    ? existing?.read_at || null
+    : read
+      ? existing?.read_at || now
+      : null;
+  const archivedAt = archived === undefined
+    ? existing?.archived_at || null
+    : archived
+      ? existing?.archived_at || now
+      : null;
+  database
+    .prepare(`
+      INSERT INTO family_letter_reads(
+        letter_id, member_id, read_at, archived_at
+      )
+      VALUES(?, ?, ?, ?)
+      ON CONFLICT(letter_id, member_id) DO UPDATE SET
+        read_at = excluded.read_at,
+        archived_at = excluded.archived_at
+    `)
+    .run(letterId, memberId, readAt, archivedAt);
+  bumpFamilyVersion(familyId);
+  return listFamilyLetters(familyId, memberId, {
+    includeArchived: true
+  }).find(entry => entry.id === letterId);
+}
+
+function mapFamilyChatGuestRow(row, familyId) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    relationshipId: row.relationship_id,
+    status: row.status,
+    direction: row.host_family_id === familyId ? 'host' : 'guest',
+    hostFamily: {
+      id: row.host_family_id,
+      familyName: row.host_family_name,
+      familyAvatar: row.host_family_avatar
+    },
+    guestFamily: {
+      id: row.guest_family_id,
+      familyName: row.guest_family_name,
+      familyAvatar: row.guest_family_avatar
+    },
+    guestMember: {
+      id: row.guest_member_id,
+      name: row.guest_member_name,
+      role: row.guest_member_role,
+      position: row.guest_member_position,
+      avatar: row.guest_member_avatar,
+      color: row.guest_member_color
+    },
+    invitedByMemberId: row.invited_by_member_id || '',
+    acceptedAt: row.accepted_at ? Number(row.accepted_at) : null,
+    createdAt: Number(row.created_at || 0),
+    updatedAt: Number(row.updated_at || 0)
+  };
+}
+
+const FAMILY_CHAT_GUEST_SELECT = `
+  SELECT
+    invitation.*,
+    host.name AS host_family_name,
+    host.avatar AS host_family_avatar,
+    guest.name AS guest_family_name,
+    guest.avatar AS guest_family_avatar,
+    guest_member.name AS guest_member_name,
+    guest_member.role AS guest_member_role,
+    guest_member.position AS guest_member_position,
+    guest_member.avatar AS guest_member_avatar,
+    guest_member.color AS guest_member_color
+  FROM family_chat_guests invitation
+  JOIN families host ON host.id = invitation.host_family_id
+  JOIN families guest ON guest.id = invitation.guest_family_id
+  JOIN members guest_member ON guest_member.id = invitation.guest_member_id
+`;
+
+export function listFamilyChatGuests(familyId) {
+  return database
+    .prepare(`
+      ${FAMILY_CHAT_GUEST_SELECT}
+      WHERE invitation.host_family_id = ?
+        OR invitation.guest_family_id = ?
+      ORDER BY invitation.updated_at DESC
+    `)
+    .all(familyId, familyId)
+    .map(row => mapFamilyChatGuestRow(row, familyId));
+}
+
+export function getFamilyChatGuest(familyId, invitationId) {
+  const row = database
+    .prepare(`
+      ${FAMILY_CHAT_GUEST_SELECT}
+      WHERE invitation.id = ?
+        AND (
+          invitation.host_family_id = ?
+          OR invitation.guest_family_id = ?
+        )
+    `)
+    .get(invitationId, familyId, familyId);
+  return mapFamilyChatGuestRow(row, familyId);
+}
+
+export function createFamilyChatGuestInvite(
+  hostFamilyId,
+  relationshipId,
+  guestMemberId,
+  invitedByMemberId
+) {
+  const relationship = database
+    .prepare(`
+      SELECT *
+      FROM family_relationships
+      WHERE id = ?
+        AND status = 'accepted'
+        AND (
+          requester_family_id = ?
+          OR target_family_id = ?
+        )
+    `)
+    .get(relationshipId, hostFamilyId, hostFamilyId);
+  if (!relationship) {
+    const error = new Error('Diese Familienverbindung ist nicht aktiv.');
+    error.statusCode = 404;
+    throw error;
+  }
+  const guestFamilyId =
+    relationship.requester_family_id === hostFamilyId
+      ? relationship.target_family_id
+      : relationship.requester_family_id;
+  const guestMember = getMember(guestFamilyId, guestMemberId);
+  if (
+    !guestMember ||
+    guestMember.isManaged ||
+    !['adult', 'senior'].includes(guestMember.role)
+  ) {
+    const error = new Error(
+      'Als Chatgast können nur erwachsene Kontoprofile eingeladen werden.'
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  const existing = database
+    .prepare(`
+      SELECT *
+      FROM family_chat_guests
+      WHERE host_family_id = ?
+        AND guest_family_id = ?
+        AND guest_member_id = ?
+    `)
+    .get(hostFamilyId, guestFamilyId, guestMemberId);
+  if (existing && ['pending', 'accepted'].includes(existing.status)) {
+    const error = new Error(
+      existing.status === 'accepted'
+        ? 'Dieses Profil ist bereits im Familienchat.'
+        : 'Für dieses Profil wartet bereits eine Einladung.'
+    );
+    error.statusCode = 409;
+    throw error;
+  }
+  const id = existing?.id || `family-chat-guest-${randomUUID()}`;
+  const now = Date.now();
+  return withTransaction(() => {
+    if (existing) {
+      database
+        .prepare(`
+          UPDATE family_chat_guests SET
+            relationship_id = ?,
+            invited_by_member_id = ?,
+            status = 'pending',
+            accepted_at = NULL,
+            created_at = ?,
+            updated_at = ?
+          WHERE id = ?
+        `)
+        .run(relationshipId, invitedByMemberId || null, now, now, id);
+    } else {
+      database
+        .prepare(`
+          INSERT INTO family_chat_guests(
+            id, relationship_id, host_family_id, guest_family_id,
+            guest_member_id, invited_by_member_id, status,
+            created_at, updated_at
+          )
+          VALUES(?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+        `)
+        .run(
+          id,
+          relationshipId,
+          hostFamilyId,
+          guestFamilyId,
+          guestMemberId,
+          invitedByMemberId || null,
+          now,
+          now
+        );
+    }
+    bumpFamilyVersion(hostFamilyId);
+    bumpFamilyVersion(guestFamilyId);
+    return getFamilyChatGuest(hostFamilyId, id);
+  });
+}
+
+export function updateFamilyChatGuestStatus(
+  familyId,
+  invitationId,
+  status
+) {
+  const existing = database
+    .prepare(`
+      SELECT *
+      FROM family_chat_guests
+      WHERE id = ?
+        AND (
+          host_family_id = ?
+          OR guest_family_id = ?
+        )
+    `)
+    .get(invitationId, familyId, familyId);
+  if (!existing) return null;
+  const now = Date.now();
+  database
+    .prepare(`
+      UPDATE family_chat_guests
+      SET status = ?,
+          accepted_at = CASE
+            WHEN ? = 'accepted' THEN COALESCE(accepted_at, ?)
+            ELSE accepted_at
+          END,
+          updated_at = ?
+      WHERE id = ?
+    `)
+    .run(status, status, now, now, invitationId);
+  bumpFamilyVersion(existing.host_family_id);
+  bumpFamilyVersion(existing.guest_family_id);
+  return getFamilyChatGuest(familyId, invitationId);
+}
+
+export function listAcceptedChatGuestsForHost(hostFamilyId) {
+  return database
+    .prepare(`
+      ${FAMILY_CHAT_GUEST_SELECT}
+      WHERE invitation.host_family_id = ?
+        AND invitation.status = 'accepted'
+      ORDER BY invitation.updated_at DESC
+    `)
+    .all(hostFamilyId)
+    .map(row => mapFamilyChatGuestRow(row, hostFamilyId));
 }
 
 function sharedEventRecipients(eventId) {

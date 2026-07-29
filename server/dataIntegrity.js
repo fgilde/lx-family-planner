@@ -37,7 +37,10 @@ const PROTECTED_TABLES = [
     name: 'shared_family_event_recipients',
     key: ['event_id', 'family_id']
   },
-  { name: 'problem_reports', key: ['id'] }
+  { name: 'problem_reports', key: ['id'] },
+  { name: 'family_letters', key: ['id'] },
+  { name: 'family_letter_reads', key: ['letter_id', 'member_id'] },
+  { name: 'family_chat_guests', key: ['id'] }
 ];
 
 const OBSERVED_TABLES = [
