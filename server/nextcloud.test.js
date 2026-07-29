@@ -18,6 +18,7 @@ const {
   createRecord,
   database,
   deleteRecord,
+  getIntegration,
   getRecord,
   listIntegrationSyncItems,
   listRecords,
@@ -127,7 +128,7 @@ const davServer = createServer(async (req, res) => {
       req.url.split('/').at(-1).split('?')[0]
     );
     const values = new URLSearchParams(body.toString('utf8'));
-    provisionedUsers.get(userId).password = values.get('value');
+    provisionedUsers.get(userId)[values.get('key')] = values.get('value');
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
       ocs: {
@@ -161,13 +162,28 @@ const davServer = createServer(async (req, res) => {
     return;
   }
   if (req.url === '/ocs/v2.php/cloud/user?format=json') {
+    const authorization = String(req.headers.authorization || '');
+    const credentials = authorization.startsWith('Basic ')
+      ? Buffer.from(authorization.slice(6), 'base64')
+          .toString('utf8')
+          .split(':')
+      : [];
+    const accountId = credentials[0] || 'family';
+    const account = provisionedUsers.get(accountId);
     res.setHeader('content-type', 'application/json');
     res.end(JSON.stringify({
       ocs: {
         data: {
-          id: 'family',
-          displayname: 'Familie Test',
-          email: 'family@example.test'
+          id: accountId,
+          displayname: account?.displayName || 'Familie Test',
+          email: 'family@example.test',
+          quota: {
+            free: 9_999_999,
+            used: 1234,
+            total: 10_001_233,
+            relative: 0.01,
+            quota: 10_001_233
+          }
         }
       }
     }));
@@ -175,12 +191,15 @@ const davServer = createServer(async (req, res) => {
   }
   if (
     req.method === 'PROPFIND' &&
-    req.url === '/remote.php/dav/calendars/family/'
+    /^\/remote\.php\/dav\/calendars\/[^/]+\/$/.test(req.url || '')
   ) {
+    const calendarUser = req.url.split('/').filter(Boolean).at(-1);
+    const userCalendarHref =
+      `/remote.php/dav/calendars/${calendarUser}/family/`;
     res.statusCode = 207;
     res.end(multiStatus([
       `<d:response>
-        <d:href>${calendarHref}</d:href>
+        <d:href>${userCalendarHref}</d:href>
         <d:propstat><d:prop>
           <d:displayname>Familie</d:displayname>
           <d:resourcetype><d:collection/><c:calendar/></d:resourcetype>
@@ -193,10 +212,16 @@ const davServer = createServer(async (req, res) => {
     ]));
     return;
   }
-  if (req.method === 'REPORT' && req.url === calendarHref) {
+  if (
+    req.method === 'REPORT' &&
+    /^\/remote\.php\/dav\/calendars\/[^/]+\/family\/$/.test(req.url || '')
+  ) {
+    const reportEvents = req.url === calendarHref
+      ? [...remoteEvents.entries()]
+      : [];
     res.statusCode = 207;
     res.end(multiStatus(
-      [...remoteEvents.entries()].map(([href, item]) => (
+      reportEvents.map(([href, item]) => (
         `<d:response>
           <d:href>${href}</d:href>
           <d:propstat><d:prop>
@@ -330,6 +355,8 @@ test('Nextcloud discovery, WebDAV files and two-way calendar sync stay safe', as
   assert.equal(inspection.userId, 'family');
   assert.equal(inspection.calendars.length, 1);
   assert.deepEqual(inspection.calendars[0].components, ['VEVENT']);
+  assert.equal(inspection.storage.used, 1234);
+  assert.equal(inspection.storage.total, 10_001_233);
 
   await ensureNextcloudFolder(connection, 'family', 'LX Family/Backups');
   const uploaded = await uploadNextcloudFile(
@@ -504,12 +531,14 @@ test('bundled Nextcloud users receive isolated renewable app credentials', async
   assert.deepEqual(first, {
     userId: 'lx-family-test',
     displayName: 'LX Family · Test',
+    quota: '10GB',
     appPassword: 'generated-app-password'
   });
   assert.equal(
     provisionedUsers.get('lx-family-test').displayName,
     'LX Family · Test'
   );
+  assert.equal(provisionedUsers.get('lx-family-test').quota, '10GB');
 
   await provisionNextcloudUser({
     baseUrl: connection.baseUrl,
@@ -532,4 +561,43 @@ test('bundled Nextcloud users receive isolated renewable app credentials', async
   );
   assert.equal(calendars.length, 1);
   assert.equal(await revokeNextcloudAppPassword(connection), true);
+});
+
+test('bundled Family Cloud provisions missing family storage automatically', async () => {
+  process.env.NEXTCLOUD_ADMIN_USER = 'familyadmin';
+  process.env.NEXTCLOUD_ADMIN_PASSWORD = 'admin-password';
+  process.env.NEXTCLOUD_INTERNAL_URL = connection.baseUrl;
+  process.env.NEXTCLOUD_PUBLIC_URL = 'https://cloud.example.test';
+  process.env.NEXTCLOUD_FAMILY_QUOTA = '12GB';
+  process.env.NEXTCLOUD_AUTO_PROVISION = 'true';
+
+  const { createApp } = await import('./app.js');
+  const app = createApp();
+  const result = await app.locals.provisionBundledCloudFamily(
+    'family-nextcloud'
+  );
+  assert.equal(result.skipped, false);
+
+  const integration = getIntegration('family-nextcloud', 'nextcloud');
+  assert.equal(integration.config.bundled, true);
+  assert.equal(integration.config.publicBaseUrl, 'https://cloud.example.test');
+  assert.equal(integration.config.quota, '12GB');
+  assert.equal(integration.config.folder, 'LX Family');
+  assert.equal(
+    provisionedUsers.get(integration.config.userId).quota,
+    '12GB'
+  );
+  assert.equal(
+    [...createdFolders].some(folderPath =>
+      folderPath.includes(
+        `/remote.php/dav/files/${integration.config.userId}/LX%20Family`
+      )
+    ),
+    true
+  );
+
+  const repeated = await app.locals.provisionBundledCloudFamily(
+    'family-nextcloud'
+  );
+  assert.equal(repeated.skipped, true);
 });

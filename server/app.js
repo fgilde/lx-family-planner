@@ -135,6 +135,7 @@ import {
   downloadNextcloudFile,
   ensureNextcloudCalendar,
   ensureNextcloudFolder,
+  fetchNextcloudAccount,
   inspectNextcloud,
   listNextcloudFiles,
   nextcloudBrowserFolderUrl,
@@ -161,6 +162,10 @@ const APP_VERSION = (() => {
 })();
 const JSON_LIMIT = process.env.JSON_LIMIT || '5mb';
 const REWARD_ICON_IMAGE_MAX_LENGTH = 350_000;
+const NEXTCLOUD_AUTO_PROVISION =
+  process.env.NEXTCLOUD_AUTO_PROVISION !== 'false';
+const NEXTCLOUD_AUTO_PROVISION_META_PREFIX =
+  'nextcloud-auto-provision-disabled:';
 const APP_SECRET =
   process.env.APP_SECRET ||
   process.env.SECRET_KEY ||
@@ -2032,7 +2037,11 @@ function bundledNextcloudAdmin() {
     return null;
   }
   return {
-    baseUrl: 'http://nextcloud',
+    baseUrl: cleanText(
+      process.env.NEXTCLOUD_INTERNAL_URL,
+      'http://nextcloud',
+      2000
+    ),
     username,
     password
   };
@@ -2053,6 +2062,158 @@ function bundledNextcloudPublicUrl() {
   } catch {
     return '';
   }
+}
+
+function bundledNextcloudQuota() {
+  return cleanText(
+    process.env.NEXTCLOUD_FAMILY_QUOTA,
+    '10GB',
+    80
+  );
+}
+
+function nextcloudAutoProvisionMetaKey(familyId) {
+  return `${NEXTCLOUD_AUTO_PROVISION_META_PREFIX}${familyId}`;
+}
+
+async function provisionBundledNextcloudForFamily(
+  familyId,
+  options = {}
+) {
+  const bundled = bundledNextcloudAdmin();
+  if (!bundled) {
+    throw Object.assign(
+      new Error(
+        'Die mitgelieferte Family Cloud ist auf diesem Server noch nicht aktiviert.'
+      ),
+      { statusCode: 503 }
+    );
+  }
+  const family = getFamily(familyId);
+  if (!family) {
+    throw Object.assign(
+      new Error('Die Familie wurde nicht gefunden.'),
+      { statusCode: 404 }
+    );
+  }
+  const existing = getIntegration(familyId, 'nextcloud');
+  if (existing && options.replace !== true) {
+    return { integration: existing, created: false };
+  }
+  const publicBaseUrl = normalizeNextcloudBaseUrl(
+    options.publicBaseUrl || bundledNextcloudPublicUrl(),
+    'Nextcloud-Adresse für Browser'
+  );
+  const folder = normalizeNextcloudFolder(
+    options.folder || existing?.config?.folder || 'LX Family'
+  );
+  const userId =
+    `lx-${createHash('sha256')
+      .update(familyId)
+      .digest('hex')
+      .slice(0, 20)}`;
+  const displayName = cleanText(
+    `LX Family · ${family.familyName || 'Familie'}`,
+    'LX Family',
+    200
+  );
+  const loginPassword = randomBytes(48).toString('base64url');
+  const provisioned = await provisionNextcloudUser({
+    baseUrl: bundled.baseUrl,
+    adminUsername: bundled.username,
+    adminPassword: bundled.password,
+    userId,
+    displayName,
+    password: loginPassword,
+    quota: bundledNextcloudQuota(),
+    appVersion: APP_VERSION
+  });
+  const connection = {
+    baseUrl: bundled.baseUrl,
+    username: provisioned.userId,
+    appPassword: provisioned.appPassword,
+    appVersion: APP_VERSION
+  };
+  let inspection = await inspectNextcloud(connection);
+  if (
+    !inspection.calendars.some(calendar =>
+      calendar.components.includes('VEVENT')
+    )
+  ) {
+    await ensureNextcloudCalendar(
+      connection,
+      inspection.userId,
+      'LX Family'
+    );
+    inspection = await inspectNextcloud(connection);
+  }
+  await ensureNextcloudFolder(
+    connection,
+    inspection.userId,
+    folder
+  );
+  const eventCalendarHref =
+    inspection.calendars.find(calendar =>
+      calendar.components.includes('VEVENT')
+    )?.href || '';
+  if (!eventCalendarHref) {
+    throw Object.assign(
+      new Error(
+        'Nextcloud konnte keinen Familienkalender bereitstellen.'
+      ),
+      { statusCode: 502 }
+    );
+  }
+  const config = {
+    ...(existing?.config || {}),
+    enabled: true,
+    bundled: true,
+    baseUrl: bundled.baseUrl,
+    publicBaseUrl,
+    host: new URL(publicBaseUrl).host,
+    userId: inspection.userId,
+    displayName: inspection.displayName || displayName,
+    quota: provisioned.quota,
+    nextcloudVersion: inspection.version,
+    calendars: inspection.calendars,
+    eventCalendarHref,
+    eventSyncEnabled: true,
+    defaultMemberId: 'all',
+    includeGrandparents: Boolean(
+      options.includeGrandparents ??
+      existing?.config?.includeGrandparents
+    ),
+    folder,
+    backupEnabled: true,
+    backupHour: Math.max(
+      0,
+      Math.min(
+        23,
+        Number(
+          options.backupHour ??
+          existing?.config?.backupHour ??
+          3
+        )
+      )
+    ),
+    lastSyncError: '',
+    lastBackupError: ''
+  };
+  saveIntegration(
+    familyId,
+    'nextcloud',
+    config,
+    encryptJson({
+      username: provisioned.userId,
+      appPassword: provisioned.appPassword,
+      loginPassword
+    })
+  );
+  setAppMeta(nextcloudAutoProvisionMetaKey(familyId), 'false');
+  return {
+    integration: getIntegration(familyId, 'nextcloud'),
+    created: !existing
+  };
 }
 
 function integrationStatus(familyId, member = null) {
@@ -2150,6 +2311,7 @@ function integrationStatus(familyId, member = null) {
                   })(),
                   userId: config.userId || '',
                   displayName: config.displayName || config.userId || '',
+                  quota: config.quota || bundledNextcloudQuota(),
                   nextcloudVersion: config.nextcloudVersion || '',
                   calendars: Array.isArray(config.calendars)
                     ? config.calendars
@@ -3263,6 +3425,58 @@ export function createApp() {
     timer.unref();
     nextcloudSyncDebounces.set(familyId, timer);
   };
+  let bundledCloudProvisioning = false;
+  app.locals.provisionBundledCloudFamily = async familyId => {
+    if (
+      !NEXTCLOUD_AUTO_PROVISION ||
+      !bundledNextcloudAdmin() ||
+      !bundledNextcloudPublicUrl() ||
+      getIntegration(familyId, 'nextcloud') ||
+      getAppMeta(nextcloudAutoProvisionMetaKey(familyId)) === 'true'
+    ) {
+      return { skipped: true, familyId };
+    }
+    const result = await provisionBundledNextcloudForFamily(familyId);
+    try {
+      await performNextcloudSync(familyId, result.integration);
+    } catch (error) {
+      console.warn(
+        `Erster Nextcloud-Abgleich für Familie ${familyId} ist fehlgeschlagen:`,
+        error.message
+      );
+    }
+    publishFamilyChange(familyId, 'nextcloud-provisioned');
+    return { skipped: false, familyId };
+  };
+  app.locals.runBundledCloudProvisioning = async () => {
+    if (bundledCloudProvisioning) {
+      return { skipped: true, created: 0, errors: [] };
+    }
+    bundledCloudProvisioning = true;
+    let created = 0;
+    const errors = [];
+    try {
+      for (const family of listPublicFamilies().slice(0, 500)) {
+        try {
+          const result =
+            await app.locals.provisionBundledCloudFamily(family.id);
+          if (!result.skipped) created += 1;
+        } catch (error) {
+          errors.push({
+            familyId: family.id,
+            message: error.message
+          });
+          console.warn(
+            `Family Cloud für Familie ${family.id} konnte nicht automatisch eingerichtet werden:`,
+            error.message
+          );
+        }
+      }
+      return { skipped: false, created, errors };
+    } finally {
+      bundledCloudProvisioning = false;
+    }
+  };
   let eventReminderSweepRunning = false;
   app.locals.runEventReminderSweep = async (now = Date.now()) => {
     if (eventReminderSweepRunning) {
@@ -3784,6 +3998,16 @@ export function createApp() {
       session: publicSessionPayload(session),
       ...nativeSessionTokenPayload(req, sessionToken)
     });
+    const cloudProvisioning = setTimeout(() => {
+      void app.locals.provisionBundledCloudFamily(result.family.id)
+        .catch(error => {
+          console.warn(
+            `Family Cloud für neue Familie ${result.family.id} konnte nicht eingerichtet werden:`,
+            error.message
+          );
+        });
+    }, 250);
+    cloudProvisioning.unref();
   });
 
   app.post('/api/auth/family', authRateLimit, (req, res) => {
@@ -6953,115 +7177,19 @@ export function createApp() {
     requireAuth,
     requireAdult,
     async (req, res) => {
-      const bundled = bundledNextcloudAdmin();
-      if (!bundled) {
-        return res.status(503).json({
-          success: false,
-          error:
-            'Die mitgelieferte Family Cloud ist auf diesem Server noch nicht aktiviert.'
-        });
-      }
-      const family = getFamily(req.session.familyId);
-      const publicBaseUrl = normalizeNextcloudBaseUrl(
-        req.body?.publicBaseUrl || bundledNextcloudPublicUrl(),
-        'Nextcloud-Adresse für Browser'
-      );
-      const folder = normalizeNextcloudFolder(
-        req.body?.folder || 'LX Family'
-      );
-      const userId =
-        `lx-${createHash('sha256')
-          .update(req.session.familyId)
-          .digest('hex')
-          .slice(0, 20)}`;
-      const displayName = cleanText(
-        `LX Family · ${family?.familyName || 'Familie'}`,
-        'LX Family',
-        200
-      );
-      const loginPassword = randomBytes(48).toString('base64url');
-      const provisioned = await provisionNextcloudUser({
-        baseUrl: bundled.baseUrl,
-        adminUsername: bundled.username,
-        adminPassword: bundled.password,
-        userId,
-        displayName,
-        password: loginPassword,
-        appVersion: APP_VERSION
-      });
-      const connection = {
-        baseUrl: bundled.baseUrl,
-        username: provisioned.userId,
-        appPassword: provisioned.appPassword,
-        appVersion: APP_VERSION
-      };
-      let inspection = await inspectNextcloud(connection);
-      if (
-        !inspection.calendars.some(calendar =>
-          calendar.components.includes('VEVENT')
-        )
-      ) {
-        await ensureNextcloudCalendar(
-          connection,
-          inspection.userId,
-          'LX Family'
-        );
-        inspection = await inspectNextcloud(connection);
-      }
-      await ensureNextcloudFolder(
-        connection,
-        inspection.userId,
-        folder
-      );
-      const eventCalendarHref =
-        inspection.calendars.find(calendar =>
-          calendar.components.includes('VEVENT')
-        )?.href || '';
-      if (!eventCalendarHref) {
-        throw Object.assign(
-          new Error(
-            'Nextcloud konnte keinen Familienkalender bereitstellen.'
-          ),
-          { statusCode: 502 }
-        );
-      }
       const existing = getIntegration(
         req.session.familyId,
         'nextcloud'
       );
-      const config = {
-        ...(existing?.config || {}),
-        enabled: true,
-        bundled: true,
-        baseUrl: bundled.baseUrl,
-        publicBaseUrl,
-        host: new URL(publicBaseUrl).host,
-        userId: inspection.userId,
-        displayName: inspection.displayName || displayName,
-        nextcloudVersion: inspection.version,
-        calendars: inspection.calendars,
-        eventCalendarHref,
-        eventSyncEnabled: true,
-        defaultMemberId: 'all',
-        includeGrandparents: Boolean(req.body?.includeGrandparents),
-        folder,
-        backupEnabled: true,
-        backupHour: Math.max(
-          0,
-          Math.min(23, Number(req.body?.backupHour ?? 3))
-        ),
-        lastSyncError: '',
-        lastBackupError: ''
-      };
-      saveIntegration(
+      await provisionBundledNextcloudForFamily(
         req.session.familyId,
-        'nextcloud',
-        config,
-        encryptJson({
-          username: provisioned.userId,
-          appPassword: provisioned.appPassword,
-          loginPassword
-        })
+        {
+          replace: true,
+          publicBaseUrl: req.body?.publicBaseUrl,
+          folder: req.body?.folder,
+          includeGrandparents: req.body?.includeGrandparents,
+          backupHour: req.body?.backupHour
+        }
       );
       const syncStats = await performNextcloudSync(
         req.session.familyId
@@ -7125,17 +7253,21 @@ export function createApp() {
     async (req, res) => {
       const workspace = nextcloudWorkspace(req.session.familyId);
       const currentPath = cleanText(req.query.path, '', 2000);
-      const entries = await listNextcloudFiles(
-        workspace.connection,
-        workspace.userId,
-        workspace.folder,
-        currentPath
-      );
+      const [entries, account] = await Promise.all([
+        listNextcloudFiles(
+          workspace.connection,
+          workspace.userId,
+          workspace.folder,
+          currentPath
+        ),
+        fetchNextcloudAccount(workspace.connection)
+      ]);
       res.setHeader('Cache-Control', 'no-store');
       res.json({
         success: true,
         path: currentPath,
         folder: workspace.folder,
+        storage: account.storage,
         entries
       });
     }
@@ -7625,6 +7757,10 @@ export function createApp() {
         );
       }
       deleteIntegration(req.session.familyId, 'nextcloud');
+      setAppMeta(
+        nextcloudAutoProvisionMetaKey(req.session.familyId),
+        'true'
+      );
       publishFamilyChange(req.session.familyId, 'nextcloud');
       res.json({
         success: true,
@@ -8397,6 +8533,10 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void app.locals.runNextcloudSweep();
   }, NEXTCLOUD_SYNC_INTERVAL_MS);
   nextcloudSyncTimer.unref();
+  const bundledCloudProvisioningTimer = setInterval(() => {
+    void app.locals.runBundledCloudProvisioning();
+  }, 10 * 60 * 1000);
+  bundledCloudProvisioningTimer.unref();
   const initialCalendarSync = setTimeout(() => {
     void syncAllCalendarSubscriptions();
   }, 20_000);
@@ -8409,13 +8549,19 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void app.locals.runNextcloudSweep();
   }, 35_000);
   initialNextcloudSweep.unref();
+  const initialBundledCloudProvisioning = setTimeout(() => {
+    void app.locals.runBundledCloudProvisioning();
+  }, 12_000);
+  initialBundledCloudProvisioning.unref();
   server.on('close', () => {
     clearInterval(calendarSyncTimer);
     clearInterval(eventReminderTimer);
     clearInterval(nextcloudSyncTimer);
+    clearInterval(bundledCloudProvisioningTimer);
     clearTimeout(initialCalendarSync);
     clearTimeout(initialEventReminderSweep);
     clearTimeout(initialNextcloudSweep);
+    clearTimeout(initialBundledCloudProvisioning);
     app.locals.stopHomeAssistantSockets?.();
     app.locals.stopNextcloudSyncDebounces?.();
   });

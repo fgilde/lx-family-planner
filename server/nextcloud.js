@@ -317,10 +317,27 @@ export async function fetchNextcloudAccount(connection) {
       'Nextcloud hat keine eindeutige Benutzerkennung zurückgegeben.'
     );
   }
+  const quota = data?.quota && typeof data.quota === 'object'
+    ? data.quota
+    : {};
+  const storageNumber = value => {
+    const number = Number(value);
+    return Number.isFinite(number) ? Math.max(0, number) : 0;
+  };
   return {
     userId,
     displayName: clean(data?.displayname, userId, 200),
-    email: clean(data?.email, '', 300)
+    email: clean(data?.email, '', 300),
+    storage: {
+      free: storageNumber(quota.free),
+      used: storageNumber(quota.used),
+      total: storageNumber(quota.total),
+      relative: Math.max(
+        0,
+        Math.min(100, storageNumber(quota.relative))
+      ),
+      quota: storageNumber(quota.quota)
+    }
   };
 }
 
@@ -455,11 +472,13 @@ export async function provisionNextcloudUser({
   userId,
   displayName,
   password,
+  quota = '10GB',
   appVersion = '1'
 }) {
   const normalizedUserId = clean(userId, '', 64).toLowerCase();
   const normalizedDisplayName = clean(displayName, 'LX Family', 200);
   const normalizedPassword = clean(password, '', 1000);
+  const normalizedQuota = clean(quota, '10GB', 80);
   if (
     !/^[a-z0-9][a-z0-9._-]{2,63}$/.test(normalizedUserId) ||
     normalizedPassword.length < 24
@@ -509,6 +528,15 @@ export async function provisionNextcloudUser({
     );
   }
 
+  await ocsJsonRequest(adminConnection, userPath, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      key: 'quota',
+      value: normalizedQuota
+    }).toString()
+  });
+
   const userConnection = {
     baseUrl,
     username: normalizedUserId,
@@ -532,6 +560,7 @@ export async function provisionNextcloudUser({
   return {
     userId: normalizedUserId,
     displayName: normalizedDisplayName,
+    quota: normalizedQuota,
     appPassword
   };
 }

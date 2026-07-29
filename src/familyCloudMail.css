@@ -55,6 +55,43 @@
   flex: 0 0 auto;
 }
 
+.cloud-storage-meter {
+  min-width: 154px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+  font-size: .64rem;
+  font-weight: 750;
+}
+
+.cloud-storage-meter strong {
+  color: var(--text-main);
+}
+
+.cloud-storage-meter > span {
+  display: block;
+  margin-bottom: 5px;
+  white-space: nowrap;
+}
+
+.cloud-storage-meter > i {
+  display: block;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+
+.cloud-storage-meter > i > b {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
 .cloud-file-heading-actions button,
 .cloud-new-folder button,
 .cloud-preview-dialog button {
@@ -1072,6 +1109,7 @@
 
   .cloud-file-heading-actions {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .cloud-file-heading-actions button {
@@ -1124,6 +1162,10 @@
   .cloud-file-heading-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .cloud-storage-meter {
+    grid-column: 1 / -1;
   }
 
   .cloud-new-folder {

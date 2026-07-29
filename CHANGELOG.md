@@ -2,6 +2,29 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.10.1] – 2026-07-29
+
+### Automatische Nextcloud-Konten und sichtbarer Speicher
+
+- vorhandene Familien ohne Cloud-Verbindung werden nach dem Serverstart
+  automatisch in der mitgelieferten Nextcloud eingerichtet
+- neue Familien erhalten kurz nach der Registrierung automatisch ein
+  getrenntes Nextcloud-Familienkonto
+- Konto, App-Passwort, Familienkalender und Ordner `LX Family` werden ohne
+  zusätzlichen Klick erzeugt
+- standardmäßig erhält jede Familie 10 GB Speicher; über
+  `NEXTCLOUD_FAMILY_QUOTA` frei konfigurierbar
+- Speichernutzung wird live aus Nextcloud gelesen und als Fortschrittsanzeige
+  im integrierten Familienarchiv dargestellt
+- ausdrücklich getrennte Cloud-Verbindungen werden über eine
+  Opt-out-Markierung nicht automatisch wiederhergestellt
+- `NEXTCLOUD_AUTO_PROVISION=false` schaltet die automatische Einrichtung bei
+  Bedarf serverweit ab
+- interne Nextcloud-Adresse kann für besondere Docker-Netze über
+  `NEXTCLOUD_INTERNAL_URL` vorgegeben werden
+- automatischer Test prüft Konto, Kontingent, Ordner, Kalender und
+  idempotente Wiederholung
+
 ## [1.10.0] – 2026-07-29
 
 ### Integrierte Family Cloud, Familienpost und Chatgäste

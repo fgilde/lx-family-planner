@@ -68,6 +68,7 @@ export default function CloudFileBrowser() {
   const [path, setPath] = useState('');
   const [folderName, setFolderName] = useState('Familienordner');
   const [entries, setEntries] = useState([]);
+  const [storage, setStorage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
   const [dragging, setDragging] = useState(false);
@@ -90,6 +91,7 @@ export default function CloudFileBrowser() {
       setPath(data.path || '');
       setFolderName(data.folder || 'Familienordner');
       setEntries(data.entries || []);
+      setStorage(data.storage || null);
     } catch (error) {
       showToast('Cloud-Ordner nicht erreichbar', error.message, 'error');
     } finally {
@@ -296,6 +298,27 @@ export default function CloudFileBrowser() {
           </p>
         </div>
         <div className="cloud-file-heading-actions">
+          {storage && (
+            <div className="cloud-storage-meter">
+              <span>
+                <strong>{fileSize(storage.used)}</strong>
+                {' von '}
+                {storage.total
+                  ? fileSize(storage.total)
+                  : 'unbegrenzt'}
+              </span>
+              <i>
+                <b
+                  style={{
+                    width: `${Math.max(
+                      1,
+                      Math.min(100, Number(storage.relative || 0))
+                    )}%`
+                  }}
+                />
+              </i>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setNewFolderOpen(value => !value)}

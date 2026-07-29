@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.10.1': {
+    version: '1.10.1',
+    eyebrow: 'Family Cloud ohne manuellen Einrichtungsschritt',
+    title: 'Jede Familie bekommt ihren Cloud-Bereich automatisch',
+    intro:
+      'Die mitgestartete Nextcloud war erreichbar, hat Familienkonten aber bisher erst nach einem zusätzlichen Klick angelegt. LX richtet bestehende und neue Familien jetzt selbstständig vollständig ein.',
+    highlights: [
+      {
+        id: 'cloud-auto-account',
+        title: 'Automatisches Familienkonto',
+        description:
+          'Jede Familie erhält ein eigenes, getrenntes Nextcloud-Konto – vorhandene Familien direkt nach dem Update und neue Familien bei der Anmeldung.'
+      },
+      {
+        id: 'cloud-auto-storage',
+        title: '10 GB Speicher pro Familie',
+        description:
+          'Zum Konto gehören ein festes Speicherkontingent, der Familienordner und ein eigener Kalender.'
+      },
+      {
+        id: 'cloud-storage-meter',
+        title: 'Speicher direkt in LX sichtbar',
+        description:
+          'Das Familienarchiv zeigt verwendeten und verfügbaren Speicher verständlich neben den Upload-Knöpfen.'
+      },
+      {
+        id: 'cloud-choice-preserved',
+        title: 'Trennen bleibt eine bewusste Entscheidung',
+        description:
+          'Wer die Cloud in LX ausdrücklich trennt, wird bei einem späteren Neustart nicht ungefragt erneut verbunden.'
+      }
+    ],
+    closing:
+      'Die Cloud bleibt familienweise getrennt. Profile benutzen den gemeinsamen Familienbereich über LX, ohne dass Kinder oder verwaltete Profile eigene Nextcloud-Passwörter benötigen.'
+  },
   '1.10.0': {
     version: '1.10.0',
     eyebrow: 'Cloud-Dateien und Familienpost direkt in LX',

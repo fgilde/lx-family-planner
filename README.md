@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.10.0</strong> ·
+  <strong>Aktuelle Version: 1.10.1</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -218,14 +218,22 @@ anschließend unter `http://IP-DES-SERVERS:8080` erreichbar. Benutzer und
 einmaliges Startpasswort zeigt das Hilfsskript an; beides steht zusätzlich in
 der lokalen, von Git ausgeschlossenen `.env`.
 
-Danach unter **Family Cloud → Mit LX Family Docker** nur prüfen, ob die
-vorgeschlagene Browser-Adresse stimmt, und auf
-**Family Cloud automatisch einrichten** drücken. LX erstellt serverseitig:
+Danach richtet LX alle bereits vorhandenen Familien automatisch ein. Neue
+Familien erhalten ihren Cloud-Bereich direkt nach der Registrierung. Der
+Knopf **Family Cloud automatisch einrichten** bleibt als manuelle Reparatur-
+und Neueinrichtungsoption sichtbar. LX erstellt serverseitig:
 
 - einen eigenen, getrennten Nextcloud-Benutzer für diese Familie,
 - ein zufälliges Kennwort und ein widerrufbares App-Passwort,
+- standardmäßig 10 GB Speicherplatz,
 - einen Familienkalender sowie den Familienordner,
 - den ersten sicheren Zwei-Wege-Abgleich.
+
+Die Trennung erfolgt absichtlich pro Familie und nicht pro Profil: Mama, Papa
+und freigegebene Familienprofile arbeiten in LX mit demselben Familienarchiv.
+Kinder oder verwaltete Organisationsprofile benötigen deshalb kein eigenes
+Nextcloud-Passwort. Eine in LX ausdrücklich getrennte Cloud wird bei späteren
+Neustarts nicht automatisch wieder verbunden.
 
 Sobald die Verbindung steht, erscheint im selben Bereich das
 **Familienarchiv**. Erwachsene können dort direkt in LX:
@@ -237,7 +245,8 @@ Sobald die Verbindung steht, erscheint im selben Bereich das
 
 Uploads sind auf 25 MB pro Datei und 20 Dateien je Durchlauf begrenzt. Der
 Browser erhält kein Nextcloud-App-Passwort: Alle Dateizugriffe laufen durch die
-angemeldete LX-Sitzung und das Backend.
+angemeldete LX-Sitzung und das Backend. Belegter und verfügbarer Speicher
+werden direkt im Familienarchiv angezeigt.
 
 Das Administratorkonto wird nicht als Familienkonto verwendet. Auch mehrere
 Familien auf demselben Portal erhalten dadurch getrennte Cloud-Bereiche. Das
@@ -868,6 +877,9 @@ Die Vorlage liegt in `.env.example`.
 | `COMPOSE_PROFILES` | mit Wert `nextcloud` die mitgelieferte Family Cloud starten |
 | `NEXTCLOUD_PORT` | Port der mitgelieferten Nextcloud, Standard `8080` |
 | `NEXTCLOUD_PUBLIC_URL` | tatsächlich vom Familiengerät erreichbare Cloud-Adresse |
+| `NEXTCLOUD_INTERNAL_URL` | interne Docker-Adresse; normalerweise `http://nextcloud` |
+| `NEXTCLOUD_AUTO_PROVISION` | fehlende Familienkonten automatisch anlegen; Standard `true` |
+| `NEXTCLOUD_FAMILY_QUOTA` | Speicherkontingent pro Familie; Standard `10GB` |
 | `NEXTCLOUD_*_PASSWORD` | vom Aktivierungsskript zufällig erzeugte Cloud-, Datenbank- und Redis-Schlüssel |
 | `NEXTCLOUD_TRUSTED_DOMAINS` | erlaubte Browsernamen und Heimnetz-Adressen für Nextcloud |
 | `CORS_ALLOWED_ORIGINS` | zusätzliche, vertrauenswürdige Ursprünge für eine getrennt gehostete oder native Oberfläche |
