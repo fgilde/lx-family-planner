@@ -15919,6 +15919,30 @@ body:has(.modal-backdrop) .problem-report-launcher {
 }
 
 /* Family Cloud · Nextcloud */
+.family-cloud-page {
+  width: min(100%, 1160px);
+  margin: 0 auto;
+  animation: family-cloud-arrive .38s ease-out both;
+}
+
+.family-cloud-page .nextcloud-settings-panel {
+  min-height: min(720px, calc(100vh - 190px));
+  box-shadow:
+    0 24px 70px color-mix(in srgb, #0b6f72 14%, transparent),
+    var(--shadow-sm);
+}
+
+@keyframes family-cloud-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .nextcloud-settings-panel {
   grid-column: 1 / -1;
   position: relative;

@@ -37,6 +37,7 @@ const VIEW_NAMES = new Set([
   'shopping',
   'meals',
   'family-life',
+  'cloud',
   'admin'
 ]);
 

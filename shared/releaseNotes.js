@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.9.2': {
+    version: '1.9.2',
+    eyebrow: 'Die Cloud ist nicht länger versteckt',
+    title: 'Family Cloud bekommt ihren eigenen Bereich',
+    intro:
+      'Nextcloud war bisher tief in der langen Elternzentrale einsortiert. Erwachsene finden die komplette Family Cloud jetzt direkt als eigenen Menüpunkt in der Hauptnavigation.',
+    highlights: [
+      {
+        id: 'cloud-main-navigation',
+        title: 'Eigener Menüpunkt „Family Cloud“',
+        description:
+          'Kalenderabgleich, Sicherungen, Ordner und Zugangsdaten sind ohne langes Scrollen erreichbar.'
+      },
+      {
+        id: 'cloud-adult-only',
+        title: 'Weiterhin nur für Erwachsene',
+        description:
+          'Kinder- und Haustierprofile sehen den Verwaltungsbereich nicht.'
+      },
+      {
+        id: 'cloud-responsive',
+        title: 'Auf Browser, Tablet und Handy',
+        description:
+          'Der neue Bereich passt sich an die vorhandene horizontale Navigation und alle Themes an.'
+      },
+      {
+        id: 'cloud-single-home',
+        title: 'Keine doppelte oder versteckte Ansicht',
+        description:
+          'Die Cloud-Karte wurde aus der langen Elternzentrale entfernt und besitzt jetzt genau einen klaren Platz.'
+      }
+    ],
+    closing:
+      'Alle vorhandenen Familien- und Nextcloud-Daten bleiben unverändert.'
+  },
   '1.9.1': {
     version: '1.9.1',
     eyebrow: 'Der Familienordner ist jetzt wirklich erreichbar',

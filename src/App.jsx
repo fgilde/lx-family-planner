@@ -20,6 +20,7 @@ import FamilyLoginScreen from './components/Auth/FamilyLoginScreen';
 import OnboardingWizard from './components/Auth/OnboardingWizard';
 import BringAccountModal from './components/Shopping/BringAccountModal';
 import ParentAdmin from './components/Admin/ParentAdmin';
+import NextcloudSettings from './components/Admin/NextcloudSettings';
 import FamilyLifeHub from './components/FamilyLife/FamilyLifeHub';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
 import ProblemReportButton from './components/ProblemReportButton';
@@ -58,7 +59,9 @@ function MainContent() {
       'board',
       'shopping',
       'meals',
-      'family-life'
+      'family-life',
+      'cloud',
+      'admin'
     ]);
     if (allowedViews.has(requestedView)) {
       if (
@@ -100,6 +103,7 @@ function MainContent() {
           'shopping',
           'meals',
           'family-life',
+          'cloud',
           'admin'
         ]);
         if (!allowedViews.has(requestedView)) return;
@@ -208,6 +212,11 @@ function MainContent() {
         {activeTab === 'tasks' && <ChoreRewardsPlanner />}
         {activeTab === 'board' && <FamilyPinboard />}
         {activeTab === 'family-life' && <FamilyLifeHub />}
+        {activeTab === 'cloud' && (
+          <div className="family-cloud-page">
+            <NextcloudSettings />
+          </div>
+        )}
         {activeTab === 'admin' && (
           <ParentAdmin onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
         )}

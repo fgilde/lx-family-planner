@@ -2,6 +2,18 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.9.2] – 2026-07-29
+
+### Family Cloud als eigener Hauptbereich
+
+- neuer, nur für Erwachsene sichtbarer Menüpunkt **Family Cloud**
+- Nextcloud-Einrichtung aus der langen Elternzentrale herausgelöst
+- direkte Ansicht für Kalenderabgleich, Cloud-Sicherungen und Familienordner
+- `?view=cloud` und Benachrichtigungsnavigation als gültiges Ziel ergänzt
+- eingeschränkte Erwachsenenprofile behalten Zugriff auf Cloud und
+  Elternzentrale
+- responsive Seitenfläche mit allen vorhandenen Theme-Variablen
+
 ## [1.9.1] – 2026-07-29
 
 ### Direkter Zugriff auf den automatisch angelegten Familienordner

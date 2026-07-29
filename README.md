@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.9.1</strong> ·
+  <strong>Aktuelle Version: 1.9.2</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -145,7 +145,8 @@ nicht immer zuverlässig.
 
 ### Family Cloud mit Nextcloud
 
-Nextcloud wird in der **Elternzentrale → Family Cloud** verbunden. LX Family
+Nextcloud wird über den eigenen Hauptmenüpunkt **Family Cloud** verbunden.
+Dieser Bereich ist ausschließlich für Erwachsenenprofile sichtbar. LX Family
 bleibt dabei die führende Stelle für Profile, Kinderfreigaben, Aufgabenpunkte
 und Belohnungen. Nextcloud übernimmt:
 
@@ -196,8 +197,8 @@ anschließend unter `http://IP-DES-SERVERS:8080` erreichbar. Benutzer und
 einmaliges Startpasswort zeigt das Hilfsskript an; beides steht zusätzlich in
 der lokalen, von Git ausgeschlossenen `.env`.
 
-Danach in **Elternzentrale → Family Cloud → Mit LX Family Docker** nur prüfen,
-ob die vorgeschlagene Browser-Adresse stimmt, und auf
+Danach unter **Family Cloud → Mit LX Family Docker** nur prüfen, ob die
+vorgeschlagene Browser-Adresse stimmt, und auf
 **Family Cloud automatisch einrichten** drücken. LX erstellt serverseitig:
 
 - einen eigenen, getrennten Nextcloud-Benutzer für diese Familie,
