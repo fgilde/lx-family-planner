@@ -7,11 +7,16 @@ import {
   FileImage,
   FileText,
   Folder,
+  FolderOpen,
   FolderPlus,
+  Grid2X2,
   Image as ImageIcon,
+  List,
   LoaderCircle,
   Maximize2,
   RefreshCw,
+  Search,
+  ShieldCheck,
   Trash2,
   Upload,
   X
@@ -28,7 +33,8 @@ function fileSize(bytes) {
   const value = Number(bytes || 0);
   if (value < 1024) return `${value} B`;
   if (value < 1024 ** 2) return `${(value / 1024).toFixed(1)} KB`;
-  return `${(value / 1024 ** 2).toFixed(1)} MB`;
+  if (value < 1024 ** 3) return `${(value / 1024 ** 2).toFixed(1)} MB`;
+  return `${(value / 1024 ** 3).toFixed(1)} GB`;
 }
 
 function fileDate(value) {
@@ -54,6 +60,70 @@ function entryIcon(entry) {
   return File;
 }
 
+function CloudImageThumbnail({ entry }) {
+  const [source, setSource] = useState('');
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const thumbnailRef = useRef(null);
+
+  useEffect(() => {
+    const element = thumbnailRef.current;
+    if (!element || typeof IntersectionObserver === 'undefined') {
+      setShouldLoad(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      observations => {
+        if (observations.some(observation => observation.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '180px' }
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (
+      !shouldLoad ||
+      !entry.mimeType?.startsWith('image/') ||
+      Number(entry.size || 0) > 12 * 1024 * 1024
+    ) {
+      return undefined;
+    }
+    let active = true;
+    let objectUrl = '';
+    const loadThumbnail = async () => {
+      try {
+        const response = await plannerApiFetch(
+          `/api/integrations/nextcloud/files/content?inline=true&path=${
+            encodeURIComponent(entry.path)
+          }`
+        );
+        if (!response.ok || !active) return;
+        objectUrl = URL.createObjectURL(await response.blob());
+        if (active) setSource(objectUrl);
+      } catch {
+        // Das Dateisymbol bleibt als ruhiger Fallback sichtbar.
+      }
+    };
+    void loadThumbnail();
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [entry.mimeType, entry.path, entry.size, shouldLoad]);
+
+  return (
+    <i ref={thumbnailRef} className="cloud-image-thumb">
+      {source
+        ? <img src={source} alt="" loading="lazy" />
+        : <FileImage size={30} />}
+    </i>
+  );
+}
+
 async function responseError(response) {
   try {
     const data = await response.json();
@@ -64,7 +134,7 @@ async function responseError(response) {
 }
 
 export default function CloudFileBrowser() {
-  const { showToast } = useFamily();
+  const { setActiveTab, showToast } = useFamily();
   const [path, setPath] = useState('');
   const [folderName, setFolderName] = useState('Familienordner');
   const [entries, setEntries] = useState([]);
@@ -78,22 +148,36 @@ export default function CloudFileBrowser() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewText, setPreviewText] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      return localStorage.getItem('lx_cloud_view') === 'list'
+        ? 'list'
+        : 'grid';
+    } catch {
+      return 'grid';
+    }
+  });
   const fileInputRef = useRef(null);
 
   const load = async (nextPath = path, { silent = false } = {}) => {
     if (!silent) setLoading(true);
     try {
+      setLoadError('');
       const data = await plannerApiRequest(
         `/api/integrations/nextcloud/files?path=${encodeURIComponent(
           nextPath
         )}`
       );
-      setPath(data.path || '');
+      const loadedPath = data.path || '';
+      if (loadedPath !== path) setSearchQuery('');
+      setPath(loadedPath);
       setFolderName(data.folder || 'Familienordner');
       setEntries(data.entries || []);
       setStorage(data.storage || null);
     } catch (error) {
-      showToast('Cloud-Ordner nicht erreichbar', error.message, 'error');
+      setLoadError(error.message);
     } finally {
       setLoading(false);
     }
@@ -117,6 +201,35 @@ export default function CloudFileBrowser() {
       }))
     ];
   }, [folderName, path]);
+
+  const visibleEntries = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase('de-DE');
+    return entries
+      .filter(entry =>
+        !query ||
+        entry.name.toLocaleLowerCase('de-DE').includes(query)
+      )
+      .sort((left, right) => {
+        if (left.type !== right.type) {
+          return left.type === 'folder' ? -1 : 1;
+        }
+        return left.name.localeCompare(right.name, 'de-DE', {
+          sensitivity: 'base'
+        });
+      });
+  }, [entries, searchQuery]);
+
+  const folderCount = entries.filter(entry => entry.type === 'folder').length;
+  const fileCount = entries.length - folderCount;
+
+  const changeViewMode = nextMode => {
+    setViewMode(nextMode);
+    try {
+      localStorage.setItem('lx_cloud_view', nextMode);
+    } catch {
+      // Die Auswahl bleibt zumindest für die aktuelle Sitzung erhalten.
+    }
+  };
 
   const uploadFiles = async fileList => {
     const files = [...(fileList || [])];
@@ -190,7 +303,7 @@ export default function CloudFileBrowser() {
       await load(path, { silent: true });
       showToast(
         'Ordner angelegt',
-        'Der neue Bereich ist sofort in Nextcloud verfügbar.',
+        'Der neue Bereich ist sofort im Familienarchiv verfügbar.',
         'success'
       );
     } catch (error) {
@@ -273,7 +386,7 @@ export default function CloudFileBrowser() {
       setPreview(null);
       await load(path, { silent: true });
       showToast(
-        'Aus der Cloud entfernt',
+        'Aus dem Archiv entfernt',
         `${entry.name} wurde gelöscht.`,
         'info'
       );
@@ -287,15 +400,18 @@ export default function CloudFileBrowser() {
   return (
     <section className="cloud-file-browser">
       <header className="cloud-file-heading">
-        <div>
-          <span className="cloud-file-kicker">
-            <ImageIcon size={15} /> Dateien direkt in LX
+        <div className="cloud-file-title">
+          <span className="cloud-file-title-mark" aria-hidden="true">
+            <ImageIcon size={25} />
           </span>
-          <h2>Unser Familienarchiv</h2>
-          <p>
-            Fotos, Dokumente und gemeinsame Erinnerungen – ohne die App zu
-            verlassen.
-          </p>
+          <div>
+            <span className="cloud-file-kicker">Dateien direkt in LX</span>
+            <h1>Unser Familienarchiv</h1>
+            <p>
+              Fotos, Dokumente und gemeinsame Erinnerungen – sicher an einem
+              Ort für eure Familie.
+            </p>
+          </div>
         </div>
         <div className="cloud-file-heading-actions">
           {storage && (
@@ -349,27 +465,65 @@ export default function CloudFileBrowser() {
         </div>
       </header>
 
-      <nav className="cloud-file-breadcrumbs" aria-label="Cloud-Pfad">
-        {path && (
+      <div className="cloud-file-toolbar">
+        <nav className="cloud-file-breadcrumbs" aria-label="Archivpfad">
+          {path && (
+            <button
+              type="button"
+              className="cloud-file-back"
+              onClick={() => {
+                const parent = path.split('/').slice(0, -1).join('/');
+                load(parent);
+              }}
+              aria-label="Eine Ebene zurück"
+            >
+              <ArrowLeft size={16} />
+            </button>
+          )}
+          {breadcrumbs.map((crumb, index) => (
+            <React.Fragment key={`${crumb.path}-${index}`}>
+              {index > 0 && <span>/</span>}
+              <button type="button" onClick={() => load(crumb.path)}>
+                {crumb.name}
+              </button>
+            </React.Fragment>
+          ))}
+        </nav>
+        <label className="cloud-file-search">
+          <Search size={15} />
+          <input
+            value={searchQuery}
+            onChange={event => setSearchQuery(event.target.value)}
+            placeholder="In diesem Ordner suchen"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Suche leeren"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </label>
+        <div className="cloud-view-switch" aria-label="Ansicht wählen">
           <button
             type="button"
-            className="cloud-file-back"
-            onClick={() => {
-              const parent = path.split('/').slice(0, -1).join('/');
-              load(parent);
-            }}
+            className={viewMode === 'grid' ? 'active' : ''}
+            onClick={() => changeViewMode('grid')}
+            title="Galerieansicht"
           >
-            <ArrowLeft size={16} />
+            <Grid2X2 size={15} />
           </button>
-        )}
-        {breadcrumbs.map((crumb, index) => (
-          <React.Fragment key={`${crumb.path}-${index}`}>
-            {index > 0 && <span>/</span>}
-            <button type="button" onClick={() => load(crumb.path)}>
-              {crumb.name}
-            </button>
-          </React.Fragment>
-        ))}
+          <button
+            type="button"
+            className={viewMode === 'list' ? 'active' : ''}
+            onClick={() => changeViewMode('list')}
+            title="Listenansicht"
+          >
+            <List size={16} />
+          </button>
+        </div>
         <button
           type="button"
           className="cloud-file-refresh"
@@ -378,7 +532,18 @@ export default function CloudFileBrowser() {
         >
           <RefreshCw className={loading ? 'spin' : ''} size={15} />
         </button>
-      </nav>
+      </div>
+
+      <div className="cloud-file-location">
+        <span>
+          <FolderOpen size={16} />
+          {path ? path.split('/').at(-1) : 'Alle Inhalte'}
+        </span>
+        <small>
+          {folderCount} Ordner · {fileCount}{' '}
+          {fileCount === 1 ? 'Datei' : 'Dateien'}
+        </small>
+      </div>
 
       {newFolderOpen && (
         <form className="cloud-new-folder" onSubmit={createFolder}>
@@ -429,9 +594,18 @@ export default function CloudFileBrowser() {
             <LoaderCircle className="spin" size={27} />
             Familienordner wird geöffnet …
           </div>
-        ) : entries.length ? (
-          <div className="cloud-entry-grid">
-            {entries.map(entry => {
+        ) : loadError ? (
+          <div className="cloud-file-error">
+            <span><ShieldCheck size={25} /></span>
+            <strong>Das Familienarchiv wird noch vorbereitet</strong>
+            <p>{loadError}</p>
+            <button type="button" onClick={() => setActiveTab('admin')}>
+              In der Elternzentrale prüfen
+            </button>
+          </div>
+        ) : visibleEntries.length ? (
+          <div className={`cloud-entry-grid view-${viewMode}`}>
+            {visibleEntries.map(entry => {
               const Icon = entryIcon(entry);
               const working = busy.endsWith(entry.path);
               return (
@@ -444,13 +618,19 @@ export default function CloudFileBrowser() {
                     className="cloud-entry-open"
                     onClick={() => openPreview(entry)}
                   >
-                    <span><Icon size={28} /></span>
-                    <strong>{entry.name}</strong>
-                    <small>
-                      {entry.type === 'folder'
-                        ? 'Ordner öffnen'
-                        : `${fileSize(entry.size)} · ${fileDate(entry.modifiedAt)}`}
-                    </small>
+                    <span className="cloud-entry-art">
+                      {entry.mimeType?.startsWith('image/')
+                        ? <CloudImageThumbnail entry={entry} />
+                        : <Icon size={30} />}
+                    </span>
+                    <span className="cloud-entry-copy">
+                      <strong>{entry.name}</strong>
+                      <small>
+                        {entry.type === 'folder'
+                          ? 'Sammlung öffnen'
+                          : `${fileSize(entry.size)} · ${fileDate(entry.modifiedAt)}`}
+                      </small>
+                    </span>
                   </button>
                   <div>
                     {entry.type === 'file' && (
@@ -495,6 +675,14 @@ export default function CloudFileBrowser() {
               );
             })}
           </div>
+        ) : searchQuery ? (
+          <div className="cloud-file-no-results">
+            <Search size={28} />
+            <strong>Nichts mit „{searchQuery}“ gefunden</strong>
+            <button type="button" onClick={() => setSearchQuery('')}>
+              Alle Inhalte zeigen
+            </button>
+          </div>
         ) : (
           <button
             type="button"
@@ -521,7 +709,7 @@ export default function CloudFileBrowser() {
           >
             <header>
               <div>
-                <small>Cloud-Vorschau</small>
+                <small>Vorschau im Familienarchiv</small>
                 <h2>{preview.name}</h2>
               </div>
               <button

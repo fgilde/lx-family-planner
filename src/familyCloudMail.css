@@ -34,7 +34,7 @@
   text-transform: uppercase;
 }
 
-.cloud-file-heading h2 {
+.cloud-file-heading h1 {
   margin: 5px 0 4px;
   font-family: var(--font-heading);
   font-size: clamp(1.35rem, 2.4vw, 2rem);
@@ -299,7 +299,7 @@
   cursor: pointer;
 }
 
-.cloud-entry-open > span {
+.cloud-entry-open > .cloud-entry-art {
   width: 49px;
   height: 49px;
   display: grid;
@@ -309,7 +309,7 @@
   background: color-mix(in srgb, var(--primary) 12%, var(--bg-subtle));
 }
 
-.cloud-entry-card.folder .cloud-entry-open > span {
+.cloud-entry-card.folder .cloud-entry-open > .cloud-entry-art {
   color: color-mix(in srgb, var(--accent) 74%, var(--text-main));
   background: color-mix(in srgb, var(--accent) 14%, var(--bg-subtle));
 }
@@ -473,6 +473,500 @@
   margin-right: auto;
   color: var(--text-muted);
   font-size: .68rem;
+}
+
+/* The archive itself is intentionally visual; configuration lives elsewhere. */
+.family-cloud-page .cloud-file-browser {
+  min-height: min(720px, calc(100dvh - 190px));
+  margin: 0;
+  animation: family-cloud-arrive .38s ease-out both;
+}
+
+.cloud-file-title {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.cloud-file-title-mark {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 34%, var(--border-color));
+  border-radius: 18px 18px 7px 18px;
+  color: var(--on-primary);
+  background:
+    radial-gradient(circle at 32% 22%, rgba(255, 255, 255, .32), transparent 28%),
+    linear-gradient(145deg, var(--primary), color-mix(in srgb, var(--primary) 68%, var(--accent)));
+  box-shadow:
+    0 12px 26px color-mix(in srgb, var(--primary) 23%, transparent),
+    inset 0 1px rgba(255, 255, 255, .24);
+}
+
+.cloud-file-toolbar {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(210px, 320px) auto auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-subtle) 68%, var(--bg-card));
+}
+
+.cloud-file-toolbar .cloud-file-breadcrumbs {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cloud-file-search {
+  min-width: 0;
+  min-height: 39px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+}
+
+.cloud-file-search:focus-within {
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border-color));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.cloud-file-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: var(--text-main);
+  background: transparent;
+  font: inherit;
+  font-size: .7rem;
+}
+
+.cloud-file-search button,
+.cloud-view-switch button,
+.cloud-file-toolbar > .cloud-file-refresh {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.cloud-view-switch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+
+.cloud-view-switch button.active {
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.cloud-file-toolbar > .cloud-file-refresh {
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.cloud-file-location {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 18px 0;
+}
+
+.cloud-file-location > span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: .73rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloud-file-location svg {
+  flex: 0 0 auto;
+  color: var(--primary);
+}
+
+.cloud-file-location small {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-size: .62rem;
+}
+
+.cloud-entry-copy {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  gap: 4px;
+}
+
+.cloud-entry-art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.cloud-image-thumb {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: inherit;
+  font-style: normal;
+}
+
+.cloud-entry-grid.view-grid {
+  grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+}
+
+.view-grid .cloud-entry-open {
+  min-height: 205px;
+  grid-template-rows: 122px auto;
+  align-content: start;
+  gap: 12px;
+  padding: 10px 10px 12px;
+}
+
+.view-grid .cloud-entry-art {
+  width: 100%;
+  height: 122px;
+  overflow: hidden;
+  border-radius: 13px;
+}
+
+.view-grid .cloud-entry-card.folder .cloud-entry-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 78% 15%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 33%),
+    repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--accent) 4%, transparent) 15px),
+    color-mix(in srgb, var(--accent) 11%, var(--bg-subtle));
+}
+
+.view-grid .cloud-entry-card.folder .cloud-entry-art::before {
+  position: absolute;
+  top: 13px;
+  left: 14px;
+  width: 42px;
+  height: 9px;
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--accent) 36%, var(--bg-card));
+  content: "";
+}
+
+.view-grid .cloud-entry-card.folder .cloud-entry-art svg {
+  width: 42px;
+  height: 42px;
+}
+
+.cloud-entry-grid.view-list {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.view-list .cloud-entry-card {
+  min-height: 70px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-radius: 14px;
+}
+
+.view-list .cloud-entry-open {
+  min-height: 68px;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  align-content: center;
+  gap: 11px;
+  padding: 8px 12px;
+}
+
+.view-list .cloud-entry-art {
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.view-list .cloud-entry-card > div {
+  align-items: center;
+  padding: 8px 10px;
+  border-top: 0;
+  border-left: 1px solid var(--border-color);
+}
+
+.cloud-file-error,
+.cloud-file-no-results {
+  min-height: 235px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 9px;
+  padding: 24px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.cloud-file-error > span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 11%, var(--bg-card));
+}
+
+.cloud-file-error strong,
+.cloud-file-no-results strong {
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+}
+
+.cloud-file-error p {
+  max-width: 480px;
+  font-size: .7rem;
+}
+
+.cloud-file-error button,
+.cloud-file-no-results button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--primary);
+  border-radius: 11px;
+  color: var(--on-primary);
+  background: var(--primary);
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.adult-cloud-widget {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 94% 8%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 34%),
+    linear-gradient(145deg, color-mix(in srgb, var(--primary) 5%, var(--bg-card)), var(--bg-card));
+}
+
+.adult-cloud-widget::after {
+  position: absolute;
+  z-index: -1;
+  right: 16px;
+  bottom: 9px;
+  color: color-mix(in srgb, var(--primary) 5%, transparent);
+  content: "⌁";
+  font-family: Georgia, serif;
+  font-size: 7rem;
+  line-height: 1;
+  transform: rotate(-10deg);
+}
+
+.adult-cloud-content {
+  display: grid;
+  gap: 10px;
+}
+
+.adult-cloud-storage {
+  display: grid;
+  gap: 8px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border-color));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-card));
+}
+
+.adult-cloud-storage > span {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.adult-cloud-storage small {
+  margin-right: auto;
+  color: var(--text-muted);
+  font-size: .62rem;
+  font-weight: 760;
+}
+
+.adult-cloud-storage strong {
+  color: var(--text-main);
+  font-size: .78rem;
+}
+
+.adult-cloud-storage em {
+  color: var(--text-muted);
+  font-size: .6rem;
+  font-style: normal;
+}
+
+.adult-cloud-storage > i {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 14%, transparent);
+}
+
+.adult-cloud-storage > i > b {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+.adult-cloud-recent {
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.adult-cloud-recent > button {
+  min-width: 0;
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  padding: 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.adult-cloud-recent > button:hover {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border-color));
+  transform: translateY(-1px);
+}
+
+.adult-cloud-recent > button > span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-subtle));
+}
+
+.adult-cloud-recent strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: .65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adult-cloud-loading {
+  grid-column: 1 / -1;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px;
+  color: var(--text-muted);
+  font-size: .66rem;
+  text-align: center;
+}
+
+.adult-cloud-upload {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 18%, transparent);
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.adult-cloud-upload:disabled {
+  opacity: .62;
+  cursor: wait;
+}
+
+.adult-cloud-unavailable {
+  min-height: 165px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.adult-cloud-unavailable > svg {
+  color: var(--primary);
+}
+
+.adult-cloud-unavailable strong {
+  color: var(--text-main);
+  font-family: var(--font-heading);
+}
+
+.adult-cloud-unavailable p {
+  font-size: .66rem;
+}
+
+.adult-cloud-unavailable button {
+  margin-top: 4px;
+  padding: 8px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 850;
+  cursor: pointer;
 }
 
 /* Family mailbox: an editorial letter desk, deliberately slower than chat. */
@@ -1116,6 +1610,14 @@
     flex: 1;
   }
 
+  .cloud-file-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .cloud-file-toolbar .cloud-file-breadcrumbs {
+    grid-column: 1 / -1;
+  }
+
   .family-mail-layout {
     grid-template-columns: 1fr;
   }
@@ -1159,6 +1661,18 @@
     padding: 19px 17px 16px;
   }
 
+  .cloud-file-title {
+    align-items: start;
+    grid-template-columns: 45px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .cloud-file-title-mark {
+    width: 45px;
+    height: 45px;
+    border-radius: 15px 15px 6px 15px;
+  }
+
   .cloud-file-heading-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1166,6 +1680,23 @@
 
   .cloud-storage-meter {
     grid-column: 1 / -1;
+  }
+
+  .cloud-file-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding: 8px 10px;
+  }
+
+  .cloud-file-search {
+    min-width: 0;
+  }
+
+  .cloud-file-search input {
+    font-size: .66rem;
+  }
+
+  .cloud-file-location {
+    padding-inline: 13px;
   }
 
   .cloud-new-folder {
@@ -1181,19 +1712,19 @@
     padding: 12px;
   }
 
-  .cloud-entry-grid {
+  .cloud-entry-grid.view-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
-  .cloud-entry-open {
-    min-height: 136px;
-    padding: 13px 11px 8px;
+  .view-grid .cloud-entry-open {
+    min-height: 170px;
+    grid-template-rows: 96px auto;
+    padding: 8px;
   }
 
-  .cloud-entry-open > span {
-    width: 43px;
-    height: 43px;
+  .view-grid .cloud-entry-art {
+    height: 96px;
   }
 
   .cloud-preview-layer {

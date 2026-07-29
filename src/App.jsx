@@ -20,7 +20,7 @@ import FamilyLoginScreen from './components/Auth/FamilyLoginScreen';
 import OnboardingWizard from './components/Auth/OnboardingWizard';
 import BringAccountModal from './components/Shopping/BringAccountModal';
 import ParentAdmin from './components/Admin/ParentAdmin';
-import NextcloudSettings from './components/Admin/NextcloudSettings';
+import CloudFileBrowser from './components/Admin/CloudFileBrowser';
 import FamilyLifeHub from './components/FamilyLife/FamilyLifeHub';
 import FamilyMailbox from './components/FamilyMail/FamilyMailbox';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
@@ -217,7 +217,7 @@ function MainContent() {
         {activeTab === 'family-life' && <FamilyLifeHub />}
         {activeTab === 'cloud' && (
           <div className="family-cloud-page">
-            <NextcloudSettings />
+            <CloudFileBrowser />
           </div>
         )}
         {activeTab === 'mail' && <FamilyMailbox />}

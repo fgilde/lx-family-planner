@@ -2,6 +2,24 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.11.0] – 2026-07-29
+
+### Das Familienarchiv wird zum eigenen Arbeitsbereich
+
+- die Seite **Family Cloud** zeigt nur noch Dateien, Ordner, Speicher und
+  Upload-Aktionen; technische Einstellungen wurden vollständig entfernt
+- Cloud-Verbindung, Kalendersynchronisation, Sicherungen und Zugangsdaten
+  befinden sich jetzt gesammelt in der Elternzentrale
+- der bisherige externe Link zum Nextcloud-Familienordner wurde entfernt,
+  damit niemand vor einem unerwarteten Nextcloud-Login landet
+- neues Dashboard-Widget **Familienarchiv** mit Speicherstand, letzten
+  Inhalten und direktem Upload
+- Galerie- und Listenansicht, Suche im aktuellen Ordner und freundliche
+  Pfadnavigation ergänzen die integrierte Dateiverwaltung
+- Bilder erhalten echte Vorschaubilder; Ordner werden als visuelle
+  Sammlungen dargestellt
+- Mobil- und Tabletansicht sowie dunkle Themes wurden visuell geprüft
+
 ## [1.10.2] – 2026-07-29
 
 ### Selbstheilende Family-Cloud-Konten

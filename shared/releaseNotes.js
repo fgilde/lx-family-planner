@@ -1,4 +1,45 @@
 const RELEASE_NOTES = {
+  '1.11.0': {
+    version: '1.11.0',
+    eyebrow: 'Euer Familienarchiv bekommt seinen eigenen Platz',
+    title: 'Fotos und Dokumente fühlen sich jetzt wie ein echtes Archiv an',
+    intro:
+      'Family Cloud war bisher eine Mischung aus Dateien und technischen Einstellungen. Jetzt ist sie ein übersichtlicher Familienbereich zum Stöbern, Ordnen und Hochladen.',
+    highlights: [
+      {
+        id: 'cloud-pure-archive',
+        title: 'Nur noch eure Inhalte',
+        description:
+          'Auf der Seite Family Cloud seht ihr ausschließlich Dateien, Ordner, Speicher und die passenden Aktionen – keine Serverformulare mehr.'
+      },
+      {
+        id: 'cloud-dashboard-upload',
+        title: 'Upload direkt vom Dashboard',
+        description:
+          'Die neue Archiv-Kachel zeigt den Speicherstand und zuletzt verwendete Inhalte. Fotos oder Dokumente lassen sich dort sofort hochladen.'
+      },
+      {
+        id: 'cloud-gallery-list',
+        title: 'Galerie oder übersichtliche Liste',
+        description:
+          'Bilder bekommen Vorschaubilder, Ordner sehen wie Sammlungen aus und die Ansicht lässt sich jederzeit umschalten oder durchsuchen.'
+      },
+      {
+        id: 'cloud-settings-parent-admin',
+        title: 'Technik bleibt bei den Erwachsenen',
+        description:
+          'Verbindung, Kalenderabgleich, Sicherungen und Zugangsdaten liegen jetzt gesammelt in der Elternzentrale.'
+      },
+      {
+        id: 'cloud-no-login-detour',
+        title: 'Kein unerwarteter Nextcloud-Login',
+        description:
+          'Der alte externe Familienordner-Link wurde entfernt. Das Archiv öffnet sich vollständig innerhalb von LX.'
+      }
+    ],
+    closing:
+      'Am Speicher und an euren vorhandenen Dateien wurde nichts verändert. Das Update ordnet nur die Bedienung neu und macht das gemeinsame Archiv deutlich angenehmer.'
+  },
   '1.10.2': {
     version: '1.10.2',
     eyebrow: 'Family Cloud repariert sich jetzt selbst',

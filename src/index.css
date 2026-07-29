@@ -15925,7 +15925,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
   animation: family-cloud-arrive .38s ease-out both;
 }
 
-.family-cloud-page .nextcloud-settings-panel {
+.family-cloud-page .cloud-file-browser {
   min-height: min(720px, calc(100vh - 190px));
   box-shadow:
     0 24px 70px color-mix(in srgb, #0b6f72 14%, transparent),
@@ -16280,7 +16280,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
   white-space: nowrap;
 }
 
-.nextcloud-account-strip > a {
+.nextcloud-account-strip > button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -16292,6 +16292,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
   font-size: .65rem;
   font-weight: 850;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .nextcloud-error-note {
@@ -16610,7 +16611,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .nextcloud-account-strip > a {
+  .nextcloud-account-strip > button {
     grid-column: 1 / -1;
     width: 100%;
     justify-content: center;

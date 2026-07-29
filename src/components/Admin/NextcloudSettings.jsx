@@ -19,7 +19,6 @@ import {
   UsersRound
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
-import CloudFileBrowser from './CloudFileBrowser';
 
 function suggestedPublicUrl() {
   const url = new URL(window.location.origin);
@@ -76,7 +75,8 @@ export default function NextcloudSettings() {
     testNextcloud,
     syncNextcloud,
     backupToNextcloud,
-    disconnectNextcloud
+    disconnectNextcloud,
+    setActiveTab
   } = useFamily();
   const connected = Boolean(nextcloudIntegration?.connected);
   const [dockerMode, setDockerMode] = useState(true);
@@ -256,7 +256,7 @@ export default function NextcloudSettings() {
         </div>
         <div>
           <span className="admin-section-kicker">
-            Kalender · Dateien · Sicherungen
+            Cloud-Einstellungen
           </span>
           <h2>Family Cloud</h2>
           <p>
@@ -443,20 +443,14 @@ export default function NextcloudSettings() {
                   : ''}
               </em>
             </span>
-            {nextcloudIntegration.browserFolderUrl && (
-              <a
-                href={nextcloudIntegration.browserFolderUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FolderHeart size={15} />
-                Familienordner
-                <ExternalLink size={13} />
-              </a>
-            )}
+            <button
+              type="button"
+              onClick={() => setActiveTab('cloud')}
+            >
+              <FolderHeart size={15} />
+              Familienarchiv öffnen
+            </button>
           </div>
-
-          <CloudFileBrowser />
 
           {(nextcloudIntegration.lastSyncError ||
             nextcloudIntegration.lastBackupError) && (

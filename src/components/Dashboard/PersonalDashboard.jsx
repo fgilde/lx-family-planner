@@ -3,6 +3,7 @@ import {
   ArrowRight,
   Calendar,
   CheckSquare,
+  Cloud,
   Home,
   LayoutDashboard,
   Pin,
@@ -17,6 +18,7 @@ import { INITIAL_TRASH_EVENTS } from '../Calendar/TrashCalendarView';
 import ChildDashboard from './ChildDashboard';
 import PetDashboard from './PetDashboard';
 import HomeAssistantWidget from './HomeAssistantWidget';
+import FamilyCloudWidget from './FamilyCloudWidget';
 import DashboardCustomizer from './DashboardCustomizer';
 import OrderedDashboardGrid, {
   DashboardWidget
@@ -70,6 +72,13 @@ const ADULT_WIDGETS = [
     description: 'Die neuesten gemeinsamen Familiennotizen',
     icon: Pin,
     color: '#a65a3f'
+  },
+  {
+    id: 'cloud',
+    label: 'Familienarchiv',
+    description: 'Fotos, Dokumente und Erinnerungen direkt hochladen',
+    icon: Cloud,
+    color: '#177f7b'
   },
   {
     id: 'home-assistant',
@@ -509,6 +518,13 @@ export default function PersonalDashboard() {
               ))}
             </div>
           )}
+        </DashboardWidget>
+
+        <DashboardWidget
+          widgetId="cloud"
+          className="card adult-dashboard-widget adult-cloud-widget"
+        >
+          <FamilyCloudWidget />
         </DashboardWidget>
 
         <DashboardWidget
