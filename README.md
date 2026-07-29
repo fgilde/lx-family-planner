@@ -46,8 +46,26 @@
 
 ![Tablet Mode im Querformat](docs/screenshots/demo-tablet-modus.png)
 
+### Jede Rolle bekommt ihren eigenen Raum
+
+| Kinderreise mit Routinen, Schule und Abzeichen | Haustierprofil ohne unnötige Kontofunktionen |
+| --- | --- |
+| ![Kinderreise mit Wochenblick und Abzeichen](docs/screenshots/demo-kinderreise.png) | ![Haustierprofil mit Versorgung und Pfotenkalender](docs/screenshots/demo-haustierprofil.png) |
+
+### Familienalltag, Dateien und Verwaltung
+
+| Gemeinsamer Kalender | Family Cloud direkt in LX |
+| --- | --- |
+| ![Familienkalender mit Profilfiltern und Erinnerungen](docs/screenshots/demo-kalender.png) | ![Integriertes Familienarchiv mit Ordnern und Upload](docs/screenshots/demo-family-cloud.png) |
+
+| Aufgaben mit Freigabe und Sternen | Elternzentrale |
+| --- | --- |
+| ![Aufgabenübersicht für die Familienprofile](docs/screenshots/demo-aufgaben.png) | ![Elternzentrale für Profile, Aufgaben, Punkte und Dienste](docs/screenshots/demo-elternzentrale.png) |
+
+![Familienbriefkasten für verbundene Familien](docs/screenshots/demo-familienpost.png)
+
 <details>
-<summary><strong>Noch mehr ansehen: Mobile Ansicht, Chat und weitere Themes</strong></summary>
+<summary><strong>Noch mehr ansehen: Mobile Ansicht, Chat und weitere Themenwelten</strong></summary>
 
 | Mobiler Familienchat | Raketenwelt |
 | --- | --- |
