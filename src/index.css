@@ -43,6 +43,732 @@
   --font-body: 'Aptos', 'Segoe UI', system-ui, sans-serif;
 }
 
+/* App-Update: echte, gut erreichbare Android-Aktualisierung beim Öffnen. */
+.app-update-layer {
+  position: fixed;
+  z-index: 120000;
+  inset: 0;
+  display: grid;
+  place-items: end center;
+  padding: 18px;
+  background: rgba(13, 24, 21, 0.54);
+  backdrop-filter: blur(7px);
+}
+
+.app-update-layer .app-update-banner {
+  position: relative;
+  display: grid;
+  width: min(100%, 520px);
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border-color));
+  border-radius: 24px 24px 9px 24px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--accent) 20%, transparent), transparent 38%),
+    var(--bg-card);
+  box-shadow: 0 26px 70px rgba(8, 28, 23, 0.34);
+  animation: lx-update-arrive 280ms ease-out both;
+}
+
+@keyframes lx-update-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.app-update-layer .app-update-mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px 17px 6px 17px;
+  color: #fff;
+  background: linear-gradient(
+    145deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 68%, #071e18)
+  );
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.app-update-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding-right: 30px;
+}
+
+.app-update-copy > small {
+  color: var(--primary);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.app-update-copy > strong {
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.app-update-copy > p {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.app-update-close {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  cursor: pointer;
+}
+
+.app-update-progress,
+.app-update-status,
+.app-update-actions {
+  grid-column: 1 / -1;
+}
+
+.app-update-progress {
+  display: grid;
+  gap: 8px;
+}
+
+.app-update-progress > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.app-update-progress > i {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--bg-subtle);
+}
+
+.app-update-progress > i > b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transition: width 180ms ease;
+}
+
+.app-update-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border-color));
+  border-radius: 14px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg-subtle));
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.app-update-status.error {
+  border-color: color-mix(in srgb, #c84b40 30%, var(--border-color));
+  color: #a43b33;
+}
+
+.app-update-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.app-update-actions > button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: var(--text-main);
+  background: var(--bg-subtle);
+  font-size: 0.74rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.app-update-actions > button.primary {
+  border-color: transparent;
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 9px 20px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+/* Chat-Dateien: Vorschau im Verlauf, Originaldatei bleibt im Familienarchiv. */
+.chat-bubble {
+  display: grid;
+  gap: 7px;
+}
+
+.chat-bubble > p {
+  margin: 1px 0 0;
+}
+
+.chat-attachment-image {
+  position: relative;
+  display: block;
+  width: min(100%, 420px);
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.chat-attachment-image > img {
+  display: block;
+  width: 100%;
+  max-height: 330px;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.chat-attachment-image > span {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  left: 7px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  padding: 6px 8px;
+  border-radius: 9px;
+  color: #fff;
+  background: rgba(7, 18, 16, 0.72);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(5px);
+}
+
+.chat-attachment-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  width: min(100%, 430px);
+  min-width: min(300px, 72vw);
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, currentColor 17%, transparent);
+  border-radius: 13px;
+  color: inherit;
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+}
+
+.chat-message.mine .chat-attachment-card {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.chat-attachment-icon {
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-subtle));
+}
+
+.chat-message.mine .chat-attachment-icon {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.chat-attachment-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.chat-attachment-copy strong,
+.chat-attachment-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-attachment-copy strong {
+  font-size: 0.72rem;
+}
+
+.chat-attachment-copy small {
+  color: inherit;
+  font-size: 0.58rem;
+  opacity: 0.72;
+}
+
+.chat-attachment-card > button,
+.chat-attachment-player > button {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 9px;
+  color: inherit;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  cursor: pointer;
+}
+
+.chat-attachment-player {
+  display: grid;
+  gap: 5px;
+  width: min(100%, 430px);
+}
+
+.chat-attachment-player video {
+  width: 100%;
+  max-height: 340px;
+  border-radius: 13px;
+  background: #101714;
+}
+
+.chat-attachment-player audio {
+  width: min(100%, 360px);
+  height: 42px;
+}
+
+.chat-attachment-player > button {
+  width: auto;
+  display: inline-flex;
+  justify-self: start;
+  gap: 6px;
+  padding: 0 9px;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.chat-pending-attachments {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 1px 1px 4px;
+  scrollbar-width: thin;
+}
+
+.chat-pending-attachments > article {
+  flex: 0 0 min(220px, 72vw);
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: var(--text-main);
+  background: var(--bg-subtle);
+}
+
+.chat-pending-attachments > article > span {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--primary);
+  background: var(--bg-card);
+}
+
+.chat-pending-attachments img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chat-pending-attachments article > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.chat-pending-attachments strong,
+.chat-pending-attachments small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-pending-attachments strong {
+  font-size: 0.67rem;
+}
+
+.chat-pending-attachments small {
+  color: var(--text-muted);
+  font-size: 0.57rem;
+}
+
+.chat-pending-attachments article > button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  cursor: pointer;
+}
+
+.chat-upload-status,
+.chat-cloud-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.61rem;
+}
+
+.chat-upload-status {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+/* Zielordner vor jedem normalen Cloud-Upload. */
+.cloud-upload-layer {
+  position: fixed;
+  z-index: 118000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(11, 24, 21, 0.58);
+  backdrop-filter: blur(8px);
+}
+
+.cloud-upload-dialog {
+  display: grid;
+  width: min(100%, 650px);
+  max-height: min(820px, calc(100dvh - 36px));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border-color));
+  border-radius: 26px 26px 10px 26px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  box-shadow: 0 28px 80px rgba(7, 28, 22, 0.36);
+  animation: lx-update-arrive 220ms ease-out both;
+}
+
+.cloud-upload-dialog > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 17px 18px 13px;
+  border-bottom: 1px solid var(--border-color);
+  background:
+    radial-gradient(circle at 85% -80%, color-mix(in srgb, var(--accent) 25%, transparent), transparent 52%),
+    color-mix(in srgb, var(--primary) 5%, var(--bg-card));
+}
+
+.cloud-upload-dialog > header > span {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px 15px 5px 15px;
+  color: #fff;
+  background: var(--primary);
+}
+
+.cloud-upload-dialog > header > div {
+  min-width: 0;
+}
+
+.cloud-upload-dialog > header small {
+  display: block;
+  color: var(--primary);
+  font-size: 0.61rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cloud-upload-dialog > header h2 {
+  margin: 2px 0 0;
+  color: var(--text-main);
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+}
+
+.cloud-upload-dialog > header > button {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  cursor: pointer;
+}
+
+.cloud-upload-area-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  padding: 13px 18px 8px;
+}
+
+.cloud-upload-area-switch > button {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  font-size: 0.7rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.cloud-upload-area-switch > button.active {
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border-color));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.cloud-upload-folder-list {
+  display: grid;
+  gap: 5px;
+  min-height: 180px;
+  max-height: 330px;
+  overflow-y: auto;
+  padding: 6px 18px 11px;
+}
+
+.cloud-upload-folder-list > button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 50px;
+  margin-left: calc(var(--folder-level, 0) * 13px);
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 13px;
+  color: var(--text-muted);
+  text-align: left;
+  background: var(--bg-subtle);
+  cursor: pointer;
+}
+
+.cloud-upload-folder-list > button.active {
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--border-color));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-card));
+}
+
+.cloud-upload-folder-list > button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cloud-upload-folder-list strong,
+.cloud-upload-folder-list small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloud-upload-folder-list strong {
+  color: var(--text-main);
+  font-size: 0.72rem;
+}
+
+.cloud-upload-folder-list small {
+  color: var(--text-muted);
+  font-size: 0.56rem;
+}
+
+.cloud-upload-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 160px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.cloud-upload-new-folder {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin: 0 18px 12px;
+  padding: 8px 8px 8px 11px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 32%, var(--border-color));
+  border-radius: 14px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-subtle));
+}
+
+.cloud-upload-new-folder input {
+  min-width: 0;
+  padding: 8px 9px;
+  border: 0;
+  color: var(--text-main);
+  background: transparent;
+  outline: none;
+}
+
+.cloud-upload-new-folder button,
+.cloud-upload-dialog > footer > button {
+  min-height: 37px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: var(--primary);
+  font-size: 0.66rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cloud-upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 18px 10px;
+  padding: 9px 11px;
+  border-radius: 11px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-subtle));
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.cloud-upload-progress span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloud-upload-dialog > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 18px 17px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-subtle);
+}
+
+.cloud-upload-dialog > footer > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloud-upload-dialog button:disabled,
+.app-update-banner button:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .app-update-layer,
+  .cloud-upload-layer {
+    place-items: end center;
+    padding: 8px;
+  }
+
+  .app-update-layer .app-update-banner,
+  .cloud-upload-dialog {
+    width: 100%;
+    border-radius: 23px 23px 7px 23px;
+  }
+
+  .app-update-actions > button {
+    flex: 1;
+  }
+
+  .chat-attachment-card {
+    min-width: 0;
+  }
+
+  .cloud-upload-dialog {
+    max-height: calc(100dvh - 16px);
+  }
+
+  .cloud-upload-area-switch,
+  .cloud-upload-folder-list {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .cloud-upload-new-folder {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-right: 11px;
+    margin-left: 11px;
+  }
+
+  .cloud-upload-new-folder > button {
+    grid-column: 1 / -1;
+  }
+
+  .cloud-upload-dialog > footer {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 11px;
+  }
+
+  .cloud-upload-dialog > footer > span {
+    white-space: normal;
+  }
+}
+
 /* --- THEME STUDIO: ALWAYS ABOVE THE APPLICATION --- */
 .theme-picker-layer {
   position: fixed;
@@ -17669,93 +18395,6 @@ body:has(.modal-backdrop) .problem-report-launcher {
 .recipe-share-howto strong,
 .recipe-share-howto b {
   color: var(--text-main);
-}
-
-.app-update-banner {
-  position: relative;
-  z-index: 42000;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 11px;
-  padding: 10px max(15px, calc((100vw - 1180px) / 2));
-  color: #fff8e6;
-  background:
-    radial-gradient(circle at 80% -80%, rgba(255, 255, 255, 0.3), transparent 46%),
-    linear-gradient(110deg, #a84d18, #d47720 54%, #a84917);
-  box-shadow: 0 8px 25px rgba(78, 35, 12, 0.2);
-}
-
-.app-update-mark {
-  width: 37px;
-  height: 37px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px 13px 5px 13px;
-  color: #91390e;
-  background: #fff4cf;
-}
-
-.app-update-banner > div {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.app-update-banner strong {
-  color: #fff;
-  font-size: 0.77rem;
-}
-
-.app-update-banner small {
-  color: #ffe8bd;
-  font-size: 0.66rem;
-  line-height: 1.35;
-}
-
-.app-update-banner > a {
-  min-height: 37px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 7px 12px;
-  border-radius: 12px;
-  color: #7c2f0c;
-  background: #fff8e6;
-  font-size: 0.7rem;
-  font-weight: 900;
-  text-decoration: none;
-  box-shadow: 0 7px 16px rgba(84, 32, 8, 0.18);
-}
-
-.app-update-banner > button {
-  width: 35px;
-  height: 35px;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 50%;
-  color: #fff4d6;
-  background: rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-}
-
-@media (max-width: 700px) {
-  .app-update-banner {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    padding: 10px 11px;
-  }
-
-  .app-update-banner > a {
-    grid-column: 1 / -1;
-  }
-
-  .app-update-banner > button {
-    grid-column: 3;
-    grid-row: 1;
-  }
 }
 
 /* Serverwahl der Android-App: eigenständige Ebene, damit kein Theme-Menü sie

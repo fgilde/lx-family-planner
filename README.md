@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.11.0</strong> ·
+  <strong>Aktuelle Version: 1.12.0</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -44,8 +44,9 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
 - kinderleichte Bubble-Profilauswahl und optionaler Profil-PIN
 - Kalender mit mehreren Erinnerungen pro Termin, Müllkalender, ICS-Dateiimport
   und automatisch aktualisierte Kalender-Abos
-- gemeinsamer Familienchat, geschützte Direktnachrichten und bewusst
-  eingeladene Chatgäste aus verbundenen Familien
+- gemeinsamer Familienchat, geschützte Direktnachrichten, bewusst
+  eingeladene Chatgäste und Cloud-Anhänge für Fotos, Videos, Audio,
+  Dokumente, ZIP-Dateien und APKs bis 100 MB
 - Einkaufslisten mit großem, alltagstauglichem Produktkatalog und Bring!-Anbindung
 - Wochen-Speiseplan, Rezeptbuch, direkter Android-Teilen-Import, sicherer Web-
   und Pinterest-Import und Kochmodus
@@ -69,7 +70,8 @@ Themenwelten. Alle Daten bleiben auf dem eigenen Server.
   Sterne, Belohnungen und Taschengeld der Enkelkinder
 - native Home-Assistant-Kacheln mit Live-Status, sicheren Aktionen,
   Profilfreigaben und großer Tablet-Ansicht
-- optionale Family Cloud mit Nextcloud, integrierter Dateiübersicht,
+- optionale Family Cloud mit Nextcloud, gemeinsamen und persönlichen
+  Profilordnern, Ordnerwahl vor Uploads, integrierter Dateiübersicht,
   Drag-and-drop-Upload, Zwei-Wege-Kalenderabgleich und verschlüsselten
   Sicherungen
 - Elternzentrale für Profile, Aufgaben, Punktestände, freigegebene YouTube-/
@@ -226,7 +228,9 @@ und Neueinrichtungsoption sichtbar. LX erstellt serverseitig:
 - einen eigenen, getrennten Nextcloud-Benutzer für diese Familie,
 - ein zufälliges Kennwort und ein widerrufbares App-Passwort,
 - standardmäßig 10 GB Speicherplatz,
-- einen Familienkalender sowie den Familienordner,
+- einen Familienkalender sowie die Bereiche `Familie`, `Familie/Uploads`,
+  `Familie/Chat` und einen persönlichen Ordner unter `Profile` für jedes
+  echte Nutzerprofil,
 - den ersten sicheren Zwei-Wege-Abgleich.
 
 Die Trennung erfolgt absichtlich pro Familie und nicht pro Profil: Mama, Papa
@@ -240,10 +244,19 @@ Sobald die Verbindung steht, erscheint im selben Bereich das
 
 - Ordner öffnen und neu anlegen,
 - Bilder, PDF- und Textdateien ansehen,
-- mehrere Dateien auswählen oder vom PC in die Fläche ziehen,
+- mehrere Dateien auswählen oder vom PC in die Fläche ziehen; vor einem
+  Dashboard-Upload wird der Zielordner gewählt und kann direkt neu angelegt
+  werden,
 - Dateien herunterladen oder nach einer zweiten Bestätigung löschen.
 
-Uploads sind auf 25 MB pro Datei und 20 Dateien je Durchlauf begrenzt. Der
+Uploads sind auf 100 MB pro Datei und 20 Dateien je Durchlauf begrenzt. Im
+Stammverzeichnis legt LX bewusst keine losen Dateien ab. Neue Chat-Anhänge
+landen automatisch unter `Familie/Chat/Jahr-Monat`; Bilder, Videos, Audio,
+PDF-/Office-Dokumente, Archive und APKs bleiben dort als Originaldateien
+erhalten, während der Chat nur den geschützten Verweis speichert. Der
+Inhalt von Direktnachrichten wird zusätzlich vor dem Cloud-Upload
+verschlüsselt und ist ausschließlich für die beiden Chatprofile über LX
+lesbar. Der
 Browser erhält kein Nextcloud-App-Passwort: Alle Dateizugriffe laufen durch die
 angemeldete LX-Sitzung und das Backend. Belegter und verfügbarer Speicher
 werden direkt im Familienarchiv angezeigt.

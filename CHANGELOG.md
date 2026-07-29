@@ -2,6 +2,37 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.12.0] – 2026-07-29
+
+### Native App-Updates und Chat-Anhänge in der Family Cloud
+
+- Versionsprüfung läuft beim Android-App-Start, beim Zurückkehren in die App
+  und zusätzlich regelmäßig im Hintergrund der geöffneten App
+- neuer nativer Update-Ablauf lädt die APK innerhalb von LX, prüft die
+  veröffentlichte SHA-256-Summe und öffnet danach den Android-Installer
+- Update-Hinweis ist auch vor der Familienanmeldung sichtbar und kann für den
+  aktuellen App-Start auf später verschoben werden
+- Chat-Anhänge werden nicht mehr als große Base64-Daten in den
+  Chat-Datensätzen gespeichert, sondern als echte Dateien in der Family Cloud
+- Bilder, Videos, Audio, PDF-/Office-Dokumente, ZIP/Archive und APKs bis
+  100 MB sowie bis zu acht Anhänge pro Nachricht
+- geschützte Vorschau und Download im Chat; aktive Dateitypen werden niemals
+  ungeprüft im Browser ausgeführt
+- signierte Anhangsmetadaten verhindern, dass Clients beliebige Cloud-Pfade
+  als Chat-Datei ausgeben; Direkt- und Gastchat-Berechtigungen gelten auch für
+  den Dateiabruf
+- Anhänge aus Direktnachrichten werden vor dem Cloud-Upload mit AES-256-GCM
+  verschlüsselt und bleiben selbst im gemeinsamen Nextcloud-Konto privat
+- vorhandene eingebettete Chatfotos bleiben vollständig kompatibel
+- gemeinsame Chat-Ablage unter `Familie/Chat/Jahr-Monat`
+- automatische Cloud-Grundstruktur mit `Familie`, `Familie/Uploads` und einem
+  Ordner unter `Profile` für jedes echte Nutzerprofil
+- Dashboard-Uploads öffnen eine Zielordnerauswahl mit direkter
+  Ordnererstellung; Dateien im Cloud-Stammverzeichnis werden verhindert
+- allgemeines Datei- und Chat-Uploadlimit auf 100 MB je Datei erweitert
+- Regressionstests prüfen Cloud-Ordner, ZIP-Upload, sicheren Abruf und
+  manipulierte Anhangsmetadaten
+
 ## [1.11.0] – 2026-07-29
 
 ### Das Familienarchiv wird zum eigenen Arbeitsbereich

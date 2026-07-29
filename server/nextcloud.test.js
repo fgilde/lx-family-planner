@@ -617,4 +617,195 @@ test('bundled Family Cloud provisions missing family storage automatically', asy
     provisionedUsers.get(integration.config.userId).quota,
     '12GB'
   );
+
+  const apiServer = app.listen(0, '127.0.0.1');
+  await new Promise((resolve, reject) => {
+    apiServer.once('listening', resolve);
+    apiServer.once('error', reject);
+  });
+  try {
+    const apiAddress = apiServer.address();
+    const apiBaseUrl = `http://127.0.0.1:${apiAddress.port}`;
+    const familyLogin = await fetch(`${apiBaseUrl}/api/auth/family`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        familyId: 'family-nextcloud',
+        password: 'long-test-password'
+      })
+    });
+    assert.equal(familyLogin.status, 200);
+    const cookie = familyLogin.headers.get('set-cookie').split(';')[0];
+    const memberLogin = await fetch(`${apiBaseUrl}/api/auth/member`, {
+      method: 'POST',
+      headers: {
+        cookie,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ memberId: 'adult-1' })
+    });
+    assert.equal(memberLogin.status, 200);
+
+    const folderResponse = await fetch(
+      `${apiBaseUrl}/api/integrations/nextcloud/folders`,
+      { headers: { cookie } }
+    );
+    assert.equal(folderResponse.status, 200);
+    const folderPayload = await folderResponse.json();
+    assert.equal(
+      folderPayload.folders.some(folder => folder.path === 'Familie/Uploads'),
+      true
+    );
+    assert.equal(
+      folderPayload.folders.some(folder => folder.path === 'Profile/Alex'),
+      true
+    );
+
+    const archiveContent = Buffer.from('family-chat-archive');
+    const uploadResponse = await fetch(
+      `${apiBaseUrl}/api/chat/attachments`,
+      {
+        method: 'PUT',
+        headers: {
+          cookie,
+          'content-type': 'application/octet-stream',
+          'x-lx-file-name': encodeURIComponent('Unterlagen.zip'),
+          'x-lx-file-type': 'application/zip'
+        },
+        body: archiveContent
+      }
+    );
+    assert.equal(uploadResponse.status, 201);
+    const uploadPayload = await uploadResponse.json();
+    assert.match(
+      uploadPayload.attachment.cloudPath,
+      /^Familie\/Chat\/\d{4}-\d{2}\//
+    );
+    assert.equal(uploadPayload.attachment.kind, 'archive');
+    assert.match(uploadPayload.attachment.claim, /^[a-z0-9_-]{32,}$/i);
+
+    const messageResponse = await fetch(
+      `${apiBaseUrl}/api/resources/chatMessages`,
+      {
+        method: 'POST',
+        headers: {
+          cookie,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: 'Hier ist das Archiv.',
+          target: 'group',
+          attachments: [uploadPayload.attachment]
+        })
+      }
+    );
+    assert.equal(messageResponse.status, 201);
+    const messagePayload = await messageResponse.json();
+    assert.equal(messagePayload.record.attachments.length, 1);
+    assert.equal(messagePayload.record.attachments[0].claim, undefined);
+    assert.equal(messagePayload.record.attachments[0].kind, 'archive');
+
+    const downloadResponse = await fetch(
+      `${apiBaseUrl}/api/chat/messages/${
+        encodeURIComponent(messagePayload.record.id)
+      }/attachments/${
+        encodeURIComponent(messagePayload.record.attachments[0].id)
+      }?inline=true`,
+      { headers: { cookie } }
+    );
+    assert.equal(downloadResponse.status, 200);
+    assert.match(
+      downloadResponse.headers.get('content-disposition'),
+      /^attachment;/
+    );
+    assert.deepEqual(
+      Buffer.from(await downloadResponse.arrayBuffer()),
+      archiveContent
+    );
+
+    const privateContent = Buffer.from('private-family-document');
+    const privateUploadResponse = await fetch(
+      `${apiBaseUrl}/api/chat/attachments`,
+      {
+        method: 'PUT',
+        headers: {
+          cookie,
+          'content-type': 'application/octet-stream',
+          'x-lx-file-name': encodeURIComponent('Privat.txt'),
+          'x-lx-file-type': 'text/plain',
+          'x-lx-chat-target': 'adult-1'
+        },
+        body: privateContent
+      }
+    );
+    assert.equal(privateUploadResponse.status, 201);
+    const privateUpload = (await privateUploadResponse.json()).attachment;
+    assert.match(privateUpload.cloudPath, /^\.LX-Privat\/Chat\//);
+    assert.equal(privateUpload.encrypted, true);
+    assert.equal(
+      [...uploadedFiles.entries()]
+        .find(([remotePath]) =>
+          remotePath.endsWith(encodeURIComponent(
+            privateUpload.cloudPath.split('/').at(-1)
+          ))
+        )[1]
+        .equals(privateContent),
+      false
+    );
+    const privateMessageResponse = await fetch(
+      `${apiBaseUrl}/api/resources/chatMessages`,
+      {
+        method: 'POST',
+        headers: {
+          cookie,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          target: 'adult-1',
+          attachments: [privateUpload]
+        })
+      }
+    );
+    assert.equal(privateMessageResponse.status, 201);
+    const privateMessage = (await privateMessageResponse.json()).record;
+    const privateDownloadResponse = await fetch(
+      `${apiBaseUrl}/api/chat/messages/${
+        encodeURIComponent(privateMessage.id)
+      }/attachments/${encodeURIComponent(privateMessage.attachments[0].id)}`,
+      { headers: { cookie } }
+    );
+    assert.equal(privateDownloadResponse.status, 200);
+    assert.deepEqual(
+      Buffer.from(await privateDownloadResponse.arrayBuffer()),
+      privateContent
+    );
+    const privateCloudBypass = await fetch(
+      `${apiBaseUrl}/api/integrations/nextcloud/files/content?path=${
+        encodeURIComponent(privateUpload.cloudPath)
+      }`,
+      { headers: { cookie } }
+    );
+    assert.equal(privateCloudBypass.status, 404);
+
+    const tamperedResponse = await fetch(
+      `${apiBaseUrl}/api/resources/chatMessages`,
+      {
+        method: 'POST',
+        headers: {
+          cookie,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          target: 'group',
+          attachments: [{
+            ...uploadPayload.attachment,
+            name: 'Manipuliert.zip'
+          }]
+        })
+      }
+    );
+    assert.equal(tamperedResponse.status, 400);
+  } finally {
+    await new Promise(resolve => apiServer.close(resolve));
+  }
 });

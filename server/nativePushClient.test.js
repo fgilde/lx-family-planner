@@ -83,3 +83,39 @@ test('Android app requests the Firebase token through the direct native bridge',
       activitySource.indexOf('super.onCreate(savedInstanceState)')
   );
 });
+
+test('Android app verifies and opens server updates through the native bridge', () => {
+  const updaterSource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      'android/app/src/main/java/com/lxfamily/planner/LXAppUpdaterPlugin.java'
+    ),
+    'utf8'
+  );
+  const activitySource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      'android/app/src/main/java/com/lxfamily/planner/MainActivity.java'
+    ),
+    'utf8'
+  );
+  const manifestSource = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      'android/app/src/main/AndroidManifest.xml'
+    ),
+    'utf8'
+  );
+  assert.match(updaterSource, /@CapacitorPlugin\(name = "LXAppUpdater"\)/);
+  assert.match(updaterSource, /MessageDigest\.getInstance\("SHA-256"\)/);
+  assert.match(updaterSource, /canRequestPackageInstalls\(\)/);
+  assert.match(updaterSource, /FileProvider\.getUriForFile/);
+  assert.match(
+    manifestSource,
+    /android\.permission\.REQUEST_INSTALL_PACKAGES/
+  );
+  assert.ok(
+    activitySource.indexOf('registerPlugin(LXAppUpdaterPlugin.class)') <
+      activitySource.indexOf('super.onCreate(savedInstanceState)')
+  );
+});

@@ -5,6 +5,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  createHmac,
   randomBytes,
   randomUUID,
   timingSafeEqual
@@ -162,6 +163,12 @@ const APP_VERSION = (() => {
 })();
 const JSON_LIMIT = process.env.JSON_LIMIT || '5mb';
 const REWARD_ICON_IMAGE_MAX_LENGTH = 350_000;
+const CHAT_ATTACHMENT_MAX_BYTES = 100 * 1024 * 1024;
+const CHAT_ATTACHMENT_MAX_COUNT = 8;
+const CHAT_ATTACHMENT_FOLDER = 'Familie/Chat';
+const PRIVATE_CHAT_ATTACHMENT_FOLDER = '.LX-Privat/Chat';
+const CLOUD_SHARED_FOLDER = 'Familie';
+const CLOUD_PROFILE_FOLDER = 'Profile';
 const NEXTCLOUD_AUTO_PROVISION =
   process.env.NEXTCLOUD_AUTO_PROVISION !== 'false';
 const NEXTCLOUD_AUTO_PROVISION_META_PREFIX =
@@ -322,6 +329,233 @@ function ensureObject(value, message = 'Ungültige Eingabe') {
     throw error;
   }
   return value;
+}
+
+function safeCloudName(value, fallback = 'Datei') {
+  const name = cleanText(value, fallback, 240)
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-')
+    .replace(/^\.+$/, fallback)
+    .trim();
+  return name || fallback;
+}
+
+function cloudProfileFolder(member, familyMembers = []) {
+  const baseName = safeCloudName(member?.name, 'Profil');
+  const matches = familyMembers.filter(
+    candidate =>
+      safeCloudName(candidate?.name, 'Profil')
+        .localeCompare(baseName, 'de-DE', { sensitivity: 'base' }) === 0
+  );
+  return `${CLOUD_PROFILE_FOLDER}/${
+    matches.length > 1
+      ? `${baseName} · ${String(member?.id || '').slice(-4)}`
+      : baseName
+  }`;
+}
+
+function normalizeChatCloudPath(value) {
+  const pieces = cleanText(value, '', 1600)
+    .replaceAll('\\', '/')
+    .split('/')
+    .map(piece => piece.trim())
+    .filter(Boolean);
+  if (
+    !pieces.length ||
+    pieces.length > 12 ||
+    pieces.some(piece => piece === '.' || piece === '..')
+  ) {
+    const error = new Error('Der Cloud-Pfad des Anhangs ist ungültig.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const normalized = pieces.join('/');
+  if (
+    !normalized.startsWith(`${CHAT_ATTACHMENT_FOLDER}/`) &&
+    !normalized.startsWith(`${PRIVATE_CHAT_ATTACHMENT_FOLDER}/`)
+  ) {
+    const error = new Error(
+      'Der Anhang stammt nicht aus dem geschützten Chat-Archiv.'
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  return normalized;
+}
+
+function publicFamilyCloudPath(value) {
+  const normalized = cleanText(value, '', 2000)
+    .replaceAll('\\', '/')
+    .replace(/^\/+|\/+$/g, '');
+  if (
+    normalized === '.LX-Privat' ||
+    normalized.startsWith('.LX-Privat/')
+  ) {
+    const error = new Error('Dieser private Chatbereich ist nicht sichtbar.');
+    error.statusCode = 404;
+    throw error;
+  }
+  return normalized;
+}
+
+function chatAttachmentKind(mimeType, fileName) {
+  const type = cleanText(mimeType, 'application/octet-stream', 200)
+    .toLowerCase();
+  const name = String(fileName || '').toLowerCase();
+  if (type.startsWith('image/') && type !== 'image/svg+xml') return 'image';
+  if (type.startsWith('video/')) return 'video';
+  if (type.startsWith('audio/')) return 'audio';
+  if (type === 'application/pdf' || name.endsWith('.pdf')) return 'pdf';
+  if (
+    type.includes('zip') ||
+    type.includes('compressed') ||
+    /\.(?:zip|7z|rar|tar|gz|bz2|xz)$/i.test(name)
+  ) {
+    return 'archive';
+  }
+  if (
+    type === 'application/vnd.android.package-archive' ||
+    name.endsWith('.apk')
+  ) {
+    return 'apk';
+  }
+  return 'document';
+}
+
+function chatAttachmentClaim(familyId, attachment) {
+  return createHmac('sha256', ENCRYPTION_KEY)
+    .update([
+      cleanText(familyId, '', 200),
+      cleanText(attachment?.id, '', 100),
+      cleanText(attachment?.cloudPath, '', 1600),
+      cleanText(attachment?.name, '', 240),
+      String(Math.max(0, Number(attachment?.size) || 0)),
+      cleanText(attachment?.chatTarget, 'group', 100),
+      attachment?.encrypted ? 'encrypted' : 'plain',
+      cleanText(attachment?.encryptionIv, '', 100),
+      cleanText(attachment?.encryptionTag, '', 100)
+    ].join('\u0000'))
+    .digest('base64url');
+}
+
+function sanitizeChatAttachments(value, familyId, expectedTarget = 'group') {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) {
+    const error = new Error('Die Anhänge sind ungültig.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (value.length > CHAT_ATTACHMENT_MAX_COUNT) {
+    const error = new Error(
+      `Pro Nachricht sind höchstens ${CHAT_ATTACHMENT_MAX_COUNT} Anhänge möglich.`
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  return value.map(item => {
+    const input = ensureObject(item, 'Ein Chat-Anhang ist ungültig.');
+    const attachment = {
+      id: requireText(input.id, 'Anhang-ID', 100),
+      name: safeCloudName(input.name, 'Datei'),
+      cloudPath: normalizeChatCloudPath(input.cloudPath),
+      mimeType: cleanText(
+        input.mimeType,
+        'application/octet-stream',
+        200
+      ),
+      size: Math.max(0, Number(input.size) || 0),
+      uploadedAt: Math.max(0, Number(input.uploadedAt) || Date.now()),
+      chatTarget: cleanText(input.chatTarget, 'group', 100),
+      encrypted: Boolean(input.encrypted),
+      encryptionIv: cleanText(input.encryptionIv, '', 100),
+      encryptionTag: cleanText(input.encryptionTag, '', 100)
+    };
+    if (
+      !attachment.size ||
+      attachment.size > CHAT_ATTACHMENT_MAX_BYTES
+    ) {
+      const error = new Error(
+        'Der Chat-Anhang ist leer oder größer als 100 MB.'
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    if (attachment.chatTarget !== expectedTarget) {
+      const error = new Error(
+        'Der Anhang wurde für einen anderen Chat vorbereitet.'
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    if (
+      attachment.encrypted &&
+      (
+        !/^[a-z0-9_-]{16,}$/i.test(attachment.encryptionIv) ||
+        !/^[a-z0-9_-]{16,}$/i.test(attachment.encryptionTag)
+      )
+    ) {
+      const error = new Error(
+        'Die Verschlüsselungsdaten des privaten Anhangs sind ungültig.'
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    const expectedClaim = chatAttachmentClaim(familyId, attachment);
+    if (!safeCompare(input.claim, expectedClaim)) {
+      const error = new Error(
+        'Der Chat-Anhang konnte nicht sicher bestätigt werden.'
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    return {
+      ...attachment,
+      kind: chatAttachmentKind(attachment.mimeType, attachment.name)
+    };
+  });
+}
+
+function chatAttachmentEncryptionKey(familyId, attachmentId) {
+  return createHmac('sha256', ENCRYPTION_KEY)
+    .update(`lx-chat-attachment\u0000${familyId}\u0000${attachmentId}`)
+    .digest();
+}
+
+function encryptPrivateChatAttachment(familyId, attachmentId, content) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv(
+    'aes-256-gcm',
+    chatAttachmentEncryptionKey(familyId, attachmentId),
+    iv
+  );
+  return {
+    content: Buffer.concat([cipher.update(content), cipher.final()]),
+    encryptionIv: iv.toString('base64url'),
+    encryptionTag: cipher.getAuthTag().toString('base64url')
+  };
+}
+
+function decryptPrivateChatAttachment(familyId, attachment, content) {
+  const decipher = createDecipheriv(
+    'aes-256-gcm',
+    chatAttachmentEncryptionKey(familyId, attachment.id),
+    Buffer.from(attachment.encryptionIv, 'base64url')
+  );
+  decipher.setAuthTag(Buffer.from(attachment.encryptionTag, 'base64url'));
+  return Buffer.concat([decipher.update(content), decipher.final()]);
+}
+
+function chatAttachmentMessageCopy(record, fallback = 'Neue Nachricht') {
+  if (record?.text) return record.text;
+  const attachments = Array.isArray(record?.attachments)
+    ? record.attachments
+    : [];
+  if (attachments.length === 1) {
+    return attachments[0].kind === 'image'
+      ? '📷 Foto gesendet'
+      : `📎 ${attachments[0].name}`;
+  }
+  if (attachments.length > 1) return `📎 ${attachments.length} Dateien`;
+  return record?.photo ? '📷 Foto gesendet' : fallback;
 }
 
 function requireText(value, label, maxLength = 160) {
@@ -1413,9 +1647,12 @@ function notifyCalendarChange(
 
 function notifyChatViaWebPush(req, record) {
   const isGroup = !record.target || record.target === 'group';
-  const hasPhoto = Boolean(record.photo);
+  const hasAttachment = Boolean(
+    record.photo ||
+    (Array.isArray(record.attachments) && record.attachments.length)
+  );
   const body = cleanText(
-    record.text || (hasPhoto ? '📷 Ein Foto wurde geteilt.' : 'Neue Nachricht'),
+    chatAttachmentMessageCopy(record),
     'Neue Nachricht',
     800
   );
@@ -1429,8 +1666,8 @@ function notifyChatViaWebPush(req, record) {
     privateTitle: isGroup
       ? 'Neue Nachricht im Familienchat'
       : 'Neue Direktnachricht',
-    privateBody: hasPhoto
-      ? 'Eine neue Nachricht mit Foto ist da.'
+    privateBody: hasAttachment
+      ? 'Eine neue Nachricht mit Anhang ist da.'
       : 'Eine neue Nachricht ist da.',
     url: `/?view=chat&chat=${encodeURIComponent(
       isGroup ? 'group' : record.senderId
@@ -1450,8 +1687,8 @@ function notifyChatViaWebPush(req, record) {
           title: `${record.senderName} bei ${hostFamily.familyName}`,
           body,
           privateTitle: `Neue Nachricht bei ${hostFamily.familyName}`,
-          privateBody: hasPhoto
-            ? 'Im eingeladenen Familienchat wurde ein Foto geteilt.'
+          privateBody: hasAttachment
+            ? 'Im eingeladenen Familienchat wurde ein Anhang geteilt.'
             : 'Im eingeladenen Familienchat gibt es eine neue Nachricht.',
           url: `/?view=chat&chat=guest:${invitation.id}`,
           tag: `guest-chat-${invitation.id}-${record.id}`,
@@ -1827,6 +2064,26 @@ function rejectPetChatAccess(req, res) {
     error: 'Haustierprofile verwenden keinen Chat.'
   });
   return true;
+}
+
+function requireChatMember(req, res, next) {
+  const member = req.session?.memberId
+    ? getMember(req.session.familyId, req.session.memberId)
+    : null;
+  if (!member) {
+    return res.status(403).json({
+      success: false,
+      error: 'Bitte zuerst ein Profil auswählen.'
+    });
+  }
+  if (member.role === 'pet' || isManagedMember(member)) {
+    return res.status(403).json({
+      success: false,
+      error: 'Dieses Profil verwendet keinen Chat.'
+    });
+  }
+  req.activeMember = member;
+  return next();
 }
 
 function normalizeHomeAssistantBaseUrl(value) {
@@ -2375,6 +2632,105 @@ function nextcloudWorkspace(familyId) {
   };
 }
 
+async function ensureFamilyCloudStructure(familyId, workspace) {
+  const members = getMembers(familyId)
+    .filter(member => !isManagedMember(member) && member.role !== 'pet');
+  const relativeFolders = [
+    CLOUD_SHARED_FOLDER,
+    `${CLOUD_SHARED_FOLDER}/Chat`,
+    `${CLOUD_SHARED_FOLDER}/Uploads`,
+    CLOUD_PROFILE_FOLDER,
+    ...members.map(member => cloudProfileFolder(member, members))
+  ];
+  for (const relativeFolder of relativeFolders) {
+    await ensureNextcloudFolder(
+      workspace.connection,
+      workspace.userId,
+      `${workspace.folder}/${relativeFolder}`
+    );
+  }
+  return relativeFolders;
+}
+
+async function listFamilyCloudFolders(workspace, maxDepth = 4) {
+  const folders = [];
+  const pending = [{ path: '', depth: 0 }];
+  const visited = new Set();
+  while (pending.length && folders.length < 100) {
+    const current = pending.shift();
+    if (visited.has(current.path)) continue;
+    visited.add(current.path);
+    const entries = await listNextcloudFiles(
+      workspace.connection,
+      workspace.userId,
+      workspace.folder,
+      current.path
+    );
+    for (const entry of entries) {
+      if (entry.type !== 'folder') continue;
+      if (entry.name.startsWith('.LX-')) continue;
+      folders.push({
+        name: entry.name,
+        path: entry.path,
+        depth: current.depth
+      });
+      if (current.depth + 1 < maxDepth) {
+        pending.push({
+          path: entry.path,
+          depth: current.depth + 1
+        });
+      }
+      if (folders.length >= 100) break;
+    }
+  }
+  return folders;
+}
+
+function chatArchiveFolder(target = 'group', now = new Date()) {
+  const root = target === 'group'
+    ? CHAT_ATTACHMENT_FOLDER
+    : PRIVATE_CHAT_ATTACHMENT_FOLDER;
+  return `${root}/${now.toISOString().slice(0, 7)}`;
+}
+
+function chatArchiveFileName(originalName, now = new Date(), encrypted = false) {
+  const stamp = now
+    .toISOString()
+    .replace(/\.\d{3}Z$/, '')
+    .replaceAll(':', '-')
+    .replace('T', '_');
+  const name = safeCloudName(
+    `${stamp}_${randomUUID().slice(0, 8)}_${safeCloudName(
+      originalName,
+      'Datei'
+    )}`,
+    `Chat-${stamp}`
+  );
+  return encrypted ? `${name}.lxenc`.slice(0, 240) : name;
+}
+
+function chatAttachmentById(message, attachmentId) {
+  return (Array.isArray(message?.attachments) ? message.attachments : [])
+    .find(attachment => attachment.id === attachmentId) || null;
+}
+
+function canInlineChatAttachment(attachment) {
+  return [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/avif',
+    'video/mp4',
+    'video/webm',
+    'audio/mpeg',
+    'audio/mp4',
+    'audio/ogg',
+    'audio/wav',
+    'application/pdf'
+  ].includes(String(attachment?.mimeType || '').toLowerCase());
+}
+
 function nextcloudBackupBundle(familyId) {
   const family = getFamily(familyId);
   const resources = Object.fromEntries(
@@ -2713,13 +3069,14 @@ function notifyChatViaGotify(req, record) {
   if (!rules[eventKey]) return;
   const messageText = rules.includeMessageText
     ? cleanText(
-        record.text || (record.photo ? '📷 Foto gesendet' : 'Neue Nachricht'),
+        chatAttachmentMessageCopy(record),
         'Neue Nachricht',
         800
       )
     : (
-        record.photo
-          ? 'Eine neue Nachricht mit Foto ist da.'
+        record.photo ||
+        (Array.isArray(record.attachments) && record.attachments.length)
+          ? 'Eine neue Nachricht mit Anhang ist da.'
           : 'Eine neue Nachricht ist da.'
       );
   queueGotifyNotification(req.session.familyId, eventKey, {
@@ -2851,8 +3208,23 @@ function sessionChatRecord(req, record) {
       throw error;
     }
   }
+  const text = cleanText(input.text, '', 4000);
+  const photo = cleanText(input.photo, '', 2_500_000);
+  const attachments = sanitizeChatAttachments(
+    input.attachments,
+    req.session.familyId,
+    target
+  );
+  if (!text && !photo && !attachments.length) {
+    const error = new Error('Die Nachricht ist leer.');
+    error.statusCode = 400;
+    throw error;
+  }
   return {
     ...input,
+    text,
+    photo,
+    attachments,
     senderId: member.id,
     senderName: member.name,
     senderAvatar: member.avatar,
@@ -3504,6 +3876,151 @@ export function createApp() {
       bundledCloudProvisioning = false;
     }
   };
+  const cloudWorkspaceForFamily = async familyId => {
+    try {
+      const workspace = nextcloudWorkspace(familyId);
+      await ensureFamilyCloudStructure(familyId, workspace);
+      return workspace;
+    } catch (error) {
+      if (Number(error.statusCode || error.status) !== 404) throw error;
+      await app.locals.provisionBundledCloudFamily(familyId);
+      const workspace = nextcloudWorkspace(familyId);
+      await ensureFamilyCloudStructure(familyId, workspace);
+      return workspace;
+    }
+  };
+  const uploadChatAttachment = async (familyId, req) => {
+    let fileName = cleanText(req.headers['x-lx-file-name'], '', 1000);
+    try {
+      fileName = decodeURIComponent(fileName);
+    } catch {
+      // Ein bereits dekodierter Dateiname bleibt verwendbar.
+    }
+    if (!fileName) {
+      const error = new Error('Der Dateiname fehlt.');
+      error.statusCode = 400;
+      throw error;
+    }
+    const content = Buffer.isBuffer(req.body)
+      ? req.body
+      : Buffer.from(req.body || '');
+    if (!content.length) {
+      const error = new Error('Die ausgewählte Datei ist leer.');
+      error.statusCode = 400;
+      throw error;
+    }
+    if (content.length > CHAT_ATTACHMENT_MAX_BYTES) {
+      const error = new Error('Chat-Anhänge dürfen höchstens 100 MB groß sein.');
+      error.statusCode = 413;
+      throw error;
+    }
+    const chatTarget = cleanText(
+      req.headers['x-lx-chat-target'],
+      'group',
+      100
+    ) || 'group';
+    if (chatTarget !== 'group') {
+      const targetMember = getMember(familyId, chatTarget);
+      if (
+        !targetMember ||
+        targetMember.role === 'pet' ||
+        isManagedMember(targetMember)
+      ) {
+        const error = new Error(
+          'Das Zielprofil für den privaten Anhang wurde nicht gefunden.'
+        );
+        error.statusCode = 404;
+        throw error;
+      }
+    }
+    const workspace = await cloudWorkspaceForFamily(familyId);
+    const relativeFolder = chatArchiveFolder(chatTarget);
+    await ensureNextcloudFolder(
+      workspace.connection,
+      workspace.userId,
+      `${workspace.folder}/${relativeFolder}`
+    );
+    const originalName = safeCloudName(fileName, 'Datei');
+    const mimeType = cleanText(
+      req.headers['x-lx-file-type'],
+      'application/octet-stream',
+      200
+    );
+    const attachmentId = `attachment-${randomUUID()}`;
+    const encrypted = chatTarget !== 'group';
+    const protectedContent = encrypted
+      ? encryptPrivateChatAttachment(familyId, attachmentId, content)
+      : {
+          content,
+          encryptionIv: '',
+          encryptionTag: ''
+        };
+    const uploaded = await uploadNextcloudUserFile(
+      workspace.connection,
+      workspace.userId,
+      workspace.folder,
+      relativeFolder,
+      chatArchiveFileName(originalName, new Date(), encrypted),
+      protectedContent.content,
+      encrypted ? 'application/octet-stream' : mimeType
+    );
+    const attachment = {
+      id: attachmentId,
+      name: originalName,
+      cloudPath: uploaded.path,
+      mimeType,
+      kind: chatAttachmentKind(mimeType, originalName),
+      size: content.length,
+      uploadedAt: Date.now(),
+      chatTarget,
+      encrypted,
+      encryptionIv: protectedContent.encryptionIv,
+      encryptionTag: protectedContent.encryptionTag
+    };
+    return {
+      ...attachment,
+      claim: chatAttachmentClaim(familyId, attachment)
+    };
+  };
+  const sendChatAttachmentContent = async (
+    res,
+    familyId,
+    message,
+    attachmentId,
+    inlineRequested
+  ) => {
+    const attachment = chatAttachmentById(message, attachmentId);
+    if (!attachment) {
+      const error = new Error('Der Chat-Anhang wurde nicht gefunden.');
+      error.statusCode = 404;
+      throw error;
+    }
+    const workspace = await cloudWorkspaceForFamily(familyId);
+    const file = await downloadNextcloudFile(
+      workspace.connection,
+      workspace.userId,
+      workspace.folder,
+      attachment.cloudPath
+    );
+    const content = attachment.encrypted
+      ? decryptPrivateChatAttachment(familyId, attachment, file.content)
+      : file.content;
+    const inline = inlineRequested && canInlineChatAttachment(attachment);
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader(
+      'Content-Type',
+      cleanText(attachment.mimeType, file.contentType, 200)
+    );
+    res.setHeader('Content-Length', String(content.length));
+    res.setHeader(
+      'Content-Disposition',
+      `${inline ? 'inline' : 'attachment'}; filename*=UTF-8''${
+        encodeURIComponent(attachment.name)
+      }`
+    );
+    if (file.etag) res.setHeader('ETag', file.etag);
+    res.end(content);
+  };
   let eventReminderSweepRunning = false;
   app.locals.runEventReminderSweep = async (now = Date.now()) => {
     if (eventReminderSweepRunning) {
@@ -3824,7 +4341,7 @@ export function createApp() {
       );
       res.setHeader(
         'Access-Control-Allow-Headers',
-        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client, X-LX-File-Name, X-LX-File-Type'
+        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client, X-LX-File-Name, X-LX-File-Type, X-LX-Chat-Target'
       );
       res.append('Vary', 'Origin');
     }
@@ -5217,6 +5734,91 @@ export function createApp() {
     }
   );
 
+  app.put(
+    '/api/family/chat-guests/:invitationId/attachments',
+    requireAuth,
+    express.raw({
+      type: 'application/octet-stream',
+      limit: '100mb'
+    }),
+    async (req, res) => {
+      const invitation = getFamilyChatGuest(
+        req.session.familyId,
+        req.params.invitationId
+      );
+      const member = getMember(
+        req.session.familyId,
+        req.session.memberId
+      );
+      if (
+        invitation?.status !== 'accepted' ||
+        invitation.direction !== 'guest' ||
+        invitation.guestMember.id !== member?.id ||
+        member?.role === 'pet'
+      ) {
+        return res.status(403).json({
+          success: false,
+          error: 'Dieser Gastchat ist für das Profil nicht freigegeben.'
+        });
+      }
+      const attachment = await uploadChatAttachment(
+        invitation.hostFamily.id,
+        req
+      );
+      res.status(201).json({ success: true, attachment });
+    }
+  );
+
+  app.get(
+    '/api/family/chat-guests/:invitationId/messages/:messageId/attachments/:attachmentId',
+    requireAuth,
+    async (req, res) => {
+      const invitation = getFamilyChatGuest(
+        req.session.familyId,
+        req.params.invitationId
+      );
+      const member = getMember(
+        req.session.familyId,
+        req.session.memberId
+      );
+      const canRead =
+        invitation?.status === 'accepted' &&
+        member?.role !== 'pet' &&
+        (
+          invitation.direction === 'host' ||
+          invitation.guestMember.id === member?.id
+        );
+      if (!canRead) {
+        return res.status(403).json({
+          success: false,
+          error: 'Dieser Gastchat ist für das Profil nicht freigegeben.'
+        });
+      }
+      const message = getRecord(
+        invitation.hostFamily.id,
+        'chatMessages',
+        req.params.messageId
+      );
+      if (
+        !message ||
+        (message.target && message.target !== 'group') ||
+        Number(message.timestamp || 0) < Number(invitation.acceptedAt || 0)
+      ) {
+        return res.status(404).json({
+          success: false,
+          error: 'Die Chatnachricht wurde nicht gefunden.'
+        });
+      }
+      await sendChatAttachmentContent(
+        res,
+        invitation.hostFamily.id,
+        message,
+        req.params.attachmentId,
+        req.query.inline === 'true'
+      );
+    }
+  );
+
   app.post(
     '/api/family/chat-guests/:invitationId/messages',
     requireAuth,
@@ -5241,7 +5843,11 @@ export function createApp() {
       }
       const text = cleanText(req.body?.text, '', 4000);
       const photo = cleanText(req.body?.photo, '', 2_500_000);
-      if (!text && !photo) {
+      const attachments = sanitizeChatAttachments(
+        req.body?.attachments,
+        invitation.hostFamily.id
+      );
+      if (!text && !photo && !attachments.length) {
         return res.status(400).json({
           success: false,
           error: 'Die Nachricht ist leer.'
@@ -5261,6 +5867,7 @@ export function createApp() {
           guestFamilyId: invitation.guestFamily.id,
           text,
           photo,
+          attachments,
           target: 'group',
           timestamp: Date.now()
         }
@@ -5273,9 +5880,9 @@ export function createApp() {
         {
           recipientMemberIds: signedInMemberIds(invitation.hostFamily.id),
           title: `${member.name} im Familienchat`,
-          body: text || 'Ein Foto wurde geteilt.',
-          privateBody: photo
-            ? 'Ein Chatgast hat ein Foto geteilt.'
+          body: chatAttachmentMessageCopy(record),
+          privateBody: photo || attachments.length
+            ? 'Ein Chatgast hat einen Anhang geteilt.'
             : 'Ein Chatgast hat eine Nachricht geschickt.',
           url: '/?view=chat',
           tag: `guest-chat-message-${record.id}`
@@ -5806,6 +6413,55 @@ export function createApp() {
       version: getFamilyVersion(req.session.familyId)
     });
   });
+
+  app.put(
+    '/api/chat/attachments',
+    requireAuth,
+    requireChatMember,
+    express.raw({
+      type: 'application/octet-stream',
+      limit: '100mb'
+    }),
+    async (req, res) => {
+      const attachment = await uploadChatAttachment(
+        req.session.familyId,
+        req
+      );
+      res.status(201).json({ success: true, attachment });
+    }
+  );
+
+  app.get(
+    '/api/chat/messages/:messageId/attachments/:attachmentId',
+    requireAuth,
+    requireChatMember,
+    async (req, res) => {
+      const message = getRecord(
+        req.session.familyId,
+        'chatMessages',
+        req.params.messageId
+      );
+      if (
+        !message ||
+        !visibleChatMessages(
+          [message],
+          req.session.memberId
+        ).length
+      ) {
+        return res.status(404).json({
+          success: false,
+          error: 'Die Chatnachricht wurde nicht gefunden.'
+        });
+      }
+      await sendChatAttachmentContent(
+        res,
+        req.session.familyId,
+        message,
+        req.params.attachmentId,
+        req.query.inline === 'true'
+      );
+    }
+  );
 
   app.get('/api/resources/:type', requireAuth, (req, res) => {
     if (rejectPetChatAccess(req, res)) return;
@@ -7278,8 +7934,8 @@ export function createApp() {
     requireAuth,
     requireAdult,
     async (req, res) => {
-      const workspace = nextcloudWorkspace(req.session.familyId);
-      const currentPath = cleanText(req.query.path, '', 2000);
+      const workspace = await cloudWorkspaceForFamily(req.session.familyId);
+      const currentPath = publicFamilyCloudPath(req.query.path);
       const [entries, account] = await Promise.all([
         listNextcloudFiles(
           workspace.connection,
@@ -7295,7 +7951,22 @@ export function createApp() {
         path: currentPath,
         folder: workspace.folder,
         storage: account.storage,
-        entries
+        entries: entries.filter(entry => !entry.name.startsWith('.LX-'))
+      });
+    }
+  );
+
+  app.get(
+    '/api/integrations/nextcloud/folders',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const workspace = await cloudWorkspaceForFamily(req.session.familyId);
+      const folders = await listFamilyCloudFolders(workspace);
+      res.setHeader('Cache-Control', 'no-store');
+      res.json({
+        success: true,
+        folders
       });
     }
   );
@@ -7305,12 +7976,12 @@ export function createApp() {
     requireAuth,
     requireAdult,
     async (req, res) => {
-      const workspace = nextcloudWorkspace(req.session.familyId);
+      const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       const file = await downloadNextcloudFile(
         workspace.connection,
         workspace.userId,
         workspace.folder,
-        cleanText(req.query.path, '', 2000)
+        publicFamilyCloudPath(req.query.path)
       );
       const disposition =
         req.query.inline === 'true' ? 'inline' : 'attachment';
@@ -7331,12 +8002,12 @@ export function createApp() {
     requireAuth,
     requireAdult,
     async (req, res) => {
-      const workspace = nextcloudWorkspace(req.session.familyId);
+      const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       const entry = await createNextcloudFolder(
         workspace.connection,
         workspace.userId,
         workspace.folder,
-        cleanText(req.body?.path, '', 2000),
+        publicFamilyCloudPath(req.body?.path),
         requireText(req.body?.name, 'Ordnername', 240)
       );
       res.status(201).json({ success: true, entry });
@@ -7349,10 +8020,18 @@ export function createApp() {
     requireAdult,
     express.raw({
       type: 'application/octet-stream',
-      limit: '25mb'
+      limit: '100mb'
     }),
     async (req, res) => {
-      const workspace = nextcloudWorkspace(req.session.familyId);
+      const workspace = await cloudWorkspaceForFamily(req.session.familyId);
+      const targetPath = publicFamilyCloudPath(req.query.path);
+      if (!targetPath) {
+        return res.status(400).json({
+          success: false,
+          error:
+            'Bitte öffne oder wähle zuerst einen Ordner. Im Stammverzeichnis werden keine Dateien abgelegt.'
+        });
+      }
       let fileName = cleanText(
         req.headers['x-lx-file-name'],
         '',
@@ -7382,7 +8061,7 @@ export function createApp() {
         workspace.connection,
         workspace.userId,
         workspace.folder,
-        cleanText(req.query.path, '', 2000),
+        targetPath,
         fileName,
         content,
         cleanText(
@@ -7403,12 +8082,12 @@ export function createApp() {
     requireAuth,
     requireAdult,
     async (req, res) => {
-      const workspace = nextcloudWorkspace(req.session.familyId);
+      const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       await deleteNextcloudEntry(
         workspace.connection,
         workspace.userId,
         workspace.folder,
-        cleanText(req.query.path, '', 2000)
+        publicFamilyCloudPath(req.query.path)
       );
       res.json({ success: true });
     }
@@ -8527,7 +9206,7 @@ export function createApp() {
       error:
         status === 413
           ? error.type === 'entity.too.large'
-            ? 'Das Bild ist zu groß. Bitte wähle ein kleineres Foto; Bilder werden vor dem Speichern automatisch optimiert.'
+            ? 'Die Datei oder das Bild ist zu groß. Bitte wähle eine kleinere Datei; Bilder werden vor dem Speichern automatisch optimiert.'
             : error.message || 'Die importierte Seite ist zu groß.'
           : status >= 500
           ? 'Es ist ein interner Fehler aufgetreten.'

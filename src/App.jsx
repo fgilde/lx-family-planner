@@ -192,7 +192,6 @@ function MainContent() {
         <span className="theme-spark">✧</span>
         <span className="theme-spark">•</span>
       </div>
-      <AppUpdateBanner />
       <Header
         onLogout={logout}
         onOpenServerConfig={
@@ -248,6 +247,7 @@ function MainContent() {
 export default function App() {
   return (
     <FamilyProvider>
+      <AppUpdateBanner />
       <MainContent />
     </FamilyProvider>
   );

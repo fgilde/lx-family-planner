@@ -1,4 +1,4 @@
-const CACHE = 'lx-familie-v1.11.0';
+const CACHE = 'lx-familie-v1.12.0';
 const STATIC = [
   '/',
   '/manifest.json',

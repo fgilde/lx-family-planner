@@ -9,8 +9,10 @@ import {
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import { plannerApiRequest } from '../../utils/apiConfig';
+import CloudUploadDestinationDialog
+  from '../Admin/CloudUploadDestinationDialog';
 
-const FILE_LIMIT_BYTES = 25 * 1024 * 1024;
+const FILE_LIMIT_BYTES = 100 * 1024 * 1024;
 
 function fileSize(bytes) {
   const value = Number(bytes || 0);
@@ -31,7 +33,7 @@ export default function FamilyCloudWidget() {
     storage: null
   });
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState([]);
   const fileInputRef = useRef(null);
   const connected = Boolean(nextcloudIntegration?.connected);
 
@@ -57,53 +59,19 @@ export default function FamilyCloudWidget() {
     void loadSummary();
   }, [connected, nextcloudIntegration?.updatedAt]);
 
-  const uploadFiles = async fileList => {
+  const prepareUpload = fileList => {
     const files = [...(fileList || [])].slice(0, 10);
-    if (!files.length || uploading) return;
+    if (!files.length) return;
     const oversized = files.find(file => file.size > FILE_LIMIT_BYTES);
     if (oversized) {
       showToast(
         'Datei zu groß',
-        `${oversized.name} ist größer als 25 MB.`,
+        `${oversized.name} ist größer als 100 MB.`,
         'warning'
       );
       return;
     }
-    setUploading(true);
-    let uploaded = 0;
-    for (const file of files) {
-      try {
-        await plannerApiRequest(
-          '/api/integrations/nextcloud/files/file?path=',
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/octet-stream',
-              'X-LX-File-Name': encodeURIComponent(file.name),
-              'X-LX-File-Type':
-                file.type || 'application/octet-stream'
-            },
-            body: await file.arrayBuffer()
-          }
-        );
-        uploaded += 1;
-      } catch (error) {
-        showToast(
-          `${file.name} nicht hochgeladen`,
-          error.message,
-          'error'
-        );
-      }
-    }
-    setUploading(false);
-    if (uploaded) {
-      await loadSummary();
-      showToast(
-        uploaded === 1 ? 'Im Familienarchiv gespeichert' : 'Upload fertig',
-        `${uploaded} Datei${uploaded === 1 ? '' : 'en'} erfolgreich hochgeladen.`,
-        'success'
-      );
-    }
+    setPendingFiles(files);
   };
 
   const recentEntries = [...summary.entries]
@@ -203,12 +171,9 @@ export default function FamilyCloudWidget() {
             type="button"
             className="adult-cloud-upload"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
           >
-            {uploading
-              ? <LoaderCircle className="spin" size={17} />
-              : <Upload size={17} />}
-            {uploading ? 'Wird hochgeladen …' : 'In die Cloud hochladen'}
+            <Upload size={17} />
+            In die Cloud hochladen
           </button>
           <input
             ref={fileInputRef}
@@ -216,11 +181,22 @@ export default function FamilyCloudWidget() {
             multiple
             hidden
             onChange={event => {
-              void uploadFiles(event.target.files);
+              prepareUpload(event.target.files);
               event.target.value = '';
             }}
           />
         </div>
+      )}
+      {pendingFiles.length > 0 && (
+        <CloudUploadDestinationDialog
+          files={pendingFiles}
+          showToast={showToast}
+          onClose={() => setPendingFiles([])}
+          onUploaded={async () => {
+            setPendingFiles([]);
+            await loadSummary();
+          }}
+        />
       )}
     </>
   );

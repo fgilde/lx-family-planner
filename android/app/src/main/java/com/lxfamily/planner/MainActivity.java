@@ -12,6 +12,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(LXNativePushPlugin.class);
+        registerPlugin(LXAppUpdaterPlugin.class);
         super.onCreate(savedInstanceState);
         String userAgent = getBridge().getWebView().getSettings().getUserAgentString();
         if (!userAgent.contains("LXFamilyAndroid/")) {

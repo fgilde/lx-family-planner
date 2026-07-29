@@ -27,7 +27,7 @@ import {
   plannerApiRequest
 } from '../../utils/apiConfig';
 
-const FILE_LIMIT_BYTES = 25 * 1024 * 1024;
+const FILE_LIMIT_BYTES = 100 * 1024 * 1024;
 
 function fileSize(bytes) {
   const value = Number(bytes || 0);
@@ -234,11 +234,19 @@ export default function CloudFileBrowser() {
   const uploadFiles = async fileList => {
     const files = [...(fileList || [])];
     if (!files.length || busy) return;
+    if (!path) {
+      showToast(
+        'Bitte einen Ordner öffnen',
+        'Dateien werden nicht lose im Stammverzeichnis abgelegt.',
+        'info'
+      );
+      return;
+    }
     const oversized = files.find(file => file.size > FILE_LIMIT_BYTES);
     if (oversized) {
       showToast(
         'Datei zu groß',
-        `${oversized.name} ist größer als 25 MB.`,
+        `${oversized.name} ist größer als 100 MB.`,
         'warning'
       );
       return;
@@ -444,7 +452,17 @@ export default function CloudFileBrowser() {
           <button
             type="button"
             className="primary"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (!path) {
+                showToast(
+                  'Zielordner auswählen',
+                  'Öffne zuerst „Familie“ oder einen Profilordner.',
+                  'info'
+                );
+                return;
+              }
+              fileInputRef.current?.click();
+            }}
             disabled={Boolean(busy)}
           >
             {busy === 'upload'
@@ -578,6 +596,15 @@ export default function CloudFileBrowser() {
         }}
         onDrop={event => {
           event.preventDefault();
+          if (!path) {
+            setDragging(false);
+            showToast(
+              'Zielordner auswählen',
+              'Öffne zuerst einen Ordner und ziehe die Dateien dann hinein.',
+              'info'
+            );
+            return;
+          }
           uploadFiles(event.dataTransfer.files);
         }}
       >
@@ -687,7 +714,13 @@ export default function CloudFileBrowser() {
           <button
             type="button"
             className="cloud-file-empty"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (path) {
+                fileInputRef.current?.click();
+              } else {
+                setNewFolderOpen(true);
+              }
+            }}
           >
             <CloudUpload size={39} />
             <strong>Noch Platz für eure Erinnerungen</strong>

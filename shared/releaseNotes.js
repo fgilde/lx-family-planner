@@ -1,4 +1,45 @@
 const RELEASE_NOTES = {
+  '1.12.0': {
+    version: '1.12.0',
+    eyebrow: 'Updates in der App und ein aufgeräumter Datei-Alltag',
+    title: 'Chat-Dateien landen jetzt sicher in eurem Familienarchiv',
+    intro:
+      'LX behandelt Anhänge nicht länger wie riesige Chattexte. Fotos, Videos und Dokumente werden als echte Dateien in der Family Cloud gespeichert – ordentlich sortiert und weiterhin direkt im Chat erreichbar.',
+    highlights: [
+      {
+        id: 'native-update-flow',
+        title: 'App-Update wieder direkt in LX',
+        description:
+          'Beim Öffnen prüft die Android-App ihre Version. Ein neuer Installationsdialog lädt das geprüfte Update und übergibt es anschließend direkt an Android.'
+      },
+      {
+        id: 'chat-cloud-attachments',
+        title: 'Anhänge gehören in die Cloud',
+        description:
+          'Neue Chat-Anhänge werden automatisch nach Monat im Familienarchiv abgelegt. Der Verlauf bleibt dadurch schnell und vorhandene Chatfotos bleiben erhalten.'
+      },
+      {
+        id: 'chat-more-file-types',
+        title: 'Mehr als nur Fotos',
+        description:
+          'Neben Bildern funktionieren jetzt Videos, Audio, PDF- und Office-Dokumente, Archive wie ZIP sowie Android-APKs – mehrere Dateien pro Nachricht und bis 100 MB je Datei.'
+      },
+      {
+        id: 'cloud-folder-choice',
+        title: 'Vor dem Upload den Ordner wählen',
+        description:
+          'Dashboard-Uploads fragen zuerst nach dem Ziel. Ein neuer Ordner lässt sich direkt in derselben Auswahl anlegen; lose Dateien im Stammverzeichnis verhindert LX.'
+      },
+      {
+        id: 'cloud-family-profile-folders',
+        title: 'Familien- und Profilordner',
+        description:
+          'LX bereitet einen gemeinsamen Bereich sowie einen persönlichen Ordner für jedes echte Nutzerprofil vor. Chat-Dateien liegen übersichtlich im gemeinsamen Familienbereich.'
+      }
+    ],
+    closing:
+      'Für das Android-Update fragt das Handy einmalig, ob LX selbst geladene Updates installieren darf. Familieninhalte, Einstellungen und bereits vorhandene Dateien bleiben unverändert.'
+  },
   '1.11.0': {
     version: '1.11.0',
     eyebrow: 'Euer Familienarchiv bekommt seinen eigenen Platz',
