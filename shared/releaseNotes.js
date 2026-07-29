@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.9.3': {
+    version: '1.9.3',
+    eyebrow: 'Keine erfundenen Cloud-Adressen mehr',
+    title: 'Nextcloud öffnet jetzt die wirklich erreichbare Adresse',
+    intro:
+      'LX hat an die öffentliche Planer-Domain automatisch Port 8080 angehängt. Das war eine falsche Mischung aus Internet- und Heimnetz-Adresse. Die Family Cloud verwendet jetzt ausschließlich eine ausdrücklich konfigurierte, erreichbare Browser-Adresse.',
+    highlights: [
+      {
+        id: 'cloud-real-public-url',
+        title: 'Server gibt die Cloud-Adresse vor',
+        description:
+          'Im Heimnetz wird die echte Server-IP verwendet; eine öffentliche Domain erst nach eingerichteter Proxy-Route.'
+      },
+      {
+        id: 'cloud-no-port-guess',
+        title: 'Kein automatisches „:8080“ an Internet-Domains',
+        description:
+          'Aus familie.example.de entsteht nicht länger eine nicht erreichbare Mischadresse.'
+      },
+      {
+        id: 'cloud-existing-connection',
+        title: 'Auch bestehende Verbindung korrigiert',
+        description:
+          'Die gespeicherte Cloud-Verbindung muss nicht getrennt oder neu angelegt werden.'
+      },
+      {
+        id: 'cloud-proxy-ready',
+        title: 'Für spätere HTTPS-Subdomain vorbereitet',
+        description:
+          'Eine echte Cloud-Domain kann zentral über NEXTCLOUD_PUBLIC_URL aktiviert werden.'
+      }
+    ],
+    closing:
+      'Kalender, Sicherungen, Zugangsdaten und alle Familieninhalte bleiben erhalten.'
+  },
   '1.9.2': {
     version: '1.9.2',
     eyebrow: 'Die Cloud ist nicht länger versteckt',

@@ -71,8 +71,16 @@ if [[ -n "$local_address" ]]; then
   trusted_domains="$trusted_domains $local_address"
 fi
 
+public_url="$(get_env NEXTCLOUD_PUBLIC_URL)"
+if [[ -z "$public_url" && -n "$local_address" ]]; then
+  public_url="http://$local_address:$port"
+fi
+
 set_env COMPOSE_PROFILES nextcloud
 set_env NEXTCLOUD_PORT "$port"
+if [[ -n "$public_url" ]]; then
+  set_env NEXTCLOUD_PUBLIC_URL "$public_url"
+fi
 set_env NEXTCLOUD_ADMIN_USER "$admin_user"
 set_env NEXTCLOUD_TRUSTED_DOMAINS "$trusted_domains"
 admin_password="$(ensure_secret NEXTCLOUD_ADMIN_PASSWORD)"

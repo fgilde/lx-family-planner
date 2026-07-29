@@ -2001,6 +2001,23 @@ function bundledNextcloudAdmin() {
   };
 }
 
+function bundledNextcloudPublicUrl() {
+  const configured = cleanText(
+    process.env.NEXTCLOUD_PUBLIC_URL,
+    '',
+    2000
+  );
+  if (!configured) return '';
+  try {
+    return normalizeNextcloudBaseUrl(
+      configured,
+      'Öffentliche Nextcloud-Adresse'
+    );
+  } catch {
+    return '';
+  }
+}
+
 function integrationStatus(familyId, member = null) {
   const bring = getIntegration(familyId, 'bring');
   const gotify = getIntegration(familyId, 'gotify');
@@ -2061,6 +2078,11 @@ function integrationStatus(familyId, member = null) {
       ? (() => {
           const config = nextcloud.config || {};
           const adultView = !member || isAdultMember(member);
+          const configuredPublicUrl = bundledNextcloudPublicUrl();
+          const publicBaseUrl =
+            config.bundled && configuredPublicUrl
+              ? configuredPublicUrl
+              : config.publicBaseUrl || config.baseUrl || '';
           return {
             connected: true,
             enabled: config.enabled !== false,
@@ -2080,8 +2102,15 @@ function integrationStatus(familyId, member = null) {
             ...(adultView
               ? {
                   baseUrl: config.baseUrl || '',
-                  publicBaseUrl: config.publicBaseUrl || config.baseUrl || '',
-                  host: config.host || '',
+                  publicBaseUrl,
+                  bundledPublicBaseUrl: configuredPublicUrl,
+                  host: (() => {
+                    try {
+                      return new URL(publicBaseUrl).host;
+                    } catch {
+                      return config.host || '';
+                    }
+                  })(),
                   userId: config.userId || '',
                   displayName: config.displayName || config.userId || '',
                   nextcloudVersion: config.nextcloudVersion || '',
@@ -2092,9 +2121,9 @@ function integrationStatus(familyId, member = null) {
                   defaultMemberId: config.defaultMemberId || 'all',
                   includeGrandparents: Boolean(config.includeGrandparents),
                   folder: config.folder || 'LX Family',
-                  browserFolderUrl: config.publicBaseUrl
+                  browserFolderUrl: publicBaseUrl
                     ? safeNextcloudBrowserFolderUrl(
-                        config.publicBaseUrl,
+                        publicBaseUrl,
                         config.folder || 'LX Family'
                       )
                     : ''
@@ -2106,6 +2135,7 @@ function integrationStatus(familyId, member = null) {
           connected: false,
           enabled: false,
           bundled: false,
+          bundledPublicBaseUrl: bundledNextcloudPublicUrl(),
           eventSyncEnabled: false,
           backupEnabled: false,
           lastSyncAt: 0,
@@ -6488,7 +6518,7 @@ export function createApp() {
       }
       const family = getFamily(req.session.familyId);
       const publicBaseUrl = normalizeNextcloudBaseUrl(
-        req.body?.publicBaseUrl,
+        req.body?.publicBaseUrl || bundledNextcloudPublicUrl(),
         'Nextcloud-Adresse für Browser'
       );
       const folder = normalizeNextcloudFolder(
@@ -6635,6 +6665,7 @@ export function createApp() {
           username: secret.username,
           password: secret.loginPassword,
           url:
+            bundledNextcloudPublicUrl() ||
             integration.config.publicBaseUrl ||
             integration.config.baseUrl
         }

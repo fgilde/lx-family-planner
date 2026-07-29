@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>Aktuelle Version: 1.9.2</strong> ·
+  <strong>Aktuelle Version: 1.9.3</strong> ·
   <a href="CHANGELOG.md">Was ist neu?</a>
 </p>
 
@@ -227,6 +227,24 @@ neues App-Passwort nur für `LX Family` erzeugen:
 Die interne Adresse wird nur vom Backend verwendet. Zugangsdaten gelangen
 nicht an den Browser und werden mit `APP_SECRET` verschlüsselt in SQLite
 gespeichert.
+
+Die Browser-Adresse wird bei öffentlichen Planer-Domains **nicht** durch
+Anhängen von `:8080` erraten. `familie.example.de:8080` wäre nur dann gültig,
+wenn genau dieser Port öffentlich weitergeleitet wurde. Maßgeblich ist
+`NEXTCLOUD_PUBLIC_URL`:
+
+```env
+# nur im Heimnetz
+NEXTCLOUD_PUBLIC_URL=http://192.168.178.50:8080
+
+# nach Einrichtung einer eigenen HTTPS-Proxy-Route
+NEXTCLOUD_PUBLIC_URL=https://cloud.example.de
+```
+
+Für öffentlichen Zugriff empfiehlt sich eine eigene Subdomain, die im
+Reverse-Proxy oder Cloudflare Tunnel auf den internen Nextcloud-Dienst
+`http://SERVER-IP:8080` zeigt. Erst nachdem diese Route wirklich antwortet,
+wird `NEXTCLOUD_PUBLIC_URL` auf die HTTPS-Adresse umgestellt.
 
 #### Daten und Updates
 
@@ -803,6 +821,7 @@ Die Vorlage liegt in `.env.example`.
 | `NEXTCLOUD_SYNC_INTERVAL_MINUTES` | regelmäßiger DAV-Abgleich, Standard `15` |
 | `COMPOSE_PROFILES` | mit Wert `nextcloud` die mitgelieferte Family Cloud starten |
 | `NEXTCLOUD_PORT` | Port der mitgelieferten Nextcloud, Standard `8080` |
+| `NEXTCLOUD_PUBLIC_URL` | tatsächlich vom Familiengerät erreichbare Cloud-Adresse |
 | `NEXTCLOUD_*_PASSWORD` | vom Aktivierungsskript zufällig erzeugte Cloud-, Datenbank- und Redis-Schlüssel |
 | `NEXTCLOUD_TRUSTED_DOMAINS` | erlaubte Browsernamen und Heimnetz-Adressen für Nextcloud |
 | `CORS_ALLOWED_ORIGINS` | zusätzliche, vertrauenswürdige Ursprünge für eine getrennt gehostete oder native Oberfläche |

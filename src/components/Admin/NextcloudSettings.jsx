@@ -22,6 +22,17 @@ import { useFamily } from '../../context/FamilyContext';
 
 function suggestedPublicUrl() {
   const url = new URL(window.location.origin);
+  const host = url.hostname.toLowerCase();
+  const isPrivateIpv4 =
+    /^(10\.|192\.168\.|127\.|169\.254\.)/.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host);
+  if (
+    host !== 'localhost' &&
+    !host.endsWith('.local') &&
+    !isPrivateIpv4
+  ) {
+    return '';
+  }
   url.port = '8080';
   return url.origin;
 }
@@ -70,7 +81,9 @@ export default function NextcloudSettings() {
   const [dockerMode, setDockerMode] = useState(true);
   const [form, setForm] = useState({
     baseUrl: 'http://nextcloud',
-    publicBaseUrl: suggestedPublicUrl(),
+    publicBaseUrl:
+      nextcloudIntegration?.bundledPublicBaseUrl ||
+      suggestedPublicUrl(),
     username: '',
     appPassword: '',
     folder: 'LX Family'
@@ -122,6 +135,22 @@ export default function NextcloudSettings() {
     nextcloudIntegration?.eventCalendarHref,
     nextcloudIntegration?.lastSyncAt,
     nextcloudIntegration?.lastBackupAt
+  ]);
+
+  useEffect(() => {
+    if (connected || !dockerMode) return;
+    const configured =
+      nextcloudIntegration?.bundledPublicBaseUrl ||
+      suggestedPublicUrl();
+    if (!configured) return;
+    setForm(previous => ({
+      ...previous,
+      publicBaseUrl: configured
+    }));
+  }, [
+    connected,
+    dockerMode,
+    nextcloudIntegration?.bundledPublicBaseUrl
   ]);
 
   const connect = async event => {
@@ -251,7 +280,9 @@ export default function NextcloudSettings() {
                 setForm(previous => ({
                   ...previous,
                   baseUrl: 'http://nextcloud',
-                  publicBaseUrl: suggestedPublicUrl()
+                  publicBaseUrl:
+                    nextcloudIntegration?.bundledPublicBaseUrl ||
+                    suggestedPublicUrl()
                 }));
               }}
             >
@@ -319,7 +350,13 @@ export default function NextcloudSettings() {
                 inputMode="url"
                 required
               />
-              <small>Diese Adresse öffnet später euren Familienordner.</small>
+              <small>
+                {dockerMode && nextcloudIntegration?.bundledPublicBaseUrl
+                  ? 'Vom LX-Server vorgegeben – kein erfundener Port an der Planer-Domain.'
+                  : dockerMode
+                    ? 'Im Heimnetz meist http://SERVER-IP:8080; öffentlich eine eigene Cloud-Domain ohne Port.'
+                    : 'Diese Adresse öffnet später euren Familienordner.'}
+              </small>
             </label>
             {!dockerMode && (
               <>

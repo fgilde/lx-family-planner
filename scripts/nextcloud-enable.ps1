@@ -94,9 +94,16 @@ if ($localAddress) {
   $trustedDomains += $localAddress
 }
 $trustedDomains = ($trustedDomains | Where-Object { $_ } | Select-Object -Unique) -join ' '
+$publicUrl = Get-EnvironmentValue -Name 'NEXTCLOUD_PUBLIC_URL'
+if (-not $publicUrl -and $localAddress) {
+  $publicUrl = "http://${localAddress}:$Port"
+}
 
 Set-EnvironmentValue -Name 'COMPOSE_PROFILES' -Value 'nextcloud'
 Set-EnvironmentValue -Name 'NEXTCLOUD_PORT' -Value ([string]$Port)
+if ($publicUrl) {
+  Set-EnvironmentValue -Name 'NEXTCLOUD_PUBLIC_URL' -Value $publicUrl
+}
 Set-EnvironmentValue -Name 'NEXTCLOUD_ADMIN_USER' -Value $AdminUser
 Set-EnvironmentValue -Name 'NEXTCLOUD_TRUSTED_DOMAINS' -Value $trustedDomains
 $adminPassword = Ensure-RandomEnvironmentValue -Name 'NEXTCLOUD_ADMIN_PASSWORD'

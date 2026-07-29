@@ -2,6 +2,21 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.9.3] – 2026-07-29
+
+### Erreichbare Nextcloud-Adresse statt Domain-Port-Mischung
+
+- öffentliche Planer-Domains erhalten nicht länger automatisch Port `8080`
+- neue Servervorgabe `NEXTCLOUD_PUBLIC_URL` für die tatsächlich erreichbare
+  Browser-Adresse
+- Docker-Aktivierung setzt ohne öffentliche Vorgabe automatisch die
+  funktionierende Heimnetz-Adresse
+- bestehende gebündelte Verbindungen verwenden die Servervorgabe sofort, ohne
+  Trennen oder erneutes Anlegen des Cloud-Kontos
+- Zugangsanzeige, Familienordner-Link und Einstellungsformular verwenden
+  dieselbe zentrale Adresse
+- Hinweise für separate HTTPS-Subdomain und Reverse-Proxy ergänzt
+
 ## [1.9.2] – 2026-07-29
 
 ### Family Cloud als eigener Hauptbereich
