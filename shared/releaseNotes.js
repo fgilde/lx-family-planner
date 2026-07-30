@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.13.1': {
+    version: '1.13.1',
+    eyebrow: 'LX zeigt jetzt, wo es gemeinsam weitergeht',
+    title: 'Das öffentliche Projekt ist direkt in LX erreichbar',
+    intro:
+      'Wer LX gerne nutzt, findet das öffentliche GitHub-Projekt jetzt ohne Suche. Dort könnt ihr einen Stern dalassen, Ideen verfolgen oder selbst mitmachen.',
+    highlights: [
+      {
+        id: 'github-welcome-link',
+        title: 'GitHub direkt auf der Startseite',
+        description:
+          'Eine ruhige Open-Source-Karte führt neue und wiederkehrende Familien direkt zum öffentlichen LX-Projekt.'
+      },
+      {
+        id: 'github-settings-link',
+        title: 'Auch später leicht wiederzufinden',
+        description:
+          'In der Familienverwaltung steht der Projektlink dauerhaft neben der installierten Versionsnummer.'
+      },
+      {
+        id: 'theme-safe-github-card',
+        title: 'Passend zu hellen und dunklen Themen',
+        description:
+          'Die neue Karte verwendet die jeweilige Themenwelt und bleibt auf Handy, Tablet und Desktop gut lesbar.'
+      },
+      {
+        id: 'github-link-only',
+        title: 'Keine Familiendaten werden geteilt',
+        description:
+          'Der Verweis öffnet nur das öffentliche Repository. Profile, Termine und Einstellungen bleiben vollständig auf eurem Server.'
+      }
+    ],
+    closing:
+      'Die Verweise öffnen ausschließlich das öffentliche GitHub-Repository. Familieninhalte und Einstellungen werden dabei nicht übertragen.'
+  },
   '1.13.0': {
     version: '1.13.0',
     eyebrow: 'Die Medien-Lounge bekommt ein Gesicht',

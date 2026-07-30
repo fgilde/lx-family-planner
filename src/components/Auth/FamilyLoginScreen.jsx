@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpRight,
+  Github,
   HeartHandshake,
   KeyRound,
   LockKeyhole,
@@ -20,6 +22,7 @@ import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import AndroidAppDownload from './AndroidAppDownload';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
@@ -221,6 +224,20 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
           <span className="auth-brand-mark">LX</span>
           <span>Family Planner</span>
         </div>
+        <a
+          className="auth-github-link"
+          href={GITHUB_REPOSITORY_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="LX Family Planner auf GitHub ansehen"
+        >
+          <span className="auth-github-mark"><Github size={21} /></span>
+          <span className="auth-github-copy">
+            <strong>Gebaut für Familien. Offen für alle.</strong>
+            <small>Projekt ansehen, mitmachen oder einen Stern dalassen.</small>
+          </span>
+          <ArrowUpRight className="auth-github-arrow" size={19} />
+        </a>
         <div className="auth-story-copy">
           <span className="eyebrow">Weniger Chaos. Mehr Wir.</span>
           <h1>Der gemeinsame Takt für eure Familie.</h1>

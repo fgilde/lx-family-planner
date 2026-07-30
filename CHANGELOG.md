@@ -2,6 +2,18 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.13.1] – 2026-07-30
+
+### Das öffentliche Projekt ist direkt erreichbar
+
+- neue Open-Source-Einladung auf der öffentlichen Familienauswahl
+- direkter GitHub-Link in der Familienverwaltung neben der Versionsnummer
+- klare Möglichkeiten zum Ansehen, Mitmachen und Hinterlassen eines Sterns
+- Gestaltung passt sich hellen und dunklen Themen an
+- responsive Darstellung für Handy, Tablet und Desktop
+- Verweise öffnen ausschließlich das öffentliche Repository und übertragen
+  keine Familieninhalte
+
 ## [1.13.0] – 2026-07-29
 
 ### Echte Cover in der Kinder-Medienlounge

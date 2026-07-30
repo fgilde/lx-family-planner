@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  ArrowUpRight,
   Check,
   CircleHelp,
+  Github,
   Home,
   LockKeyhole,
   ShieldAlert,
+  Star,
   Trash2,
   Upload,
   X
@@ -13,6 +16,7 @@ import {
 import { useFamily } from '../../context/FamilyContext';
 import { compressImageDataUrl } from '../../utils/imageCompressor';
 import { DEFAULT_FAMILY_AVATAR } from '../../utils/imageFallback';
+import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 
 export default function FamilyEditModal({ family, isOpen, onClose }) {
   const { appVersion, updateFamilyAccount, deleteFamily } = useFamily();
@@ -189,6 +193,24 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
               <span>LX Family Planner</span>
               <strong>Version {appVersion}</strong>
             </div>
+
+            <a
+              className="family-github-card"
+              href={GITHUB_REPOSITORY_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="LX Family Planner auf GitHub ansehen"
+            >
+              <span className="family-github-icon"><Github size={21} /></span>
+              <span className="family-github-copy">
+                <small>Open Source</small>
+                <strong>Gefällt euch LX?</strong>
+                <span>Besucht das Projekt oder lasst einen Stern da.</span>
+              </span>
+              <span className="family-github-action">
+                <Star size={15} /> GitHub <ArrowUpRight size={15} />
+              </span>
+            </a>
 
             <div className="modal-actions family-settings-actions">
               <button className="auth-primary" disabled={busy}>

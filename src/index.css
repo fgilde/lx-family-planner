@@ -3055,6 +3055,82 @@ textarea {
   font-weight: 700;
 }
 
+.auth-github-link {
+  width: min(100%, 480px);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 12px 14px;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  color: #fff;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.1), rgba(246, 216, 178, 0.04)),
+    rgba(9, 29, 24, 0.22);
+  box-shadow: 0 14px 34px rgba(6, 25, 20, 0.12);
+  backdrop-filter: blur(14px);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.auth-github-link:hover,
+.auth-github-link:focus-visible {
+  border-color: rgba(246, 216, 178, 0.52);
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.14), rgba(246, 216, 178, 0.08)),
+    rgba(9, 29, 24, 0.3);
+  transform: translateY(-2px);
+}
+
+.auth-github-link:focus-visible {
+  outline: 3px solid rgba(246, 216, 178, 0.28);
+  outline-offset: 3px;
+}
+
+.auth-github-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #1f4b40;
+  background: #f6d8b2;
+  box-shadow: 0 8px 22px rgba(5, 27, 21, 0.2);
+}
+
+.auth-github-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.auth-github-copy strong {
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.auth-github-copy small {
+  color: rgba(255, 255, 255, 0.67);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.auth-github-arrow {
+  color: #f0c58f;
+  transition: transform 180ms ease;
+}
+
+.auth-github-link:hover .auth-github-arrow {
+  transform: translate(2px, -2px);
+}
+
 .auth-family-portrait {
   position: relative;
   z-index: 1;
@@ -5692,6 +5768,15 @@ textarea {
 
   .auth-story-copy {
     margin: 42px 0 22px;
+  }
+
+  .auth-github-link {
+    margin-top: 15px;
+    padding: 10px 12px;
+  }
+
+  .auth-github-copy small {
+    display: none;
   }
 
   .auth-story-copy p,
@@ -11587,6 +11672,15 @@ textarea {
     width: 100%;
   }
 
+  .family-github-card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .family-github-action {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
   .cooking-steps-panel {
     padding: 14px;
   }
@@ -15497,6 +15591,93 @@ textarea {
 .family-version-strip strong {
   color: var(--primary);
   font-size: .7rem;
+}
+
+.family-github-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border-color));
+  border-radius: 16px;
+  color: var(--text-main);
+  background:
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--primary) 10%, transparent),
+      color-mix(in srgb, var(--accent) 5%, transparent)
+    ),
+    var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.family-github-card:hover,
+.family-github-card:focus-visible {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border-color));
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.family-github-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  outline-offset: 2px;
+}
+
+.family-github-icon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--bg-elevated);
+  background: var(--text-main);
+}
+
+.family-github-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.family-github-copy small {
+  color: var(--primary);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.family-github-copy strong {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.family-github-copy > span {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.family-github-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 10px;
+  border-radius: 11px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 11%, var(--bg-elevated));
+  font-size: 0.7rem;
+  font-weight: 850;
 }
 
 .calendar-person-filter button {
