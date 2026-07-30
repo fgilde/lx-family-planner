@@ -1,0 +1,10 @@
+<CommunityApplications>
+  <Profile>
+    LX Family Planner is a private, self-hosted family organizer for calendars,
+    tasks, shopping, meals, chat, family files and playful child profiles.
+    Support and source code are available in the GitHub repository.
+  </Profile>
+  <Icon>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/public/icon-512.png</Icon>
+  <WebPage>https://github.com/laxxx-lab/lx-family-planner</WebPage>
+  <Forum>https://github.com/laxxx-lab/lx-family-planner/issues</Forum>
+</CommunityApplications>

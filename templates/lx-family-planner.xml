@@ -1,0 +1,32 @@
+<Container version="2">
+  <Name>LX Family Planner</Name>
+  <Repository>ghcr.io/laxxx-lab/lx-family-planner:latest</Repository>
+  <Registry>https://github.com/laxxx-lab/lx-family-planner/pkgs/container/lx-family-planner</Registry>
+  <Network>bridge</Network>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Icon>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/public/icon-512.png</Icon>
+  <WebUI>http://[IP]:[PORT:3001]</WebUI>
+  <Overview>Private self-hosted family planner with calendars, tasks, shopping, meals, chat, Android notifications, Family Cloud and dedicated child and pet profiles.</Overview>
+  <Support>https://github.com/laxxx-lab/lx-family-planner/issues</Support>
+  <Project>https://familie.laxxx-lab.de</Project>
+  <TemplateURL>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/templates/lx-family-planner.xml</TemplateURL>
+  <ReadMe>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/README.md</ReadMe>
+  <Category>Tools:Utilities</Category>
+  <ExtraSearchTerms>family planner calendar household children meal shopping self hosted</ExtraSearchTerms>
+  <Requires>A 32-character or longer random APP_SECRET. Keep the same value for every update.</Requires>
+  <Changes>Initial Community Applications release.</Changes>
+  <Date>2026-07-30</Date>
+  <License>MIT</License>
+  <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-dashboard.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-kinderprofil.png</Screenshot>
+  <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-haustierprofil.png</Screenshot>
+  <Config Name="WebUI" Target="3001" Default="3001" Mode="tcp" Description="Port used to open LX Family Planner." Type="Port" Display="always" Required="true" Mask="false"/>
+  <Config Name="Family data" Target="/app/data" Default="/mnt/user/appdata/lx-family-planner/data" Mode="rw" Description="Persistent database, integration secrets and Firebase configuration." Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="Backups" Target="/app/backups" Default="/mnt/user/appdata/lx-family-planner/backups" Mode="rw" Description="Persistent LX Family Planner backups." Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="App secret" Target="APP_SECRET" Default="" Description="Random secret with at least 32 characters. Never change it after the first start." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Timezone" Target="TZ" Default="Europe/Berlin" Description="Timezone used for calendar reminders and scheduled tasks." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+  <Config Name="Secure session cookie" Target="SESSION_COOKIE_SECURE" Default="auto" Description="Automatically uses secure cookies when accessed through HTTPS." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+  <Config Name="Database file" Target="DATABASE_FILE" Default="/app/data/family_planner.sqlite" Description="Persistent SQLite database location." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+  <Config Name="Legacy database file" Target="LEGACY_DATABASE_FILE" Default="/app/data/family_db.json" Description="Optional path used for a one-time migration from older LX versions." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+</Container>

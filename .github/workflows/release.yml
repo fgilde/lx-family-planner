@@ -1,0 +1,159 @@
+name: Veröffentlichung
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  quality:
+    name: Version, Tests und Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v6
+
+      - name: Node.js vorbereiten
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Release-Versionen abgleichen
+        run: node scripts/verify-release.mjs "${GITHUB_REF_NAME}"
+
+      - name: Anwendung vollständig prüfen
+        run: npm run check
+
+  container:
+    name: Docker-Image für AMD64 und ARM64
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v6
+
+      - name: QEMU vorbereiten
+        uses: docker/setup-qemu-action@v4
+
+      - name: Docker Buildx vorbereiten
+        uses: docker/setup-buildx-action@v4
+
+      - name: Bei GitHub Container Registry anmelden
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image-Metadaten erzeugen
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=LX Family Planner
+            org.opencontainers.image.description=Private self-hosted family planner for calendars, tasks, meals, shopping, chat and child profiles.
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.url=https://familie.laxxx-lab.de
+            org.opencontainers.image.licenses=MIT
+
+      - name: Image bauen und veröffentlichen
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: runtime
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
+
+  release:
+    name: GitHub Release
+    needs:
+      - quality
+      - container
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v6
+
+      - name: Release-Dateien vorbereiten
+        env:
+          IMAGE_DIGEST: ${{ needs.container.outputs.digest }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          mkdir -p release
+          cp public/apk/latest.apk "release/LX-Family-Planner-${version}.apk"
+          cp compose.production.yaml release/compose.yaml
+          cp .env.example release/env.example
+          {
+            sha256sum "release/LX-Family-Planner-${version}.apk"
+            sha256sum release/compose.yaml
+            sha256sum release/env.example
+          } > release/SHA256SUMS.txt
+          printf '%s\n' \
+            "ghcr.io/${GITHUB_REPOSITORY}:${version}" \
+            "${IMAGE_DIGEST}" \
+            > release/CONTAINER-IMAGE.txt
+
+      - name: Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          notes_file="docs/releases/${GITHUB_REF_NAME}.md"
+          if [[ -f "${notes_file}" ]]; then
+            notes=(--notes-file "${notes_file}")
+          else
+            notes=(--generate-notes)
+          fi
+          gh release create "${GITHUB_REF_NAME}" \
+            --verify-tag \
+            --latest \
+            --title "LX Family Planner ${version}" \
+            "${notes[@]}" \
+            "release/LX-Family-Planner-${version}.apk" \
+            "release/compose.yaml" \
+            "release/env.example" \
+            "release/SHA256SUMS.txt" \
+            "release/CONTAINER-IMAGE.txt"

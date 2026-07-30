@@ -14,6 +14,7 @@
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
+  <a href="LICENSE"><img alt="MIT-Lizenz" src="https://img.shields.io/badge/Lizenz-MIT-E4B76B"></a>
 </p>
 
 <p align="center">
@@ -462,6 +463,28 @@ docker compose down
 Die aktiven Daten liegen in `data/`, Sicherungen in `backups/`. Beide Ordner
 werden absichtlich nicht in Git aufgenommen.
 
+### Fertiges Docker-Image verwenden
+
+Für Server, NAS-Systeme und App-Stores wird jede veröffentlichte Version
+zusätzlich als fertiges Image für AMD64 und ARM64 bereitgestellt:
+
+```text
+ghcr.io/laxxx-lab/lx-family-planner:latest
+```
+
+Damit muss LX auf dem Zielserver nicht mehr aus dem Quellcode gebaut werden:
+
+```bash
+mkdir -p lx-family-planner && cd lx-family-planner
+curl -fsSLo compose.yaml https://github.com/laxxx-lab/lx-family-planner/releases/latest/download/compose.yaml
+curl -fsSLo .env https://github.com/laxxx-lab/lx-family-planner/releases/latest/download/env.example
+sed -i "s/^APP_SECRET=.*/APP_SECRET=$(openssl rand -hex 32)/" .env
+docker compose up -d
+```
+
+Die Daten bleiben in `data/`, Sicherungen in `backups/`. Eine bestimmte
+Programmversion lässt sich mit `LX_FAMILY_VERSION=1.13.0` fest anheften.
+
 ## Proxmox VE Helper-Script
 
 Für Proxmox VE gibt es einen eigenen One-Liner. Er wird in der
@@ -516,6 +539,17 @@ lx-family doctor
 Der Helper ist für eine **neue Installation** gedacht. Für den Umzug einer
 bestehenden Familie zuerst ein Datenbank-Backup erstellen und dieses
 anschließend bewusst in die neue Instanz übernehmen.
+
+## Installation aus einem App-Store
+
+LX Family Planner ist für **Unraid Community Applications** und den
+**Umbrel App Store** vorbereitet. Nach der Prüfung durch die jeweiligen
+Store-Teams erscheint LX dort als normale App: Installieren anklicken,
+Speicherort und Zugang festlegen, fertig.
+
+Bis zur Freischaltung funktionieren Docker, das fertige GHCR-Image und der
+Proxmox-Helper unverändert weiter. Die Store-Pakete und ihre Prüfschritte sind
+unter [Store-Veröffentlichungen](docs/STORE_SUBMISSIONS.md) dokumentiert.
 
 ## Bequem und sicher aktualisieren
 
