@@ -10,7 +10,9 @@ const scriptPaths = [
   path.join(projectRoot, 'scripts', 'pve-guest-install.sh'),
   path.join(projectRoot, 'scripts', 'pve-manage.sh'),
   path.join(projectRoot, 'scripts', 'nextcloud-public-url.sh'),
-  path.join(projectRoot, 'scripts', 'docker-update.sh')
+  path.join(projectRoot, 'scripts', 'docker-update.sh'),
+  path.join(projectRoot, 'scripts', 'docker-auto-update.sh'),
+  path.join(projectRoot, 'scripts', 'install-auto-update.sh')
 ];
 const scripts = Object.fromEntries(
   scriptPaths.map(file => [
@@ -108,6 +110,25 @@ test('Linux Docker updates do not require Node.js on the host', () => {
     updateScript,
     /expected_version="\$\(node\s+-p/
   );
+});
+
+test('automatic updates only install published stable releases', () => {
+  const autoUpdate = scripts['docker-auto-update.sh'];
+  assert.match(autoUpdate, /releases\/latest/);
+  assert.match(autoUpdate, /latest_tag.*\^v\[0-9\]/s);
+  assert.match(autoUpdate, /git merge --ff-only/);
+  assert.match(autoUpdate, /docker-update\.sh --skip-pull/);
+  assert.match(autoUpdate, /git merge-base --is-ancestor/);
+  assert.match(autoUpdate, /flock -n/);
+  assert.doesNotMatch(autoUpdate, /git reset|git pull/);
+});
+
+test('automatic update installer enables a guarded systemd timer', () => {
+  const installer = scripts['install-auto-update.sh'];
+  assert.match(installer, /lx-family-planner-auto-update\.timer/);
+  assert.match(installer, /systemctl enable --now/);
+  assert.match(installer, /EUID/);
+  assert.doesNotMatch(installer, /rm\s+-rf|systemctl disable/);
 });
 
 test('Docker and PVE builds retain the signed public Android package', () => {

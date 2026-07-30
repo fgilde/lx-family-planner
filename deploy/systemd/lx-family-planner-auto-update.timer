@@ -1,0 +1,12 @@
+[Unit]
+Description=LX Family Planner regelmäßig auf stabile Updates prüfen
+
+[Timer]
+OnCalendar=*-*-* 04:15:00 Europe/Berlin
+RandomizedDelaySec=20m
+Persistent=true
+Unit=lx-family-planner-auto-update.service
+
+[Install]
+WantedBy=timers.target
+

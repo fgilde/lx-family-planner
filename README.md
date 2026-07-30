@@ -599,6 +599,40 @@ Ohne Git-Abruf:
 bash scripts/docker-update.sh --skip-pull
 ```
 
+#### Stabile Releases automatisch einspielen
+
+Auf einem Linux-Docker-Server kann LX einmalig für kontrollierte automatische
+Updates eingerichtet werden:
+
+```bash
+sudo bash scripts/install-auto-update.sh
+```
+
+Der Server prüft täglich nachts das neueste **veröffentlichte stabile**
+GitHub-Release. Einzelne Entwicklungs-Commits werden nicht installiert. Vor
+jedem echten Update verwendet LX denselben geschützten Ablauf wie beim
+manuellen Docker-Update:
+
+- bisheriges Docker-Abbild als Rückfallversion vormerken
+- konsistente Datenbanksicherung mit Prüfmanifest erstellen
+- Migration zuerst auf einer Sicherungskopie simulieren
+- neue Version starten und Gesundheitscheck ausführen
+- Familieninhalte und Einstellungen mit dem vorherigen Stand vergleichen
+- bei einem Fehler automatisch zur vorherigen Version zurückkehren
+
+Nur prüfen, ohne etwas zu verändern:
+
+```bash
+bash scripts/docker-auto-update.sh --check
+```
+
+Zeitplan und letzter Lauf:
+
+```bash
+systemctl list-timers lx-family-planner-auto-update.timer
+systemctl status lx-family-planner-auto-update.service
+```
+
 ### Ohne Docker
 
 Vor dem Austausch des Programmcodes:

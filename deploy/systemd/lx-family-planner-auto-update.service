@@ -1,0 +1,17 @@
+[Unit]
+Description=LX Family Planner – geprüftes stabiles Update
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+ConditionPathExists=@@PROJECT_ROOT@@/scripts/docker-auto-update.sh
+
+[Service]
+Type=oneshot
+WorkingDirectory=@@PROJECT_ROOT@@
+ExecStart=/usr/bin/env bash @@PROJECT_ROOT@@/scripts/docker-auto-update.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+UMask=0077
+
