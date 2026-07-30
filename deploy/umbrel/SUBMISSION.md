@@ -17,8 +17,10 @@ Use these existing 1440×900 product views in the submission:
 
 Before opening the pull request:
 
-1. replace the image tag with the published multi-architecture digest,
-2. verify a clean install,
-3. restart the app and confirm all data is still present,
-4. update the app and confirm `/app/data` and `/app/backups` remain intact,
-5. test the dashboard, login, calendar and Android download link.
+1. verify a clean install,
+2. restart the app and confirm all data is still present,
+3. update the app and confirm `/app/data` and `/app/backups` remain intact,
+4. test the dashboard, login, calendar and Android download link.
+
+The package is already pinned to the published `1.13.0` multi-architecture
+digest.

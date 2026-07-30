@@ -11,6 +11,12 @@ All stores use the same signed release source:
 ghcr.io/laxxx-lab/lx-family-planner:1.13.0
 ```
 
+Immutable release digest:
+
+```text
+sha256:33f5b2380ffafd0ffa4fc1f6c4610ea499326c254410d23a436771b3a3a04932
+```
+
 Supported platforms:
 
 - `linux/amd64`
