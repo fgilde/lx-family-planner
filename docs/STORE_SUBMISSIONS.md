@@ -8,7 +8,7 @@ Registry, Unraid Community Applications and the Umbrel App Store.
 All stores use the same signed release source:
 
 ```text
-ghcr.io/laxxx-lab/lx-family-planner:1.13.0
+ghcr.io/laxxx-lab/lx-family-planner:1.13.1
 ```
 
 Immutable release digest:
