@@ -23,6 +23,10 @@ firebase-service-account.json
 # Runtime databases and user data
 data/
 backups/
+!deploy/umbrel/lx-family-planner/data/
+!deploy/umbrel/lx-family-planner/data/.gitkeep
+!deploy/umbrel/lx-family-planner/backups/
+!deploy/umbrel/lx-family-planner/backups/.gitkeep
 family_planner.sqlite
 family_planner.sqlite-*
 family_db.json

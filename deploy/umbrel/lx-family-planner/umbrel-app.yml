@@ -1,6 +1,6 @@
 manifestVersion: 1.1
 id: lx-family-planner
-category: productivity
+category: files
 name: LX Family Planner
 version: "1.13.0"
 tagline: Private family planning for every generation
@@ -20,10 +20,9 @@ website: https://familie.laxxx-lab.de
 dependencies: []
 repo: https://github.com/laxxx-lab/lx-family-planner
 support: https://github.com/laxxx-lab/lx-family-planner/issues
-port: 3001
+port: 3413
 gallery: []
 path: ""
 defaultUsername: ""
 defaultPassword: ""
-permissions: []
 submitter: LaxXx Lab
