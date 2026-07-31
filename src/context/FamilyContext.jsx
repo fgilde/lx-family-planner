@@ -34,6 +34,8 @@ import {
   plannerApiRequest
 } from '../utils/apiConfig';
 import { DEFAULT_GOTIFY_RULES } from '../../shared/notificationEvents';
+import i18n from '../i18n';
+import { formatDateTime } from '../utils/formatting';
 
 const FamilyContext = createContext(null);
 
@@ -213,7 +215,11 @@ export function FamilyProvider({ children }) {
       setFamiliesList(data.families || []);
       return data.families || [];
     } catch (error) {
-      showToast('Verbindung fehlt', error.message, 'error');
+      showToast(
+        i18n.t('context:toasts.connectionMissing.title'),
+        error.message,
+        'error'
+      );
       return [];
     }
   }, [showToast]);
@@ -279,7 +285,11 @@ export function FamilyProvider({ children }) {
         setWebPush(initialWebPushState());
         setNativePush(initialNativePushState());
       } else if (!silent) {
-        showToast('Aktualisierung fehlgeschlagen', error.message, 'error');
+        showToast(
+          i18n.t('context:toasts.refreshFailed.title'),
+          error.message,
+          'error'
+        );
       }
       return null;
     }
@@ -305,7 +315,11 @@ export function FamilyProvider({ children }) {
       return data.entities || [];
     } catch (error) {
       if (!silent) {
-        showToast('Hausstatus nicht erreichbar', error.message, 'warning');
+        showToast(
+          i18n.t('context:toasts.homeStatusUnreachable.title'),
+          error.message,
+          'warning'
+        );
       }
       return [];
     } finally {
@@ -332,7 +346,7 @@ export function FamilyProvider({ children }) {
     } catch (error) {
       if (!silent) {
         showToast(
-          'Meldungen nicht erreichbar',
+          i18n.t('context:toasts.notificationsUnreachable.title'),
           error.message,
           'warning'
         );
@@ -384,7 +398,11 @@ export function FamilyProvider({ children }) {
       return data.notification;
     } catch (error) {
       await refreshNotifications({ silent: true });
-      showToast('Meldung nicht gespeichert', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.notificationNotSaved.title'),
+        error.message,
+        'warning'
+      );
       return null;
     }
   }, [notifications, refreshNotifications, showToast]);
@@ -408,7 +426,11 @@ export function FamilyProvider({ children }) {
       return true;
     } catch (error) {
       await refreshNotifications({ silent: true });
-      showToast('Meldungen nicht gespeichert', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.notificationsNotSaved.title'),
+        error.message,
+        'warning'
+      );
       return false;
     }
   }, [
@@ -517,7 +539,7 @@ export function FamilyProvider({ children }) {
       setWebPush(previous => ({ ...previous, loading: false }));
       if (!silent) {
         showToast(
-          'Benachrichtigungen nicht erreichbar',
+          i18n.t('context:toasts.webPushUnreachable.title'),
           error.message,
           'warning'
         );
@@ -733,8 +755,8 @@ export function FamilyProvider({ children }) {
       return true;
     } catch (error) {
       showToast(
-        'Noch nicht gespeichert',
-        'Die Neuigkeiten konnten nicht als gelesen markiert werden. Bitte versuche es noch einmal.',
+        i18n.t('context:toasts.releaseNotesNotSaved.title'),
+        i18n.t('context:toasts.releaseNotesNotSaved.message'),
         'warning'
       );
       return false;
@@ -756,7 +778,11 @@ export function FamilyProvider({ children }) {
       );
       versionRef.current = Number(data.version || versionRef.current);
     } catch (error) {
-      showToast('Design nicht gespeichert', error.message, 'error');
+      showToast(
+        i18n.t('context:toasts.themeNotSaved.title'),
+        error.message,
+        'error'
+      );
     }
   }, [activeMember?.id, showToast]);
 
@@ -822,7 +848,10 @@ export function FamilyProvider({ children }) {
     return records;
   }, []);
 
-  const withActionError = useCallback(async (action, title = 'Änderung fehlgeschlagen') => {
+  const withActionError = useCallback(async (
+    action,
+    title = i18n.t('context:errors.changeFailed')
+  ) => {
     try {
       return await action();
     } catch (error) {
@@ -835,7 +864,7 @@ export function FamilyProvider({ children }) {
     const capability = webPushCapability();
     if (!capability.supported) {
       showToast(
-        'Benachrichtigungen noch nicht möglich',
+        i18n.t('context:toasts.webPushUnavailable.title'),
         capability.message,
         'warning'
       );
@@ -872,8 +901,10 @@ export function FamilyProvider({ children }) {
         ]
       }));
       showToast(
-        'Benachrichtigungen sind an',
-        `Dieses Gerät meldet sich jetzt für ${activeMember?.name || 'dich'}.`,
+        i18n.t('context:toasts.webPushEnabled.title'),
+        i18n.t('context:toasts.webPushEnabled.message', {
+          name: activeMember?.name || i18n.t('context:defaults.you')
+        }),
         'success'
       );
       return data.device;
@@ -883,7 +914,11 @@ export function FamilyProvider({ children }) {
         permission: notificationPermission(),
         busy: ''
       }));
-      showToast('Aktivierung nicht möglich', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.activationFailed.title'),
+        error.message,
+        'warning'
+      );
       return null;
     }
   }, [
@@ -916,14 +951,18 @@ export function FamilyProvider({ children }) {
         permission: notificationPermission()
       }));
       showToast(
-        'Benachrichtigungen ausgeschaltet',
-        'Dieses Gerät erhält keine Browser-Meldungen mehr.',
+        i18n.t('context:toasts.webPushDisabled.title'),
+        i18n.t('context:toasts.webPushDisabled.message'),
         'info'
       );
       return true;
     } catch (error) {
       setWebPush(previous => ({ ...previous, busy: '' }));
-      showToast('Ausschalten nicht möglich', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.disableFailed.title'),
+        error.message,
+        'warning'
+      );
       return false;
     }
   }, [showToast]);
@@ -933,7 +972,7 @@ export function FamilyProvider({ children }) {
     try {
       const subscription = await currentBrowserSubscription();
       if (!subscription) {
-        throw new Error('Dieses Gerät ist noch nicht angemeldet.');
+        throw new Error(i18n.t('context:errors.deviceNotRegistered'));
       }
       const currentDevice = webPush.devices.find(
         device => device.id === webPush.currentDeviceId
@@ -960,14 +999,18 @@ export function FamilyProvider({ children }) {
         ]
       }));
       showToast(
-        'Benachrichtigungen gespeichert',
-        'Deine Auswahl gilt sofort auf diesem Gerät.',
+        i18n.t('context:toasts.notificationPrefsSaved.title'),
+        i18n.t('context:toasts.webPushSaved.message'),
         'success'
       );
       return data.device;
     } catch (error) {
       setWebPush(previous => ({ ...previous, busy: '' }));
-      showToast('Speichern nicht möglich', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.saveFailed.title'),
+        error.message,
+        'warning'
+      );
       return null;
     }
   }, [
@@ -983,14 +1026,18 @@ export function FamilyProvider({ children }) {
       await apiRequest('/api/push/test', { method: 'POST' });
       setWebPush(previous => ({ ...previous, busy: '' }));
       showToast(
-        'Test wurde gesendet',
-        'Die Meldung sollte gleich auf diesem Gerät erscheinen.',
+        i18n.t('context:toasts.webPushTestSent.title'),
+        i18n.t('context:toasts.webPushTestSent.message'),
         'success'
       );
       return true;
     } catch (error) {
       setWebPush(previous => ({ ...previous, busy: '' }));
-      showToast('Test fehlgeschlagen', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.testFailed.title'),
+        error.message,
+        'warning'
+      );
       return false;
     }
   }, [showToast]);
@@ -1046,7 +1093,7 @@ export function FamilyProvider({ children }) {
             permission: 'error',
             error:
               error?.message ||
-              'Die Android-Berechtigung konnte nicht gelesen werden.'
+              i18n.t('context:errors.androidPermissionReadFailed')
           }))
       ]);
       const permission = permissionResult.permission;
@@ -1077,11 +1124,11 @@ export function FamilyProvider({ children }) {
         loading: false,
         statusError:
           error?.message ||
-          'Der Android-Push-Status konnte nicht geladen werden.'
+          i18n.t('context:errors.androidPushStatusLoadFailed')
       }));
       if (!silent) {
         showToast(
-          'Android-Benachrichtigungen nicht erreichbar',
+          i18n.t('context:toasts.androidPushUnreachable.title'),
           error.message,
           'warning'
         );
@@ -1128,12 +1175,10 @@ export function FamilyProvider({ children }) {
           ? Promise.resolve(nativePush)
           : refreshNativePushStatus(),
         15_000,
-        'Der Familienserver antwortet bei der Push-Prüfung nicht. Prüfe die Server-Adresse und versuche es erneut.'
+        i18n.t('context:errors.pushCheckTimeout')
       );
       if (!status?.serverConfigured && !status?.server?.configured) {
-        throw new Error(
-          'Der Server ist noch nicht mit Firebase Cloud Messaging verbunden.'
-        );
+        throw new Error(i18n.t('context:errors.fcmNotConfigured'));
       }
       const token = await registerNativePush({
         requestPermission: true,
@@ -1151,7 +1196,7 @@ export function FamilyProvider({ children }) {
           ...preferences
         }),
         15_000,
-        'Der Geräteschlüssel ist vorhanden, aber der Familienserver antwortet beim Speichern nicht.'
+        i18n.t('context:errors.deviceKeySaveTimeout')
       );
       setNativePush(previous => ({
         ...previous,
@@ -1161,8 +1206,10 @@ export function FamilyProvider({ children }) {
         activationStep: ''
       }));
       showToast(
-        'Android-Benachrichtigungen sind an',
-        `Die LX App meldet sich jetzt für ${activeMember?.name || 'dich'}.`,
+        i18n.t('context:toasts.nativePushEnabled.title'),
+        i18n.t('context:toasts.nativePushEnabled.message', {
+          name: activeMember?.name || i18n.t('context:defaults.you')
+        }),
         'success'
       );
       return device;
@@ -1173,10 +1220,14 @@ export function FamilyProvider({ children }) {
         busy: '',
         activationError:
           error?.message ||
-          'Die Android-Benachrichtigungen konnten nicht aktiviert werden.',
+          i18n.t('context:errors.androidPushActivationFailed'),
         activationStep: ''
       }));
-      showToast('Aktivierung nicht möglich', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.activationFailed.title'),
+        error.message,
+        'warning'
+      );
       return null;
     }
   }, [
@@ -1208,16 +1259,20 @@ export function FamilyProvider({ children }) {
         )
       }));
       showToast(
-        'App-Benachrichtigungen ausgeschaltet',
-        `Dieses Gerät meldet sich nicht mehr für ${
-          activeMember?.name || 'dieses Profil'
-        }.`,
+        i18n.t('context:toasts.nativePushDisabled.title'),
+        i18n.t('context:toasts.nativePushDisabled.message', {
+          name: activeMember?.name || i18n.t('context:defaults.thisProfile')
+        }),
         'info'
       );
       return true;
     } catch (error) {
       setNativePush(previous => ({ ...previous, busy: '' }));
-      showToast('Ausschalten nicht möglich', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.disableFailed.title'),
+        error.message,
+        'warning'
+      );
       return false;
     }
   }, [activeMember?.name, showToast]);
@@ -1226,7 +1281,7 @@ export function FamilyProvider({ children }) {
     setNativePush(previous => ({ ...previous, busy: 'save' }));
     try {
       if (!nativePush.currentDeviceId) {
-        throw new Error('Diese App ist für das Profil noch nicht angemeldet.');
+        throw new Error(i18n.t('context:errors.appNotRegistered'));
       }
       const currentDevice = nativePush.devices.find(
         device => device.id === nativePush.currentDeviceId
@@ -1239,14 +1294,18 @@ export function FamilyProvider({ children }) {
       });
       setNativePush(previous => ({ ...previous, busy: '' }));
       showToast(
-        'App-Benachrichtigungen gespeichert',
-        'Deine Auswahl gilt sofort auf diesem Android-Gerät.',
+        i18n.t('context:toasts.nativePushSaved.title'),
+        i18n.t('context:toasts.nativePushSaved.message'),
         'success'
       );
       return device;
     } catch (error) {
       setNativePush(previous => ({ ...previous, busy: '' }));
-      showToast('Speichern nicht möglich', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.saveFailed.title'),
+        error.message,
+        'warning'
+      );
       return null;
     }
   }, [
@@ -1268,14 +1327,18 @@ export function FamilyProvider({ children }) {
       });
       setNativePush(previous => ({ ...previous, busy: '' }));
       showToast(
-        'Android-Test wurde gesendet',
-        'Die Meldung sollte gleich im Android-Benachrichtigungsbereich erscheinen.',
+        i18n.t('context:toasts.nativePushTestSent.title'),
+        i18n.t('context:toasts.nativePushTestSent.message'),
         'success'
       );
       return true;
     } catch (error) {
       setNativePush(previous => ({ ...previous, busy: '' }));
-      showToast('Android-Test fehlgeschlagen', error.message, 'warning');
+      showToast(
+        i18n.t('context:toasts.nativeTestFailed.title'),
+        error.message,
+        'warning'
+      );
       return false;
     }
   }, [showToast]);
@@ -1344,8 +1407,8 @@ export function FamilyProvider({ children }) {
       devices: previous.devices.filter(device => device.id !== deviceId)
     }));
     showToast(
-      'Gerät entfernt',
-      'Dieses Gerät erhält keine Familienmeldungen mehr.',
+      i18n.t('context:toasts.deviceRemoved.title'),
+      i18n.t('context:toasts.deviceRemoved.message'),
       'info'
     );
     return true;
@@ -1360,19 +1423,24 @@ export function FamilyProvider({ children }) {
       await refreshBootstrap({ silent: true });
       if (data.warning) {
         showToast(
-          'Kalenderquelle gespeichert',
-          `Die erste Aktualisierung ist noch fehlgeschlagen: ${data.warning}`,
+          i18n.t('context:toasts.calendarSourceSaved.title'),
+          i18n.t('context:toasts.calendarSourceSaved.warningMessage', {
+            warning: data.warning
+          }),
           'warning'
         );
       } else {
         showToast(
-          'Kalender verbunden',
-          `${data.subscription.name} wurde mit ${data.records.length} Terminen eingelesen.`,
+          i18n.t('context:toasts.calendarConnected.title'),
+          i18n.t('context:toasts.calendarConnected.message', {
+            name: data.subscription.name,
+            count: data.records.length
+          }),
           'success'
         );
       }
       return data.subscription;
-    }, 'Kalender konnte nicht verbunden werden'), [
+    }, i18n.t('context:errors.calendarConnectFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -1389,12 +1457,14 @@ export function FamilyProvider({ children }) {
       );
       await refreshBootstrap({ silent: true });
       showToast(
-        data.warning ? 'Kalender gespeichert' : 'Kalender aktualisiert',
-        data.warning || 'Die Kalenderquelle wurde aktualisiert.',
+        data.warning
+          ? i18n.t('context:toasts.calendarSaved.title')
+          : i18n.t('context:toasts.calendarUpdated.title'),
+        data.warning || i18n.t('context:toasts.calendarUpdated.message'),
         data.warning ? 'warning' : 'success'
       );
       return data.subscription;
-    }, 'Kalender konnte nicht geändert werden'), [
+    }, i18n.t('context:errors.calendarUpdateFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -1408,12 +1478,14 @@ export function FamilyProvider({ children }) {
       );
       await refreshBootstrap({ silent: true });
       showToast(
-        'Kalender ist aktuell',
-        `${data.records.length} Termine wurden abgeglichen.`,
+        i18n.t('context:toasts.calendarSynced.title'),
+        i18n.t('context:toasts.calendarSynced.message', {
+          count: data.records.length
+        }),
         'success'
       );
       return data.subscription;
-    }, 'Kalender konnte nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.calendarSyncFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -1428,14 +1500,20 @@ export function FamilyProvider({ children }) {
       await refreshBootstrap({ silent: true });
       const failed = data.results.filter(result => !result.success).length;
       showToast(
-        failed ? 'Abgleich teilweise fertig' : 'Alle Kalender sind aktuell',
         failed
-          ? `${failed} Kalender konnten gerade nicht erreicht werden.`
-          : `${data.results.length} Kalenderquellen wurden abgeglichen.`,
+          ? i18n.t('context:toasts.calendarSyncPartial.title')
+          : i18n.t('context:toasts.calendarSyncAll.title'),
+        failed
+          ? i18n.t('context:toasts.calendarSyncPartial.message', {
+              count: failed
+            })
+          : i18n.t('context:toasts.calendarSyncAll.message', {
+              count: data.results.length
+            }),
         failed ? 'warning' : 'success'
       );
       return data.results;
-    }, 'Kalender konnten nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.calendarsSyncFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -1449,12 +1527,12 @@ export function FamilyProvider({ children }) {
       );
       await refreshBootstrap({ silent: true });
       showToast(
-        'Kalenderquelle entfernt',
-        'Die dazugehörigen Termine wurden aus dem Familienplaner entfernt.',
+        i18n.t('context:toasts.calendarSourceRemoved.title'),
+        i18n.t('context:toasts.calendarSourceRemoved.message'),
         'info'
       );
       return true;
-    }, 'Kalenderquelle konnte nicht entfernt werden'), [
+    }, i18n.t('context:errors.calendarSourceRemoveFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -1477,8 +1555,10 @@ export function FamilyProvider({ children }) {
         });
         await refreshBootstrap({ silent: true });
         showToast(
-          'Familientermin geteilt',
-          `"${data.event.title}" ist bei den eingeladenen Familien sichtbar.`,
+          i18n.t('context:toasts.sharedEventCreated.title'),
+          i18n.t('context:toasts.sharedEventCreated.message', {
+            title: data.event.title
+          }),
           'success'
         );
         return data.event;
@@ -1488,7 +1568,11 @@ export function FamilyProvider({ children }) {
         household: activeHouseholdState,
         ...eventData
       });
-      showToast('Termin hinzugefügt', `"${event.title}" steht jetzt im Kalender.`, 'success');
+      showToast(
+        i18n.t('context:toasts.eventAdded.title'),
+        i18n.t('context:toasts.eventAdded.message', { title: event.title }),
+        'success'
+      );
       return event;
     }), [
       activeHouseholdState,
@@ -1502,14 +1586,19 @@ export function FamilyProvider({ children }) {
     withActionError(async () => {
       const event = await patchResource('events', eventId, changes);
       showToast(
-        'Terminerinnerungen gespeichert',
+        i18n.t('context:toasts.eventRemindersSaved.title'),
         event.reminders?.length
-          ? `"${event.title}" erinnert dich jetzt zu ${event.reminders.length} Zeitpunkten.`
-          : `Für "${event.title}" sind die Erinnerungen ausgeschaltet.`,
+          ? i18n.t('context:toasts.eventRemindersSaved.enabledMessage', {
+              title: event.title,
+              count: event.reminders.length
+            })
+          : i18n.t('context:toasts.eventRemindersSaved.disabledMessage', {
+              title: event.title
+            }),
         'success'
       );
       return event;
-    }, 'Terminerinnerungen konnten nicht gespeichert werden'), [
+    }, i18n.t('context:errors.eventRemindersSaveFailed')), [
     patchResource,
     showToast,
     withActionError
@@ -1525,14 +1614,18 @@ export function FamilyProvider({ children }) {
         );
         await refreshBootstrap({ silent: true });
         showToast(
-          'Gemeinsamer Termin gelöscht',
-          'Der Termin wurde bei allen eingeladenen Familien entfernt.',
+          i18n.t('context:toasts.sharedEventDeleted.title'),
+          i18n.t('context:toasts.sharedEventDeleted.message'),
           'info'
         );
         return;
       }
       await removeResource('events', eventId);
-      showToast('Termin gelöscht', 'Der Termin wurde entfernt.', 'info');
+      showToast(
+        i18n.t('context:toasts.eventDeleted.title'),
+        i18n.t('context:toasts.eventDeleted.message'),
+        'info'
+      );
     }), [
       refreshBootstrap,
       removeResource,
@@ -1546,7 +1639,11 @@ export function FamilyProvider({ children }) {
     reader.onload = async event => {
       const parsed = parseICSContent(event.target.result);
       if (!parsed.length) {
-        showToast('Import nicht möglich', 'Keine gültigen Termine gefunden.', 'warning');
+        showToast(
+          i18n.t('context:toasts.icsImportFailed.title'),
+          i18n.t('context:toasts.icsImportFailed.message'),
+          'warning'
+        );
         return;
       }
       await withActionError(async () => {
@@ -1556,7 +1653,13 @@ export function FamilyProvider({ children }) {
           household: activeHouseholdState
         }));
         await bulkCreateResources('events', records);
-        showToast('Kalender importiert', `${records.length} Termine wurden übernommen.`, 'success');
+        showToast(
+          i18n.t('context:toasts.icsImported.title'),
+          i18n.t('context:toasts.icsImported.message', {
+            count: records.length
+          }),
+          'success'
+        );
       });
     };
     reader.readAsText(file);
@@ -1565,9 +1668,13 @@ export function FamilyProvider({ children }) {
   const exportICS = useCallback(() => {
     exportEventsToICS(
       resources.events,
-      familyAccount?.familyName || 'Unsere Familie'
+      familyAccount?.familyName || i18n.t('context:defaults.familyName')
     );
-    showToast('Kalender exportiert', 'Die Kalenderdatei wurde erstellt.', 'info');
+    showToast(
+      i18n.t('context:toasts.icsExported.title'),
+      i18n.t('context:toasts.icsExported.message'),
+      'info'
+    );
   }, [familyAccount?.familyName, resources.events, showToast]);
 
   const addShoppingItem = useCallback(item =>
@@ -1582,8 +1689,10 @@ export function FamilyProvider({ children }) {
         });
         const records = applyShoppingRecords(data);
         showToast(
-          'Bei Bring! eingetragen',
-          `${item.name} steht jetzt auf der gemeinsamen Liste.`,
+          i18n.t('context:toasts.bringAdded.title'),
+          i18n.t('context:toasts.bringAdded.itemMessage', {
+            name: item.name
+          }),
           'success'
         );
         return records.find(
@@ -1597,19 +1706,21 @@ export function FamilyProvider({ children }) {
         id: makeId('shop'),
         category: 'Vorräte',
         icon: '🛒',
-        quantity: '1 Stk',
+        quantity: i18n.t('context:defaults.shoppingQuantity'),
         isSelected: true,
         inCart: false,
         household: activeHouseholdState,
         ...item
       });
       showToast(
-        'Auf der Einkaufsliste',
-        `${record.name} wurde hinzugefügt.`,
+        i18n.t('context:toasts.shoppingItemAdded.title'),
+        i18n.t('context:toasts.shoppingItemAdded.message', {
+          name: record.name
+        }),
         'success'
       );
       return record;
-    }, 'Artikel konnte nicht hinzugefügt werden'), [
+    }, i18n.t('context:errors.shoppingItemAddFailed')), [
       activeHouseholdState,
       applyShoppingRecords,
       createResource,
@@ -1649,7 +1760,7 @@ export function FamilyProvider({ children }) {
             record.name.toLocaleLowerCase('de-DE') ===
             item.name.toLocaleLowerCase('de-DE')
         );
-      }, 'Bring!-Artikel konnte nicht aktualisiert werden');
+      }, i18n.t('context:errors.bringItemUpdateFailed'));
     }
     return withActionError(() =>
       patchResource('shoppingItems', itemId, { inCart: !item.inCart })
@@ -1674,7 +1785,11 @@ export function FamilyProvider({ children }) {
     Promise.all(
       changed.map(item => patchResource('shoppingItems', item.id, item))
     ).catch(error => {
-      showToast('Einkaufsliste nicht gespeichert', error.message, 'error');
+      showToast(
+        i18n.t('context:toasts.shoppingListNotSaved.title'),
+        error.message,
+        'error'
+      );
       refreshBootstrap({ silent: true });
     });
   }, [patchResource, refreshBootstrap, resources.shoppingItems, showToast]);
@@ -1696,11 +1811,13 @@ export function FamilyProvider({ children }) {
         });
         applyShoppingRecords(data);
         showToast(
-          'Bei Bring! eingetragen',
-          `${data.added} Zutaten wurden übertragen.`,
+          i18n.t('context:toasts.bringAdded.title'),
+          i18n.t('context:toasts.bringAdded.ingredientsMessage', {
+            count: data.added
+          }),
           'success'
         );
-      }, 'Zutaten konnten nicht an Bring! übertragen werden');
+      }, i18n.t('context:errors.bringIngredientsTransferFailed'));
       return;
     }
 
@@ -1717,7 +1834,13 @@ export function FamilyProvider({ children }) {
     if (!records.length) return;
     await withActionError(async () => {
       await bulkCreateResources('shoppingItems', records);
-      showToast('Auf Einkaufsliste', `${records.length} Zutaten wurden ergänzt.`, 'success');
+      showToast(
+        i18n.t('context:toasts.ingredientsAdded.title'),
+        i18n.t('context:toasts.ingredientsAdded.message', {
+          count: records.length
+        }),
+        'success'
+      );
     });
   }, [
     activeHouseholdState,
@@ -1734,18 +1857,28 @@ export function FamilyProvider({ children }) {
         id: makeId('recipe'),
         image:
           'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=80',
-        servings: '4 Portionen',
+        servings: i18n.t('context:defaults.recipeServings'),
         household: activeHouseholdState,
         ...recipe
       });
-      showToast('Rezept gespeichert', `"${created.name || created.title}" ist im Rezeptbuch.`, 'success');
+      showToast(
+        i18n.t('context:toasts.recipeSaved.title'),
+        i18n.t('context:toasts.recipeSaved.message', {
+          name: created.name || created.title
+        }),
+        'success'
+      );
       return created;
     }), [activeHouseholdState, createResource, showToast, withActionError]);
 
   const deleteRecipe = useCallback(recipeId =>
     withActionError(async () => {
       await removeResource('savedRecipes', recipeId);
-      showToast('Rezept gelöscht', 'Das Rezept wurde entfernt.', 'info');
+      showToast(
+        i18n.t('context:toasts.recipeDeleted.title'),
+        i18n.t('context:toasts.recipeDeleted.message'),
+        'info'
+      );
     }), [removeResource, showToast, withActionError]);
 
   const toggleTask = useCallback(taskId =>
@@ -1775,24 +1908,34 @@ export function FamilyProvider({ children }) {
       versionRef.current = Number(data.version || versionRef.current);
       if (data.action === 'approval_requested') {
         showToast(
-          'Zur Prüfung geschickt',
-          `"${data.task.title}" wartet jetzt auf die Bestätigung von ${
-            data.task.createdByName || 'einem Elternteil'
-          }.`,
+          i18n.t('context:toasts.taskSentForReview.title'),
+          i18n.t('context:toasts.taskSentForReview.message', {
+            title: data.task.title,
+            name:
+              data.task.createdByName || i18n.t('context:defaults.aParent')
+          }),
           'success'
         );
       } else if (data.action === 'approval_cancelled') {
         showToast(
-          'Meldung zurückgenommen',
-          `"${data.task.title}" ist wieder offen.`,
+          i18n.t('context:toasts.taskReportWithdrawn.title'),
+          i18n.t('context:toasts.taskReportWithdrawn.message', {
+            title: data.task.title
+          }),
           'info'
         );
       } else if (data.task.completed) {
         showToast(
-          'Sterne verdient!',
+          i18n.t('context:toasts.starsEarned.title'),
           data.nextTask
-            ? `+${data.task.stars || 10} Sterne – die nächste Wiederholung ist für ${data.nextTask.dueDate} geplant.`
-            : `+${data.task.stars || 10} Sterne für "${data.task.title}".`,
+            ? i18n.t('context:toasts.starsEarned.nextMessage', {
+                stars: data.task.stars || 10,
+                date: data.nextTask.dueDate
+              })
+            : i18n.t('context:toasts.starsEarned.message', {
+                stars: data.task.stars || 10,
+                title: data.task.title
+              }),
           'star'
         );
       }
@@ -1818,12 +1961,20 @@ export function FamilyProvider({ children }) {
       }
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        approved ? 'Aufgabe bestätigt' : 'Noch einmal versuchen',
+        approved
+          ? i18n.t('context:toasts.taskApproved.title')
+          : i18n.t('context:toasts.taskRejected.title'),
         approved
           ? data.nextTask
-            ? `"${data.task.title}" ist bestätigt. Die nächste Wiederholung wurde eingeplant.`
-            : `"${data.task.title}" ist freigegeben – die Sterne wurden gutgeschrieben.`
-          : `"${data.task.title}" ist wieder als offen markiert.`,
+            ? i18n.t('context:toasts.taskApproved.nextMessage', {
+                title: data.task.title
+              })
+            : i18n.t('context:toasts.taskApproved.message', {
+                title: data.task.title
+              })
+          : i18n.t('context:toasts.taskRejected.message', {
+              title: data.task.title
+            }),
         approved ? 'star' : 'info'
       );
       return data.task;
@@ -1838,7 +1989,13 @@ export function FamilyProvider({ children }) {
         stars: 10,
         ...task
       });
-      showToast('Aufgabe erstellt', `"${created.title}" kann losgehen.`, 'success');
+      showToast(
+        i18n.t('context:toasts.taskCreated.title'),
+        i18n.t('context:toasts.taskCreated.message', {
+          title: created.title
+        }),
+        'success'
+      );
       return created;
     }), [activeHouseholdState, createResource, showToast, withActionError]);
 
@@ -1850,21 +2007,35 @@ export function FamilyProvider({ children }) {
         forMemberId: 'all',
         ...reward
       });
-      showToast('Belohnung angelegt', `"${created.title}" ist im Sterneshop.`, 'success');
+      showToast(
+        i18n.t('context:toasts.rewardCreated.title'),
+        i18n.t('context:toasts.rewardCreated.message', {
+          title: created.title
+        }),
+        'success'
+      );
       return created;
     }), [activeHouseholdState, createResource, showToast, withActionError]);
 
   const updateReward = useCallback((rewardId, changes) =>
     withActionError(async () => {
       const reward = await patchResource('rewards', rewardId, changes);
-      showToast('Belohnung aktualisiert', 'Die Änderung ist gespeichert.', 'info');
+      showToast(
+        i18n.t('context:toasts.rewardUpdated.title'),
+        i18n.t('context:shared.changeSaved'),
+        'info'
+      );
       return reward;
     }), [patchResource, showToast, withActionError]);
 
   const deleteReward = useCallback(rewardId =>
     withActionError(async () => {
       await removeResource('rewards', rewardId);
-      showToast('Belohnung gelöscht', 'Der Eintrag wurde entfernt.', 'info');
+      showToast(
+        i18n.t('context:toasts.rewardDeleted.title'),
+        i18n.t('context:toasts.rewardDeleted.message'),
+        'info'
+      );
     }), [removeResource, showToast, withActionError]);
 
   const redeemReward = useCallback((reward, memberId) =>
@@ -1879,9 +2050,15 @@ export function FamilyProvider({ children }) {
         )
       );
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Belohnung eingelöst!', `"${reward.title}" ist verdient.`, 'star');
+      showToast(
+        i18n.t('context:toasts.rewardRedeemed.title'),
+        i18n.t('context:toasts.rewardRedeemed.message', {
+          title: reward.title
+        }),
+        'star'
+      );
       return data;
-    }, 'Einlösen nicht möglich'), [showToast, withActionError]);
+    }, i18n.t('context:errors.redeemFailed')), [showToast, withActionError]);
 
   const updateMeal = useCallback((day, mealType, recipe, ingredients = []) =>
     withActionError(async () => {
@@ -1901,7 +2078,11 @@ export function FamilyProvider({ children }) {
             ingredients,
             household: activeHouseholdState
           });
-      showToast('Speiseplan aktualisiert', `${recipe} ist eingeplant.`, 'success');
+      showToast(
+        i18n.t('context:toasts.mealPlanUpdated.title'),
+        i18n.t('context:toasts.mealPlanUpdated.message', { recipe }),
+        'success'
+      );
       return meal;
     }), [
       activeHouseholdState,
@@ -1916,8 +2097,8 @@ export function FamilyProvider({ children }) {
     withActionError(async () => {
       await removeResource('meals', mealId);
       showToast(
-        'Gericht entfernt',
-        'Der Platz im Speiseplan ist wieder frei.',
+        i18n.t('context:toasts.mealRemoved.title'),
+        i18n.t('context:toasts.mealRemoved.message'),
         'info'
       );
       return true;
@@ -1925,7 +2106,7 @@ export function FamilyProvider({ children }) {
 
   const addNote = useCallback(note =>
     withActionError(async () => {
-      const now = new Date().toLocaleString('de-DE', {
+      const now = formatDateTime(new Date(), {
         day: 'numeric',
         month: 'short',
         hour: '2-digit',
@@ -1934,16 +2115,20 @@ export function FamilyProvider({ children }) {
       const created = await createResource('notes', {
         id: makeId('note'),
         color: '#fef08a',
-        createdBy: activeMember?.name || 'Familie',
+        createdBy: activeMember?.name || i18n.t('context:defaults.familyAuthor'),
         createdAt: now,
-        updatedBy: activeMember?.name || 'Familie',
+        updatedBy: activeMember?.name || i18n.t('context:defaults.familyAuthor'),
         updatedAt: now,
         household: activeHouseholdState,
         isShared: false,
         photo: null,
         ...note
       });
-      showToast('Notiz angeheftet', `"${created.title}" ist auf der Pinnwand.`, 'success');
+      showToast(
+        i18n.t('context:toasts.noteAdded.title'),
+        i18n.t('context:toasts.noteAdded.message', { title: created.title }),
+        'success'
+      );
       return created;
     }), [
       activeHouseholdState,
@@ -1957,17 +2142,25 @@ export function FamilyProvider({ children }) {
     withActionError(async () => {
       const note = await patchResource('notes', noteId, {
         ...changes,
-        updatedBy: activeMember?.name || 'Familie',
-        updatedAt: new Date().toLocaleString('de-DE')
+        updatedBy: activeMember?.name || i18n.t('context:defaults.familyAuthor'),
+        updatedAt: formatDateTime(new Date())
       });
-      showToast('Notiz aktualisiert', 'Die Änderung ist gespeichert.', 'info');
+      showToast(
+        i18n.t('context:toasts.noteUpdated.title'),
+        i18n.t('context:shared.changeSaved'),
+        'info'
+      );
       return note;
     }), [activeMember?.name, patchResource, showToast, withActionError]);
 
   const deleteNote = useCallback(noteId =>
     withActionError(async () => {
       await removeResource('notes', noteId);
-      showToast('Notiz entfernt', 'Die Notiz wurde von der Pinnwand genommen.', 'info');
+      showToast(
+        i18n.t('context:toasts.noteDeleted.title'),
+        i18n.t('context:toasts.noteDeleted.message'),
+        'info'
+      );
     }), [removeResource, showToast, withActionError]);
 
   const addMember = useCallback(member =>
@@ -1978,7 +2171,13 @@ export function FamilyProvider({ children }) {
       });
       setMembers(previous => [...previous, data.member]);
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Profil angelegt', `${data.member.name} gehört jetzt dazu.`, 'success');
+      showToast(
+        i18n.t('context:toasts.memberAdded.title'),
+        i18n.t('context:toasts.memberAdded.message', {
+          name: data.member.name
+        }),
+        'success'
+      );
       return data.member;
     }), [showToast, withActionError]);
 
@@ -2010,8 +2209,10 @@ export function FamilyProvider({ children }) {
       );
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Punkte zurückgesetzt',
-        `${data.member.name} startet wieder bei 0 Sternen.`,
+        i18n.t('context:toasts.starsReset.title'),
+        i18n.t('context:toasts.starsReset.message', {
+          name: data.member.name
+        }),
         'info'
       );
       return data.member;
@@ -2029,10 +2230,14 @@ export function FamilyProvider({ children }) {
       setResources(previous => ({ ...previous, tasks: data.records || [] }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        data.deleted ? 'Aufgabenliste bereinigt' : 'Nichts zu löschen',
         data.deleted
-          ? `${data.deleted} Aufgabe${data.deleted === 1 ? '' : 'n'} wurde${data.deleted === 1 ? '' : 'n'} entfernt.`
-          : 'Für diesen Filter gibt es keine passenden Aufgaben.',
+          ? i18n.t('context:toasts.tasksCleared.title')
+          : i18n.t('context:toasts.nothingToClear.title'),
+        data.deleted
+          ? i18n.t('context:toasts.tasksCleared.message', {
+              count: data.deleted
+            })
+          : i18n.t('context:toasts.nothingToClear.message'),
         data.deleted ? 'success' : 'info'
       );
       return data;
@@ -2045,7 +2250,11 @@ export function FamilyProvider({ children }) {
       });
       setMembers(previous => previous.filter(member => member.id !== memberId));
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Profil gelöscht', 'Das Familienprofil wurde entfernt.', 'info');
+      showToast(
+        i18n.t('context:toasts.memberDeleted.title'),
+        i18n.t('context:toasts.memberDeleted.message'),
+        'info'
+      );
     }), [showToast, withActionError]);
 
   const updateFamilyAccount = useCallback(changes =>
@@ -2061,7 +2270,11 @@ export function FamilyProvider({ children }) {
         )
       );
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Familie aktualisiert', 'Die Einstellungen sind gespeichert.', 'success');
+      showToast(
+        i18n.t('context:toasts.familyUpdated.title'),
+        i18n.t('context:toasts.familyUpdated.message'),
+        'success'
+      );
       return data.family;
     }), [showToast, withActionError]);
 
@@ -2073,9 +2286,13 @@ export function FamilyProvider({ children }) {
       });
       await logout();
       await refreshPublicFamilies();
-      showToast('Familie gelöscht', 'Das Familienkonto wurde entfernt.', 'info');
+      showToast(
+        i18n.t('context:toasts.familyDeleted.title'),
+        i18n.t('context:toasts.familyDeleted.message'),
+        'info'
+      );
       return true;
-    }, 'Familie konnte nicht gelöscht werden'), [
+    }, i18n.t('context:errors.familyDeleteFailed')), [
       logout,
       refreshPublicFamilies,
       showToast,
@@ -2094,7 +2311,7 @@ export function FamilyProvider({ children }) {
       const data = await apiRequest('/api/integrations/bring/catalog');
       setBringCatalog(data.catalog);
       return data.catalog;
-    }, 'Bring!-Katalog konnte nicht geladen werden');
+    }, i18n.t('context:errors.bringCatalogLoadFailed'));
   }, [bringCatalog, withActionError]);
 
   const completeBringConnection = useCallback(async payload => {
@@ -2113,9 +2330,13 @@ export function FamilyProvider({ children }) {
         method: 'POST'
       });
       applyShoppingRecords(data);
-      showToast('Bring! synchronisiert', 'Die Einkaufsliste ist aktuell.', 'success');
+      showToast(
+        i18n.t('context:toasts.bringSynced.title'),
+        i18n.t('context:toasts.bringSynced.message'),
+        'success'
+      );
       return data.records;
-    }, 'Bring!-Sync fehlgeschlagen'), [
+    }, i18n.t('context:errors.bringSyncFailed')), [
       applyShoppingRecords,
       showToast,
       withActionError
@@ -2128,7 +2349,11 @@ export function FamilyProvider({ children }) {
       });
       setIntegrations(previous => ({ ...previous, bring: data.integration }));
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Bring! getrennt', 'Die Zugangsdaten wurden sicher entfernt.', 'info');
+      showToast(
+        i18n.t('context:toasts.bringDisconnected.title'),
+        i18n.t('context:toasts.bringDisconnected.message'),
+        'info'
+      );
     }), [showToast, withActionError]);
 
   const setupGotify = useCallback(payload =>
@@ -2143,12 +2368,12 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Gotify verbunden',
-        'Die Testnachricht wurde erfolgreich gesendet.',
+        i18n.t('context:toasts.gotifyConnected.title'),
+        i18n.t('context:toasts.gotifyConnected.message'),
         'success'
       );
       return data.integration;
-    }, 'Gotify konnte nicht verbunden werden'), [showToast, withActionError]);
+    }, i18n.t('context:errors.gotifyConnectFailed')), [showToast, withActionError]);
 
   const updateGotifySettings = useCallback(changes =>
     withActionError(async () => {
@@ -2162,12 +2387,12 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Benachrichtigungen gespeichert',
-        'Die neuen Gotify-Regeln sind aktiv.',
+        i18n.t('context:toasts.notificationPrefsSaved.title'),
+        i18n.t('context:toasts.gotifySaved.message'),
         'success'
       );
       return data.integration;
-    }, 'Gotify-Einstellungen konnten nicht gespeichert werden'), [
+    }, i18n.t('context:errors.gotifySettingsSaveFailed')), [
       showToast,
       withActionError
     ]);
@@ -2178,12 +2403,12 @@ export function FamilyProvider({ children }) {
         method: 'POST'
       });
       showToast(
-        'Testnachricht gesendet',
-        'Prüfe jetzt deine Gotify-App.',
+        i18n.t('context:toasts.gotifyTestSent.title'),
+        i18n.t('context:toasts.gotifyTestSent.message'),
         'success'
       );
       return true;
-    }, 'Gotify-Test fehlgeschlagen'), [showToast, withActionError]);
+    }, i18n.t('context:errors.gotifyTestFailed')), [showToast, withActionError]);
 
   const disconnectGotify = useCallback(() =>
     withActionError(async () => {
@@ -2196,8 +2421,8 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Gotify getrennt',
-        'Der Familienplaner sendet keine Push-Nachrichten mehr.',
+        i18n.t('context:toasts.gotifyDisconnected.title'),
+        i18n.t('context:toasts.gotifyDisconnected.message'),
         'info'
       );
       return true;
@@ -2218,12 +2443,14 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Home Assistant verbunden',
-        `${data.entities?.length || 0} Geräte und Sensoren wurden gefunden.`,
+        i18n.t('context:toasts.homeAssistantConnected.title'),
+        i18n.t('context:toasts.homeAssistantConnected.message', {
+          count: data.entities?.length || 0
+        }),
         'success'
       );
       return data;
-    }, 'Home Assistant konnte nicht verbunden werden'), [
+    }, i18n.t('context:errors.homeAssistantConnectFailed')), [
     showToast,
     withActionError
   ]);
@@ -2234,7 +2461,7 @@ export function FamilyProvider({ children }) {
         '/api/integrations/home-assistant/entities'
       );
       return data.entities || [];
-    }, 'Geräteliste konnte nicht geladen werden'), [withActionError]);
+    }, i18n.t('context:errors.deviceListLoadFailed')), [withActionError]);
 
   const updateHomeAssistant = useCallback(changes =>
     withActionError(async () => {
@@ -2249,12 +2476,12 @@ export function FamilyProvider({ children }) {
       versionRef.current = Number(data.version || versionRef.current);
       await refreshHomeAssistantStates({ silent: true });
       showToast(
-        'Haus-Dashboard gespeichert',
-        'Freigaben und Geräteauswahl sind jetzt aktiv.',
+        i18n.t('context:toasts.homeDashboardSaved.title'),
+        i18n.t('context:toasts.homeDashboardSaved.message'),
         'success'
       );
       return data.integration;
-    }, 'Home-Assistant-Einstellungen konnten nicht gespeichert werden'), [
+    }, i18n.t('context:errors.homeAssistantSettingsSaveFailed')), [
     refreshHomeAssistantStates,
     showToast,
     withActionError
@@ -2266,9 +2493,16 @@ export function FamilyProvider({ children }) {
         '/api/integrations/home-assistant/test',
         { method: 'POST' }
       );
-      showToast('Verbindung steht', data.message, 'success');
+      showToast(
+        i18n.t('context:toasts.connectionOk.title'),
+        data.message,
+        'success'
+      );
       return data;
-    }, 'Home Assistant antwortet nicht'), [showToast, withActionError]);
+    }, i18n.t('context:errors.homeAssistantNoResponse')), [
+    showToast,
+    withActionError
+  ]);
 
   const disconnectHomeAssistant = useCallback(() =>
     withActionError(async () => {
@@ -2282,8 +2516,8 @@ export function FamilyProvider({ children }) {
       setHomeAssistantEntities([]);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Home Assistant getrennt',
-        'Der Zugriffsschlüssel wurde aus dem Familienplaner entfernt.',
+        i18n.t('context:toasts.homeAssistantDisconnected.title'),
+        i18n.t('context:toasts.homeAssistantDisconnected.message'),
         'info'
       );
       return true;
@@ -2300,7 +2534,7 @@ export function FamilyProvider({ children }) {
       );
       setHomeAssistantEntities(data.entities || []);
       return data.entities || [];
-    }, 'Gerät konnte nicht gesteuert werden'), [withActionError]);
+    }, i18n.t('context:errors.deviceControlFailed')), [withActionError]);
 
   const setupNextcloud = useCallback(payload =>
     withActionError(async () => {
@@ -2315,12 +2549,12 @@ export function FamilyProvider({ children }) {
       versionRef.current = Number(data.version || versionRef.current);
       await refreshBootstrap({ silent: true });
       showToast(
-        'Family Cloud verbunden',
-        'Kalender, Familienordner und sichere Backups sind bereit.',
+        i18n.t('context:toasts.nextcloudConnected.title'),
+        i18n.t('context:toasts.nextcloudConnected.message'),
         'success'
       );
       return data;
-    }, 'Nextcloud konnte nicht verbunden werden'), [
+    }, i18n.t('context:errors.nextcloudConnectFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -2342,12 +2576,12 @@ export function FamilyProvider({ children }) {
       versionRef.current = Number(data.version || versionRef.current);
       await refreshBootstrap({ silent: true });
       showToast(
-        'Family Cloud ist startklar',
-        'Dein Familienkonto, Kalender und Cloud-Ordner wurden automatisch eingerichtet.',
+        i18n.t('context:toasts.nextcloudBundledReady.title'),
+        i18n.t('context:toasts.nextcloudBundledReady.message'),
         'success'
       );
       return data;
-    }, 'Family Cloud konnte nicht automatisch eingerichtet werden'), [
+    }, i18n.t('context:errors.nextcloudBundledSetupFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -2359,7 +2593,7 @@ export function FamilyProvider({ children }) {
         '/api/integrations/nextcloud/access'
       );
       return data.access;
-    }, 'Cloud-Zugang konnte nicht geladen werden'), [withActionError]);
+    }, i18n.t('context:errors.cloudAccessLoadFailed')), [withActionError]);
 
   const updateNextcloud = useCallback(changes =>
     withActionError(async () => {
@@ -2373,12 +2607,12 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Family Cloud gespeichert',
-        'Die Nextcloud-Regeln sind jetzt aktiv.',
+        i18n.t('context:toasts.nextcloudSaved.title'),
+        i18n.t('context:toasts.nextcloudSaved.message'),
         'success'
       );
       return data.integration;
-    }, 'Nextcloud-Einstellungen konnten nicht gespeichert werden'), [
+    }, i18n.t('context:errors.nextcloudSettingsSaveFailed')), [
     showToast,
     withActionError
   ]);
@@ -2393,9 +2627,13 @@ export function FamilyProvider({ children }) {
         nextcloud: data.integration
       }));
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Family Cloud erreichbar', data.message, 'success');
+      showToast(
+        i18n.t('context:toasts.nextcloudReachable.title'),
+        data.message,
+        'success'
+      );
       return data;
-    }, 'Nextcloud antwortet nicht'), [showToast, withActionError]);
+    }, i18n.t('context:errors.nextcloudNoResponse')), [showToast, withActionError]);
 
   const syncNextcloud = useCallback(() =>
     withActionError(async () => {
@@ -2411,14 +2649,16 @@ export function FamilyProvider({ children }) {
       const changed = Object.values(data.stats || {})
         .reduce((sum, value) => sum + Number(value || 0), 0);
       showToast(
-        'Kalender synchronisiert',
+        i18n.t('context:toasts.nextcloudSynced.title'),
         changed
-          ? `${changed} Änderungen wurden sicher abgeglichen.`
-          : 'LX Family und Nextcloud waren bereits auf demselben Stand.',
+          ? i18n.t('context:toasts.nextcloudSynced.changedMessage', {
+              count: changed
+            })
+          : i18n.t('context:toasts.nextcloudSynced.unchangedMessage'),
         'success'
       );
       return data;
-    }, 'Nextcloud-Kalender konnte nicht synchronisiert werden'), [
+    }, i18n.t('context:errors.nextcloudSyncFailed')), [
     refreshBootstrap,
     showToast,
     withActionError
@@ -2435,12 +2675,15 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Cloud-Sicherung erstellt',
-        `${data.backup?.fileName || 'Das Familienarchiv'} liegt verschlüsselt in Nextcloud.`,
+        i18n.t('context:toasts.cloudBackupCreated.title'),
+        i18n.t('context:toasts.cloudBackupCreated.message', {
+          name:
+            data.backup?.fileName || i18n.t('context:defaults.familyArchive')
+        }),
         'success'
       );
       return data;
-    }, 'Cloud-Sicherung konnte nicht erstellt werden'), [
+    }, i18n.t('context:errors.cloudBackupFailed')), [
     showToast,
     withActionError
   ]);
@@ -2456,8 +2699,8 @@ export function FamilyProvider({ children }) {
       }));
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Family Cloud getrennt',
-        'Lokale Familieneinträge bleiben vollständig erhalten.',
+        i18n.t('context:toasts.nextcloudDisconnected.title'),
+        i18n.t('context:toasts.nextcloudDisconnected.message'),
         'info'
       );
       return true;
@@ -2478,7 +2721,11 @@ export function FamilyProvider({ children }) {
         mood,
         createdAt: Date.now()
       });
-      showToast('Danke fürs Teilen', 'Deine Stimmung ist im Familienkompass.', 'success');
+      showToast(
+        i18n.t('context:toasts.moodShared.title'),
+        i18n.t('context:toasts.moodShared.message'),
+        'success'
+      );
       return record;
     }), [activeMember?.id, createResource, showToast, withActionError]);
 
@@ -2526,12 +2773,12 @@ export function FamilyProvider({ children }) {
       setFamilyRelationships(data.relationships || []);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Anfrage gesendet',
-        'Die andere Familie kann die Verbindung jetzt bestätigen.',
+        i18n.t('context:toasts.relationshipRequested.title'),
+        i18n.t('context:toasts.relationshipRequested.message'),
         'success'
       );
       return data.relationship;
-    }, 'Familienanfrage fehlgeschlagen'), [showToast, withActionError]);
+    }, i18n.t('context:errors.familyRequestFailed')), [showToast, withActionError]);
 
   const respondFamilyRelationship = useCallback((relationshipId, status) =>
     withActionError(async () => {
@@ -2545,14 +2792,16 @@ export function FamilyProvider({ children }) {
       setFamilyRelationships(data.relationships || []);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        status === 'accepted' ? 'Familien verbunden' : 'Anfrage abgelehnt',
         status === 'accepted'
-          ? 'Die Verbindung ist jetzt im Stammbaum sichtbar.'
-          : 'Die Anfrage wurde entfernt.',
+          ? i18n.t('context:toasts.familiesConnected.title')
+          : i18n.t('context:toasts.requestDeclined.title'),
+        status === 'accepted'
+          ? i18n.t('context:toasts.familiesConnected.message')
+          : i18n.t('context:toasts.requestDeclined.message'),
         status === 'accepted' ? 'success' : 'info'
       );
       return data.relationship;
-    }, 'Anfrage konnte nicht beantwortet werden'), [showToast, withActionError]);
+    }, i18n.t('context:errors.requestAnswerFailed')), [showToast, withActionError]);
 
   const removeFamilyRelationship = useCallback(relationshipId =>
     withActionError(async () => {
@@ -2563,12 +2812,15 @@ export function FamilyProvider({ children }) {
       setFamilyRelationships(data.relationships || []);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Verbindung entfernt',
-        'Die Familienkonten sind nicht mehr miteinander verknüpft.',
+        i18n.t('context:toasts.relationshipRemoved.title'),
+        i18n.t('context:toasts.relationshipRemoved.message'),
         'info'
       );
       return true;
-    }, 'Verbindung konnte nicht entfernt werden'), [showToast, withActionError]);
+    }, i18n.t('context:errors.relationshipRemoveFailed')), [
+    showToast,
+    withActionError
+  ]);
 
   const updateFamilyRelationshipGrants = useCallback(
     (relationshipId, grants) =>
@@ -2583,12 +2835,12 @@ export function FamilyProvider({ children }) {
         setFamilyRelationships(data.relationships || []);
         versionRef.current = Number(data.version || versionRef.current);
         showToast(
-          'Familienfreigaben gespeichert',
-          'Die andere Familie sieht sofort, was sie mitplanen darf.',
+          i18n.t('context:toasts.familyGrantsSaved.title'),
+          i18n.t('context:toasts.familyGrantsSaved.message'),
           'success'
         );
         return data.relationship;
-      }, 'Familienfreigaben konnten nicht gespeichert werden'),
+      }, i18n.t('context:errors.familyGrantsSaveFailed')),
     [showToast, withActionError]
   );
 
@@ -2598,7 +2850,7 @@ export function FamilyProvider({ children }) {
       setFamilyLetters(data.letters || []);
       versionRef.current = Number(data.version || versionRef.current);
       return data.letters || [];
-    }, 'Familienpost konnte nicht geladen werden'), [withActionError]);
+    }, i18n.t('context:errors.familyMailLoadFailed')), [withActionError]);
 
   const sendFamilyLetter = useCallback(letter =>
     withActionError(async () => {
@@ -2609,12 +2861,12 @@ export function FamilyProvider({ children }) {
       setFamilyLetters(data.letters || []);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Brief eingeworfen',
-        'Die verbundene Familie findet ihn jetzt in ihrem Briefkasten.',
+        i18n.t('context:toasts.letterSent.title'),
+        i18n.t('context:toasts.letterSent.message'),
         'success'
       );
       return data.letter;
-    }, 'Brief konnte nicht verschickt werden'), [
+    }, i18n.t('context:errors.letterSendFailed')), [
     showToast,
     withActionError
   ]);
@@ -2628,7 +2880,7 @@ export function FamilyProvider({ children }) {
       setFamilyLetters(data.letters || []);
       versionRef.current = Number(data.version || versionRef.current);
       return data.letter;
-    }, 'Brief konnte nicht aktualisiert werden'), [withActionError]);
+    }, i18n.t('context:errors.letterUpdateFailed')), [withActionError]);
 
   const refreshFamilyChatGuests = useCallback(() =>
     withActionError(async () => {
@@ -2636,7 +2888,7 @@ export function FamilyProvider({ children }) {
       setFamilyChatGuests(data.invitations || []);
       versionRef.current = Number(data.version || versionRef.current);
       return data.invitations || [];
-    }, 'Chat-Einladungen konnten nicht geladen werden'), [withActionError]);
+    }, i18n.t('context:errors.chatInvitationsLoadFailed')), [withActionError]);
 
   const inviteFamilyChatGuest = useCallback(invitation =>
     withActionError(async () => {
@@ -2647,12 +2899,12 @@ export function FamilyProvider({ children }) {
       setFamilyChatGuests(data.invitations || []);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Chat-Einladung verschickt',
-        'Das ausgewählte Profil entscheidet selbst über den Zugang.',
+        i18n.t('context:toasts.chatInvitationSent.title'),
+        i18n.t('context:toasts.chatInvitationSent.message'),
         'success'
       );
       return data.invitation;
-    }, 'Chat-Einladung konnte nicht verschickt werden'), [
+    }, i18n.t('context:errors.chatInvitationSendFailed')), [
     showToast,
     withActionError
   ]);
@@ -2670,17 +2922,17 @@ export function FamilyProvider({ children }) {
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
         status === 'accepted'
-          ? 'Einladung angenommen'
+          ? i18n.t('context:toasts.invitationAccepted.title')
           : status === 'revoked'
-            ? 'Gastzugang beendet'
-            : 'Einladung abgelehnt',
+            ? i18n.t('context:toasts.guestAccessEnded.title')
+            : i18n.t('context:toasts.invitationDeclined.title'),
         status === 'accepted'
-          ? 'Der Familienchat erscheint jetzt als eigener Kanal.'
-          : 'Die Freigabe wurde aktualisiert.',
+          ? i18n.t('context:toasts.invitationAccepted.message')
+          : i18n.t('context:toasts.chatAccessUpdated.message'),
         status === 'accepted' ? 'success' : 'info'
       );
       return data.invitation;
-    }, 'Chat-Freigabe konnte nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.chatAccessUpdateFailed')), [
     showToast,
     withActionError
   ]);
@@ -2691,7 +2943,7 @@ export function FamilyProvider({ children }) {
         `/api/family/chat-guests/${invitationId}/messages`
       );
       return data.messages || [];
-    }, 'Eingeladener Familienchat konnte nicht geladen werden'), [
+    }, i18n.t('context:errors.guestChatLoadFailed')), [
     withActionError
   ]);
 
@@ -2705,7 +2957,7 @@ export function FamilyProvider({ children }) {
         }
       );
       return data.message;
-    }, 'Nachricht konnte nicht gesendet werden'), [withActionError]);
+    }, i18n.t('context:errors.messageSendFailed')), [withActionError]);
 
   const addRelatedFamilyTask = useCallback((relationshipId, task) =>
     withActionError(async () => {
@@ -2717,12 +2969,14 @@ export function FamilyProvider({ children }) {
         }
       );
       showToast(
-        'Aufgabe verschickt',
-        `"${data.task.title}" ist jetzt beim Enkelkind sichtbar.`,
+        i18n.t('context:toasts.taskSentToGrandchild.title'),
+        i18n.t('context:toasts.taskSentToGrandchild.message', {
+          title: data.task.title
+        }),
         'success'
       );
       return data.task;
-    }, 'Aufgabe konnte nicht verschickt werden'), [
+    }, i18n.t('context:errors.taskSendFailed')), [
     showToast,
     withActionError
   ]);
@@ -2737,12 +2991,14 @@ export function FamilyProvider({ children }) {
         }
       );
       showToast(
-        'Belohnung angelegt',
-        `"${data.reward.title}" wartet jetzt beim Enkelkind.`,
+        i18n.t('context:toasts.rewardCreated.title'),
+        i18n.t('context:toasts.rewardCreated.grandchildMessage', {
+          title: data.reward.title
+        }),
         'success'
       );
       return data.reward;
-    }, 'Belohnung konnte nicht angelegt werden'), [
+    }, i18n.t('context:errors.rewardCreateFailed')), [
     showToast,
     withActionError
   ]);
@@ -2758,12 +3014,12 @@ export function FamilyProvider({ children }) {
           }
         );
         showToast(
-          'Taschengeld gebucht',
-          'Die Buchung ist jetzt im Familienkonto des Enkelkindes sichtbar.',
+          i18n.t('context:toasts.pocketMoneyBooked.title'),
+          i18n.t('context:toasts.grandchildPocketMoneyBooked.message'),
           'success'
         );
         return data.transaction;
-      }, 'Taschengeld konnte nicht gebucht werden'),
+      }, i18n.t('context:errors.pocketMoneyBookFailed')),
     [showToast, withActionError]
   );
 
@@ -2774,12 +3030,12 @@ export function FamilyProvider({ children }) {
         body: JSON.stringify(report)
       });
       showToast(
-        'Danke für deine Meldung',
-        'Die Problemdetails wurden sicher im Familienplaner gespeichert.',
+        i18n.t('context:toasts.problemReportSaved.title'),
+        i18n.t('context:toasts.problemReportSaved.message'),
         'success'
       );
       return data.report;
-    }, 'Meldung konnte nicht gespeichert werden'), [
+    }, i18n.t('context:errors.reportSaveFailed')), [
     showToast,
     withActionError
   ]);
@@ -2788,7 +3044,7 @@ export function FamilyProvider({ children }) {
     withActionError(async () => {
       const data = await apiRequest('/api/problem-reports');
       return data.reports || [];
-    }, 'Problemmeldungen konnten nicht geladen werden'), [withActionError]);
+    }, i18n.t('context:errors.problemReportsLoadFailed')), [withActionError]);
 
   const updateProblemReport = useCallback((reportId, status) =>
     withActionError(async () => {
@@ -2797,7 +3053,7 @@ export function FamilyProvider({ children }) {
         body: JSON.stringify({ status })
       });
       return data.report;
-    }, 'Meldungsstatus konnte nicht geändert werden'), [withActionError]);
+    }, i18n.t('context:errors.reportStatusChangeFailed')), [withActionError]);
 
   const addDashboardLink = useCallback(link =>
     withActionError(async () => {
@@ -2806,12 +3062,14 @@ export function FamilyProvider({ children }) {
         ...link
       });
       showToast(
-        'Dashboard erweitert',
-        `"${created.title}" ist jetzt beim Kinderprofil sichtbar.`,
+        i18n.t('context:toasts.dashboardLinkAdded.title'),
+        i18n.t('context:toasts.dashboardLinkAdded.message', {
+          title: created.title
+        }),
         'success'
       );
       return created;
-    }, 'Medien-Widget konnte nicht gespeichert werden'), [
+    }, i18n.t('context:errors.mediaWidgetSaveFailed')), [
       createResource,
       showToast,
       withActionError
@@ -2821,8 +3079,8 @@ export function FamilyProvider({ children }) {
     withActionError(async () => {
       await removeResource('dashboardLinks', linkId);
       showToast(
-        'Dashboard-Link entfernt',
-        'Die Kachel wurde vom Kinderprofil genommen.',
+        i18n.t('context:toasts.dashboardLinkRemoved.title'),
+        i18n.t('context:toasts.dashboardLinkRemoved.message'),
         'info'
       );
       return true;
@@ -2845,12 +3103,12 @@ export function FamilyProvider({ children }) {
         ...record
       });
       showToast(
-        'Gespeichert',
-        'Der Familienalltag wurde aktualisiert.',
+        i18n.t('context:toasts.familyLifeSaved.title'),
+        i18n.t('context:toasts.familyLifeSaved.message'),
         'success'
       );
       return created;
-    }, 'Eintrag konnte nicht gespeichert werden'), [
+    }, i18n.t('context:errors.entrySaveFailed')), [
       createResource,
       showToast,
       withActionError
@@ -2859,9 +3117,13 @@ export function FamilyProvider({ children }) {
   const updateFamilyLifeRecord = useCallback((type, id, changes) =>
     withActionError(async () => {
       const updated = await patchResource(type, id, changes);
-      showToast('Aktualisiert', 'Die Änderung ist gespeichert.', 'success');
+      showToast(
+        i18n.t('context:toasts.familyLifeUpdated.title'),
+        i18n.t('context:shared.changeSaved'),
+        'success'
+      );
       return updated;
-    }, 'Eintrag konnte nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.entryUpdateFailed')), [
       patchResource,
       showToast,
       withActionError
@@ -2870,9 +3132,13 @@ export function FamilyProvider({ children }) {
   const deleteFamilyLifeRecord = useCallback((type, id) =>
     withActionError(async () => {
       await removeResource(type, id);
-      showToast('Entfernt', 'Der Eintrag wurde gelöscht.', 'info');
+      showToast(
+        i18n.t('context:toasts.familyLifeRemoved.title'),
+        i18n.t('context:toasts.familyLifeRemoved.message'),
+        'info'
+      );
       return true;
-    }, 'Eintrag konnte nicht gelöscht werden'), [
+    }, i18n.t('context:errors.entryDeleteFailed')), [
       removeResource,
       showToast,
       withActionError
@@ -2888,13 +3154,13 @@ export function FamilyProvider({ children }) {
       versionRef.current = Number(data.version || versionRef.current);
       if (data.completedToday) {
         showToast(
-          'Routine geschafft!',
-          'Alle Schritte leuchten – großartig gemacht.',
+          i18n.t('context:toasts.routineCompleted.title'),
+          i18n.t('context:toasts.routineCompleted.message'),
           'star'
         );
       }
       return data.record;
-    }, 'Routine konnte nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.routineUpdateFailed')), [
       showToast,
       updateResourceState,
       withActionError
@@ -2908,7 +3174,7 @@ export function FamilyProvider({ children }) {
       updateResourceState('schoolItems', data.record);
       versionRef.current = Number(data.version || versionRef.current);
       return data.record;
-    }, 'Schuleintrag konnte nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.schoolItemUpdateFailed')), [
       updateResourceState,
       withActionError
     ]);
@@ -2921,9 +3187,13 @@ export function FamilyProvider({ children }) {
       });
       updateResourceState('familyPolls', data.record);
       versionRef.current = Number(data.version || versionRef.current);
-      showToast('Stimme gezählt', 'Deine Familie sieht jetzt deine Wahl.', 'success');
+      showToast(
+        i18n.t('context:toasts.voteCounted.title'),
+        i18n.t('context:toasts.voteCounted.message'),
+        'success'
+      );
       return data.record;
-    }, 'Abstimmung konnte nicht gespeichert werden'), [
+    }, i18n.t('context:errors.pollSaveFailed')), [
       showToast,
       updateResourceState,
       withActionError
@@ -2941,7 +3211,7 @@ export function FamilyProvider({ children }) {
       updateResourceState('familyMissions', data.record);
       versionRef.current = Number(data.version || versionRef.current);
       return data.record;
-    }, 'Familienmission konnte nicht aktualisiert werden'), [
+    }, i18n.t('context:errors.familyMissionUpdateFailed')), [
       updateResourceState,
       withActionError
     ]);
@@ -2960,12 +3230,16 @@ export function FamilyProvider({ children }) {
       );
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        data.transaction.starCost ? 'Sterne umgewandelt' : 'Taschengeld gebucht',
-        `${data.member.name}s Familienkonto ist aktuell.`,
+        data.transaction.starCost
+          ? i18n.t('context:toasts.starsConverted.title')
+          : i18n.t('context:toasts.pocketMoneyBooked.title'),
+        i18n.t('context:toasts.pocketMoneyBooked.message', {
+          name: data.member.name
+        }),
         'success'
       );
       return data.transaction;
-    }, 'Taschengeld konnte nicht gebucht werden'), [
+    }, i18n.t('context:errors.pocketMoneyBookFailed')), [
       showToast,
       updateResourceState,
       withActionError
@@ -2980,12 +3254,12 @@ export function FamilyProvider({ children }) {
       updateResourceState('kidProfiles', data.record);
       versionRef.current = Number(data.version || versionRef.current);
       showToast(
-        'Deine Welt ist bereit',
-        'Dein Begleiter reist jetzt mit dir.',
+        i18n.t('context:toasts.kidWorldReady.title'),
+        i18n.t('context:toasts.kidWorldReady.message'),
         'star'
       );
       return data.record;
-    }, 'Kinderwelt konnte nicht gespeichert werden'), [
+    }, i18n.t('context:errors.kidWorldSaveFailed')), [
       showToast,
       updateResourceState,
       withActionError

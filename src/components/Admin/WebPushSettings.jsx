@@ -22,9 +22,11 @@ import {
   Trophy,
   Vote
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { NOTIFICATION_EVENT_DEFINITIONS } from '../../../shared/notificationEvents';
 import { isCapacitorNative } from '../../utils/apiConfig';
+import { formatDate } from '../../utils/formatting';
 
 const RULE_ICONS = {
   groupChat: MessageCircleMore,
@@ -61,6 +63,8 @@ const NATIVE_ACTIVATION_LABELS = {
 };
 
 export default function WebPushSettings() {
+  const { t } = useTranslation('admin');
+  const { t: tShared } = useTranslation('shared');
   const {
     activeMember,
     webPush,
@@ -164,21 +168,21 @@ export default function WebPushSettings() {
         <div className="webpush-mark"><BellRing size={23} /></div>
         <div>
           <span className="admin-section-kicker">
-            {isNative ? 'Direkt von Android' : 'Ohne Zusatz-App'}
+            {isNative ? t('webPush.kickerNative') : t('webPush.kickerWeb')}
           </span>
           <h2>
             {isNative
-              ? 'Android-App-Benachrichtigungen'
-              : 'Browser-Benachrichtigungen'}
+              ? t('webPush.titleNative')
+              : t('webPush.titleWeb')}
           </h2>
           <p>
             {isNative
-              ? 'Die LX App meldet dieses Android-Gerät einmal für ein Profil an. Danach kommen Meldungen auch bei geschlossener App.'
-              : 'Jedes Handy oder Tablet meldet sich einmal für ein Familienprofil an. Schlüssel und technische Daten bleiben unsichtbar.'}
+              ? t('webPush.introNative')
+              : t('webPush.introWeb')}
           </p>
         </div>
         {status === 'connected' && (
-          <span className="webpush-connected"><Check size={14} /> Dieses Gerät ist an</span>
+          <span className="webpush-connected"><Check size={14} /> {t('webPush.deviceConnected')}</span>
         )}
       </header>
 
@@ -186,16 +190,9 @@ export default function WebPushSettings() {
         <div className="webpush-prerequisite">
           <LockKeyhole size={24} />
           <div>
-            <strong>Firebase-Verbindung fehlt noch</strong>
-            <p>
-              Der LX-Server besitzt noch keinen privaten Firebase-Dienstschlüssel.
-              Deshalb kann er Android momentan nicht erreichen.
-            </p>
-            <small>
-              Lege den Dienstschlüssel ausschließlich im Datenordner des Servers
-              ab und installiere danach die mit demselben Firebase-Projekt gebaute
-              LX App. Der Schlüssel gehört niemals ins Git-Repository.
-            </small>
+            <strong>{t('webPush.serverMissing.title')}</strong>
+            <p>{t('webPush.serverMissing.description')}</p>
+            <small>{t('webPush.serverMissing.hint')}</small>
           </div>
         </div>
       )}
@@ -204,8 +201,8 @@ export default function WebPushSettings() {
         <div className="webpush-prerequisite">
           <RefreshCw className="spin" size={24} />
           <div>
-            <strong>Android-Verbindung wird geprüft</strong>
-            <p>LX fragt den aktuellen Firebase-Status beim Familienserver ab.</p>
+            <strong>{t('webPush.checking.title')}</strong>
+            <p>{t('webPush.checking.description')}</p>
           </div>
         </div>
       )}
@@ -214,10 +211,9 @@ export default function WebPushSettings() {
         <div className="webpush-prerequisite denied">
           <RefreshCw size={24} />
           <div>
-            <strong>Status konnte nicht geprüft werden</strong>
+            <strong>{t('webPush.statusError.title')}</strong>
             <p>
-              {push.statusError ||
-                'Die App hat noch keine Antwort vom Familienserver erhalten.'}
+              {push.statusError || t('webPush.statusError.fallback')}
             </p>
             <button
               type="button"
@@ -225,7 +221,7 @@ export default function WebPushSettings() {
               disabled={Boolean(push.busy || push.loading)}
             >
               <RefreshCw size={16} />
-              Erneut prüfen
+              {t('webPush.statusError.retry')}
             </button>
           </div>
         </div>
@@ -237,14 +233,14 @@ export default function WebPushSettings() {
           <div>
             <strong>
               {webPush.reason === 'secure-context'
-                ? 'HTTPS fehlt – deshalb kommt kein Hintergrund-Push'
-                : 'Noch ein sicherer Schritt'}
+                ? t('webPush.unavailable.titleSecureContext')
+                : t('webPush.unavailable.titleGeneric')}
             </strong>
             <p>{webPush.message}</p>
             <small>
               {isNative
-                ? 'Installiere die aktuelle LX Android-App, um native Benachrichtigungen zu verwenden.'
-                : 'Öffne den Planer über eine vertrauenswürdige HTTPS-Adresse, füge ihn auf Android zum Startbildschirm hinzu und aktiviere danach dieses Gerät.'}
+                ? t('webPush.unavailable.hintNative')
+                : t('webPush.unavailable.hintWeb')}
             </small>
           </div>
         </div>
@@ -254,11 +250,11 @@ export default function WebPushSettings() {
         <div className="webpush-prerequisite denied">
           <BellRing size={24} />
           <div>
-            <strong>Im Browser ausgeschaltet</strong>
+            <strong>{t('webPush.denied.title')}</strong>
             <p>
               {isNative
-                ? 'Erlaube Benachrichtigungen unter Android → Apps → LX Family Planner → Benachrichtigungen.'
-                : 'Erlaube Benachrichtigungen in den Website-Einstellungen deines Browsers und öffne den Planer danach erneut.'}
+                ? t('webPush.denied.bodyNative')
+                : t('webPush.denied.bodyWeb')}
             </p>
           </div>
         </div>
@@ -270,25 +266,29 @@ export default function WebPushSettings() {
             <div>
               <Smartphone size={25} />
               <span>
-                <strong>Dieses Gerät für {activeMember?.name} anmelden</strong>
+                <strong>{t('webPush.ready.title', { name: activeMember?.name })}</strong>
                 <small>
                   {isNative
-                    ? 'Ein Klick – die Android-Abfrage erscheint nur einmal.'
-                    : 'Ein Klick – kein Token und keine zusätzliche App.'}
+                    ? t('webPush.ready.hintNative')
+                    : t('webPush.ready.hintWeb')}
                 </small>
               </span>
             </div>
             <button type="button" onClick={activate} disabled={Boolean(push.busy)}>
               <BellRing size={17} />
               {push.busy === 'enable'
-                ? NATIVE_ACTIVATION_LABELS[push.activationStep] ||
-                  'Wird verbunden …'
-                : 'Benachrichtigungen einschalten'}
+                ? (NATIVE_ACTIVATION_LABELS[push.activationStep]
+                    ? t(`webPush.activationSteps.${push.activationStep}`, {
+                        defaultValue:
+                          NATIVE_ACTIVATION_LABELS[push.activationStep]
+                      })
+                    : t('webPush.ready.connecting'))
+                : t('webPush.ready.enable')}
             </button>
           </div>
           {isNative && push.activationError && (
             <div className="webpush-activation-error" role="alert">
-              <strong>Verbindung nicht abgeschlossen</strong>
+              <strong>{t('webPush.activationError')}</strong>
               <span>{push.activationError}</span>
             </div>
           )}
@@ -300,10 +300,10 @@ export default function WebPushSettings() {
           <div className="webpush-background-note">
             <Check size={16} />
             <span>
-              <strong>Bereit für Hintergrund-Push</strong>
+              <strong>{t('webPush.connectedNote.title')}</strong>
               {isNative
-                ? 'Android zeigt Familienmeldungen im Systembereich und auf Wunsch auf dem Sperrbildschirm – auch wenn LX geschlossen ist.'
-                : 'Für die zuverlässigste Zustellung auf Android den Planer über „Zum Startbildschirm hinzufügen“ installieren und Benachrichtigungen in den Android-App-Einstellungen erlauben.'}
+                ? t('webPush.connectedNote.bodyNative')
+                : t('webPush.connectedNote.bodyWeb')}
             </span>
           </div>
           <div className="webpush-rule-grid">
@@ -319,8 +319,16 @@ export default function WebPushSettings() {
                 >
                   <span><Icon size={18} /></span>
                   <span>
-                    <strong>{rule.title}</strong>
-                    <small>{rule.description}</small>
+                    <strong>
+                      {tShared(`events.${rule.key}.title`, {
+                        defaultValue: rule.title
+                      })}
+                    </strong>
+                    <small>
+                      {tShared(`events.${rule.key}.description`, {
+                        defaultValue: rule.description
+                      })}
+                    </small>
                   </span>
                   <i>{preferences[rule.key] ? <Check size={13} /> : null}</i>
                 </button>
@@ -335,8 +343,8 @@ export default function WebPushSettings() {
               onChange={() => toggle('showPreviews')}
             />
             <span>
-              <strong>Details auf dem Sperrbildschirm zeigen</strong>
-              Ausgeschaltet bleiben Chats, Aufgaben und Termine privat.
+              <strong>{t('webPush.preview.title')}</strong>
+              {t('webPush.preview.hint')}
             </span>
           </label>
 
@@ -348,7 +356,9 @@ export default function WebPushSettings() {
               onClick={() => updatePushPreferences(preferences)}
             >
               <Check size={16} />
-              {push.busy === 'save' ? 'Speichert …' : 'Auswahl speichern'}
+              {push.busy === 'save'
+                ? t('webPush.actions.saving')
+                : t('webPush.actions.save')}
             </button>
             <button
               type="button"
@@ -356,7 +366,9 @@ export default function WebPushSettings() {
               onClick={testPush}
             >
               <Send size={16} />
-              {push.busy === 'test' ? 'Sendet …' : 'Test senden'}
+              {push.busy === 'test'
+                ? t('webPush.actions.sending')
+                : t('webPush.actions.sendTest')}
             </button>
             <button
               type="button"
@@ -366,7 +378,7 @@ export default function WebPushSettings() {
                 if (await disablePush()) await loadDevices();
               }}
             >
-              <BellRing size={16} /> Für dieses Profil ausschalten
+              <BellRing size={16} /> {t('webPush.actions.disable')}
             </button>
           </div>
         </>
@@ -376,12 +388,14 @@ export default function WebPushSettings() {
         <div className="webpush-device-title">
           <span>
             <Smartphone size={18} />
-            <strong>Familiengeräte</strong>
+            <strong>{t('webPush.devices.title')}</strong>
           </span>
           <small>
             {loadingDevices
-              ? 'Wird geladen …'
-              : `${familyDevices.length} angemeldet`}
+              ? t('common:status.loading')
+              : t('webPush.devices.registeredCount', {
+                  count: familyDevices.length
+                })}
           </small>
         </div>
         <div className="webpush-device-list">
@@ -390,24 +404,28 @@ export default function WebPushSettings() {
               <span className="webpush-device-icon"><Smartphone size={18} /></span>
               <div>
                 <strong>{device.deviceName}</strong>
-                <small>{
-                  device.transport === 'android' ? 'Android-App' : 'Browser'
-                } · {device.memberName} · zuletzt aktualisiert {
-                  new Date(device.updatedAt).toLocaleDateString('de-DE')
-                }</small>
+                <small>{t('webPush.devices.meta', {
+                  transport: device.transport === 'android'
+                    ? t('webPush.devices.transportAndroid')
+                    : t('webPush.devices.transportBrowser'),
+                  member: device.memberName,
+                  date: formatDate(device.updatedAt)
+                })}</small>
               </div>
               <button
                 type="button"
-                aria-label={`${device.deviceName} entfernen`}
+                aria-label={t('webPush.devices.removeDevice', { name: device.deviceName })}
                 onClick={() => remove(device.id)}
               >
-                {confirmRemove === device.id ? 'Bestätigen' : <Trash2 size={16} />}
+                {confirmRemove === device.id
+                  ? t('common:actions.confirm')
+                  : <Trash2 size={16} />}
               </button>
             </article>
           ))}
           {!loadingDevices && !familyDevices.length && (
             <div className="admin-inline-empty">
-              <Smartphone size={18} /> Noch kein Familiengerät angemeldet.
+              <Smartphone size={18} /> {t('webPush.devices.empty')}
             </div>
           )}
         </div>

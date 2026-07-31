@@ -9,15 +9,17 @@ import {
   ShieldCheck,
   X
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 
 const CATEGORIES = [
-  { id: 'problem', label: 'Etwas funktioniert nicht', icon: Bug },
-  { id: 'content', label: 'Inhalt stimmt nicht', icon: MessageSquareText },
-  { id: 'idea', label: 'Ich habe eine Idee', icon: Lightbulb }
+  { id: 'problem', icon: Bug },
+  { id: 'content', icon: MessageSquareText },
+  { id: 'idea', icon: Lightbulb }
 ];
 
 export default function ProblemReportButton() {
+  const { t } = useTranslation('chrome');
   const {
     activeTab,
     activeMember,
@@ -73,12 +75,12 @@ export default function ProblemReportButton() {
       <button
         type="button"
         className="problem-report-launcher"
-        aria-label="Problem melden"
-        title="Problem melden"
+        aria-label={t('problemReport.launcher')}
+        title={t('problemReport.launcher')}
         onClick={() => setOpen(true)}
       >
         <Bug size={16} />
-        <span>Problem melden</span>
+        <span>{t('problemReport.launcher')}</span>
       </button>
       {open && createPortal(
         <div className="modal-backdrop problem-report-backdrop" onClick={close}>
@@ -92,14 +94,14 @@ export default function ProblemReportButton() {
             <header>
               <span className="problem-report-icon"><Bug size={22} /></span>
               <span>
-                <small>Direkter Draht</small>
-                <h2 id="problem-report-title">Problem melden</h2>
+                <small>{t('problemReport.kicker')}</small>
+                <h2 id="problem-report-title">{t('problemReport.launcher')}</h2>
               </span>
               <button
                 type="button"
                 className="icon-circle-btn"
                 onClick={close}
-                aria-label="Meldung schließen"
+                aria-label={t('problemReport.close')}
               >
                 <X size={18} />
               </button>
@@ -108,12 +110,11 @@ export default function ProblemReportButton() {
             {sent ? (
               <div className="problem-report-success">
                 <CheckCircle2 size={42} />
-                <h3>Danke, ist angekommen.</h3>
+                <h3>{t('problemReport.success.title')}</h3>
                 <p>
-                  Die Meldung liegt jetzt mit Version und Bereich in der
-                  Elternzentrale. Zugangsdaten werden nicht mitgesendet.
+                  {t('problemReport.success.body')}
                 </p>
-                <button type="button" onClick={close}>Fertig</button>
+                <button type="button" onClick={close}>{t('problemReport.success.done')}</button>
               </div>
             ) : (
               <form onSubmit={submit}>
@@ -128,45 +129,44 @@ export default function ProblemReportButton() {
                         onClick={() => setCategory(option.id)}
                       >
                         <Icon size={17} />
-                        {option.label}
+                        {t(`problemReport.categories.${option.id}`)}
                       </button>
                     );
                   })}
                 </div>
                 <label>
-                  <span>Was ist kurz gesagt passiert?</span>
+                  <span>{t('problemReport.titleLabel')}</span>
                   <input
                     value={title}
                     onChange={event => setTitle(event.target.value)}
                     maxLength={120}
-                    placeholder="z. B. Termin lässt sich nicht löschen"
+                    placeholder={t('problemReport.titlePlaceholder')}
                     required
                     autoFocus
                   />
                 </label>
                 <label>
-                  <span>Wie können wir es nachvollziehen?</span>
+                  <span>{t('problemReport.descriptionLabel')}</span>
                   <textarea
                     value={description}
                     onChange={event => setDescription(event.target.value)}
                     maxLength={4000}
                     rows={5}
-                    placeholder="Was hast du gemacht, was sollte passieren und was ist stattdessen passiert?"
+                    placeholder={t('problemReport.descriptionPlaceholder')}
                     required
                   />
                 </label>
                 <div className="problem-report-meta">
                   <ShieldCheck size={15} />
                   <span>
-                    Gespeichert werden Bereich, Bildschirmgröße, Browsertyp
-                    und Version {appVersion}. Keine Passwörter oder Tokens.
+                    {t('problemReport.meta', { version: appVersion })}
                   </span>
                 </div>
                 <button className="problem-report-submit" disabled={busy}>
                   {busy
                     ? <LoaderCircle className="spin" size={17} />
                     : <Bug size={17} />}
-                  Meldung speichern
+                  {t('problemReport.submit')}
                 </button>
               </form>
             )}

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Check,
   ChevronDown,
@@ -24,6 +25,7 @@ export default function DashboardCustomizer({
   toggleWidget,
   widgets
 }) {
+  const { t } = useTranslation('dashboard');
   useEffect(() => {
     if (!isOpen) return undefined;
     const onKeyDown = event => {
@@ -58,20 +60,23 @@ export default function DashboardCustomizer({
               : <LayoutDashboard size={22} />}
           </span>
           <div>
-            <span className="dashboard-studio-kicker">Ansichtsatelier</span>
+            <span className="dashboard-studio-kicker">{t('customizer.kicker')}</span>
             <h2 id={`${mode}-dashboard-studio-title`}>
-              {isTablet ? 'Tablet-Kacheln' : 'Dein Überblick'}
+              {isTablet
+                ? t('customizer.tabletTitle')
+                : t('customizer.personalTitle')}
             </h2>
             <p>
-              Diese Auswahl gilt nur für {profileName || 'dieses Profil'} auf
-              diesem Gerät.
+              {t('customizer.scopeNote', {
+                name: profileName || t('customizer.thisProfile')
+              })}
             </p>
           </div>
           <button
             type="button"
             className="dashboard-studio-close"
             onClick={onClose}
-            aria-label="Ansichtsatelier schließen"
+            aria-label={t('customizer.closeAria')}
           >
             <X size={19} />
           </button>
@@ -79,17 +84,17 @@ export default function DashboardCustomizer({
 
         <div className="dashboard-density-picker">
           <div>
-            <strong>Kachelabstand</strong>
-            <span>Bequem für Touch oder kompakt für mehr Überblick.</span>
+            <strong>{t('customizer.density.title')}</strong>
+            <span>{t('customizer.density.hint')}</span>
           </div>
-          <div role="group" aria-label="Kachelabstand auswählen">
+          <div role="group" aria-label={t('customizer.density.groupAria')}>
             <button
               type="button"
               className={layout.density === 'comfortable' ? 'active' : ''}
               onClick={() => setDensity('comfortable')}
               aria-pressed={layout.density === 'comfortable'}
             >
-              Bequem
+              {t('customizer.density.comfortable')}
             </button>
             <button
               type="button"
@@ -97,7 +102,7 @@ export default function DashboardCustomizer({
               onClick={() => setDensity('compact')}
               aria-pressed={layout.density === 'compact'}
             >
-              Kompakt
+              {t('customizer.density.compact')}
             </button>
           </div>
         </div>
@@ -129,7 +134,7 @@ export default function DashboardCustomizer({
                     type="button"
                     onClick={() => moveWidget(widgetId, 'up')}
                     disabled={index === 0}
-                    aria-label={`${widget.label} nach oben`}
+                    aria-label={t('customizer.moveUp', { label: widget.label })}
                   >
                     <ChevronUp size={17} />
                   </button>
@@ -137,7 +142,7 @@ export default function DashboardCustomizer({
                     type="button"
                     onClick={() => moveWidget(widgetId, 'down')}
                     disabled={index === layout.order.length - 1}
-                    aria-label={`${widget.label} nach unten`}
+                    aria-label={t('customizer.moveDown', { label: widget.label })}
                   >
                     <ChevronDown size={17} />
                   </button>
@@ -151,11 +156,13 @@ export default function DashboardCustomizer({
                   title={
                     canHide
                       ? undefined
-                      : 'Mindestens eine Kachel muss sichtbar bleiben.'
+                      : t('customizer.minVisible')
                   }
                 >
                   {isHidden ? <EyeOff size={17} /> : <Eye size={17} />}
-                  {isHidden ? 'Aus' : 'An'}
+                  {isHidden
+                    ? t('customizer.visibilityOff')
+                    : t('customizer.visibilityOn')}
                 </button>
               </article>
             );
@@ -168,14 +175,14 @@ export default function DashboardCustomizer({
             className="dashboard-studio-reset"
             onClick={resetLayout}
           >
-            <RotateCcw size={16} /> Standard wiederherstellen
+            <RotateCcw size={16} /> {t('customizer.reset')}
           </button>
           <button
             type="button"
             className="dashboard-studio-done"
             onClick={onClose}
           >
-            <Check size={17} /> Fertig
+            <Check size={17} /> {t('customizer.done')}
           </button>
         </footer>
       </section>

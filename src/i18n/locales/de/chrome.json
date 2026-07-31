@@ -1,0 +1,151 @@
+{
+  "app": {
+    "loading": "Dein Familienraum wird vorbereitet …"
+  },
+  "navigation": {
+    "myArea": "Mein Bereich ({{name}})",
+    "myAreaFallback": "Start",
+    "chat": "Familien-Chat & PM",
+    "calendar": "Kalender",
+    "trash": "Müllkalender",
+    "shopping": "Bring! Einkauf",
+    "meals": "Essensplan",
+    "tasks": "Aufgaben & Sterne",
+    "familyLife": "Familienreise",
+    "board": "Pinnwand",
+    "childDashboard": "Mein Abenteuer",
+    "childTasks": "Missionen & Sterne",
+    "childFamilyLife": "Meine Reise",
+    "childCalendar": "Familienkalender",
+    "childChat": "Familienfunk",
+    "petDashboard": "Für {{name}}",
+    "petDashboardFallback": "unser Tier",
+    "petCalendar": "Tierarzt & Termine",
+    "cloud": "Family Cloud",
+    "mail": "Familienpost",
+    "admin": "Elternzentrale",
+    "familyTree": "Stammbaum",
+    "familyTreeTitle": "Stammbaum & Familien verknüpfen"
+  },
+  "header": {
+    "tagline": "Unser Familien-Zuhause",
+    "householdSwitched": "🏠 Haushalt gewechselt",
+    "householdViewFamily": "Ansicht: Unser Familien-Zuhause",
+    "householdViewGrandparents": "Ansicht: Zuhause von Oma & Opa",
+    "planLocationAria": "Planungsort auswählen",
+    "planLocation": "Planungsort",
+    "ourHome": "Unser Zuhause",
+    "grandparentsHome": "Zuhause Oma & Opa",
+    "manageFamily": "Familie verwalten",
+    "pet": "Haustier",
+    "serverConfigTitle": "Server-Verbindung / IP einstellen",
+    "logoutTitle": "Familie wechseln / Abmelden",
+    "themePicker": {
+      "openPet": "Pfotenwelt wählen",
+      "openChild": "Meine Themenwelt wählen",
+      "openAdult": "Themenwelt wählen",
+      "kicker": "Designwelt",
+      "titlePet": "{{name}}s Pfotenwelt",
+      "petNameFallback": "Deine Fellnase",
+      "titleChild": "Deine Themenwelt",
+      "titleAdult": "Dein Zuhause, dein Stil",
+      "descriptionPet": "Wähle eine ruhige Welt für das Haustierprofil.",
+      "descriptionChild": "Such dir deine Lieblingswelt aus.",
+      "descriptionAdult": "Ruhig oder laut – die Auswahl wird im Profil gespeichert.",
+      "close": "Designauswahl schließen"
+    },
+    "tabletMode": {
+      "exitTitle": "Tablet Mode verlassen",
+      "enterTitle": "Tablet Mode öffnen",
+      "exit": "Tablet verlassen",
+      "enter": "Tablet Mode"
+    },
+    "themes": {
+      "adult": {
+        "light": { "name": "Waldruhe", "description": "warm & natürlich" },
+        "ocean": { "name": "Küstenruhe", "description": "luftig & entspannt" },
+        "midnight": { "name": "Nachtlounge", "description": "ruhig & dunkel" },
+        "rock": { "name": "Backstage", "description": "rockig & warm" },
+        "festival": { "name": "Neon Nacht", "description": "fett & farbig" }
+      },
+      "child": {
+        "space": { "name": "Raketenbasis", "description": "Raketen & Planeten" },
+        "unicorn": { "name": "Einhornland", "description": "Regenbogen & Magie" },
+        "fairy": { "name": "Feenzauber", "description": "Feen & Zauberwald" },
+        "dino": { "name": "Dinowelt", "description": "Dinos & Dschungel" },
+        "sunshine": { "name": "Sonneninsel", "description": "Sommer & gute Laune" },
+        "adventure": { "name": "Helden-Camp", "description": "Helden & Blitze" }
+      },
+      "pet": {
+        "light": { "name": "Grüne Wiese", "description": "ruhig & natürlich" },
+        "ocean": { "name": "Küstenpfoten", "description": "frisch & entspannt" },
+        "rock": { "name": "Wilde Schnauze", "description": "kräftig & verspielt" },
+        "midnight": { "name": "Nachtpfote", "description": "sanft & dunkel" }
+      }
+    }
+  },
+  "appUpdate": {
+    "dismiss": "Update später installieren",
+    "source": "Direkt von eurem LX-Server",
+    "title": "Version {{version}} ist da",
+    "body": "LX kann das Update jetzt laden und anschließend direkt den Android-Installationsdialog öffnen.",
+    "downloading": "Update wird sicher geladen",
+    "permissionMessage": "Erlaube LX auf der geöffneten Android-Seite einmalig App-Updates. Kehre danach zurück und tippe erneut auf „Jetzt aktualisieren“.",
+    "installerMessage": "Android zeigt jetzt den Installationsdialog. Deine Daten und Einstellungen bleiben erhalten.",
+    "errorMessage": "Das Update konnte nicht geladen werden. Bitte versuche es noch einmal.",
+    "checkPermission": "Berechtigung prüfen",
+    "updateNow": "Jetzt aktualisieren",
+    "later": "Später"
+  },
+  "releaseNotes": {
+    "close": "Neuigkeiten schließen",
+    "version": "Version {{version}}",
+    "confirm": "Alles klar, los geht’s"
+  },
+  "problemReport": {
+    "launcher": "Problem melden",
+    "kicker": "Direkter Draht",
+    "close": "Meldung schließen",
+    "categories": {
+      "problem": "Etwas funktioniert nicht",
+      "content": "Inhalt stimmt nicht",
+      "idea": "Ich habe eine Idee"
+    },
+    "success": {
+      "title": "Danke, ist angekommen.",
+      "body": "Die Meldung liegt jetzt mit Version und Bereich in der Elternzentrale. Zugangsdaten werden nicht mitgesendet.",
+      "done": "Fertig"
+    },
+    "titleLabel": "Was ist kurz gesagt passiert?",
+    "titlePlaceholder": "z. B. Termin lässt sich nicht löschen",
+    "descriptionLabel": "Wie können wir es nachvollziehen?",
+    "descriptionPlaceholder": "Was hast du gemacht, was sollte passieren und was ist stattdessen passiert?",
+    "meta": "Gespeichert werden Bereich, Bildschirmgröße, Browsertyp und Version {{version}}. Keine Passwörter oder Tokens.",
+    "submit": "Meldung speichern"
+  },
+  "planLocationHelp": {
+    "trigger": "Wofür?",
+    "title": "Zwei Zuhause, ein Familienplan",
+    "body": "Praktisch, wenn Oma und Opa kein eigenes Familienkonto haben: Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand werden für ihr Zuhause getrennt geführt.",
+    "hint": "Ein- oder ausblenden: Zahnrad → Familieneinstellungen."
+  },
+  "serverConfig": {
+    "kicker": "Verbindung",
+    "title": "Dein Familien-Server",
+    "subtitle": "Für Zuhause, NAS oder eure eigene Domain.",
+    "close": "Server-Einstellungen schließen",
+    "urlLabel": "Server-Adresse",
+    "urlPlaceholder": "https://familie.example.de",
+    "hint": "Im Heimnetz kannst du zum Beispiel <code>192.168.178.50:3001</code> eintragen. Außerhalb des Heimnetzes sollte die Adresse immer HTTPS verwenden.",
+    "connected": "Verbindung steht · LX Family Planner {{version}}",
+    "testing": "Verbindung wird geprüft …",
+    "test": "Verbindung testen",
+    "errors": {
+      "emptyUrl": "Bitte gib eine Server-Adresse ein.",
+      "badStatus": "Der Server antwortet mit Status {{status}}.",
+      "notLxServer": "Die Adresse gehört nicht zu einem LX-Family-Server.",
+      "noConnection": "Keine Verbindung möglich. Prüfe IP, Domain und Netzwerk.",
+      "invalidUrl": "Die Server-Adresse ist nicht gültig."
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Bell,
   BellOff,
@@ -14,6 +15,7 @@ import {
   TRASH_DEFAULT_REMINDERS
 } from '../../../shared/eventReminders.js';
 import { useFamily } from '../../context/FamilyContext';
+import { formatDate } from '../../utils/formatting';
 import { parseICSContent } from '../../utils/icsUtils';
 import EventReminderDialog from './EventReminderDialog';
 import EventReminderPicker from './EventReminderPicker';
@@ -103,6 +105,8 @@ function localTrashDate(date) {
 }
 
 export default function TrashCalendarView() {
+  const { t } = useTranslation('calendar');
+  const { t: tShared } = useTranslation('shared');
   const {
     showToast,
     trashEvents,
@@ -149,8 +153,8 @@ export default function TrashCalendarView() {
       const parsed = parseICSContent(loadEvent.target.result);
       if (!parsed.length) {
         showToast(
-          'Import nicht möglich',
-          'In dieser Datei wurden keine Mülltermine gefunden.',
+          t('trash.toast.importFailedTitle'),
+          t('trash.toast.importFailedBody'),
           'warning'
         );
         return;
@@ -166,8 +170,8 @@ export default function TrashCalendarView() {
       const result = await addTrashEvents(importedTrash);
       if (!result) return;
       showToast(
-        'Müllkalender importiert',
-        `${importedTrash.length} Abholtermine wurden übernommen und erinnern standardmäßig einen Tag vorher.`,
+        t('trash.toast.importSuccessTitle'),
+        t('trash.toast.importSuccessBody', { count: importedTrash.length }),
         'success'
       );
       event.target.value = '';
@@ -187,8 +191,10 @@ export default function TrashCalendarView() {
     if (!result) return;
     closeAddDialog();
     showToast(
-      'Mülltermin eingetragen',
-      `Die Abholung am ${localTrashDate(newDate).toLocaleDateString('de-DE')} ist gespeichert.`,
+      t('trash.toast.addedTitle'),
+      t('trash.toast.addedBody', {
+        date: formatDate(localTrashDate(newDate))
+      }),
       'success'
     );
   };
@@ -197,12 +203,16 @@ export default function TrashCalendarView() {
     const result = await updateTrashEvent(event.id, { reminders });
     if (result) {
       showToast(
-        reminders.length ? 'Erinnerung gespeichert' : 'Erinnerung ausgeschaltet',
         reminders.length
-          ? `LX erinnert ${reminders
-              .map(minutes => formatReminderLead(minutes))
-              .join(', ')}.`
-          : `Für ${event.title} wird keine Erinnerung gesendet.`,
+          ? t('trash.toast.reminderSavedTitle')
+          : t('trash.toast.reminderOffTitle'),
+        reminders.length
+          ? t('trash.toast.reminderSavedBody', {
+              leads: reminders
+                .map(minutes => formatReminderLead(minutes, false, tShared))
+                .join(', ')
+            })
+          : t('trash.toast.reminderOffBody', { title: event.title }),
         'success'
       );
     }
@@ -222,17 +232,14 @@ export default function TrashCalendarView() {
             <Trash2 size={25} />
           </span>
           <div>
-            <h2 className="card-title">Digitaler Müllkalender</h2>
-            <p>
-              Importiere die .ics-Datei eures Entsorgers oder trage eine
-              Abholung selbst ein. LX erinnert standardmäßig am Vortag.
-            </p>
+            <h2 className="card-title">{t('trash.header.title')}</h2>
+            <p>{t('trash.header.description')}</p>
           </div>
         </div>
 
         <div className="trash-calendar-actions">
           <label className="btn-secondary trash-calendar-import">
-            <Upload size={16} /> Müllkalender importieren
+            <Upload size={16} /> {t('trash.header.import')}
             <input
               type="file"
               accept=".ics,text/calendar"
@@ -244,7 +251,7 @@ export default function TrashCalendarView() {
             className="btn-primary"
             onClick={() => setIsAddOpen(true)}
           >
-            <Plus size={16} /> Termin eintragen
+            <Plus size={16} /> {t('trash.header.add')}
           </button>
         </div>
       </section>
@@ -254,10 +261,10 @@ export default function TrashCalendarView() {
           <div className="trash-next-pickup-main">
             <span className="trash-next-pickup-icon">{nextType.icon}</span>
             <div>
-              <span>Nächste Müllabfuhr</span>
+              <span>{t('trash.next.kicker')}</span>
               <h3>{nextPickup.title}</h3>
               <p>
-                {localTrashDate(nextPickup.date).toLocaleDateString('de-DE', {
+                {formatDate(localTrashDate(nextPickup.date), {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long'
@@ -265,15 +272,17 @@ export default function TrashCalendarView() {
               </p>
             </div>
           </div>
-          <div className="trash-next-pickup-callout">Tonne rausstellen</div>
+          <div className="trash-next-pickup-callout">
+            {t('trash.next.callout')}
+          </div>
         </section>
       ) : null}
 
       <section className="card trash-schedule">
         <header>
           <div>
-            <span>Abholplan</span>
-            <h3>Anstehende Termine</h3>
+            <span>{t('trash.schedule.kicker')}</span>
+            <h3>{t('trash.schedule.title')}</h3>
           </div>
           <b>{upcomingTrash.length}</b>
         </header>
@@ -281,8 +290,8 @@ export default function TrashCalendarView() {
         {!upcomingTrash.length ? (
           <div className="trash-schedule-empty">
             <span>🗓️</span>
-            <strong>Noch keine Abholtermine</strong>
-            <p>Lade die .ics-Datei eures Entsorgers hoch.</p>
+            <strong>{t('trash.schedule.emptyTitle')}</strong>
+            <p>{t('trash.schedule.emptyDescription')}</p>
           </div>
         ) : (
           <div className="trash-schedule-list">
@@ -301,7 +310,7 @@ export default function TrashCalendarView() {
                   <div className="trash-schedule-copy">
                     <strong>{item.title}</strong>
                     <span>
-                      {localTrashDate(item.date).toLocaleDateString('de-DE', {
+                      {formatDate(localTrashDate(item.date), {
                         weekday: 'short',
                         day: 'numeric',
                         month: 'short',
@@ -331,9 +340,11 @@ export default function TrashCalendarView() {
                       )}
                       {reminders.length
                         ? reminders
-                            .map(minutes => formatReminderLead(minutes, true))
+                            .map(minutes =>
+                              formatReminderLead(minutes, true, tShared)
+                            )
                             .join(' · ')
-                        : 'Erinnerung aus'}
+                        : t('trash.schedule.reminderOff')}
                     </button>
                   </div>
                   <div className="trash-schedule-row-actions">
@@ -348,8 +359,10 @@ export default function TrashCalendarView() {
                           reminders
                         })
                       }
-                      title="Erinnerung ändern"
-                      aria-label={`Erinnerung für ${item.title} ändern`}
+                      title={t('trash.schedule.editReminderTitle')}
+                      aria-label={t('trash.schedule.editReminderAria', {
+                        title: item.title
+                      })}
                     >
                       <Bell size={16} />
                     </button>
@@ -357,8 +370,10 @@ export default function TrashCalendarView() {
                       type="button"
                       className="icon-circle-btn trash-delete-button"
                       onClick={() => deleteTrashEvent(item.id)}
-                      title="Termin entfernen"
-                      aria-label={`${item.title} entfernen`}
+                      title={t('trash.schedule.removeTitle')}
+                      aria-label={t('trash.schedule.removeAria', {
+                        title: item.title
+                      })}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -379,14 +394,16 @@ export default function TrashCalendarView() {
           >
             <div className="card-header">
               <div>
-                <span className="trash-dialog-eyebrow">Neue Abholung</span>
-                <h2 className="card-title">Mülltermin eintragen</h2>
+                <span className="trash-dialog-eyebrow">
+                  {t('trash.dialog.eyebrow')}
+                </span>
+                <h2 className="card-title">{t('trash.dialog.title')}</h2>
               </div>
               <button
                 type="button"
                 className="icon-circle-btn"
                 onClick={closeAddDialog}
-                aria-label="Schließen"
+                aria-label={t('common:actions.close')}
               >
                 <X size={20} />
               </button>
@@ -394,7 +411,9 @@ export default function TrashCalendarView() {
 
             <form onSubmit={handleAddManual}>
               <div className="form-group">
-                <label className="form-label">Müllart</label>
+                <label className="form-label">
+                  {t('trash.dialog.typeLabel')}
+                </label>
                 <select
                   className="form-select"
                   value={newType}
@@ -415,7 +434,9 @@ export default function TrashCalendarView() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Bezeichnung</label>
+                <label className="form-label">
+                  {t('trash.dialog.nameLabel')}
+                </label>
                 <input
                   type="text"
                   className="form-input"
@@ -426,7 +447,9 @@ export default function TrashCalendarView() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Abholdatum</label>
+                <label className="form-label">
+                  {t('trash.dialog.dateLabel')}
+                </label>
                 <input
                   type="date"
                   className="form-input"
@@ -443,10 +466,10 @@ export default function TrashCalendarView() {
 
               <div className="trash-add-actions">
                 <button type="button" className="btn-secondary" onClick={closeAddDialog}>
-                  Abbrechen
+                  {t('common:actions.cancel')}
                 </button>
                 <button type="submit" className="btn-primary">
-                  Termin speichern
+                  {t('trash.dialog.save')}
                 </button>
               </div>
             </form>

@@ -1,0 +1,152 @@
+{
+  "center": {
+    "trigger": {
+      "unread_one": "{{count}} ungelesene Meldung im Familien-Posteingang",
+      "unread_other": "{{count}} ungelesene Meldungen im Familien-Posteingang",
+      "open": "Familien-Posteingang öffnen",
+      "title": "Familien-Posteingang"
+    },
+    "header": {
+      "kicker": "Familienfunk",
+      "title": "Familien-Posteingang",
+      "subtitle": "Tagesüberblick und Meldungen für {{name}} an einem Ort.",
+      "subtitleFallbackName": "dich",
+      "close": "Meldungen schließen"
+    },
+    "tabs": {
+      "label": "Posteingang auswählen",
+      "today": "Heute",
+      "notifications": "Meldungen"
+    },
+    "markAllRead": "Alle gelesen",
+    "time": {
+      "today": "Heute, {{time}}",
+      "yesterday": "Gestern, {{time}}"
+    },
+    "digest": {
+      "summary_one": "{{count}} Ding braucht heute euren Blick.",
+      "summary_other": "{{count}} Dinge brauchen heute euren Blick.",
+      "allClear": "Heute ist alles angenehm übersichtlich.",
+      "intro": "Ein kurzer Blick genügt – danach kann der Tag beginnen.",
+      "events": {
+        "label": "Termine",
+        "free": "Heute ist frei",
+        "count_one": "{{count}} Termin heute",
+        "count_other": "{{count}} Termine heute",
+        "empty": "Keine Einträge im Kalender"
+      },
+      "tasks": {
+        "label": "Aufgaben",
+        "approvals_one": "{{count}} wartet auf Freigabe",
+        "approvals_other": "{{count}} warten auf Freigabe",
+        "open_one": "{{count}} heute offen",
+        "open_other": "{{count}} heute offen",
+        "done": "Alles geschafft",
+        "empty": "Keine dringende Aufgabe"
+      },
+      "meals": {
+        "label": "Heute essen",
+        "unplanned": "Noch nicht geplant",
+        "empty": "Der Speiseplan hat noch Platz"
+      },
+      "shopping": {
+        "label": "Einkauf",
+        "missing_one": "{{count}} Ding fehlt",
+        "missing_other": "{{count}} Dinge fehlen",
+        "listEmpty": "Liste ist leer",
+        "nothingToBuy": "Gerade nichts einzukaufen"
+      }
+    },
+    "empty": {
+      "title": "Hier ist alles ruhig",
+      "text": "Neue Termine, Nachrichten und Aufgaben landen künftig zuverlässig hier."
+    },
+    "meta": {
+      "groupChat": "Familienchat",
+      "directMessages": "Direktnachricht",
+      "taskAssigned": "Neue Aufgabe",
+      "taskApproval": "Aufgabenfreigabe",
+      "taskCompleted": "Geschafft",
+      "events": "Familienkalender",
+      "moodHelp": "Familienkompass",
+      "moodUpdates": "Gefühlslage",
+      "problemReports": "Problemmeldung",
+      "encouragements": "Mutmacher",
+      "familyPolls": "Familien-Abstimmung",
+      "familyMissions": "Familienmission",
+      "schoolItems": "Schule",
+      "rewards": "Belohnung",
+      "pocketMoney": "Taschengeld",
+      "familyConnections": "Familiennetz",
+      "familyMail": "Familienpost",
+      "familyChatInvites": "Chat-Einladung",
+      "default": "Familienplaner"
+    },
+    "footer": {
+      "today": "Der Tagesüberblick wird live aus eurem Familienplan erstellt.",
+      "notifications": "Meldungen werden 90 Tage lang gespeichert."
+    }
+  },
+  "permissionBanner": {
+    "child": {
+      "eyebrow": "Nichts Wichtiges verpassen",
+      "title": "Soll ich dir Bescheid sagen, {{name}}?",
+      "textNative": "Wenn eine Nachricht oder neue Mission für dich ankommt, meldet sich die LX App.",
+      "textWeb": "Wenn eine Nachricht oder neue Mission für dich ankommt, meldet sich dieses Gerät.",
+      "action": "Ja, sag mir Bescheid"
+    },
+    "adult": {
+      "eyebrow": "Familie auf dem Laufenden",
+      "titleNative": "Echte Android-Benachrichtigungen",
+      "titleWeb": "Benachrichtigungen auf diesem Gerät",
+      "textNative": "Chat, Termine und Aufgaben erscheinen im Android-Benachrichtigungsbereich – auch bei geschlossener LX App.",
+      "textWeb": "Chat, Termine und Aufgaben erreichen dich auch dann, wenn der Planer gerade geschlossen ist.",
+      "action": "Jetzt einschalten"
+    },
+    "profileOnly": "Nur für {{name}}s Profil",
+    "busy": "Einen Moment …",
+    "later": "Später",
+    "close": "Hinweis schließen"
+  },
+  "webPush": {
+    "secureContext": "Benachrichtigungen brauchen eine sichere HTTPS-Adresse.",
+    "iosHomeScreen": "Auf iPhone und iPad zuerst „Zum Home-Bildschirm“ wählen und die Familien-App von dort öffnen.",
+    "unsupported": "Dieser Browser unterstützt keine Web-Benachrichtigungen.",
+    "permissionDenied": "Benachrichtigungen wurden im Browser abgelehnt.",
+    "permissionNotGranted": "Benachrichtigungen wurden noch nicht erlaubt.",
+    "deviceNames": {
+      "apple": "Apple-Mobilgerät",
+      "android": "Android-Gerät",
+      "windows": "Windows-PC",
+      "mac": "Mac",
+      "chromebook": "Chromebook",
+      "fallback": "Familiengerät"
+    }
+  },
+  "nativePush": {
+    "timeoutDefault": "Android hat nicht rechtzeitig geantwortet.",
+    "registrationFailed": "Die Android-App konnte sich nicht für Push anmelden.",
+    "serviceStartFailed": "Android konnte den Benachrichtigungsdienst nicht starten. Beende LX vollständig und öffne die App erneut.",
+    "channels": {
+      "updatesName": "Familienmeldungen",
+      "updatesDescription": "Nachrichten, Termine, Aufgaben und Familienereignisse",
+      "urgentName": "Dringende Familienmeldungen",
+      "urgentDescription": "Dringende Hilfe-Anfragen und zeitkritische Erinnerungen",
+      "createFailed": "Android konnte die Benachrichtigungskanäle nicht anlegen. Prüfe die App-Benachrichtigungen in den Android-Einstellungen."
+    },
+    "onlyInApp": "Echte Android-Benachrichtigungen sind in der LX Android-App verfügbar.",
+    "onlyInAppRegister": "Echte Android-Benachrichtigungen sind nur in der App verfügbar.",
+    "permissionCheckTimeout": "Android antwortet nicht auf die Berechtigungsprüfung. Beende LX vollständig und öffne die App erneut.",
+    "diagnoseTimeout": "Android konnte den Zustand der Google Play-Dienste nicht prüfen.",
+    "firebaseNotReady": "Firebase ist in der Android-App nicht bereit: {{error}}",
+    "firebaseNotConfigured": "Firebase ist in der Android-App nicht eingerichtet.",
+    "playServicesUnavailable": "Google Play-Dienste sind auf diesem Gerät nicht bereit: {{status}}. Aktualisiere die Google Play-Dienste und versuche es erneut.",
+    "playServicesUnknownStatus": "unbekannter Zustand",
+    "tokenTimeout": "Firebase hat keinen Geräteschlüssel geliefert. Google Play-Dienste sind verfügbar; prüfe VPN, Firewall und privates DNS auf dem Handy.",
+    "tokenEmpty": "Firebase hat einen leeren Geräteschlüssel geliefert.",
+    "permissionRequestTimeout": "Die Android-Berechtigungsabfrage wurde nicht abgeschlossen. Erlaube Benachrichtigungen in den App-Einstellungen und versuche es erneut.",
+    "permissionDenied": "Benachrichtigungen sind in den Android-App-Einstellungen ausgeschaltet.",
+    "permissionNotGranted": "Benachrichtigungen wurden noch nicht erlaubt.",
+    "deviceName": "LX Android-App"
+  }
+}

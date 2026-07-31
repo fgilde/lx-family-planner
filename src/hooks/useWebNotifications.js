@@ -1,9 +1,11 @@
+import i18n from '../i18n/index.js';
+
 export function webPushCapability() {
   if (!window.isSecureContext) {
     return {
       supported: false,
       reason: 'secure-context',
-      message: 'Benachrichtigungen brauchen eine sichere HTTPS-Adresse.'
+      message: i18n.t('notifications:webPush.secureContext')
     };
   }
   const isAppleMobile = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -14,8 +16,7 @@ export function webPushCapability() {
     return {
       supported: false,
       reason: 'ios-home-screen',
-      message:
-        'Auf iPhone und iPad zuerst „Zum Home-Bildschirm“ wählen und die Familien-App von dort öffnen.'
+      message: i18n.t('notifications:webPush.iosHomeScreen')
     };
   }
   if (
@@ -26,7 +27,7 @@ export function webPushCapability() {
     return {
       supported: false,
       reason: 'unsupported',
-      message: 'Dieser Browser unterstützt keine Web-Benachrichtigungen.'
+      message: i18n.t('notifications:webPush.unsupported')
     };
   }
   return {
@@ -63,8 +64,8 @@ export async function subscribeBrowser(publicKey) {
   if (permission !== 'granted') {
     throw new Error(
       permission === 'denied'
-        ? 'Benachrichtigungen wurden im Browser abgelehnt.'
-        : 'Benachrichtigungen wurden noch nicht erlaubt.'
+        ? i18n.t('notifications:webPush.permissionDenied')
+        : i18n.t('notifications:webPush.permissionNotGranted')
     );
   }
   const registration = await navigator.serviceWorker.ready;
@@ -80,10 +81,20 @@ export async function subscribeBrowser(publicKey) {
 
 export function friendlyDeviceName() {
   const agent = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod/.test(agent)) return 'Apple-Mobilgerät';
-  if (agent.includes('android')) return 'Android-Gerät';
-  if (agent.includes('windows')) return 'Windows-PC';
-  if (agent.includes('macintosh')) return 'Mac';
-  if (agent.includes('cros')) return 'Chromebook';
-  return 'Familiengerät';
+  if (/iphone|ipad|ipod/.test(agent)) {
+    return i18n.t('notifications:webPush.deviceNames.apple');
+  }
+  if (agent.includes('android')) {
+    return i18n.t('notifications:webPush.deviceNames.android');
+  }
+  if (agent.includes('windows')) {
+    return i18n.t('notifications:webPush.deviceNames.windows');
+  }
+  if (agent.includes('macintosh')) {
+    return i18n.t('notifications:webPush.deviceNames.mac');
+  }
+  if (agent.includes('cros')) {
+    return i18n.t('notifications:webPush.deviceNames.chromebook');
+  }
+  return i18n.t('notifications:webPush.deviceNames.fallback');
 }

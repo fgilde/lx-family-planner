@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import CookingModeModal from './CookingModeModal';
 import {
@@ -20,12 +21,13 @@ import { recipeShareTargetFromUrl } from '../../../shared/recipeShareTarget.js';
 import { plannerApiRequest } from '../../utils/apiConfig.js';
 
 function RecipeImage({ src, alt }) {
+  const { t } = useTranslation('meals');
   const [failed, setFailed] = useState(false);
   if (!src || failed) {
     return (
-      <div className="recipe-image-fallback" role="img" aria-label={`${alt} ohne Bild`}>
+      <div className="recipe-image-fallback" role="img" aria-label={t('recipeBook.image.noImageAria', { title: alt })}>
         <ImageOff size={28} />
-        <span>Rezeptbild nicht verfügbar</span>
+        <span>{t('recipeBook.image.unavailable')}</span>
       </div>
     );
   }
@@ -41,6 +43,7 @@ function RecipeImage({ src, alt }) {
 }
 
 export default function RecipeBook() {
+  const { t } = useTranslation('meals');
   const { savedRecipes, addRecipe, deleteRecipe, addMealIngredientsToShopping, showToast } = useFamily();
   const initialShareTarget = useRef(
     recipeShareTargetFromUrl(window.location.href)
@@ -84,26 +87,26 @@ export default function RecipeBook() {
         body: JSON.stringify({ url: targetUrl })
       });
       if (data.error) {
-        throw new Error(data.error || 'Rezept konnte nicht importiert werden.');
+        throw new Error(data.error || t('recipeBook.errors.importFailed'));
       }
 
       const saved = await addRecipe(data.recipe);
       if (!saved) {
-        throw new Error('Das Rezept konnte nicht im Kochbuch gespeichert werden.');
+        throw new Error(t('recipeBook.errors.saveFailed'));
       }
       setUrlInput('');
       setActiveTab('browse');
       setSharedImport(false);
       const warning = Array.isArray(data.warnings) ? data.warnings[0] : '';
       showToast(
-        warning ? 'Rezept importiert – bitte prüfen' : '🎉 Rezept importiert!',
-        warning || `"${data.recipe.title}" wurde erfolgreich importiert!`,
+        warning ? t('recipeBook.toasts.importedCheckTitle') : t('recipeBook.toasts.importedTitle'),
+        warning || t('recipeBook.toasts.importedBody', { title: data.recipe.title }),
         warning ? 'info' : 'success'
       );
       return saved;
     } catch (err) {
       setError(err.message);
-      showToast('⚠️ Import-Fehler', err.message, 'error');
+      showToast(t('recipeBook.toasts.importErrorTitle'), err.message, 'error');
       return null;
     } finally {
       setLoading(false);
@@ -122,9 +125,7 @@ export default function RecipeBook() {
     shareImportStarted.current = true;
     window.history.replaceState({}, '', '/?view=meals');
     if (!payload.url) {
-      setError(
-        'Die geteilte App hat keinen Rezept-Link mitgegeben. Füge den Link bitte unten ein.'
-      );
+      setError(t('recipeBook.errors.shareMissingLink'));
       return;
     }
     void importRecipeUrl(payload.url);
@@ -145,7 +146,7 @@ export default function RecipeBook() {
 
     setManualTitle('');
     setActiveTab('browse');
-    showToast('✨ Rezept erstellt', `"${manualTitle}" wurde im Rezeptbuch gespeichert.`, 'success');
+    showToast(t('recipeBook.toasts.manualCreatedTitle'), t('recipeBook.toasts.manualCreatedBody', { title: manualTitle }), 'success');
   };
 
   return (
@@ -154,11 +155,10 @@ export default function RecipeBook() {
       <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <BookOpen style={{ color: 'var(--primary)' }} /> Unser Kochbuch & Rezeptwelt
+            <BookOpen style={{ color: 'var(--primary)' }} /> {t('recipeBook.header.title')}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Rezepte aus Pinterest, Chefkoch und vielen weiteren Portalen
-            importieren, gemeinsam sammeln und Schritt für Schritt kochen.
+            {t('recipeBook.header.subtitle')}
           </p>
         </div>
 
@@ -167,20 +167,20 @@ export default function RecipeBook() {
             className={`btn-secondary ${activeTab === 'browse' ? 'active' : ''}`}
             onClick={() => setActiveTab('browse')}
           >
-            Alle Rezepte ({savedRecipes.length})
+            {t('recipeBook.tabs.browse', { count: savedRecipes.length })}
           </button>
           <button
             className={`btn-secondary ${activeTab === 'import' ? 'active' : ''}`}
             onClick={() => setActiveTab('import')}
             style={{ color: '#059669', borderColor: '#059669' }}
           >
-            <Download size={16} /> Rezept importieren
+            <Download size={16} /> {t('recipeBook.tabs.import')}
           </button>
           <button
             className={`btn-primary ${activeTab === 'manual' ? 'active' : ''}`}
             onClick={() => setActiveTab('manual')}
           >
-            <Plus size={16} /> Neues Rezept
+            <Plus size={16} /> {t('recipeBook.tabs.manual')}
           </button>
         </div>
       </div>
@@ -196,7 +196,7 @@ export default function RecipeBook() {
                   className="icon-circle-btn"
                   style={{ position: 'absolute', top: 10, right: 10, background: 'var(--bg-elevated)', width: 32, height: 32, color: 'var(--danger)' }}
                   onClick={() => deleteRecipe(recipe.id)}
-                  title="Rezept löschen"
+                  title={t('recipeBook.card.deleteTitle')}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -210,10 +210,10 @@ export default function RecipeBook() {
 
                   <div style={{ display: 'flex', gap: 14, fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 12 }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Clock size={14} /> {recipe.prepTime || '30 Min'}
+                      <Clock size={14} /> {recipe.prepTime || t('recipeBook.card.defaultPrepTime')}
                     </span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Users size={14} /> {recipe.servings || '4 Portionen'}
+                      <Users size={14} /> {recipe.servings || t('recipeBook.card.defaultServings')}
                     </span>
                   </div>
                 </div>
@@ -224,16 +224,16 @@ export default function RecipeBook() {
                     style={{ flex: 1, justifyContent: 'center', padding: '8px 12px', fontSize: '0.85rem' }}
                     onClick={() => setCookingRecipe(recipe)}
                   >
-                    <Play size={15} /> Kochen Starten
+                    <Play size={15} /> {t('recipeBook.card.startCooking')}
                   </button>
 
                   <button
                     className="btn-secondary"
                     style={{ padding: '8px 12px', fontSize: '0.85rem' }}
                     onClick={() => addMealIngredientsToShopping(recipe.ingredients || [])}
-                    title="Zutaten auf die Einkaufsliste setzen"
+                    title={t('recipeBook.card.addIngredientsTitle')}
                   >
-                    <ShoppingBag size={15} /> Zutaten auf die Liste
+                    <ShoppingBag size={15} /> {t('recipeBook.card.addIngredients')}
                   </button>
                 </div>
               </div>
@@ -249,55 +249,49 @@ export default function RecipeBook() {
             <div className="recipe-share-arrival">
               <span><Share2 size={19} /></span>
               <div>
-                <strong>Direkt vom Handy geteilt</strong>
+                <strong>{t('recipeBook.import.shareArrivalTitle')}</strong>
                 <small>
-                  LX übernimmt den Rezept-Link und legt das Gericht automatisch
-                  in eurem Kochbuch ab.
+                  {t('recipeBook.import.shareArrivalBody')}
                 </small>
               </div>
               {loading
-                ? <span className="recipe-share-pulse" aria-label="Import läuft" />
+                ? <span className="recipe-share-pulse" aria-label={t('recipeBook.import.importRunningAria')} />
                 : <CheckCircle2 size={18} />}
             </div>
           )}
           <div className="recipe-import-mark">
             <Globe2 size={25} />
           </div>
-          <span className="recipe-import-kicker">Rezept-Finder</span>
+          <span className="recipe-import-kicker">{t('recipeBook.import.kicker')}</span>
           <h3>
-            Rezept aus dem Web importieren
+            {t('recipeBook.import.title')}
           </h3>
           <p>
-            Füge den Link zu einem Rezept oder Pinterest-Pin ein. Bilder,
-            Zutaten, Zeiten und Zubereitung werden automatisch übernommen,
-            wenn die Seite Rezeptdaten bereitstellt.
+            {t('recipeBook.import.description')}
           </p>
-          <div className="recipe-platform-chips" aria-label="Beispiele unterstützter Portale">
+          <div className="recipe-platform-chips" aria-label={t('recipeBook.import.platformsAria')}>
             <span className="pinterest">Pinterest</span>
             <span>Chefkoch</span>
             <span>Lecker</span>
             <span>Kitchen Stories</span>
             <span>Essen &amp; Trinken</span>
-            <span>weitere Rezeptseiten</span>
+            <span>{t('recipeBook.import.morePlatforms')}</span>
           </div>
 
           <div className="recipe-share-howto">
             <Smartphone size={19} />
             <span>
-              <strong>Ohne Kopieren auf Android:</strong>
-              Installiere LX einmal als App. Danach kannst du bei Chefkoch,
-              Pinterest und anderen Apps über <b>Teilen → LX Familie</b>
-              importieren.
+              <Trans t={t} i18nKey="recipeBook.import.howto" components={{ b: <b /> }} />
             </span>
           </div>
 
           <form onSubmit={handleImportUrl}>
             <div className="form-group">
-              <label className="form-label">Öffentlicher Rezept-Link</label>
+              <label className="form-label">{t('recipeBook.import.urlLabel')}</label>
               <input
                 type="url"
                 className="form-input"
-                placeholder="https://www.pinterest.de/pin/... oder Rezeptseite"
+                placeholder={t('recipeBook.import.urlPlaceholder')}
                 value={urlInput}
                 onChange={e => setUrlInput(e.target.value)}
                 required
@@ -316,12 +310,10 @@ export default function RecipeBook() {
               disabled={loading}
               style={{ width: '100%', justifyContent: 'center', background: '#059669', padding: 12 }}
             >
-              {loading ? 'Rezept wird gelesen …' : 'Rezept jetzt importieren'}
+              {loading ? t('recipeBook.import.submitLoading') : t('recipeBook.import.submit')}
             </button>
             <small className="recipe-import-help">
-              Private Seiten, Logins und interne Heimnetz-Adressen werden aus
-              Sicherheitsgründen nicht geöffnet. Manche Portale können den
-              automatischen Abruf technisch blockieren.
+              {t('recipeBook.import.help')}
             </small>
           </form>
         </div>
@@ -330,14 +322,14 @@ export default function RecipeBook() {
       {/* TAB 3: MANUAL RECIPE FORM */}
       {activeTab === 'manual' && (
         <div className="card" style={{ maxWidth: 640, margin: '0 auto', width: '100%', padding: 28 }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: 16 }}>Eigenes Rezept anlegen</h3>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: 16 }}>{t('recipeBook.manual.title')}</h3>
           <form onSubmit={handleManualSubmit}>
             <div className="form-group">
-              <label className="form-label">Titel des Gerichts</label>
+              <label className="form-label">{t('recipeBook.manual.dishTitleLabel')}</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="z. B. Papas berühmte Bolognese"
+                placeholder={t('recipeBook.manual.dishTitlePlaceholder')}
                 value={manualTitle}
                 onChange={e => setManualTitle(e.target.value)}
                 required
@@ -346,7 +338,7 @@ export default function RecipeBook() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="form-group">
-                <label className="form-label">Zubereitungszeit</label>
+                <label className="form-label">{t('recipeBook.manual.prepTimeLabel')}</label>
                 <input
                   type="text"
                   className="form-input"
@@ -356,7 +348,7 @@ export default function RecipeBook() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Portionen</label>
+                <label className="form-label">{t('recipeBook.manual.servingsLabel')}</label>
                 <input
                   type="text"
                   className="form-input"
@@ -367,7 +359,7 @@ export default function RecipeBook() {
             </div>
 
             <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: 12 }}>
-              Rezept Speichern
+              {t('recipeBook.manual.submit')}
             </button>
           </form>
         </div>

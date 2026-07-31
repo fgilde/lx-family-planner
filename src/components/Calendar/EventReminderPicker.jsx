@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BellRing, Check, Clock3 } from 'lucide-react';
 import {
   EVENT_REMINDER_OPTIONS,
+  formatReminderLead,
   normalizeEventReminders
 } from '../../../shared/eventReminders.js';
 
@@ -10,6 +12,8 @@ export default function EventReminderPicker({
   onChange,
   maxSelections = 6
 }) {
+  const { t } = useTranslation('calendar');
+  const { t: tShared } = useTranslation('shared');
   const selected = normalizeEventReminders(value);
 
   const toggle = minutes => {
@@ -28,10 +32,10 @@ export default function EventReminderPicker({
           <BellRing size={17} />
         </span>
         <span>
-          <strong>Wann soll LX erinnern?</strong>
-          <small>Wähle einen oder mehrere Zeitpunkte</small>
+          <strong>{t('reminderPicker.title')}</strong>
+          <small>{t('reminderPicker.subtitle')}</small>
         </span>
-        <b>{selected.length || 'Aus'}</b>
+        <b>{selected.length || t('reminderPicker.off')}</b>
       </legend>
 
       <div className="event-reminder-options">
@@ -53,7 +57,7 @@ export default function EventReminderPicker({
                   ? <Check size={14} />
                   : <Clock3 size={14} />}
               </span>
-              {option.label}
+              {formatReminderLead(option.minutes, false, tShared)}
             </button>
           );
         })}
@@ -61,8 +65,8 @@ export default function EventReminderPicker({
 
       <p>
         {selected.length
-          ? 'LX erinnert auf allen für das Profil freigeschalteten Geräten.'
-          : 'Ohne Auswahl wird für diesen Eintrag keine Erinnerung gesendet.'}
+          ? t('reminderPicker.activeHint')
+          : t('reminderPicker.inactiveHint')}
       </p>
     </fieldset>
   );

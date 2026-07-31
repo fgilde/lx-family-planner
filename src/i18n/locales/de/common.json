@@ -1,0 +1,36 @@
+{
+  "app": {
+    "title": "LX Family Planner - Unser Familienplaner",
+    "description": "Übersichtlicher, intuitiver Familienplaner mit Kalender, Bring!-Einkaufsliste, Essensplaner, Haushaltsaufgaben, Belohnungssystem und Pinnwand."
+  },
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "confirm": "Bestätigen",
+    "search": "Suchen",
+    "reset": "Zurücksetzen",
+    "refresh": "Aktualisieren",
+    "retry": "Erneut versuchen"
+  },
+  "status": {
+    "loading": "Wird geladen …",
+    "saving": "Wird gespeichert …",
+    "error": "Etwas ist schiefgelaufen.",
+    "empty": "Noch keine Einträge vorhanden."
+  },
+  "labels": {
+    "optional": "optional",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "title": "Titel",
+    "description": "Beschreibung",
+    "location": "Ort",
+    "name": "Name"
+  }
+}

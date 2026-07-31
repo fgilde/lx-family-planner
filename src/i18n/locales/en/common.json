@@ -1,0 +1,36 @@
+{
+  "app": {
+    "title": "LX Family Planner - Our Family Organizer",
+    "description": "Clear, intuitive family planner with calendar, Bring! shopping list, meal planner, household chores, reward system and pinboard."
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "search": "Search",
+    "reset": "Reset",
+    "refresh": "Refresh",
+    "retry": "Try again"
+  },
+  "status": {
+    "loading": "Loading …",
+    "saving": "Saving …",
+    "error": "Something went wrong.",
+    "empty": "No entries yet."
+  },
+  "labels": {
+    "optional": "optional",
+    "date": "Date",
+    "time": "Time",
+    "title": "Title",
+    "description": "Description",
+    "location": "Location",
+    "name": "Name"
+  }
+}

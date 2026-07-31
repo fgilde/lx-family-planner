@@ -1,0 +1,190 @@
+{
+  "kitchen": {
+    "widgets": {
+      "calendar": {
+        "label": "Heute",
+        "description": "Alle heutigen Termine"
+      },
+      "meals": {
+        "label": "Essen",
+        "description": "Der aktuelle Tagesplan"
+      },
+      "tasks": {
+        "label": "Aufgaben",
+        "description": "Offene Aufgaben und Freigaben"
+      },
+      "shopping": {
+        "label": "Einkauf",
+        "description": "Noch benötigte Artikel"
+      },
+      "chat": {
+        "label": "Familienchat",
+        "description": "Die letzten Familiennachrichten"
+      },
+      "board": {
+        "label": "Pinnwand",
+        "description": "Aktuelle Familiennotizen"
+      },
+      "trash": {
+        "label": "Müllabfuhr",
+        "description": "Der nächste Abholtermin"
+      },
+      "family": {
+        "label": "Familie",
+        "description": "Profile und Sterne im Überblick"
+      },
+      "homeAssistant": {
+        "label": "Haussteuerung",
+        "description": "Geräte, Sensoren und Szenen als große Tablet-Kacheln"
+      }
+    },
+    "household": {
+      "omaOpa": "Oma & Opa",
+      "default": "Unser Zuhause"
+    },
+    "live": "Live",
+    "allInView": "Alles im Blick.",
+    "signedInAs": "Angemeldet als {{name}}",
+    "quickActions": {
+      "event": "Termin",
+      "shopping": "Einkauf",
+      "standardView": "Standardansicht",
+      "tiles": "Kacheln"
+    },
+    "cards": {
+      "calendar": {
+        "title": "Heute",
+        "count_one": "{{count}} Termin",
+        "count_other": "{{count}} Termine",
+        "allDay": "ganztags",
+        "familyFallback": "Familie",
+        "empty": "Heute ist noch ganz frei."
+      },
+      "meals": {
+        "title": "Essen",
+        "empty": "Noch kein Essen geplant."
+      },
+      "tasks": {
+        "title": "Aufgaben",
+        "count_one": "{{count}} offen",
+        "count_other": "{{count}} offen",
+        "pendingApproval": "Wartet auf Prüfung",
+        "empty": "Alle Aufgaben sind geschafft."
+      },
+      "shopping": {
+        "title": "Einkauf",
+        "count_one": "{{count}} Artikel",
+        "count_other": "{{count}} Artikel",
+        "empty": "Alles eingekauft."
+      },
+      "chat": {
+        "title": "Familienchat",
+        "count_one": "{{count}} Nachricht",
+        "count_other": "{{count}} Nachrichten",
+        "photo": "📷 Foto",
+        "newMessage": "Neue Nachricht",
+        "senderFallback": "Familie",
+        "empty": "Noch keine Nachricht."
+      },
+      "board": {
+        "title": "Pinnwand",
+        "count_one": "{{count}} Notiz",
+        "count_other": "{{count}} Notizen",
+        "empty": "Die Pinnwand ist leer."
+      },
+      "trash": {
+        "title": "Nächste Abholung",
+        "noDate": "Kein Termin",
+        "empty": "Noch kein Mülltermin."
+      },
+      "family": {
+        "title": "Familie",
+        "count_one": "{{count}} Profil",
+        "count_other": "{{count}} Profile"
+      }
+    }
+  },
+  "pet": {
+    "noDateAppointment": "Termin ohne Datum",
+    "appointmentWithTime": "{{day}} · {{time}} Uhr",
+    "petFallbackName": "Fellnase",
+    "petAlt": "Haustier",
+    "kicker": "Pfotenprofil · Familienliebling",
+    "heroTitle": "Alles für {{name}} im Blick",
+    "heroText": "Termine, Pflege und Versorgung an einem ruhigen Ort – ohne Chat, Sterne oder unnötige Menüs.",
+    "caredFor": "Umsorgt",
+    "openCareItems": "offene Pflegepunkte",
+    "overviewAria": "Pfotenüberblick",
+    "nextAppointment": "Nächster Termin",
+    "nothingPlanned": "Nichts geplant",
+    "calendarFree": "Der Kalender ist frei.",
+    "care": "Versorgung",
+    "careOpen_one": "{{count}} Punkt offen",
+    "careOpen_other": "{{count}} Punkte offen",
+    "allDone": "Alles erledigt",
+    "managedByAdults": "Wird von den Erwachsenen gepflegt.",
+    "petMode": "Haustiermodus",
+    "calmProtected": "Ruhig & geschützt",
+    "noChatNoAccount": "Kein Chat und keine Kontofunktionen.",
+    "carePlan": "Versorgungsplan",
+    "whatsUpFor": "Was für {{name}} ansteht",
+    "familyTakesCare": "Familie kümmert sich",
+    "careCategoryFallback": "Pflege & Versorgung",
+    "openLabel": "offen",
+    "allCaredFor": "Alles bestens versorgt",
+    "noCareItems": "Für {{name}} sind gerade keine Pflegepunkte offen.",
+    "appointmentsHealth": "Termine & Gesundheit",
+    "pawCalendar": "Pfotenkalender",
+    "calendar": "Kalender",
+    "noDateShort": "offen",
+    "noAppointments": "Keine Termine geplant",
+    "pawCalendarFree": "Im Pfotenkalender ist gerade alles frei.",
+    "importantNotes": "Wichtige Hinweise",
+    "noteFallback": "Notiz"
+  },
+  "homeAssistant": {
+    "states": {
+      "on": "An",
+      "off": "Aus",
+      "open": "Offen",
+      "closed": "Geschlossen",
+      "opening": "Öffnet …",
+      "closing": "Schließt …",
+      "home": "Zuhause",
+      "notHome": "Unterwegs",
+      "unavailable": "Nicht erreichbar",
+      "unknown": "Unbekannt",
+      "clear": "Klar",
+      "cloudy": "Bewölkt",
+      "rainy": "Regen"
+    },
+    "defaultTitle": "Unser Zuhause",
+    "subtitle": "Home Assistant · live",
+    "refreshAria": "Hausstatus aktualisieren",
+    "emptyTitle": "Noch keine Hauskacheln",
+    "emptyHint": "Ein Elternprofil kann Geräte und Sensoren in der Elternzentrale freigeben.",
+    "openCover": "Öffnen",
+    "closeCover": "Schließen",
+    "adultsOnlyConfirm": "Nur für Erwachsene mit Bestätigung",
+    "control": "Steuern"
+  },
+  "familyCloud": {
+    "title": "Familienarchiv",
+    "openAria": "Familienarchiv öffnen",
+    "open": "Öffnen",
+    "preparing": "Das Archiv wird vorbereitet",
+    "checkConnection": "Die Verbindung lässt sich in der Elternzentrale prüfen.",
+    "toParentCenter": "Zur Elternzentrale",
+    "sharedStorage": "Gemeinsamer Speicher",
+    "loading": "Wird geladen",
+    "ofTotal": "von {{size}}",
+    "safeForFamily": "sicher für eure Familie",
+    "openingArchive": "Archiv wird geöffnet …",
+    "noFiles": "Noch keine Dateien – hier ist Platz für eure Erinnerungen.",
+    "upload": "In die Cloud hochladen",
+    "toast": {
+      "fileTooBigTitle": "Datei zu groß",
+      "fileTooBigMessage": "{{name}} ist größer als 100 MB."
+    }
+  }
+}

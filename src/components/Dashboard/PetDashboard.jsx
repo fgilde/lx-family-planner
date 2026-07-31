@@ -9,8 +9,10 @@ import {
   ShieldCheck,
   Stethoscope
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../../utils/imageFallback';
+import { formatDate } from '../../utils/formatting';
 
 function upcomingDateValue(event) {
   if (!event?.date) return Number.MAX_SAFE_INTEGER;
@@ -18,15 +20,16 @@ function upcomingDateValue(event) {
   return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
 }
 
-function formatAppointment(event) {
-  if (!event?.date) return 'Termin ohne Datum';
-  const date = new Date(`${event.date}T${event.time || '00:00'}`);
-  const day = date.toLocaleDateString('de-DE', {
+function formatAppointment(event, t) {
+  if (!event?.date) return t('pet.noDateAppointment');
+  const day = formatDate(`${event.date}T${event.time || '00:00'}`, {
     weekday: 'short',
     day: '2-digit',
     month: 'short'
   });
-  return event.time ? `${day} · ${event.time} Uhr` : day;
+  return event.time
+    ? t('pet.appointmentWithTime', { day, time: event.time })
+    : day;
 }
 
 function careIcon(title = '') {
@@ -47,7 +50,9 @@ export default function PetDashboard() {
     notes,
     setActiveTab
   } = useFamily();
-  const firstName = activeMember?.name?.split(' ')[0] || 'Fellnase';
+  const { t } = useTranslation('widgets');
+  const firstName =
+    activeMember?.name?.split(' ')[0] || t('pet.petFallbackName');
   const today = new Date().toISOString().slice(0, 10);
   const careTasks = tasks.filter(
     task => task.memberId === activeMember?.id && !task.completed
@@ -80,58 +85,53 @@ export default function PetDashboard() {
           <img
             src={activeMember?.avatar || DEFAULT_FAMILY_AVATAR}
             onError={handleImgError}
-            alt={activeMember?.name || 'Haustier'}
+            alt={activeMember?.name || t('pet.petAlt')}
           />
           <span><PawPrint size={20} /></span>
         </div>
         <div className="pet-hero-copy">
-          <span className="pet-kicker">Pfotenprofil · Familienliebling</span>
-          <h1>Alles für {firstName} im Blick</h1>
-          <p>
-            Termine, Pflege und Versorgung an einem ruhigen Ort – ohne Chat,
-            Sterne oder unnötige Menüs.
-          </p>
+          <span className="pet-kicker">{t('pet.kicker')}</span>
+          <h1>{t('pet.heroTitle', { name: firstName })}</h1>
+          <p>{t('pet.heroText')}</p>
         </div>
         <div className="pet-hero-status">
-          <span><HeartPulse size={18} /> Umsorgt</span>
+          <span><HeartPulse size={18} /> {t('pet.caredFor')}</span>
           <strong>{careTasks.length}</strong>
-          <small>offene Pflegepunkte</small>
+          <small>{t('pet.openCareItems')}</small>
         </div>
       </section>
 
-      <section className="pet-overview-strip" aria-label="Pfotenüberblick">
+      <section className="pet-overview-strip" aria-label={t('pet.overviewAria')}>
         <article>
           <span><CalendarDays size={20} /></span>
           <div>
-            <small>Nächster Termin</small>
-            <strong>{nextAppointment?.title || 'Nichts geplant'}</strong>
+            <small>{t('pet.nextAppointment')}</small>
+            <strong>{nextAppointment?.title || t('pet.nothingPlanned')}</strong>
             <p>
               {nextAppointment
-                ? formatAppointment(nextAppointment)
-                : 'Der Kalender ist frei.'}
+                ? formatAppointment(nextAppointment, t)
+                : t('pet.calendarFree')}
             </p>
           </div>
         </article>
         <article>
           <span><ClipboardCheck size={20} /></span>
           <div>
-            <small>Versorgung</small>
+            <small>{t('pet.care')}</small>
             <strong>
               {careTasks.length
-                ? `${careTasks.length} ${
-                    careTasks.length === 1 ? 'Punkt' : 'Punkte'
-                  } offen`
-                : 'Alles erledigt'}
+                ? t('pet.careOpen', { count: careTasks.length })
+                : t('pet.allDone')}
             </strong>
-            <p>Wird von den Erwachsenen gepflegt.</p>
+            <p>{t('pet.managedByAdults')}</p>
           </div>
         </article>
         <article>
           <span><ShieldCheck size={20} /></span>
           <div>
-            <small>Haustiermodus</small>
-            <strong>Ruhig &amp; geschützt</strong>
-            <p>Kein Chat und keine Kontofunktionen.</p>
+            <small>{t('pet.petMode')}</small>
+            <strong>{t('pet.calmProtected')}</strong>
+            <p>{t('pet.noChatNoAccount')}</p>
           </div>
         </article>
       </section>
@@ -140,10 +140,13 @@ export default function PetDashboard() {
         <section className="pet-panel pet-care-panel">
           <header>
             <div>
-              <span className="pet-section-label">Versorgungsplan</span>
-              <h2><ClipboardCheck size={22} /> Was für {firstName} ansteht</h2>
+              <span className="pet-section-label">{t('pet.carePlan')}</span>
+              <h2>
+                <ClipboardCheck size={22} />{' '}
+                {t('pet.whatsUpFor', { name: firstName })}
+              </h2>
             </div>
-            <span className="pet-readonly-badge">Familie kümmert sich</span>
+            <span className="pet-readonly-badge">{t('pet.familyTakesCare')}</span>
           </header>
           <div className="pet-care-list">
             {careTasks.length ? (
@@ -152,18 +155,20 @@ export default function PetDashboard() {
                   <span className="pet-care-icon">{careIcon(task.title)}</span>
                   <div>
                     <strong>{task.title}</strong>
-                    <small>{task.category || 'Pflege & Versorgung'}</small>
+                    <small>
+                      {task.category || t('pet.careCategoryFallback')}
+                    </small>
                   </div>
                   <span className="pet-care-open">
-                    <Clock3 size={14} /> offen
+                    <Clock3 size={14} /> {t('pet.openLabel')}
                   </span>
                 </article>
               ))
             ) : (
               <div className="pet-empty-state">
                 <span>🐾</span>
-                <strong>Alles bestens versorgt</strong>
-                <p>Für {firstName} sind gerade keine Pflegepunkte offen.</p>
+                <strong>{t('pet.allCaredFor')}</strong>
+                <p>{t('pet.noCareItems', { name: firstName })}</p>
               </div>
             )}
           </div>
@@ -172,11 +177,13 @@ export default function PetDashboard() {
         <section className="pet-panel pet-appointments-panel">
           <header>
             <div>
-              <span className="pet-section-label">Termine & Gesundheit</span>
-              <h2><Stethoscope size={22} /> Pfotenkalender</h2>
+              <span className="pet-section-label">
+                {t('pet.appointmentsHealth')}
+              </span>
+              <h2><Stethoscope size={22} /> {t('pet.pawCalendar')}</h2>
             </div>
             <button type="button" onClick={() => setActiveTab('calendar')}>
-              Kalender <ChevronRight size={16} />
+              {t('pet.calendar')} <ChevronRight size={16} />
             </button>
           </header>
           <div className="pet-appointment-list">
@@ -186,32 +193,30 @@ export default function PetDashboard() {
                   <time dateTime={`${event.date || ''}T${event.time || ''}`}>
                     <span>
                       {event.date
-                        ? new Date(`${event.date}T00:00:00`).toLocaleDateString(
-                            'de-DE',
-                            { day: '2-digit' }
-                          )
+                        ? formatDate(`${event.date}T00:00:00`, {
+                            day: '2-digit'
+                          })
                         : '–'}
                     </span>
                     <small>
                       {event.date
-                        ? new Date(`${event.date}T00:00:00`).toLocaleDateString(
-                            'de-DE',
-                            { month: 'short' }
-                          )
-                        : 'offen'}
+                        ? formatDate(`${event.date}T00:00:00`, {
+                            month: 'short'
+                          })
+                        : t('pet.noDateShort')}
                     </small>
                   </time>
                   <div>
                     <strong>{event.title}</strong>
-                    <small>{formatAppointment(event)}</small>
+                    <small>{formatAppointment(event, t)}</small>
                   </div>
                 </article>
               ))
             ) : (
               <div className="pet-empty-state compact">
                 <span>🩺</span>
-                <strong>Keine Termine geplant</strong>
-                <p>Im Pfotenkalender ist gerade alles frei.</p>
+                <strong>{t('pet.noAppointments')}</strong>
+                <p>{t('pet.pawCalendarFree')}</p>
               </div>
             )}
           </div>
@@ -220,11 +225,11 @@ export default function PetDashboard() {
 
       {petNotes.length > 0 && (
         <section className="pet-notes">
-          <span className="pet-section-label">Wichtige Hinweise</span>
+          <span className="pet-section-label">{t('pet.importantNotes')}</span>
           <div>
             {petNotes.map(note => (
               <article key={note.id}>
-                <strong>{note.title || 'Notiz'}</strong>
+                <strong>{note.title || t('pet.noteFallback')}</strong>
                 <p>{note.content}</p>
               </article>
             ))}

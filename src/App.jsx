@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { FamilyProvider, useFamily } from './context/FamilyContext';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
@@ -32,6 +33,7 @@ import { isPetProfile } from './constants/roles';
 import { isCapacitorNative } from './utils/apiConfig';
 
 function MainContent() {
+  const { t } = useTranslation('chrome');
   const {
     activeTab,
     authStatus,
@@ -151,7 +153,7 @@ function MainContent() {
       <div className="app-loading">
         <div className="app-loading-mark">LX</div>
         <LoaderCircle className="spin" size={28} />
-        <strong>Dein Familienraum wird vorbereitet …</strong>
+        <strong>{t('app.loading')}</strong>
       </div>
     );
   }

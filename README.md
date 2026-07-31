@@ -762,6 +762,14 @@ Die Prüfung läuft auf dem Server und nicht nur im geöffneten Browser:
 Docker verwendet standardmäßig `Europe/Berlin`. Eine andere Zeitzone kann über
 `TZ` in der `.env` gesetzt werden.
 
+## Sprache der Oberfläche
+
+Die App startet standardmäßig auf Deutsch. Über die Umgebungsvariable
+`APP_LANGUAGE` in der `.env` kann eine englische Oberfläche gewählt werden
+(`APP_LANGUAGE=en`). Die Einstellung gilt für die Web-App, die Android-App und
+serverseitige Benachrichtigungen. Details und Übersetzungs-Konventionen stehen
+in [docs/i18n.md](docs/i18n.md).
+
 ## Rezepte aus dem Web importieren
 
 Der Rezept-Finder liest öffentliche HTTPS-Seiten mit Schema.org- oder

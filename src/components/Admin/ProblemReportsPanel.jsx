@@ -7,7 +7,9 @@ import {
   LoaderCircle,
   RotateCcw
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
+import { formatDateTime } from '../../utils/formatting';
 
 const CATEGORY_LABELS = {
   problem: 'Problem',
@@ -16,6 +18,7 @@ const CATEGORY_LABELS = {
 };
 
 export default function ProblemReportsPanel() {
+  const { t } = useTranslation('admin');
   const {
     fetchProblemReports,
     updateProblemReport,
@@ -25,6 +28,13 @@ export default function ProblemReportsPanel() {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
+
+  const categoryLabel = category =>
+    CATEGORY_LABELS[category]
+      ? t(`problemReports.categories.${category}`, {
+          defaultValue: CATEGORY_LABELS[category]
+        })
+      : t('problemReports.categories.fallback');
 
   const load = async () => {
     setLoading(true);
@@ -54,24 +64,26 @@ export default function ProblemReportsPanel() {
   const copy = async report => {
     const member = members.find(item => item.id === report.memberId);
     const text = [
-      `[${CATEGORY_LABELS[report.category] || 'Meldung'}] ${report.title}`,
+      `[${categoryLabel(report.category)}] ${report.title}`,
       report.description,
-      `Profil: ${member?.name || 'Unbekannt'}`,
-      `Bereich: ${report.page || '–'}`,
-      `Version: ${report.appVersion || '–'}`,
-      `Gerät: ${report.clientInfo || '–'}`
+      t('problemReports.copy.profileLine', {
+        value: member?.name || t('problemReports.unknownMember')
+      }),
+      t('problemReports.copy.areaLine', { value: report.page || '–' }),
+      t('problemReports.copy.versionLine', { value: report.appVersion || '–' }),
+      t('problemReports.copy.deviceLine', { value: report.clientInfo || '–' })
     ].join('\n');
     try {
       await navigator.clipboard.writeText(text);
       showToast(
-        'Meldung kopiert',
-        'Du kannst sie jetzt direkt in GitHub oder eine Nachricht einfügen.',
+        t('problemReports.copy.successTitle'),
+        t('problemReports.copy.successBody'),
         'success'
       );
     } catch {
       showToast(
-        'Kopieren nicht möglich',
-        'Der Browser hat den Zugriff auf die Zwischenablage blockiert.',
+        t('problemReports.copy.errorTitle'),
+        t('problemReports.copy.errorBody'),
         'warning'
       );
     }
@@ -83,23 +95,20 @@ export default function ProblemReportsPanel() {
     <section className="admin-panel problem-reports-panel">
       <header className="admin-panel-header">
         <div>
-          <span className="admin-section-kicker">Rückmeldungen aus der App</span>
-          <h2><Bug size={21} /> Problemmeldungen</h2>
+          <span className="admin-section-kicker">{t('problemReports.kicker')}</span>
+          <h2><Bug size={21} /> {t('problemReports.title')}</h2>
         </div>
         <button type="button" className="admin-text-button" onClick={load}>
           {loading
             ? <LoaderCircle className="spin" size={16} />
             : <RotateCcw size={16} />}
-          Aktualisieren
+          {t('common:actions.refresh')}
         </button>
       </header>
-      <p className="admin-panel-intro">
-        Meldungen bleiben auf eurem Server. Mit „Kopieren“ lassen sie sich
-        vollständig und ohne Zugangsdaten weitergeben.
-      </p>
+      <p className="admin-panel-intro">{t('problemReports.intro')}</p>
       {loading ? (
         <div className="admin-inline-empty">
-          <LoaderCircle className="spin" size={18} /> Meldungen werden geladen …
+          <LoaderCircle className="spin" size={18} /> {t('problemReports.loading')}
         </div>
       ) : reports.length ? (
         <div className="problem-report-list">
@@ -111,20 +120,22 @@ export default function ProblemReportsPanel() {
                 className={report.status === 'resolved' ? 'resolved' : ''}
               >
                 <header>
-                  <span>{CATEGORY_LABELS[report.category] || 'Meldung'}</span>
+                  <span>{categoryLabel(report.category)}</span>
                   <time>
-                    {new Date(report.createdAt).toLocaleString('de-DE')}
+                    {formatDateTime(report.createdAt)}
                   </time>
                 </header>
                 <strong>{report.title}</strong>
                 <p>{report.description}</p>
                 <small>
-                  {member?.name || 'Unbekannt'} · {report.page || 'App'}
+                  {member?.name || t('problemReports.unknownMember')}
+                  {' · '}
+                  {report.page || t('problemReports.areaFallback')}
                   {' · '}v{report.appVersion}
                 </small>
                 <footer>
                   <button type="button" onClick={() => copy(report)}>
-                    <ClipboardCopy size={14} /> Kopieren
+                    <ClipboardCopy size={14} /> {t('problemReports.copyButton')}
                   </button>
                   <button
                     type="button"
@@ -132,8 +143,8 @@ export default function ProblemReportsPanel() {
                     disabled={busy === report.id}
                   >
                     {report.status === 'open'
-                      ? <><Check size={14} /> Erledigt</>
-                      : <><RotateCcw size={14} /> Wieder öffnen</>}
+                      ? <><Check size={14} /> {t('problemReports.markDone')}</>
+                      : <><RotateCcw size={14} /> {t('problemReports.reopen')}</>}
                   </button>
                 </footer>
               </article>
@@ -144,14 +155,14 @@ export default function ProblemReportsPanel() {
         <div className="admin-managed-empty">
           <Inbox size={24} />
           <span>
-            <strong>Keine Meldungen offen</strong>
-            <small>Hier ist im Moment alles ruhig.</small>
+            <strong>{t('problemReports.empty.title')}</strong>
+            <small>{t('problemReports.empty.hint')}</small>
           </span>
         </div>
       )}
       {openReports.length > 0 && (
         <span className="problem-open-count">
-          {openReports.length} offen
+          {t('problemReports.openCount', { count: openReports.length })}
         </span>
       )}
     </section>

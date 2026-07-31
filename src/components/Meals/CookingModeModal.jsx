@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { handleImgError, DEFAULT_RECIPE_IMAGE } from '../../utils/imageFallback';
 import { X, Play, Pause, RotateCcw, Clock, ShoppingBag, CheckSquare, Users, Flame, BellRing } from 'lucide-react';
@@ -8,6 +9,7 @@ import {
 } from '../../../shared/recipeInstructions.js';
 
 export default function CookingModeModal({ recipe, onClose }) {
+  const { t } = useTranslation('meals');
   const { addMealIngredientsToShopping, showToast } = useFamily();
 
   if (!recipe) return null;
@@ -62,7 +64,7 @@ export default function CookingModeModal({ recipe, onClose }) {
               audio.play();
             } catch (e) {}
 
-            showToast('⏰ Kochen beendet!', `Der Koch-Timer für "${recipe.title}" ist abgelaufen!`, 'star');
+            showToast(t('cookingMode.timer.finishedTitle'), t('cookingMode.timer.finishedBody', { title: recipe.title }), 'star');
             return 0;
           }
           return prev - 1;
@@ -78,7 +80,7 @@ export default function CookingModeModal({ recipe, onClose }) {
     const secs = Math.round(mins * 60);
     setTimerSeconds(secs);
     setIsTimerRunning(true);
-    showToast('⏱️ Koch-Timer gestartet', `Timer auf ${mins} Minute(n) gestartet.`, 'info');
+    showToast(t('cookingMode.timer.startedTitle'), t('cookingMode.timer.startedBody', { count: mins }), 'info');
   };
 
   const formatTimerTime = (secs) => {
@@ -98,7 +100,7 @@ export default function CookingModeModal({ recipe, onClose }) {
   const handleAddAllToShopping = () => {
     if (scaledIngredients.length === 0) return;
     addMealIngredientsToShopping(scaledIngredients);
-    showToast('🛒 Zutaten hinzugefügt', `${scaledIngredients.length} Zutaten für "${recipe.title}" stehen auf der Einkaufsliste!`, 'success');
+    showToast(t('cookingMode.ingredients.addedTitle'), t('cookingMode.ingredients.addedBody', { count: scaledIngredients.length, title: recipe.title }), 'success');
   };
 
   const recipeImageUrl = typeof recipe.image === 'string' && recipe.image ? recipe.image : DEFAULT_RECIPE_IMAGE;
@@ -111,7 +113,7 @@ export default function CookingModeModal({ recipe, onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, borderBottom: '1px solid var(--border-color)', paddingBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ background: '#059669', color: 'white', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Flame size={16} /> Koch-Modus Aktiv
+              <Flame size={16} /> {t('cookingMode.activeBadge')}
             </div>
             <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
               {recipe.title}
@@ -140,7 +142,7 @@ export default function CookingModeModal({ recipe, onClose }) {
             {/* PORTION SCALER */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <span style={{ fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Users size={18} style={{ color: 'var(--primary)' }} /> Portionen anpassen:
+                <Users size={18} style={{ color: 'var(--primary)' }} /> {t('cookingMode.adjustPortions')}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <button
@@ -167,7 +169,7 @@ export default function CookingModeModal({ recipe, onClose }) {
             <div style={{ background: 'var(--bg-card)', padding: 12, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <span style={{ fontWeight: 800, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6, color: '#d97706' }}>
-                  <BellRing size={16} /> Küchen-Timer
+                  <BellRing size={16} /> {t('cookingMode.timer.title')}
                 </span>
                 <span style={{ fontFamily: 'monospace', fontWeight: 900, fontSize: '1.4rem', color: isTimerRunning ? '#ef4444' : 'var(--text-main)' }}>
                   {formatTimerTime(timerSeconds)}
@@ -184,7 +186,7 @@ export default function CookingModeModal({ recipe, onClose }) {
                   value={customTimerMinutes}
                   onChange={e => setCustomTimerMinutes(e.target.value)}
                 />
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Min</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', alignSelf: 'center' }}>{t('cookingMode.timer.minutesUnit')}</span>
 
                 {!isTimerRunning ? (
                   <button
@@ -192,7 +194,7 @@ export default function CookingModeModal({ recipe, onClose }) {
                     style={{ flex: 1, minHeight: 36, padding: '4px 10px', fontSize: '0.85rem', justifyContent: 'center', background: '#059669' }}
                     onClick={() => startTimerWithMinutes(customTimerMinutes)}
                   >
-                    <Play size={14} /> Start
+                    <Play size={14} /> {t('cookingMode.timer.start')}
                   </button>
                 ) : (
                   <button
@@ -200,7 +202,7 @@ export default function CookingModeModal({ recipe, onClose }) {
                     style={{ flex: 1, minHeight: 36, padding: '4px 10px', fontSize: '0.85rem', justifyContent: 'center', color: '#ef4444' }}
                     onClick={() => setIsTimerRunning(false)}
                   >
-                    <Pause size={14} /> Stopp
+                    <Pause size={14} /> {t('cookingMode.timer.stop')}
                   </button>
                 )}
 
@@ -208,7 +210,7 @@ export default function CookingModeModal({ recipe, onClose }) {
                   className="icon-circle-btn"
                   style={{ width: 36, height: 36 }}
                   onClick={() => { setIsTimerRunning(false); setTimerSeconds(0); }}
-                  title="Timer zurücksetzen"
+                  title={t('cookingMode.timer.resetTitle')}
                 >
                   <RotateCcw size={14} />
                 </button>
@@ -224,14 +226,14 @@ export default function CookingModeModal({ recipe, onClose }) {
           <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: 8, color: '#059669' }}>
-                <ShoppingBag size={20} /> Zutaten ({scaledIngredients.length})
+                <ShoppingBag size={20} /> {t('cookingMode.ingredients.title', { count: scaledIngredients.length })}
               </h3>
               <button
                 className="btn-secondary"
                 style={{ padding: '4px 10px', fontSize: '0.8rem', color: '#059669', borderColor: '#059669' }}
                 onClick={handleAddAllToShopping}
               >
-                🛒 Auf Bring! Liste
+                {t('cookingMode.ingredients.addToList')}
               </button>
             </div>
 
@@ -263,17 +265,17 @@ export default function CookingModeModal({ recipe, onClose }) {
           <div className="cooking-steps-panel">
             <div className="cooking-steps-heading">
               <h3>
-                <CheckSquare size={20} /> Schritt-für-Schritt Zubereitung
+                <CheckSquare size={20} /> {t('cookingMode.steps.title')}
               </h3>
               <span>
-                {completedSteps.length} / {steps.length} erledigt
+                {t('cookingMode.steps.progress', { completed: completedSteps.length, total: steps.length })}
               </span>
             </div>
 
             <div
               className="cooking-steps-progress"
               role="progressbar"
-              aria-label="Fortschritt der Zubereitung"
+              aria-label={t('cookingMode.steps.progressAria')}
               aria-valuemin="0"
               aria-valuemax="100"
               aria-valuenow={stepProgress}
@@ -310,7 +312,7 @@ export default function CookingModeModal({ recipe, onClose }) {
                       <span className="cooking-step-copy">
                         {stepText}
                         {isParallel && (
-                          <small>Parallel vorbereiten</small>
+                          <small>{t('cookingMode.steps.parallelHint')}</small>
                         )}
                       </span>
                       <CheckSquare
@@ -327,7 +329,7 @@ export default function CookingModeModal({ recipe, onClose }) {
                         }
                       >
                         <Clock size={14} />
-                        Timer · {durationMinutes} Min
+                        {t('cookingMode.steps.stepTimer', { minutes: durationMinutes })}
                       </button>
                     )}
                   </article>

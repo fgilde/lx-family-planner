@@ -1,0 +1,178 @@
+{
+  "toggle": {
+    "on": "An",
+    "off": "Aus"
+  },
+  "access": {
+    "grants": {
+      "sharedCalendar": {
+        "label": "Gemeinsame Termine",
+        "help": "Diese Familie darf euch zu gemeinsam sichtbaren Terminen einladen."
+      },
+      "tasks": {
+        "label": "Aufgaben",
+        "help": "Erwachsene dieser Familie dürfen euren Kindern Aufgaben geben."
+      },
+      "rewards": {
+        "label": "Sterne & Belohnungen",
+        "help": "Erlaubt Sternpunkte bei Aufgaben und eigene Belohnungen."
+      },
+      "pocketMoney": {
+        "label": "Taschengeld",
+        "help": "Erlaubt nachvollziehbare Taschengeldbuchungen für eure Kinder."
+      }
+    },
+    "childPosition": {
+      "teenager": "Teenager",
+      "grandchild": "Enkelkind"
+    },
+    "header": {
+      "kicker": "Sicher zusammen organisieren",
+      "title": "Freigaben im Familiennetz",
+      "description": "Ihr entscheidet je Verbindung. Die andere Familie sieht keine privaten Kalender, Chats oder Pinnwand-Inhalte."
+    },
+    "card": {
+      "subtitle": "Was diese Familie für eure Kinder tun darf",
+      "grantedFromOther": "Von dort für euch freigegeben:",
+      "nothingYet": "noch nichts"
+    },
+    "planner": {
+      "kicker": "Für Enkelkinder",
+      "title": "Von Familie zu Familie",
+      "description": "Aufgabe, Belohnung oder Taschengeld landet direkt und nachvollziehbar im Familienkonto des Kindes.",
+      "familyBranch": "Familienzweig",
+      "tools": {
+        "task": "Aufgabe",
+        "reward": "Belohnung",
+        "money": "Taschengeld"
+      },
+      "task": {
+        "label": "Aufgabe",
+        "placeholder": "z. B. Oma im Garten helfen",
+        "dueDate": "Bis wann?",
+        "stars": "Sterne"
+      },
+      "reward": {
+        "label": "Belohnung",
+        "placeholder": "z. B. Ein Nachmittag im Zoo",
+        "costStars": "Sternepreis",
+        "image": "Bild der Belohnung"
+      },
+      "money": {
+        "amount": "Betrag in Euro",
+        "note": "Wofür?",
+        "defaultNote": "Von Oma & Opa"
+      },
+      "submit": "An das Kinderprofil senden"
+    }
+  },
+  "tree": {
+    "relations": {
+      "parent": {
+        "label": "Elternfamilie",
+        "help": "Die ausgewählte Familie steht über eurer Familie."
+      },
+      "child": {
+        "label": "Kinderfamilie",
+        "help": "Die ausgewählte Familie ist ein Familienzweig unter euch."
+      },
+      "sibling": {
+        "label": "Geschwisterfamilie",
+        "help": "Beide Familien stehen auf derselben Ebene."
+      },
+      "relative": {
+        "label": "Weitere Verwandte",
+        "help": "Zum Beispiel Tante, Onkel, Cousins oder enge Wahlfamilie."
+      },
+      "fallback": "Verwandte Familie"
+    },
+    "node": {
+      "ourFamily": "Unsere Familie",
+      "profiles_one": "{{count}} Profil",
+      "profiles_other": "{{count}} Profile"
+    },
+    "branch": {
+      "membersAria": "Mitglieder von {{familyName}}",
+      "thisFamily": "dieser Familie",
+      "noProfiles": "Keine Profile vorhanden"
+    },
+    "header": {
+      "kicker": "Verbindungen nur mit Bestätigung",
+      "title": "Euer Familiennetz",
+      "description": "Verknüpft echte Familienkonten. Eine Verbindung wird erst sichtbar, wenn die andere Familie zustimmt.",
+      "closeAria": "Stammbaum schließen"
+    },
+    "generations": {
+      "parents": "Elternfamilien",
+      "parentsEmpty": "Noch nicht verknüpft",
+      "children": "Kinderfamilien",
+      "childrenEmpty": "Noch kein Familienzweig",
+      "ourAccount": "Euer Konto"
+    },
+    "inbox": {
+      "kicker": "Benötigt eure Entscheidung",
+      "title": "Familienanfragen",
+      "request": "{{familyName}} möchte euch als {{relation}} einordnen.",
+      "accept": "Annehmen",
+      "decline": "Ablehnen"
+    },
+    "request": {
+      "kicker": "Familienkonto verbinden",
+      "title": "Neue Verknüpfung",
+      "registeredFamily": "Registrierte Familie",
+      "selectFamily": "Familie auswählen …",
+      "relationLabel": "Diese Familie ist eure …",
+      "send": "Anfrage senden",
+      "allConnected": "Alle derzeit registrierten Familien sind bereits verbunden oder angefragt.",
+      "adultsOnly": "Nur Erwachsene können Familienkonten verknüpfen."
+    },
+    "manage": {
+      "kicker": "Verwaltung",
+      "title": "Verbindungen & Anfragen",
+      "pending": "Wartet auf Bestätigung",
+      "removeTitle": "Verbindung entfernen",
+      "empty": "Noch keine Verbindungen."
+    }
+  },
+  "settings": {
+    "header": {
+      "eyebrow": "Familienverwaltung",
+      "title": "Unser Zuhause"
+    },
+    "form": {
+      "newImage": "Neues Familienbild",
+      "familyName": "Familienname",
+      "badge": "Kurzer Zusatz",
+      "badgePlaceholder": "z. B. Unser Zuhause",
+      "newPassword": "Neues Familienpasswort (optional)",
+      "passwordPlaceholder": "Leer lassen = unverändert"
+    },
+    "household": {
+      "title": "Zweiten Planungsort anzeigen",
+      "description": "Blendet „Zuhause Oma & Opa“ als eigenen Planungsbereich im Kopf der App ein.",
+      "why": "Warum gibt es das?",
+      "explainer": "Ideal, wenn Oma und Opa kein eigenes Familienkonto nutzen: Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand lassen sich für ihr Zuhause getrennt planen."
+    },
+    "about": {
+      "version": "Version {{version}}"
+    },
+    "github": {
+      "aria": "LX Family Planner auf GitHub ansehen",
+      "kicker": "Open Source",
+      "title": "Gefällt euch LX?",
+      "description": "Besucht das Projekt oder lasst einen Stern da."
+    },
+    "actions": {
+      "saving": "Speichert …",
+      "save": "Änderungen speichern",
+      "deleteAccount": "Familienkonto löschen"
+    },
+    "delete": {
+      "title": "Familienkonto endgültig löschen?",
+      "description": "Dabei werden Profile, Termine, Aufgaben und alle weiteren Familieninhalte entfernt. Diese Aktion lässt sich nicht rückgängig machen.",
+      "passwordLabel": "Zur Bestätigung das Familienpasswort eingeben",
+      "deleting": "Wird gelöscht …",
+      "confirm": "Familie endgültig löschen"
+    }
+  }
+}

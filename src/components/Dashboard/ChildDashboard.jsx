@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   AlarmClock,
   BadgeCheck,
@@ -28,60 +29,28 @@ import {
   DEFAULT_MEMBER_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import { formatCurrency } from '../../utils/formatting';
 import HomeAssistantWidget from './HomeAssistantWidget';
 import MediaCover from './MediaCover';
 import RewardIcon from '../Tasks/RewardIcon';
 
+// Die label-Werte werden als heroTitle im Profil gespeichert und bleiben
+// deshalb deutsch – angezeigt wird die Übersetzung (child.worlds.*).
 const CHILD_WORLDS = {
-  space: {
-    label: 'Raketenbasis',
-    mascot: '🚀',
-    buddy: '🛸',
-    mission: 'Sternenenergie',
-    greeting: 'Bereit zum Abheben?'
-  },
-  unicorn: {
-    label: 'Einhornland',
-    mascot: '🦄',
-    buddy: '🌈',
-    mission: 'Regenbogenkraft',
-    greeting: 'Heute wird magisch!'
-  },
-  fairy: {
-    label: 'Feenzauber',
-    mascot: '🧚',
-    buddy: '✨',
-    mission: 'Zauberstaub',
-    greeting: 'Der Zauberwald ruft!'
-  },
-  dino: {
-    label: 'Dinowelt',
-    mascot: '🦖',
-    buddy: '🥚',
-    mission: 'Dino-Power',
-    greeting: 'Auf ins große Abenteuer!'
-  },
-  sunshine: {
-    label: 'Sonneninsel',
-    mascot: '☀️',
-    buddy: '🏄',
-    mission: 'Sonnenstrahlen',
-    greeting: 'Ein guter Tag beginnt!'
-  },
-  adventure: {
-    label: 'Helden-Camp',
-    mascot: '🦸',
-    buddy: '⚡',
-    mission: 'Heldenkraft',
-    greeting: 'Deine Mission wartet!'
-  }
+  space: { label: 'Raketenbasis', mascot: '🚀', buddy: '🛸' },
+  unicorn: { label: 'Einhornland', mascot: '🦄', buddy: '🌈' },
+  fairy: { label: 'Feenzauber', mascot: '🧚', buddy: '✨' },
+  dino: { label: 'Dinowelt', mascot: '🦖', buddy: '🥚' },
+  sunshine: { label: 'Sonneninsel', mascot: '☀️', buddy: '🏄' },
+  adventure: { label: 'Helden-Camp', mascot: '🦸', buddy: '⚡' }
 };
 
+// Die ids werden gespeichert – die Anzeigetexte kommen aus child.moods.*.
 const MOODS = [
-  { id: 'super', label: 'Super!', emoji: '🤩', icon: Laugh },
-  { id: 'gut', label: 'Gut', emoji: '😊', icon: Sun },
-  { id: 'okay', label: 'Geht so', emoji: '😐', icon: Meh },
-  { id: 'hilfe', label: 'Brauche Nähe', emoji: '🫶', icon: Heart }
+  { id: 'super', emoji: '🤩', icon: Laugh },
+  { id: 'gut', emoji: '😊', icon: Sun },
+  { id: 'okay', emoji: '😐', icon: Meh },
+  { id: 'hilfe', emoji: '🫶', icon: Heart }
 ];
 
 const BUDDIES = ['🦊', '🐼', '🦁', '🐲', '🦄', '🤖', '🦖', '🧚'];
@@ -108,6 +77,7 @@ function isInTimeWindow(start, end) {
 }
 
 export default function ChildDashboard() {
+  const { t } = useTranslation('dashboard');
   const {
     activeMember,
     tasks,
@@ -133,12 +103,14 @@ export default function ChildDashboard() {
     toggleFamilyMission,
     updateKidProfile
   } = useFamily();
-  const firstName = activeMember?.name?.split(' ')[0] || 'Abenteurer';
+  const firstName = activeMember?.name?.split(' ')[0] || t('child.fallbackName');
   const stars = Number(activeMember?.stars || 0);
   const level = Math.floor(stars / 50) + 1;
   const levelProgress = stars % 50;
-  const world =
-    CHILD_WORLDS[activeMember?.theme] || CHILD_WORLDS.adventure;
+  const worldKey = CHILD_WORLDS[activeMember?.theme]
+    ? activeMember.theme
+    : 'adventure';
+  const world = CHILD_WORLDS[worldKey];
   const allMyTasks = tasks.filter(
     task => task.memberId === activeMember?.id
   );
@@ -234,30 +206,38 @@ export default function ChildDashboard() {
         </div>
         <div className="child-hero-copy">
           <span className="child-kicker">
-            <Sparkles size={16} /> Level {level} · {kidStyle?.heroTitle || world.label}
+            <Sparkles size={16} />{' '}
+            {t('child.hero.kicker', {
+              level,
+              title: kidStyle?.heroTitle || t(`child.worlds.${worldKey}.label`)
+            })}
           </span>
-          <h1>Hey {firstName}! {world.greeting}</h1>
-          <p>
-            Heute gibt es {myTasks.length || 'keine'} Mission
-            {myTasks.length === 1 ? '' : 'en'} für dich. Mit jeder erledigten
-            Aufgabe wächst dein Sterneschatz.
-          </p>
+          <h1>
+            {t('child.hero.hey', { name: firstName })}{' '}
+            {t(`child.worlds.${worldKey}.greeting`)}
+          </h1>
+          <p>{t('child.hero.intro', { count: myTasks.length })}</p>
           <div className="child-level-track">
             <span style={{ width: `${(levelProgress / 50) * 100}%` }} />
           </div>
-          <small>{50 - levelProgress} Sterne bis Level {level + 1}</small>
+          <small>
+            {t('child.hero.starsToNextLevel', {
+              count: 50 - levelProgress,
+              level: level + 1
+            })}
+          </small>
           <div className="child-hero-metrics">
             <span>
               <b>{myTasks.length}</b>
-              Missionen offen
+              {t('child.hero.openMissions')}
             </span>
             <span>
               <b>{completedMissions}</b>
-              geschafft
+              {t('child.hero.done')}
             </span>
             <span>
               <b>{missionProgress}%</b>
-              {world.mission}
+              {t(`child.worlds.${worldKey}.mission`)}
             </span>
           </div>
         </div>
@@ -289,16 +269,19 @@ export default function ChildDashboard() {
           <Rocket size={19} />
         </div>
         <div className="child-map-copy">
-          <span className="child-section-kicker">Dein Abenteuerpfad</span>
+          <span className="child-section-kicker">{t('child.map.kicker')}</span>
           <h2>
             {allMyTasks.length
-              ? `${completedMissions} von ${allMyTasks.length} Missionen geschafft`
-              : 'Heute ist freier Entdeckertag'}
+              ? t('child.map.progress', {
+                  done: completedMissions,
+                  total: allMyTasks.length
+                })
+              : t('child.map.freeDay')}
           </h2>
           <div
             className="child-map-track"
             role="progressbar"
-            aria-label="Fortschritt der Missionen"
+            aria-label={t('child.map.progressAria')}
             aria-valuemin="0"
             aria-valuemax="100"
             aria-valuenow={missionProgress}
@@ -308,11 +291,15 @@ export default function ChildDashboard() {
         </div>
         <div className="child-map-goal">
           <span>{missionProgress === 100 ? '🏆' : '🎁'}</span>
-          <small>{missionProgress === 100 ? 'Geschafft!' : 'Tagesziel'}</small>
+          <small>
+            {missionProgress === 100
+              ? t('child.map.goalDone')
+              : t('child.map.goalLabel')}
+          </small>
           <strong>
             {missionProgress === 100
-              ? 'Du bist heute unschlagbar'
-              : `${myTasks.length} Mission${myTasks.length === 1 ? '' : 'en'} bis zum Ziel`}
+              ? t('child.map.unbeatable')
+              : t('child.map.missionsToGoal', { count: myTasks.length })}
           </strong>
         </div>
       </section>
@@ -331,14 +318,19 @@ export default function ChildDashboard() {
         >
           <span className="child-today-icon"><AlarmClock size={23} /></span>
           <span className="child-today-copy">
-            <small>Deine Routine</small>
+            <small>{t('child.today.routine.label')}</small>
             <strong>
               {nextRoutineStep?.title || (
-                routineSteps.length ? 'Heute komplett geschafft!' : 'Routine entdecken'
+                routineSteps.length
+                  ? t('child.today.routine.allDone')
+                  : t('child.today.routine.discover')
               )}
             </strong>
             <i>
-              {completedRoutineSteps}/{routineSteps.length || 0} Schritte
+              {t('child.today.routine.steps', {
+                done: completedRoutineSteps,
+                total: routineSteps.length || 0
+              })}
             </i>
           </span>
           <span className="child-today-action">
@@ -353,14 +345,13 @@ export default function ChildDashboard() {
         >
           <span className="child-today-icon"><PiggyBank size={23} /></span>
           <span className="child-today-copy">
-            <small>Dein Sparschwein</small>
-            <strong>{savingGoal?.title || 'Noch kein Sparziel'}</strong>
+            <small>{t('child.today.saving.label')}</small>
+            <strong>{savingGoal?.title || t('child.today.saving.noGoal')}</strong>
             <i>
-              {(pocketBalance / 100).toLocaleString('de-DE', {
-                style: 'currency',
-                currency: 'EUR'
-              })}
-              {savingGoal ? ` · ${savingPercent}% geschafft` : ''}
+              {formatCurrency(pocketBalance / 100)}
+              {savingGoal
+                ? ` · ${t('child.today.saving.percentDone', { percent: savingPercent })}`
+                : ''}
             </i>
           </span>
           <span className="child-today-action"><Coins size={18} /></span>
@@ -373,9 +364,9 @@ export default function ChildDashboard() {
         >
           <span className="child-today-icon"><BadgeCheck size={23} /></span>
           <span className="child-today-copy">
-            <small>Deine Sammlung</small>
-            <strong>{earnedBadges} Abzeichen entdeckt</strong>
-            <i>Neue Erfolge warten auf dich</i>
+            <small>{t('child.today.badges.label')}</small>
+            <strong>{t('child.today.badges.count', { count: earnedBadges })}</strong>
+            <i>{t('child.today.badges.hint')}</i>
           </span>
           <span className="child-today-action"><Trophy size={18} /></span>
         </button>
@@ -387,8 +378,15 @@ export default function ChildDashboard() {
             <article className="child-mutmach-card">
               <span>{latestEncouragement.icon || '💛'}</span>
               <div>
-                <small>Mutmacher von {latestEncouragement.createdByName || 'deiner Familie'}</small>
-                <strong>„{latestEncouragement.message}“</strong>
+                <small>
+                  {t('child.story.encouragementFrom', {
+                    name: latestEncouragement.createdByName ||
+                      t('child.story.familyFallback')
+                  })}
+                </small>
+                <strong>
+                  {t('child.story.quote', { message: latestEncouragement.message })}
+                </strong>
               </div>
             </article>
           )}
@@ -400,7 +398,7 @@ export default function ChildDashboard() {
             >
               <span>{openFamilyMission.icon || '🤝'}</span>
               <div>
-                <small>Gemeinsam stark</small>
+                <small>{t('child.story.togetherStrong')}</small>
                 <strong>{openFamilyMission.title}</strong>
               </div>
               <i><Check size={17} /></i>
@@ -410,7 +408,7 @@ export default function ChildDashboard() {
             <article className="child-quick-poll">
               <header>
                 <Vote size={18} />
-                <div><small>Deine Stimme zählt</small><strong>{activePoll.question}</strong></div>
+                <div><small>{t('child.story.pollKicker')}</small><strong>{activePoll.question}</strong></div>
               </header>
               <div>
                 {activePoll.options?.slice(0, 4).map(option => (
@@ -433,12 +431,12 @@ export default function ChildDashboard() {
 
       <section className="child-mood-card">
         <div>
-          <span className="child-section-kicker">Familienkompass</span>
-          <h2>Wie fühlst du dich heute?</h2>
+          <span className="child-section-kicker">{t('child.mood.kicker')}</span>
+          <h2>{t('child.mood.title')}</h2>
           <p>
             {latestMood
-              ? 'Danke, dass du heute schon eingecheckt hast.'
-              : 'Ein Klick reicht – deine Familie weiß dann, wie es dir geht.'}
+              ? t('child.mood.checkedIn')
+              : t('child.mood.prompt')}
           </p>
         </div>
         <div className="child-mood-options">
@@ -450,7 +448,7 @@ export default function ChildDashboard() {
               className={latestMood?.mood === mood.id ? 'selected' : ''}
             >
               <span>{mood.emoji}</span>
-              <strong>{mood.label}</strong>
+              <strong>{t(`child.moods.${mood.id}`)}</strong>
             </button>
           ))}
         </div>
@@ -460,11 +458,11 @@ export default function ChildDashboard() {
         <section className="child-panel child-quests">
           <header>
             <div>
-              <span className="child-section-kicker">Deine Missionen</span>
-              <h2><Trophy size={22} /> Heute Sterne sammeln</h2>
+              <span className="child-section-kicker">{t('child.quests.kicker')}</span>
+              <h2><Trophy size={22} /> {t('child.quests.title')}</h2>
             </div>
             <button onClick={() => setActiveTab('tasks')} type="button">
-              Alle <ChevronRight size={16} />
+              {t('child.quests.viewAll')} <ChevronRight size={16} />
             </button>
           </header>
           <div className="child-quest-list">
@@ -479,7 +477,7 @@ export default function ChildDashboard() {
                   <span className="child-quest-number">{index + 1}</span>
                   <span className="child-quest-copy">
                     <strong>{task.title}</strong>
-                    <small>{task.category || 'Familienmission'}</small>
+                    <small>{task.category || t('child.quests.defaultCategory')}</small>
                   </span>
                   <span className="child-quest-stars">
                     +{task.stars || 10} <Star size={15} fill="currentColor" />
@@ -490,8 +488,8 @@ export default function ChildDashboard() {
             ) : (
               <div className="child-empty">
                 <span>🏆</span>
-                <strong>Alles geschafft!</strong>
-                <p>Deine Missionen sind erledigt. Stark gemacht.</p>
+                <strong>{t('child.quests.emptyTitle')}</strong>
+                <p>{t('child.quests.emptyText')}</p>
               </div>
             )}
           </div>
@@ -500,11 +498,11 @@ export default function ChildDashboard() {
         <section className="child-panel child-rewards">
           <header>
             <div>
-              <span className="child-section-kicker">Wunschstation</span>
-              <h2><Gift size={22} /> Dein Sterneshop</h2>
+              <span className="child-section-kicker">{t('child.rewards.kicker')}</span>
+              <h2><Gift size={22} /> {t('child.rewards.title')}</h2>
             </div>
             <button onClick={() => setActiveTab('tasks')} type="button">
-              Shop <ChevronRight size={16} />
+              {t('child.rewards.shop')} <ChevronRight size={16} />
             </button>
           </header>
           <div className="child-reward-list">
@@ -522,7 +520,7 @@ export default function ChildDashboard() {
                       <strong>{reward.title}</strong>
                       <small>
                         <Star size={13} fill="currentColor" />
-                        {reward.costStars} Sterne
+                        {t('child.rewards.cost', { count: Number(reward.costStars || 0) })}
                       </small>
                     </div>
                     <button
@@ -530,7 +528,9 @@ export default function ChildDashboard() {
                       disabled={!affordable}
                       onClick={() => redeemReward(reward, activeMember.id)}
                     >
-                      {affordable ? 'Holen' : 'Sammeln'}
+                      {affordable
+                        ? t('child.rewards.redeem')
+                        : t('child.rewards.collect')}
                     </button>
                   </article>
                 );
@@ -538,7 +538,7 @@ export default function ChildDashboard() {
             ) : (
               <div className="child-empty compact">
                 <span>🎁</span>
-                <p>Noch keine Wünsche im Shop.</p>
+                <p>{t('child.rewards.empty')}</p>
               </div>
             )}
           </div>
@@ -549,10 +549,10 @@ export default function ChildDashboard() {
         <section className="child-media-club">
           <header>
             <div>
-              <span className="child-section-kicker">Von deiner Familie freigegeben</span>
-              <h2><Play size={23} fill="currentColor" /> Deine Medien-Lounge</h2>
+              <span className="child-section-kicker">{t('child.media.kicker')}</span>
+              <h2><Play size={23} fill="currentColor" /> {t('child.media.title')}</h2>
             </div>
-            <span className="child-safe-badge">✓ Von Eltern ausgewählt</span>
+            <span className="child-safe-badge">{t('child.media.safeBadge')}</span>
           </header>
           <div className="child-media-grid">
             {myDashboardLinks.map((link, index) => {
@@ -587,10 +587,16 @@ export default function ChildDashboard() {
                   </span>
                   <span className="child-media-copy">
                     <small>
-                      {isSpotify ? 'Spotify Playlist' : 'YouTube Kanal'}
+                      {isSpotify
+                        ? t('child.media.spotifyPlaylist')
+                        : t('child.media.youtubeChannel')}
                     </small>
                     <strong>{link.title}</strong>
-                    <em>{isSpotify ? 'Musik an' : 'Video starten'}</em>
+                    <em>
+                      {isSpotify
+                        ? t('child.media.playMusic')
+                        : t('child.media.playVideo')}
+                    </em>
                   </span>
                   <ExternalLink className="child-media-external" size={18} />
                   <span className="child-media-provider" aria-hidden="true">
@@ -607,9 +613,11 @@ export default function ChildDashboard() {
         <section className="child-media-rest">
           <span><Clock3 size={25} /></span>
           <div>
-            <small>Medien-Lounge macht gerade Pause</small>
+            <small>{t('child.media.pausedLabel')}</small>
             <strong>
-              Ab {familyRules?.mediaStart || '15:00'} Uhr ist sie wieder für dich da.
+              {t('child.media.pausedUntil', {
+                time: familyRules?.mediaStart || '15:00'
+              })}
             </strong>
           </div>
         </section>
@@ -618,18 +626,15 @@ export default function ChildDashboard() {
       {homeAssistantEntities.length > 0 && (
         <HomeAssistantWidget
           className="child-home-assistant"
-          title="Deine Haus-Kontrollen"
+          title={t('child.homeControlsTitle')}
         />
       )}
 
       <section className="child-buddy-lab">
         <div>
-          <span className="child-section-kicker">Deine Welt, deine Wahl</span>
-          <h2><Palette size={22} /> Abenteuer-Begleiter</h2>
-          <p>
-            Wähle, wer dich durch deine Missionen begleitet. Die Auswahl wird
-            nur für dein Profil gespeichert.
-          </p>
+          <span className="child-section-kicker">{t('child.buddy.kicker')}</span>
+          <h2><Palette size={22} /> {t('child.buddy.title')}</h2>
+          <p>{t('child.buddy.text')}</p>
         </div>
         <div className="child-buddy-options">
           {BUDDIES.map(buddy => (
@@ -653,23 +658,23 @@ export default function ChildDashboard() {
         <div className="child-family-card">
           <CalendarDays size={22} />
           <span>
-            <small>Als Nächstes</small>
+            <small>{t('child.familyStrip.nextLabel')}</small>
             <strong>
-              {upcomingEvents[0]?.title || 'Heute ist alles frei'}
+              {upcomingEvents[0]?.title || t('child.familyStrip.nothingPlanned')}
             </strong>
           </span>
           <button type="button" onClick={() => setActiveTab('calendar')}>
-            Kalender <ChevronRight size={15} />
+            {t('child.familyStrip.calendar')} <ChevronRight size={15} />
           </button>
         </div>
         <div className="child-family-card coral">
           <MessageCircle size={22} />
           <span>
-            <small>Familienfunk</small>
-            <strong>Sag allen kurz Hallo!</strong>
+            <small>{t('child.familyStrip.chatLabel')}</small>
+            <strong>{t('child.familyStrip.chatPrompt')}</strong>
           </span>
           <button type="button" onClick={() => setActiveTab('chat')}>
-            Öffnen <ChevronRight size={15} />
+            {t('child.familyStrip.open')} <ChevronRight size={15} />
           </button>
         </div>
       </section>

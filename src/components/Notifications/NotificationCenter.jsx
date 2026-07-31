@@ -27,8 +27,14 @@ import {
   Vote,
   X
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { canManageFamily } from '../../constants/roles';
+import {
+  formatDate,
+  formatDateTime,
+  formatTime
+} from '../../utils/formatting';
 
 const VIEW_NAMES = new Set([
   'dashboard',
@@ -46,98 +52,98 @@ const VIEW_NAMES = new Set([
 
 const NOTIFICATION_META = {
   groupChat: {
-    label: 'Familienchat',
+    labelKey: 'center.meta.groupChat',
     icon: MessageCircle,
     tone: 'chat'
   },
   directMessages: {
-    label: 'Direktnachricht',
+    labelKey: 'center.meta.directMessages',
     icon: MessageCircle,
     tone: 'chat'
   },
   taskAssigned: {
-    label: 'Neue Aufgabe',
+    labelKey: 'center.meta.taskAssigned',
     icon: ClipboardCheck,
     tone: 'task'
   },
   taskApproval: {
-    label: 'Aufgabenfreigabe',
+    labelKey: 'center.meta.taskApproval',
     icon: CheckCircle2,
     tone: 'approval'
   },
   taskCompleted: {
-    label: 'Geschafft',
+    labelKey: 'center.meta.taskCompleted',
     icon: Sparkles,
     tone: 'success'
   },
   events: {
-    label: 'Familienkalender',
+    labelKey: 'center.meta.events',
     icon: CalendarDays,
     tone: 'calendar'
   },
   moodHelp: {
-    label: 'Familienkompass',
+    labelKey: 'center.meta.moodHelp',
     icon: HeartHandshake,
     tone: 'care'
   },
   moodUpdates: {
-    label: 'Gefühlslage',
+    labelKey: 'center.meta.moodUpdates',
     icon: HeartPulse,
     tone: 'care'
   },
   problemReports: {
-    label: 'Problemmeldung',
+    labelKey: 'center.meta.problemReports',
     icon: Bug,
     tone: 'approval'
   },
   encouragements: {
-    label: 'Mutmacher',
+    labelKey: 'center.meta.encouragements',
     icon: MessageCircleHeart,
     tone: 'care'
   },
   familyPolls: {
-    label: 'Familien-Abstimmung',
+    labelKey: 'center.meta.familyPolls',
     icon: Vote,
     tone: 'calendar'
   },
   familyMissions: {
-    label: 'Familienmission',
+    labelKey: 'center.meta.familyMissions',
     icon: Flag,
     tone: 'success'
   },
   schoolItems: {
-    label: 'Schule',
+    labelKey: 'center.meta.schoolItems',
     icon: GraduationCap,
     tone: 'task'
   },
   rewards: {
-    label: 'Belohnung',
+    labelKey: 'center.meta.rewards',
     icon: Gift,
     tone: 'success'
   },
   pocketMoney: {
-    label: 'Taschengeld',
+    labelKey: 'center.meta.pocketMoney',
     icon: Coins,
     tone: 'success'
   },
   familyConnections: {
-    label: 'Familiennetz',
+    labelKey: 'center.meta.familyConnections',
     icon: Network,
     tone: 'calendar'
   },
   familyMail: {
-    label: 'Familienpost',
+    labelKey: 'center.meta.familyMail',
     icon: Mail,
     tone: 'chat'
   },
   familyChatInvites: {
-    label: 'Chat-Einladung',
+    labelKey: 'center.meta.familyChatInvites',
     icon: UserRoundPlus,
     tone: 'approval'
   }
 };
 
-function relativeTime(timestamp) {
+function relativeTime(timestamp, t) {
   const date = new Date(Number(timestamp || Date.now()));
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -149,13 +155,10 @@ function relativeTime(timestamp) {
   const dayDifference = Math.round(
     (today.getTime() - notificationDay.getTime()) / 86_400_000
   );
-  const time = date.toLocaleTimeString('de-DE', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-  if (dayDifference === 0) return `Heute, ${time}`;
-  if (dayDifference === 1) return `Gestern, ${time}`;
-  return date.toLocaleDateString('de-DE', {
+  const time = formatTime(date);
+  if (dayDifference === 0) return t('center.time.today', { time });
+  if (dayDifference === 1) return t('center.time.yesterday', { time });
+  return formatDateTime(date, {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -172,6 +175,7 @@ function localDateKey(date = new Date()) {
 }
 
 export default function NotificationCenter() {
+  const { t, i18n } = useTranslation('notifications');
   const {
     activeMember,
     activeHousehold,
@@ -247,7 +251,7 @@ export default function NotificationCenter() {
         belongsToHousehold(item)
     );
     return {
-      dateLabel: now.toLocaleDateString('de-DE', {
+      dateLabel: formatDate(now, {
         weekday: 'long',
         day: 'numeric',
         month: 'long'
@@ -262,6 +266,7 @@ export default function NotificationCenter() {
     activeHousehold,
     activeMember,
     events,
+    i18n.language,
     meals,
     shoppingItems,
     tasks
@@ -326,10 +331,10 @@ export default function NotificationCenter() {
         }}
         aria-label={
           unreadNotificationCount
-            ? `${unreadNotificationCount} ungelesene Meldungen im Familien-Posteingang`
-            : 'Familien-Posteingang öffnen'
+            ? t('center.trigger.unread', { count: unreadNotificationCount })
+            : t('center.trigger.open')
         }
-        title="Familien-Posteingang"
+        title={t('center.trigger.title')}
       >
         <Bell size={19} />
         {unreadNotificationCount > 0 && (
@@ -355,21 +360,24 @@ export default function NotificationCenter() {
               <header className="notification-center-header">
                 <div>
                   <span className="notification-center-kicker">
-                    <Bell size={13} /> Familienfunk
+                    <Bell size={13} /> {t('center.header.kicker')}
                   </span>
                   <h2 id="notification-center-title">
-                    Familien-Posteingang
+                    {t('center.header.title')}
                   </h2>
                   <p>
-                    Tagesüberblick und Meldungen für{' '}
-                    {activeMember?.name?.split(' ')[0] || 'dich'} an einem Ort.
+                    {t('center.header.subtitle', {
+                      name:
+                        activeMember?.name?.split(' ')[0] ||
+                        t('center.header.subtitleFallbackName')
+                    })}
                   </p>
                 </div>
                 <button
                   type="button"
                   className="notification-center-close"
                   onClick={() => setIsOpen(false)}
-                  aria-label="Meldungen schließen"
+                  aria-label={t('center.header.close')}
                 >
                   <X size={19} />
                 </button>
@@ -379,7 +387,7 @@ export default function NotificationCenter() {
                 <div
                   className="notification-center-tabs"
                   role="tablist"
-                  aria-label="Posteingang auswählen"
+                  aria-label={t('center.tabs.label')}
                 >
                   <button
                     type="button"
@@ -388,7 +396,7 @@ export default function NotificationCenter() {
                     role="tab"
                     aria-selected={activeSection === 'today'}
                   >
-                    <SunMedium size={15} /> Heute
+                    <SunMedium size={15} /> {t('center.tabs.today')}
                   </button>
                   <button
                     type="button"
@@ -399,7 +407,7 @@ export default function NotificationCenter() {
                     role="tab"
                     aria-selected={activeSection === 'notifications'}
                   >
-                    <Inbox size={15} /> Meldungen
+                    <Inbox size={15} /> {t('center.tabs.notifications')}
                     {unreadNotificationCount > 0 && (
                       <span>{unreadNotificationCount}</span>
                     )}
@@ -412,7 +420,7 @@ export default function NotificationCenter() {
                       className="notification-mark-all"
                       onClick={() => void markAllNotificationsRead()}
                     >
-                      <CheckCheck size={15} /> Alle gelesen
+                      <CheckCheck size={15} /> {t('center.markAllRead')}
                     </button>
                   )}
               </div>
@@ -424,11 +432,11 @@ export default function NotificationCenter() {
                       <span>{dailyBriefing.dateLabel}</span>
                       <strong>
                         {briefingCount
-                          ? `${briefingCount} Dinge brauchen heute euren Blick.`
-                          : 'Heute ist alles angenehm übersichtlich.'}
+                          ? t('center.digest.summary', { count: briefingCount })
+                          : t('center.digest.allClear')}
                       </strong>
                       <p>
-                        Ein kurzer Blick genügt – danach kann der Tag beginnen.
+                        {t('center.digest.intro')}
                       </p>
                     </header>
 
@@ -440,20 +448,18 @@ export default function NotificationCenter() {
                       >
                         <span><CalendarDays size={19} /></span>
                         <div>
-                          <small>Termine</small>
+                          <small>{t('center.digest.events.label')}</small>
                           <strong>
                             {dailyBriefing.events.length
                               ? dailyBriefing.events[0].title
-                              : 'Heute ist frei'}
+                              : t('center.digest.events.free')}
                           </strong>
                           <p>
                             {dailyBriefing.events.length
-                              ? `${dailyBriefing.events.length} ${
-                                  dailyBriefing.events.length === 1
-                                    ? 'Termin'
-                                    : 'Termine'
-                                } heute`
-                              : 'Keine Einträge im Kalender'}
+                              ? t('center.digest.events.count', {
+                                  count: dailyBriefing.events.length
+                                })
+                              : t('center.digest.events.empty')}
                           </p>
                         </div>
                         <ArrowUpRight size={16} />
@@ -466,18 +472,22 @@ export default function NotificationCenter() {
                       >
                         <span><ClipboardCheck size={19} /></span>
                         <div>
-                          <small>Aufgaben</small>
+                          <small>{t('center.digest.tasks.label')}</small>
                           <strong>
                             {dailyBriefing.approvals.length
-                              ? `${dailyBriefing.approvals.length} wartet auf Freigabe`
+                              ? t('center.digest.tasks.approvals', {
+                                  count: dailyBriefing.approvals.length
+                                })
                               : dailyBriefing.tasks.length
-                                ? `${dailyBriefing.tasks.length} heute offen`
-                                : 'Alles geschafft'}
+                                ? t('center.digest.tasks.open', {
+                                    count: dailyBriefing.tasks.length
+                                  })
+                                : t('center.digest.tasks.done')}
                           </strong>
                           <p>
                             {dailyBriefing.tasks[0]?.title ||
                               dailyBriefing.approvals[0]?.title ||
-                              'Keine dringende Aufgabe'}
+                              t('center.digest.tasks.empty')}
                           </p>
                         </div>
                         <ArrowUpRight size={16} />
@@ -490,17 +500,17 @@ export default function NotificationCenter() {
                       >
                         <span><UtensilsCrossed size={19} /></span>
                         <div>
-                          <small>Heute essen</small>
+                          <small>{t('center.digest.meals.label')}</small>
                           <strong>
                             {dailyBriefing.meals[0]?.recipe ||
-                              'Noch nicht geplant'}
+                              t('center.digest.meals.unplanned')}
                           </strong>
                           <p>
                             {dailyBriefing.meals.length
                               ? dailyBriefing.meals
                                   .map(meal => meal.meal)
                                   .join(' · ')
-                              : 'Der Speiseplan hat noch Platz'}
+                              : t('center.digest.meals.empty')}
                           </p>
                         </div>
                         <ArrowUpRight size={16} />
@@ -513,17 +523,20 @@ export default function NotificationCenter() {
                       >
                         <span><ShoppingBasket size={19} /></span>
                         <div>
-                          <small>Einkauf</small>
+                          <small>{t('center.digest.shopping.label')}</small>
                           <strong>
                             {dailyBriefing.shopping.length
-                              ? `${dailyBriefing.shopping.length} Dinge fehlen`
-                              : 'Liste ist leer'}
+                              ? t('center.digest.shopping.missing', {
+                                  count: dailyBriefing.shopping.length
+                                })
+                              : t('center.digest.shopping.listEmpty')}
                           </strong>
                           <p>
                             {dailyBriefing.shopping
                               .slice(0, 3)
                               .map(item => item.name)
-                              .join(' · ') || 'Gerade nichts einzukaufen'}
+                              .join(' · ') ||
+                              t('center.digest.shopping.nothingToBuy')}
                           </p>
                         </div>
                         <ArrowUpRight size={16} />
@@ -533,17 +546,14 @@ export default function NotificationCenter() {
                 ) : orderedNotifications.length === 0 ? (
                   <div className="notification-center-empty">
                     <span><CheckCheck size={28} /></span>
-                    <strong>Hier ist alles ruhig</strong>
-                    <p>
-                      Neue Termine, Nachrichten und Aufgaben landen künftig
-                      zuverlässig hier.
-                    </p>
+                    <strong>{t('center.empty.title')}</strong>
+                    <p>{t('center.empty.text')}</p>
                   </div>
                 ) : (
                   orderedNotifications.map(notification => {
                     const meta =
                       NOTIFICATION_META[notification.eventKey] || {
-                        label: 'Familienplaner',
+                        labelKey: 'center.meta.default',
                         icon: Bell,
                         tone: 'default'
                       };
@@ -562,8 +572,8 @@ export default function NotificationCenter() {
                         </span>
                         <span className="notification-center-copy">
                           <span className="notification-center-meta">
-                            <strong>{meta.label}</strong>
-                            <time>{relativeTime(notification.createdAt)}</time>
+                            <strong>{t(meta.labelKey)}</strong>
+                            <time>{relativeTime(notification.createdAt, t)}</time>
                           </span>
                           <b>{notification.title}</b>
                           {notification.body && <p>{notification.body}</p>}
@@ -580,8 +590,8 @@ export default function NotificationCenter() {
 
               <footer className="notification-center-footer">
                 {activeSection === 'today'
-                  ? 'Der Tagesüberblick wird live aus eurem Familienplan erstellt.'
-                  : 'Meldungen werden 90 Tage lang gespeichert.'}
+                  ? t('center.footer.today')
+                  : t('center.footer.notifications')}
               </footer>
             </aside>
           </div>,

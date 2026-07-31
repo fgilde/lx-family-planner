@@ -1,0 +1,126 @@
+{
+  "planner": {
+    "tabs": {
+      "weeklyPlan": "Weekly meal plan ({{household}})",
+      "recipeBook": "Recipe book ({{count}})"
+    },
+    "households": {
+      "family": "Our home",
+      "grandparents": "Grandma & Grandpa"
+    },
+    "header": {
+      "title": "Weekly meal plan",
+      "subtitle": "Plan your meals for the week. Click a meal to pick a recipe or add its ingredients to the shopping list with one click!"
+    },
+    "mealTypes": {
+      "lunch": "Lunch",
+      "dinner": "Dinner"
+    },
+    "slots": {
+      "editAria": "Edit {{meal}} for {{day}}",
+      "addIngredients": "Add ingredients to the list ({{count}})",
+      "empty": "No dish planned"
+    },
+    "modal": {
+      "title": "Add a dish: {{day}} ({{meal}})",
+      "chooseFromBook": "Choose from your recipe book",
+      "recipePlaceholderOption": "-- Select a recipe from the recipe book --",
+      "customLabel": "Or enter a dish yourself",
+      "customPlaceholder": "e.g. pancakes with apple sauce...",
+      "ingredientsLabel": "Ingredients (comma-separated for the shopping list)",
+      "ingredientsPlaceholder": "e.g. 500g flour, 4 eggs, 1L milk...",
+      "saving": "Saving …",
+      "removeEntry": "Remove entry"
+    }
+  },
+  "recipeBook": {
+    "image": {
+      "noImageAria": "{{title}} without image",
+      "unavailable": "Recipe image not available"
+    },
+    "errors": {
+      "importFailed": "The recipe could not be imported.",
+      "saveFailed": "The recipe could not be saved to the cookbook.",
+      "shareMissingLink": "The sharing app did not pass along a recipe link. Please paste the link below."
+    },
+    "toasts": {
+      "importedCheckTitle": "Recipe imported – please review",
+      "importedTitle": "🎉 Recipe imported!",
+      "importedBody": "\"{{title}}\" was imported successfully!",
+      "importErrorTitle": "⚠️ Import error",
+      "manualCreatedTitle": "✨ Recipe created",
+      "manualCreatedBody": "\"{{title}}\" was saved to the recipe book."
+    },
+    "header": {
+      "title": "Our Cookbook & Recipe World",
+      "subtitle": "Import recipes from Pinterest, Chefkoch and many other sites, collect them together and cook step by step."
+    },
+    "tabs": {
+      "browse": "All recipes ({{count}})",
+      "import": "Import recipe",
+      "manual": "New recipe"
+    },
+    "card": {
+      "deleteTitle": "Delete recipe",
+      "defaultPrepTime": "30 min",
+      "defaultServings": "4 servings",
+      "startCooking": "Start Cooking",
+      "addIngredientsTitle": "Add ingredients to the shopping list",
+      "addIngredients": "Add ingredients to the list"
+    },
+    "import": {
+      "shareArrivalTitle": "Shared straight from your phone",
+      "shareArrivalBody": "LX picks up the recipe link and automatically saves the dish to your cookbook.",
+      "importRunningAria": "Import in progress",
+      "kicker": "Recipe Finder",
+      "title": "Import a recipe from the web",
+      "description": "Paste the link to a recipe or Pinterest pin. Images, ingredients, times and instructions are imported automatically if the page provides recipe data.",
+      "platformsAria": "Examples of supported sites",
+      "morePlatforms": "more recipe sites",
+      "howto": "<strong>No copying needed on Android:</strong> Install LX as an app once. After that you can import from Chefkoch, Pinterest and other apps via <b>Share → LX Familie</b>.",
+      "urlLabel": "Public recipe link",
+      "urlPlaceholder": "https://www.pinterest.de/pin/... or recipe page",
+      "submitLoading": "Reading recipe …",
+      "submit": "Import recipe now",
+      "help": "Private pages, logins and internal home network addresses are not opened for security reasons. Some sites may technically block automatic retrieval."
+    },
+    "manual": {
+      "title": "Create your own recipe",
+      "dishTitleLabel": "Title of the dish",
+      "dishTitlePlaceholder": "e.g. Dad's famous Bolognese",
+      "prepTimeLabel": "Preparation time",
+      "servingsLabel": "Servings",
+      "submit": "Save Recipe"
+    }
+  },
+  "cookingMode": {
+    "activeBadge": "Cooking Mode Active",
+    "adjustPortions": "Adjust servings:",
+    "timer": {
+      "title": "Kitchen timer",
+      "minutesUnit": "min",
+      "start": "Start",
+      "stop": "Stop",
+      "resetTitle": "Reset timer",
+      "startedTitle": "⏱️ Cooking timer started",
+      "startedBody_one": "Timer started for {{count}} minute.",
+      "startedBody_other": "Timer started for {{count}} minutes.",
+      "finishedTitle": "⏰ Cooking finished!",
+      "finishedBody": "The cooking timer for \"{{title}}\" is up!"
+    },
+    "ingredients": {
+      "title": "Ingredients ({{count}})",
+      "addToList": "🛒 Add to Bring! list",
+      "addedTitle": "🛒 Ingredients added",
+      "addedBody_one": "{{count}} ingredient for \"{{title}}\" is on the shopping list!",
+      "addedBody_other": "{{count}} ingredients for \"{{title}}\" are on the shopping list!"
+    },
+    "steps": {
+      "title": "Step-by-step instructions",
+      "progress": "{{completed}} / {{total}} done",
+      "progressAria": "Preparation progress",
+      "parallelHint": "Prepare in parallel",
+      "stepTimer": "Timer · {{minutes}} min"
+    }
+  }
+}

@@ -16,6 +16,7 @@ import {
   Users,
   UtensilsCrossed
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { isChildProfile } from '../../constants/roles';
@@ -28,71 +29,87 @@ import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import {
+  formatDate,
+  formatTime,
+  getWeekdayNames
+} from '../../utils/formatting';
 
 const TABLET_WIDGETS = [
   {
     id: 'calendar',
-    label: 'Heute',
-    description: 'Alle heutigen Termine',
+    labelKey: 'kitchen.widgets.calendar.label',
+    descriptionKey: 'kitchen.widgets.calendar.description',
     icon: CalendarDays,
     color: '#377d69'
   },
   {
     id: 'meals',
-    label: 'Essen',
-    description: 'Der aktuelle Tagesplan',
+    labelKey: 'kitchen.widgets.meals.label',
+    descriptionKey: 'kitchen.widgets.meals.description',
     icon: UtensilsCrossed,
     color: '#c26745'
   },
   {
     id: 'tasks',
-    label: 'Aufgaben',
-    description: 'Offene Aufgaben und Freigaben',
+    labelKey: 'kitchen.widgets.tasks.label',
+    descriptionKey: 'kitchen.widgets.tasks.description',
     icon: CheckSquare,
     color: '#3975b9'
   },
   {
     id: 'shopping',
-    label: 'Einkauf',
-    description: 'Noch benötigte Artikel',
+    labelKey: 'kitchen.widgets.shopping.label',
+    descriptionKey: 'kitchen.widgets.shopping.description',
     icon: ShoppingBag,
     color: '#8a6a24'
   },
   {
     id: 'chat',
-    label: 'Familienchat',
-    description: 'Die letzten Familiennachrichten',
+    labelKey: 'kitchen.widgets.chat.label',
+    descriptionKey: 'kitchen.widgets.chat.description',
     icon: MessageSquare,
     color: '#6d5faf'
   },
   {
     id: 'board',
-    label: 'Pinnwand',
-    description: 'Aktuelle Familiennotizen',
+    labelKey: 'kitchen.widgets.board.label',
+    descriptionKey: 'kitchen.widgets.board.description',
     icon: Pin,
     color: '#a65a3f'
   },
   {
     id: 'trash',
-    label: 'Müllabfuhr',
-    description: 'Der nächste Abholtermin',
+    labelKey: 'kitchen.widgets.trash.label',
+    descriptionKey: 'kitchen.widgets.trash.description',
     icon: Trash2,
     color: '#66736e'
   },
   {
     id: 'family',
-    label: 'Familie',
-    description: 'Profile und Sterne im Überblick',
+    labelKey: 'kitchen.widgets.family.label',
+    descriptionKey: 'kitchen.widgets.family.description',
     icon: Users,
     color: '#b35d6d'
   },
   {
     id: 'home-assistant',
-    label: 'Haussteuerung',
-    description: 'Geräte, Sensoren und Szenen als große Tablet-Kacheln',
+    labelKey: 'kitchen.widgets.homeAssistant.label',
+    descriptionKey: 'kitchen.widgets.homeAssistant.description',
     icon: Home,
     color: '#2f7c73'
   }
+];
+
+// Gespeicherte meal.day-Werte sind deutsche Wochentagsnamen (Datenschlüssel).
+const MEAL_PLAN_DAYS = [
+  'Montag',
+  'Dienstag',
+  'Mittwoch',
+  'Donnerstag',
+  'Freitag',
+  'Samstag',
+  'Sonntag'
 ];
 
 function localDateKey(date) {
@@ -104,7 +121,7 @@ function localDateKey(date) {
 
 function shortDate(value) {
   if (!value) return '';
-  return new Date(`${value}T12:00:00`).toLocaleDateString('de-DE', {
+  return formatDate(`${value}T12:00:00`, {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit'
@@ -150,6 +167,7 @@ export default function KitchenTabletView() {
     toggleTask,
     trashEvents
   } = useFamily();
+  const { t } = useTranslation('widgets');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const availableWidgets = useMemo(
@@ -161,11 +179,16 @@ export default function KitchenTabletView() {
           homeAssistantIntegration?.enabled !== false &&
           homeAssistantIntegration?.selectedEntities?.length > 0
         )
-    ),
+    ).map(widget => ({
+      ...widget,
+      label: t(widget.labelKey),
+      description: t(widget.descriptionKey)
+    })),
     [
       homeAssistantIntegration?.connected,
       homeAssistantIntegration?.enabled,
-      homeAssistantIntegration?.selectedEntities?.length
+      homeAssistantIntegration?.selectedEntities?.length,
+      t
     ]
   );
   const dashboardLayout = useDashboardLayout(
@@ -180,11 +203,14 @@ export default function KitchenTabletView() {
   }, []);
 
   const todayKey = localDateKey(currentTime);
-  const currentDayName = currentTime.toLocaleDateString('de-DE', {
-    weekday: 'long'
-  });
+  // Montag-basierter Index verbindet Datenschlüssel und lokalisierte Anzeige.
+  const weekdayIndex = (currentTime.getDay() + 6) % 7;
+  const currentDayName = MEAL_PLAN_DAYS[weekdayIndex];
+  const displayDayName = getWeekdayNames('long')[weekdayIndex];
   const householdName =
-    activeHousehold === 'oma_opa' ? 'Oma & Opa' : 'Unser Zuhause';
+    activeHousehold === 'oma_opa'
+      ? t('kitchen.household.omaOpa')
+      : t('kitchen.household.default');
   const belongsToHousehold = item =>
     (item.household || 'familie') === activeHousehold;
 
@@ -269,15 +295,15 @@ export default function KitchenTabletView() {
     <div className="tablet-command-center">
       <header className="tablet-command-hero">
         <div className="tablet-time-block">
-          <span className="tablet-live-dot">Live</span>
+          <span className="tablet-live-dot">{t('kitchen.live')}</span>
           <strong>
-            {currentTime.toLocaleTimeString('de-DE', {
+            {formatTime(currentTime, {
               hour: '2-digit',
               minute: '2-digit'
             })}
           </strong>
           <p>
-            {currentTime.toLocaleDateString('de-DE', {
+            {formatDate(currentTime, {
               weekday: 'long',
               day: 'numeric',
               month: 'long'
@@ -286,21 +312,21 @@ export default function KitchenTabletView() {
         </div>
         <div className="tablet-home-status">
           <span><Home size={17} /> {householdName}</span>
-          <strong>Alles im Blick.</strong>
-          <small>Angemeldet als {activeMember?.name}</small>
+          <strong>{t('kitchen.allInView')}</strong>
+          <small>{t('kitchen.signedInAs', { name: activeMember?.name })}</small>
         </div>
         <div className="tablet-quick-actions">
           <button type="button" onClick={() => openQuickAdd('event')}>
-            <Plus size={17} /> Termin
+            <Plus size={17} /> {t('kitchen.quickActions.event')}
           </button>
           <button type="button" onClick={() => openQuickAdd('shopping')}>
-            <Plus size={17} /> Einkauf
+            <Plus size={17} /> {t('kitchen.quickActions.shopping')}
           </button>
           <button type="button" onClick={() => setActiveTab('dashboard')}>
-            Standardansicht <ArrowUpRight size={16} />
+            {t('kitchen.quickActions.standardView')} <ArrowUpRight size={16} />
           </button>
           <button type="button" onClick={() => setIsCustomizerOpen(true)}>
-            <SlidersHorizontal size={16} /> Kacheln
+            <SlidersHorizontal size={16} /> {t('kitchen.quickActions.tiles')}
           </button>
         </div>
       </header>
@@ -313,8 +339,10 @@ export default function KitchenTabletView() {
           widgetId="calendar"
           tab="calendar"
           icon={CalendarDays}
-          title="Heute"
-          count={`${todayEvents.length} Termine`}
+          title={t('kitchen.cards.calendar.title')}
+          count={t('kitchen.cards.calendar.count', {
+            count: todayEvents.length
+          })}
           tone="calendar"
           onOpen={setActiveTab}
         >
@@ -328,10 +356,14 @@ export default function KitchenTabletView() {
                     key={event.id}
                     onClick={() => setActiveTab('calendar')}
                   >
-                    <time>{event.time || 'ganztags'}</time>
+                    <time>{event.time || t('kitchen.cards.calendar.allDay')}</time>
                     <span>
                       <strong>{event.title}</strong>
-                      <small>{event.location || member?.name || 'Familie'}</small>
+                      <small>
+                        {event.location ||
+                          member?.name ||
+                          t('kitchen.cards.calendar.familyFallback')}
+                      </small>
                     </span>
                     {member && (
                       <img
@@ -347,7 +379,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <CalendarDays size={24} />
-              <span>Heute ist noch ganz frei.</span>
+              <span>{t('kitchen.cards.calendar.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -356,8 +388,8 @@ export default function KitchenTabletView() {
           widgetId="meals"
           tab="meals"
           icon={UtensilsCrossed}
-          title="Essen"
-          count={currentDayName}
+          title={t('kitchen.cards.meals.title')}
+          count={displayDayName}
           tone="meals"
           onOpen={setActiveTab}
         >
@@ -377,7 +409,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <UtensilsCrossed size={24} />
-              <span>Noch kein Essen geplant.</span>
+              <span>{t('kitchen.cards.meals.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -386,8 +418,10 @@ export default function KitchenTabletView() {
           widgetId="tasks"
           tab="tasks"
           icon={CheckSquare}
-          title="Aufgaben"
-          count={`${pendingTasks.length} offen`}
+          title={t('kitchen.cards.tasks.title')}
+          count={t('kitchen.cards.tasks.count', {
+            count: pendingTasks.length
+          })}
           tone="tasks"
           onOpen={setActiveTab}
         >
@@ -409,7 +443,9 @@ export default function KitchenTabletView() {
                     <span>
                       <strong>{task.title}</strong>
                       <small>
-                        {pendingApproval ? 'Wartet auf Prüfung' : member?.name}
+                        {pendingApproval
+                          ? t('kitchen.cards.tasks.pendingApproval')
+                          : member?.name}
                       </small>
                     </span>
                     <em><Star size={12} fill="currentColor" /> {task.stars}</em>
@@ -420,7 +456,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <Star size={24} />
-              <span>Alle Aufgaben sind geschafft.</span>
+              <span>{t('kitchen.cards.tasks.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -429,8 +465,10 @@ export default function KitchenTabletView() {
           widgetId="shopping"
           tab="shopping"
           icon={ShoppingBag}
-          title="Einkauf"
-          count={`${activeShopping.length} Artikel`}
+          title={t('kitchen.cards.shopping.title')}
+          count={t('kitchen.cards.shopping.count', {
+            count: activeShopping.length
+          })}
           tone="shopping"
           onOpen={setActiveTab}
         >
@@ -451,7 +489,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <Check size={24} />
-              <span>Alles eingekauft.</span>
+              <span>{t('kitchen.cards.shopping.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -460,8 +498,10 @@ export default function KitchenTabletView() {
           widgetId="chat"
           tab="chat"
           icon={MessageSquare}
-          title="Familienchat"
-          count={`${groupMessages.length} Nachrichten`}
+          title={t('kitchen.cards.chat.title')}
+          count={t('kitchen.cards.chat.count', {
+            count: groupMessages.length
+          })}
           tone="chat"
           onOpen={setActiveTab}
         >
@@ -473,9 +513,14 @@ export default function KitchenTabletView() {
                   key={message.id}
                   onClick={() => setActiveTab('chat')}
                 >
-                  <strong>{message.senderName || 'Familie'}</strong>
+                  <strong>
+                    {message.senderName || t('kitchen.cards.chat.senderFallback')}
+                  </strong>
                   <span>
-                    {message.text || (message.photo ? '📷 Foto' : 'Neue Nachricht')}
+                    {message.text ||
+                      (message.photo
+                        ? t('kitchen.cards.chat.photo')
+                        : t('kitchen.cards.chat.newMessage'))}
                   </span>
                 </button>
               ))}
@@ -483,7 +528,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <MessageSquare size={24} />
-              <span>Noch keine Nachricht.</span>
+              <span>{t('kitchen.cards.chat.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -492,8 +537,10 @@ export default function KitchenTabletView() {
           widgetId="board"
           tab="board"
           icon={Pin}
-          title="Pinnwand"
-          count={`${visibleNotes.length} Notizen`}
+          title={t('kitchen.cards.board.title')}
+          count={t('kitchen.cards.board.count', {
+            count: visibleNotes.length
+          })}
           tone="board"
           onOpen={setActiveTab}
         >
@@ -513,7 +560,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <Pin size={24} />
-              <span>Die Pinnwand ist leer.</span>
+              <span>{t('kitchen.cards.board.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -522,8 +569,12 @@ export default function KitchenTabletView() {
           widgetId="trash"
           tab="trash"
           icon={Trash2}
-          title="Nächste Abholung"
-          count={nextTrash ? shortDate(nextTrash.date) : 'Kein Termin'}
+          title={t('kitchen.cards.trash.title')}
+          count={
+            nextTrash
+              ? shortDate(nextTrash.date)
+              : t('kitchen.cards.trash.noDate')
+          }
           tone="trash"
           onOpen={setActiveTab}
         >
@@ -540,7 +591,7 @@ export default function KitchenTabletView() {
           ) : (
             <div className="tablet-empty">
               <Trash2 size={24} />
-              <span>Noch kein Mülltermin.</span>
+              <span>{t('kitchen.cards.trash.empty')}</span>
             </div>
           )}
         </TabletCard>
@@ -549,8 +600,10 @@ export default function KitchenTabletView() {
           widgetId="family"
           tab="dashboard"
           icon={Users}
-          title="Familie"
-          count={`${members.length} Profile`}
+          title={t('kitchen.cards.family.title')}
+          count={t('kitchen.cards.family.count', {
+            count: members.length
+          })}
           tone="family"
           onOpen={setActiveTab}
         >
@@ -580,7 +633,10 @@ export default function KitchenTabletView() {
           widgetId="home-assistant"
           className="tablet-command-card tablet-ha-card"
         >
-          <HomeAssistantWidget compact title="Haussteuerung" />
+          <HomeAssistantWidget
+            compact
+            title={t('kitchen.widgets.homeAssistant.label')}
+          />
         </DashboardWidget>
       </OrderedDashboardGrid>
 

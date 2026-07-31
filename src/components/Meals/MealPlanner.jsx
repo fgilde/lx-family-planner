@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { UtensilsCrossed, ShoppingBag, Edit3, BookOpen, Trash2, X } from 'lucide-react';
 import RecipeBook from './RecipeBook';
 import { recipeShareTargetFromUrl } from '../../../shared/recipeShareTarget.js';
+import { getWeekdayNames } from '../../utils/formatting';
 
+// Gespeicherte Schlüssel im Speiseplan (meal.day / meal.meal) bleiben deutsch –
+// nur die Anzeige wird übersetzt.
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+const MEAL_TYPE_LABEL_KEYS = {
+  Mittagessen: 'planner.mealTypes.lunch',
+  Abendessen: 'planner.mealTypes.dinner'
+};
 
 export default function MealPlanner() {
+  const { t } = useTranslation('meals');
   const {
     meals,
     updateMeal,
@@ -27,6 +36,14 @@ export default function MealPlanner() {
   const [customRecipeTitle, setCustomRecipeTitle] = useState('');
   const [customIngredientsText, setCustomIngredientsText] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const weekdayLabels = getWeekdayNames('long');
+  const dayLabelFor = day => {
+    const index = DAYS.indexOf(day);
+    return index >= 0 ? weekdayLabels[index] : day;
+  };
+  const mealLabelFor = mealType =>
+    MEAL_TYPE_LABEL_KEYS[mealType] ? t(MEAL_TYPE_LABEL_KEYS[mealType]) : mealType;
 
   const handleStartEditSlot = (day, mealType, existingMeal) => {
     setSelectedMealSlot({ day, meal: mealType, id: existingMeal?.id || '' });
@@ -84,14 +101,18 @@ export default function MealPlanner() {
             style={{ flex: 1, justifyContent: 'center' }}
             onClick={() => setSubTab('plan')}
           >
-            <UtensilsCrossed size={18} /> Wochen-Speiseplan ({activeHousehold === 'familie' ? 'Unser Zuhause' : 'Oma & Opa'})
+            <UtensilsCrossed size={18} /> {t('planner.tabs.weeklyPlan', {
+              household: activeHousehold === 'familie'
+                ? t('planner.households.family')
+                : t('planner.households.grandparents')
+            })}
           </button>
           <button
             className={`btn-secondary ${subTab === 'recipes' ? 'btn-primary' : ''}`}
             style={{ flex: 1, justifyContent: 'center' }}
             onClick={() => setSubTab('recipes')}
           >
-            <BookOpen size={18} /> Rezeptbuch ({savedRecipes.length})
+            <BookOpen size={18} /> {t('planner.tabs.recipeBook', { count: savedRecipes.length })}
           </button>
         </div>
       </div>
@@ -102,37 +123,38 @@ export default function MealPlanner() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div className="card" style={{ padding: 20 }}>
             <h2 className="card-title" style={{ color: '#d97706', marginBottom: 6 }}>
-              <UtensilsCrossed size={24} /> Wochen-Speiseplan
+              <UtensilsCrossed size={24} /> {t('planner.header.title')}
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              Plant eure Gerichte für die Woche. Klicke auf ein Essen, um Rezepte auszuwählen oder Zutaten mit 1 Klick auf die Einkaufsliste zu setzen!
+              {t('planner.header.subtitle')}
             </p>
           </div>
 
           {/* Weekly Grid (Montag - Sonntag) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
-            {DAYS.map(dayName => {
+            {DAYS.map((dayName, dayIndex) => {
               const dayMeals = meals.filter(m => m.day === dayName && (m.household || 'familie') === activeHousehold);
               const mittag = dayMeals.find(m => m.meal === 'Mittagessen');
               const abend = dayMeals.find(m => m.meal === 'Abendessen');
+              const dayLabel = weekdayLabels[dayIndex] || dayName;
 
               return (
                 <div key={dayName} className="card" style={{ padding: 18 }}>
                   <div style={{ fontSize: '1.1rem', fontWeight: 800, borderBottom: '2px solid var(--border-color)', paddingBottom: 8, marginBottom: 14, color: 'var(--primary)' }}>
-                    📅 {dayName}
+                    📅 {dayLabel}
                   </div>
 
                   {/* Mittagessen */}
                   <div style={{ background: 'var(--bg-subtle)', padding: 12, borderRadius: 'var(--radius-md)', marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                       <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                        ☀️ Mittagessen
+                        ☀️ {t('planner.mealTypes.lunch')}
                       </span>
                       <button
                         className="icon-circle-btn"
                         style={{ width: 26, height: 26 }}
                         onClick={() => handleStartEditSlot(dayName, 'Mittagessen', mittag)}
-                        aria-label={`${dayName} Mittagessen bearbeiten`}
+                        aria-label={t('planner.slots.editAria', { day: dayLabel, meal: t('planner.mealTypes.lunch') })}
                       >
                         <Edit3 size={13} />
                       </button>
@@ -147,12 +169,12 @@ export default function MealPlanner() {
                             style={{ padding: '3px 8px', fontSize: '0.75rem', marginTop: 6, width: '100%', justifyContent: 'center' }}
                             onClick={() => handleAddAllToShopping(mittag.ingredients)}
                           >
-                            <ShoppingBag size={12} /> Zutaten auf die Liste ({mittag.ingredients.length})
+                            <ShoppingBag size={12} /> {t('planner.slots.addIngredients', { count: mittag.ingredients.length })}
                           </button>
                         )}
                       </div>
                     ) : (
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', italic: 'true' }}>Kein Gericht eingetragen</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', italic: 'true' }}>{t('planner.slots.empty')}</div>
                     )}
                   </div>
 
@@ -160,13 +182,13 @@ export default function MealPlanner() {
                   <div style={{ background: 'var(--bg-subtle)', padding: 12, borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                       <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                        🌙 Abendessen
+                        🌙 {t('planner.mealTypes.dinner')}
                       </span>
                       <button
                         className="icon-circle-btn"
                         style={{ width: 26, height: 26 }}
                         onClick={() => handleStartEditSlot(dayName, 'Abendessen', abend)}
-                        aria-label={`${dayName} Abendessen bearbeiten`}
+                        aria-label={t('planner.slots.editAria', { day: dayLabel, meal: t('planner.mealTypes.dinner') })}
                       >
                         <Edit3 size={13} />
                       </button>
@@ -181,12 +203,12 @@ export default function MealPlanner() {
                             style={{ padding: '3px 8px', fontSize: '0.75rem', marginTop: 6, width: '100%', justifyContent: 'center' }}
                             onClick={() => handleAddAllToShopping(abend.ingredients)}
                           >
-                            <ShoppingBag size={12} /> Zutaten auf die Liste ({abend.ingredients.length})
+                            <ShoppingBag size={12} /> {t('planner.slots.addIngredients', { count: abend.ingredients.length })}
                           </button>
                         )}
                       </div>
                     ) : (
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', italic: 'true' }}>Kein Gericht eingetragen</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', italic: 'true' }}>{t('planner.slots.empty')}</div>
                     )}
                   </div>
                 </div>
@@ -202,7 +224,10 @@ export default function MealPlanner() {
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
               <h2 className="card-title">
-                Gericht eintragen: {selectedMealSlot.day} ({selectedMealSlot.meal})
+                {t('planner.modal.title', {
+                  day: dayLabelFor(selectedMealSlot.day),
+                  meal: mealLabelFor(selectedMealSlot.meal)
+                })}
               </h2>
               <button className="icon-circle-btn" onClick={() => setSelectedMealSlot(null)}>
                 <X size={20} />
@@ -212,13 +237,13 @@ export default function MealPlanner() {
             <form onSubmit={handleSaveMealSlot}>
               {savedRecipes.length > 0 && (
                 <div className="form-group">
-                  <label className="form-label">Aus deinem Rezeptbuch wählen</label>
+                  <label className="form-label">{t('planner.modal.chooseFromBook')}</label>
                   <select
                     className="form-select"
                     value={selectedRecipeId}
                     onChange={e => setSelectedRecipeId(e.target.value)}
                   >
-                    <option value="">-- Rezept aus Rezeptbuch auswählen --</option>
+                    <option value="">{t('planner.modal.recipePlaceholderOption')}</option>
                     {savedRecipes.map(r => (
                       <option key={r.id} value={r.id}>{r.title}</option>
                     ))}
@@ -227,11 +252,11 @@ export default function MealPlanner() {
               )}
 
               <div className="form-group">
-                <label className="form-label">Oder Gericht selbst eingeben</label>
+                <label className="form-label">{t('planner.modal.customLabel')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="z. B. Pfannkuchen mit Apfelmus..."
+                  placeholder={t('planner.modal.customPlaceholder')}
                   value={customRecipeTitle}
                   onChange={e => setCustomRecipeTitle(e.target.value)}
                   required={!selectedRecipeId}
@@ -239,11 +264,11 @@ export default function MealPlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Zutaten (kommagetrennt für Einkaufsliste)</label>
+                <label className="form-label">{t('planner.modal.ingredientsLabel')}</label>
                 <textarea
                   className="form-textarea"
                   rows="3"
-                  placeholder="z. B. 500g Mehl, 4 Eier, 1L Milch..."
+                  placeholder={t('planner.modal.ingredientsPlaceholder')}
                   value={customIngredientsText}
                   onChange={e => setCustomIngredientsText(e.target.value)}
                 />
@@ -251,10 +276,10 @@ export default function MealPlanner() {
 
               <div className="meal-modal-actions">
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? 'Speichert …' : 'Speichern'}
+                  {saving ? t('planner.modal.saving') : t('common:actions.save')}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setSelectedMealSlot(null)}>
-                  Abbrechen
+                  {t('common:actions.cancel')}
                 </button>
                 {selectedMealSlot.id && (
                   <button
@@ -263,7 +288,7 @@ export default function MealPlanner() {
                     onClick={handleDeleteMeal}
                     disabled={saving}
                   >
-                    <Trash2 size={16} /> Eintrag entfernen
+                    <Trash2 size={16} /> {t('planner.modal.removeEntry')}
                   </button>
                 )}
               </div>

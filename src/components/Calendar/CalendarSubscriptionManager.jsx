@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   CalendarClock,
   Check,
@@ -15,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import { formatDate, formatTime } from '../../utils/formatting';
 
 const SOURCE_COLORS = [
   '#147d64',
@@ -25,17 +27,19 @@ const SOURCE_COLORS = [
   '#0891b2'
 ];
 
-function syncLabel(timestamp) {
-  if (!timestamp) return 'Noch nicht erfolgreich abgeglichen';
+function syncLabel(timestamp, t) {
+  if (!timestamp) return t('sources.list.syncNever');
   const date = new Date(Number(timestamp));
   const today = new Date();
   const sameDay = date.toDateString() === today.toDateString();
   return sameDay
-    ? `Heute um ${date.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })}`
-    : date.toLocaleDateString('de-DE', {
+    ? t('sources.list.syncToday', {
+        time: formatTime(date, {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      })
+    : formatDate(date, {
         day: '2-digit',
         month: 'short',
         hour: '2-digit',
@@ -44,6 +48,7 @@ function syncLabel(timestamp) {
 }
 
 export default function CalendarSubscriptionManager({ isOpen, onClose }) {
+  const { t } = useTranslation('calendar');
   const {
     activeHousehold,
     familyAccount,
@@ -128,7 +133,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
   const removeOne = async subscription => {
     if (
       !window.confirm(
-        `"${subscription.name}" und alle darüber eingelesenen Termine entfernen?`
+        t('sources.list.confirmRemove', { name: subscription.name })
       )
     ) {
       return;
@@ -162,19 +167,16 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
           </span>
           <div>
             <span className="calendar-source-kicker">
-              Kalenderbrücke
+              {t('sources.header.kicker')}
             </span>
-            <h2 id="calendar-source-title">Externe Kalender</h2>
-            <p>
-              Termine aus Google, Outlook, Nextcloud und anderen
-              ICS-Kalendern automatisch einlesen.
-            </p>
+            <h2 id="calendar-source-title">{t('sources.header.title')}</h2>
+            <p>{t('sources.header.description')}</p>
           </div>
           <button
             type="button"
             className="calendar-source-close"
             onClick={onClose}
-            aria-label="Kalenderquellen schließen"
+            aria-label={t('sources.header.closeAria')}
           >
             <X size={19} />
           </button>
@@ -184,9 +186,11 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
           <section className="calendar-source-existing">
             <div className="calendar-source-section-heading">
               <div>
-                <span>Verbundene Quellen</span>
+                <span>{t('sources.list.heading')}</span>
                 <strong>
-                  {enabledSubscriptions.length} aktiv
+                  {t('sources.list.activeCount', {
+                    count: enabledSubscriptions.length
+                  })}
                 </strong>
               </div>
               {enabledSubscriptions.length > 1 && (
@@ -199,7 +203,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     size={15}
                     className={busy === 'sync-all' ? 'spin' : ''}
                   />
-                  Alle abgleichen
+                  {t('sources.list.syncAll')}
                 </button>
               )}
             </div>
@@ -208,11 +212,8 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
               {calendarSubscriptions.length === 0 ? (
                 <div className="calendar-source-empty">
                   <span><CloudDownload size={25} /></span>
-                  <strong>Noch keine Kalenderbrücke</strong>
-                  <p>
-                    Füge rechts einen privaten ICS-Link ein. Danach laufen
-                    neue Termine automatisch in euren Familienkalender.
-                  </p>
+                  <strong>{t('sources.list.emptyTitle')}</strong>
+                  <p>{t('sources.list.emptyDescription')}</p>
                 </div>
               ) : (
                 calendarSubscriptions.map(subscription => {
@@ -238,7 +239,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                           <span>
                             {subscription.host}
                             {' · '}
-                            {member?.name || 'Alle'}
+                            {member?.name || t('sources.list.everyone')}
                           </span>
                         </div>
                         {subscription.lastError ? (
@@ -247,8 +248,11 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                           </p>
                         ) : (
                           <p>
-                            {subscription.eventCount} Termine ·{' '}
-                            {syncLabel(subscription.lastSuccessAt)}
+                            {t('sources.list.eventCount', {
+                              count: subscription.eventCount
+                            })}
+                            {' · '}
+                            {syncLabel(subscription.lastSuccessAt, t)}
                           </p>
                         )}
                       </div>
@@ -257,8 +261,10 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                           type="button"
                           onClick={() => void syncOne(subscription.id)}
                           disabled={Boolean(busy) || !subscription.enabled}
-                          title="Jetzt abgleichen"
-                          aria-label={`${subscription.name} jetzt abgleichen`}
+                          title={t('sources.list.syncNowTitle')}
+                          aria-label={t('sources.list.syncNowAria', {
+                            name: subscription.name
+                          })}
                         >
                           <RefreshCw
                             size={15}
@@ -274,8 +280,12 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                           disabled={Boolean(busy)}
                           aria-label={
                             subscription.enabled
-                              ? `${subscription.name} pausieren`
-                              : `${subscription.name} aktivieren`
+                              ? t('sources.list.pauseAria', {
+                                  name: subscription.name
+                                })
+                              : t('sources.list.resumeAria', {
+                                  name: subscription.name
+                                })
                           }
                         >
                           {isToggling ? (
@@ -291,8 +301,10 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                           className="is-danger"
                           onClick={() => void removeOne(subscription)}
                           disabled={Boolean(busy)}
-                          title="Quelle entfernen"
-                          aria-label={`${subscription.name} entfernen`}
+                          title={t('sources.list.removeTitle')}
+                          aria-label={t('sources.list.removeAria', {
+                            name: subscription.name
+                          })}
                         >
                           <Trash2 size={15} />
                         </button>
@@ -308,13 +320,13 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
             <div className="calendar-source-form-heading">
               <span><Link2 size={18} /></span>
               <div>
-                <strong>Kalender verbinden</strong>
-                <p>Der Link bleibt verschlüsselt auf eurem Server.</p>
+                <strong>{t('sources.form.connect')}</strong>
+                <p>{t('sources.form.connectHint')}</p>
               </div>
             </div>
 
             <label>
-              <span>Name der Quelle</span>
+              <span>{t('sources.form.nameLabel')}</span>
               <input
                 required
                 maxLength={100}
@@ -325,12 +337,12 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     name: event.target.value
                   }))
                 }
-                placeholder="z. B. Schulkalender"
+                placeholder={t('sources.form.namePlaceholder')}
               />
             </label>
 
             <label>
-              <span>Privater ICS-Link</span>
+              <span>{t('sources.form.urlLabel')}</span>
               <input
                 required
                 type="url"
@@ -350,7 +362,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
 
             <div className="calendar-source-form-grid">
               <label>
-                <span>Sichtbar für</span>
+                <span>{t('sources.form.visibilityLabel')}</span>
                 <select
                   value={form.memberId}
                   onChange={event =>
@@ -360,7 +372,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     }))
                   }
                 >
-                  <option value="all">Alle Familienmitglieder</option>
+                  <option value="all">{t('sources.form.allMembers')}</option>
                   {members.map(member => (
                     <option key={member.id} value={member.id}>
                       {member.name}
@@ -370,7 +382,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
               </label>
 
               <label>
-                <span>Planungsort</span>
+                <span>{t('sources.form.householdLabel')}</span>
                 <select
                   value={form.household}
                   onChange={event =>
@@ -380,16 +392,20 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     }))
                   }
                 >
-                  <option value="familie">Unser Zuhause</option>
+                  <option value="familie">
+                    {t('sources.form.householdFamily')}
+                  </option>
                   {familyAccount?.grandparentsHouseholdEnabled && (
-                    <option value="grosseltern">Zuhause Oma & Opa</option>
+                    <option value="grosseltern">
+                      {t('sources.form.householdGrandparents')}
+                    </option>
                   )}
                 </select>
               </label>
             </div>
 
             <fieldset className="calendar-source-colors">
-              <legend>Kalenderfarbe</legend>
+              <legend>{t('sources.form.colorLegend')}</legend>
               <div>
                 {SOURCE_COLORS.map(color => (
                   <button
@@ -400,7 +416,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     onClick={() =>
                       setForm(previous => ({ ...previous, color }))
                     }
-                    aria-label={`Farbe ${color} wählen`}
+                    aria-label={t('sources.form.pickColorAria', { color })}
                     aria-pressed={form.color === color}
                   >
                     {form.color === color && <Check size={14} />}
@@ -411,11 +427,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
 
             <aside className="calendar-source-privacy">
               <LockKeyhole size={16} />
-              <p>
-                Nur lesen: Der Familienplaner kann im fremden Kalender nichts
-                ändern oder löschen. Teile den geheimen Link trotzdem nicht
-                öffentlich.
-              </p>
+              <p>{t('sources.form.privacyNote')}</p>
             </aside>
 
             <button
@@ -428,7 +440,9 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
               ) : (
                 <Globe2 size={17} />
               )}
-              {busy === 'add' ? 'Wird verbunden …' : 'Kalender verbinden'}
+              {busy === 'add'
+                ? t('sources.form.connecting')
+                : t('sources.form.connect')}
             </button>
           </form>
         </div>

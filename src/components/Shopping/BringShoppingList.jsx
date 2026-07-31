@@ -16,6 +16,7 @@ import {
   Wifi,
   WifiOff
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import BringAccountModal from './BringAccountModal';
 
@@ -98,6 +99,7 @@ function rankMatch(item, query) {
 }
 
 export default function BringShoppingList() {
+  const { t } = useTranslation('shopping');
   const {
     shoppingItems,
     toggleShoppingSelected,
@@ -259,23 +261,20 @@ export default function BringShoppingList() {
         <div className="market-hero-copy">
           <span className="market-eyebrow">
             <Sparkles size={15} />
-            Familienmarkt
+            {t('hero.eyebrow')}
           </span>
-          <h1>Was fehlt zu Hause?</h1>
-          <p>
-            Durchsuche den vollständigen deutschen Bring!-Katalog oder füge
-            einen ganz eigenen Artikel hinzu.
-          </p>
+          <h1>{t('hero.title')}</h1>
+          <p>{t('hero.subtitle')}</p>
           <div className="market-status-row">
             <span className={`market-status ${bringCredentials.isConnected ? 'live' : ''}`}>
               {bringCredentials.isConnected ? <Wifi size={15} /> : <WifiOff size={15} />}
               {bringCredentials.isConnected
-                ? `Live mit „${bringCredentials.listName}“`
-                : 'Lokale Familienliste'}
+                ? t('hero.statusLive', { listName: bringCredentials.listName })
+                : t('hero.statusLocal')}
             </span>
             <span className="market-status catalog">
               <PackageOpen size={15} />
-              {bringCatalog.total || '…'} Standardartikel
+              {t('hero.catalogItems', { total: bringCatalog.total || '…' })}
             </span>
           </div>
         </div>
@@ -289,7 +288,7 @@ export default function BringShoppingList() {
               disabled={syncing}
             >
               <RefreshCw size={18} className={syncing ? 'spin' : ''} />
-              {syncing ? 'Synchronisiere' : 'Bring! aktualisieren'}
+              {syncing ? t('hero.syncing') : t('hero.refreshBring')}
             </button>
           )}
           <button
@@ -298,7 +297,7 @@ export default function BringShoppingList() {
             onClick={() => setIsBringModalOpen(true)}
           >
             {bringCredentials.isConnected ? <Smartphone size={18} /> : <Link2 size={18} />}
-            {bringCredentials.isConnected ? 'Verbindung' : 'Bring! verbinden'}
+            {bringCredentials.isConnected ? t('hero.connection') : t('hero.connectBring')}
           </button>
         </div>
       </section>
@@ -310,17 +309,17 @@ export default function BringShoppingList() {
             <input
               value={query}
               onChange={event => setQuery(event.target.value)}
-              placeholder="Eier, Nutella, Brötchen, Porree …"
-              aria-label="Artikel suchen oder neu anlegen"
+              placeholder={t('search.placeholder')}
+              aria-label={t('search.searchAria')}
               autoComplete="off"
             />
           </div>
           <label className="market-quantity">
-            <span>Menge</span>
+            <span>{t('search.quantityLabel')}</span>
             <input
               value={quantity}
               onChange={event => setQuantity(event.target.value)}
-              aria-label="Menge oder Hinweis"
+              aria-label={t('search.quantityAria')}
               placeholder="1x"
             />
           </label>
@@ -330,19 +329,19 @@ export default function BringShoppingList() {
             disabled={!query.trim() || Boolean(addingName)}
           >
             {addingName ? <LoaderCircle size={19} className="spin" /> : <Plus size={19} />}
-            Hinzufügen
+            {t('common:actions.add')}
           </button>
         </form>
         <p className="market-search-hint">
-          Nicht gefunden? Der eingegebene Begriff wird als eigener Bring!-Artikel angelegt.
+          {t('search.hint')}
         </p>
       </section>
 
       <section className="market-list-section">
         <div className="market-section-heading">
           <div>
-            <span className="market-kicker">Euer Zettel</span>
-            <h2>Noch einzukaufen</h2>
+            <span className="market-kicker">{t('list.kicker')}</span>
+            <h2>{t('list.title')}</h2>
           </div>
           <span className="market-count">{activeItems.length}</span>
         </div>
@@ -350,8 +349,8 @@ export default function BringShoppingList() {
         {activeItems.length === 0 ? (
           <div className="market-empty">
             <span>🧺</span>
-            <strong>Der Einkaufskorb wartet.</strong>
-            <p>Tippe unten auf einen Standardartikel oder suche direkt danach.</p>
+            <strong>{t('list.emptyTitle')}</strong>
+            <p>{t('list.emptyHint')}</p>
           </div>
         ) : (
           <div className="market-active-grid">
@@ -383,7 +382,7 @@ export default function BringShoppingList() {
             >
               <span>
                 <RotateCcw size={17} />
-                Zuletzt gekauft ({recentItems.length})
+                {t('list.recentToggle', { count: recentItems.length })}
               </span>
               {showRecent ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </button>
@@ -397,7 +396,7 @@ export default function BringShoppingList() {
                   >
                     <span>{item.icon || '✓'}</span>
                     <span>{item.name}</span>
-                    <small>Wieder auf die Liste</small>
+                    <small>{t('list.backToList')}</small>
                   </button>
                 ))}
               </div>
@@ -410,22 +409,22 @@ export default function BringShoppingList() {
         <div className="market-section-heading catalog-heading">
           <div>
             <span className="market-kicker">
-              {bringCatalog.source === 'bring' ? 'Bring!-Sortiment' : 'Grundsortiment'}
+              {bringCatalog.source === 'bring' ? t('catalog.sourceBring') : t('catalog.sourceDefault')}
             </span>
-            <h2>{query ? `Treffer für „${query}“` : 'Schnell hinzufügen'}</h2>
+            <h2>{query ? t('catalog.resultsFor', { query }) : t('catalog.quickAdd')}</h2>
           </div>
-          <span className="market-result-count">{visibleCatalog.length} angezeigt</span>
+          <span className="market-result-count">{t('catalog.shownCount', { count: visibleCatalog.length })}</span>
         </div>
 
         {!query && (
-          <div className="market-departments" aria-label="Warengruppen">
+          <div className="market-departments" aria-label={t('catalog.departmentsAria')}>
             <button
               type="button"
               className={activeSection === 'popular' ? 'active' : ''}
               onClick={() => setActiveSection('popular')}
             >
               <span>⭐</span>
-              Häufig
+              {t('catalog.popular')}
             </button>
             {(bringCatalog.sections || []).map(section => (
               <button
@@ -462,7 +461,7 @@ export default function BringShoppingList() {
                   <span className="market-catalog-action">
                     {alreadyActive ? (
                       <>
-                        <Check size={16} /> Auf Liste
+                        <Check size={16} /> {t('catalog.onList')}
                       </>
                     ) : isAdding ? (
                       <LoaderCircle size={17} className="spin" />
@@ -477,8 +476,8 @@ export default function BringShoppingList() {
         ) : (
           <div className="market-no-results">
             <Search size={26} />
-            <strong>Kein Katalogtreffer – aber kein Problem.</strong>
-            <p>Mit „Hinzufügen“ legst du „{query}“ als eigenen Artikel an.</p>
+            <strong>{t('catalog.noResultsTitle')}</strong>
+            <p>{t('catalog.noResultsHint', { query })}</p>
           </div>
         )}
       </section>

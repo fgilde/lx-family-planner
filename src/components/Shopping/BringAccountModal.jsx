@@ -10,9 +10,11 @@ import {
   Trash2,
   X
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 
 export default function BringAccountModal() {
+  const { t } = useTranslation('shopping');
   const {
     isBringModalOpen,
     setIsBringModalOpen,
@@ -67,8 +69,10 @@ export default function BringAccountModal() {
         listName: list?.name || 'Bring! Liste'
       });
       showToast(
-        'Bring! ist verbunden',
-        `${list?.name || 'Die Einkaufsliste'} wird jetzt synchronisiert.`,
+        t('accountModal.toastConnectedTitle'),
+        t('accountModal.toastConnectedBody', {
+          listName: list?.name || t('accountModal.toastDefaultList')
+        }),
         'success'
       );
       close();
@@ -96,11 +100,11 @@ export default function BringAccountModal() {
           <div className="bring-modal-heading">
             <span><ShoppingBag size={24} /></span>
             <div>
-              <span className="eyebrow">Optionale Integration</span>
-              <h2>Bring! Einkauf verbinden</h2>
+              <span className="eyebrow">{t('accountModal.eyebrow')}</span>
+              <h2>{t('accountModal.title')}</h2>
             </div>
           </div>
-          <button className="icon-circle-btn" onClick={close} aria-label="Schließen">
+          <button className="icon-circle-btn" onClick={close} aria-label={t('common:actions.close')}>
             <X size={20} />
           </button>
         </div>
@@ -108,15 +112,12 @@ export default function BringAccountModal() {
         {bringCredentials.isConnected ? (
           <div className="bring-connected-panel">
             <div className="bring-connected-icon"><CheckCircle2 size={30} /></div>
-            <span className="eyebrow">Live verbunden</span>
-            <h3>{bringCredentials.listName || 'Familienliste'}</h3>
+            <span className="eyebrow">{t('accountModal.connectedEyebrow')}</span>
+            <h3>{bringCredentials.listName || t('accountModal.defaultListName')}</h3>
             <p>{bringCredentials.mail}</p>
             <div className="bring-security-note">
               <ShieldCheck size={18} />
-              <span>
-                Das Passwort liegt verschlüsselt auf eurem Server und wird nie
-                im Browser gespeichert.
-              </span>
+              <span>{t('accountModal.securityNote')}</span>
             </div>
             <div className="modal-actions">
               <button
@@ -125,7 +126,7 @@ export default function BringAccountModal() {
                 onClick={fetchBringLiveItems}
                 disabled={loading}
               >
-                <RefreshCw size={17} /> Jetzt synchronisieren
+                <RefreshCw size={17} /> {t('accountModal.syncNow')}
               </button>
               <button
                 type="button"
@@ -133,7 +134,7 @@ export default function BringAccountModal() {
                 onClick={disconnect}
                 disabled={loading}
               >
-                <Trash2 size={16} /> Verbindung trennen
+                <Trash2 size={16} /> {t('accountModal.disconnect')}
               </button>
             </div>
           </div>
@@ -141,26 +142,23 @@ export default function BringAccountModal() {
           <>
             <div className="bring-intro">
               <Link2 size={21} />
-              <p>
-                Übernimm eure vorhandene Bring!-Liste. Wähle nach der Anmeldung
-                genau die Liste aus, die zum Familienplaner gehört.
-              </p>
+              <p>{t('accountModal.intro')}</p>
             </div>
 
             <form onSubmit={login}>
               <label className="auth-field">
-                <span>Bring!-E-Mail</span>
+                <span>{t('accountModal.emailLabel')}</span>
                 <input
                   type="email"
                   value={email}
                   onChange={event => setEmail(event.target.value)}
-                  placeholder="name@beispiel.de"
+                  placeholder={t('accountModal.emailPlaceholder')}
                   required
                 />
               </label>
               {!lists.length && (
                 <label className="auth-field">
-                  <span>Bring!-Passwort</span>
+                  <span>{t('accountModal.passwordLabel')}</span>
                   <div className="auth-input-wrap">
                     <LockKeyhole size={18} />
                     <input
@@ -168,7 +166,7 @@ export default function BringAccountModal() {
                       autoComplete="current-password"
                       value={password}
                       onChange={event => setPassword(event.target.value)}
-                      placeholder="Nur für die sichere Anmeldung"
+                      placeholder={t('accountModal.passwordPlaceholder')}
                       required
                     />
                   </div>
@@ -177,7 +175,7 @@ export default function BringAccountModal() {
 
               {lists.length > 0 && (
                 <label className="auth-field">
-                  <span>Welche Liste soll verbunden werden?</span>
+                  <span>{t('accountModal.selectListLabel')}</span>
                   <select
                     value={selectedListUuid}
                     onChange={event => setSelectedListUuid(event.target.value)}
@@ -200,7 +198,7 @@ export default function BringAccountModal() {
                   disabled={!selectedListUuid || loading}
                 >
                   {loading ? <LoaderCircle className="spin" size={18} /> : <Link2 size={18} />}
-                  Ausgewählte Liste verbinden
+                  {t('accountModal.connectSelected')}
                 </button>
               ) : (
                 <button
@@ -209,14 +207,11 @@ export default function BringAccountModal() {
                   disabled={!email || !password || loading}
                 >
                   {loading ? <LoaderCircle className="spin" size={18} /> : <LockKeyhole size={18} />}
-                  Sicher bei Bring! anmelden
+                  {t('accountModal.loginButton')}
                 </button>
               )}
             </form>
-            <p className="bring-fineprint">
-              LX Family Planner ist kein Produkt von Bring! Labs AG. Die
-              Verbindung kann jederzeit getrennt werden.
-            </p>
+            <p className="bring-fineprint">{t('accountModal.fineprint')}</p>
           </>
         )}
       </div>

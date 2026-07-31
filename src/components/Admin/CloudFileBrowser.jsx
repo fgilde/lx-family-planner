@@ -21,11 +21,17 @@ import {
   Upload,
   X
 } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   plannerApiFetch,
   plannerApiRequest
 } from '../../utils/apiConfig';
+import {
+  compareStrings,
+  formatDateTime,
+  toLocaleLowerCase
+} from '../../utils/formatting';
 
 const FILE_LIMIT_BYTES = 100 * 1024 * 1024;
 
@@ -37,9 +43,9 @@ function fileSize(bytes) {
   return `${(value / 1024 ** 3).toFixed(1)} GB`;
 }
 
-function fileDate(value) {
-  if (!value) return 'Noch kein Datum';
-  return new Date(value).toLocaleString('de-DE', {
+function fileDate(value, t) {
+  if (!value) return t('fileBrowser.noDateYet');
+  return formatDateTime(value, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -124,19 +130,20 @@ function CloudImageThumbnail({ entry }) {
   );
 }
 
-async function responseError(response) {
+async function responseError(response, t) {
   try {
     const data = await response.json();
-    return data?.error || 'Die Datei konnte nicht geladen werden.';
+    return data?.error || t('fileBrowser.loadFileError');
   } catch {
-    return 'Die Datei konnte nicht geladen werden.';
+    return t('fileBrowser.loadFileError');
   }
 }
 
 export default function CloudFileBrowser() {
+  const { t } = useTranslation('adminCloud');
   const { setActiveTab, showToast } = useFamily();
   const [path, setPath] = useState('');
-  const [folderName, setFolderName] = useState('Familienordner');
+  const [folderName, setFolderName] = useState(t('fileBrowser.familyFolder'));
   const [entries, setEntries] = useState([]);
   const [storage, setStorage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -173,7 +180,7 @@ export default function CloudFileBrowser() {
       const loadedPath = data.path || '';
       if (loadedPath !== path) setSearchQuery('');
       setPath(loadedPath);
-      setFolderName(data.folder || 'Familienordner');
+      setFolderName(data.folder || t('fileBrowser.familyFolder'));
       setEntries(data.entries || []);
       setStorage(data.storage || null);
     } catch (error) {
@@ -203,19 +210,17 @@ export default function CloudFileBrowser() {
   }, [folderName, path]);
 
   const visibleEntries = useMemo(() => {
-    const query = searchQuery.trim().toLocaleLowerCase('de-DE');
+    const query = toLocaleLowerCase(searchQuery.trim());
     return entries
       .filter(entry =>
         !query ||
-        entry.name.toLocaleLowerCase('de-DE').includes(query)
+        toLocaleLowerCase(entry.name).includes(query)
       )
       .sort((left, right) => {
         if (left.type !== right.type) {
           return left.type === 'folder' ? -1 : 1;
         }
-        return left.name.localeCompare(right.name, 'de-DE', {
-          sensitivity: 'base'
-        });
+        return compareStrings(left.name, right.name);
       });
   }, [entries, searchQuery]);
 
@@ -236,8 +241,8 @@ export default function CloudFileBrowser() {
     if (!files.length || busy) return;
     if (!path) {
       showToast(
-        'Bitte einen Ordner öffnen',
-        'Dateien werden nicht lose im Stammverzeichnis abgelegt.',
+        t('fileBrowser.openFolderFirstTitle'),
+        t('fileBrowser.openFolderFirstBody'),
         'info'
       );
       return;
@@ -245,8 +250,8 @@ export default function CloudFileBrowser() {
     const oversized = files.find(file => file.size > FILE_LIMIT_BYTES);
     if (oversized) {
       showToast(
-        'Datei zu groß',
-        `${oversized.name} ist größer als 100 MB.`,
+        t('fileBrowser.fileTooLargeTitle'),
+        t('fileBrowser.fileTooLargeBody', { name: oversized.name }),
         'warning'
       );
       return;
@@ -273,7 +278,7 @@ export default function CloudFileBrowser() {
         uploaded += 1;
       } catch (error) {
         showToast(
-          `${file.name} nicht hochgeladen`,
+          t('fileBrowser.fileNotUploaded', { name: file.name }),
           error.message,
           'error'
         );
@@ -284,8 +289,8 @@ export default function CloudFileBrowser() {
     if (uploaded) {
       await load(path, { silent: true });
       showToast(
-        uploaded === 1 ? 'Datei hochgeladen' : 'Dateien hochgeladen',
-        `${uploaded} Datei${uploaded === 1 ? '' : 'en'} liegt jetzt im Familienordner.`,
+        t('fileBrowser.uploadedTitle', { count: uploaded }),
+        t('fileBrowser.uploadedBody', { count: uploaded }),
         'success'
       );
     }
@@ -310,12 +315,12 @@ export default function CloudFileBrowser() {
       setNewFolderOpen(false);
       await load(path, { silent: true });
       showToast(
-        'Ordner angelegt',
-        'Der neue Bereich ist sofort im Familienarchiv verfügbar.',
+        t('fileBrowser.folderCreatedTitle'),
+        t('fileBrowser.folderCreatedBody'),
         'success'
       );
     } catch (error) {
-      showToast('Ordner nicht angelegt', error.message, 'error');
+      showToast(t('fileBrowser.folderNotCreated'), error.message, 'error');
     } finally {
       setBusy('');
     }
@@ -337,7 +342,7 @@ export default function CloudFileBrowser() {
           encodeURIComponent(entry.path)
         }`
       );
-      if (!response.ok) throw new Error(await responseError(response));
+      if (!response.ok) throw new Error(await responseError(response, t));
       const blob = await response.blob();
       if (entry.mimeType?.startsWith('text/')) {
         setPreviewText((await blob.text()).slice(0, 200_000));
@@ -346,7 +351,7 @@ export default function CloudFileBrowser() {
       }
     } catch (error) {
       setPreview(null);
-      showToast('Vorschau nicht verfügbar', error.message, 'error');
+      showToast(t('fileBrowser.previewUnavailable'), error.message, 'error');
     } finally {
       setBusy('');
     }
@@ -360,7 +365,7 @@ export default function CloudFileBrowser() {
           encodeURIComponent(entry.path)
         }`
       );
-      if (!response.ok) throw new Error(await responseError(response));
+      if (!response.ok) throw new Error(await responseError(response, t));
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -371,7 +376,7 @@ export default function CloudFileBrowser() {
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
-      showToast('Download fehlgeschlagen', error.message, 'error');
+      showToast(t('fileBrowser.downloadFailed'), error.message, 'error');
     } finally {
       setBusy('');
     }
@@ -394,12 +399,12 @@ export default function CloudFileBrowser() {
       setPreview(null);
       await load(path, { silent: true });
       showToast(
-        'Aus dem Archiv entfernt',
-        `${entry.name} wurde gelöscht.`,
+        t('fileBrowser.deletedTitle'),
+        t('fileBrowser.deletedBody', { name: entry.name }),
         'info'
       );
     } catch (error) {
-      showToast('Löschen fehlgeschlagen', error.message, 'error');
+      showToast(t('fileBrowser.deleteFailed'), error.message, 'error');
     } finally {
       setBusy('');
     }
@@ -413,23 +418,26 @@ export default function CloudFileBrowser() {
             <ImageIcon size={25} />
           </span>
           <div>
-            <span className="cloud-file-kicker">Dateien direkt in LX</span>
-            <h1>Unser Familienarchiv</h1>
-            <p>
-              Fotos, Dokumente und gemeinsame Erinnerungen – sicher an einem
-              Ort für eure Familie.
-            </p>
+            <span className="cloud-file-kicker">{t('fileBrowser.kicker')}</span>
+            <h1>{t('fileBrowser.title')}</h1>
+            <p>{t('fileBrowser.intro')}</p>
           </div>
         </div>
         <div className="cloud-file-heading-actions">
           {storage && (
             <div className="cloud-storage-meter">
               <span>
-                <strong>{fileSize(storage.used)}</strong>
-                {' von '}
-                {storage.total
-                  ? fileSize(storage.total)
-                  : 'unbegrenzt'}
+                <Trans
+                  t={t}
+                  i18nKey="fileBrowser.storageUsage"
+                  values={{
+                    used: fileSize(storage.used),
+                    total: storage.total
+                      ? fileSize(storage.total)
+                      : t('fileBrowser.unlimited')
+                  }}
+                  components={{ strong: <strong /> }}
+                />
               </span>
               <i>
                 <b
@@ -447,7 +455,7 @@ export default function CloudFileBrowser() {
             type="button"
             onClick={() => setNewFolderOpen(value => !value)}
           >
-            <FolderPlus size={16} /> Neuer Ordner
+            <FolderPlus size={16} /> {t('fileBrowser.newFolder')}
           </button>
           <button
             type="button"
@@ -455,8 +463,8 @@ export default function CloudFileBrowser() {
             onClick={() => {
               if (!path) {
                 showToast(
-                  'Zielordner auswählen',
-                  'Öffne zuerst „Familie“ oder einen Profilordner.',
+                  t('fileBrowser.chooseTargetTitle'),
+                  t('fileBrowser.chooseTargetUpload'),
                   'info'
                 );
                 return;
@@ -468,7 +476,7 @@ export default function CloudFileBrowser() {
             {busy === 'upload'
               ? <LoaderCircle className="spin" size={16} />
               : <Upload size={16} />}
-            Hochladen
+            {t('fileBrowser.upload')}
           </button>
           <input
             ref={fileInputRef}
@@ -484,7 +492,7 @@ export default function CloudFileBrowser() {
       </header>
 
       <div className="cloud-file-toolbar">
-        <nav className="cloud-file-breadcrumbs" aria-label="Archivpfad">
+        <nav className="cloud-file-breadcrumbs" aria-label={t('fileBrowser.breadcrumbsLabel')}>
           {path && (
             <button
               type="button"
@@ -493,7 +501,7 @@ export default function CloudFileBrowser() {
                 const parent = path.split('/').slice(0, -1).join('/');
                 load(parent);
               }}
-              aria-label="Eine Ebene zurück"
+              aria-label={t('fileBrowser.upOneLevel')}
             >
               <ArrowLeft size={16} />
             </button>
@@ -512,24 +520,24 @@ export default function CloudFileBrowser() {
           <input
             value={searchQuery}
             onChange={event => setSearchQuery(event.target.value)}
-            placeholder="In diesem Ordner suchen"
+            placeholder={t('fileBrowser.searchPlaceholder')}
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              aria-label="Suche leeren"
+              aria-label={t('fileBrowser.clearSearch')}
             >
               <X size={14} />
             </button>
           )}
         </label>
-        <div className="cloud-view-switch" aria-label="Ansicht wählen">
+        <div className="cloud-view-switch" aria-label={t('fileBrowser.viewSwitchLabel')}>
           <button
             type="button"
             className={viewMode === 'grid' ? 'active' : ''}
             onClick={() => changeViewMode('grid')}
-            title="Galerieansicht"
+            title={t('fileBrowser.gridView')}
           >
             <Grid2X2 size={15} />
           </button>
@@ -537,7 +545,7 @@ export default function CloudFileBrowser() {
             type="button"
             className={viewMode === 'list' ? 'active' : ''}
             onClick={() => changeViewMode('list')}
-            title="Listenansicht"
+            title={t('fileBrowser.listView')}
           >
             <List size={16} />
           </button>
@@ -546,7 +554,7 @@ export default function CloudFileBrowser() {
           type="button"
           className="cloud-file-refresh"
           onClick={() => load(path)}
-          title="Ordner aktualisieren"
+          title={t('fileBrowser.refreshFolder')}
         >
           <RefreshCw className={loading ? 'spin' : ''} size={15} />
         </button>
@@ -555,11 +563,11 @@ export default function CloudFileBrowser() {
       <div className="cloud-file-location">
         <span>
           <FolderOpen size={16} />
-          {path ? path.split('/').at(-1) : 'Alle Inhalte'}
+          {path ? path.split('/').at(-1) : t('fileBrowser.allContents')}
         </span>
         <small>
-          {folderCount} Ordner · {fileCount}{' '}
-          {fileCount === 1 ? 'Datei' : 'Dateien'}
+          {t('fileBrowser.folderCount', { count: folderCount })} ·{' '}
+          {t('fileBrowser.fileCount', { count: fileCount })}
         </small>
       </div>
 
@@ -569,12 +577,12 @@ export default function CloudFileBrowser() {
           <input
             value={newFolderName}
             onChange={event => setNewFolderName(event.target.value)}
-            placeholder="Name des neuen Ordners"
+            placeholder={t('fileBrowser.newFolderPlaceholder')}
             maxLength={120}
             autoFocus
           />
           <button disabled={!newFolderName.trim() || Boolean(busy)}>
-            Anlegen
+            {t('fileBrowser.create')}
           </button>
           <button type="button" onClick={() => setNewFolderOpen(false)}>
             <X size={16} />
@@ -599,8 +607,8 @@ export default function CloudFileBrowser() {
           if (!path) {
             setDragging(false);
             showToast(
-              'Zielordner auswählen',
-              'Öffne zuerst einen Ordner und ziehe die Dateien dann hinein.',
+              t('fileBrowser.chooseTargetTitle'),
+              t('fileBrowser.chooseTargetDrop'),
               'info'
             );
             return;
@@ -611,23 +619,23 @@ export default function CloudFileBrowser() {
         {dragging && (
           <div className="cloud-drop-message">
             <CloudUpload size={34} />
-            <strong>Hier loslassen</strong>
-            <span>Die Dateien landen in diesem Ordner.</span>
+            <strong>{t('fileBrowser.dropHereTitle')}</strong>
+            <span>{t('fileBrowser.dropHereBody')}</span>
           </div>
         )}
 
         {loading ? (
           <div className="cloud-file-loading">
             <LoaderCircle className="spin" size={27} />
-            Familienordner wird geöffnet …
+            {t('fileBrowser.loading')}
           </div>
         ) : loadError ? (
           <div className="cloud-file-error">
             <span><ShieldCheck size={25} /></span>
-            <strong>Das Familienarchiv wird noch vorbereitet</strong>
+            <strong>{t('fileBrowser.errorTitle')}</strong>
             <p>{loadError}</p>
             <button type="button" onClick={() => setActiveTab('admin')}>
-              In der Elternzentrale prüfen
+              {t('fileBrowser.checkInAdmin')}
             </button>
           </div>
         ) : visibleEntries.length ? (
@@ -654,8 +662,8 @@ export default function CloudFileBrowser() {
                       <strong>{entry.name}</strong>
                       <small>
                         {entry.type === 'folder'
-                          ? 'Sammlung öffnen'
-                          : `${fileSize(entry.size)} · ${fileDate(entry.modifiedAt)}`}
+                          ? t('fileBrowser.openCollection')
+                          : `${fileSize(entry.size)} · ${fileDate(entry.modifiedAt, t)}`}
                       </small>
                     </span>
                   </button>
@@ -664,7 +672,7 @@ export default function CloudFileBrowser() {
                       <button
                         type="button"
                         onClick={() => openPreview(entry)}
-                        title="Vorschau"
+                        title={t('fileBrowser.preview')}
                         disabled={working}
                       >
                         <Maximize2 size={15} />
@@ -674,7 +682,7 @@ export default function CloudFileBrowser() {
                       <button
                         type="button"
                         onClick={() => downloadEntry(entry)}
-                        title="Herunterladen"
+                        title={t('fileBrowser.download')}
                         disabled={working}
                       >
                         <Download size={15} />
@@ -688,8 +696,8 @@ export default function CloudFileBrowser() {
                       onClick={() => deleteEntry(entry)}
                       title={
                         deleteConfirm === entry.path
-                          ? 'Noch einmal klicken'
-                          : 'Entfernen'
+                          ? t('fileBrowser.clickAgain')
+                          : t('fileBrowser.remove')
                       }
                       disabled={working}
                     >
@@ -705,9 +713,9 @@ export default function CloudFileBrowser() {
         ) : searchQuery ? (
           <div className="cloud-file-no-results">
             <Search size={28} />
-            <strong>Nichts mit „{searchQuery}“ gefunden</strong>
+            <strong>{t('fileBrowser.noResults', { query: searchQuery })}</strong>
             <button type="button" onClick={() => setSearchQuery('')}>
-              Alle Inhalte zeigen
+              {t('fileBrowser.showAll')}
             </button>
           </div>
         ) : (
@@ -723,10 +731,8 @@ export default function CloudFileBrowser() {
             }}
           >
             <CloudUpload size={39} />
-            <strong>Noch Platz für eure Erinnerungen</strong>
-            <span>
-              Dateien hierher ziehen oder antippen und auswählen.
-            </span>
+            <strong>{t('fileBrowser.emptyTitle')}</strong>
+            <span>{t('fileBrowser.emptyBody')}</span>
           </button>
         )}
       </div>
@@ -742,13 +748,13 @@ export default function CloudFileBrowser() {
           >
             <header>
               <div>
-                <small>Vorschau im Familienarchiv</small>
+                <small>{t('fileBrowser.previewKicker')}</small>
                 <h2>{preview.name}</h2>
               </div>
               <button
                 type="button"
                 onClick={() => setPreview(null)}
-                aria-label="Vorschau schließen"
+                aria-label={t('fileBrowser.closePreview')}
               >
                 <X size={18} />
               </button>
@@ -765,17 +771,17 @@ export default function CloudFileBrowser() {
               ) : (
                 <div className="cloud-preview-generic">
                   <File size={45} />
-                  <strong>Keine direkte Vorschau verfügbar</strong>
+                  <strong>{t('fileBrowser.noPreview')}</strong>
                   <span>{preview.mimeType}</span>
                 </div>
               )}
             </div>
             <footer>
               <span>
-                {fileSize(preview.size)} · {fileDate(preview.modifiedAt)}
+                {fileSize(preview.size)} · {fileDate(preview.modifiedAt, t)}
               </span>
               <button type="button" onClick={() => downloadEntry(preview)}>
-                <Download size={16} /> Herunterladen
+                <Download size={16} /> {t('fileBrowser.download')}
               </button>
               <button
                 type="button"
@@ -786,8 +792,8 @@ export default function CloudFileBrowser() {
               >
                 <Trash2 size={16} />
                 {deleteConfirm === preview.path
-                  ? 'Löschen bestätigen'
-                  : 'Löschen'}
+                  ? t('fileBrowser.confirmDelete')
+                  : t('common:actions.delete')}
               </button>
             </footer>
           </section>

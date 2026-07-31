@@ -1,0 +1,190 @@
+{
+  "sections": {
+    "today": "Week view",
+    "routines": "Routines",
+    "money": "Pocket money",
+    "school": "School",
+    "polls": "Vote",
+    "safety": "Safe & calm"
+  },
+  "hero": {
+    "kicker": "Your everyday life, one great team",
+    "title": "Family journey",
+    "intro": "Routines, school, pocket money and decisions all come together here – easy for kids to understand, reliable for parents.",
+    "viewFor": "Viewing for",
+    "yourJourney": "Your journey",
+    "navAria": "Family journey sections"
+  },
+  "adultsOnly": "Adults only",
+  "weekly": {
+    "kicker": "The last seven days",
+    "title": "That was {{name}}'s week",
+    "metrics": {
+      "missions": "Missions",
+      "routineDays": "Routine days",
+      "polls": "Polls",
+      "stars": "Stars"
+    },
+    "strongWeek": "That was a really strong week!",
+    "everyStepCounts": "Every little step counts.",
+    "nextEvent": "Up next, “{{title}}” is waiting for you.",
+    "spontaneousMoment": "The next family moment can happen spontaneously."
+  },
+  "achievements": {
+    "kicker": "Trophy cabinet",
+    "title": "Badges",
+    "firstStep": "First step",
+    "routinePro": "Routine pro",
+    "starCollector": "Star collector",
+    "teamSpirit": "Team spirit",
+    "collected": "Collected",
+    "stillSecret": "Still a secret"
+  },
+  "missions": {
+    "kicker": "Together, not alone",
+    "title": "Family missions",
+    "progress": "{{completed}} of {{total}} are in",
+    "empty": "No shared mission yet.",
+    "creatorTitle": "New family mission",
+    "titlePlaceholder": "For example: Save the garden together",
+    "descriptionPlaceholder": "What will you do together?",
+    "start": "Start mission"
+  },
+  "encouragement": {
+    "kicker": "Small words, big impact",
+    "title": "Cheer-ups",
+    "quote": "“{{message}}”",
+    "fromFamily": "Your family",
+    "empty": "A kind cheer-up will be waiting here soon.",
+    "messagePlaceholder": "What would you like to tell {{name}}?",
+    "send": "Send"
+  },
+  "routines": {
+    "kicker": "Step by step",
+    "title": "{{name}}'s routines",
+    "timeOfDay": {
+      "morning": "Mornings",
+      "afternoon": "Afternoons",
+      "evening": "Evenings"
+    },
+    "streak_one": "🔥 {{count}} day in a row",
+    "streak_other": "🔥 {{count}} days in a row",
+    "deleteAria": "Delete routine",
+    "emptyTitle": "No routine yet",
+    "emptyText": "A good routine takes the stress out of mornings and evenings.",
+    "workshop": {
+      "kicker": "Routine workshop",
+      "title": "Create a routine",
+      "namePlaceholder": "Routine name",
+      "stepsLabel": "One step per line",
+      "save": "Save routine"
+    },
+    "defaults": {
+      "title": "Morning start",
+      "steps": "Get up\nGet dressed\nBrush teeth\nCheck school bag"
+    }
+  },
+  "money": {
+    "kicker": "Family account",
+    "title": "{{name}}'s pocket money",
+    "balanceLabel": "Current balance",
+    "starsAvailable": "{{count}} ⭐ available",
+    "starCost_one": "{{count}} star",
+    "starCost_other": "{{count}} stars",
+    "emptyLedger": "The pocket money book is still empty.",
+    "goals": {
+      "kicker": "Wishes become visible",
+      "title": "Savings goals",
+      "progress": "{{current}} of {{target}}",
+      "deleteAria": "Delete savings goal",
+      "empty": "No wish to save for yet.",
+      "creatorTitle": "Add savings goal",
+      "titlePlaceholder": "What are you saving for?",
+      "amountAria": "Target amount in euros",
+      "create": "Create goal"
+    },
+    "booking": {
+      "title": "Book pocket money",
+      "amountLabel": "Amount in euros – negative for an expense",
+      "noteLabel": "Booking note",
+      "starsLabel": "Convert stars for it (optional)",
+      "submit": "Book safely",
+      "defaultNote": "Pocket money"
+    }
+  },
+  "school": {
+    "kicker": "Everything for the school day",
+    "title": "{{name}}'s school area",
+    "kinds": {
+      "lesson": "Timetable",
+      "homework": "Homework",
+      "exam": "Class test",
+      "bag": "Bag check"
+    },
+    "deleteAria": "Delete school entry",
+    "emptyKind": "Nothing entered yet.",
+    "form": {
+      "kicker": "Enter it once, stay calm",
+      "title": "Create school entry",
+      "subjectPlaceholder": "Subject",
+      "titlePlaceholder": "What's coming up?",
+      "detailsPlaceholder": "Book, materials or a short note",
+      "submit": "Add entry"
+    }
+  },
+  "polls": {
+    "kicker": "Every vote counts",
+    "title": "Family polls",
+    "votes_one": "{{count}} vote",
+    "votes_other": "{{count}} votes",
+    "deleteAria": "Delete poll",
+    "emptyTitle": "No poll yet",
+    "emptyText": "The next food or outing question belongs to the whole family.",
+    "form": {
+      "kicker": "Decided quickly",
+      "title": "Ask a new question",
+      "questionPlaceholder": "What would you like to decide together?",
+      "optionsLabel": "One answer per line – emoji are allowed",
+      "closesLabel": "Poll optionally ends on",
+      "submit": "Start poll",
+      "defaultOptions": "🍕 Pizza\n🍝 Pasta\n🥞 Pancakes"
+    }
+  },
+  "safety": {
+    "emergency": {
+      "kicker": "Just in case",
+      "fallbackTitle": "Emergency card",
+      "defaultTitle": "Important help for our family",
+      "empty": "Parents can store safe emergency contacts here."
+    },
+    "quiet": {
+      "kicker": "Protected family time",
+      "title": "Quiet and media times",
+      "notifications": "Notification quiet time",
+      "range": "{{start}} to {{end}}",
+      "notActive": "Not enabled",
+      "mediaLounge": "Media lounge",
+      "alwaysVisible": "Always visible",
+      "explanation": "Urgent “Need closeness” alerts can still come through during quiet time if you wish. Normal messages stay in the family inbox."
+    },
+    "editor": {
+      "title": "Edit protection rules",
+      "quietSwitch": "Quiet time for notifications",
+      "quietSwitchHint": "Pause normal push messages.",
+      "startLabel": "Start",
+      "endLabel": "End",
+      "urgentSwitch": "Let urgent calls for help through",
+      "urgentSwitchHint": "“Need closeness” stays reachable.",
+      "mediaSwitch": "Use media times",
+      "mediaSwitchHint": "Only show YouTube and Spotify within the time window.",
+      "mediaFromLabel": "Media from",
+      "mediaToLabel": "Media until",
+      "emergencyTitleLabel": "Emergency card title",
+      "contactsLabel": "Contacts – name | phone number | note",
+      "contactsPlaceholder": "Paediatrician | 0123 456789 | Bring vaccination card\nGrandma | 0987 654321 | May pick up",
+      "notesLabel": "Important notes",
+      "notesPlaceholder": "Allergies, medication or important notes",
+      "save": "Save protection rules"
+    }
+  }
+}

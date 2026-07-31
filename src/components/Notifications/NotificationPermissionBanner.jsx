@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BellRing, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import { isPetProfile } from '../../constants/roles';
@@ -7,6 +8,7 @@ import { isCapacitorNative } from '../../utils/apiConfig';
 const SNOOZE_MS = 24 * 60 * 60 * 1000;
 
 export default function NotificationPermissionBanner() {
+  const { t } = useTranslation('notifications');
   const {
     activeMember,
     webPush,
@@ -40,24 +42,26 @@ export default function NotificationPermissionBanner() {
     () =>
       isChild
         ? {
-            eyebrow: 'Nichts Wichtiges verpassen',
-            title: `Soll ich dir Bescheid sagen, ${activeMember?.name || ''}?`,
-            text: `Wenn eine Nachricht oder neue Mission für dich ankommt, meldet sich ${
-              isNative ? 'die LX App' : 'dieses Gerät'
-            }.`,
-            action: 'Ja, sag mir Bescheid'
+            eyebrow: t('permissionBanner.child.eyebrow'),
+            title: t('permissionBanner.child.title', {
+              name: activeMember?.name || ''
+            }),
+            text: isNative
+              ? t('permissionBanner.child.textNative')
+              : t('permissionBanner.child.textWeb'),
+            action: t('permissionBanner.child.action')
           }
         : {
-            eyebrow: 'Familie auf dem Laufenden',
+            eyebrow: t('permissionBanner.adult.eyebrow'),
             title: isNative
-              ? 'Echte Android-Benachrichtigungen'
-              : 'Benachrichtigungen auf diesem Gerät',
+              ? t('permissionBanner.adult.titleNative')
+              : t('permissionBanner.adult.titleWeb'),
             text: isNative
-              ? 'Chat, Termine und Aufgaben erscheinen im Android-Benachrichtigungsbereich – auch bei geschlossener LX App.'
-              : 'Chat, Termine und Aufgaben erreichen dich auch dann, wenn der Planer gerade geschlossen ist.',
-            action: 'Jetzt einschalten'
+              ? t('permissionBanner.adult.textNative')
+              : t('permissionBanner.adult.textWeb'),
+            action: t('permissionBanner.adult.action')
           },
-    [activeMember?.name, isChild, isNative]
+    [activeMember?.name, isChild, isNative, t]
   );
 
   if (!canOffer || isSnoozed) return null;
@@ -80,7 +84,7 @@ export default function NotificationPermissionBanner() {
         <span>{copy.eyebrow}</span>
         <strong>{copy.title}</strong>
         <p>{copy.text}</p>
-        <small><ShieldCheck size={13} /> Nur für {activeMember?.name}s Profil</small>
+        <small><ShieldCheck size={13} /> {t('permissionBanner.profileOnly', { name: activeMember?.name })}</small>
       </div>
       <div className="push-banner-actions">
         <button
@@ -90,16 +94,16 @@ export default function NotificationPermissionBanner() {
           onClick={() => enablePush()}
         >
           <BellRing size={17} />
-          {push.busy === 'enable' ? 'Einen Moment …' : copy.action}
+          {push.busy === 'enable' ? t('permissionBanner.busy') : copy.action}
         </button>
         <button type="button" className="push-banner-later" onClick={snooze}>
-          Später
+          {t('permissionBanner.later')}
         </button>
       </div>
       <button
         type="button"
         className="push-banner-close"
-        aria-label="Hinweis schließen"
+        aria-label={t('permissionBanner.close')}
         onClick={snooze}
       >
         <X size={17} />

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Calendar,
@@ -24,70 +25,32 @@ import OrderedDashboardGrid, {
   DashboardWidget
 } from './OrderedDashboardGrid';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
+import { formatDate } from '../../utils/formatting';
 import { isChildProfile, isPetProfile } from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
 
+// Die ids sind im gespeicherten Layout persistiert – Anzeigetexte kommen
+// zur Laufzeit aus personal.widgets.<id>.*.
 const ADULT_WIDGETS = [
-  {
-    id: 'calendar',
-    label: 'Meine Termine',
-    description: 'Deine nächsten Termine und Familienereignisse',
-    icon: Calendar,
-    color: '#377d69'
-  },
-  {
-    id: 'tasks',
-    label: 'Aufgaben & Freigaben',
-    description: 'Eigene Aufgaben und offene Elternbestätigungen',
-    icon: CheckSquare,
-    color: '#3975b9'
-  },
-  {
-    id: 'meals',
-    label: 'Heute auf dem Tisch',
-    description: 'Der aktuelle Essensplan für euren Haushalt',
-    icon: UtensilsCrossed,
-    color: '#c26745'
-  },
-  {
-    id: 'shopping',
-    label: 'Noch einzukaufen',
-    description: 'Die wichtigsten offenen Artikel auf einen Blick',
-    icon: ShoppingBag,
-    color: '#8a6a24'
-  },
-  {
-    id: 'trash',
-    label: 'Nächste Müllabfuhr',
-    description: 'Der nächste Abholtermin für euren Planungsort',
-    icon: Trash2,
-    color: '#66736e'
-  },
-  {
-    id: 'board',
-    label: 'Pinnwand',
-    description: 'Die neuesten gemeinsamen Familiennotizen',
-    icon: Pin,
-    color: '#a65a3f'
-  },
-  {
-    id: 'cloud',
-    label: 'Familienarchiv',
-    description: 'Fotos, Dokumente und Erinnerungen direkt hochladen',
-    icon: Cloud,
-    color: '#177f7b'
-  },
-  {
-    id: 'home-assistant',
-    label: 'Unser Zuhause',
-    description: 'Freigegebene Geräte, Sensoren und Szenen aus Home Assistant',
-    icon: Home,
-    color: '#2f7c73'
-  }
+  { id: 'calendar', icon: Calendar, color: '#377d69' },
+  { id: 'tasks', icon: CheckSquare, color: '#3975b9' },
+  { id: 'meals', icon: UtensilsCrossed, color: '#c26745' },
+  { id: 'shopping', icon: ShoppingBag, color: '#8a6a24' },
+  { id: 'trash', icon: Trash2, color: '#66736e' },
+  { id: 'board', icon: Pin, color: '#a65a3f' },
+  { id: 'cloud', icon: Cloud, color: '#177f7b' },
+  { id: 'home-assistant', icon: Home, color: '#2f7c73' }
 ];
+
+// Gespeicherte Schlüssel im Speiseplan (meal.meal) bleiben deutsch –
+// nur die Anzeige wird übersetzt.
+const MEAL_TYPE_LABEL_KEYS = {
+  Mittagessen: 'personal.meals.types.lunch',
+  Abendessen: 'personal.meals.types.dinner'
+};
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -104,6 +67,7 @@ function DashboardCardHeader({
   title,
   tone = 'var(--primary)'
 }) {
+  const { t } = useTranslation('dashboard');
   return (
     <div className="adult-widget-header">
       <div className="adult-widget-heading" style={{ color: tone }}>
@@ -124,7 +88,7 @@ function DashboardCardHeader({
         aria-label={`${actionLabel}: ${title}`}
         title={actionLabel}
       >
-        Öffnen <ArrowRight size={13} />
+        {t('personal.widgetHeader.open')} <ArrowRight size={13} />
       </button>
     </div>
   );
@@ -140,6 +104,7 @@ function EmptyWidget({ icon, children }) {
 }
 
 export default function PersonalDashboard() {
+  const { t } = useTranslation('dashboard');
   const {
     activeMember,
     events,
@@ -164,11 +129,16 @@ export default function PersonalDashboard() {
           homeAssistantIntegration?.enabled !== false &&
           homeAssistantIntegration?.selectedEntities?.length > 0
         )
-    ),
+    ).map(widget => ({
+      ...widget,
+      label: t(`personal.widgets.${widget.id}.label`),
+      description: t(`personal.widgets.${widget.id}.description`)
+    })),
     [
       homeAssistantIntegration?.connected,
       homeAssistantIntegration?.enabled,
-      homeAssistantIntegration?.selectedEntities?.length
+      homeAssistantIntegration?.selectedEntities?.length,
+      t
     ]
   );
   const dashboardLayout = useDashboardLayout(
@@ -180,8 +150,14 @@ export default function PersonalDashboard() {
   const now = new Date();
   const hour = now.getHours();
   const timeGreeting =
-    hour < 11 ? 'Guten Morgen' : hour >= 18 ? 'Guten Abend' : 'Guten Tag';
+    hour < 11
+      ? t('personal.hero.greeting.morning')
+      : hour >= 18
+        ? t('personal.hero.greeting.evening')
+        : t('personal.hero.greeting.day');
   const todayKey = localDateKey(now);
+  // meal.day wird als deutscher Wochentagsname gespeichert –
+  // der Vergleich bleibt deshalb bewusst bei de-DE.
   const currentDayName = now.toLocaleDateString('de-DE', {
     weekday: 'long'
   });
@@ -286,14 +262,21 @@ export default function PersonalDashboard() {
             className="adult-hero-avatar"
           />
           <div>
-            <span className="adult-hero-kicker">Dein Familienüberblick</span>
-            <h1>{timeGreeting}, {activeMember.name.split(' ')[0]}!</h1>
+            <span className="adult-hero-kicker">{t('personal.hero.kicker')}</span>
+            <h1>
+              {t('personal.hero.title', {
+                greeting: timeGreeting,
+                name: activeMember.name.split(' ')[0]
+              })}
+            </h1>
             <p>
-              Heute im Blick: {myEvents.length}{' '}
-              {myEvents.length === 1 ? 'Termin' : 'Termine'},{' '}
-              {myTasks.length} offene{' '}
-              {myTasks.length === 1 ? 'Aufgabe' : 'Aufgaben'} und{' '}
-              {openShopping.length} Einkäufe.
+              {t('personal.hero.summary', {
+                events: t('personal.hero.events', { count: myEvents.length }),
+                tasks: t('personal.hero.tasks', { count: myTasks.length }),
+                shopping: t('personal.hero.shopping', {
+                  count: openShopping.length
+                })
+              })}
             </p>
           </div>
         </div>
@@ -303,14 +286,14 @@ export default function PersonalDashboard() {
             className="adult-layout-button"
             onClick={() => setIsCustomizerOpen(true)}
           >
-            <LayoutDashboard size={17} /> Ansicht
+            <LayoutDashboard size={17} /> {t('personal.hero.customize')}
           </button>
           <button
             type="button"
             className="adult-quick-add"
             onClick={() => setIsQuickAddOpen(true)}
           >
-            <Plus size={18} /> Etwas eintragen
+            <Plus size={18} /> {t('personal.hero.quickAdd')}
           </button>
         </div>
       </div>
@@ -322,13 +305,13 @@ export default function PersonalDashboard() {
         <DashboardWidget widgetId="calendar" className="card adult-dashboard-widget">
           <DashboardCardHeader
             action={() => setActiveTab('calendar')}
-            actionLabel="Alle anzeigen"
+            actionLabel={t('personal.widgets.calendar.action')}
             count={myEvents.length}
             icon={Calendar}
-            title="Meine Termine"
+            title={t('personal.widgets.calendar.label')}
           />
           {myEvents.length === 0 ? (
-            <EmptyWidget icon="🎉">Keine Termine für dich eingetragen.</EmptyWidget>
+            <EmptyWidget icon="🎉">{t('personal.calendar.empty')}</EmptyWidget>
           ) : (
             <div className="adult-event-list">
               {myEvents.slice(0, 4).map(event => (
@@ -338,17 +321,16 @@ export default function PersonalDashboard() {
                   onClick={() => setActiveTab('calendar')}
                 >
                   <time>
-                    <strong>{event.time || 'ganztags'}</strong>
+                    <strong>{event.time || t('personal.calendar.allDay')}</strong>
                     <span>
-                      {new Date(`${event.date}T12:00:00`).toLocaleDateString(
-                        'de-DE',
-                        { weekday: 'short', day: '2-digit', month: 'short' }
-                      )}
+                      {formatDate(`${event.date}T12:00:00`, {
+                        weekday: 'short', day: '2-digit', month: 'short'
+                      })}
                     </span>
                   </time>
                   <span>
                     <strong>{event.title}</strong>
-                    <small>{event.location || 'Familientermin'}</small>
+                    <small>{event.location || t('personal.calendar.defaultLocation')}</small>
                   </span>
                 </button>
               ))}
@@ -359,10 +341,10 @@ export default function PersonalDashboard() {
         <DashboardWidget widgetId="tasks" className="card adult-dashboard-widget">
           <DashboardCardHeader
             action={() => setActiveTab('tasks')}
-            actionLabel="Aufgabenplan"
+            actionLabel={t('personal.widgets.tasks.action')}
             count={myTasks.length + approvalTasks.length}
             icon={CheckSquare}
-            title="Aufgaben & Freigaben"
+            title={t('personal.widgets.tasks.label')}
           />
           {approvalTasks.length > 0 && (
             <button
@@ -372,15 +354,13 @@ export default function PersonalDashboard() {
             >
               <span>{approvalTasks.length}</span>
               <strong>
-                {approvalTasks.length === 1
-                  ? 'Erledigung wartet auf dich'
-                  : 'Erledigungen warten auf dich'}
+                {t('personal.tasks.approvals', { count: approvalTasks.length })}
               </strong>
               <ArrowRight size={15} />
             </button>
           )}
           {myTasks.length === 0 && approvalTasks.length === 0 ? (
-            <EmptyWidget icon="🌟">Alle Aufgaben sind erledigt.</EmptyWidget>
+            <EmptyWidget icon="🌟">{t('personal.tasks.empty')}</EmptyWidget>
           ) : (
             <div className="adult-task-list">
               {myTasks.slice(0, approvalTasks.length ? 3 : 4).map(task => (
@@ -394,8 +374,10 @@ export default function PersonalDashboard() {
                     <strong>{task.title}</strong>
                     <small>
                       {task.dueDate
-                        ? `Fällig ${new Date(`${task.dueDate}T12:00:00`).toLocaleDateString('de-DE')}`
-                        : task.category || 'Aufgabe'}
+                        ? t('personal.tasks.due', {
+                            date: formatDate(`${task.dueDate}T12:00:00`)
+                          })
+                        : task.category || t('personal.tasks.defaultCategory')}
                     </small>
                   </span>
                   <em><Star size={13} fill="currentColor" /> +{task.stars}</em>
@@ -408,14 +390,14 @@ export default function PersonalDashboard() {
         <DashboardWidget widgetId="meals" className="card adult-dashboard-widget meals">
           <DashboardCardHeader
             action={() => setActiveTab('meals')}
-            actionLabel="Essensplan"
+            actionLabel={t('personal.widgets.meals.action')}
             count={todayMeals.length}
             icon={UtensilsCrossed}
-            title="Heute auf dem Tisch"
+            title={t('personal.widgets.meals.label')}
             tone="var(--accent)"
           />
           {todayMeals.length === 0 ? (
-            <EmptyWidget icon="🥣">Für heute ist noch nichts geplant.</EmptyWidget>
+            <EmptyWidget icon="🥣">{t('personal.meals.empty')}</EmptyWidget>
           ) : (
             <div className="adult-meal-list">
               {todayMeals.map(meal => (
@@ -424,7 +406,11 @@ export default function PersonalDashboard() {
                   key={meal.id}
                   onClick={() => setActiveTab('meals')}
                 >
-                  <span>{meal.meal}</span>
+                  <span>
+                    {MEAL_TYPE_LABEL_KEYS[meal.meal]
+                      ? t(MEAL_TYPE_LABEL_KEYS[meal.meal])
+                      : meal.meal}
+                  </span>
                   <strong>{meal.recipe}</strong>
                   <ArrowRight size={15} />
                 </button>
@@ -436,14 +422,14 @@ export default function PersonalDashboard() {
         <DashboardWidget widgetId="shopping" className="card adult-dashboard-widget shopping">
           <DashboardCardHeader
             action={() => setActiveTab('shopping')}
-            actionLabel="Einkaufsliste"
+            actionLabel={t('personal.widgets.shopping.action')}
             count={openShopping.length}
             icon={ShoppingBag}
-            title="Noch einzukaufen"
+            title={t('personal.widgets.shopping.label')}
             tone="var(--warning)"
           />
           {openShopping.length === 0 ? (
-            <EmptyWidget icon="✓">Die Einkaufsliste ist erledigt.</EmptyWidget>
+            <EmptyWidget icon="✓">{t('personal.shopping.empty')}</EmptyWidget>
           ) : (
             <div className="adult-shopping-preview">
               {openShopping.slice(0, 6).map(item => (
@@ -464,9 +450,9 @@ export default function PersonalDashboard() {
         <DashboardWidget widgetId="trash" className="card adult-dashboard-widget trash">
           <DashboardCardHeader
             action={() => setActiveTab('trash')}
-            actionLabel="Müllkalender"
+            actionLabel={t('personal.widgets.trash.action')}
             icon={Trash2}
-            title="Nächste Müllabfuhr"
+            title={t('personal.widgets.trash.label')}
             tone="var(--warning)"
           />
           {nextTrash ? (
@@ -479,30 +465,30 @@ export default function PersonalDashboard() {
               <span>
                 <strong>{nextTrash.title}</strong>
                 <small>
-                  Abholung am{' '}
-                  {new Date(`${nextTrash.date}T12:00:00`).toLocaleDateString(
-                    'de-DE',
-                    { weekday: 'long', day: 'numeric', month: 'long' }
-                  )}
+                  {t('personal.trash.pickupOn', {
+                    date: formatDate(`${nextTrash.date}T12:00:00`, {
+                      weekday: 'long', day: 'numeric', month: 'long'
+                    })
+                  })}
                 </small>
               </span>
               <ArrowRight size={16} />
             </button>
           ) : (
-            <EmptyWidget icon="🗓️">Keine Mülltermine vorhanden.</EmptyWidget>
+            <EmptyWidget icon="🗓️">{t('personal.trash.empty')}</EmptyWidget>
           )}
         </DashboardWidget>
 
         <DashboardWidget widgetId="board" className="card adult-dashboard-widget board">
           <DashboardCardHeader
             action={() => setActiveTab('board')}
-            actionLabel="Zur Pinnwand"
+            actionLabel={t('personal.widgets.board.action')}
             count={householdNotes.length}
             icon={Pin}
-            title="Neues an der Pinnwand"
+            title={t('personal.board.title')}
           />
           {householdNotes.length === 0 ? (
-            <EmptyWidget icon="📌">Noch keine Notizen vorhanden.</EmptyWidget>
+            <EmptyWidget icon="📌">{t('personal.board.empty')}</EmptyWidget>
           ) : (
             <div className="adult-note-stack">
               {householdNotes.slice(0, 3).map(note => (

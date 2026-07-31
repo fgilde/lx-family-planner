@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BellOff,
   BellRing,
@@ -24,6 +25,7 @@ import {
   POSITION_OPTIONS,
   canManageFamily,
   getPositionLabel,
+  getPositionOptionLabel,
   isManagedProfile,
   isPetProfile,
   roleForPosition
@@ -78,6 +80,8 @@ export default function ProfileModal() {
     setIsProfileModalOpen,
     showToast
   } = useFamily();
+  const { t } = useTranslation('profile');
+  const { t: tShared } = useTranslation('shared');
   const [mode, setMode] = useState('list');
   const [editingMemberId, setEditingMemberId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -154,10 +158,10 @@ export default function ProfileModal() {
     setBusy(true);
     try {
       await setActiveMemberId(member.id);
-      showToast('Profil gewechselt', `Hallo ${member.name}!`, 'success');
+      showToast(t('toasts.switched'), t('toasts.greeting', { name: member.name }), 'success');
       close();
     } catch (error) {
-      showToast('Profil gesperrt', error.message, 'error');
+      showToast(t('toasts.locked'), error.message, 'error');
     } finally {
       setBusy(false);
     }
@@ -173,10 +177,10 @@ export default function ProfileModal() {
         profileSecretType === 'pin' ? pinInput : '',
         profileSecretType === 'family-password' ? pinInput : ''
       );
-      showToast('Profil gewechselt', `Hallo ${pinTarget.name}!`, 'success');
+      showToast(t('toasts.switched'), t('toasts.greeting', { name: pinTarget.name }), 'success');
       close();
     } catch (error) {
-      showToast('PIN nicht korrekt', error.message, 'error');
+      showToast(t('toasts.pinIncorrect'), error.message, 'error');
     } finally {
       setBusy(false);
     }
@@ -248,7 +252,7 @@ export default function ProfileModal() {
       };
       if (editingMemberId) {
         await updateMember(editingMemberId, payload);
-        showToast('Profil aktualisiert', `${payload.name} ist gespeichert.`, 'success');
+        showToast(t('toasts.updated'), t('toasts.savedMessage', { name: payload.name }), 'success');
       } else {
         await addMember(payload);
       }
@@ -260,7 +264,7 @@ export default function ProfileModal() {
 
   const remove = async () => {
     if (!editingMemberId) return;
-    if (!window.confirm('Dieses Familienprofil wirklich löschen?')) return;
+    if (!window.confirm(t('confirmDelete'))) return;
     setBusy(true);
     await deleteMember(editingMemberId);
     setBusy(false);
@@ -280,29 +284,29 @@ export default function ProfileModal() {
           <div>
             <span className="eyebrow">
               {pinTarget
-                ? 'Geschütztes Profil'
+                ? t('modal.eyebrow.protected')
                 : mode === 'form'
                   ? editingMemberId
-                    ? 'Profil bearbeiten'
-                    : 'Neues Profil'
-                  : 'Eure Familie'}
+                    ? t('modal.eyebrow.edit')
+                    : t('modal.eyebrow.new')
+                  : t('modal.eyebrow.family')}
             </span>
             <h2 className="card-title" id="profile-modal-title">
               <UserRound size={23} />
               {pinTarget
-                ? `${pinTarget.name} entsperren`
+                ? t('modal.title.unlock', { name: pinTarget.name })
                 : mode === 'form'
                   ? editingMemberId
-                    ? 'Profil bearbeiten'
-                    : 'Profil anlegen'
-                  : 'Wer ist gerade dran?'}
+                    ? t('modal.title.edit')
+                    : t('modal.title.create')
+                  : t('modal.title.whoseTurn')}
             </h2>
           </div>
           <button
             type="button"
             className="icon-circle-btn"
             onClick={close}
-            aria-label="Schließen"
+            aria-label={t('common:actions.close')}
           >
             <X size={20} />
           </button>
@@ -312,13 +316,13 @@ export default function ProfileModal() {
           {pinTarget ? (
           <form className="profile-pin-panel" onSubmit={verifyPin}>
             <div className="profile-pin-icon"><Lock size={26} /></div>
-            <h3>{pinTarget.name}s Profil ist geschützt</h3>
+            <h3>{t('pin.protectedHeading', { name: pinTarget.name })}</h3>
             <p>
               {profileSecretType === 'pin'
-                ? 'Gib die persönliche Profil-PIN ein.'
+                ? t('pin.enterPin')
                 : activeProfileIsPet
-                  ? 'Für den Wechsel aus einem Haustierprofil wird das Familienpasswort benötigt.'
-                  : 'Für den Wechsel aus einem Kinderprofil wird das Familienpasswort benötigt.'}
+                  ? t('pin.petPasswordNeeded')
+                  : t('pin.childPasswordNeeded')}
             </p>
             <div className="auth-input-wrap">
               <KeyRound size={18} />
@@ -335,30 +339,29 @@ export default function ProfileModal() {
                 maxLength={profileSecretType === 'pin' ? 12 : 128}
                 placeholder={
                   profileSecretType === 'pin'
-                    ? 'Profil-PIN'
-                    : 'Familienpasswort'
+                    ? t('pin.pinPlaceholder')
+                    : t('pin.familyPasswordPlaceholder')
                 }
                 autoFocus
               />
             </div>
             <div className="modal-actions">
               <button className="auth-primary" disabled={busy || !pinInput}>
-                Entsperren
+                {t('pin.unlock')}
               </button>
               <button
                 className="auth-secondary"
                 type="button"
                 onClick={() => setPinTarget(null)}
               >
-                Abbrechen
+                {t('common:actions.cancel')}
               </button>
             </div>
           </form>
           ) : mode === 'list' ? (
           <>
             <p className="profile-switch-intro">
-              Tippe auf ein Profil, um direkt in seine persönliche Familienwelt
-              zu wechseln.
+              {t('list.intro')}
             </p>
             <div className="profile-switch-grid" role="list">
               {selectableMembers.map((member, index) => {
@@ -381,7 +384,7 @@ export default function ProfileModal() {
                     className="profile-switch-target"
                     onClick={() => selectProfile(member)}
                     disabled={busy}
-                    aria-label={`${member.name}, ${getPositionLabel(member)} auswählen`}
+                    aria-label={t('list.selectAria', { name: member.name, position: getPositionLabel(member) })}
                   >
                     <span className="profile-switch-avatar">
                       <img
@@ -390,12 +393,12 @@ export default function ProfileModal() {
                         alt=""
                       />
                       {isActive && (
-                        <span className="profile-active-check" aria-label="Aktives Profil">
+                        <span className="profile-active-check" aria-label={t('list.activeProfile')}>
                           <Check size={16} strokeWidth={3} />
                         </span>
                       )}
                       {member.hasPin && (
-                        <span className="profile-lock-badge" aria-label="Mit PIN geschützt">
+                        <span className="profile-lock-badge" aria-label={t('list.pinProtected')}>
                           <Lock size={13} />
                         </span>
                       )}
@@ -411,7 +414,7 @@ export default function ProfileModal() {
                     )}
                     {isPetProfile(member) && (
                       <span className="profile-switch-pet">
-                        <PawPrint size={13} /> Pfotenprofil
+                        <PawPrint size={13} /> {t('list.petBadge')}
                       </span>
                     )}
                   </button>
@@ -420,8 +423,8 @@ export default function ProfileModal() {
                       type="button"
                       className="profile-switch-edit"
                       onClick={event => beginEdit(member, event)}
-                      aria-label={`${member.name} bearbeiten`}
-                      title={`${member.name} bearbeiten`}
+                      aria-label={t('list.editMember', { name: member.name })}
+                      title={t('list.editMember', { name: member.name })}
                     >
                       <Edit3 size={15} />
                     </button>
@@ -438,9 +441,9 @@ export default function ProfileModal() {
                     <ClipboardList size={19} />
                   </span>
                   <div>
-                    <strong>Von euch verwaltet</strong>
+                    <strong>{t('list.managedHeading')}</strong>
                     <small>
-                      Ohne Anmeldung · für Termine und Aufgaben
+                      {t('list.managedSubheading')}
                     </small>
                   </div>
                   <span className="managed-profile-count">
@@ -461,18 +464,18 @@ export default function ProfileModal() {
                       <span>
                         <strong>{member.name}</strong>
                         <small>
-                          {getPositionLabel(member)} · kein eigener Zugang
+                          {t('list.managedNoAccess', { position: getPositionLabel(member) })}
                         </small>
                       </span>
                       <span className="managed-profile-capabilities">
-                        <i title="Termine"><CalendarDays size={14} /></i>
-                        <i title="Aufgaben"><ClipboardList size={14} /></i>
+                        <i title={t('list.eventsTitle')}><CalendarDays size={14} /></i>
+                        <i title={t('list.tasksTitle')}><ClipboardList size={14} /></i>
                       </span>
                       <button
                         type="button"
                         onClick={event => beginEdit(member, event)}
-                        aria-label={`${member.name} bearbeiten`}
-                        title={`${member.name} bearbeiten`}
+                        aria-label={t('list.editMember', { name: member.name })}
+                        title={t('list.editMember', { name: member.name })}
                       >
                         <Edit3 size={15} />
                       </button>
@@ -495,9 +498,9 @@ export default function ProfileModal() {
                     {notificationsEnabled ? <BellRing size={19} /> : <BellOff size={19} />}
                   </span>
                   <span className="profile-tool-copy">
-                    <strong>Benachrichtigungen</strong>
+                    <strong>{t('notifications.title')}</strong>
                     <small>
-                      Für {activeMember?.name} auf diesem Gerät
+                      {t('notifications.deviceHint', { name: activeMember?.name })}
                     </small>
                   </span>
                   <ChevronDown
@@ -510,8 +513,8 @@ export default function ProfileModal() {
                 <div className="profile-pet-mode-note">
                   <PawPrint size={19} />
                   <span>
-                    <strong>Haustiermodus aktiv</strong>
-                    <small>Ohne Chat, Meldungen und Kontofunktionen</small>
+                    <strong>{t('notifications.petModeActive')}</strong>
+                    <small>{t('notifications.petModeHint')}</small>
                   </span>
                 </div>
               )}
@@ -521,7 +524,7 @@ export default function ProfileModal() {
                   className="auth-secondary profile-add"
                   onClick={() => beginAdd(false)}
                 >
-                  <Plus size={18} /> Mitglied hinzufügen
+                  <Plus size={18} /> {t('list.addMember')}
                 </button>
               )}
             </div>
@@ -536,9 +539,9 @@ export default function ProfileModal() {
                   {notificationsEnabled ? <BellRing size={20} /> : <BellOff size={20} />}
                 </span>
                 <div>
-                  <strong>Benachrichtigungen für {activeMember?.name}</strong>
+                  <strong>{t('notifications.headingFor', { name: activeMember?.name })}</strong>
                   <small>
-                    Diese Auswahl wird für dieses Profil und dieses Gerät gespeichert.
+                    {t('notifications.savedPerDevice')}
                   </small>
                 </div>
                 <button
@@ -558,7 +561,7 @@ export default function ProfileModal() {
                   }
                 >
                   <span />
-                  {notificationsEnabled ? 'An' : 'Aus'}
+                  {notificationsEnabled ? t('notifications.on') : t('notifications.off')}
                 </button>
               </div>
 
@@ -567,15 +570,14 @@ export default function ProfileModal() {
               )}
               {isNative && !push.serverConfigured && (
                 <p className="profile-notification-note warning">
-                  Native Android-Meldungen sind auf dem Server noch nicht
-                  eingerichtet. Die Anleitung findest du in der Elternzentrale.
+                  {t('notifications.serverNotConfigured')}
                 </p>
               )}
               {push.permission === 'denied' && (
                 <p className="profile-notification-note warning">
                   {isNative
-                    ? 'Android blockiert Meldungen. Bitte erlaube sie unter Apps → LX Family Planner → Benachrichtigungen.'
-                    : 'Der Browser blockiert Meldungen. Bitte erlaube sie einmal in den Website-Einstellungen des Browsers.'}
+                    ? t('notifications.deniedNative')
+                    : t('notifications.deniedBrowser')}
                 </p>
               )}
 
@@ -594,7 +596,7 @@ export default function ProfileModal() {
                             })
                           }
                         />
-                        <span>{label}</span>
+                        <span>{tShared(`events.${key}.title`, { defaultValue: label })}</span>
                       </label>
                     ))}
                     <label>
@@ -608,7 +610,7 @@ export default function ProfileModal() {
                           })
                         }
                       />
-                      <span>Inhalt in Meldungen zeigen</span>
+                      <span>{t('notifications.showPreviews')}</span>
                     </label>
                   </div>
                   <button
@@ -617,7 +619,7 @@ export default function ProfileModal() {
                     disabled={Boolean(push.busy)}
                     onClick={testPush}
                   >
-                    <Send size={15} /> Testmeldung senden
+                    <Send size={15} /> {t('notifications.sendTest')}
                   </button>
                 </>
               )}
@@ -628,17 +630,17 @@ export default function ProfileModal() {
           <form className="profile-editor-modern" onSubmit={save}>
             <div className="profile-editor-preview">
               <img src={form.avatar || DEFAULT_FAMILY_AVATAR} alt="" />
-              <strong>{form.name || 'Neues Profil'}</strong>
+              <strong>{form.name || t('modal.eyebrow.new')}</strong>
               <span>
                 {POSITION_OPTIONS.find(option => option.value === form.position)?.emoji}{' '}
-                {POSITION_OPTIONS.find(option => option.value === form.position)?.label}
+                {getPositionOptionLabel(POSITION_OPTIONS.find(option => option.value === form.position))}
               </span>
             </div>
 
             <div className="profile-editor-fields">
               {canManage && form.role !== 'pet' && (
                 <fieldset className="profile-access-choice">
-                  <legend className="form-label">Wie wird das Profil genutzt?</legend>
+                  <legend className="form-label">{t('form.usage')}</legend>
                   <label className={!form.isManaged ? 'selected' : ''}>
                     <input
                       type="radio"
@@ -649,9 +651,9 @@ export default function ProfileModal() {
                     />
                     <span className="profile-access-icon"><UserRound size={19} /></span>
                     <span>
-                      <strong>Mit eigener Anmeldung</strong>
+                      <strong>{t('form.ownLogin')}</strong>
                       <small>
-                        Erscheint beim Profilwechsel und kann den Planer selbst öffnen.
+                        {t('form.ownLoginHint')}
                       </small>
                     </span>
                   </label>
@@ -665,9 +667,9 @@ export default function ProfileModal() {
                     />
                     <span className="profile-access-icon"><ClipboardList size={19} /></span>
                     <span>
-                      <strong>Nur von uns verwaltet</strong>
+                      <strong>{t('form.managedOnly')}</strong>
                       <small>
-                        Für Oma, Opa oder betreute Personen ohne eigenen Zugang.
+                        {t('form.managedOnlyHint')}
                       </small>
                     </span>
                   </label>
@@ -677,10 +679,9 @@ export default function ProfileModal() {
                 <div className="managed-profile-editor-note">
                   <CalendarDays size={20} />
                   <span>
-                    <strong>Organisationsprofil ohne Anmeldung</strong>
+                    <strong>{t('form.managedNote')}</strong>
                     <small>
-                      Das Profil erscheint in Kalendern und Aufgaben, aber nicht
-                      bei der Anmeldung, im Profilwechsel oder im Chat.
+                      {t('form.managedNoteHint')}
                     </small>
                   </span>
                 </div>
@@ -689,23 +690,22 @@ export default function ProfileModal() {
                 <div className="pet-profile-editor-note">
                   <PawPrint size={20} />
                   <span>
-                    <strong>Haustierprofil</strong>
+                    <strong>{t('form.petNote')}</strong>
                     <small>
-                      Zeigt Pflegeaufgaben und Tiertermine – ohne Chat,
-                      Benachrichtigungen oder Sterneshop.
+                      {t('form.petNoteHint')}
                     </small>
                   </span>
                 </div>
               )}
               <label className="form-group">
                 <span className="form-label">
-                  {form.role === 'pet' ? 'Name des Haustiers' : 'Name'}
+                  {form.role === 'pet' ? t('form.petName') : t('common:labels.name')}
                 </span>
                 <input
                   className="form-input"
                   value={form.name}
                   onChange={event => updateForm({ name: event.target.value })}
-                  placeholder={form.role === 'pet' ? 'z. B. Luna' : 'z. B. Testname'}
+                  placeholder={form.role === 'pet' ? t('form.petNamePlaceholder') : t('form.namePlaceholder')}
                   maxLength={80}
                   required
                 />
@@ -713,7 +713,7 @@ export default function ProfileModal() {
 
               {canManage && (
                 <label className="form-group">
-                  <span className="form-label">Position in der Familie</span>
+                  <span className="form-label">{t('form.position')}</span>
                   <select
                     className="form-select"
                     value={form.position}
@@ -721,7 +721,7 @@ export default function ProfileModal() {
                   >
                     {POSITION_OPTIONS.map(option => (
                       <option value={option.value} key={option.value}>
-                        {option.emoji} {option.label}
+                        {option.emoji} {getPositionOptionLabel(option)}
                       </option>
                     ))}
                   </select>
@@ -729,7 +729,7 @@ export default function ProfileModal() {
               )}
 
               <div className="form-group">
-                <span className="form-label">Profilbild</span>
+                <span className="form-label">{t('form.avatar')}</span>
                 <div className="avatar-preset-row">
                   {FUNNY_COMIC_AVATARS.map(avatar => (
                     <button
@@ -742,7 +742,7 @@ export default function ProfileModal() {
                       <img src={avatar.url} alt="" />
                     </button>
                   ))}
-                  <label className="avatar-upload-button" title="Eigenes Foto">
+                  <label className="avatar-upload-button" title={t('form.ownPhoto')}>
                     <Upload size={18} />
                     <input type="file" accept="image/*" onChange={handleUpload} />
                   </label>
@@ -750,7 +750,7 @@ export default function ProfileModal() {
               </div>
 
               <div className="form-group">
-                <span className="form-label">Profilfarbe</span>
+                <span className="form-label">{t('form.color')}</span>
                 <div className="color-preset-row">
                   {COLOR_PRESETS.map(color => (
                     <button
@@ -769,7 +769,7 @@ export default function ProfileModal() {
               {form.role !== 'pet' && !form.isManaged && (
                 <label className="form-group">
                   <span className="form-label">
-                    {editingMemberId ? 'Neue Profil-PIN (optional)' : 'Profil-PIN (optional)'}
+                    {editingMemberId ? t('form.newPin') : t('form.pin')}
                   </span>
                   <input
                     className="form-input"
@@ -778,7 +778,7 @@ export default function ProfileModal() {
                     inputMode="numeric"
                     value={form.pin}
                     onChange={event => updateForm({ pin: event.target.value })}
-                    placeholder={editingMemberId ? 'Leer lassen = unverändert' : 'Persönlicher Schutz'}
+                    placeholder={editingMemberId ? t('form.pinKeepPlaceholder') : t('form.pinPlaceholder')}
                     maxLength={12}
                   />
                 </label>
@@ -787,14 +787,14 @@ export default function ProfileModal() {
 
             <div className="modal-actions profile-editor-actions">
               <button className="auth-primary" disabled={busy}>
-                <Check size={17} /> {busy ? 'Speichert …' : 'Profil speichern'}
+                <Check size={17} /> {busy ? t('form.saving') : t('form.save')}
               </button>
               <button
                 type="button"
                 className="auth-secondary"
                 onClick={() => setMode('list')}
               >
-                Abbrechen
+                {t('common:actions.cancel')}
               </button>
               {canManage && editingMemberId && editingMemberId !== activeMemberId && (
                 <button
@@ -803,7 +803,7 @@ export default function ProfileModal() {
                   onClick={remove}
                   disabled={busy}
                 >
-                  <Trash2 size={16} /> Profil löschen
+                  <Trash2 size={16} /> {t('form.delete')}
                 </button>
               )}
             </div>

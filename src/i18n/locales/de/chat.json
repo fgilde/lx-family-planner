@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "attachmentLoad": "Der Anhang konnte nicht geladen werden."
+  },
+  "imageViewer": {
+    "label": "Chatbild",
+    "viewLarge": "{{name}} groß ansehen",
+    "closeAria": "Bildansicht schließen",
+    "tapToClose": "Zum Schließen außerhalb des Bildes tippen"
+  },
+  "attachment": {
+    "open": "Öffnen",
+    "download": "Herunterladen",
+    "kinds": {
+      "apk": "Android-App",
+      "archive": "Archiv",
+      "pdf": "PDF-Dokument",
+      "video": "Video",
+      "audio": "Audio",
+      "document": "Dokument"
+    }
+  },
+  "toasts": {
+    "attachmentOpenFailedTitle": "Anhang nicht geöffnet",
+    "downloadFailedTitle": "Download fehlgeschlagen",
+    "attachmentLimitTitle": "Genug Anhänge",
+    "attachmentLimitBody": "Pro Nachricht sind höchstens {{max}} Dateien möglich.",
+    "fileTooLargeTitle": "Datei zu groß",
+    "fileTooLargeBody": "{{name}} ist größer als 100 MB.",
+    "selectionTrimmedTitle": "Auswahl gekürzt",
+    "selectionTrimmedBody_one": "Die erste Datei wurde angehängt.",
+    "selectionTrimmedBody_other": "Die ersten {{count}} Dateien wurden angehängt.",
+    "attachmentSendFailedTitle": "Anhang nicht gesendet",
+    "attachmentSendFailedBody": "Die Datei konnte nicht in der Family Cloud gespeichert werden."
+  },
+  "preview": {
+    "fileShared": "📎 Datei geteilt",
+    "invitedChat": "Eingeladener Familienchat",
+    "openGroup": "Offene Gruppe",
+    "noMessages": "Noch keine Nachricht",
+    "photo": "📷 Foto",
+    "file": "📎 Datei",
+    "newMessage": "Neue Nachricht"
+  },
+  "directory": {
+    "kicker": "Familienfunk",
+    "title": "Chats",
+    "groupChannel": "Alle zusammen",
+    "directLabel": "Direkt",
+    "invitedLabel": "Eingeladen"
+  },
+  "room": {
+    "familyProfiles_one": "{{count}} Familienprofil",
+    "familyProfiles_other": "{{count}} Familienprofile",
+    "guestInvited": "Du bist persönlich eingeladen",
+    "groupTitle": "Familienchat",
+    "visibleToAll": "Für alle sichtbar",
+    "guestAccess": "Gastzugang ab Zustimmung",
+    "directMessage": "Direktnachricht"
+  },
+  "empty": {
+    "title": "Noch ganz still hier",
+    "prompt": "Schreib die erste Nachricht an {{name}}.",
+    "familyName": "deine Familie"
+  },
+  "message": {
+    "you": "Du",
+    "chatPhoto": "Chatfoto",
+    "sentAttachmentAlt": "Gesendeter Anhang",
+    "viewLarge": "Groß ansehen"
+  },
+  "composer": {
+    "removeAttachment": "{{name}} entfernen",
+    "uploadingFile": "Datei {{current}} von {{total}} wird in der Cloud gespeichert",
+    "sendingMessage": "Nachricht wird gesendet",
+    "attachFiles": "Dateien anhängen",
+    "placeholder": "Nachricht an {{name}} …",
+    "placeholderFamilyName": "die Familie",
+    "sending": "Sendet …",
+    "send": "Senden",
+    "cloudNote": "Anhänge werden automatisch im Familienarchiv sortiert · bis 100 MB"
+  }
+}

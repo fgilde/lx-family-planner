@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,6 +27,7 @@ import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import AndroidAppDownload from './AndroidAppDownload';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
+  const { t } = useTranslation('auth');
   const {
     authStatus,
     familiesList,
@@ -107,12 +109,9 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
             <span>Family Planner</span>
           </div>
           <div className="auth-story-copy">
-            <span className="eyebrow">Willkommen zu Hause</span>
-            <h1>Wer plant heute mit?</h1>
-            <p>
-              Jedes Profil bekommt seine eigene Startseite – klar für Erwachsene,
-              spielerisch für Kinder.
-            </p>
+            <span className="eyebrow">{t('login.profileStep.eyebrow')}</span>
+            <h1>{t('login.profileStep.title')}</h1>
+            <p>{t('login.profileStep.description')}</p>
           </div>
           <div className="auth-family-portrait">
             <img
@@ -123,10 +122,13 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
             <div>
               <strong>{familyAccount?.familyName}</strong>
               <span>
-                {loginMembers.length}{' '}
-                {loginMembers.length === 1 ? 'Profil' : 'Profile'} mit Zugang
+                {t('login.profileStep.profilesWithAccess', {
+                  count: loginMembers.length
+                })}
                 {managedProfilesCount > 0
-                  ? ` · ${managedProfilesCount} verwaltet`
+                  ? t('login.profileStep.managedSuffix', {
+                      count: managedProfilesCount
+                    })
                   : ''}
               </span>
             </div>
@@ -135,14 +137,14 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
 
         <main className="auth-action-panel">
           <button className="auth-back" type="button" onClick={logout}>
-            <ArrowLeft size={18} /> Andere Familie
+            <ArrowLeft size={18} /> {t('login.profileStep.otherFamily')}
           </button>
           <div className="auth-card auth-card-wide">
             <div className="auth-card-heading">
               <div className="auth-icon"><Users size={24} /></div>
               <div>
-                <span className="eyebrow">Profil wählen</span>
-                <h2>Das bin ich</h2>
+                <span className="eyebrow">{t('login.profileStep.chooseEyebrow')}</span>
+                <h2>{t('login.profileStep.chooseTitle')}</h2>
               </div>
             </div>
 
@@ -158,7 +160,10 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                     style={{ '--member-color': member.color || '#2563eb' }}
                     onClick={() => chooseProfile(member)}
                     disabled={loading}
-                    aria-label={`${member.name}, ${getPositionLabel(member)} auswählen`}
+                    aria-label={t('login.profileStep.selectProfileAria', {
+                      name: member.name,
+                      position: getPositionLabel(member)
+                    })}
                   >
                     <span className="profile-choice-avatar">
                       <img
@@ -176,7 +181,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
 
               {selectedMember?.hasPin && (
                 <label className="auth-field">
-                  <span>Profil-PIN</span>
+                  <span>{t('login.profileStep.pinLabel')}</span>
                   <div className="auth-input-wrap">
                     <KeyRound size={18} />
                     <input
@@ -186,7 +191,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                       maxLength={12}
                       value={pin}
                       onChange={event => setPin(event.target.value)}
-                      placeholder="PIN eingeben"
+                      placeholder={t('login.profileStep.pinPlaceholder')}
                       autoFocus
                     />
                   </div>
@@ -200,14 +205,18 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                   disabled={!pin || loading}
                   type="submit"
                 >
-                  {loading ? 'Profil wird geöffnet …' : `${selectedMember.name} öffnen`}
+                  {loading
+                    ? t('login.profileStep.openingProfile')
+                    : t('login.profileStep.openProfile', {
+                        name: selectedMember.name
+                      })}
                   {!loading && <ArrowRight size={18} />}
                 </button>
               ) : (
                 <p className="profile-choice-hint">
                   {loading
-                    ? 'Dein Profil wird geöffnet …'
-                    : 'Tippe einfach auf dein Bild.'}
+                    ? t('login.profileStep.openingOwnProfile')
+                    : t('login.profileStep.tapHint')}
                 </p>
               )}
             </form>
@@ -229,27 +238,24 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
           href={GITHUB_REPOSITORY_URL}
           target="_blank"
           rel="noreferrer"
-          aria-label="LX Family Planner auf GitHub ansehen"
+          aria-label={t('login.github.aria')}
         >
           <span className="auth-github-mark"><Github size={21} /></span>
           <span className="auth-github-copy">
-            <strong>Gebaut für Familien. Offen für alle.</strong>
-            <small>Projekt ansehen, mitmachen oder einen Stern dalassen.</small>
+            <strong>{t('login.github.title')}</strong>
+            <small>{t('login.github.subtitle')}</small>
           </span>
           <ArrowUpRight className="auth-github-arrow" size={19} />
         </a>
         <div className="auth-story-copy">
-          <span className="eyebrow">Weniger Chaos. Mehr Wir.</span>
-          <h1>Der gemeinsame Takt für eure Familie.</h1>
-          <p>
-            Termine, Einkäufe, Essen, Aufgaben und kleine Glücksmomente –
-            an einem ruhigen Ort für alle Generationen.
-          </p>
+          <span className="eyebrow">{t('login.hero.eyebrow')}</span>
+          <h1>{t('login.hero.title')}</h1>
+          <p>{t('login.hero.description')}</p>
         </div>
         <div className="auth-proof-row">
-          <span><ShieldCheck size={17} /> Privat</span>
-          <span><HeartHandshake size={17} /> Familiennah</span>
-          <span><Sparkles size={17} /> Kinderleicht</span>
+          <span><ShieldCheck size={17} /> {t('login.proof.private')}</span>
+          <span><HeartHandshake size={17} /> {t('login.proof.family')}</span>
+          <span><Sparkles size={17} /> {t('login.proof.easy')}</span>
         </div>
       </section>
 
@@ -259,8 +265,8 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
           <div className="auth-card-heading">
             <div className="auth-icon"><Users size={24} /></div>
             <div>
-              <span className="eyebrow">Familie auswählen</span>
-              <h2>Schön, dass ihr da seid.</h2>
+              <span className="eyebrow">{t('login.familyStep.eyebrow')}</span>
+              <h2>{t('login.familyStep.title')}</h2>
             </div>
           </div>
 
@@ -286,8 +292,10 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                   <span>
                     <strong>{family.familyName}</strong>
                     <small>
-                      {family.badge || 'Familie'} · {family.membersCount || 0}{' '}
-                      {family.membersCount === 1 ? 'Profil' : 'Profile'}
+                      {family.badge || t('login.familyStep.badgeFallback')} ·{' '}
+                      {t('login.familyStep.profileCount', {
+                        count: family.membersCount || 0
+                      })}
                     </small>
                   </span>
                 </button>
@@ -296,7 +304,11 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
 
             {selectedFamily && (
               <label className="auth-field">
-                <span>Familienpasswort für {selectedFamily.familyName}</span>
+                <span>
+                  {t('login.familyStep.passwordLabel', {
+                    name: selectedFamily.familyName
+                  })}
+                </span>
                 <div className="auth-input-wrap">
                   <KeyRound size={18} />
                   <input
@@ -304,7 +316,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                     autoComplete="current-password"
                     value={password}
                     onChange={event => setPassword(event.target.value)}
-                    placeholder="Familienpasswort"
+                    placeholder={t('login.familyStep.passwordPlaceholder')}
                     autoFocus
                   />
                 </div>
@@ -317,26 +329,28 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
               disabled={!selectedFamilyId || !password || loading}
               type="submit"
             >
-              {loading ? 'Anmeldung läuft …' : 'Weiter zu den Profilen'}
+              {loading
+                ? t('login.familyStep.loggingIn')
+                : t('login.familyStep.continueToProfiles')}
               {!loading && <ArrowRight size={18} />}
             </button>
           </form>
 
-          <div className="auth-divider"><span>oder</span></div>
+          <div className="auth-divider"><span>{t('login.familyStep.or')}</span></div>
           <div className="flex gap-2">
             <button
               type="button"
               className="auth-secondary flex-1"
               onClick={onStartOnboarding}
             >
-              <Plus size={18} /> Neue Familie anlegen
+              <Plus size={18} /> {t('login.familyStep.createFamily')}
             </button>
             {onOpenServerConfig && (
               <button
                 type="button"
                 className="auth-secondary"
                 onClick={onOpenServerConfig}
-                title="Server-Adresse / IP-Verbindung einstellen"
+                title={t('login.familyStep.serverConfigTitle')}
                 style={{ padding: '0 12px' }}
               >
                 <Server size={18} />

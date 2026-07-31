@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "eyebrow": "Familienmarkt",
+    "title": "Was fehlt zu Hause?",
+    "subtitle": "Durchsuche den vollständigen deutschen Bring!-Katalog oder füge einen ganz eigenen Artikel hinzu.",
+    "statusLive": "Live mit „{{listName}}“",
+    "statusLocal": "Lokale Familienliste",
+    "catalogItems": "{{total}} Standardartikel",
+    "syncing": "Synchronisiere",
+    "refreshBring": "Bring! aktualisieren",
+    "connection": "Verbindung",
+    "connectBring": "Bring! verbinden"
+  },
+  "search": {
+    "placeholder": "Eier, Nutella, Brötchen, Porree …",
+    "searchAria": "Artikel suchen oder neu anlegen",
+    "quantityLabel": "Menge",
+    "quantityAria": "Menge oder Hinweis",
+    "hint": "Nicht gefunden? Der eingegebene Begriff wird als eigener Bring!-Artikel angelegt."
+  },
+  "list": {
+    "kicker": "Euer Zettel",
+    "title": "Noch einzukaufen",
+    "emptyTitle": "Der Einkaufskorb wartet.",
+    "emptyHint": "Tippe unten auf einen Standardartikel oder suche direkt danach.",
+    "recentToggle": "Zuletzt gekauft ({{count}})",
+    "backToList": "Wieder auf die Liste"
+  },
+  "catalog": {
+    "sourceBring": "Bring!-Sortiment",
+    "sourceDefault": "Grundsortiment",
+    "resultsFor": "Treffer für „{{query}}“",
+    "quickAdd": "Schnell hinzufügen",
+    "shownCount": "{{count}} angezeigt",
+    "departmentsAria": "Warengruppen",
+    "popular": "Häufig",
+    "onList": "Auf Liste",
+    "noResultsTitle": "Kein Katalogtreffer – aber kein Problem.",
+    "noResultsHint": "Mit „Hinzufügen“ legst du „{{query}}“ als eigenen Artikel an."
+  },
+  "accountModal": {
+    "eyebrow": "Optionale Integration",
+    "title": "Bring! Einkauf verbinden",
+    "connectedEyebrow": "Live verbunden",
+    "defaultListName": "Familienliste",
+    "securityNote": "Das Passwort liegt verschlüsselt auf eurem Server und wird nie im Browser gespeichert.",
+    "syncNow": "Jetzt synchronisieren",
+    "disconnect": "Verbindung trennen",
+    "intro": "Übernimm eure vorhandene Bring!-Liste. Wähle nach der Anmeldung genau die Liste aus, die zum Familienplaner gehört.",
+    "emailLabel": "Bring!-E-Mail",
+    "emailPlaceholder": "name@beispiel.de",
+    "passwordLabel": "Bring!-Passwort",
+    "passwordPlaceholder": "Nur für die sichere Anmeldung",
+    "selectListLabel": "Welche Liste soll verbunden werden?",
+    "connectSelected": "Ausgewählte Liste verbinden",
+    "loginButton": "Sicher bei Bring! anmelden",
+    "fineprint": "LX Family Planner ist kein Produkt von Bring! Labs AG. Die Verbindung kann jederzeit getrennt werden.",
+    "toastConnectedTitle": "Bring! ist verbunden",
+    "toastConnectedBody": "{{listName}} wird jetzt synchronisiert.",
+    "toastDefaultList": "Die Einkaufsliste"
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "planner": {
+    "tabs": {
+      "weeklyPlan": "Wochen-Speiseplan ({{household}})",
+      "recipeBook": "Rezeptbuch ({{count}})"
+    },
+    "households": {
+      "family": "Unser Zuhause",
+      "grandparents": "Oma & Opa"
+    },
+    "header": {
+      "title": "Wochen-Speiseplan",
+      "subtitle": "Plant eure Gerichte für die Woche. Klicke auf ein Essen, um Rezepte auszuwählen oder Zutaten mit 1 Klick auf die Einkaufsliste zu setzen!"
+    },
+    "mealTypes": {
+      "lunch": "Mittagessen",
+      "dinner": "Abendessen"
+    },
+    "slots": {
+      "editAria": "{{day}} {{meal}} bearbeiten",
+      "addIngredients": "Zutaten auf die Liste ({{count}})",
+      "empty": "Kein Gericht eingetragen"
+    },
+    "modal": {
+      "title": "Gericht eintragen: {{day}} ({{meal}})",
+      "chooseFromBook": "Aus deinem Rezeptbuch wählen",
+      "recipePlaceholderOption": "-- Rezept aus Rezeptbuch auswählen --",
+      "customLabel": "Oder Gericht selbst eingeben",
+      "customPlaceholder": "z. B. Pfannkuchen mit Apfelmus...",
+      "ingredientsLabel": "Zutaten (kommagetrennt für Einkaufsliste)",
+      "ingredientsPlaceholder": "z. B. 500g Mehl, 4 Eier, 1L Milch...",
+      "saving": "Speichert …",
+      "removeEntry": "Eintrag entfernen"
+    }
+  },
+  "recipeBook": {
+    "image": {
+      "noImageAria": "{{title}} ohne Bild",
+      "unavailable": "Rezeptbild nicht verfügbar"
+    },
+    "errors": {
+      "importFailed": "Rezept konnte nicht importiert werden.",
+      "saveFailed": "Das Rezept konnte nicht im Kochbuch gespeichert werden.",
+      "shareMissingLink": "Die geteilte App hat keinen Rezept-Link mitgegeben. Füge den Link bitte unten ein."
+    },
+    "toasts": {
+      "importedCheckTitle": "Rezept importiert – bitte prüfen",
+      "importedTitle": "🎉 Rezept importiert!",
+      "importedBody": "\"{{title}}\" wurde erfolgreich importiert!",
+      "importErrorTitle": "⚠️ Import-Fehler",
+      "manualCreatedTitle": "✨ Rezept erstellt",
+      "manualCreatedBody": "\"{{title}}\" wurde im Rezeptbuch gespeichert."
+    },
+    "header": {
+      "title": "Unser Kochbuch & Rezeptwelt",
+      "subtitle": "Rezepte aus Pinterest, Chefkoch und vielen weiteren Portalen importieren, gemeinsam sammeln und Schritt für Schritt kochen."
+    },
+    "tabs": {
+      "browse": "Alle Rezepte ({{count}})",
+      "import": "Rezept importieren",
+      "manual": "Neues Rezept"
+    },
+    "card": {
+      "deleteTitle": "Rezept löschen",
+      "defaultPrepTime": "30 Min",
+      "defaultServings": "4 Portionen",
+      "startCooking": "Kochen Starten",
+      "addIngredientsTitle": "Zutaten auf die Einkaufsliste setzen",
+      "addIngredients": "Zutaten auf die Liste"
+    },
+    "import": {
+      "shareArrivalTitle": "Direkt vom Handy geteilt",
+      "shareArrivalBody": "LX übernimmt den Rezept-Link und legt das Gericht automatisch in eurem Kochbuch ab.",
+      "importRunningAria": "Import läuft",
+      "kicker": "Rezept-Finder",
+      "title": "Rezept aus dem Web importieren",
+      "description": "Füge den Link zu einem Rezept oder Pinterest-Pin ein. Bilder, Zutaten, Zeiten und Zubereitung werden automatisch übernommen, wenn die Seite Rezeptdaten bereitstellt.",
+      "platformsAria": "Beispiele unterstützter Portale",
+      "morePlatforms": "weitere Rezeptseiten",
+      "howto": "<strong>Ohne Kopieren auf Android:</strong> Installiere LX einmal als App. Danach kannst du bei Chefkoch, Pinterest und anderen Apps über <b>Teilen → LX Familie</b> importieren.",
+      "urlLabel": "Öffentlicher Rezept-Link",
+      "urlPlaceholder": "https://www.pinterest.de/pin/... oder Rezeptseite",
+      "submitLoading": "Rezept wird gelesen …",
+      "submit": "Rezept jetzt importieren",
+      "help": "Private Seiten, Logins und interne Heimnetz-Adressen werden aus Sicherheitsgründen nicht geöffnet. Manche Portale können den automatischen Abruf technisch blockieren."
+    },
+    "manual": {
+      "title": "Eigenes Rezept anlegen",
+      "dishTitleLabel": "Titel des Gerichts",
+      "dishTitlePlaceholder": "z. B. Papas berühmte Bolognese",
+      "prepTimeLabel": "Zubereitungszeit",
+      "servingsLabel": "Portionen",
+      "submit": "Rezept Speichern"
+    }
+  },
+  "cookingMode": {
+    "activeBadge": "Koch-Modus Aktiv",
+    "adjustPortions": "Portionen anpassen:",
+    "timer": {
+      "title": "Küchen-Timer",
+      "minutesUnit": "Min",
+      "start": "Start",
+      "stop": "Stopp",
+      "resetTitle": "Timer zurücksetzen",
+      "startedTitle": "⏱️ Koch-Timer gestartet",
+      "startedBody_one": "Timer auf {{count}} Minute gestartet.",
+      "startedBody_other": "Timer auf {{count}} Minuten gestartet.",
+      "finishedTitle": "⏰ Kochen beendet!",
+      "finishedBody": "Der Koch-Timer für \"{{title}}\" ist abgelaufen!"
+    },
+    "ingredients": {
+      "title": "Zutaten ({{count}})",
+      "addToList": "🛒 Auf Bring! Liste",
+      "addedTitle": "🛒 Zutaten hinzugefügt",
+      "addedBody_one": "{{count}} Zutat für \"{{title}}\" steht auf der Einkaufsliste!",
+      "addedBody_other": "{{count}} Zutaten für \"{{title}}\" stehen auf der Einkaufsliste!"
+    },
+    "steps": {
+      "title": "Schritt-für-Schritt Zubereitung",
+      "progress": "{{completed}} / {{total}} erledigt",
+      "progressAria": "Fortschritt der Zubereitung",
+      "parallelHint": "Parallel vorbereiten",
+      "stepTimer": "Timer · {{minutes}} Min"
+    }
+  }
+}

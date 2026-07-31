@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server } from 'lucide-react';
 import { isChildProfile, isPetProfile } from '../constants/roles';
@@ -8,30 +9,31 @@ import PlanLocationHelp from './PlanLocationHelp';
 import NotificationCenter from './Notifications/NotificationCenter';
 
 const ADULT_THEMES = [
-  { id: 'light', name: 'Waldruhe', description: 'warm & natürlich', icon: '❧', color: '#286a58', accent: '#d87058' },
-  { id: 'ocean', name: 'Küstenruhe', description: 'luftig & entspannt', icon: '≈', color: '#17687a', accent: '#d99157' },
-  { id: 'midnight', name: 'Nachtlounge', description: 'ruhig & dunkel', icon: '☾', color: '#164f49', accent: '#e0a65b' },
-  { id: 'rock', name: 'Backstage', description: 'rockig & warm', icon: '⚡', color: '#70251f', accent: '#efb84d' },
-  { id: 'festival', name: 'Neon Nacht', description: 'fett & farbig', icon: '✦', color: '#a22d78', accent: '#25aab4' }
+  { id: 'light', icon: '❧', color: '#286a58', accent: '#d87058' },
+  { id: 'ocean', icon: '≈', color: '#17687a', accent: '#d99157' },
+  { id: 'midnight', icon: '☾', color: '#164f49', accent: '#e0a65b' },
+  { id: 'rock', icon: '⚡', color: '#70251f', accent: '#efb84d' },
+  { id: 'festival', icon: '✦', color: '#a22d78', accent: '#25aab4' }
 ];
 
 const CHILD_THEMES = [
-  { id: 'space', name: 'Raketenbasis', description: 'Raketen & Planeten', icon: '🚀', color: '#4747a9', accent: '#ffbd4a' },
-  { id: 'unicorn', name: 'Einhornland', description: 'Regenbogen & Magie', icon: '🦄', color: '#d84692', accent: '#8063d9' },
-  { id: 'fairy', name: 'Feenzauber', description: 'Feen & Zauberwald', icon: '🧚', color: '#728a35', accent: '#b84f91' },
-  { id: 'dino', name: 'Dinowelt', description: 'Dinos & Dschungel', icon: '🦖', color: '#287755', accent: '#d66d31' },
-  { id: 'sunshine', name: 'Sonneninsel', description: 'Sommer & gute Laune', icon: '☀️', color: '#ed8d26', accent: '#e74757' },
-  { id: 'adventure', name: 'Helden-Camp', description: 'Helden & Blitze', icon: '🦸', color: '#3169c8', accent: '#e7474f' }
+  { id: 'space', icon: '🚀', color: '#4747a9', accent: '#ffbd4a' },
+  { id: 'unicorn', icon: '🦄', color: '#d84692', accent: '#8063d9' },
+  { id: 'fairy', icon: '🧚', color: '#728a35', accent: '#b84f91' },
+  { id: 'dino', icon: '🦖', color: '#287755', accent: '#d66d31' },
+  { id: 'sunshine', icon: '☀️', color: '#ed8d26', accent: '#e74757' },
+  { id: 'adventure', icon: '🦸', color: '#3169c8', accent: '#e7474f' }
 ];
 
 const PET_THEMES = [
-  { id: 'light', name: 'Grüne Wiese', description: 'ruhig & natürlich', icon: '🐾', color: '#286a58', accent: '#d87058' },
-  { id: 'ocean', name: 'Küstenpfoten', description: 'frisch & entspannt', icon: '🌊', color: '#17687a', accent: '#d99157' },
-  { id: 'rock', name: 'Wilde Schnauze', description: 'kräftig & verspielt', icon: '🦴', color: '#70251f', accent: '#efb84d' },
-  { id: 'midnight', name: 'Nachtpfote', description: 'sanft & dunkel', icon: '🌙', color: '#164f49', accent: '#e0a65b' }
+  { id: 'light', icon: '🐾', color: '#286a58', accent: '#d87058' },
+  { id: 'ocean', icon: '🌊', color: '#17687a', accent: '#d99157' },
+  { id: 'rock', icon: '🦴', color: '#70251f', accent: '#efb84d' },
+  { id: 'midnight', icon: '🌙', color: '#164f49', accent: '#e0a65b' }
 ];
 
 export default function Header({ onLogout, onOpenServerConfig, unreadChatCount = 0 }) {
+  const { t } = useTranslation('chrome');
   const {
     theme, setTheme,
     activeTab, setActiveTab,
@@ -51,16 +53,21 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
     : isChild
       ? CHILD_THEMES
       : ADULT_THEMES;
+  const themeGroup = isPet ? 'pet' : isChild ? 'child' : 'adult';
   const themePickerTitle = isPet
-    ? `${activeMember?.name?.split(' ')[0] || 'Deine Fellnase'}s Pfotenwelt`
+    ? t('header.themePicker.titlePet', {
+        name:
+          activeMember?.name?.split(' ')[0] ||
+          t('header.themePicker.petNameFallback')
+      })
     : isChild
-      ? 'Deine Themenwelt'
-      : 'Dein Zuhause, dein Stil';
+      ? t('header.themePicker.titleChild')
+      : t('header.themePicker.titleAdult');
   const themePickerDescription = isPet
-    ? 'Wähle eine ruhige Welt für das Haustierprofil.'
+    ? t('header.themePicker.descriptionPet')
     : isChild
-      ? 'Such dir deine Lieblingswelt aus.'
-      : 'Ruhig oder laut – die Auswahl wird im Profil gespeichert.';
+      ? t('header.themePicker.descriptionChild')
+      : t('header.themePicker.descriptionAdult');
 
   useEffect(() => {
     if (!isThemePickerOpen) return undefined;
@@ -74,8 +81,8 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
   const toggleHousehold = (targetHousehold) => {
     setActiveHousehold(targetHousehold);
     showToast(
-      '🏠 Haushalt gewechselt',
-      targetHousehold === 'familie' ? 'Ansicht: Unser Familien-Zuhause' : 'Ansicht: Zuhause von Oma & Opa',
+      t('header.householdSwitched'),
+      targetHousehold === 'familie' ? t('header.householdViewFamily') : t('header.householdViewGrandparents'),
       'info'
     );
   };
@@ -88,7 +95,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         </div>
         <div className="brand-text">
           <h1>LX Family Planner</h1>
-          <p>Unser Familien-Zuhause</p>
+          <p>{t('header.tagline')}</p>
         </div>
       </a>
 
@@ -96,10 +103,10 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
       {!isChild && !isPet && grandparentsHouseholdEnabled && <div
         className="household-switcher"
         role="group"
-        aria-label="Planungsort auswählen"
+        aria-label={t('header.planLocationAria')}
       >
         <span className="household-switcher-label">
-          Planungsort
+          {t('header.planLocation')}
           <PlanLocationHelp />
         </span>
         <button
@@ -107,7 +114,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           className={activeHousehold === 'familie' ? 'active' : ''}
           aria-pressed={activeHousehold === 'familie'}
         >
-          <Home size={15} /> Unser Zuhause
+          <Home size={15} /> {t('header.ourHome')}
         </button>
 
         <button
@@ -115,7 +122,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           className={activeHousehold === 'oma_opa' ? 'active grandparents' : ''}
           aria-pressed={activeHousehold === 'oma_opa'}
         >
-          <Users size={15} /> Zuhause Oma & Opa
+          <Users size={15} /> {t('header.grandparentsHome')}
         </button>
       </div>}
 
@@ -125,7 +132,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           <button
             className="icon-circle-btn"
             onClick={() => setIsFamilySettingsOpen(true)}
-            title="Familie verwalten"
+            title={t('header.manageFamily')}
           >
             <Settings size={18} />
           </button>
@@ -135,8 +142,8 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           <button
             className="icon-circle-btn"
             onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
-            title={isPet ? 'Pfotenwelt wählen' : isChild ? 'Meine Themenwelt wählen' : 'Themenwelt wählen'}
-            aria-label={isPet ? 'Pfotenwelt wählen' : isChild ? 'Meine Themenwelt wählen' : 'Themenwelt wählen'}
+            title={isPet ? t('header.themePicker.openPet') : isChild ? t('header.themePicker.openChild') : t('header.themePicker.openAdult')}
+            aria-label={isPet ? t('header.themePicker.openPet') : isChild ? t('header.themePicker.openChild') : t('header.themePicker.openAdult')}
             aria-expanded={isThemePickerOpen}
           >
             <Sparkles size={20} style={{ color: 'var(--primary)' }} />
@@ -157,7 +164,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
                 >
                   <div className="theme-picker-title">
                     <span className="theme-picker-kicker">
-                      <Sparkles size={14} /> Designwelt
+                      <Sparkles size={14} /> {t('header.themePicker.kicker')}
                     </span>
                     <strong id="theme-picker-title">{themePickerTitle}</strong>
                     <span>{themePickerDescription}</span>
@@ -165,26 +172,26 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
                       type="button"
                       className="theme-picker-close"
                       onClick={() => setIsThemePickerOpen(false)}
-                      aria-label="Designauswahl schließen"
+                      aria-label={t('header.themePicker.close')}
                     >
                       <X size={18} />
                     </button>
                   </div>
-                  {availableThemes.map(t => (
+                  {availableThemes.map(themeOption => (
                     <button
-                      key={t.id}
+                      key={themeOption.id}
                       onClick={() => {
-                        setTheme(t.id);
+                        setTheme(themeOption.id);
                         setIsThemePickerOpen(false);
                       }}
-                      className={`theme-choice ${theme === t.id ? 'active' : ''}`}
-                      style={{ '--choice-color': t.color, '--choice-accent': t.accent }}
-                      aria-pressed={theme === t.id}
+                      className={`theme-choice ${theme === themeOption.id ? 'active' : ''}`}
+                      style={{ '--choice-color': themeOption.color, '--choice-accent': themeOption.accent }}
+                      aria-pressed={theme === themeOption.id}
                     >
-                      <span className="theme-choice-preview" aria-hidden="true">{t.icon}</span>
+                      <span className="theme-choice-preview" aria-hidden="true">{themeOption.icon}</span>
                       <span className="theme-choice-copy">
-                        <strong>{t.name}</strong>
-                        <small>{t.description}</small>
+                        <strong>{t(`header.themes.${themeGroup}.${themeOption.id}.name`)}</strong>
+                        <small>{t(`header.themes.${themeGroup}.${themeOption.id}.description`)}</small>
                       </span>
                     </button>
                   ))}
@@ -198,11 +205,11 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         {!isChild && !isPet && <button
           className={`tablet-mode-btn ${activeTab === 'kitchen' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'kitchen' ? 'dashboard' : 'kitchen')}
-          title={activeTab === 'kitchen' ? 'Tablet Mode verlassen' : 'Tablet Mode öffnen'}
+          title={activeTab === 'kitchen' ? t('header.tabletMode.exitTitle') : t('header.tabletMode.enterTitle')}
         >
           <Tablet size={18} />
           <span className="hide-mobile">
-            {activeTab === 'kitchen' ? 'Tablet verlassen' : 'Tablet Mode'}
+            {activeTab === 'kitchen' ? t('header.tabletMode.exit') : t('header.tabletMode.enter')}
           </span>
         </button>}
 
@@ -224,7 +231,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
             )}
             {isPet && (
               <span className="profile-pill-pet">
-                <PawPrint size={11} /> Haustier
+                <PawPrint size={11} /> {t('header.pet')}
               </span>
             )}
           </div>
@@ -249,7 +256,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           <button
             className="icon-circle-btn"
             onClick={onOpenServerConfig}
-            title="Server-Verbindung / IP einstellen"
+            title={t('header.serverConfigTitle')}
           >
             <Server size={18} />
           </button>
@@ -259,7 +266,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         <button
           className="icon-circle-btn"
           onClick={onLogout}
-          title="Familie wechseln / Abmelden"
+          title={t('header.logoutTitle')}
         >
           <LogOut size={18} />
         </button>

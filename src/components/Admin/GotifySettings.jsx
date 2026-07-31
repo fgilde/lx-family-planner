@@ -23,6 +23,7 @@ import {
   Unplug,
   Vote
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   DEFAULT_GOTIFY_RULES,
@@ -62,6 +63,8 @@ function suggestedPlannerUrl() {
 }
 
 export default function GotifySettings() {
+  const { t } = useTranslation('admin');
+  const { t: tShared } = useTranslation('shared');
   const {
     gotifyIntegration,
     setupGotify,
@@ -101,7 +104,7 @@ export default function GotifySettings() {
     try {
       return new URL(gotifyIntegration?.baseUrl || form.baseUrl).host;
     } catch {
-      return 'Gotify-Server';
+      return '';
     }
   }, [form.baseUrl, gotifyIntegration?.baseUrl]);
 
@@ -151,16 +154,13 @@ export default function GotifySettings() {
       <header className="gotify-heading">
         <div className="gotify-mark"><RadioTower size={23} /></div>
         <div>
-          <span className="admin-section-kicker">Push-Nachrichten</span>
-          <h2>Gotify-Benachrichtigungen</h2>
-          <p>
-            Wichtige Familienmomente erreichen euch auch dann, wenn der
-            Planer gerade nicht geöffnet ist.
-          </p>
+          <span className="admin-section-kicker">{t('gotify.kicker')}</span>
+          <h2>{t('gotify.title')}</h2>
+          <p>{t('gotify.intro')}</p>
         </div>
         {connected && (
           <span className="gotify-connected">
-            <Check size={14} /> Verbunden
+            <Check size={14} /> {t('gotify.connected')}
           </span>
         )}
       </header>
@@ -170,13 +170,12 @@ export default function GotifySettings() {
           <div className="gotify-security-note">
             <ShieldCheck size={19} />
             <span>
-              <strong>Sichere Einrichtung</strong>
-              Das Passwort wird nur einmal zum Erstellen einer eigenen
-              Gotify-App verwendet und nicht gespeichert.
+              <strong>{t('gotify.security.title')}</strong>
+              {t('gotify.security.body')}
             </span>
           </div>
           <label>
-            <span>Gotify-Server</span>
+            <span>{t('gotify.form.serverLabel')}</span>
             <input
               value={form.baseUrl}
               onChange={event => setForm(previous => ({
@@ -188,7 +187,7 @@ export default function GotifySettings() {
             />
           </label>
           <label>
-            <span>Benutzer</span>
+            <span>{t('gotify.form.usernameLabel')}</span>
             <input
               value={form.username}
               onChange={event => setForm(previous => ({
@@ -200,7 +199,7 @@ export default function GotifySettings() {
             />
           </label>
           <label>
-            <span>Passwort</span>
+            <span>{t('gotify.form.passwordLabel')}</span>
             <input
               type="password"
               value={form.password}
@@ -213,7 +212,7 @@ export default function GotifySettings() {
             />
           </label>
           <label className="gotify-planner-url">
-            <span>Planer-Adresse auf dem Handy</span>
+            <span>{t('gotify.form.plannerUrlLabel')}</span>
             <input
               value={form.plannerUrl}
               onChange={event => setForm(previous => ({
@@ -226,7 +225,9 @@ export default function GotifySettings() {
           </label>
           <button className="gotify-connect-button" disabled={Boolean(busy)}>
             <RadioTower size={17} />
-            {busy === 'connect' ? 'Verbindet …' : 'Verbinden & testen'}
+            {busy === 'connect'
+              ? t('gotify.form.connecting')
+              : t('gotify.form.connect')}
           </button>
         </form>
       ) : (
@@ -235,8 +236,8 @@ export default function GotifySettings() {
             <div>
               <Smartphone size={19} />
               <span>
-                <small>Nachrichtenkanal</small>
-                <strong>{serverHost}</strong>
+                <small>{t('gotify.status.channel')}</small>
+                <strong>{serverHost || t('gotify.serverFallback')}</strong>
               </span>
             </div>
             <a
@@ -244,7 +245,7 @@ export default function GotifySettings() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Gotify öffnen <ExternalLink size={14} />
+              {t('gotify.status.openGotify')} <ExternalLink size={14} />
             </a>
           </div>
 
@@ -261,8 +262,16 @@ export default function GotifySettings() {
                 >
                   <span><Icon size={18} /></span>
                   <span>
-                    <strong>{option.title}</strong>
-                    <small>{option.description}</small>
+                    <strong>
+                      {tShared(`events.${option.key}.title`, {
+                        defaultValue: option.title
+                      })}
+                    </strong>
+                    <small>
+                      {tShared(`events.${option.key}.description`, {
+                        defaultValue: option.description
+                      })}
+                    </small>
                   </span>
                   <i>{rules[option.key] ? <Check size={13} /> : null}</i>
                 </button>
@@ -277,13 +286,13 @@ export default function GotifySettings() {
               onChange={() => toggleRule('includeMessageText')}
             />
             <span>
-              <strong>Nachrichtentext auf dem Sperrbildschirm zeigen</strong>
-              Aus Datenschutzgründen standardmäßig ausgeschaltet.
+              <strong>{t('gotify.includeText.title')}</strong>
+              {t('gotify.includeText.hint')}
             </span>
           </label>
 
           <label className="gotify-phone-url">
-            <span>Beim Antippen diese Planer-Adresse öffnen</span>
+            <span>{t('gotify.phoneUrlLabel')}</span>
             <input
               value={form.plannerUrl}
               onChange={event => setForm(previous => ({
@@ -301,7 +310,9 @@ export default function GotifySettings() {
               disabled={Boolean(busy)}
             >
               <Check size={16} />
-              {busy === 'save' ? 'Speichert …' : 'Regeln speichern'}
+              {busy === 'save'
+                ? t('gotify.actions.saving')
+                : t('gotify.actions.saveRules')}
             </button>
             <button
               type="button"
@@ -309,7 +320,9 @@ export default function GotifySettings() {
               disabled={Boolean(busy)}
             >
               <Send size={16} />
-              {busy === 'test' ? 'Sendet …' : 'Test senden'}
+              {busy === 'test'
+                ? t('gotify.actions.sending')
+                : t('gotify.actions.sendTest')}
             </button>
             <button
               type="button"
@@ -318,7 +331,9 @@ export default function GotifySettings() {
               disabled={Boolean(busy)}
             >
               <Unplug size={16} />
-              {confirmDisconnect ? 'Wirklich trennen?' : 'Verbindung trennen'}
+              {confirmDisconnect
+                ? t('gotify.actions.disconnectConfirm')
+                : t('gotify.actions.disconnect')}
             </button>
           </div>
         </>

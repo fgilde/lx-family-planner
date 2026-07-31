@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BadgeEuro,
   CalendarDays,
@@ -17,33 +18,14 @@ import { DEFAULT_REWARD_ICON } from '../Tasks/RewardIcon';
 import RewardIconPicker from '../Tasks/RewardIconPicker';
 
 const GRANTS = [
-  {
-    key: 'sharedCalendar',
-    label: 'Gemeinsame Termine',
-    help: 'Diese Familie darf euch zu gemeinsam sichtbaren Terminen einladen.',
-    icon: CalendarDays
-  },
-  {
-    key: 'tasks',
-    label: 'Aufgaben',
-    help: 'Erwachsene dieser Familie dürfen euren Kindern Aufgaben geben.',
-    icon: CheckSquare
-  },
-  {
-    key: 'rewards',
-    label: 'Sterne & Belohnungen',
-    help: 'Erlaubt Sternpunkte bei Aufgaben und eigene Belohnungen.',
-    icon: Star
-  },
-  {
-    key: 'pocketMoney',
-    label: 'Taschengeld',
-    help: 'Erlaubt nachvollziehbare Taschengeldbuchungen für eure Kinder.',
-    icon: BadgeEuro
-  }
+  { key: 'sharedCalendar', icon: CalendarDays },
+  { key: 'tasks', icon: CheckSquare },
+  { key: 'rewards', icon: Star },
+  { key: 'pocketMoney', icon: BadgeEuro }
 ];
 
 function ChildChoice({ member, active, onClick }) {
+  const { t } = useTranslation('familyTree');
   return (
     <button
       type="button"
@@ -53,12 +35,17 @@ function ChildChoice({ member, active, onClick }) {
     >
       <span>{member.name.slice(0, 1).toUpperCase()}</span>
       <strong>{member.name}</strong>
-      <small>{member.position === 'teenager' ? 'Teenager' : 'Enkelkind'}</small>
+      <small>
+        {member.position === 'teenager'
+          ? t('access.childPosition.teenager')
+          : t('access.childPosition.grandchild')}
+      </small>
     </button>
   );
 }
 
 export default function FamilyConnectionAccess({ relationships }) {
+  const { t } = useTranslation('familyTree');
   const {
     updateFamilyRelationshipGrants,
     addRelatedFamilyTask,
@@ -99,7 +86,7 @@ export default function FamilyConnectionAccess({ relationships }) {
   });
   const [money, setMoney] = useState({
     amount: '5',
-    note: 'Von Oma & Opa',
+    note: t('access.planner.money.defaultNote'),
     icon: '💶'
   });
 
@@ -184,11 +171,10 @@ export default function FamilyConnectionAccess({ relationships }) {
   return (
     <section className="family-access-section">
       <header>
-        <span className="admin-section-kicker">Sicher zusammen organisieren</span>
-        <h3><ShieldCheck size={20} /> Freigaben im Familiennetz</h3>
+        <span className="admin-section-kicker">{t('access.header.kicker')}</span>
+        <h3><ShieldCheck size={20} /> {t('access.header.title')}</h3>
         <p>
-          Ihr entscheidet je Verbindung. Die andere Familie sieht keine
-          privaten Kalender, Chats oder Pinnwand-Inhalte.
+          {t('access.header.description')}
         </p>
       </header>
 
@@ -202,7 +188,7 @@ export default function FamilyConnectionAccess({ relationships }) {
               <div>
                 <strong>{relationship.otherFamily.familyName}</strong>
                 <small>
-                  Was diese Familie für eure Kinder tun darf
+                  {t('access.card.subtitle')}
                 </small>
               </div>
             </header>
@@ -221,25 +207,25 @@ export default function FamilyConnectionAccess({ relationships }) {
                     disabled={
                       savingGrant === `${relationship.id}-${grant.key}`
                     }
-                    title={grant.help}
+                    title={t(`access.grants.${grant.key}.help`)}
                   >
                     <Icon size={16} />
                     <span>
-                      <strong>{grant.label}</strong>
-                      <small>{grant.help}</small>
+                      <strong>{t(`access.grants.${grant.key}.label`)}</strong>
+                      <small>{t(`access.grants.${grant.key}.help`)}</small>
                     </span>
-                    <i>{active ? 'An' : 'Aus'}</i>
+                    <i>{active ? t('toggle.on') : t('toggle.off')}</i>
                   </button>
                 );
               })}
             </div>
             <footer>
               <HeartHandshake size={14} />
-              Von dort für euch freigegeben:{' '}
+              {t('access.card.grantedFromOther')}{' '}
               {GRANTS
                 .filter(grant => relationship.grantsFromOther?.[grant.key])
-                .map(grant => grant.label)
-                .join(', ') || 'noch nichts'}
+                .map(grant => t(`access.grants.${grant.key}.label`))
+                .join(', ') || t('access.card.nothingYet')}
             </footer>
           </article>
         ))}
@@ -252,18 +238,17 @@ export default function FamilyConnectionAccess({ relationships }) {
               <UsersRound size={22} />
             </span>
             <div>
-              <span className="admin-section-kicker">Für Enkelkinder</span>
-              <h3>Von Familie zu Familie</h3>
+              <span className="admin-section-kicker">{t('access.planner.kicker')}</span>
+              <h3>{t('access.planner.title')}</h3>
               <p>
-                Aufgabe, Belohnung oder Taschengeld landet direkt und
-                nachvollziehbar im Familienkonto des Kindes.
+                {t('access.planner.description')}
               </p>
             </div>
           </header>
 
           {actionable.length > 1 && (
             <label className="grandchild-family-select">
-              <span>Familienzweig</span>
+              <span>{t('access.planner.familyBranch')}</span>
               <select
                 value={selectedRelationship?.id || ''}
                 onChange={event => setRelationshipId(event.target.value)}
@@ -295,7 +280,7 @@ export default function FamilyConnectionAccess({ relationships }) {
                 className={tool === 'task' ? 'active' : ''}
                 onClick={() => setTool('task')}
               >
-                <CheckSquare size={16} /> Aufgabe
+                <CheckSquare size={16} /> {t('access.planner.tools.task')}
               </button>
             )}
             {selectedRelationship.grantsFromOther?.rewards && (
@@ -304,7 +289,7 @@ export default function FamilyConnectionAccess({ relationships }) {
                 className={tool === 'reward' ? 'active' : ''}
                 onClick={() => setTool('reward')}
               >
-                <Gift size={16} /> Belohnung
+                <Gift size={16} /> {t('access.planner.tools.reward')}
               </button>
             )}
             {selectedRelationship.grantsFromOther?.pocketMoney && (
@@ -313,7 +298,7 @@ export default function FamilyConnectionAccess({ relationships }) {
                 className={tool === 'money' ? 'active' : ''}
                 onClick={() => setTool('money')}
               >
-                <Coins size={16} /> Taschengeld
+                <Coins size={16} /> {t('access.planner.tools.money')}
               </button>
             )}
           </div>
@@ -323,19 +308,19 @@ export default function FamilyConnectionAccess({ relationships }) {
               selectedRelationship.grantsFromOther?.tasks && (
                 <>
                   <label>
-                    <span>Aufgabe</span>
+                    <span>{t('access.planner.task.label')}</span>
                     <input
                       value={task.title}
                       onChange={event => setTask(previous => ({
                         ...previous,
                         title: event.target.value
                       }))}
-                      placeholder="z. B. Oma im Garten helfen"
+                      placeholder={t('access.planner.task.placeholder')}
                       required
                     />
                   </label>
                   <label>
-                    <span>Bis wann?</span>
+                    <span>{t('access.planner.task.dueDate')}</span>
                     <input
                       type="date"
                       value={task.dueDate}
@@ -348,7 +333,7 @@ export default function FamilyConnectionAccess({ relationships }) {
                   </label>
                   {selectedRelationship.grantsFromOther?.rewards && (
                     <label>
-                      <span>Sterne</span>
+                      <span>{t('access.planner.task.stars')}</span>
                       <input
                         type="number"
                         min="0"
@@ -368,19 +353,19 @@ export default function FamilyConnectionAccess({ relationships }) {
               selectedRelationship.grantsFromOther?.rewards && (
                 <>
                   <label>
-                    <span>Belohnung</span>
+                    <span>{t('access.planner.reward.label')}</span>
                     <input
                       value={reward.title}
                       onChange={event => setReward(previous => ({
                         ...previous,
                         title: event.target.value
                       }))}
-                      placeholder="z. B. Ein Nachmittag im Zoo"
+                      placeholder={t('access.planner.reward.placeholder')}
                       required
                     />
                   </label>
                   <label>
-                    <span>Sternepreis</span>
+                    <span>{t('access.planner.reward.costStars')}</span>
                     <input
                       type="number"
                       min="1"
@@ -394,7 +379,7 @@ export default function FamilyConnectionAccess({ relationships }) {
                     />
                   </label>
                   <div className="grandchild-reward-icon-field">
-                    <span>Bild der Belohnung</span>
+                    <span>{t('access.planner.reward.image')}</span>
                     <RewardIconPicker
                       value={reward.icon}
                       image={reward.iconImage}
@@ -411,7 +396,7 @@ export default function FamilyConnectionAccess({ relationships }) {
               selectedRelationship.grantsFromOther?.pocketMoney && (
                 <>
                   <label>
-                    <span>Betrag in Euro</span>
+                    <span>{t('access.planner.money.amount')}</span>
                     <input
                       type="number"
                       min="-10000"
@@ -426,7 +411,7 @@ export default function FamilyConnectionAccess({ relationships }) {
                     />
                   </label>
                   <label>
-                    <span>Wofür?</span>
+                    <span>{t('access.planner.money.note')}</span>
                     <input
                       value={money.note}
                       onChange={event => setMoney(previous => ({
@@ -446,7 +431,7 @@ export default function FamilyConnectionAccess({ relationships }) {
               {busy
                 ? <LoaderCircle className="spin" size={16} />
                 : <Send size={16} />}
-              An das Kinderprofil senden
+              {t('access.planner.submit')}
             </button>
           </form>
         </div>

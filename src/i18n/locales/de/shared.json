@@ -1,0 +1,62 @@
+{
+  "events": {
+    "groupChat": { "title": "Familienchat", "description": "Neue Nachrichten in der Familiengruppe" },
+    "directMessages": { "title": "Direktnachrichten", "description": "Private Nachrichten für das passende Profil" },
+    "familyMail": { "title": "Familienbriefkasten", "description": "Neue Briefe von verbundenen Familien" },
+    "familyChatInvites": { "title": "Chat-Einladungen", "description": "Einladungen in den Chat einer verbundenen Familie" },
+    "events": { "title": "Kalender & Erinnerungen", "description": "Neue, geänderte, abgesagte und bald beginnende Termine" },
+    "taskAssigned": { "title": "Neue Aufgaben", "description": "Neue Missionen und Pflichten" },
+    "taskApproval": { "title": "Aufgaben prüfen", "description": "Erledigt-Meldungen und abgelehnte Prüfungen" },
+    "taskCompleted": { "title": "Geschaffte Aufgaben", "description": "Bestätigte Aufgaben, Sterne und Erfolge" },
+    "moodUpdates": { "title": "Gefühlslage der Kinder", "description": "Neue Einträge im Familienkompass" },
+    "moodHelp": { "title": "Brauche Nähe", "description": "Dringender Hinweis – auch während erlaubter Ruhezeiten" },
+    "problemReports": { "title": "Problemmeldungen", "description": "Neue Meldungen und Rückmeldung zur Lösung" },
+    "encouragements": { "title": "Mutmacher", "description": "Liebe Nachrichten der Familie" },
+    "familyPolls": { "title": "Abstimmungen", "description": "Neue Familienentscheidungen" },
+    "familyMissions": { "title": "Familienmissionen", "description": "Neue gemeinsame Missionen" },
+    "schoolItems": { "title": "Schule", "description": "Hausaufgaben, Schultasche und Klassenarbeiten" },
+    "rewards": { "title": "Belohnungen", "description": "Neue und eingelöste Belohnungen" },
+    "pocketMoney": { "title": "Taschengeld", "description": "Neue Einzahlungen, Abzüge und Umwandlungen" },
+    "familyConnections": { "title": "Familiennetz", "description": "Anfragen, Freigaben und Änderungen verbundener Familien" }
+  },
+  "reminderLead": {
+    "atStart": "Wenn es losgeht",
+    "weeks_one": "{{count}} Woche vorher",
+    "weeks_other": "{{count}} Wochen vorher",
+    "days_one": "{{count}} Tag vorher",
+    "days_other": "{{count}} Tage vorher",
+    "hours_one": "{{count}} Stunde vorher",
+    "hours_other": "{{count}} Stunden vorher",
+    "minutes_one": "{{count}} Minute vorher",
+    "minutes_other": "{{count}} Minuten vorher"
+  },
+  "reminderLeadShort": {
+    "atStart": "Zum Start",
+    "weeks_one": "{{count}} Woche",
+    "weeks_other": "{{count}} Wochen",
+    "days_one": "{{count}} Tag",
+    "days_other": "{{count}} T.",
+    "hours_one": "{{count}} Std.",
+    "hours_other": "{{count}} Std.",
+    "minutes_one": "{{count}} Min.",
+    "minutes_other": "{{count}} Min."
+  },
+  "eventReminder": {
+    "fallback": "Ein Termin beginnt bald.",
+    "startsNow": "beginnt jetzt",
+    "startsInMinutes_one": "beginnt in {{count}} Minute",
+    "startsInMinutes_other": "beginnt in {{count}} Minuten",
+    "startsInHours_one": "beginnt in {{count}} Stunde",
+    "startsInHours_other": "beginnt in {{count}} Stunden",
+    "startsOnDate": "beginnt am {{date}}"
+  },
+  "trashReminder": {
+    "defaultTitle": "Müllabfuhr",
+    "tomorrowTitle": "🗑️ Morgen: {{title}}",
+    "tomorrowBody": "Morgen wird {{title}} abgeholt. Bitte rechtzeitig rausstellen.",
+    "todayTitle": "🗑️ Heute: {{title}}",
+    "todayBody": "{{title}} wird heute abgeholt.",
+    "reminderTitle": "🗑️ Erinnerung: {{title}}",
+    "reminderBody": "Abholung {{lead}}. Bitte rechtzeitig rausstellen."
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Archive,
   Download,
@@ -33,6 +34,7 @@ import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import { formatDateTime } from '../../utils/formatting';
 
 const MAX_ATTACHMENT_BYTES = 100 * 1024 * 1024;
 const MAX_ATTACHMENTS = 8;
@@ -41,7 +43,7 @@ function messageTime(timestamp) {
   const date = new Date(Number(timestamp || Date.now()));
   const today = new Date();
   const sameDay = date.toDateString() === today.toDateString();
-  return date.toLocaleString('de-DE', sameDay
+  return formatDateTime(date, sameDay
     ? { hour: '2-digit', minute: '2-digit' }
     : {
         day: '2-digit',
@@ -111,16 +113,17 @@ function attachmentUrl(message, attachment, guestInvitationId, inline) {
     : `/api/chat/messages/${suffix}`;
 }
 
-async function responseError(response) {
+async function responseError(response, fallback) {
   try {
     const data = await response.json();
-    return data?.error || 'Der Anhang konnte nicht geladen werden.';
+    return data?.error || fallback;
   } catch {
-    return 'Der Anhang konnte nicht geladen werden.';
+    return fallback;
   }
 }
 
 function ChatImageViewer({ image, onClose }) {
+  const { t } = useTranslation('chat');
   useEffect(() => {
     if (!image) return undefined;
     const previousOverflow = document.body.style.overflow;
@@ -146,23 +149,23 @@ function ChatImageViewer({ image, onClose }) {
       <section
         role="dialog"
         aria-modal="true"
-        aria-label={`${image.name} groß ansehen`}
+        aria-label={t('imageViewer.viewLarge', { name: image.name })}
         onClick={event => event.stopPropagation()}
       >
         <header>
           <span>
-            <small>Chatbild</small>
+            <small>{t('imageViewer.label')}</small>
             <strong>{image.name}</strong>
           </span>
           <div>
             <a href={image.src} download={image.name}>
               <Download size={17} />
-              <span>Speichern</span>
+              <span>{t('common:actions.save')}</span>
             </a>
             <button
               type="button"
               onClick={onClose}
-              aria-label="Bildansicht schließen"
+              aria-label={t('imageViewer.closeAria')}
             >
               <X size={19} />
             </button>
@@ -171,7 +174,7 @@ function ChatImageViewer({ image, onClose }) {
         <div className="chat-image-viewer-stage">
           <img src={image.src} alt={image.name} />
         </div>
-        <footer>Zum Schließen außerhalb des Bildes tippen</footer>
+        <footer>{t('imageViewer.tapToClose')}</footer>
       </section>
     </div>
   );
@@ -184,6 +187,7 @@ function ChatAttachment({
   onOpenImage,
   showToast
 }) {
+  const { t } = useTranslation('chat');
   const [source, setSource] = useState('');
   const [loading, setLoading] = useState(false);
   const Icon = attachmentIcon(attachment);
@@ -196,10 +200,10 @@ function ChatAttachment({
       const response = await plannerApiFetch(
         attachmentUrl(message, attachment, guestInvitationId, true)
       );
-      if (!response.ok) throw new Error(await responseError(response));
+      if (!response.ok) throw new Error(await responseError(response, t('errors.attachmentLoad')));
       setSource(URL.createObjectURL(await response.blob()));
     } catch (error) {
-      showToast('Anhang nicht geöffnet', error.message, 'error');
+      showToast(t('toasts.attachmentOpenFailedTitle'), error.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -225,7 +229,7 @@ function ChatAttachment({
       const response = await plannerApiFetch(
         attachmentUrl(message, attachment, guestInvitationId, false)
       );
-      if (!response.ok) throw new Error(await responseError(response));
+      if (!response.ok) throw new Error(await responseError(response, t('errors.attachmentLoad')));
       const url = URL.createObjectURL(await response.blob());
       const anchor = document.createElement('a');
       anchor.href = url;
@@ -235,7 +239,7 @@ function ChatAttachment({
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1500);
     } catch (error) {
-      showToast('Download fehlgeschlagen', error.message, 'error');
+      showToast(t('toasts.downloadFailedTitle'), error.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -250,7 +254,7 @@ function ChatAttachment({
           src: source,
           name: attachment.name
         })}
-        title={`${attachment.name} groß ansehen`}
+        title={t('imageViewer.viewLarge', { name: attachment.name })}
       >
         <img src={source} alt={attachment.name} />
         <span><ZoomIn size={14} /> {attachment.name}</span>
@@ -291,16 +295,16 @@ function ChatAttachment({
         <strong>{attachment.name}</strong>
         <small>
           {attachment.kind === 'apk'
-            ? 'Android-App'
+            ? t('attachment.kinds.apk')
             : attachment.kind === 'archive'
-              ? 'Archiv'
+              ? t('attachment.kinds.archive')
               : attachment.kind === 'pdf'
-                ? 'PDF-Dokument'
+                ? t('attachment.kinds.pdf')
                 : attachment.kind === 'video'
-                  ? 'Video'
+                  ? t('attachment.kinds.video')
                   : attachment.kind === 'audio'
-                    ? 'Audio'
-                    : 'Dokument'}
+                    ? t('attachment.kinds.audio')
+                    : t('attachment.kinds.document')}
           {' · '}
           {readableSize(attachment.size)}
         </small>
@@ -310,7 +314,7 @@ function ChatAttachment({
           type="button"
           onClick={loadPreview}
           disabled={loading}
-          title="Öffnen"
+          title={t('attachment.open')}
         >
           <Play size={15} />
         </button>
@@ -319,7 +323,7 @@ function ChatAttachment({
         type="button"
         onClick={download}
         disabled={loading}
-        title="Herunterladen"
+        title={t('attachment.download')}
       >
         <Download size={15} />
       </button>
@@ -328,6 +332,7 @@ function ChatAttachment({
 }
 
 export default function FamilyChatView() {
+  const { t } = useTranslation('chat');
   const {
     members,
     activeMember,
@@ -459,8 +464,8 @@ export default function FamilyChatView() {
         ? guestMessages[guestMessages.length - 1]
         : null;
       if (latest?.text) return latest.text;
-      if (latest?.attachments?.length) return '📎 Datei geteilt';
-      return 'Eingeladener Familienchat';
+      if (latest?.attachments?.length) return t('preview.fileShared');
+      return t('preview.invitedChat');
     }
     const relevant = messages
       .filter(message => {
@@ -480,14 +485,14 @@ export default function FamilyChatView() {
       .sort((left, right) =>
         Number(right.timestamp || 0) - Number(left.timestamp || 0)
       )[0];
-    if (!relevant) return targetId === 'group' ? 'Offene Gruppe' : 'Noch keine Nachricht';
+    if (!relevant) return targetId === 'group' ? t('preview.openGroup') : t('preview.noMessages');
     if (relevant.text) return relevant.text;
     if (relevant.attachments?.length) {
       return relevant.attachments[0].kind === 'image'
-        ? '📷 Foto'
-        : '📎 Datei';
+        ? t('preview.photo')
+        : t('preview.file');
     }
-    return relevant.photo ? '📷 Foto' : 'Neue Nachricht';
+    return relevant.photo ? t('preview.photo') : t('preview.newMessage');
   };
 
   const chooseAttachments = event => {
@@ -497,8 +502,8 @@ export default function FamilyChatView() {
     const remaining = MAX_ATTACHMENTS - pendingAttachments.length;
     if (remaining <= 0) {
       showToast(
-        'Genug Anhänge',
-        `Pro Nachricht sind höchstens ${MAX_ATTACHMENTS} Dateien möglich.`,
+        t('toasts.attachmentLimitTitle'),
+        t('toasts.attachmentLimitBody', { max: MAX_ATTACHMENTS }),
         'warning'
       );
       return;
@@ -506,8 +511,8 @@ export default function FamilyChatView() {
     const oversized = selected.find(file => file.size > MAX_ATTACHMENT_BYTES);
     if (oversized) {
       showToast(
-        'Datei zu groß',
-        `${oversized.name} ist größer als 100 MB.`,
+        t('toasts.fileTooLargeTitle'),
+        t('toasts.fileTooLargeBody', { name: oversized.name }),
         'warning'
       );
       return;
@@ -524,8 +529,8 @@ export default function FamilyChatView() {
     setPendingAttachments(previous => [...previous, ...additions]);
     if (selected.length > remaining) {
       showToast(
-        'Auswahl gekürzt',
-        `Die ersten ${remaining} Dateien wurden angehängt.`,
+        t('toasts.selectionTrimmedTitle'),
+        t('toasts.selectionTrimmedBody', { count: remaining }),
         'info'
       );
     }
@@ -544,7 +549,10 @@ export default function FamilyChatView() {
     for (let index = 0; index < pendingAttachments.length; index += 1) {
       const item = pendingAttachments[index];
       setUploadLabel(
-        `Datei ${index + 1} von ${pendingAttachments.length} wird in der Cloud gespeichert`
+        t('composer.uploadingFile', {
+          current: index + 1,
+          total: pendingAttachments.length
+        })
       );
       const path = activeGuestChat
         ? `/api/family/chat-guests/${
@@ -590,7 +598,7 @@ export default function FamilyChatView() {
       const attachments = pendingAttachments.length
         ? await uploadAttachments()
         : [];
-      setUploadLabel(attachments.length ? 'Nachricht wird gesendet' : '');
+      setUploadLabel(attachments.length ? t('composer.sendingMessage') : '');
       const payload = {
         text: inputText.trim(),
         attachments
@@ -610,9 +618,9 @@ export default function FamilyChatView() {
       }
     } catch (error) {
       showToast(
-        'Anhang nicht gesendet',
+        t('toasts.attachmentSendFailedTitle'),
         error?.message ||
-        'Die Datei konnte nicht in der Family Cloud gespeichert werden.',
+        t('toasts.attachmentSendFailedBody'),
         'error'
       );
     } finally {
@@ -628,8 +636,8 @@ export default function FamilyChatView() {
         <header className="chat-directory-header">
           <span><MessageCircleMore size={17} /></span>
           <div>
-            <small>Familienfunk</small>
-            <h2>Chats</h2>
+            <small>{t('directory.kicker')}</small>
+            <h2>{t('directory.title')}</h2>
           </div>
         </header>
 
@@ -641,12 +649,12 @@ export default function FamilyChatView() {
           >
             <span className="chat-channel-avatar group"><Users size={20} /></span>
             <span className="chat-channel-copy">
-              <strong>Alle zusammen</strong>
+              <strong>{t('directory.groupChannel')}</strong>
               <small>{conversationPreview('group')}</small>
             </span>
           </button>
 
-          <div className="chat-directory-label">Direkt</div>
+          <div className="chat-directory-label">{t('directory.directLabel')}</div>
 
           {chatPartners.map(member => (
             <button
@@ -671,7 +679,7 @@ export default function FamilyChatView() {
 
           {guestChats.length > 0 && (
             <>
-              <div className="chat-directory-label">Eingeladen</div>
+              <div className="chat-directory-label">{t('directory.invitedLabel')}</div>
               {guestChats.map(invitation => {
                 const target = `guest:${invitation.id}`;
                 return (
@@ -713,14 +721,14 @@ export default function FamilyChatView() {
           <div>
             <small>
               {activeChatTarget === 'group'
-                ? `${chatMembers.length} Familienprofile`
+                ? t('room.familyProfiles', { count: chatMembers.length })
                 : activeGuestChat
-                  ? 'Du bist persönlich eingeladen'
+                  ? t('room.guestInvited')
                   : getPositionLabel(activeTargetMember)}
             </small>
             <h1>
               {activeChatTarget === 'group'
-                ? 'Familienchat'
+                ? t('room.groupTitle')
                 : activeGuestChat
                   ? activeGuestChat.hostFamily.familyName
                   : activeTargetMember?.name}
@@ -728,10 +736,10 @@ export default function FamilyChatView() {
           </div>
           <span className="chat-privacy-note">
             {activeChatTarget === 'group'
-              ? <><Users size={13} /> Für alle sichtbar</>
+              ? <><Users size={13} /> {t('room.visibleToAll')}</>
               : activeGuestChat
-                ? <><ShieldCheck size={13} /> Gastzugang ab Zustimmung</>
-                : <><Lock size={13} /> Direktnachricht</>}
+                ? <><ShieldCheck size={13} /> {t('room.guestAccess')}</>
+                : <><Lock size={13} /> {t('room.directMessage')}</>}
           </span>
         </header>
 
@@ -739,15 +747,15 @@ export default function FamilyChatView() {
           {visibleMessages.length === 0 ? (
             <div className="chat-empty">
               <span>{activeChatTarget === 'group' ? '👋' : '💬'}</span>
-              <strong>Noch ganz still hier</strong>
+              <strong>{t('empty.title')}</strong>
               <p>
-                Schreib die erste Nachricht an
-                {' '}
-                {activeChatTarget === 'group'
-                  ? 'deine Familie'
-                  : activeGuestChat
-                    ? activeGuestChat.hostFamily.familyName
-                    : activeTargetMember?.name}.
+                {t('empty.prompt', {
+                  name: activeChatTarget === 'group'
+                    ? t('empty.familyName')
+                    : activeGuestChat
+                      ? activeGuestChat.hostFamily.familyName
+                      : activeTargetMember?.name
+                })}
               </p>
             </div>
           ) : (
@@ -772,7 +780,7 @@ export default function FamilyChatView() {
                   />
                   <div>
                     <small>
-                      <strong>{isMine ? 'Du' : message.senderName}</strong>
+                      <strong>{isMine ? t('message.you') : message.senderName}</strong>
                       <time>{messageTime(message.timestamp)}</time>
                     </small>
                     <div className="chat-bubble">
@@ -782,16 +790,18 @@ export default function FamilyChatView() {
                           className="chat-legacy-photo-button"
                           onClick={() => setImageViewer({
                             src: message.photo,
-                            name: 'Chatfoto'
+                            name: t('message.chatPhoto')
                           })}
-                          title="Chatfoto groß ansehen"
+                          title={t('imageViewer.viewLarge', {
+                            name: t('message.chatPhoto')
+                          })}
                         >
                           <img
                             className="chat-legacy-photo"
                             src={message.photo}
-                            alt="Gesendeter Anhang"
+                            alt={t('message.sentAttachmentAlt')}
                           />
-                          <span><ZoomIn size={14} /> Groß ansehen</span>
+                          <span><ZoomIn size={14} /> {t('message.viewLarge')}</span>
                         </button>
                       )}
                       {Array.isArray(message.attachments) &&
@@ -834,7 +844,7 @@ export default function FamilyChatView() {
                     <button
                       type="button"
                       onClick={() => removePendingAttachment(item.id)}
-                      aria-label={`${item.file.name} entfernen`}
+                      aria-label={t('composer.removeAttachment', { name: item.file.name })}
                     >
                       <X size={13} />
                     </button>
@@ -852,7 +862,7 @@ export default function FamilyChatView() {
           <div className="chat-composer-row">
             <label
               className="chat-attach-button"
-              title="Dateien anhängen"
+              title={t('composer.attachFiles')}
             >
               <Paperclip size={20} />
               <input
@@ -863,13 +873,13 @@ export default function FamilyChatView() {
             </label>
             <textarea
               rows={1}
-              placeholder={`Nachricht an ${
-                activeChatTarget === 'group'
-                  ? 'die Familie'
+              placeholder={t('composer.placeholder', {
+                name: activeChatTarget === 'group'
+                  ? t('composer.placeholderFamilyName')
                   : activeGuestChat
                     ? activeGuestChat.hostFamily.familyName
                     : activeTargetMember?.name
-              } …`}
+              })}
               value={inputText}
               onChange={event => setInputText(event.target.value)}
               onKeyDown={event => {
@@ -894,12 +904,12 @@ export default function FamilyChatView() {
               {sending
                 ? <LoaderCircle className="spin" size={18} />
                 : <Send size={18} />}
-              <span>{sending ? 'Sendet …' : 'Senden'}</span>
+              <span>{sending ? t('composer.sending') : t('composer.send')}</span>
             </button>
           </div>
           <small className="chat-cloud-note">
             <Archive size={13} />
-            Anhänge werden automatisch im Familienarchiv sortiert · bis 100 MB
+            {t('composer.cloudNote')}
           </small>
         </form>
       </section>

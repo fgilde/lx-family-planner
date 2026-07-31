@@ -1,0 +1,160 @@
+{
+  "view": {
+    "hero": {
+      "eyebrow": "Family time",
+      "title": "Your calendar, without the scheduling chaos.",
+      "todayCount_one": "There is <1>{{count}}</1> event today.",
+      "todayCount_other": "There are <1>{{count}}</1> events today.",
+      "nextUp": "Up next: {{title}}.",
+      "noNext": "The next free moment is yours."
+    },
+    "actions": {
+      "sources": "Calendar sources",
+      "newEvent": "New event"
+    },
+    "filter": {
+      "ariaLabel": "Filter by person",
+      "all": "All",
+      "managed": "managed"
+    },
+    "tools": {
+      "hidePast": "Hide past",
+      "showPast": "Show past",
+      "export": "Export",
+      "import": "Import file"
+    },
+    "agenda": {
+      "kicker": "Agenda",
+      "title": "What's coming up next",
+      "count_one": "{{count}} event",
+      "count_other": "{{count}} events"
+    },
+    "empty": {
+      "title": "There's still room for something nice",
+      "description": "Add an event or connect an existing calendar.",
+      "cta": "Add your first event"
+    },
+    "day": {
+      "today": "Today",
+      "tomorrow": "Tomorrow"
+    },
+    "event": {
+      "allDay": "All day",
+      "until": "until {{time}}",
+      "fromSubscriptionTitle": "From a calendar subscription",
+      "fromFamily": "From {{name}}",
+      "subscriptionFallback": "Calendar subscription",
+      "sharedWithTitle": "Shared with connected families",
+      "sharedWith": "With {{names}}",
+      "memberManaged": "{{name}} · managed",
+      "wholeFamily": "Whole family",
+      "readOnlyTitle": "This event is managed by its calendar source",
+      "editRemindersTitle": "Edit reminders",
+      "editRemindersAria": "Edit reminders for {{title}}",
+      "deleteTitle": "Delete event",
+      "deleteAria": "Delete {{title}}"
+    }
+  },
+  "trash": {
+    "header": {
+      "title": "Digital waste calendar",
+      "description": "Import your waste collector's .ics file or add a pickup yourself. LX reminds you the day before by default.",
+      "import": "Import waste calendar",
+      "add": "Add pickup"
+    },
+    "next": {
+      "kicker": "Next waste collection",
+      "callout": "Put the bin out"
+    },
+    "schedule": {
+      "kicker": "Pickup schedule",
+      "title": "Upcoming pickups",
+      "emptyTitle": "No pickup dates yet",
+      "emptyDescription": "Upload your waste collector's .ics file.",
+      "reminderOff": "Reminder off",
+      "editReminderTitle": "Change reminder",
+      "editReminderAria": "Change reminder for {{title}}",
+      "removeTitle": "Remove pickup",
+      "removeAria": "Remove {{title}}"
+    },
+    "dialog": {
+      "eyebrow": "New pickup",
+      "title": "Add pickup date",
+      "typeLabel": "Waste type",
+      "nameLabel": "Name",
+      "dateLabel": "Pickup date",
+      "save": "Save pickup"
+    },
+    "toast": {
+      "importFailedTitle": "Import not possible",
+      "importFailedBody": "No waste collection dates were found in this file.",
+      "importSuccessTitle": "Waste calendar imported",
+      "importSuccessBody_one": "{{count}} pickup date was imported and reminds you one day ahead by default.",
+      "importSuccessBody_other": "{{count}} pickup dates were imported and remind you one day ahead by default.",
+      "addedTitle": "Pickup saved",
+      "addedBody": "The pickup on {{date}} has been saved.",
+      "reminderSavedTitle": "Reminder saved",
+      "reminderOffTitle": "Reminder turned off",
+      "reminderSavedBody": "LX will remind you {{leads}}.",
+      "reminderOffBody": "No reminder will be sent for {{title}}."
+    }
+  },
+  "sources": {
+    "header": {
+      "kicker": "Calendar bridge",
+      "title": "External calendars",
+      "description": "Automatically pull in events from Google, Outlook, Nextcloud and other ICS calendars.",
+      "closeAria": "Close calendar sources"
+    },
+    "list": {
+      "heading": "Connected sources",
+      "activeCount": "{{count}} active",
+      "syncAll": "Sync all",
+      "emptyTitle": "No calendar bridge yet",
+      "emptyDescription": "Paste a private ICS link on the right. New events will then flow into your family calendar automatically.",
+      "everyone": "All",
+      "eventCount_one": "{{count}} event",
+      "eventCount_other": "{{count}} events",
+      "syncNever": "Not successfully synced yet",
+      "syncToday": "Today at {{time}}",
+      "syncNowTitle": "Sync now",
+      "syncNowAria": "Sync {{name}} now",
+      "pauseAria": "Pause {{name}}",
+      "resumeAria": "Activate {{name}}",
+      "removeTitle": "Remove source",
+      "removeAria": "Remove {{name}}",
+      "confirmRemove": "Remove \"{{name}}\" and all events imported from it?"
+    },
+    "form": {
+      "connect": "Connect calendar",
+      "connectHint": "The link stays encrypted on your server.",
+      "nameLabel": "Source name",
+      "namePlaceholder": "e.g. school calendar",
+      "urlLabel": "Private ICS link",
+      "visibilityLabel": "Visible to",
+      "allMembers": "All family members",
+      "householdLabel": "Planning space",
+      "householdFamily": "Our home",
+      "householdGrandparents": "Grandma & Grandpa's home",
+      "colorLegend": "Calendar color",
+      "pickColorAria": "Choose color {{color}}",
+      "privacyNote": "Read-only: the family planner cannot change or delete anything in the external calendar. Still, never share the secret link publicly.",
+      "connecting": "Connecting …"
+    }
+  },
+  "reminderDialog": {
+    "trashKicker": "Pickup alarm",
+    "eventKicker": "Event alarm",
+    "atTime": "{{time}}",
+    "noneActive": "No reminder active",
+    "note": "Notifications must be enabled once in each profile. The notice also appears in the family inbox.",
+    "save": "Save reminders"
+  },
+  "reminderPicker": {
+    "title": "When should LX remind you?",
+    "subtitle": "Choose one or more times",
+    "off": "Off",
+    "activeHint": "LX reminds you on all devices enabled for this profile.",
+    "inactiveHint": "Without a selection, no reminder will be sent for this entry."
+  }
+}

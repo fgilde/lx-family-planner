@@ -1,0 +1,120 @@
+{
+  "header": {
+    "title": "Tasks & Star Rewards Shop",
+    "createReward": "Create a custom reward",
+    "assignTask": "Assign a new task",
+    "intro": "Children report a task as done. Stars are only awarded once the parent who created it confirms completion.",
+    "approvalsWaiting_one": "{{count}} task is waiting for your review",
+    "approvalsWaiting_other": "{{count}} tasks are waiting for your review"
+  },
+  "repeat": {
+    "none": "One-time",
+    "daily": "Every day",
+    "weekdays": "Monday to Friday",
+    "weekly": "Every week",
+    "monthly": "Every month",
+    "recurring": "Recurring"
+  },
+  "memberCard": {
+    "managedOnly": "Organized only",
+    "noTasks": "No tasks assigned to {{name}}."
+  },
+  "taskItem": {
+    "reviewWaitingFor": "The review is waiting for {{name}}.",
+    "fallbackCreator": "the creator",
+    "fallbackParent": "a parent",
+    "statusConfirmed": "Confirmed and credited",
+    "statusPendingWith": "Awaiting review by {{name}}",
+    "statusCreatedBy": "Created by {{name}}",
+    "statusTapWhenDone": "Tap when you're done",
+    "rotationTitle": "Rotates with each repetition",
+    "fairRotation": "Fair rotation ({{count}})",
+    "approve": "Really done",
+    "reject": "Try again"
+  },
+  "shop": {
+    "title": "Star Rewards Shop",
+    "titleForChild": "Star Rewards Shop for {{name}}",
+    "editRewardTitle": "Edit reward",
+    "deleteRewardTitle": "Delete reward",
+    "forChild": "🧒 For {{name}}",
+    "forAllChildren": "✨ For all children",
+    "requiresStars": "Requires {{count}} stars",
+    "redeemFor": "Redeem for {{name}}!"
+  },
+  "rewardModal": {
+    "editTitle": "Edit reward",
+    "createTitle": "Create new reward",
+    "titleLabel": "Reward title",
+    "titlePlaceholder": "e.g. 1x zoo trip, 30 min of gaming...",
+    "forWhichChild": "Which child is this reward for?",
+    "childOption": "🧒 {{name}}",
+    "starCost": "Star cost",
+    "imageLabel": "Reward image"
+  },
+  "taskModal": {
+    "taskLabel": "Task / chore",
+    "taskPlaceholder": "e.g. tidy up the room, unload the dishwasher...",
+    "assignTo": "Assign to",
+    "managedSuffix": ", managed",
+    "scheduleTitle": "When is the task due?",
+    "scheduleHint": "Repeats are rescheduled automatically after confirmation.",
+    "dueDate": "Due on",
+    "repeatLabel": "Repeat",
+    "rotationToggle": "Rotate fairly between profiles",
+    "rotationHint": "After each confirmed repetition, the next person is automatically up.",
+    "category": "Category",
+    "categories": {
+      "household": "Household",
+      "kitchen": "Kitchen",
+      "room": "Room",
+      "school": "School",
+      "pet": "Pet",
+      "garden": "Garden"
+    },
+    "managedNoteTitle": "Organization task",
+    "managedNoteHint": "Managed profiles get no stars and no separate done report.",
+    "starsLabel": "Star reward (+ stars)",
+    "submit": "Create Task"
+  },
+  "rewardIcon": {
+    "defaultLabel": "Reward",
+    "customImage": "Custom image",
+    "customSymbol": "Custom symbol",
+    "customImageTitle": "{{label}}: custom image"
+  },
+  "presets": {
+    "gift": "Gift",
+    "iceCream": "Ice cream",
+    "gaming": "Game time",
+    "movie": "Movie night",
+    "popcorn": "Cinema",
+    "pizza": "Pizza",
+    "trip": "Outing",
+    "outdoors": "Outdoors",
+    "bike": "Bike ride",
+    "swimming": "Swimming",
+    "creative": "Creative time",
+    "music": "Music",
+    "book": "Book",
+    "party": "Party",
+    "animal": "Animal adventure",
+    "cake": "Sweet treat",
+    "rocket": "Adventure",
+    "trophy": "Grand prize",
+    "crown": "Choose a wish",
+    "surprise": "Surprise"
+  },
+  "iconPicker": {
+    "hint": "A clear image children will recognize right away.",
+    "uploadAriaLabel": "Choose a custom reward image",
+    "presetsAriaLabel": "Reward icons",
+    "removeCustomImage": "Remove custom image",
+    "errors": {
+      "invalidType": "Please choose a PNG, JPG, or WebP image.",
+      "tooLarge": "The image must be no larger than 5 MB.",
+      "stillTooLarge": "The image is still too large after resizing.",
+      "readFailed": "The image could not be read."
+    }
+  }
+}

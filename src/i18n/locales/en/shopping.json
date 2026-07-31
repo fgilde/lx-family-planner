@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "eyebrow": "Family market",
+    "title": "What's missing at home?",
+    "subtitle": "Browse the full German Bring! catalog or add an item of your own.",
+    "statusLive": "Live with “{{listName}}”",
+    "statusLocal": "Local family list",
+    "catalogItems": "{{total}} standard items",
+    "syncing": "Syncing",
+    "refreshBring": "Refresh Bring!",
+    "connection": "Connection",
+    "connectBring": "Connect Bring!"
+  },
+  "search": {
+    "placeholder": "Eier, Nutella, Brötchen, Porree …",
+    "searchAria": "Search for an item or create a new one",
+    "quantityLabel": "Quantity",
+    "quantityAria": "Quantity or note",
+    "hint": "Not found? The term you entered will be added as your own Bring! item."
+  },
+  "list": {
+    "kicker": "Your list",
+    "title": "Still to buy",
+    "emptyTitle": "The shopping basket is waiting.",
+    "emptyHint": "Tap a standard item below or search for it directly.",
+    "recentToggle": "Recently bought ({{count}})",
+    "backToList": "Back on the list"
+  },
+  "catalog": {
+    "sourceBring": "Bring! range",
+    "sourceDefault": "Basic range",
+    "resultsFor": "Results for “{{query}}”",
+    "quickAdd": "Quick add",
+    "shownCount": "{{count}} shown",
+    "departmentsAria": "Product categories",
+    "popular": "Popular",
+    "onList": "On the list",
+    "noResultsTitle": "No catalog match – no problem.",
+    "noResultsHint": "Use “Add” to create “{{query}}” as your own item."
+  },
+  "accountModal": {
+    "eyebrow": "Optional integration",
+    "title": "Connect Bring! shopping",
+    "connectedEyebrow": "Connected live",
+    "defaultListName": "Family list",
+    "securityNote": "Your password is stored encrypted on your own server and is never saved in the browser.",
+    "syncNow": "Sync now",
+    "disconnect": "Disconnect",
+    "intro": "Take over your existing Bring! list. After signing in, pick exactly the list that belongs to the family planner.",
+    "emailLabel": "Bring! email",
+    "emailPlaceholder": "name@example.com",
+    "passwordLabel": "Bring! password",
+    "passwordPlaceholder": "Only used for secure sign-in",
+    "selectListLabel": "Which list should be connected?",
+    "connectSelected": "Connect selected list",
+    "loginButton": "Sign in securely with Bring!",
+    "fineprint": "LX Family Planner is not a product of Bring! Labs AG. You can disconnect at any time.",
+    "toastConnectedTitle": "Bring! is connected",
+    "toastConnectedBody": "{{listName}} is now being synced.",
+    "toastDefaultList": "The shopping list"
+  }
+}

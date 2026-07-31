@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ImagePlus, RotateCcw, Upload } from 'lucide-react';
 import { compressImageDataUrl } from '../../utils/imageCompressor';
 import RewardIcon, {
@@ -18,9 +19,10 @@ export default function RewardIconPicker({
   image = '',
   onChange
 }) {
+  const { t } = useTranslation('tasks');
   const fileRef = useRef(null);
   const [error, setError] = useState('');
-  const selectedLabel = rewardIconLabel(value, Boolean(image));
+  const selectedLabel = rewardIconLabel(value, Boolean(image), t);
 
   const choosePreset = preset => {
     setError('');
@@ -35,11 +37,11 @@ export default function RewardIconPicker({
     event.target.value = '';
     if (!file) return;
     if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-      setError('Bitte ein PNG-, JPG- oder WebP-Bild auswählen.');
+      setError('iconPicker.errors.invalidType');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('Das Bild darf höchstens 5 MB groß sein.');
+      setError('iconPicker.errors.tooLarge');
       return;
     }
 
@@ -52,7 +54,7 @@ export default function RewardIconPicker({
         0.82
       );
       if (!compressed || compressed.length > 350_000) {
-        setError('Das Bild ist nach dem Verkleinern noch zu groß.');
+        setError('iconPicker.errors.stillTooLarge');
         return;
       }
       setError('');
@@ -61,7 +63,7 @@ export default function RewardIconPicker({
         iconImage: compressed
       });
     };
-    reader.onerror = () => setError('Das Bild konnte nicht gelesen werden.');
+    reader.onerror = () => setError('iconPicker.errors.readFailed');
     reader.readAsDataURL(file);
   };
 
@@ -76,7 +78,7 @@ export default function RewardIconPicker({
         />
         <span>
           <strong>{selectedLabel}</strong>
-          <small>Ein klares Bild, das Kinder sofort wiedererkennen.</small>
+          <small>{t('iconPicker.hint')}</small>
         </span>
         <button
           type="button"
@@ -84,19 +86,19 @@ export default function RewardIconPicker({
           onClick={() => fileRef.current?.click()}
         >
           <Upload size={16} />
-          Eigenes Bild
+          {t('rewardIcon.customImage')}
         </button>
         <input
           ref={fileRef}
           className="visually-hidden"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          aria-label="Eigenes Belohnungsbild auswählen"
+          aria-label={t('iconPicker.uploadAriaLabel')}
           onChange={uploadImage}
         />
       </div>
 
-      <div className="reward-icon-preset-grid" aria-label="Belohnungs-Icons">
+      <div className="reward-icon-preset-grid" aria-label={t('iconPicker.presetsAriaLabel')}>
         {REWARD_ICON_PRESETS.map(preset => {
           const selected = !image && value === `preset:${preset.id}`;
           return (
@@ -106,11 +108,11 @@ export default function RewardIconPicker({
               className={selected ? 'selected' : ''}
               onClick={() => choosePreset(preset)}
               aria-pressed={selected}
-              aria-label={preset.label}
-              title={preset.label}
+              aria-label={t(preset.labelKey)}
+              title={t(preset.labelKey)}
             >
-              <RewardIcon value={`preset:${preset.id}`} label={preset.label} />
-              <span>{preset.label}</span>
+              <RewardIcon value={`preset:${preset.id}`} label={t(preset.labelKey)} />
+              <span>{t(preset.labelKey)}</span>
             </button>
           );
         })}
@@ -121,11 +123,11 @@ export default function RewardIconPicker({
           aria-pressed={Boolean(image)}
         >
           {image ? (
-            <RewardIcon value="custom" image={image} label="Eigenes Bild" />
+            <RewardIcon value="custom" image={image} label={t('rewardIcon.customImage')} />
           ) : (
             <span className="reward-upload-placeholder"><ImagePlus /></span>
           )}
-          <span>Eigenes Bild</span>
+          <span>{t('rewardIcon.customImage')}</span>
         </button>
       </div>
 
@@ -138,10 +140,10 @@ export default function RewardIconPicker({
             iconImage: ''
           })}
         >
-          <RotateCcw size={14} /> Eigenes Bild entfernen
+          <RotateCcw size={14} /> {t('iconPicker.removeCustomImage')}
         </button>
       )}
-      {error && <p className="reward-icon-error" role="alert">{error}</p>}
+      {error && <p className="reward-icon-error" role="alert">{t(error)}</p>}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   LoaderCircle,
   Upload
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { plannerApiRequest } from '../../utils/apiConfig';
 import CloudUploadDestinationDialog
@@ -28,6 +29,7 @@ export default function FamilyCloudWidget() {
     setActiveTab,
     showToast
   } = useFamily();
+  const { t } = useTranslation('widgets');
   const [summary, setSummary] = useState({
     entries: [],
     storage: null
@@ -65,8 +67,8 @@ export default function FamilyCloudWidget() {
     const oversized = files.find(file => file.size > FILE_LIMIT_BYTES);
     if (oversized) {
       showToast(
-        'Datei zu groß',
-        `${oversized.name} ist größer als 100 MB.`,
+        t('familyCloud.toast.fileTooBigTitle'),
+        t('familyCloud.toast.fileTooBigMessage', { name: oversized.name }),
         'warning'
       );
       return;
@@ -99,39 +101,39 @@ export default function FamilyCloudWidget() {
           <span className="adult-widget-heading-icon" aria-hidden="true">
             <Cloud size={20} />
           </span>
-          <h3><span>Familienarchiv</span></h3>
+          <h3><span>{t('familyCloud.title')}</span></h3>
         </div>
         <button
           type="button"
           className="adult-widget-link"
           onClick={() => setActiveTab('cloud')}
-          aria-label="Familienarchiv öffnen"
+          aria-label={t('familyCloud.openAria')}
         >
-          Öffnen <ArrowRight size={13} />
+          {t('familyCloud.open')} <ArrowRight size={13} />
         </button>
       </div>
 
       {!connected ? (
         <div className="adult-cloud-unavailable">
           <Cloud size={31} />
-          <strong>Das Archiv wird vorbereitet</strong>
-          <p>Die Verbindung lässt sich in der Elternzentrale prüfen.</p>
+          <strong>{t('familyCloud.preparing')}</strong>
+          <p>{t('familyCloud.checkConnection')}</p>
           <button type="button" onClick={() => setActiveTab('admin')}>
-            Zur Elternzentrale
+            {t('familyCloud.toParentCenter')}
           </button>
         </div>
       ) : (
         <div className="adult-cloud-content">
           <div className="adult-cloud-storage">
             <span>
-              <small>Gemeinsamer Speicher</small>
+              <small>{t('familyCloud.sharedStorage')}</small>
               <strong>
-                {storage ? fileSize(storage.used) : 'Wird geladen'}
+                {storage ? fileSize(storage.used) : t('familyCloud.loading')}
               </strong>
               <em>
                 {storage?.total
-                  ? `von ${fileSize(storage.total)}`
-                  : 'sicher für eure Familie'}
+                  ? t('familyCloud.ofTotal', { size: fileSize(storage.total) })
+                  : t('familyCloud.safeForFamily')}
               </em>
             </span>
             <i>
@@ -143,7 +145,7 @@ export default function FamilyCloudWidget() {
             {loading ? (
               <span className="adult-cloud-loading">
                 <LoaderCircle className="spin" size={18} />
-                Archiv wird geöffnet …
+                {t('familyCloud.openingArchive')}
               </span>
             ) : recentEntries.length ? (
               recentEntries.map(entry => (
@@ -162,7 +164,7 @@ export default function FamilyCloudWidget() {
               ))
             ) : (
               <span className="adult-cloud-loading">
-                Noch keine Dateien – hier ist Platz für eure Erinnerungen.
+                {t('familyCloud.noFiles')}
               </span>
             )}
           </div>
@@ -173,7 +175,7 @@ export default function FamilyCloudWidget() {
             onClick={() => fileInputRef.current?.click()}
           >
             <Upload size={17} />
-            In die Cloud hochladen
+            {t('familyCloud.upload')}
           </button>
           <input
             ref={fileInputRef}

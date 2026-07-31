@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { registerPlugin } from '@capacitor/core';
 import {
   ArrowUpCircle,
@@ -18,6 +19,7 @@ function installedAndroidVersionCode() {
 }
 
 export default function AppUpdateBanner() {
+  const { t } = useTranslation('chrome');
   const [updateInfo, setUpdateInfo] = useState(null);
   const [dismissedVersion, setDismissedVersion] = useState(0);
   const [installState, setInstallState] = useState('idle');
@@ -122,19 +124,19 @@ export default function AppUpdateBanner() {
       if (result?.status === 'permission') {
         setInstallState('permission');
         setInstallMessage(
-          'Erlaube LX auf der geöffneten Android-Seite einmalig App-Updates. Kehre danach zurück und tippe erneut auf „Jetzt aktualisieren“.'
+          t('appUpdate.permissionMessage')
         );
         return;
       }
       setInstallState('installer');
       setInstallMessage(
-        'Android zeigt jetzt den Installationsdialog. Deine Daten und Einstellungen bleiben erhalten.'
+        t('appUpdate.installerMessage')
       );
     } catch (error) {
       setInstallState('error');
       setInstallMessage(
         error?.message ||
-        'Das Update konnte nicht geladen werden. Bitte versuche es noch einmal.'
+        t('appUpdate.errorMessage')
       );
     }
   };
@@ -158,26 +160,25 @@ export default function AppUpdateBanner() {
           type="button"
           className="app-update-close"
           onClick={() => setDismissedVersion(updateInfo.versionCode)}
-          aria-label="Update später installieren"
+          aria-label={t('appUpdate.dismiss')}
         >
           <X size={17} />
         </button>
         <span className="app-update-mark"><ArrowUpCircle size={25} /></span>
         <div className="app-update-copy">
-          <small>Direkt von eurem LX-Server</small>
+          <small>{t('appUpdate.source')}</small>
           <strong id="lx-app-update-title">
-            Version {updateInfo.versionName} ist da
+            {t('appUpdate.title', { version: updateInfo.versionName })}
           </strong>
           <p>
-            LX kann das Update jetzt laden und anschließend direkt den
-            Android-Installationsdialog öffnen.
+            {t('appUpdate.body')}
           </p>
         </div>
         {installState === 'loading' && (
           <div className="app-update-progress" aria-live="polite">
             <span>
               <LoaderCircle className="spin" size={16} />
-              Update wird sicher geladen
+              {t('appUpdate.downloading')}
             </span>
             <i><b style={{ width: `${progress || 12}%` }} /></i>
           </div>
@@ -204,16 +205,16 @@ export default function AppUpdateBanner() {
               ? <LoaderCircle className="spin" size={17} />
               : <Download size={17} />}
             {installState === 'loading'
-              ? 'Wird geladen …'
+              ? t('common:status.loading')
               : installState === 'permission'
-                ? 'Berechtigung prüfen'
-                : 'Jetzt aktualisieren'}
+                ? t('appUpdate.checkPermission')
+                : t('appUpdate.updateNow')}
           </button>
           <button
             type="button"
             onClick={() => setDismissedVersion(updateInfo.versionCode)}
           >
-            Später
+            {t('appUpdate.later')}
           </button>
         </div>
       </aside>
