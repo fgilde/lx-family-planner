@@ -1,0 +1,190 @@
+{
+  "sections": {
+    "today": "Wochenblick",
+    "routines": "Routinen",
+    "money": "Taschengeld",
+    "school": "Schule",
+    "polls": "Abstimmen",
+    "safety": "Sicher & ruhig"
+  },
+  "hero": {
+    "kicker": "Euer Alltag, ein gutes Team",
+    "title": "Familienreise",
+    "intro": "Routinen, Schule, Taschengeld und Entscheidungen greifen hier ineinander – verständlich für Kinder, verlässlich für Eltern.",
+    "viewFor": "Ansicht für",
+    "yourJourney": "Deine Reise",
+    "navAria": "Bereiche der Familienreise"
+  },
+  "adultsOnly": "Nur für Erwachsene",
+  "weekly": {
+    "kicker": "Die letzten sieben Tage",
+    "title": "Das war {{name}}s Woche",
+    "metrics": {
+      "missions": "Missionen",
+      "routineDays": "Routinetage",
+      "polls": "Abstimmungen",
+      "stars": "Sterne"
+    },
+    "strongWeek": "Das war eine richtig starke Woche!",
+    "everyStepCounts": "Jeder kleine Schritt zählt.",
+    "nextEvent": "Als Nächstes wartet „{{title}}“ auf euch.",
+    "spontaneousMoment": "Der nächste Familienmoment kann ganz spontan entstehen."
+  },
+  "achievements": {
+    "kicker": "Sammelkabinett",
+    "title": "Abzeichen",
+    "firstStep": "Erster Schritt",
+    "routinePro": "Routine-Profi",
+    "starCollector": "Sternensammler",
+    "teamSpirit": "Teamgeist",
+    "collected": "Gesammelt",
+    "stillSecret": "Noch geheim"
+  },
+  "missions": {
+    "kicker": "Gemeinsam statt allein",
+    "title": "Familien-Missionen",
+    "progress": "{{completed}} von {{total}} sind dabei",
+    "empty": "Noch keine gemeinsame Mission.",
+    "creatorTitle": "Neue Familien-Mission",
+    "titlePlaceholder": "Zum Beispiel: Gemeinsam den Garten retten",
+    "descriptionPlaceholder": "Was macht ihr zusammen?",
+    "start": "Mission starten"
+  },
+  "encouragement": {
+    "kicker": "Kleine Worte, große Wirkung",
+    "title": "Mutmacher",
+    "quote": "„{{message}}“",
+    "fromFamily": "Deine Familie",
+    "empty": "Hier wartet bald ein lieber Mutmacher.",
+    "messagePlaceholder": "Was möchtest du {{name}} sagen?",
+    "send": "Senden"
+  },
+  "routines": {
+    "kicker": "Schritt für Schritt",
+    "title": "{{name}}s Routinen",
+    "timeOfDay": {
+      "morning": "Morgens",
+      "afternoon": "Nachmittags",
+      "evening": "Abends"
+    },
+    "streak_one": "🔥 {{count}} Tag in Folge",
+    "streak_other": "🔥 {{count}} Tage in Folge",
+    "deleteAria": "Routine löschen",
+    "emptyTitle": "Noch keine Routine",
+    "emptyText": "Ein guter Ablauf nimmt morgens und abends den Stress raus.",
+    "workshop": {
+      "kicker": "Routinen-Werkstatt",
+      "title": "Ablauf anlegen",
+      "namePlaceholder": "Name der Routine",
+      "stepsLabel": "Ein Schritt pro Zeile",
+      "save": "Routine speichern"
+    },
+    "defaults": {
+      "title": "Morgenstart",
+      "steps": "Aufstehen\nAnziehen\nZähne putzen\nSchulranzen prüfen"
+    }
+  },
+  "money": {
+    "kicker": "Familienkonto",
+    "title": "{{name}}s Taschengeld",
+    "balanceLabel": "Aktuelles Guthaben",
+    "starsAvailable": "{{count}} ⭐ verfügbar",
+    "starCost_one": "{{count}} Stern",
+    "starCost_other": "{{count}} Sterne",
+    "emptyLedger": "Das Taschengeldbuch ist noch leer.",
+    "goals": {
+      "kicker": "Wünsche werden sichtbar",
+      "title": "Sparziele",
+      "progress": "{{current}} von {{target}}",
+      "deleteAria": "Sparziel löschen",
+      "empty": "Noch kein Wunsch zum Daraufsparen.",
+      "creatorTitle": "Sparziel hinzufügen",
+      "titlePlaceholder": "Worauf wird gespart?",
+      "amountAria": "Zielbetrag in Euro",
+      "create": "Ziel anlegen"
+    },
+    "booking": {
+      "title": "Taschengeld buchen",
+      "amountLabel": "Betrag in Euro – negativ für Ausgabe",
+      "noteLabel": "Buchungstext",
+      "starsLabel": "Dafür Sterne umwandeln (optional)",
+      "submit": "Sicher buchen",
+      "defaultNote": "Taschengeld"
+    }
+  },
+  "school": {
+    "kicker": "Alles für den Schultag",
+    "title": "{{name}}s Schulbereich",
+    "kinds": {
+      "lesson": "Stundenplan",
+      "homework": "Hausaufgabe",
+      "exam": "Klassenarbeit",
+      "bag": "Ranzen-Check"
+    },
+    "deleteAria": "Schuleintrag löschen",
+    "emptyKind": "Noch nichts eingetragen.",
+    "form": {
+      "kicker": "Einmal eintragen, ruhig bleiben",
+      "title": "Schuleintrag anlegen",
+      "subjectPlaceholder": "Fach",
+      "titlePlaceholder": "Was steht an?",
+      "detailsPlaceholder": "Buch, Material oder kurze Notiz",
+      "submit": "Eintragen"
+    }
+  },
+  "polls": {
+    "kicker": "Jede Stimme zählt",
+    "title": "Familien-Abstimmungen",
+    "votes_one": "{{count}} Stimme",
+    "votes_other": "{{count}} Stimmen",
+    "deleteAria": "Abstimmung löschen",
+    "emptyTitle": "Noch keine Abstimmung",
+    "emptyText": "Die nächste Essens- oder Ausflugsfrage gehört der ganzen Familie.",
+    "form": {
+      "kicker": "Schnell entschieden",
+      "title": "Neue Frage stellen",
+      "questionPlaceholder": "Was möchtet ihr gemeinsam entscheiden?",
+      "optionsLabel": "Eine Antwort pro Zeile – Emoji ist erlaubt",
+      "closesLabel": "Abstimmung endet optional am",
+      "submit": "Abstimmung starten",
+      "defaultOptions": "🍕 Pizza\n🍝 Nudeln\n🥞 Pfannkuchen"
+    }
+  },
+  "safety": {
+    "emergency": {
+      "kicker": "Im Fall der Fälle",
+      "fallbackTitle": "Notfallkarte",
+      "defaultTitle": "Wichtige Hilfe für unsere Familie",
+      "empty": "Eltern können hier sichere Notfallkontakte hinterlegen."
+    },
+    "quiet": {
+      "kicker": "Geschützte Familienzeit",
+      "title": "Ruhe- und Medienzeiten",
+      "notifications": "Benachrichtigungsruhe",
+      "range": "{{start}} bis {{end}} Uhr",
+      "notActive": "Nicht aktiviert",
+      "mediaLounge": "Medien-Lounge",
+      "alwaysVisible": "Immer sichtbar",
+      "explanation": "Dringende „Brauche Nähe“-Hinweise dürfen auf Wunsch auch während der Ruhezeit ankommen. Normale Meldungen bleiben im Familien-Posteingang."
+    },
+    "editor": {
+      "title": "Schutzregeln bearbeiten",
+      "quietSwitch": "Ruhezeit für Benachrichtigungen",
+      "quietSwitchHint": "Normale Push-Meldungen pausieren.",
+      "startLabel": "Beginn",
+      "endLabel": "Ende",
+      "urgentSwitch": "Dringende Hilferufe durchlassen",
+      "urgentSwitchHint": "„Brauche Nähe“ bleibt erreichbar.",
+      "mediaSwitch": "Medienzeiten verwenden",
+      "mediaSwitchHint": "YouTube und Spotify nur im Zeitfenster zeigen.",
+      "mediaFromLabel": "Medien ab",
+      "mediaToLabel": "Medien bis",
+      "emergencyTitleLabel": "Titel der Notfallkarte",
+      "contactsLabel": "Kontakte – Name | Telefonnummer | Hinweis",
+      "contactsPlaceholder": "Kinderarzt | 0123 456789 | Impfpass mitnehmen\nOma | 0987 654321 | Darf abholen",
+      "notesLabel": "Wichtige Notizen",
+      "notesPlaceholder": "Allergien, Medikamente oder wichtige Hinweise",
+      "save": "Schutzregeln speichern"
+    }
+  }
+}

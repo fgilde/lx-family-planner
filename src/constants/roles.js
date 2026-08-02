@@ -1,3 +1,5 @@
+import i18n from '../i18n/index.js';
+
 export const POSITION_OPTIONS = [
   { value: 'mama', label: 'Mama', role: 'adult', emoji: '🌷' },
   { value: 'papa', label: 'Papa', role: 'adult', emoji: '🧢' },
@@ -40,9 +42,27 @@ export function getPositionOption(position) {
   );
 }
 
+export function getPositionOptionLabel(option) {
+  if (!option) return undefined;
+  return i18n.t(`profile:positions.${option.value}`, {
+    defaultValue: option.label
+  });
+}
+
 export function getPositionLabel(member) {
-  if (!member) return 'Familienmitglied';
-  return getPositionOption(member.position)?.label || ROLE_LABELS[member.role];
+  if (!member) {
+    return i18n.t('profile:positions.familienmitglied', {
+      defaultValue: 'Familienmitglied'
+    });
+  }
+  return (
+    getPositionOptionLabel(getPositionOption(member.position)) ||
+    (ROLE_LABELS[member.role]
+      ? i18n.t(`profile:roleLabels.${member.role}`, {
+          defaultValue: ROLE_LABELS[member.role]
+        })
+      : ROLE_LABELS[member.role])
+  );
 }
 
 export function roleForPosition(position) {

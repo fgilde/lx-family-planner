@@ -1,0 +1,255 @@
+{
+  "child": {
+    "fallbackName": "Abenteurer",
+    "worlds": {
+      "space": {
+        "label": "Raketenbasis",
+        "mission": "Sternenenergie",
+        "greeting": "Bereit zum Abheben?"
+      },
+      "unicorn": {
+        "label": "Einhornland",
+        "mission": "Regenbogenkraft",
+        "greeting": "Heute wird magisch!"
+      },
+      "fairy": {
+        "label": "Feenzauber",
+        "mission": "Zauberstaub",
+        "greeting": "Der Zauberwald ruft!"
+      },
+      "dino": {
+        "label": "Dinowelt",
+        "mission": "Dino-Power",
+        "greeting": "Auf ins große Abenteuer!"
+      },
+      "sunshine": {
+        "label": "Sonneninsel",
+        "mission": "Sonnenstrahlen",
+        "greeting": "Ein guter Tag beginnt!"
+      },
+      "adventure": {
+        "label": "Helden-Camp",
+        "mission": "Heldenkraft",
+        "greeting": "Deine Mission wartet!"
+      }
+    },
+    "moods": {
+      "super": "Super!",
+      "gut": "Gut",
+      "okay": "Geht so",
+      "hilfe": "Brauche Nähe"
+    },
+    "hero": {
+      "kicker": "Level {{level}} · {{title}}",
+      "hey": "Hey {{name}}!",
+      "intro_zero": "Heute gibt es keine Missionen für dich. Mit jeder erledigten Aufgabe wächst dein Sterneschatz.",
+      "intro_one": "Heute gibt es {{count}} Mission für dich. Mit jeder erledigten Aufgabe wächst dein Sterneschatz.",
+      "intro_other": "Heute gibt es {{count}} Missionen für dich. Mit jeder erledigten Aufgabe wächst dein Sterneschatz.",
+      "starsToNextLevel_one": "{{count}} Stern bis Level {{level}}",
+      "starsToNextLevel_other": "{{count}} Sterne bis Level {{level}}",
+      "openMissions": "Missionen offen",
+      "done": "geschafft"
+    },
+    "map": {
+      "kicker": "Dein Abenteuerpfad",
+      "progress": "{{done}} von {{total}} Missionen geschafft",
+      "freeDay": "Heute ist freier Entdeckertag",
+      "progressAria": "Fortschritt der Missionen",
+      "goalDone": "Geschafft!",
+      "goalLabel": "Tagesziel",
+      "unbeatable": "Du bist heute unschlagbar",
+      "missionsToGoal_one": "{{count}} Mission bis zum Ziel",
+      "missionsToGoal_other": "{{count}} Missionen bis zum Ziel"
+    },
+    "today": {
+      "routine": {
+        "label": "Deine Routine",
+        "allDone": "Heute komplett geschafft!",
+        "discover": "Routine entdecken",
+        "steps": "{{done}}/{{total}} Schritte"
+      },
+      "saving": {
+        "label": "Dein Sparschwein",
+        "noGoal": "Noch kein Sparziel",
+        "percentDone": "{{percent}}% geschafft"
+      },
+      "badges": {
+        "label": "Deine Sammlung",
+        "count_one": "{{count}} Abzeichen entdeckt",
+        "count_other": "{{count}} Abzeichen entdeckt",
+        "hint": "Neue Erfolge warten auf dich"
+      }
+    },
+    "story": {
+      "encouragementFrom": "Mutmacher von {{name}}",
+      "familyFallback": "deiner Familie",
+      "quote": "„{{message}}“",
+      "togetherStrong": "Gemeinsam stark",
+      "pollKicker": "Deine Stimme zählt"
+    },
+    "mood": {
+      "kicker": "Familienkompass",
+      "title": "Wie fühlst du dich heute?",
+      "checkedIn": "Danke, dass du heute schon eingecheckt hast.",
+      "prompt": "Ein Klick reicht – deine Familie weiß dann, wie es dir geht."
+    },
+    "quests": {
+      "kicker": "Deine Missionen",
+      "title": "Heute Sterne sammeln",
+      "viewAll": "Alle",
+      "defaultCategory": "Familienmission",
+      "emptyTitle": "Alles geschafft!",
+      "emptyText": "Deine Missionen sind erledigt. Stark gemacht."
+    },
+    "rewards": {
+      "kicker": "Wunschstation",
+      "title": "Dein Sterneshop",
+      "shop": "Shop",
+      "cost_one": "{{count}} Stern",
+      "cost_other": "{{count}} Sterne",
+      "redeem": "Holen",
+      "collect": "Sammeln",
+      "empty": "Noch keine Wünsche im Shop."
+    },
+    "media": {
+      "kicker": "Von deiner Familie freigegeben",
+      "title": "Deine Medien-Lounge",
+      "safeBadge": "✓ Von Eltern ausgewählt",
+      "spotifyPlaylist": "Spotify Playlist",
+      "youtubeChannel": "YouTube Kanal",
+      "playMusic": "Musik an",
+      "playVideo": "Video starten",
+      "pausedLabel": "Medien-Lounge macht gerade Pause",
+      "pausedUntil": "Ab {{time}} Uhr ist sie wieder für dich da."
+    },
+    "homeControlsTitle": "Deine Haus-Kontrollen",
+    "buddy": {
+      "kicker": "Deine Welt, deine Wahl",
+      "title": "Abenteuer-Begleiter",
+      "text": "Wähle, wer dich durch deine Missionen begleitet. Die Auswahl wird nur für dein Profil gespeichert."
+    },
+    "familyStrip": {
+      "nextLabel": "Als Nächstes",
+      "nothingPlanned": "Heute ist alles frei",
+      "calendar": "Kalender",
+      "chatLabel": "Familienfunk",
+      "chatPrompt": "Sag allen kurz Hallo!",
+      "open": "Öffnen"
+    }
+  },
+  "personal": {
+    "widgets": {
+      "calendar": {
+        "label": "Meine Termine",
+        "description": "Deine nächsten Termine und Familienereignisse",
+        "action": "Alle anzeigen"
+      },
+      "tasks": {
+        "label": "Aufgaben & Freigaben",
+        "description": "Eigene Aufgaben und offene Elternbestätigungen",
+        "action": "Aufgabenplan"
+      },
+      "meals": {
+        "label": "Heute auf dem Tisch",
+        "description": "Der aktuelle Essensplan für euren Haushalt",
+        "action": "Essensplan"
+      },
+      "shopping": {
+        "label": "Noch einzukaufen",
+        "description": "Die wichtigsten offenen Artikel auf einen Blick",
+        "action": "Einkaufsliste"
+      },
+      "trash": {
+        "label": "Nächste Müllabfuhr",
+        "description": "Der nächste Abholtermin für euren Planungsort",
+        "action": "Müllkalender"
+      },
+      "board": {
+        "label": "Pinnwand",
+        "description": "Die neuesten gemeinsamen Familiennotizen",
+        "action": "Zur Pinnwand"
+      },
+      "cloud": {
+        "label": "Familienarchiv",
+        "description": "Fotos, Dokumente und Erinnerungen direkt hochladen"
+      },
+      "home-assistant": {
+        "label": "Unser Zuhause",
+        "description": "Freigegebene Geräte, Sensoren und Szenen aus Home Assistant"
+      }
+    },
+    "hero": {
+      "kicker": "Dein Familienüberblick",
+      "greeting": {
+        "morning": "Guten Morgen",
+        "day": "Guten Tag",
+        "evening": "Guten Abend"
+      },
+      "title": "{{greeting}}, {{name}}!",
+      "summary": "Heute im Blick: {{events}}, {{tasks}} und {{shopping}}.",
+      "events_one": "{{count}} Termin",
+      "events_other": "{{count}} Termine",
+      "tasks_one": "{{count}} offene Aufgabe",
+      "tasks_other": "{{count}} offene Aufgaben",
+      "shopping_one": "{{count}} Einkauf",
+      "shopping_other": "{{count}} Einkäufe",
+      "customize": "Ansicht",
+      "quickAdd": "Etwas eintragen"
+    },
+    "widgetHeader": {
+      "open": "Öffnen"
+    },
+    "calendar": {
+      "empty": "Keine Termine für dich eingetragen.",
+      "allDay": "ganztags",
+      "defaultLocation": "Familientermin"
+    },
+    "tasks": {
+      "approvals_one": "Erledigung wartet auf dich",
+      "approvals_other": "Erledigungen warten auf dich",
+      "empty": "Alle Aufgaben sind erledigt.",
+      "due": "Fällig {{date}}",
+      "defaultCategory": "Aufgabe"
+    },
+    "meals": {
+      "empty": "Für heute ist noch nichts geplant.",
+      "types": {
+        "lunch": "Mittagessen",
+        "dinner": "Abendessen"
+      }
+    },
+    "shopping": {
+      "empty": "Die Einkaufsliste ist erledigt."
+    },
+    "trash": {
+      "pickupOn": "Abholung am {{date}}",
+      "empty": "Keine Mülltermine vorhanden."
+    },
+    "board": {
+      "title": "Neues an der Pinnwand",
+      "empty": "Noch keine Notizen vorhanden."
+    }
+  },
+  "customizer": {
+    "kicker": "Ansichtsatelier",
+    "personalTitle": "Dein Überblick",
+    "tabletTitle": "Tablet-Kacheln",
+    "scopeNote": "Diese Auswahl gilt nur für {{name}} auf diesem Gerät.",
+    "thisProfile": "dieses Profil",
+    "closeAria": "Ansichtsatelier schließen",
+    "density": {
+      "title": "Kachelabstand",
+      "hint": "Bequem für Touch oder kompakt für mehr Überblick.",
+      "groupAria": "Kachelabstand auswählen",
+      "comfortable": "Bequem",
+      "compact": "Kompakt"
+    },
+    "moveUp": "{{label}} nach oben",
+    "moveDown": "{{label}} nach unten",
+    "minVisible": "Mindestens eine Kachel muss sichtbar bleiben.",
+    "visibilityOn": "An",
+    "visibilityOff": "Aus",
+    "reset": "Standard wiederherstellen",
+    "done": "Fertig"
+  }
+}

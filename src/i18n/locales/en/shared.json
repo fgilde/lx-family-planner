@@ -1,0 +1,62 @@
+{
+  "events": {
+    "groupChat": { "title": "Family chat", "description": "New messages in the family group" },
+    "directMessages": { "title": "Direct messages", "description": "Private messages for the matching profile" },
+    "familyMail": { "title": "Family mailbox", "description": "New letters from connected families" },
+    "familyChatInvites": { "title": "Chat invitations", "description": "Invitations to a connected family's chat" },
+    "events": { "title": "Calendar & reminders", "description": "New, changed, cancelled and soon-starting events" },
+    "taskAssigned": { "title": "New tasks", "description": "New missions and duties" },
+    "taskApproval": { "title": "Review tasks", "description": "Done reports and rejected reviews" },
+    "taskCompleted": { "title": "Completed tasks", "description": "Confirmed tasks, stars and achievements" },
+    "moodUpdates": { "title": "Children's moods", "description": "New entries in the family compass" },
+    "moodHelp": { "title": "Need closeness", "description": "Urgent alert – even during allowed quiet hours" },
+    "problemReports": { "title": "Problem reports", "description": "New reports and feedback on solutions" },
+    "encouragements": { "title": "Encouragements", "description": "Kind messages from the family" },
+    "familyPolls": { "title": "Polls", "description": "New family decisions" },
+    "familyMissions": { "title": "Family missions", "description": "New shared missions" },
+    "schoolItems": { "title": "School", "description": "Homework, school bag and tests" },
+    "rewards": { "title": "Rewards", "description": "New and redeemed rewards" },
+    "pocketMoney": { "title": "Pocket money", "description": "New deposits, deductions and conversions" },
+    "familyConnections": { "title": "Family network", "description": "Requests, approvals and changes of connected families" }
+  },
+  "reminderLead": {
+    "atStart": "When it starts",
+    "weeks_one": "{{count}} week before",
+    "weeks_other": "{{count}} weeks before",
+    "days_one": "{{count}} day before",
+    "days_other": "{{count}} days before",
+    "hours_one": "{{count}} hour before",
+    "hours_other": "{{count}} hours before",
+    "minutes_one": "{{count}} minute before",
+    "minutes_other": "{{count}} minutes before"
+  },
+  "reminderLeadShort": {
+    "atStart": "At start",
+    "weeks_one": "{{count}} week",
+    "weeks_other": "{{count}} wks",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours_one": "{{count}} hr",
+    "hours_other": "{{count}} hrs",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min"
+  },
+  "eventReminder": {
+    "fallback": "An event starts soon.",
+    "startsNow": "starts now",
+    "startsInMinutes_one": "starts in {{count}} minute",
+    "startsInMinutes_other": "starts in {{count}} minutes",
+    "startsInHours_one": "starts in {{count}} hour",
+    "startsInHours_other": "starts in {{count}} hours",
+    "startsOnDate": "starts on {{date}}"
+  },
+  "trashReminder": {
+    "defaultTitle": "Trash collection",
+    "tomorrowTitle": "🗑️ Tomorrow: {{title}}",
+    "tomorrowBody": "{{title}} will be collected tomorrow. Please put it out in time.",
+    "todayTitle": "🗑️ Today: {{title}}",
+    "todayBody": "{{title}} will be collected today.",
+    "reminderTitle": "🗑️ Reminder: {{title}}",
+    "reminderBody": "Collection {{lead}}. Please put it out in time."
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "parentAdmin": {
+    "accessDenied": {
+      "title": "Elternbereich",
+      "description": "Dieser Bereich ist nur für erwachsene Familienprofile sichtbar."
+    },
+    "toasts": {
+      "profileUpdatedTitle": "Kinderprofil aktualisiert",
+      "profileUpdatedBody": "{{name}}s Einstellungen sind gespeichert."
+    },
+    "hero": {
+      "kicker": "Nur für Erwachsene",
+      "title": "Elternzentrale",
+      "description": "Profile, Aufgaben und Kinder-Dashboards an einem ruhigen Ort verwalten – ohne zwischen mehreren Bereichen zu springen."
+    },
+    "overview": {
+      "childProfiles": "Kinderprofile",
+      "openTasks": "Offene Aufgaben",
+      "totalStars": "Sterne gesamt",
+      "managedProfiles": "Verwaltete Profile"
+    },
+    "managed": {
+      "kicker": "Ohne eigenen Zugang",
+      "title": "Verwaltete Profile",
+      "create": "Profil anlegen",
+      "intro": "Für Oma, Opa oder betreute Personen: Sie erscheinen bei Terminen und Aufgaben, aber nicht bei der Anmeldung oder im Chat.",
+      "positionWithoutLogin": "{{position}} · ohne Anmeldung",
+      "plannable": "Planbar",
+      "emptyTitle": "Noch niemand eingetragen",
+      "emptyHint": "Beim Anlegen „Nur von uns verwaltet“ auswählen."
+    },
+    "children": {
+      "kicker": "Kinder & Teenager",
+      "title": "Profile administrieren",
+      "add": "Profil hinzufügen",
+      "selectedProfile": "Ausgewähltes Profil",
+      "positionLabel": "Position",
+      "pinLabel": "Neue Profil-PIN (optional)",
+      "pinPlaceholder": "Leer = unverändert",
+      "saving": "Speichert …",
+      "save": "Profil speichern",
+      "emptyTitle": "Noch kein Kinderprofil",
+      "emptyDescription": "Lege zuerst ein Profil als Kind oder Teenager an.",
+      "emptyCta": "Kinderprofil anlegen"
+    },
+    "tasks": {
+      "kicker": "Ordnung schaffen",
+      "title": "Aufgabenliste bereinigen",
+      "openCount": "{{count}} offen",
+      "doneCount": "{{count}} erledigt",
+      "filterLabel": "Nur Aufgaben von",
+      "allMembers": "Allen Familienmitgliedern",
+      "deleteCompleted": "Erledigte löschen",
+      "deleteCompletedConfirm": "Erledigte wirklich löschen?",
+      "clearAll": "Aufgabenliste leeren",
+      "clearAllConfirm": "Wirklich alle löschen?"
+    },
+    "points": {
+      "kicker": "Sternenkonten",
+      "title": "Belohnungspunkte",
+      "intro": "Setze die Punkte von Kindern und Erwachsenen getrennt zurück. Haustiere sammeln keine Belohnungspunkte.",
+      "resetConfirm": "Wirklich auf 0?"
+    },
+    "media": {
+      "kicker": "Kinder-Dashboard",
+      "title": "Medien-Lounge",
+      "intro": "Lege geprüfte YouTube-Kanäle und Spotify-Playlists als große, kindgerechte Kacheln ab. Sichtbar ist nur, was ihr hier freigebt.",
+      "chooseChild": "Kinderprofil wählen",
+      "kindAriaLabel": "Medienart",
+      "titlePlaceholder": "z. B. Die Maus",
+      "share": "Widget freigeben",
+      "linkMeta": "{{kind}} · auf {{name}}s Dashboard",
+      "childProfileFallback": "Kinderprofil",
+      "removeLink": "{{title}} entfernen",
+      "empty": "Noch keine Medien-Widgets freigegeben."
+    },
+    "family": {
+      "kicker": "Familiennetz",
+      "title": "Verwandte Familienkonten",
+      "confirmedConnections_one": "{{count}} bestätigte Verbindung",
+      "confirmedConnections_other": "{{count}} bestätigte Verbindungen",
+      "pendingRequests_one": "{{count}} offene Anfrage",
+      "pendingRequests_other": "{{count}} offene Anfragen",
+      "openTree": "Stammbaum öffnen"
+    }
+  },
+  "homeAssistant": {
+    "kicker": "Smart Home · lokal & geschützt",
+    "connected": "Verbunden",
+    "notConnected": "Nicht verbunden",
+    "intro": "Holt ausgewählte Hauszustände als echte Kacheln in den Familienplaner. Der Zugriffsschlüssel bleibt verschlüsselt auf eurem Server.",
+    "domains": {
+      "binary_sensor": "Status",
+      "button": "Taste",
+      "climate": "Klima",
+      "cover": "Rollladen",
+      "device_tracker": "Anwesenheit",
+      "fan": "Lüfter",
+      "input_boolean": "Schalter",
+      "light": "Licht",
+      "media_player": "Medien",
+      "person": "Person",
+      "scene": "Szene",
+      "script": "Ablauf",
+      "sensor": "Sensor",
+      "sun": "Sonne",
+      "switch": "Schalter",
+      "vacuum": "Saugroboter",
+      "weather": "Wetter"
+    },
+    "connect": {
+      "addressLabel": "Home-Assistant-Adresse",
+      "addressHint": "Bei Docker am zuverlässigsten die feste IP im Heimnetz verwenden.",
+      "tokenLabel": "Langlebiger Zugriffsschlüssel",
+      "tokenPlaceholder": "Token aus dem Home-Assistant-Profil",
+      "tokenHint": "Der Schlüssel wird nach dem Speichern nicht mehr angezeigt.",
+      "submit": "Verbindung prüfen"
+    },
+    "summary": {
+      "tilesShared_one": "{{count}} Kachel im Dashboard freigegeben",
+      "tilesShared_other": "{{count}} Kacheln im Dashboard freigegeben",
+      "active": "Aktiv"
+    },
+    "toolbar": {
+      "loadDevices": "Geräte laden",
+      "testConnection": "Verbindung testen",
+      "searchPlaceholder": "Gerät oder Sensor suchen"
+    },
+    "callout": {
+      "title": "Dashboard-Kacheln auswählen",
+      "description": "Lade die Geräte und entscheide genau, was sichtbar und steuerbar sein darf."
+    },
+    "entity": {
+      "allowControl": "Bedienung erlauben",
+      "visibleFor": "Auch sichtbar für:"
+    },
+    "noMatches": "Keine passenden Geräte gefunden.",
+    "saveBar": {
+      "selectedCount": "{{count}} ausgewählt",
+      "hint": "Erwachsene sehen alle, Kinder nur ihre Freigaben.",
+      "save": "Auswahl speichern"
+    },
+    "manage": {
+      "summary": "Verbindung verwalten",
+      "newTokenPlaceholder": "Neuer Zugriffsschlüssel",
+      "renew": "Verbindung erneuern",
+      "disconnectConfirm": "Wirklich trennen?",
+      "disconnect": "Verbindung trennen"
+    }
+  },
+  "webPush": {
+    "kickerNative": "Direkt von Android",
+    "kickerWeb": "Ohne Zusatz-App",
+    "titleNative": "Android-App-Benachrichtigungen",
+    "titleWeb": "Browser-Benachrichtigungen",
+    "introNative": "Die LX App meldet dieses Android-Gerät einmal für ein Profil an. Danach kommen Meldungen auch bei geschlossener App.",
+    "introWeb": "Jedes Handy oder Tablet meldet sich einmal für ein Familienprofil an. Schlüssel und technische Daten bleiben unsichtbar.",
+    "deviceConnected": "Dieses Gerät ist an",
+    "activationSteps": {
+      "server": "Server wird geprüft …",
+      "android": "Android wird vorbereitet …",
+      "channels": "Meldungen werden eingerichtet …",
+      "permission": "Berechtigung wird geprüft …",
+      "permission-request": "Bitte Android-Abfrage bestätigen …",
+      "firebase": "Gerät wird bei Firebase angemeldet …",
+      "save": "Gerät wird gespeichert …"
+    },
+    "serverMissing": {
+      "title": "Firebase-Verbindung fehlt noch",
+      "description": "Der LX-Server besitzt noch keinen privaten Firebase-Dienstschlüssel. Deshalb kann er Android momentan nicht erreichen.",
+      "hint": "Lege den Dienstschlüssel ausschließlich im Datenordner des Servers ab und installiere danach die mit demselben Firebase-Projekt gebaute LX App. Der Schlüssel gehört niemals ins Git-Repository."
+    },
+    "checking": {
+      "title": "Android-Verbindung wird geprüft",
+      "description": "LX fragt den aktuellen Firebase-Status beim Familienserver ab."
+    },
+    "statusError": {
+      "title": "Status konnte nicht geprüft werden",
+      "fallback": "Die App hat noch keine Antwort vom Familienserver erhalten.",
+      "retry": "Erneut prüfen"
+    },
+    "unavailable": {
+      "titleSecureContext": "HTTPS fehlt – deshalb kommt kein Hintergrund-Push",
+      "titleGeneric": "Noch ein sicherer Schritt",
+      "hintNative": "Installiere die aktuelle LX Android-App, um native Benachrichtigungen zu verwenden.",
+      "hintWeb": "Öffne den Planer über eine vertrauenswürdige HTTPS-Adresse, füge ihn auf Android zum Startbildschirm hinzu und aktiviere danach dieses Gerät."
+    },
+    "denied": {
+      "title": "Im Browser ausgeschaltet",
+      "bodyNative": "Erlaube Benachrichtigungen unter Android → Apps → LX Family Planner → Benachrichtigungen.",
+      "bodyWeb": "Erlaube Benachrichtigungen in den Website-Einstellungen deines Browsers und öffne den Planer danach erneut."
+    },
+    "ready": {
+      "title": "Dieses Gerät für {{name}} anmelden",
+      "hintNative": "Ein Klick – die Android-Abfrage erscheint nur einmal.",
+      "hintWeb": "Ein Klick – kein Token und keine zusätzliche App.",
+      "connecting": "Wird verbunden …",
+      "enable": "Benachrichtigungen einschalten"
+    },
+    "activationError": "Verbindung nicht abgeschlossen",
+    "connectedNote": {
+      "title": "Bereit für Hintergrund-Push",
+      "bodyNative": "Android zeigt Familienmeldungen im Systembereich und auf Wunsch auf dem Sperrbildschirm – auch wenn LX geschlossen ist.",
+      "bodyWeb": "Für die zuverlässigste Zustellung auf Android den Planer über „Zum Startbildschirm hinzufügen“ installieren und Benachrichtigungen in den Android-App-Einstellungen erlauben."
+    },
+    "preview": {
+      "title": "Details auf dem Sperrbildschirm zeigen",
+      "hint": "Ausgeschaltet bleiben Chats, Aufgaben und Termine privat."
+    },
+    "actions": {
+      "saving": "Speichert …",
+      "save": "Auswahl speichern",
+      "sending": "Sendet …",
+      "sendTest": "Test senden",
+      "disable": "Für dieses Profil ausschalten"
+    },
+    "devices": {
+      "title": "Familiengeräte",
+      "registeredCount": "{{count}} angemeldet",
+      "transportAndroid": "Android-App",
+      "transportBrowser": "Browser",
+      "meta": "{{transport}} · {{member}} · zuletzt aktualisiert {{date}}",
+      "removeDevice": "{{name}} entfernen",
+      "empty": "Noch kein Familiengerät angemeldet."
+    }
+  },
+  "gotify": {
+    "kicker": "Push-Nachrichten",
+    "title": "Gotify-Benachrichtigungen",
+    "intro": "Wichtige Familienmomente erreichen euch auch dann, wenn der Planer gerade nicht geöffnet ist.",
+    "connected": "Verbunden",
+    "serverFallback": "Gotify-Server",
+    "security": {
+      "title": "Sichere Einrichtung",
+      "body": "Das Passwort wird nur einmal zum Erstellen einer eigenen Gotify-App verwendet und nicht gespeichert."
+    },
+    "form": {
+      "serverLabel": "Gotify-Server",
+      "usernameLabel": "Benutzer",
+      "passwordLabel": "Passwort",
+      "plannerUrlLabel": "Planer-Adresse auf dem Handy",
+      "connecting": "Verbindet …",
+      "connect": "Verbinden & testen"
+    },
+    "status": {
+      "channel": "Nachrichtenkanal",
+      "openGotify": "Gotify öffnen"
+    },
+    "includeText": {
+      "title": "Nachrichtentext auf dem Sperrbildschirm zeigen",
+      "hint": "Aus Datenschutzgründen standardmäßig ausgeschaltet."
+    },
+    "phoneUrlLabel": "Beim Antippen diese Planer-Adresse öffnen",
+    "actions": {
+      "saving": "Speichert …",
+      "saveRules": "Regeln speichern",
+      "sending": "Sendet …",
+      "sendTest": "Test senden",
+      "disconnectConfirm": "Wirklich trennen?",
+      "disconnect": "Verbindung trennen"
+    }
+  },
+  "problemReports": {
+    "kicker": "Rückmeldungen aus der App",
+    "title": "Problemmeldungen",
+    "intro": "Meldungen bleiben auf eurem Server. Mit „Kopieren“ lassen sie sich vollständig und ohne Zugangsdaten weitergeben.",
+    "loading": "Meldungen werden geladen …",
+    "categories": {
+      "problem": "Problem",
+      "content": "Inhalt",
+      "idea": "Idee",
+      "fallback": "Meldung"
+    },
+    "copy": {
+      "profileLine": "Profil: {{value}}",
+      "areaLine": "Bereich: {{value}}",
+      "versionLine": "Version: {{value}}",
+      "deviceLine": "Gerät: {{value}}",
+      "successTitle": "Meldung kopiert",
+      "successBody": "Du kannst sie jetzt direkt in GitHub oder eine Nachricht einfügen.",
+      "errorTitle": "Kopieren nicht möglich",
+      "errorBody": "Der Browser hat den Zugriff auf die Zwischenablage blockiert."
+    },
+    "unknownMember": "Unbekannt",
+    "areaFallback": "App",
+    "copyButton": "Kopieren",
+    "markDone": "Erledigt",
+    "reopen": "Wieder öffnen",
+    "empty": {
+      "title": "Keine Meldungen offen",
+      "hint": "Hier ist im Moment alles ruhig."
+    },
+    "openCount": "{{count}} offen"
+  }
+}

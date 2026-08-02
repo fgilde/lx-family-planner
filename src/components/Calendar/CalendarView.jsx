@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   Calendar as CalendarIcon,
   CalendarPlus,
@@ -25,6 +26,7 @@ import {
   DEFAULT_MEMBER_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import { formatDate } from '../../utils/formatting';
 import CalendarSubscriptionManager from './CalendarSubscriptionManager';
 import EventReminderDialog from './EventReminderDialog';
 import {
@@ -43,12 +45,12 @@ function dateFromKey(value) {
   return new Date(`${value}T12:00:00`);
 }
 
-function dayHeading(dateKey, todayKey) {
+function dayHeading(dateKey, todayKey, t) {
   const date = dateFromKey(dateKey);
   const tomorrow = new Date(dateFromKey(todayKey).getTime() + 86_400_000);
-  if (dateKey === todayKey) return 'Heute';
-  if (dateKey === localDateKey(tomorrow)) return 'Morgen';
-  return date.toLocaleDateString('de-DE', {
+  if (dateKey === todayKey) return t('view.day.today');
+  if (dateKey === localDateKey(tomorrow)) return t('view.day.tomorrow');
+  return formatDate(date, {
     weekday: 'long',
     day: 'numeric',
     month: 'long'
@@ -60,6 +62,8 @@ function eventDateValue(event) {
 }
 
 export default function CalendarView() {
+  const { t } = useTranslation('calendar');
+  const { t: tShared } = useTranslation('shared');
   const {
     events,
     deleteEvent,
@@ -129,15 +133,21 @@ export default function CalendarView() {
       <section className="calendar-hero">
         <div className="calendar-hero-copy">
           <span className="calendar-eyebrow">
-            <Radio size={13} /> Familienzeit
+            <Radio size={13} /> {t('view.hero.eyebrow')}
           </span>
-          <h1>Euer Kalender, ohne Terminchaos.</h1>
+          <h1>{t('view.hero.title')}</h1>
           <p>
-            Heute stehen <strong>{todayEvents.length}</strong>{' '}
-            {todayEvents.length === 1 ? 'Termin' : 'Termine'} an.
+            <Trans
+              t={t}
+              i18nKey="view.hero.todayCount"
+              count={todayEvents.length}
+            >
+              Heute stehen <strong>{{ count: todayEvents.length }}</strong>{' '}
+              Termine an.
+            </Trans>{' '}
             {nextEvent
-              ? ` Als Nächstes: ${nextEvent.title}.`
-              : ' Der nächste freie Moment gehört euch.'}
+              ? t('view.hero.nextUp', { title: nextEvent.title })
+              : t('view.hero.noNext')}
           </p>
         </div>
 
@@ -149,7 +159,7 @@ export default function CalendarView() {
               onClick={() => setIsSourcesOpen(true)}
             >
               <Cloud size={17} />
-              Kalenderquellen
+              {t('view.actions.sources')}
               {calendarSubscriptions.length > 0 && (
                 <span>{calendarSubscriptions.length}</span>
               )}
@@ -163,7 +173,7 @@ export default function CalendarView() {
               setIsQuickAddOpen(true);
             }}
           >
-            <Plus size={18} /> Neuer Termin
+            <Plus size={18} /> {t('view.actions.newEvent')}
           </button>
         </div>
 
@@ -173,14 +183,14 @@ export default function CalendarView() {
       </section>
 
       <section className="calendar-control-deck">
-        <div className="calendar-person-filter" aria-label="Personen filtern">
+        <div className="calendar-person-filter" aria-label={t('view.filter.ariaLabel')}>
           <button
             type="button"
             className={selectedMemberFilter === 'all' ? 'is-active' : ''}
             onClick={() => setSelectedMemberFilter('all')}
           >
             <span><UserRound size={16} /></span>
-            Alle
+            {t('view.filter.all')}
           </button>
           {members.map(member => (
             <button
@@ -208,7 +218,9 @@ export default function CalendarView() {
                     ? member.name
                     : member.name.split(' ')[0]}
                 </span>
-                {isManagedProfile(member) && <small>verwaltet</small>}
+                {isManagedProfile(member) && (
+                  <small>{t('view.filter.managed')}</small>
+                )}
               </span>
             </button>
           ))}
@@ -217,13 +229,13 @@ export default function CalendarView() {
         <div className="calendar-tools">
           <button type="button" onClick={() => setShowPast(value => !value)}>
             <History size={15} />
-            {showPast ? 'Vergangene aus' : 'Vergangene zeigen'}
+            {showPast ? t('view.tools.hidePast') : t('view.tools.showPast')}
           </button>
           <button type="button" onClick={exportICS}>
-            <Download size={15} /> Export
+            <Download size={15} /> {t('view.tools.export')}
           </button>
           <label>
-            <Upload size={15} /> Datei importieren
+            <Upload size={15} /> {t('view.tools.import')}
             <input
               type="file"
               accept=".ics,text/calendar"
@@ -236,19 +248,19 @@ export default function CalendarView() {
       <section className="calendar-agenda">
         <header className="calendar-agenda-heading">
           <div>
-            <span>Agenda</span>
-            <h2>Was als Nächstes ansteht</h2>
+            <span>{t('view.agenda.kicker')}</span>
+            <h2>{t('view.agenda.title')}</h2>
           </div>
-          <strong>{filteredEvents.length} Termine</strong>
+          <strong>
+            {t('view.agenda.count', { count: filteredEvents.length })}
+          </strong>
         </header>
 
         {groupedEvents.length === 0 ? (
           <div className="calendar-empty-state">
             <span><CalendarPlus size={30} /></span>
-            <h3>Hier ist noch Platz für Schönes</h3>
-            <p>
-              Trage einen Termin ein oder verbinde einen bestehenden Kalender.
-            </p>
+            <h3>{t('view.empty.title')}</h3>
+            <p>{t('view.empty.description')}</p>
             <button
               type="button"
               onClick={() => {
@@ -256,7 +268,7 @@ export default function CalendarView() {
                 setIsQuickAddOpen(true);
               }}
             >
-              <Plus size={16} /> Ersten Termin eintragen
+              <Plus size={16} /> {t('view.empty.cta')}
             </button>
           </div>
         ) : (
@@ -266,7 +278,7 @@ export default function CalendarView() {
                 <header>
                   <time dateTime={dateKey}>
                     <strong>{dateKeyFromDay(dateKey)}</strong>
-                    <span>{dayHeading(dateKey, todayKey)}</span>
+                    <span>{dayHeading(dateKey, todayKey, t)}</span>
                   </time>
                   <i />
                 </header>
@@ -292,11 +304,13 @@ export default function CalendarView() {
                         <div className="calendar-event-time">
                           <strong>
                             {event.allDay || !event.time
-                              ? 'Ganztags'
+                              ? t('view.event.allDay')
                               : event.time}
                           </strong>
                           {event.endTime && (
-                            <span>bis {event.endTime}</span>
+                            <span>
+                              {t('view.event.until', { time: event.endTime })}
+                            </span>
                           )}
                         </div>
 
@@ -304,22 +318,27 @@ export default function CalendarView() {
                           <div className="calendar-event-title">
                             <h3>{event.title}</h3>
                             {event.readOnly && (
-                              <span title="Aus einem Kalenderabo">
+                              <span title={t('view.event.fromSubscriptionTitle')}>
                                 {event.sharedEventId
                                   ? <HeartHandshake size={12} />
                                   : <LockKeyhole size={12} />}
                                 {event.sharedEventId
-                                  ? `Von ${event.sharedOwnerFamilyName}`
-                                  : event.sourceName || 'Kalenderabo'}
+                                  ? t('view.event.fromFamily', {
+                                      name: event.sharedOwnerFamilyName
+                                    })
+                                  : event.sourceName ||
+                                    t('view.event.subscriptionFallback')}
                               </span>
                             )}
                             {!event.readOnly &&
                               event.sharedWithFamilies?.length > 0 && (
-                                <span title="Mit verbundenen Familien geteilt">
+                                <span title={t('view.event.sharedWithTitle')}>
                                   <HeartHandshake size={12} />
-                                  Mit {event.sharedWithFamilies
-                                    .map(family => family.familyName)
-                                    .join(', ')}
+                                  {t('view.event.sharedWith', {
+                                    names: event.sharedWithFamilies
+                                      .map(family => family.familyName)
+                                      .join(', ')
+                                  })}
                                 </span>
                               )}
                           </div>
@@ -332,12 +351,12 @@ export default function CalendarView() {
                             <span>
                               <UserRound size={13} />
                               {member
-                                ? `${member.name}${
-                                    isManagedProfile(member)
-                                      ? ' · verwaltet'
-                                      : ''
-                                  }`
-                                : 'Ganze Familie'}
+                                ? isManagedProfile(member)
+                                  ? t('view.event.memberManaged', {
+                                      name: member.name
+                                    })
+                                  : member.name
+                                : t('view.event.wholeFamily')}
                             </span>
                             {reminders.length > 0 && (
                               <span className="calendar-event-reminders">
@@ -345,7 +364,7 @@ export default function CalendarView() {
                                 {reminders
                                   .slice(0, 2)
                                   .map(minutes =>
-                                    formatReminderLead(minutes, true)
+                                    formatReminderLead(minutes, true, tShared)
                                   )
                                   .join(' · ')}
                                 {reminders.length > 2
@@ -360,7 +379,7 @@ export default function CalendarView() {
                         {event.readOnly ? (
                           <span
                             className="calendar-event-readonly"
-                            title="Dieser Termin wird von der Kalenderquelle verwaltet"
+                            title={t('view.event.readOnlyTitle')}
                           >
                             <Cloud size={16} />
                           </span>
@@ -373,8 +392,10 @@ export default function CalendarView() {
                                 onClick={() =>
                                   setSelectedReminderEvent(event)
                                 }
-                                title="Erinnerungen bearbeiten"
-                                aria-label={`Erinnerungen für ${event.title} bearbeiten`}
+                                title={t('view.event.editRemindersTitle')}
+                                aria-label={t('view.event.editRemindersAria', {
+                                  title: event.title
+                                })}
                               >
                                 <BellRing size={16} />
                               </button>
@@ -383,8 +404,10 @@ export default function CalendarView() {
                               type="button"
                               className="calendar-event-delete"
                               onClick={() => deleteEvent(event.id)}
-                              title="Termin löschen"
-                              aria-label={`${event.title} löschen`}
+                              title={t('view.event.deleteTitle')}
+                              aria-label={t('view.event.deleteAria', {
+                                title: event.title
+                              })}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -422,7 +445,7 @@ export default function CalendarView() {
 
 function dateKeyFromDay(value) {
   const date = dateFromKey(value);
-  return date.toLocaleDateString('de-DE', {
+  return formatDate(date, {
     day: '2-digit',
     month: 'short'
   });

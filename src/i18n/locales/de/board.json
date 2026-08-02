@@ -1,0 +1,73 @@
+{
+  "header": {
+    "title": "Familien-Pinnwand",
+    "householdFamily": "Unser Haushalt",
+    "householdGrandparents": "Haushalt Oma & Opa",
+    "addNote": "Neue Notiz oder Foto anheften",
+    "intro": "Wichtige Zettel & Fotos am virtuellen Kühlschrank. Tippe ein Foto für die große Ansicht an – die Rückseite öffnest du über „Notiz lesen“."
+  },
+  "note": {
+    "shared": "🤝 Geteilt mit Oma & Opa",
+    "viewLarge": "Groß ansehen",
+    "readNote": "Notiz lesen",
+    "createdByLabel": "Erstellt von:",
+    "fallbackAuthor": "Familie",
+    "today": "Heute",
+    "editedLabel": "Bearbeitet:",
+    "flipTitle": "Karte umdrehen",
+    "editTitle": "Notiz bearbeiten",
+    "deleteTitle": "Notiz löschen",
+    "backSideLabel": "Rückseite des Fotos:",
+    "showPhoto": "Foto anzeigen"
+  },
+  "lightbox": {
+    "openAria": "Bild „{{title}}“ groß ansehen",
+    "dialogAria": "Große Bildansicht: {{title}}",
+    "closeAria": "Bildansicht schließen"
+  },
+  "photo": {
+    "previewAlt": "Vorschau",
+    "optimizing": "Foto wird optimiert …",
+    "choose": "Foto wählen / aufnehmen",
+    "upload": "Foto hochladen",
+    "readError": "Das Foto konnte nicht gelesen werden."
+  },
+  "toasts": {
+    "notImage": {
+      "title": "Keine Bilddatei",
+      "body": "Bitte wähle ein Foto im JPG-, PNG- oder WebP-Format."
+    },
+    "tooLarge": {
+      "title": "Foto ist zu groß",
+      "body": "Bitte wähle ein Bild mit höchstens 20 MB."
+    },
+    "stillTooLarge": "Das Foto ist nach der Optimierung noch zu groß. Bitte wähle ein anderes Bild.",
+    "ready": {
+      "title": "Foto ist bereit",
+      "body": "Das Bild wurde automatisch für die Pinnwand optimiert."
+    },
+    "loadFailed": "Foto konnte nicht geladen werden"
+  },
+  "form": {
+    "shared": "🤝 Geteilt (auch bei Oma & Opa anzeigen)"
+  },
+  "addModal": {
+    "title": "Neue Notiz / Foto anheften",
+    "titlePlaceholder": "z. B. Ausflug am Sonntag, WLAN Code...",
+    "contentLabel": "Inhalt (Notiztext)",
+    "contentPlaceholder": "Schreibe hier deine Erinnerung oder den Text zum Foto...",
+    "photoLabel": "Optionales Foto anheften (Polaroid-Effekt)",
+    "autoResizeHint": "Große Handyfotos werden vor dem Speichern automatisch verkleinert.",
+    "colorLabel": "Zettelfarbe wählen",
+    "pinning": "Wird angeheftet …",
+    "submit": "Notiz anheften"
+  },
+  "editModal": {
+    "title": "Notiz bearbeiten",
+    "contentLabel": "Inhalt",
+    "photoLabel": "Foto bearbeiten / ersetzen",
+    "optimizeHint": "Das Foto wird automatisch für eine schnelle Anzeige optimiert.",
+    "colorLabel": "Farbe wählen",
+    "submit": "Änderungen speichern"
+  }
+}

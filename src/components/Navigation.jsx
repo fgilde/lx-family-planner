@@ -1,9 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake, Cloud, Mail } from 'lucide-react';
 import { canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
 
 export default function Navigation({ onOpenFamilyTree }) {
+  const { t } = useTranslation('chrome');
   const {
     activeTab,
     setActiveTab,
@@ -31,29 +33,29 @@ export default function Navigation({ onOpenFamilyTree }) {
   ).length;
 
   const allTabs = [
-    { id: 'dashboard', label: `Mein Bereich (${activeMember?.name?.split(' ')[0] || 'Start'})`, icon: UserCheck },
-    { id: 'chat', label: 'Familien-Chat & PM', icon: MessageSquare },
-    { id: 'calendar', label: 'Kalender', icon: Calendar },
-    { id: 'trash', label: 'Müllkalender', icon: Trash2 },
-    { id: 'shopping', label: 'Bring! Einkauf', icon: ShoppingBag, badge: shoppingCount > 0 ? shoppingCount : null },
-    { id: 'meals', label: 'Essensplan', icon: UtensilsCrossed },
-    { id: 'tasks', label: 'Aufgaben & Sterne', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : null },
-    { id: 'family-life', label: 'Familienreise', icon: HeartHandshake },
-    { id: 'board', label: 'Pinnwand', icon: Pin }
+    { id: 'dashboard', label: t('navigation.myArea', { name: activeMember?.name?.split(' ')[0] || t('navigation.myAreaFallback') }), icon: UserCheck },
+    { id: 'chat', label: t('navigation.chat'), icon: MessageSquare },
+    { id: 'calendar', label: t('navigation.calendar'), icon: Calendar },
+    { id: 'trash', label: t('navigation.trash'), icon: Trash2 },
+    { id: 'shopping', label: t('navigation.shopping'), icon: ShoppingBag, badge: shoppingCount > 0 ? shoppingCount : null },
+    { id: 'meals', label: t('navigation.meals'), icon: UtensilsCrossed },
+    { id: 'tasks', label: t('navigation.tasks'), icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : null },
+    { id: 'family-life', label: t('navigation.familyLife'), icon: HeartHandshake },
+    { id: 'board', label: t('navigation.board'), icon: Pin }
   ];
 
   const childTabs = [
-    { id: 'dashboard', label: 'Mein Abenteuer', icon: UserCheck },
-    { id: 'tasks', label: 'Missionen & Sterne', icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : null },
-    { id: 'family-life', label: 'Meine Reise', icon: HeartHandshake },
-    { id: 'calendar', label: 'Familienkalender', icon: Calendar },
-    { id: 'chat', label: 'Familienfunk', icon: MessageSquare },
-    { id: 'board', label: 'Pinnwand', icon: Pin }
+    { id: 'dashboard', label: t('navigation.childDashboard'), icon: UserCheck },
+    { id: 'tasks', label: t('navigation.childTasks'), icon: CheckSquare, badge: pendingTasksCount > 0 ? pendingTasksCount : null },
+    { id: 'family-life', label: t('navigation.childFamilyLife'), icon: HeartHandshake },
+    { id: 'calendar', label: t('navigation.childCalendar'), icon: Calendar },
+    { id: 'chat', label: t('navigation.childChat'), icon: MessageSquare },
+    { id: 'board', label: t('navigation.board'), icon: Pin }
   ];
 
   const petTabs = [
-    { id: 'dashboard', label: `Für ${activeMember?.name?.split(' ')[0] || 'unser Tier'}`, icon: PawPrint },
-    { id: 'calendar', label: 'Tierarzt & Termine', icon: Calendar }
+    { id: 'dashboard', label: t('navigation.petDashboard', { name: activeMember?.name?.split(' ')[0] || t('navigation.petDashboardFallback') }), icon: PawPrint },
+    { id: 'calendar', label: t('navigation.petCalendar'), icon: Calendar }
   ];
 
   // Granular access filter: If member has allowedModules restriction, filter tabs accordingly
@@ -64,15 +66,15 @@ export default function Navigation({ onOpenFamilyTree }) {
       : canManageFamily(activeMember)
         ? [
             allTabs[0],
-            { id: 'cloud', label: 'Family Cloud', icon: Cloud },
+            { id: 'cloud', label: t('navigation.cloud'), icon: Cloud },
             {
               id: 'mail',
-              label: 'Familienpost',
+              label: t('navigation.mail'),
               icon: Mail,
               badge: unreadLetterCount > 0 ? unreadLetterCount : null
             },
             ...allTabs.slice(1),
-            { id: 'admin', label: 'Elternzentrale', icon: ShieldCheck }
+            { id: 'admin', label: t('navigation.admin'), icon: ShieldCheck }
           ]
         : allTabs;
   const visibleTabs = activeMember?.allowedModules
@@ -109,10 +111,10 @@ export default function Navigation({ onOpenFamilyTree }) {
         className="nav-tab"
         style={{ marginLeft: 'auto', background: 'var(--bg-subtle)', color: 'var(--primary)' }}
         onClick={onOpenFamilyTree}
-        title="Stammbaum & Familien verknüpfen"
+        title={t('navigation.familyTreeTitle')}
       >
         <Network size={19} />
-        <span>Stammbaum</span>
+        <span>{t('navigation.familyTree')}</span>
       </button>}
     </nav>
   );

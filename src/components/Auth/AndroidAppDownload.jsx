@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   Download,
@@ -13,10 +14,16 @@ import {
   buildApiUrl,
   isCapacitorNative
 } from '../../utils/apiConfig';
+import { formatNumber } from '../../utils/formatting';
 
 function readableSize(bytes) {
   const megabytes = Number(bytes || 0) / 1024 / 1024;
-  return megabytes > 0 ? `${megabytes.toFixed(1)} MB` : '';
+  return megabytes > 0
+    ? `${formatNumber(megabytes, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      })} MB`
+    : '';
 }
 
 function isLoopbackDownloadUrl(value) {
@@ -36,6 +43,7 @@ function isLoopbackDownloadUrl(value) {
 }
 
 export default function AndroidAppDownload() {
+  const { t } = useTranslation('auth');
   const [release, setRelease] = useState(null);
   const [status, setStatus] = useState('loading');
 
@@ -86,11 +94,13 @@ export default function AndroidAppDownload() {
 
   const releaseFacts = useMemo(
     () => [
-      release?.versionName ? `Version ${release.versionName}` : '',
+      release?.versionName
+        ? t('androidApp.version', { version: release.versionName })
+        : '',
       release?.size,
-      'Android 7+'
+      t('androidApp.androidRequirement')
     ].filter(Boolean),
-    [release]
+    [release, t]
   );
 
   if (isCapacitorNative() || status === 'unavailable') return null;
@@ -99,10 +109,10 @@ export default function AndroidAppDownload() {
     return (
       <aside
         className="android-download-card is-loading"
-        aria-label="Android-App wird geladen"
+        aria-label={t('androidApp.loadingAria')}
       >
         <RefreshCw className="spin" size={20} />
-        <span>Android-App wird vorbereitet …</span>
+        <span>{t('androidApp.loading')}</span>
       </aside>
     );
   }
@@ -117,25 +127,24 @@ export default function AndroidAppDownload() {
 
       <div className="android-download-copy">
         <span className="android-download-kicker">
-          <Smartphone size={14} /> Die Familien-App
+          <Smartphone size={14} /> {t('androidApp.kicker')}
         </span>
-        <h3 id="android-app-title">LX direkt aufs Android-Handy</h3>
-        <p>
-          Schneller öffnen, Rezepte direkt teilen und neue App-Versionen
-          automatisch entdecken.
-        </p>
+        <h3 id="android-app-title">{t('androidApp.title')}</h3>
+        <p>{t('androidApp.description')}</p>
         <div className="android-download-facts">
           {releaseFacts.map(fact => <span key={fact}>{fact}</span>)}
-          <span><ShieldCheck size={13} /> Direkt von eurem Server</span>
+          <span><ShieldCheck size={13} /> {t('androidApp.fromYourServer')}</span>
         </div>
         <a
           className="android-download-button"
           href={release.downloadUrl}
           download="LX-Family-Planner.apk"
-          aria-label={`LX Family Planner ${release.versionName} für Android herunterladen`}
+          aria-label={t('androidApp.downloadAria', {
+            version: release.versionName
+          })}
         >
           <Download size={17} />
-          Android-App laden
+          {t('androidApp.downloadButton')}
         </a>
       </div>
 
@@ -146,7 +155,7 @@ export default function AndroidAppDownload() {
       >
         {release.qrAvailable ? (
           <>
-            <span><QrCode size={13} /> Mit dem Handy scannen</span>
+            <span><QrCode size={13} /> {t('androidApp.scanWithPhone')}</span>
             <div className="android-download-qr-frame">
               <QRCodeSVG
                 value={release.qrDownloadUrl}
@@ -155,19 +164,16 @@ export default function AndroidAppDownload() {
                 marginSize={1}
                 bgColor="#fffdf8"
                 fgColor="#173e34"
-                title="QR-Code zum Download der LX Family Planner Android-App"
+                title={t('androidApp.qrTitle')}
               />
             </div>
           </>
         ) : (
           <>
-            <span><Wifi size={13} /> Auf dem Handy öffnen</span>
+            <span><Wifi size={13} /> {t('androidApp.openOnPhone')}</span>
             <div className="android-download-local-hint">
-              <strong>Lokale Vorschau</strong>
-              <small>
-                Öffne LX über die Heimnetz-IP oder eure öffentliche Adresse.
-                Dann erscheint hier der passende QR-Code.
-              </small>
+              <strong>{t('androidApp.localPreviewTitle')}</strong>
+              <small>{t('androidApp.localPreviewHint')}</small>
             </div>
           </>
         )}

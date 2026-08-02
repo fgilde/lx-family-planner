@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Verbundene Familien · bewusst privat",
+    "title": "Familienbriefkasten",
+    "description": "Plant in Ruhe miteinander oder ladet Oma und Opa gezielt in euren Familienchat ein.",
+    "writeLetter": "Brief schreiben"
+  },
+  "filters": {
+    "inbox": "Eingang",
+    "sent": "Gesendet"
+  },
+  "list": {
+    "emptyTitle": "Noch keine Briefe",
+    "emptyConnected": "Ein ruhiger Anfang für euren Familienaustausch.",
+    "emptyUnconnected": "Verknüpft zuerst eine andere Familie im Familiennetz."
+  },
+  "reader": {
+    "sentTo": "Gesendet an {{family}}",
+    "from": "Brief von {{family}}",
+    "reply": "Antworten",
+    "archiveLetter": "Brief archivieren",
+    "privacyNote": "Nur Erwachsene beider verbundenen Familien sehen diesen Brief.",
+    "placeholderTitle": "Ein Brief wartet auf deine Auswahl",
+    "placeholderText": "Persönlicher als Chat, übersichtlicher für Absprachen und gemeinsame Pläne."
+  },
+  "guests": {
+    "kicker": "Familienfunk mit Zustimmung",
+    "title": "Gäste im Familienchat",
+    "description": "Erwachsene Profile wie Oma oder Opa sehen nur neue Gruppennachrichten ab ihrer Zustimmung.",
+    "connectedFamily": "Verbundene Familie",
+    "adultProfile": "Erwachsenes Profil",
+    "selectProfile": "Profil auswählen",
+    "sendInvitation": "Einladung senden",
+    "status": {
+      "accepted": "Im Chat",
+      "pending": "Wartet auf Zustimmung",
+      "revoked": "Zugang beendet",
+      "declined": "Abgelehnt"
+    },
+    "accept": "Annehmen",
+    "decline": "Ablehnen",
+    "endAccess": "Zugang beenden",
+    "empty": "Noch keine Chatgäste eingeladen."
+  },
+  "compose": {
+    "kicker": "Neue Familienpost",
+    "title": "Brief schreiben",
+    "recipientFamily": "Empfängerfamilie",
+    "subject": "Betreff",
+    "subjectPlaceholder": "Worum geht es?",
+    "body": "Dein Brief",
+    "bodyPlaceholder": "Hallo ihr Lieben, …",
+    "privacyNote": "Nur über die bestätigte Familienverbindung",
+    "submit": "Brief einwerfen"
+  }
+}

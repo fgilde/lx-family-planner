@@ -99,8 +99,25 @@ export function selectDueEventReminder(
   };
 }
 
-export function formatReminderLead(minutes, short = false) {
+// `t` ist optional: eine Übersetzungsfunktion (key, options) => string mit
+// Schlüsseln aus dem "shared"-Namespace (reminderLead.*, reminderLeadShort.*).
+// Ohne `t` bleibt das bisherige deutsche Verhalten erhalten.
+export function formatReminderLead(minutes, short = false, t = null) {
   const normalized = Number(minutes);
+  if (typeof t === 'function') {
+    const prefix = short ? 'reminderLeadShort' : 'reminderLead';
+    if (normalized === 0) return t(`${prefix}.atStart`);
+    if (normalized % 10_080 === 0) {
+      return t(`${prefix}.weeks`, { count: normalized / 10_080 });
+    }
+    if (normalized % 1_440 === 0) {
+      return t(`${prefix}.days`, { count: normalized / 1_440 });
+    }
+    if (normalized % 60 === 0) {
+      return t(`${prefix}.hours`, { count: normalized / 60 });
+    }
+    return t(`${prefix}.minutes`, { count: normalized });
+  }
   const preset = EVENT_REMINDER_OPTIONS.find(
     option => option.minutes === normalized
   );
@@ -123,46 +140,76 @@ export function formatReminderLead(minutes, short = false) {
     : `${normalized} Minuten vorher`;
 }
 
-export function eventReminderMessage(event, now = Date.now()) {
+// Optionales `options`-Objekt: { t, locale } – Schlüssel aus dem
+// "shared"-Namespace (eventReminder.*). Ohne `t` bleibt Deutsch erhalten.
+export function eventReminderMessage(event, now = Date.now(), options = {}) {
+  const t = typeof options.t === 'function' ? options.t : null;
+  const locale = options.locale || 'de-DE';
   const startAt = eventStartTimestamp(event);
-  if (!Number.isFinite(startAt)) return 'Ein Termin beginnt bald.';
+  if (!Number.isFinite(startAt)) {
+    return t ? t('eventReminder.fallback') : 'Ein Termin beginnt bald.';
+  }
   const minutes = Math.max(0, Math.round((startAt - now) / 60_000));
   let timing;
   if (minutes <= 1) {
-    timing = 'beginnt jetzt';
+    timing = t ? t('eventReminder.startsNow') : 'beginnt jetzt';
   } else if (minutes < 60) {
-    timing = `beginnt in ${minutes} Minuten`;
+    timing = t
+      ? t('eventReminder.startsInMinutes', { count: minutes })
+      : `beginnt in ${minutes} Minuten`;
   } else if (minutes < 1_440) {
     const hours = Math.max(1, Math.round(minutes / 60));
-    timing = `beginnt in ${hours} ${hours === 1 ? 'Stunde' : 'Stunden'}`;
+    timing = t
+      ? t('eventReminder.startsInHours', { count: hours })
+      : `beginnt in ${hours} ${hours === 1 ? 'Stunde' : 'Stunden'}`;
   } else {
-    const date = new Date(startAt).toLocaleDateString('de-DE', {
+    const date = new Date(startAt).toLocaleDateString(locale, {
       weekday: 'long',
       day: '2-digit',
       month: '2-digit'
     });
-    timing = `beginnt am ${date}`;
+    timing = t
+      ? t('eventReminder.startsOnDate', { date })
+      : `beginnt am ${date}`;
   }
   const location = String(event?.location || '').trim();
   return location ? `${timing} · ${location}` : timing;
 }
 
-export function trashReminderCopy(record, reminderMinutes) {
-  const title = String(record?.title || '').trim() || 'Müllabfuhr';
+// Optionales `options`-Objekt: { t } – Schlüssel aus dem "shared"-Namespace
+// (trashReminder.*). Ohne `t` bleibt Deutsch erhalten.
+export function trashReminderCopy(record, reminderMinutes, options = {}) {
+  const t = typeof options.t === 'function' ? options.t : null;
+  const title =
+    String(record?.title || '').trim() ||
+    (t ? t('trashReminder.defaultTitle') : 'Müllabfuhr');
   if (Number(reminderMinutes) === 1_440) {
     return {
-      title: `🗑️ Morgen: ${title}`,
-      body: `Morgen wird ${title} abgeholt. Bitte rechtzeitig rausstellen.`
+      title: t
+        ? t('trashReminder.tomorrowTitle', { title })
+        : `🗑️ Morgen: ${title}`,
+      body: t
+        ? t('trashReminder.tomorrowBody', { title })
+        : `Morgen wird ${title} abgeholt. Bitte rechtzeitig rausstellen.`
     };
   }
   if (Number(reminderMinutes) === 0) {
     return {
-      title: `🗑️ Heute: ${title}`,
-      body: `${title} wird heute abgeholt.`
+      title: t
+        ? t('trashReminder.todayTitle', { title })
+        : `🗑️ Heute: ${title}`,
+      body: t
+        ? t('trashReminder.todayBody', { title })
+        : `${title} wird heute abgeholt.`
     };
   }
+  const lead = formatReminderLead(reminderMinutes, false, t);
   return {
-    title: `🗑️ Erinnerung: ${title}`,
-    body: `Abholung ${formatReminderLead(reminderMinutes)}. Bitte rechtzeitig rausstellen.`
+    title: t
+      ? t('trashReminder.reminderTitle', { title })
+      : `🗑️ Erinnerung: ${title}`,
+    body: t
+      ? t('trashReminder.reminderBody', { lead })
+      : `Abholung ${lead}. Bitte rechtzeitig rausstellen.`
   };
 }

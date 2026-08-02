@@ -1,0 +1,73 @@
+{
+  "header": {
+    "title": "Family Pinboard",
+    "householdFamily": "Our household",
+    "householdGrandparents": "Grandma & Grandpa's household",
+    "addNote": "Pin a new note or photo",
+    "intro": "Important notes & photos on the virtual fridge. Tap a photo for the large view – open the back via “Read note”."
+  },
+  "note": {
+    "shared": "🤝 Shared with Grandma & Grandpa",
+    "viewLarge": "View large",
+    "readNote": "Read note",
+    "createdByLabel": "Created by:",
+    "fallbackAuthor": "Family",
+    "today": "Today",
+    "editedLabel": "Edited:",
+    "flipTitle": "Flip card",
+    "editTitle": "Edit note",
+    "deleteTitle": "Delete note",
+    "backSideLabel": "Back of the photo:",
+    "showPhoto": "Show photo"
+  },
+  "lightbox": {
+    "openAria": "View image “{{title}}” full size",
+    "dialogAria": "Large image view: {{title}}",
+    "closeAria": "Close image view"
+  },
+  "photo": {
+    "previewAlt": "Preview",
+    "optimizing": "Optimizing photo …",
+    "choose": "Choose / take photo",
+    "upload": "Upload photo",
+    "readError": "The photo could not be read."
+  },
+  "toasts": {
+    "notImage": {
+      "title": "Not an image file",
+      "body": "Please choose a photo in JPG, PNG, or WebP format."
+    },
+    "tooLarge": {
+      "title": "Photo is too large",
+      "body": "Please choose an image of at most 20 MB."
+    },
+    "stillTooLarge": "The photo is still too large after optimization. Please choose a different image.",
+    "ready": {
+      "title": "Photo is ready",
+      "body": "The image was automatically optimized for the pinboard."
+    },
+    "loadFailed": "Photo could not be loaded"
+  },
+  "form": {
+    "shared": "🤝 Shared (also show at Grandma & Grandpa's)"
+  },
+  "addModal": {
+    "title": "Pin a new note / photo",
+    "titlePlaceholder": "e.g. Sunday outing, Wi-Fi code...",
+    "contentLabel": "Content (note text)",
+    "contentPlaceholder": "Write your reminder or the text for the photo here...",
+    "photoLabel": "Optionally pin a photo (Polaroid effect)",
+    "autoResizeHint": "Large phone photos are automatically shrunk before saving.",
+    "colorLabel": "Choose note color",
+    "pinning": "Pinning …",
+    "submit": "Pin note"
+  },
+  "editModal": {
+    "title": "Edit note",
+    "contentLabel": "Content",
+    "photoLabel": "Edit / replace photo",
+    "optimizeHint": "The photo is automatically optimized for fast display.",
+    "colorLabel": "Choose color",
+    "submit": "Save changes"
+  }
+}

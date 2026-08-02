@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   Edit3,
@@ -11,6 +12,7 @@ import {
   ZoomIn
 } from 'lucide-react';
 import { compressImageDataUrl } from '../../utils/imageCompressor';
+import i18n from '../../i18n/index.js';
 
 const NOTE_COLORS = [
   '#fef08a', // Yellow
@@ -28,13 +30,14 @@ function readFileAsDataUrl(file) {
     const reader = new FileReader();
     reader.onload = event => resolve(event.target.result);
     reader.onerror = () => reject(
-      new Error('Das Foto konnte nicht gelesen werden.')
+      new Error(i18n.t('board:photo.readError'))
     );
     reader.readAsDataURL(file);
   });
 }
 
 export default function FamilyPinboard() {
+  const { t } = useTranslation('board');
   const {
     notes,
     addNote,
@@ -87,16 +90,16 @@ export default function FamilyPinboard() {
     input.value = '';
     if (!file.type.startsWith('image/')) {
       showToast(
-        'Keine Bilddatei',
-        'Bitte wähle ein Foto im JPG-, PNG- oder WebP-Format.',
+        t('toasts.notImage.title'),
+        t('toasts.notImage.body'),
         'warning'
       );
       return;
     }
     if (file.size > MAX_SOURCE_PHOTO_BYTES) {
       showToast(
-        'Foto ist zu groß',
-        'Bitte wähle ein Bild mit höchstens 20 MB.',
+        t('toasts.tooLarge.title'),
+        t('toasts.tooLarge.body'),
         'warning'
       );
       return;
@@ -121,17 +124,17 @@ export default function FamilyPinboard() {
       }
       if (optimized.length > MAX_STORED_PHOTO_LENGTH) {
         throw new Error(
-          'Das Foto ist nach der Optimierung noch zu groß. Bitte wähle ein anderes Bild.'
+          t('toasts.stillTooLarge')
         );
       }
       setPhotoFn(optimized);
       showToast(
-        'Foto ist bereit',
-        'Das Bild wurde automatisch für die Pinnwand optimiert.',
+        t('toasts.ready.title'),
+        t('toasts.ready.body'),
         'success'
       );
     } catch (error) {
-      showToast('Foto konnte nicht geladen werden', error.message, 'error');
+      showToast(t('toasts.loadFailed'), error.message, 'error');
     } finally {
       setPhotoBusy('');
     }
@@ -198,15 +201,14 @@ export default function FamilyPinboard() {
       <div className="card" style={{ padding: 20 }}>
         <div className="card-header" style={{ marginBottom: 12 }}>
           <h2 className="card-title" style={{ color: 'var(--primary)' }}>
-            <Pin size={24} /> Familien-Pinnwand ({activeHousehold === 'familie' ? 'Unser Haushalt' : 'Haushalt Oma & Opa'})
+            <Pin size={24} /> {t('header.title')} ({activeHousehold === 'familie' ? t('header.householdFamily') : t('header.householdGrandparents')})
           </h2>
           <button className="btn-primary" onClick={() => setIsAddNoteOpen(true)}>
-            <Plus size={18} /> Neue Notiz oder Foto anheften
+            <Plus size={18} /> {t('header.addNote')}
           </button>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Wichtige Zettel & Fotos am virtuellen Kühlschrank. Tippe ein Foto
-          für die große Ansicht an – die Rückseite öffnest du über „Notiz lesen“.
+          {t('header.intro')}
         </p>
       </div>
 
@@ -262,7 +264,7 @@ export default function FamilyPinboard() {
                   <div>
                     {note.isShared && (
                       <span className="badge" style={{ background: '#2563eb', color: 'white', marginBottom: 8, fontSize: '0.75rem' }}>
-                        🤝 Geteilt mit Oma & Opa
+                        {t('note.shared')}
                       </span>
                     )}
 
@@ -279,10 +281,10 @@ export default function FamilyPinboard() {
                               title: note.title
                             });
                           }}
-                          aria-label={`Bild „${note.title}“ groß ansehen`}
+                          aria-label={t('lightbox.openAria', { title: note.title })}
                         >
                           <img src={note.photo} alt={note.title} />
-                          <span><ZoomIn size={15} /> Groß ansehen</span>
+                          <span><ZoomIn size={15} /> {t('note.viewLarge')}</span>
                         </button>
                         <div style={{ fontWeight: 800, fontSize: '1rem', marginTop: 8 }}>{note.title}</div>
                         <button
@@ -290,7 +292,7 @@ export default function FamilyPinboard() {
                           className="pinboard-flip-hint"
                           onClick={event => toggleFlip(note.id, event)}
                         >
-                          <RotateCw size={12} /> Notiz lesen
+                          <RotateCw size={12} /> {t('note.readNote')}
                         </button>
                       </div>
                     ) : (
@@ -308,8 +310,8 @@ export default function FamilyPinboard() {
                   {/* Note Footer Metadata & Actions */}
                   <div style={{ borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: 8, marginTop: 8 }}>
                     <div style={{ fontSize: '0.78rem', opacity: 0.8, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <span>✍️ <strong>Erstellt von:</strong> {note.createdBy || 'Familie'} ({note.createdAt || 'Heute'})</span>
-                      {note.updatedBy && <span>✏️ <strong>Bearbeitet:</strong> {note.updatedBy}</span>}
+                      <span>✍️ <strong>{t('note.createdByLabel')}</strong> {note.createdBy || t('note.fallbackAuthor')} ({note.createdAt || t('note.today')})</span>
+                      {note.updatedBy && <span>✏️ <strong>{t('note.editedLabel')}</strong> {note.updatedBy}</span>}
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
@@ -318,7 +320,7 @@ export default function FamilyPinboard() {
                           className="icon-circle-btn pinboard-note-action rotate"
                           style={{ width: 32, height: 32 }}
                           onClick={(e) => toggleFlip(note.id, e)}
-                          title="Karte umdrehen"
+                          title={t('note.flipTitle')}
                         >
                           <RotateCw size={14} />
                         </button>
@@ -328,7 +330,7 @@ export default function FamilyPinboard() {
                         className="icon-circle-btn pinboard-note-action"
                         style={{ width: 32, height: 32 }}
                         onClick={(e) => handleStartEdit(note, e)}
-                        title="Notiz bearbeiten"
+                        title={t('note.editTitle')}
                       >
                         <Edit3 size={14} />
                       </button>
@@ -337,7 +339,7 @@ export default function FamilyPinboard() {
                         className="icon-circle-btn pinboard-note-action danger"
                         style={{ width: 32, height: 32 }}
                         onClick={(e) => { e.stopPropagation(); deleteNote(note.id); }}
-                        title="Notiz löschen"
+                        title={t('note.deleteTitle')}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -364,7 +366,7 @@ export default function FamilyPinboard() {
                   }}>
                     <div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#6b7280', marginBottom: 6 }}>
-                        Rückseite des Fotos:
+                        {t('note.backSideLabel')}
                       </div>
                       <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 8 }}>{note.title}</h3>
                       <div style={{ fontSize: '0.95rem', whiteSpace: 'pre-wrap', lineHeight: 1.5, opacity: 0.9 }}>
@@ -379,7 +381,7 @@ export default function FamilyPinboard() {
                         style={{ padding: '4px 10px', fontSize: '0.8rem' }}
                         onClick={(e) => toggleFlip(note.id, e)}
                       >
-                        <RotateCw size={12} /> Foto anzeigen
+                        <RotateCw size={12} /> {t('note.showPhoto')}
                       </button>
                     </div>
                   </div>
@@ -395,7 +397,7 @@ export default function FamilyPinboard() {
         <div className="modal-backdrop" onClick={() => setIsAddNoteOpen(false)}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
-              <h2 className="card-title">Neue Notiz / Foto anheften</h2>
+              <h2 className="card-title">{t('addModal.title')}</h2>
               <button className="icon-circle-btn" onClick={() => setIsAddNoteOpen(false)}>
                 <X size={20} />
               </button>
@@ -403,11 +405,11 @@ export default function FamilyPinboard() {
 
             <form onSubmit={handleAddSubmit}>
               <div className="form-group">
-                <label className="form-label">Titel</label>
+                <label className="form-label">{t('common:labels.title')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="z. B. Ausflug am Sonntag, WLAN Code..."
+                  placeholder={t('addModal.titlePlaceholder')}
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
                   required
@@ -415,11 +417,11 @@ export default function FamilyPinboard() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Inhalt (Notiztext)</label>
+                <label className="form-label">{t('addModal.contentLabel')}</label>
                 <textarea
                   className="form-textarea"
                   rows="3"
-                  placeholder="Schreibe hier deine Erinnerung oder den Text zum Foto..."
+                  placeholder={t('addModal.contentPlaceholder')}
                   value={newContent}
                   onChange={e => setNewContent(e.target.value)}
                   required
@@ -428,11 +430,11 @@ export default function FamilyPinboard() {
 
               {/* Photo Upload for Note */}
               <div className="form-group">
-                <label className="form-label">Optionales Foto anheften (Polaroid-Effekt)</label>
+                <label className="form-label">{t('addModal.photoLabel')}</label>
                 
                 {newPhoto ? (
                   <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 10 }}>
-                    <img src={newPhoto} alt="Vorschau" style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }} />
+                    <img src={newPhoto} alt={t('photo.previewAlt')} style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }} />
                     <button
                       type="button"
                       className="icon-circle-btn"
@@ -453,8 +455,8 @@ export default function FamilyPinboard() {
                   >
                     <Upload size={16} />
                     {photoBusy === 'new'
-                      ? 'Foto wird optimiert …'
-                      : 'Foto wählen / aufnehmen'}
+                      ? t('photo.optimizing')
+                      : t('photo.choose')}
                     <input
                       type="file"
                       accept="image/*"
@@ -469,13 +471,12 @@ export default function FamilyPinboard() {
                   </label>
                 )}
                 <small className="form-help">
-                  Große Handyfotos werden vor dem Speichern automatisch
-                  verkleinert.
+                  {t('addModal.autoResizeHint')}
                 </small>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Zettelfarbe wählen</label>
+                <label className="form-label">{t('addModal.colorLabel')}</label>
                 <div style={{ display: 'flex', gap: 10 }}>
                   {NOTE_COLORS.map(col => (
                     <div
@@ -498,7 +499,7 @@ export default function FamilyPinboard() {
                     onChange={e => setNewIsShared(e.target.checked)}
                     style={{ width: 18, height: 18 }}
                   />
-                  <span>🤝 Geteilt (auch bei Oma & Opa anzeigen)</span>
+                  <span>{t('form.shared')}</span>
                 </label>
               </div>
 
@@ -510,11 +511,11 @@ export default function FamilyPinboard() {
                   disabled={Boolean(saving || photoBusy)}
                 >
                   {saving === 'new'
-                    ? 'Wird angeheftet …'
-                    : 'Notiz anheften'}
+                    ? t('addModal.pinning')
+                    : t('addModal.submit')}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setIsAddNoteOpen(false)}>
-                  Abbrechen
+                  {t('common:actions.cancel')}
                 </button>
               </div>
             </form>
@@ -527,7 +528,7 @@ export default function FamilyPinboard() {
         <div className="modal-backdrop" onClick={() => setEditingNote(null)}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
-              <h2 className="card-title">Notiz bearbeiten</h2>
+              <h2 className="card-title">{t('editModal.title')}</h2>
               <button className="icon-circle-btn" onClick={() => setEditingNote(null)}>
                 <X size={20} />
               </button>
@@ -535,7 +536,7 @@ export default function FamilyPinboard() {
 
             <form onSubmit={handleSaveEdit}>
               <div className="form-group">
-                <label className="form-label">Titel</label>
+                <label className="form-label">{t('common:labels.title')}</label>
                 <input
                   type="text"
                   className="form-input"
@@ -546,7 +547,7 @@ export default function FamilyPinboard() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Inhalt</label>
+                <label className="form-label">{t('editModal.contentLabel')}</label>
                 <textarea
                   className="form-textarea"
                   rows="4"
@@ -557,10 +558,10 @@ export default function FamilyPinboard() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Foto bearbeiten / ersetzen</label>
+                <label className="form-label">{t('editModal.photoLabel')}</label>
                 {editPhoto ? (
                   <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 10 }}>
-                    <img src={editPhoto} alt="Vorschau" style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }} />
+                    <img src={editPhoto} alt={t('photo.previewAlt')} style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }} />
                     <button
                       type="button"
                       className="icon-circle-btn"
@@ -581,8 +582,8 @@ export default function FamilyPinboard() {
                   >
                     <Upload size={16} />
                     {photoBusy === 'edit'
-                      ? 'Foto wird optimiert …'
-                      : 'Foto hochladen'}
+                      ? t('photo.optimizing')
+                      : t('photo.upload')}
                     <input
                       type="file"
                       accept="image/*"
@@ -597,13 +598,12 @@ export default function FamilyPinboard() {
                   </label>
                 )}
                 <small className="form-help">
-                  Das Foto wird automatisch für eine schnelle Anzeige
-                  optimiert.
+                  {t('editModal.optimizeHint')}
                 </small>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Farbe wählen</label>
+                <label className="form-label">{t('editModal.colorLabel')}</label>
                 <div style={{ display: 'flex', gap: 10 }}>
                   {NOTE_COLORS.map(col => (
                     <div
@@ -626,7 +626,7 @@ export default function FamilyPinboard() {
                     onChange={e => setEditIsShared(e.target.checked)}
                     style={{ width: 18, height: 18 }}
                   />
-                  <span>🤝 Geteilt (auch bei Oma & Opa anzeigen)</span>
+                  <span>{t('form.shared')}</span>
                 </label>
               </div>
 
@@ -638,11 +638,11 @@ export default function FamilyPinboard() {
                   disabled={Boolean(saving || photoBusy)}
                 >
                   {saving === 'edit'
-                    ? 'Wird gespeichert …'
-                    : 'Änderungen speichern'}
+                    ? t('common:status.saving')
+                    : t('editModal.submit')}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setEditingNote(null)}>
-                  Abbrechen
+                  {t('common:actions.cancel')}
                 </button>
               </div>
             </form>
@@ -655,7 +655,7 @@ export default function FamilyPinboard() {
           className="pinboard-lightbox"
           role="dialog"
           aria-modal="true"
-          aria-label={`Große Bildansicht: ${lightboxPhoto.title}`}
+          aria-label={t('lightbox.dialogAria', { title: lightboxPhoto.title })}
           onClick={() => setLightboxPhoto(null)}
         >
           <div
@@ -666,7 +666,7 @@ export default function FamilyPinboard() {
               type="button"
               className="pinboard-lightbox-close"
               onClick={() => setLightboxPhoto(null)}
-              aria-label="Bildansicht schließen"
+              aria-label={t('lightbox.closeAria')}
             >
               <X size={21} />
             </button>

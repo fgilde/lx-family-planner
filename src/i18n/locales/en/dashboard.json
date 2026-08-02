@@ -1,0 +1,255 @@
+{
+  "child": {
+    "fallbackName": "Adventurer",
+    "worlds": {
+      "space": {
+        "label": "Rocket Base",
+        "mission": "Star energy",
+        "greeting": "Ready for liftoff?"
+      },
+      "unicorn": {
+        "label": "Unicorn Land",
+        "mission": "Rainbow power",
+        "greeting": "Today will be magical!"
+      },
+      "fairy": {
+        "label": "Fairy Magic",
+        "mission": "Magic dust",
+        "greeting": "The enchanted forest is calling!"
+      },
+      "dino": {
+        "label": "Dino World",
+        "mission": "Dino power",
+        "greeting": "Off on a big adventure!"
+      },
+      "sunshine": {
+        "label": "Sunshine Island",
+        "mission": "Sunbeams",
+        "greeting": "A good day is starting!"
+      },
+      "adventure": {
+        "label": "Hero Camp",
+        "mission": "Hero power",
+        "greeting": "Your mission awaits!"
+      }
+    },
+    "moods": {
+      "super": "Awesome!",
+      "gut": "Good",
+      "okay": "So-so",
+      "hilfe": "Need a hug"
+    },
+    "hero": {
+      "kicker": "Level {{level}} · {{title}}",
+      "hey": "Hey {{name}}!",
+      "intro_zero": "There are no missions for you today. Every task you complete grows your treasure of stars.",
+      "intro_one": "There is {{count}} mission for you today. Every task you complete grows your treasure of stars.",
+      "intro_other": "There are {{count}} missions for you today. Every task you complete grows your treasure of stars.",
+      "starsToNextLevel_one": "{{count}} star to level {{level}}",
+      "starsToNextLevel_other": "{{count}} stars to level {{level}}",
+      "openMissions": "missions open",
+      "done": "completed"
+    },
+    "map": {
+      "kicker": "Your adventure trail",
+      "progress": "{{done}} of {{total}} missions completed",
+      "freeDay": "Today is a free explorer day",
+      "progressAria": "Mission progress",
+      "goalDone": "Done!",
+      "goalLabel": "Daily goal",
+      "unbeatable": "You are unstoppable today",
+      "missionsToGoal_one": "{{count}} mission to the goal",
+      "missionsToGoal_other": "{{count}} missions to the goal"
+    },
+    "today": {
+      "routine": {
+        "label": "Your routine",
+        "allDone": "All done for today!",
+        "discover": "Discover routines",
+        "steps": "{{done}}/{{total}} steps"
+      },
+      "saving": {
+        "label": "Your piggy bank",
+        "noGoal": "No savings goal yet",
+        "percentDone": "{{percent}}% there"
+      },
+      "badges": {
+        "label": "Your collection",
+        "count_one": "{{count}} badge discovered",
+        "count_other": "{{count}} badges discovered",
+        "hint": "New achievements are waiting for you"
+      }
+    },
+    "story": {
+      "encouragementFrom": "Cheer from {{name}}",
+      "familyFallback": "your family",
+      "quote": "“{{message}}”",
+      "togetherStrong": "Stronger together",
+      "pollKicker": "Your vote counts"
+    },
+    "mood": {
+      "kicker": "Family compass",
+      "title": "How are you feeling today?",
+      "checkedIn": "Thanks for checking in today.",
+      "prompt": "One tap is enough – your family will know how you are doing."
+    },
+    "quests": {
+      "kicker": "Your missions",
+      "title": "Collect stars today",
+      "viewAll": "All",
+      "defaultCategory": "Family mission",
+      "emptyTitle": "All done!",
+      "emptyText": "Your missions are complete. Great job."
+    },
+    "rewards": {
+      "kicker": "Wish station",
+      "title": "Your star shop",
+      "shop": "Shop",
+      "cost_one": "{{count}} star",
+      "cost_other": "{{count}} stars",
+      "redeem": "Redeem",
+      "collect": "Keep collecting",
+      "empty": "No wishes in the shop yet."
+    },
+    "media": {
+      "kicker": "Approved by your family",
+      "title": "Your media lounge",
+      "safeBadge": "✓ Chosen by your parents",
+      "spotifyPlaylist": "Spotify playlist",
+      "youtubeChannel": "YouTube channel",
+      "playMusic": "Play music",
+      "playVideo": "Start video",
+      "pausedLabel": "The media lounge is taking a break",
+      "pausedUntil": "It will be back for you at {{time}}."
+    },
+    "homeControlsTitle": "Your home controls",
+    "buddy": {
+      "kicker": "Your world, your choice",
+      "title": "Adventure companions",
+      "text": "Choose who accompanies you on your missions. The choice is saved for your profile only."
+    },
+    "familyStrip": {
+      "nextLabel": "Up next",
+      "nothingPlanned": "Nothing planned today",
+      "calendar": "Calendar",
+      "chatLabel": "Family radio",
+      "chatPrompt": "Say a quick hello to everyone!",
+      "open": "Open"
+    }
+  },
+  "personal": {
+    "widgets": {
+      "calendar": {
+        "label": "My events",
+        "description": "Your upcoming events and family occasions",
+        "action": "Show all"
+      },
+      "tasks": {
+        "label": "Tasks & approvals",
+        "description": "Your own tasks and pending parent approvals",
+        "action": "Task planner"
+      },
+      "meals": {
+        "label": "On the table today",
+        "description": "The current meal plan for your household",
+        "action": "Meal plan"
+      },
+      "shopping": {
+        "label": "Still to buy",
+        "description": "The most important open items at a glance",
+        "action": "Shopping list"
+      },
+      "trash": {
+        "label": "Next trash collection",
+        "description": "The next pickup date for your planning location",
+        "action": "Trash calendar"
+      },
+      "board": {
+        "label": "Pinboard",
+        "description": "The latest shared family notes",
+        "action": "To the pinboard"
+      },
+      "cloud": {
+        "label": "Family archive",
+        "description": "Upload photos, documents and memories directly"
+      },
+      "home-assistant": {
+        "label": "Our home",
+        "description": "Shared devices, sensors and scenes from Home Assistant"
+      }
+    },
+    "hero": {
+      "kicker": "Your family overview",
+      "greeting": {
+        "morning": "Good morning",
+        "day": "Hello",
+        "evening": "Good evening"
+      },
+      "title": "{{greeting}}, {{name}}!",
+      "summary": "On your radar today: {{events}}, {{tasks}} and {{shopping}}.",
+      "events_one": "{{count}} event",
+      "events_other": "{{count}} events",
+      "tasks_one": "{{count}} open task",
+      "tasks_other": "{{count}} open tasks",
+      "shopping_one": "{{count}} shopping item",
+      "shopping_other": "{{count}} shopping items",
+      "customize": "Layout",
+      "quickAdd": "Add something"
+    },
+    "widgetHeader": {
+      "open": "Open"
+    },
+    "calendar": {
+      "empty": "No events scheduled for you.",
+      "allDay": "all day",
+      "defaultLocation": "Family event"
+    },
+    "tasks": {
+      "approvals_one": "completed task waiting for you",
+      "approvals_other": "completed tasks waiting for you",
+      "empty": "All tasks are done.",
+      "due": "Due {{date}}",
+      "defaultCategory": "Task"
+    },
+    "meals": {
+      "empty": "Nothing planned for today yet.",
+      "types": {
+        "lunch": "Lunch",
+        "dinner": "Dinner"
+      }
+    },
+    "shopping": {
+      "empty": "The shopping list is done."
+    },
+    "trash": {
+      "pickupOn": "Pickup on {{date}}",
+      "empty": "No trash collection dates available."
+    },
+    "board": {
+      "title": "New on the pinboard",
+      "empty": "No notes yet."
+    }
+  },
+  "customizer": {
+    "kicker": "View studio",
+    "personalTitle": "Your overview",
+    "tabletTitle": "Tablet tiles",
+    "scopeNote": "This selection only applies to {{name}} on this device.",
+    "thisProfile": "this profile",
+    "closeAria": "Close view studio",
+    "density": {
+      "title": "Tile spacing",
+      "hint": "Comfortable for touch or compact for more overview.",
+      "groupAria": "Select tile spacing",
+      "comfortable": "Comfortable",
+      "compact": "Compact"
+    },
+    "moveUp": "Move {{label}} up",
+    "moveDown": "Move {{label}} down",
+    "minVisible": "At least one tile must stay visible.",
+    "visibilityOn": "On",
+    "visibilityOff": "Off",
+    "reset": "Restore defaults",
+    "done": "Done"
+  }
+}

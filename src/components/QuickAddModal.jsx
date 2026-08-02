@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import {
   X,
@@ -22,6 +23,7 @@ export default function QuickAddModal() {
     members, activeMemberId, activeMember, familyRelationships,
     addEvent, addShoppingItem, addTask, addNote
   } = useFamily();
+  const { t } = useTranslation('profile');
 
   const [type, setType] = useState(quickAddDefaultType || 'event');
 
@@ -119,7 +121,7 @@ export default function QuickAddModal() {
     <div className="modal-backdrop" onClick={() => setIsQuickAddOpen(false)}>
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <div className="card-header" style={{ marginBottom: 16 }}>
-          <h2 className="card-title">Schnell Hinzufügen</h2>
+          <h2 className="card-title">{t('quickAdd.title')}</h2>
           <button className="icon-circle-btn" onClick={() => setIsQuickAddOpen(false)}>
             <X size={20} />
           </button>
@@ -131,40 +133,40 @@ export default function QuickAddModal() {
             className={`cat-pill ${type === 'event' ? 'active' : ''}`}
             onClick={() => setType('event')}
           >
-            <Calendar size={16} /> Termin
+            <Calendar size={16} /> {t('quickAdd.types.event')}
           </button>
           <button
             className={`cat-pill ${type === 'shopping' ? 'active' : ''}`}
             onClick={() => setType('shopping')}
           >
-            <ShoppingBag size={16} /> Einkauf
+            <ShoppingBag size={16} /> {t('quickAdd.types.shopping')}
           </button>
           <button
             className={`cat-pill ${type === 'task' ? 'active' : ''}`}
             onClick={() => setType('task')}
           >
-            <CheckSquare size={16} /> Aufgabe
+            <CheckSquare size={16} /> {t('quickAdd.types.task')}
           </button>
           <button
             className={`cat-pill ${type === 'note' ? 'active' : ''}`}
             onClick={() => setType('note')}
           >
-            <Pin size={16} /> Notiz
+            <Pin size={16} /> {t('quickAdd.types.note')}
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">
-              {type === 'event' && 'Termintitel'}
-              {type === 'shopping' && 'Artikelname'}
-              {type === 'task' && 'Aufgabe'}
-              {type === 'note' && 'Notiz-Titel'}
+              {type === 'event' && t('quickAdd.titleLabels.event')}
+              {type === 'shopping' && t('quickAdd.titleLabels.shopping')}
+              {type === 'task' && t('quickAdd.titleLabels.task')}
+              {type === 'note' && t('quickAdd.titleLabels.note')}
             </label>
             <input
               type="text"
               className="form-input"
-              placeholder="Eingeben..."
+              placeholder={t('quickAdd.titlePlaceholder')}
               value={title}
               onChange={e => setTitle(e.target.value)}
               required
@@ -177,11 +179,11 @@ export default function QuickAddModal() {
             <>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div className="form-group">
-                  <label className="form-label">Datum</label>
+                  <label className="form-label">{t('common:labels.date')}</label>
                   <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Uhrzeit</label>
+                  <label className="form-label">{t('common:labels.time')}</label>
                   <input type="time" className="form-input" value={time} onChange={e => setTime(e.target.value)} />
                 </div>
               </div>
@@ -190,26 +192,26 @@ export default function QuickAddModal() {
                 onChange={setReminders}
               />
               <div className="form-group">
-                <label className="form-label">Für wer?</label>
+                <label className="form-label">{t('quickAdd.forWhom')}</label>
                 <select className="form-select" value={memberId} onChange={e => setMemberId(e.target.value)}>
-                  <option value="all">Alle (Gemeinsam)</option>
+                  <option value="all">{t('quickAdd.everyone')}</option>
                   {members.map(m => (
                     <option key={m.id} value={m.id}>
                       {m.name}
-                      {isManagedProfile(m) ? ' · verwaltet' : ''}
+                      {isManagedProfile(m) ? ` · ${t('quickAdd.managed')}` : ''}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Ort (optional)</label>
-                <input type="text" className="form-input" placeholder="z. B. Dr. Weber, Schule" value={location} onChange={e => setLocation(e.target.value)} />
+                <label className="form-label">{t('quickAdd.locationOptional')}</label>
+                <input type="text" className="form-input" placeholder={t('quickAdd.locationPlaceholder')} value={location} onChange={e => setLocation(e.target.value)} />
               </div>
               {canManageFamily(activeMember) && shareableFamilies.length > 0 && (
                 <div className="shared-event-picker">
                   <span>
                     <HeartHandshake size={15} />
-                    Verbundene Familien einladen
+                    {t('quickAdd.inviteFamilies')}
                   </span>
                   <div>
                     {shareableFamilies.map(relationship => {
@@ -233,8 +235,7 @@ export default function QuickAddModal() {
                     })}
                   </div>
                   <small>
-                    Der Termin erscheint bei allen ausgewählten Familien,
-                    private Termine bleiben getrennt.
+                    {t('quickAdd.inviteFamiliesHint')}
                   </small>
                 </div>
               )}
@@ -251,18 +252,18 @@ export default function QuickAddModal() {
               }}
             >
               <div className="form-group">
-                <label className="form-label">Kategorie</label>
+                <label className="form-label">{t('quickAdd.categoryLabel')}</label>
                 <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
-                  <option value="Obst & Gemüse">Obst & Gemüse</option>
-                  <option value="Kühlung & Milch">Kühlung & Milch</option>
-                  <option value="Bäckerei">Bäckerei</option>
-                  <option value="Vorräte">Vorräte</option>
-                  <option value="Getränke">Getränke</option>
-                  <option value="Drogerie & Haushalt">Drogerie & Haushalt</option>
+                  <option value="Obst & Gemüse">{t('quickAdd.shoppingCategories.produce')}</option>
+                  <option value="Kühlung & Milch">{t('quickAdd.shoppingCategories.dairy')}</option>
+                  <option value="Bäckerei">{t('quickAdd.shoppingCategories.bakery')}</option>
+                  <option value="Vorräte">{t('quickAdd.shoppingCategories.pantry')}</option>
+                  <option value="Getränke">{t('quickAdd.shoppingCategories.drinks')}</option>
+                  <option value="Drogerie & Haushalt">{t('quickAdd.shoppingCategories.household')}</option>
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Menge</label>
+                <label className="form-label">{t('quickAdd.quantity')}</label>
                 <input type="text" className="form-input" value={quantity} onChange={e => setQuantity(e.target.value)} />
               </div>
             </div>
@@ -272,19 +273,19 @@ export default function QuickAddModal() {
           {type === 'task' && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="form-group">
-                <label className="form-label">Zugewiesen an</label>
+                <label className="form-label">{t('quickAdd.assignedTo')}</label>
                 <select className="form-select" value={memberId} onChange={e => setMemberId(e.target.value)}>
                   {members.map(m => (
                     <option key={m.id} value={m.id}>
                       {m.name} ({getPositionLabel(m)}
-                      {isManagedProfile(m) ? ', verwaltet' : ''})
+                      {isManagedProfile(m) ? `, ${t('quickAdd.managed')}` : ''})
                     </option>
                   ))}
                 </select>
               </div>
               {!taskIsForManagedProfile && (
                 <div className="form-group">
-                  <label className="form-label">Sterne-Punkte</label>
+                  <label className="form-label">{t('quickAdd.starPoints')}</label>
                   <input type="number" min="5" max="100" step="5" className="form-input" value={stars} onChange={e => setStars(e.target.value)} />
                 </div>
               )}
@@ -294,8 +295,8 @@ export default function QuickAddModal() {
           {/* Note Fields */}
           {type === 'note' && (
             <div className="form-group">
-              <label className="form-label">Notiztext</label>
-              <textarea className="form-textarea" rows="3" placeholder="Inhalt eingeben..." value={notes} onChange={e => setNotes(e.target.value)} />
+              <label className="form-label">{t('quickAdd.noteText')}</label>
+              <textarea className="form-textarea" rows="3" placeholder={t('quickAdd.notePlaceholder')} value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
           )}
 
@@ -306,7 +307,7 @@ export default function QuickAddModal() {
               style={{ flex: 1 }}
               disabled={saving}
             >
-              {saving ? 'Wird gespeichert …' : 'Hinzufügen'}
+              {saving ? t('common:status.saving') : t('common:actions.add')}
             </button>
             <button
               type="button"
@@ -314,7 +315,7 @@ export default function QuickAddModal() {
               disabled={saving}
               onClick={() => setIsQuickAddOpen(false)}
             >
-              Abbrechen
+              {t('common:actions.cancel')}
             </button>
           </div>
         </form>

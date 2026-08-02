@@ -18,23 +18,24 @@ import {
   ToggleLeft,
   Wind
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { canManageFamily } from '../../constants/roles';
 
-const STATE_LABELS = {
-  on: 'An',
-  off: 'Aus',
-  open: 'Offen',
-  closed: 'Geschlossen',
-  opening: 'Öffnet …',
-  closing: 'Schließt …',
-  home: 'Zuhause',
-  not_home: 'Unterwegs',
-  unavailable: 'Nicht erreichbar',
-  unknown: 'Unbekannt',
-  clear: 'Klar',
-  cloudy: 'Bewölkt',
-  rainy: 'Regen'
+const STATE_LABEL_KEYS = {
+  on: 'homeAssistant.states.on',
+  off: 'homeAssistant.states.off',
+  open: 'homeAssistant.states.open',
+  closed: 'homeAssistant.states.closed',
+  opening: 'homeAssistant.states.opening',
+  closing: 'homeAssistant.states.closing',
+  home: 'homeAssistant.states.home',
+  not_home: 'homeAssistant.states.notHome',
+  unavailable: 'homeAssistant.states.unavailable',
+  unknown: 'homeAssistant.states.unknown',
+  clear: 'homeAssistant.states.clear',
+  cloudy: 'homeAssistant.states.cloudy',
+  rainy: 'homeAssistant.states.rainy'
 };
 
 function EntityIcon({ entity, size = 20 }) {
@@ -57,14 +58,15 @@ function EntityIcon({ entity, size = 20 }) {
   return <Icon size={size} />;
 }
 
-function displayState(entity) {
+function displayState(entity, t) {
   if (
     entity.temperature !== null &&
     entity.temperature !== undefined
   ) {
     return `${entity.temperature} °C`;
   }
-  const label = STATE_LABELS[entity.state] || entity.state;
+  const labelKey = STATE_LABEL_KEYS[entity.state];
+  const label = labelKey ? t(labelKey) : entity.state;
   return `${label}${entity.unit ? ` ${entity.unit}` : ''}`;
 }
 
@@ -86,8 +88,9 @@ function primaryAction(entity) {
 export default function HomeAssistantWidget({
   className = '',
   compact = false,
-  title = 'Unser Zuhause'
+  title
 }) {
+  const { t } = useTranslation('widgets');
   const {
     activeMember,
     homeAssistantEntities,
@@ -133,16 +136,16 @@ export default function HomeAssistantWidget({
         <div>
           <span className="ha-widget-mark"><Home size={20} /></span>
           <span>
-            <small>Home Assistant · live</small>
-            <strong>{title}</strong>
+            <small>{t('homeAssistant.subtitle')}</small>
+            <strong>{title ?? t('homeAssistant.defaultTitle')}</strong>
           </span>
         </div>
         <button
           type="button"
           onClick={() => refreshHomeAssistantStates()}
           disabled={homeAssistantLoading}
-          aria-label="Hausstatus aktualisieren"
-          title="Aktualisieren"
+          aria-label={t('homeAssistant.refreshAria')}
+          title={t('common:actions.refresh')}
         >
           {homeAssistantLoading
             ? <LoaderCircle className="spin" size={16} />
@@ -154,11 +157,8 @@ export default function HomeAssistantWidget({
         <div className="ha-widget-empty">
           <Gauge size={24} />
           <span>
-            <strong>Noch keine Hauskacheln</strong>
-            <small>
-              Ein Elternprofil kann Geräte und Sensoren in der Elternzentrale
-              freigeben.
-            </small>
+            <strong>{t('homeAssistant.emptyTitle')}</strong>
+            <small>{t('homeAssistant.emptyHint')}</small>
           </span>
         </div>
       ) : (
@@ -189,7 +189,7 @@ export default function HomeAssistantWidget({
                 </span>
                 <span className="ha-entity-copy">
                   <strong title={entity.name}>{entity.name}</strong>
-                  <small>{displayState(entity)}</small>
+                  <small>{displayState(entity, t)}</small>
                 </span>
 
                 {entity.domain === 'cover' && entity.allowControl ? (
@@ -198,7 +198,7 @@ export default function HomeAssistantWidget({
                       type="button"
                       disabled={isBusy || (entity.requiresAdult && !isAdult)}
                       onClick={() => run(entity, 'open_cover')}
-                      title="Öffnen"
+                      title={t('homeAssistant.openCover')}
                     >
                       ↑
                     </button>
@@ -206,7 +206,7 @@ export default function HomeAssistantWidget({
                       type="button"
                       disabled={isBusy || (entity.requiresAdult && !isAdult)}
                       onClick={() => run(entity, 'close_cover')}
-                      title="Schließen"
+                      title={t('homeAssistant.closeCover')}
                     >
                       ↓
                     </button>
@@ -247,8 +247,8 @@ export default function HomeAssistantWidget({
                     onClick={() => run(entity, action)}
                     title={
                       entity.requiresAdult
-                        ? 'Nur für Erwachsene mit Bestätigung'
-                        : 'Steuern'
+                        ? t('homeAssistant.adultsOnlyConfirm')
+                        : t('homeAssistant.control')
                     }
                   >
                     {isBusy
@@ -272,7 +272,7 @@ export default function HomeAssistantWidget({
                       confirmRequest.payload
                     )}
                   >
-                    <ShieldAlert size={13} /> Bestätigen
+                    <ShieldAlert size={13} /> {t('common:actions.confirm')}
                   </button>
                 )}
               </article>

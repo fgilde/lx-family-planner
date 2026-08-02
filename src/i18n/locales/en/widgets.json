@@ -1,0 +1,190 @@
+{
+  "kitchen": {
+    "widgets": {
+      "calendar": {
+        "label": "Today",
+        "description": "All of today's events"
+      },
+      "meals": {
+        "label": "Meals",
+        "description": "Today's meal plan"
+      },
+      "tasks": {
+        "label": "Tasks",
+        "description": "Open tasks and approvals"
+      },
+      "shopping": {
+        "label": "Shopping",
+        "description": "Items still needed"
+      },
+      "chat": {
+        "label": "Family chat",
+        "description": "The latest family messages"
+      },
+      "board": {
+        "label": "Pinboard",
+        "description": "Current family notes"
+      },
+      "trash": {
+        "label": "Trash collection",
+        "description": "The next pickup date"
+      },
+      "family": {
+        "label": "Family",
+        "description": "Profiles and stars at a glance"
+      },
+      "homeAssistant": {
+        "label": "Home control",
+        "description": "Devices, sensors and scenes as large tablet tiles"
+      }
+    },
+    "household": {
+      "omaOpa": "Grandma & Grandpa",
+      "default": "Our home"
+    },
+    "live": "Live",
+    "allInView": "Everything at a glance.",
+    "signedInAs": "Signed in as {{name}}",
+    "quickActions": {
+      "event": "Event",
+      "shopping": "Shopping",
+      "standardView": "Standard view",
+      "tiles": "Tiles"
+    },
+    "cards": {
+      "calendar": {
+        "title": "Today",
+        "count_one": "{{count}} event",
+        "count_other": "{{count}} events",
+        "allDay": "all day",
+        "familyFallback": "Family",
+        "empty": "Nothing planned for today yet."
+      },
+      "meals": {
+        "title": "Meals",
+        "empty": "No meals planned yet."
+      },
+      "tasks": {
+        "title": "Tasks",
+        "count_one": "{{count}} open",
+        "count_other": "{{count}} open",
+        "pendingApproval": "Waiting for review",
+        "empty": "All tasks are done."
+      },
+      "shopping": {
+        "title": "Shopping",
+        "count_one": "{{count}} item",
+        "count_other": "{{count}} items",
+        "empty": "Everything bought."
+      },
+      "chat": {
+        "title": "Family chat",
+        "count_one": "{{count}} message",
+        "count_other": "{{count}} messages",
+        "photo": "📷 Photo",
+        "newMessage": "New message",
+        "senderFallback": "Family",
+        "empty": "No messages yet."
+      },
+      "board": {
+        "title": "Pinboard",
+        "count_one": "{{count}} note",
+        "count_other": "{{count}} notes",
+        "empty": "The pinboard is empty."
+      },
+      "trash": {
+        "title": "Next pickup",
+        "noDate": "No date",
+        "empty": "No trash pickup scheduled yet."
+      },
+      "family": {
+        "title": "Family",
+        "count_one": "{{count}} profile",
+        "count_other": "{{count}} profiles"
+      }
+    }
+  },
+  "pet": {
+    "noDateAppointment": "Appointment without a date",
+    "appointmentWithTime": "{{day}} · {{time}}",
+    "petFallbackName": "Furry friend",
+    "petAlt": "Pet",
+    "kicker": "Paw profile · Family favourite",
+    "heroTitle": "Everything for {{name}} at a glance",
+    "heroText": "Appointments, care and feeding in one calm place – no chat, stars or unnecessary menus.",
+    "caredFor": "Cared for",
+    "openCareItems": "open care items",
+    "overviewAria": "Paw overview",
+    "nextAppointment": "Next appointment",
+    "nothingPlanned": "Nothing planned",
+    "calendarFree": "The calendar is free.",
+    "care": "Care",
+    "careOpen_one": "{{count}} item open",
+    "careOpen_other": "{{count}} items open",
+    "allDone": "All done",
+    "managedByAdults": "Taken care of by the adults.",
+    "petMode": "Pet mode",
+    "calmProtected": "Calm & protected",
+    "noChatNoAccount": "No chat and no account features.",
+    "carePlan": "Care plan",
+    "whatsUpFor": "What's coming up for {{name}}",
+    "familyTakesCare": "Family takes care of it",
+    "careCategoryFallback": "Care & feeding",
+    "openLabel": "open",
+    "allCaredFor": "Everything well cared for",
+    "noCareItems": "There are no open care items for {{name}} right now.",
+    "appointmentsHealth": "Appointments & health",
+    "pawCalendar": "Paw calendar",
+    "calendar": "Calendar",
+    "noDateShort": "open",
+    "noAppointments": "No appointments planned",
+    "pawCalendarFree": "The paw calendar is completely free right now.",
+    "importantNotes": "Important notes",
+    "noteFallback": "Note"
+  },
+  "homeAssistant": {
+    "states": {
+      "on": "On",
+      "off": "Off",
+      "open": "Open",
+      "closed": "Closed",
+      "opening": "Opening …",
+      "closing": "Closing …",
+      "home": "Home",
+      "notHome": "Away",
+      "unavailable": "Unavailable",
+      "unknown": "Unknown",
+      "clear": "Clear",
+      "cloudy": "Cloudy",
+      "rainy": "Rain"
+    },
+    "defaultTitle": "Our home",
+    "subtitle": "Home Assistant · live",
+    "refreshAria": "Refresh home status",
+    "emptyTitle": "No home tiles yet",
+    "emptyHint": "A parent profile can share devices and sensors in the parent centre.",
+    "openCover": "Open",
+    "closeCover": "Close",
+    "adultsOnlyConfirm": "Adults only, with confirmation",
+    "control": "Control"
+  },
+  "familyCloud": {
+    "title": "Family archive",
+    "openAria": "Open family archive",
+    "open": "Open",
+    "preparing": "The archive is being prepared",
+    "checkConnection": "You can check the connection in the parent centre.",
+    "toParentCenter": "To the parent centre",
+    "sharedStorage": "Shared storage",
+    "loading": "Loading",
+    "ofTotal": "of {{size}}",
+    "safeForFamily": "safe for your family",
+    "openingArchive": "Opening archive …",
+    "noFiles": "No files yet – there's room here for your memories.",
+    "upload": "Upload to the cloud",
+    "toast": {
+      "fileTooBigTitle": "File too large",
+      "fileTooBigMessage": "{{name}} is larger than 100 MB."
+    }
+  }
+}

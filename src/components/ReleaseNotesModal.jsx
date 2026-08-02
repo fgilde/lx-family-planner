@@ -10,6 +10,7 @@ import {
   UsersRound,
   X
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 
 const HIGHLIGHT_ICONS = {
@@ -22,6 +23,7 @@ const HIGHLIGHT_ICONS = {
 };
 
 export default function ReleaseNotesModal() {
+  const { t } = useTranslation('chrome');
   const { releaseNotes, acknowledgeReleaseNotes } = useFamily();
   const [isSaving, setIsSaving] = useState(false);
   const closeButtonRef = useRef(null);
@@ -69,7 +71,7 @@ export default function ReleaseNotesModal() {
         <button
           type="button"
           className="release-notes-close"
-          aria-label="Neuigkeiten schließen"
+          aria-label={t('releaseNotes.close')}
           onClick={closeReleaseNotes}
           disabled={isSaving}
           ref={closeButtonRef}
@@ -84,7 +86,7 @@ export default function ReleaseNotesModal() {
           <div>
             <div className="release-notes-meta">
               <span>{releaseNotes.eyebrow}</span>
-              <strong>Version {releaseNotes.version}</strong>
+              <strong>{t('releaseNotes.version', { version: releaseNotes.version })}</strong>
             </div>
             <h2 id="release-notes-title">{releaseNotes.title}</h2>
             <p id="release-notes-intro">{releaseNotes.intro}</p>
@@ -121,7 +123,7 @@ export default function ReleaseNotesModal() {
             onClick={closeReleaseNotes}
             disabled={isSaving}
           >
-            {isSaving ? 'Wird gespeichert …' : 'Alles klar, los geht’s'}
+            {isSaving ? t('common:status.saving') : t('releaseNotes.confirm')}
           </button>
         </footer>
       </section>

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,6 +15,7 @@ import { FUNNY_COMIC_AVATARS, useFamily } from '../../context/FamilyContext';
 import {
   POSITION_OPTIONS,
   getPositionOption,
+  getPositionOptionLabel,
   roleForPosition
 } from '../../constants/roles';
 
@@ -42,10 +44,11 @@ function emptyMember(index = 0) {
 }
 
 export default function OnboardingWizard({ onComplete, onBack }) {
+  const { t } = useTranslation('auth');
   const { registerFamily } = useFamily();
   const [step, setStep] = useState(1);
   const [familyName, setFamilyName] = useState('');
-  const [badge, setBadge] = useState('Unsere Familie');
+  const [badge, setBadge] = useState(() => t('onboarding.badgeDefault'));
   const [password, setPassword] = useState('');
   const [members, setMembers] = useState([emptyMember(0)]);
   const [error, setError] = useState('');
@@ -110,13 +113,15 @@ export default function OnboardingWizard({ onComplete, onBack }) {
           className="auth-back"
           onClick={() => (step === 1 ? onBack?.() : setStep(step - 1))}
         >
-          <ArrowLeft size={18} /> Zurück
+          <ArrowLeft size={18} /> {t('common:actions.back')}
         </button>
         <div className="auth-brand">
           <span className="auth-brand-mark">LX</span>
           <span>Family Planner</span>
         </div>
-        <span className="onboarding-step">Schritt {step} von 3</span>
+        <span className="onboarding-step">
+          {t('onboarding.stepIndicator', { step, total: 3 })}
+        </span>
       </header>
 
       <div className="onboarding-progress" aria-hidden="true">
@@ -129,49 +134,43 @@ export default function OnboardingWizard({ onComplete, onBack }) {
         {step === 1 && (
           <section className="onboarding-card">
             <span className="onboarding-illustration">🏡</span>
-            <span className="eyebrow">Euer gemeinsamer Ort</span>
-            <h1>Wie heißt eure Familie?</h1>
-            <p>
-              Der Familienname erscheint auf dem Startbildschirm. Das Passwort
-              schützt euren privaten Raum.
-            </p>
+            <span className="eyebrow">{t('onboarding.step1.eyebrow')}</span>
+            <h1>{t('onboarding.step1.title')}</h1>
+            <p>{t('onboarding.step1.description')}</p>
             <div className="onboarding-fields">
               <label className="auth-field">
-                <span>Familienname</span>
+                <span>{t('onboarding.step1.familyNameLabel')}</span>
                 <input
                   value={familyName}
                   onChange={event => setFamilyName(event.target.value)}
-                  placeholder="z. B. Familie Testname"
+                  placeholder={t('onboarding.step1.familyNamePlaceholder')}
                   autoFocus
                   maxLength={100}
                 />
               </label>
               <label className="auth-field">
-                <span>Kurzer Zusatz</span>
+                <span>{t('onboarding.step1.badgeLabel')}</span>
                 <input
                   value={badge}
                   onChange={event => setBadge(event.target.value)}
-                  placeholder="z. B. Unser Zuhause"
+                  placeholder={t('onboarding.step1.badgePlaceholder')}
                   maxLength={60}
                 />
               </label>
               <label className="auth-field">
-                <span>Familienpasswort</span>
+                <span>{t('onboarding.step1.passwordLabel')}</span>
                 <input
                   type="password"
                   autoComplete="new-password"
                   value={password}
                   onChange={event => setPassword(event.target.value)}
-                  placeholder="Mindestens 4 Zeichen"
+                  placeholder={t('onboarding.step1.passwordPlaceholder')}
                   maxLength={100}
                 />
               </label>
               <div className="privacy-note">
                 <ShieldCheck size={18} />
-                <span>
-                  Das Passwort wird verschlüsselt gespeichert und nie in der
-                  Familienübersicht angezeigt.
-                </span>
+                <span>{t('onboarding.step1.privacyNote')}</span>
               </div>
             </div>
           </section>
@@ -179,12 +178,9 @@ export default function OnboardingWizard({ onComplete, onBack }) {
 
         {step === 2 && (
           <section className="onboarding-card onboarding-card-large">
-            <span className="eyebrow">Wer gehört dazu?</span>
-            <h1>Gebt jedem einen Namen und seine Position.</h1>
-            <p>
-              Mama, Papa, Kind, Oma, Opa und mehr: Daraus entsteht automatisch
-              die passende Ansicht und Berechtigung.
-            </p>
+            <span className="eyebrow">{t('onboarding.step2.eyebrow')}</span>
+            <h1>{t('onboarding.step2.title')}</h1>
+            <p>{t('onboarding.step2.description')}</p>
 
             <div className="member-builder-list">
               {members.map((member, index) => {
@@ -200,7 +196,7 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                     </div>
                     <div className="member-builder-fields">
                       <label className="auth-field">
-                        <span>Name</span>
+                        <span>{t('common:labels.name')}</span>
                         <input
                           value={member.name}
                           onChange={event =>
@@ -208,12 +204,16 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                               name: event.target.value
                             })
                           }
-                          placeholder={index === 0 ? 'Testname' : 'Name'}
+                          placeholder={
+                            index === 0
+                              ? t('onboarding.step2.firstNamePlaceholder')
+                              : t('common:labels.name')
+                          }
                           maxLength={80}
                         />
                       </label>
                       <label className="auth-field">
-                        <span>Position in der Familie</span>
+                        <span>{t('onboarding.step2.positionLabel')}</span>
                         <select
                           value={member.position}
                           onChange={event =>
@@ -222,13 +222,13 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                         >
                           {POSITION_OPTIONS.map(option => (
                             <option key={option.value} value={option.value}>
-                              {option.emoji} {option.label}
+                              {option.emoji} {getPositionOptionLabel(option)}
                             </option>
                           ))}
                         </select>
                       </label>
                       <label className="auth-field">
-                        <span>Profil-PIN (optional)</span>
+                        <span>{t('onboarding.step2.pinLabel')}</span>
                         <input
                           type="password"
                           autoComplete="new-password"
@@ -239,7 +239,7 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                               pin: event.target.value
                             })
                           }
-                          placeholder="Nur für dieses Profil"
+                          placeholder={t('onboarding.step2.pinPlaceholder')}
                           maxLength={12}
                         />
                       </label>
@@ -248,7 +248,11 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                       <button
                         type="button"
                         className="member-remove"
-                        aria-label={`${member.name || 'Profil'} entfernen`}
+                        aria-label={t('onboarding.step2.removeMemberAria', {
+                          name:
+                            member.name ||
+                            t('onboarding.step2.memberFallbackName')
+                        })}
                         onClick={() =>
                           setMembers(previous =>
                             previous.filter(entry => entry.id !== member.id)
@@ -267,7 +271,7 @@ export default function OnboardingWizard({ onComplete, onBack }) {
               className="auth-secondary member-add"
               onClick={addDraftMember}
             >
-              <Plus size={18} /> Weiteres Familienmitglied
+              <Plus size={18} /> {t('onboarding.step2.addMember')}
             </button>
           </section>
         )}
@@ -275,12 +279,9 @@ export default function OnboardingWizard({ onComplete, onBack }) {
         {step === 3 && (
           <section className="onboarding-card">
             <span className="onboarding-illustration">✨</span>
-            <span className="eyebrow">Alles bereit</span>
-            <h1>{familyName}, euer Familienraum kann starten.</h1>
-            <p>
-              Profile, Rollen und Privatsphäre sind eingerichtet. Inhalte könnt
-              ihr ab jetzt gemeinsam ergänzen.
-            </p>
+            <span className="eyebrow">{t('onboarding.step3.eyebrow')}</span>
+            <h1>{t('onboarding.step3.title', { familyName })}</h1>
+            <p>{t('onboarding.step3.description')}</p>
             <div className="onboarding-summary">
               <div>
                 <Heart size={20} />
@@ -289,7 +290,11 @@ export default function OnboardingWizard({ onComplete, onBack }) {
               <div>
                 <UserRound size={20} />
                 <span>
-                  <strong>{members.length} Profile</strong>
+                  <strong>
+                    {t('onboarding.step3.profileCount', {
+                      count: members.length
+                    })}
+                  </strong>
                   <small>
                     {members.map(member => member.name).join(', ')}
                   </small>
@@ -298,10 +303,8 @@ export default function OnboardingWizard({ onComplete, onBack }) {
               <div>
                 <Sparkles size={20} />
                 <span>
-                  <strong>Kindermodus automatisch</strong>
-                  <small>
-                    Kinder sehen Aufgaben als Abenteuer und sammeln Sterne.
-                  </small>
+                  <strong>{t('onboarding.step3.childModeTitle')}</strong>
+                  <small>{t('onboarding.step3.childModeDescription')}</small>
                 </span>
               </div>
             </div>
@@ -312,9 +315,9 @@ export default function OnboardingWizard({ onComplete, onBack }) {
 
       <footer className="onboarding-footer">
         <span>
-          {step === 1 && 'Startet mit eurem gemeinsamen Namen.'}
-          {step === 2 && 'Position und Rolle lassen sich später ändern.'}
-          {step === 3 && 'Ihr könnt direkt losplanen.'}
+          {step === 1 && t('onboarding.footer.step1')}
+          {step === 2 && t('onboarding.footer.step2')}
+          {step === 3 && t('onboarding.footer.step3')}
         </span>
         <button
           type="button"
@@ -323,10 +326,10 @@ export default function OnboardingWizard({ onComplete, onBack }) {
           onClick={next}
         >
           {loading
-            ? 'Familienraum wird erstellt …'
+            ? t('onboarding.creating')
             : step === 3
-              ? 'Familienraum eröffnen'
-              : 'Weiter'}
+              ? t('onboarding.openFamilySpace')
+              : t('common:actions.next')}
           {!loading && (step === 3 ? <Check size={18} /> : <ArrowRight size={18} />)}
         </button>
       </footer>

@@ -5,11 +5,13 @@ import React, {
   useState
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { CircleHelp, MapPinned } from 'lucide-react';
 
 const POPOVER_HEIGHT = 170;
 
 export default function PlanLocationHelp() {
+  const { t } = useTranslation('chrome');
   const triggerRef = useRef(null);
   const closeTimerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -112,7 +114,7 @@ export default function PlanLocationHelp() {
         onBlur={scheduleClose}
       >
         <CircleHelp size={14} />
-        <span>Wofür?</span>
+        <span>{t('planLocationHelp.trigger')}</span>
       </button>
 
       {isOpen &&
@@ -129,14 +131,12 @@ export default function PlanLocationHelp() {
               <MapPinned size={20} />
             </span>
             <div>
-              <strong>Zwei Zuhause, ein Familienplan</strong>
+              <strong>{t('planLocationHelp.title')}</strong>
               <p>
-                Praktisch, wenn Oma und Opa kein eigenes Familienkonto haben:
-                Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand werden
-                für ihr Zuhause getrennt geführt.
+                {t('planLocationHelp.body')}
               </p>
               <small>
-                Ein- oder ausblenden: Zahnrad → Familieneinstellungen.
+                {t('planLocationHelp.hint')}
               </small>
             </div>
           </aside>,

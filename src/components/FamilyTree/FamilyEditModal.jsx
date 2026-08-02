@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowUpRight,
   Check,
@@ -19,6 +20,7 @@ import { DEFAULT_FAMILY_AVATAR } from '../../utils/imageFallback';
 import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 
 export default function FamilyEditModal({ family, isOpen, onClose }) {
+  const { t } = useTranslation('familyTree');
   const { appVersion, updateFamilyAccount, deleteFamily } = useFamily();
   const [familyName, setFamilyName] = useState('');
   const [badge, setBadge] = useState('');
@@ -97,11 +99,11 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
           <div className="family-settings-heading">
             <span><Home size={22} /></span>
             <div>
-              <span className="eyebrow">Familienverwaltung</span>
-              <h2>Unser Zuhause</h2>
+              <span className="eyebrow">{t('settings.header.eyebrow')}</span>
+              <h2>{t('settings.header.title')}</h2>
             </div>
           </div>
-          <button className="icon-circle-btn" onClick={onClose} aria-label="Schließen">
+          <button className="icon-circle-btn" onClick={onClose} aria-label={t('common:actions.close')}>
             <X size={20} />
           </button>
         </div>
@@ -111,13 +113,13 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
             <div className="family-cover-editor">
               <img src={familyAvatar || DEFAULT_FAMILY_AVATAR} alt="" />
               <label className="auth-secondary">
-                <Upload size={17} /> Neues Familienbild
+                <Upload size={17} /> {t('settings.form.newImage')}
                 <input type="file" accept="image/*" onChange={uploadImage} />
               </label>
             </div>
 
             <label className="auth-field">
-              <span>Familienname</span>
+              <span>{t('settings.form.familyName')}</span>
               <input
                 value={familyName}
                 onChange={event => setFamilyName(event.target.value)}
@@ -126,12 +128,12 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
               />
             </label>
             <label className="auth-field">
-              <span>Kurzer Zusatz</span>
+              <span>{t('settings.form.badge')}</span>
               <input
                 value={badge}
                 onChange={event => setBadge(event.target.value)}
                 maxLength={60}
-                placeholder="z. B. Unser Zuhause"
+                placeholder={t('settings.form.badgePlaceholder')}
               />
             </label>
 
@@ -141,20 +143,17 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
               </span>
               <div className="family-feature-setting-copy">
                 <span className="family-feature-setting-title">
-                  <strong>Zweiten Planungsort anzeigen</strong>
+                  <strong>{t('settings.household.title')}</strong>
                 </span>
                 <small>
-                  Blendet „Zuhause Oma &amp; Opa“ als eigenen Planungsbereich
-                  im Kopf der App ein.
+                  {t('settings.household.description')}
                 </small>
                 <details className="family-feature-explainer">
                   <summary>
-                    <CircleHelp size={14} /> Warum gibt es das?
+                    <CircleHelp size={14} /> {t('settings.household.why')}
                   </summary>
                   <p>
-                    Ideal, wenn Oma und Opa kein eigenes Familienkonto nutzen:
-                    Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand
-                    lassen sich für ihr Zuhause getrennt planen.
+                    {t('settings.household.explainer')}
                   </p>
                 </details>
               </div>
@@ -170,12 +169,12 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
                 }
               >
                 <span />
-                {grandparentsHouseholdEnabled ? 'An' : 'Aus'}
+                {grandparentsHouseholdEnabled ? t('toggle.on') : t('toggle.off')}
               </button>
             </section>
 
             <label className="auth-field">
-              <span>Neues Familienpasswort (optional)</span>
+              <span>{t('settings.form.newPassword')}</span>
               <div className="auth-input-wrap">
                 <LockKeyhole size={18} />
                 <input
@@ -184,14 +183,14 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
                   type="password"
                   autoComplete="new-password"
                   minLength={4}
-                  placeholder="Leer lassen = unverändert"
+                  placeholder={t('settings.form.passwordPlaceholder')}
                 />
               </div>
             </label>
 
             <div className="family-version-strip">
               <span>LX Family Planner</span>
-              <strong>Version {appVersion}</strong>
+              <strong>{t('settings.about.version', { version: appVersion })}</strong>
             </div>
 
             <a
@@ -199,13 +198,13 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
               href={GITHUB_REPOSITORY_URL}
               target="_blank"
               rel="noreferrer"
-              aria-label="LX Family Planner auf GitHub ansehen"
+              aria-label={t('settings.github.aria')}
             >
               <span className="family-github-icon"><Github size={21} /></span>
               <span className="family-github-copy">
-                <small>Open Source</small>
-                <strong>Gefällt euch LX?</strong>
-                <span>Besucht das Projekt oder lasst einen Stern da.</span>
+                <small>{t('settings.github.kicker')}</small>
+                <strong>{t('settings.github.title')}</strong>
+                <span>{t('settings.github.description')}</span>
               </span>
               <span className="family-github-action">
                 <Star size={15} /> GitHub <ArrowUpRight size={15} />
@@ -214,28 +213,26 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
 
             <div className="modal-actions family-settings-actions">
               <button className="auth-primary" disabled={busy}>
-                <Check size={17} /> {busy ? 'Speichert …' : 'Änderungen speichern'}
+                <Check size={17} /> {busy ? t('settings.actions.saving') : t('settings.actions.save')}
               </button>
               <button
                 type="button"
                 className="family-danger-link"
                 onClick={() => setShowDelete(true)}
               >
-                <Trash2 size={16} /> Familienkonto löschen
+                <Trash2 size={16} /> {t('settings.actions.deleteAccount')}
               </button>
             </div>
           </form>
         ) : (
           <form className="family-delete-panel" onSubmit={removeFamily}>
             <span className="family-delete-icon"><ShieldAlert size={28} /></span>
-            <h3>Familienkonto endgültig löschen?</h3>
+            <h3>{t('settings.delete.title')}</h3>
             <p>
-              Dabei werden Profile, Termine, Aufgaben und alle weiteren
-              Familieninhalte entfernt. Diese Aktion lässt sich nicht rückgängig
-              machen.
+              {t('settings.delete.description')}
             </p>
             <label className="auth-field">
-              <span>Zur Bestätigung das Familienpasswort eingeben</span>
+              <span>{t('settings.delete.passwordLabel')}</span>
               <input
                 value={deletePassword}
                 onChange={event => setDeletePassword(event.target.value)}
@@ -251,14 +248,14 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
                 disabled={!deletePassword || busy}
               >
                 <Trash2 size={16} />
-                {busy ? 'Wird gelöscht …' : 'Familie endgültig löschen'}
+                {busy ? t('settings.delete.deleting') : t('settings.delete.confirm')}
               </button>
               <button
                 type="button"
                 className="auth-secondary"
                 onClick={() => setShowDelete(false)}
               >
-                Abbrechen
+                {t('common:actions.cancel')}
               </button>
             </div>
           </form>

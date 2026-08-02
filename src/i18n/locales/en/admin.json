@@ -1,0 +1,295 @@
+{
+  "parentAdmin": {
+    "accessDenied": {
+      "title": "Parents' area",
+      "description": "This area is only visible to adult family profiles."
+    },
+    "toasts": {
+      "profileUpdatedTitle": "Child profile updated",
+      "profileUpdatedBody": "{{name}}'s settings have been saved."
+    },
+    "hero": {
+      "kicker": "Adults only",
+      "title": "Parent hub",
+      "description": "Manage profiles, tasks and kids' dashboards in one calm place – without jumping between multiple areas."
+    },
+    "overview": {
+      "childProfiles": "Child profiles",
+      "openTasks": "Open tasks",
+      "totalStars": "Total stars",
+      "managedProfiles": "Managed profiles"
+    },
+    "managed": {
+      "kicker": "No login of their own",
+      "title": "Managed profiles",
+      "create": "Create profile",
+      "intro": "For grandma, grandpa or people in your care: they appear in events and tasks, but not at sign-in or in the chat.",
+      "positionWithoutLogin": "{{position}} · no login",
+      "plannable": "Plannable",
+      "emptyTitle": "No one added yet",
+      "emptyHint": "Choose “Managed by us only” when creating a profile."
+    },
+    "children": {
+      "kicker": "Kids & teenagers",
+      "title": "Administer profiles",
+      "add": "Add profile",
+      "selectedProfile": "Selected profile",
+      "positionLabel": "Position",
+      "pinLabel": "New profile PIN (optional)",
+      "pinPlaceholder": "Leave empty to keep unchanged",
+      "saving": "Saving …",
+      "save": "Save profile",
+      "emptyTitle": "No child profile yet",
+      "emptyDescription": "First create a profile as a child or teenager.",
+      "emptyCta": "Create child profile"
+    },
+    "tasks": {
+      "kicker": "Tidy up",
+      "title": "Clean up the task list",
+      "openCount": "{{count}} open",
+      "doneCount": "{{count}} done",
+      "filterLabel": "Only tasks from",
+      "allMembers": "All family members",
+      "deleteCompleted": "Delete completed",
+      "deleteCompletedConfirm": "Really delete completed tasks?",
+      "clearAll": "Empty the task list",
+      "clearAllConfirm": "Really delete all?"
+    },
+    "points": {
+      "kicker": "Star accounts",
+      "title": "Reward points",
+      "intro": "Reset the points of children and adults separately. Pets don't collect reward points.",
+      "resetConfirm": "Really reset to 0?"
+    },
+    "media": {
+      "kicker": "Kids' dashboard",
+      "title": "Media lounge",
+      "intro": "Add approved YouTube channels and Spotify playlists as large, kid-friendly tiles. Only what you approve here is visible.",
+      "chooseChild": "Choose a child profile",
+      "kindAriaLabel": "Media type",
+      "titlePlaceholder": "e.g. Sesame Street",
+      "share": "Approve widget",
+      "linkMeta": "{{kind}} · on {{name}}'s dashboard",
+      "childProfileFallback": "Child profile",
+      "removeLink": "Remove {{title}}",
+      "empty": "No media widgets approved yet."
+    },
+    "family": {
+      "kicker": "Family network",
+      "title": "Related family accounts",
+      "confirmedConnections_one": "{{count}} confirmed connection",
+      "confirmedConnections_other": "{{count}} confirmed connections",
+      "pendingRequests_one": "{{count}} pending request",
+      "pendingRequests_other": "{{count}} pending requests",
+      "openTree": "Open family tree"
+    }
+  },
+  "homeAssistant": {
+    "kicker": "Smart home · local & protected",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "intro": "Brings selected home states into the family planner as real tiles. The access token stays encrypted on your server.",
+    "domains": {
+      "binary_sensor": "Status",
+      "button": "Button",
+      "climate": "Climate",
+      "cover": "Blinds",
+      "device_tracker": "Presence",
+      "fan": "Fan",
+      "input_boolean": "Switch",
+      "light": "Light",
+      "media_player": "Media",
+      "person": "Person",
+      "scene": "Scene",
+      "script": "Script",
+      "sensor": "Sensor",
+      "sun": "Sun",
+      "switch": "Switch",
+      "vacuum": "Vacuum robot",
+      "weather": "Weather"
+    },
+    "connect": {
+      "addressLabel": "Home Assistant address",
+      "addressHint": "With Docker, using the fixed IP on your home network is most reliable.",
+      "tokenLabel": "Long-lived access token",
+      "tokenPlaceholder": "Token from your Home Assistant profile",
+      "tokenHint": "The token is no longer shown after saving.",
+      "submit": "Check connection"
+    },
+    "summary": {
+      "tilesShared_one": "{{count}} tile shared on the dashboard",
+      "tilesShared_other": "{{count}} tiles shared on the dashboard",
+      "active": "Active"
+    },
+    "toolbar": {
+      "loadDevices": "Load devices",
+      "testConnection": "Test connection",
+      "searchPlaceholder": "Search for a device or sensor"
+    },
+    "callout": {
+      "title": "Choose dashboard tiles",
+      "description": "Load the devices and decide exactly what may be visible and controllable."
+    },
+    "entity": {
+      "allowControl": "Allow control",
+      "visibleFor": "Also visible to:"
+    },
+    "noMatches": "No matching devices found.",
+    "saveBar": {
+      "selectedCount": "{{count}} selected",
+      "hint": "Adults see everything, children only what is shared with them.",
+      "save": "Save selection"
+    },
+    "manage": {
+      "summary": "Manage connection",
+      "newTokenPlaceholder": "New access token",
+      "renew": "Renew connection",
+      "disconnectConfirm": "Really disconnect?",
+      "disconnect": "Disconnect"
+    }
+  },
+  "webPush": {
+    "kickerNative": "Straight from Android",
+    "kickerWeb": "No extra app",
+    "titleNative": "Android app notifications",
+    "titleWeb": "Browser notifications",
+    "introNative": "The LX app registers this Android device once for a profile. After that, alerts arrive even when the app is closed.",
+    "introWeb": "Each phone or tablet registers once for a family profile. Keys and technical details stay invisible.",
+    "deviceConnected": "This device is on",
+    "activationSteps": {
+      "server": "Checking server …",
+      "android": "Preparing Android …",
+      "channels": "Setting up notifications …",
+      "permission": "Checking permission …",
+      "permission-request": "Please confirm the Android prompt …",
+      "firebase": "Registering device with Firebase …",
+      "save": "Saving device …"
+    },
+    "serverMissing": {
+      "title": "Firebase connection still missing",
+      "description": "The LX server doesn't have a private Firebase service key yet. That's why it can't reach Android at the moment.",
+      "hint": "Store the service key only in the server's data folder, then install the LX app built with the same Firebase project. The key never belongs in the Git repository."
+    },
+    "checking": {
+      "title": "Checking the Android connection",
+      "description": "LX is requesting the current Firebase status from the family server."
+    },
+    "statusError": {
+      "title": "Status could not be checked",
+      "fallback": "The app hasn't received a response from the family server yet.",
+      "retry": "Check again"
+    },
+    "unavailable": {
+      "titleSecureContext": "HTTPS is missing – that's why background push isn't working",
+      "titleGeneric": "One more secure step",
+      "hintNative": "Install the latest LX Android app to use native notifications.",
+      "hintWeb": "Open the planner via a trusted HTTPS address, add it to your Android home screen, then activate this device."
+    },
+    "denied": {
+      "title": "Turned off in the browser",
+      "bodyNative": "Allow notifications under Android → Apps → LX Family Planner → Notifications.",
+      "bodyWeb": "Allow notifications in your browser's site settings and then reopen the planner."
+    },
+    "ready": {
+      "title": "Register this device for {{name}}",
+      "hintNative": "One tap – the Android prompt appears only once.",
+      "hintWeb": "One click – no token and no extra app.",
+      "connecting": "Connecting …",
+      "enable": "Turn on notifications"
+    },
+    "activationError": "Connection not completed",
+    "connectedNote": {
+      "title": "Ready for background push",
+      "bodyNative": "Android shows family alerts in the system tray and, if you like, on the lock screen – even when LX is closed.",
+      "bodyWeb": "For the most reliable delivery on Android, install the planner via “Add to Home screen” and allow notifications in the Android app settings."
+    },
+    "preview": {
+      "title": "Show details on the lock screen",
+      "hint": "When turned off, chats, tasks and events stay private."
+    },
+    "actions": {
+      "saving": "Saving …",
+      "save": "Save selection",
+      "sending": "Sending …",
+      "sendTest": "Send test",
+      "disable": "Turn off for this profile"
+    },
+    "devices": {
+      "title": "Family devices",
+      "registeredCount": "{{count}} registered",
+      "transportAndroid": "Android app",
+      "transportBrowser": "Browser",
+      "meta": "{{transport}} · {{member}} · last updated {{date}}",
+      "removeDevice": "Remove {{name}}",
+      "empty": "No family device registered yet."
+    }
+  },
+  "gotify": {
+    "kicker": "Push messages",
+    "title": "Gotify notifications",
+    "intro": "Important family moments reach you even when the planner isn't open.",
+    "connected": "Connected",
+    "serverFallback": "Gotify server",
+    "security": {
+      "title": "Secure setup",
+      "body": "The password is used only once to create a dedicated Gotify app and is not stored."
+    },
+    "form": {
+      "serverLabel": "Gotify server",
+      "usernameLabel": "Username",
+      "passwordLabel": "Password",
+      "plannerUrlLabel": "Planner address on your phone",
+      "connecting": "Connecting …",
+      "connect": "Connect & test"
+    },
+    "status": {
+      "channel": "Message channel",
+      "openGotify": "Open Gotify"
+    },
+    "includeText": {
+      "title": "Show message text on the lock screen",
+      "hint": "Turned off by default for privacy reasons."
+    },
+    "phoneUrlLabel": "Open this planner address when tapped",
+    "actions": {
+      "saving": "Saving …",
+      "saveRules": "Save rules",
+      "sending": "Sending …",
+      "sendTest": "Send test",
+      "disconnectConfirm": "Really disconnect?",
+      "disconnect": "Disconnect"
+    }
+  },
+  "problemReports": {
+    "kicker": "Feedback from the app",
+    "title": "Problem reports",
+    "intro": "Reports stay on your server. With “Copy” they can be passed on in full and without credentials.",
+    "loading": "Loading reports …",
+    "categories": {
+      "problem": "Problem",
+      "content": "Content",
+      "idea": "Idea",
+      "fallback": "Report"
+    },
+    "copy": {
+      "profileLine": "Profile: {{value}}",
+      "areaLine": "Area: {{value}}",
+      "versionLine": "Version: {{value}}",
+      "deviceLine": "Device: {{value}}",
+      "successTitle": "Report copied",
+      "successBody": "You can now paste it directly into GitHub or a message.",
+      "errorTitle": "Copying not possible",
+      "errorBody": "The browser blocked access to the clipboard."
+    },
+    "unknownMember": "Unknown",
+    "areaFallback": "App",
+    "copyButton": "Copy",
+    "markDone": "Done",
+    "reopen": "Reopen",
+    "empty": {
+      "title": "No open reports",
+      "hint": "Everything is quiet here right now."
+    },
+    "openCount": "{{count}} open"
+  }
+}

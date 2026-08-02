@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Connected families · deliberately private",
+    "title": "Family mailbox",
+    "description": "Plan together at your own pace, or invite Grandma and Grandpa directly into your family chat.",
+    "writeLetter": "Write a letter"
+  },
+  "filters": {
+    "inbox": "Inbox",
+    "sent": "Sent"
+  },
+  "list": {
+    "emptyTitle": "No letters yet",
+    "emptyConnected": "A quiet start to your family correspondence.",
+    "emptyUnconnected": "Connect with another family in the family network first."
+  },
+  "reader": {
+    "sentTo": "Sent to {{family}}",
+    "from": "Letter from {{family}}",
+    "reply": "Reply",
+    "archiveLetter": "Archive letter",
+    "privacyNote": "Only adults from both connected families can see this letter.",
+    "placeholderTitle": "A letter is waiting for you to pick it",
+    "placeholderText": "More personal than chat, clearer for arrangements and shared plans."
+  },
+  "guests": {
+    "kicker": "Family talk with consent",
+    "title": "Guests in the family chat",
+    "description": "Adult profiles like Grandma or Grandpa only see new group messages from the moment they accept.",
+    "connectedFamily": "Connected family",
+    "adultProfile": "Adult profile",
+    "selectProfile": "Select a profile",
+    "sendInvitation": "Send invitation",
+    "status": {
+      "accepted": "In the chat",
+      "pending": "Waiting for consent",
+      "revoked": "Access ended",
+      "declined": "Declined"
+    },
+    "accept": "Accept",
+    "decline": "Decline",
+    "endAccess": "End access",
+    "empty": "No chat guests invited yet."
+  },
+  "compose": {
+    "kicker": "New family mail",
+    "title": "Write a letter",
+    "recipientFamily": "Recipient family",
+    "subject": "Subject",
+    "subjectPlaceholder": "What is it about?",
+    "body": "Your letter",
+    "bodyPlaceholder": "Hello everyone, …",
+    "privacyNote": "Only via the confirmed family connection",
+    "submit": "Post letter"
+  }
+}

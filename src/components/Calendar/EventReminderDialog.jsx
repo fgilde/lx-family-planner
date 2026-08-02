@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   BellRing,
   CalendarClock,
@@ -11,6 +12,7 @@ import {
   formatReminderLead,
   normalizeEventReminders
 } from '../../../shared/eventReminders.js';
+import { formatDate } from '../../utils/formatting';
 import EventReminderPicker from './EventReminderPicker';
 
 export default function EventReminderDialog({
@@ -18,6 +20,8 @@ export default function EventReminderDialog({
   onClose,
   onSave
 }) {
+  const { t } = useTranslation('calendar');
+  const { t: tShared } = useTranslation('shared');
   const [reminders, setReminders] = useState(
     normalizeEventReminders(event?.reminders)
   );
@@ -64,18 +68,21 @@ export default function EventReminderDialog({
             <CalendarClock size={25} />
           </span>
           <div>
-            <span>{isTrashReminder ? 'Abhol-Wecker' : 'Termin-Wecker'}</span>
+            <span>
+              {isTrashReminder
+                ? t('reminderDialog.trashKicker')
+                : t('reminderDialog.eventKicker')}
+            </span>
             <h2>{event.title}</h2>
             <p>
-              {new Date(`${event.date}T12:00:00`).toLocaleDateString(
-                'de-DE',
-                {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: 'long'
-                }
-              )}
-              {!event.allDay && event.time ? ` · ${event.time} Uhr` : ''}
+              {formatDate(new Date(`${event.date}T12:00:00`), {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long'
+              })}
+              {!event.allDay && event.time
+                ? ` · ${t('reminderDialog.atTime', { time: event.time })}`
+                : ''}
               {event.location ? (
                 <>
                   {' · '}
@@ -86,7 +93,7 @@ export default function EventReminderDialog({
           </div>
           <button
             type="button"
-            aria-label="Schließen"
+            aria-label={t('common:actions.close')}
             disabled={saving}
             onClick={onClose}
           >
@@ -105,12 +112,11 @@ export default function EventReminderDialog({
             <strong>
               {reminders.length
                 ? reminders
-                    .map(minutes => formatReminderLead(minutes))
+                    .map(minutes => formatReminderLead(minutes, false, tShared))
                     .join(' · ')
-                : 'Keine Erinnerung aktiv'}
+                : t('reminderDialog.noneActive')}
             </strong>
-            Benachrichtigungen müssen im jeweiligen Profil einmal aktiviert
-            sein. Der Hinweis erscheint zusätzlich im Familien-Posteingang.
+            {t('reminderDialog.note')}
           </span>
         </aside>
 
@@ -121,7 +127,7 @@ export default function EventReminderDialog({
             disabled={saving}
             onClick={onClose}
           >
-            Abbrechen
+            {t('common:actions.cancel')}
           </button>
           <button
             type="submit"
@@ -129,10 +135,10 @@ export default function EventReminderDialog({
             disabled={saving}
           >
             {saving ? (
-              'Wird gespeichert …'
+              t('common:status.saving')
             ) : (
               <>
-                <Check size={16} /> Erinnerungen speichern
+                <Check size={16} /> {t('reminderDialog.save')}
               </>
             )}
           </button>

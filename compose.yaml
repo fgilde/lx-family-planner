@@ -12,6 +12,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       TZ: "${TZ:-Europe/Berlin}"
+      APP_LANGUAGE: "${APP_LANGUAGE:-de}"
       DATABASE_FILE: /app/data/family_planner.sqlite
       LEGACY_DATABASE_FILE: /app/data/family_db.json
     ports:

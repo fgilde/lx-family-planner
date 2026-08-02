@@ -10,6 +10,7 @@ import {
   UsersRound,
   X
 } from 'lucide-react';
+import { Trans, useTranslation } from 'react-i18next';
 import { plannerApiRequest } from '../../utils/apiConfig';
 
 const FILE_LIMIT_BYTES = 100 * 1024 * 1024;
@@ -31,6 +32,7 @@ export default function CloudUploadDestinationDialog({
   onUploaded,
   showToast
 }) {
+  const { t } = useTranslation('adminCloud');
   const [folders, setFolders] = useState([]);
   const [selectedPath, setSelectedPath] = useState('');
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export default function CloudUploadDestinationDialog({
       setSelectedPath(nextSelection);
       setArea(folderArea(nextSelection));
     } catch (error) {
-      showToast('Ordner nicht geladen', error.message, 'error');
+      showToast(t('uploadDestination.foldersNotLoaded'), error.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -103,12 +105,12 @@ export default function CloudUploadDestinationDialog({
       setNewFolderName('');
       await loadFolders(data.entry.path);
       showToast(
-        'Ordner angelegt',
-        `${data.entry.name} ist als Ziel ausgewählt.`,
+        t('uploadDestination.folderCreatedTitle'),
+        t('uploadDestination.folderCreatedBody', { name: data.entry.name }),
         'success'
       );
     } catch (error) {
-      showToast('Ordner nicht angelegt', error.message, 'error');
+      showToast(t('uploadDestination.folderNotCreated'), error.message, 'error');
     } finally {
       setCreating(false);
     }
@@ -119,8 +121,8 @@ export default function CloudUploadDestinationDialog({
     const oversized = files.find(file => file.size > FILE_LIMIT_BYTES);
     if (oversized) {
       showToast(
-        'Datei zu groß',
-        `${oversized.name} ist größer als 100 MB.`,
+        t('uploadDestination.fileTooLargeTitle'),
+        t('uploadDestination.fileTooLargeBody', { name: oversized.name }),
         'warning'
       );
       return;
@@ -129,7 +131,11 @@ export default function CloudUploadDestinationDialog({
     let uploaded = 0;
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
-      setProgress(`${index + 1} von ${files.length}: ${file.name}`);
+      setProgress(t('uploadDestination.progress', {
+        current: index + 1,
+        total: files.length,
+        name: file.name
+      }));
       try {
         await plannerApiRequest(
           `/api/integrations/nextcloud/files/file?path=${
@@ -149,7 +155,7 @@ export default function CloudUploadDestinationDialog({
         uploaded += 1;
       } catch (error) {
         showToast(
-          `${file.name} nicht hochgeladen`,
+          t('uploadDestination.fileNotUploaded', { name: file.name }),
           error.message,
           'error'
         );
@@ -164,10 +170,11 @@ export default function CloudUploadDestinationDialog({
     setProgress('');
     if (uploaded) {
       showToast(
-        uploaded === 1 ? 'In der Cloud gespeichert' : 'Upload fertig',
-        `${uploaded} Datei${uploaded === 1 ? '' : 'en'} liegt jetzt in ${
-          selectedPath
-        }.`,
+        t('uploadDestination.uploadedTitle', { count: uploaded }),
+        t('uploadDestination.uploadedBody', {
+          count: uploaded,
+          path: selectedPath
+        }),
         'success'
       );
       onUploaded?.(selectedPath);
@@ -190,14 +197,14 @@ export default function CloudUploadDestinationDialog({
         <header>
           <span><CloudUpload size={22} /></span>
           <div>
-            <small>{files.length} Datei{files.length === 1 ? '' : 'en'} bereit</small>
-            <h2 id="cloud-upload-title">Wohin soll der Upload?</h2>
+            <small>{t('uploadDestination.filesReady', { count: files.length })}</small>
+            <h2 id="cloud-upload-title">{t('uploadDestination.title')}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={uploading}
-            aria-label="Ordnerauswahl schließen"
+            aria-label={t('uploadDestination.closeDialog')}
           >
             <X size={18} />
           </button>
@@ -210,7 +217,7 @@ export default function CloudUploadDestinationDialog({
             onClick={() => setArea('family')}
           >
             <UsersRound size={16} />
-            Familienordner
+            {t('uploadDestination.familyFolders')}
           </button>
           <button
             type="button"
@@ -218,7 +225,7 @@ export default function CloudUploadDestinationDialog({
             onClick={() => setArea('profile')}
           >
             <UserRound size={16} />
-            Profilordner
+            {t('uploadDestination.profileFolders')}
           </button>
         </div>
 
@@ -226,7 +233,7 @@ export default function CloudUploadDestinationDialog({
           {loading ? (
             <span className="cloud-upload-loading">
               <LoaderCircle className="spin" size={20} />
-              Ordner werden vorbereitet …
+              {t('uploadDestination.loadingFolders')}
             </span>
           ) : visibleFolders.length ? (
             visibleFolders.map(folder => (
@@ -252,7 +259,7 @@ export default function CloudUploadDestinationDialog({
             ))
           ) : (
             <span className="cloud-upload-loading">
-              In diesem Bereich gibt es noch keinen Ordner.
+              {t('uploadDestination.noFolders')}
             </span>
           )}
         </div>
@@ -264,8 +271,10 @@ export default function CloudUploadDestinationDialog({
             onChange={event => setNewFolderName(event.target.value)}
             placeholder={
               selectedPath
-                ? `Neuer Ordner in ${selectedPath.split('/').at(-1)}`
-                : 'Zuerst einen Bereich wählen'
+                ? t('uploadDestination.newFolderIn', {
+                    folder: selectedPath.split('/').at(-1)
+                  })
+                : t('uploadDestination.chooseAreaFirst')
             }
             maxLength={120}
             disabled={!selectedPath || uploading}
@@ -282,7 +291,7 @@ export default function CloudUploadDestinationDialog({
             {creating
               ? <LoaderCircle className="spin" size={15} />
               : <FolderPlus size={15} />}
-            Anlegen
+            {t('uploadDestination.create')}
           </button>
         </form>
 
@@ -296,8 +305,15 @@ export default function CloudUploadDestinationDialog({
         <footer>
           <span>
             {selectedPath
-              ? <>Ziel: <strong>{selectedPath}</strong></>
-              : 'Bitte einen Ordner auswählen.'}
+              ? (
+                <Trans
+                  t={t}
+                  i18nKey="uploadDestination.target"
+                  values={{ path: selectedPath }}
+                  components={{ strong: <strong /> }}
+                />
+              )
+              : t('uploadDestination.chooseFolder')}
           </span>
           <button
             type="button"
@@ -308,7 +324,7 @@ export default function CloudUploadDestinationDialog({
             {uploading
               ? <LoaderCircle className="spin" size={17} />
               : <Upload size={17} />}
-            {uploading ? 'Wird hochgeladen …' : 'Hier hochladen'}
+            {uploading ? t('uploadDestination.uploading') : t('uploadDestination.uploadHere')}
           </button>
         </footer>
       </section>

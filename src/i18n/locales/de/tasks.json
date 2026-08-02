@@ -1,0 +1,120 @@
+{
+  "header": {
+    "title": "Aufgaben & Sterne-Belohnungsshop",
+    "createReward": "Eigene Belohnung anlegen",
+    "assignTask": "Neue Aufgabe zuteilen",
+    "intro": "Kinder melden eine Aufgabe als erledigt. Sterne gibt es erst, wenn der Elternteil, der sie erstellt hat, die Erledigung bestätigt.",
+    "approvalsWaiting_one": "{{count}} Aufgabe wartet auf deine Prüfung",
+    "approvalsWaiting_other": "{{count}} Aufgaben warten auf deine Prüfung"
+  },
+  "repeat": {
+    "none": "Einmalig",
+    "daily": "Jeden Tag",
+    "weekdays": "Montag bis Freitag",
+    "weekly": "Jede Woche",
+    "monthly": "Jeden Monat",
+    "recurring": "Wiederkehrend"
+  },
+  "memberCard": {
+    "managedOnly": "Nur organisiert",
+    "noTasks": "Keine Aufgaben für {{name}} zugeteilt."
+  },
+  "taskItem": {
+    "reviewWaitingFor": "Die Prüfung wartet auf {{name}}.",
+    "fallbackCreator": "den Ersteller",
+    "fallbackParent": "einem Elternteil",
+    "statusConfirmed": "Bestätigt und gutgeschrieben",
+    "statusPendingWith": "Zur Prüfung bei {{name}}",
+    "statusCreatedBy": "Erstellt von {{name}}",
+    "statusTapWhenDone": "Tippen, wenn du fertig bist",
+    "rotationTitle": "Wechselt bei jeder Wiederholung",
+    "fairRotation": "Fairer Wechsel ({{count}})",
+    "approve": "Wirklich erledigt",
+    "reject": "Noch einmal"
+  },
+  "shop": {
+    "title": "Sterne-Belohnungsshop",
+    "titleForChild": "Sterne-Belohnungsshop für {{name}}",
+    "editRewardTitle": "Belohnung bearbeiten",
+    "deleteRewardTitle": "Belohnung löschen",
+    "forChild": "🧒 Für {{name}}",
+    "forAllChildren": "✨ Für alle Kinder",
+    "requiresStars": "Benötigt {{count}} Sterne",
+    "redeemFor": "Für {{name}} einlösen!"
+  },
+  "rewardModal": {
+    "editTitle": "Belohnung bearbeiten",
+    "createTitle": "Neue Belohnung anlegen",
+    "titleLabel": "Titel der Belohnung",
+    "titlePlaceholder": "z. B. 1x Zoo Ausflug, 30 Min Zocken...",
+    "forWhichChild": "Für welches Kind ist diese Belohnung?",
+    "childOption": "🧒 {{name}}",
+    "starCost": "Sterne-Kosten",
+    "imageLabel": "Bild der Belohnung"
+  },
+  "taskModal": {
+    "taskLabel": "Aufgabe / Pflicht",
+    "taskPlaceholder": "z. B. Zimmer aufräumen, Spülmaschine ausräumen...",
+    "assignTo": "Zuteilen an",
+    "managedSuffix": ", verwaltet",
+    "scheduleTitle": "Wann ist die Aufgabe dran?",
+    "scheduleHint": "Wiederholungen werden nach der Bestätigung automatisch neu eingeplant.",
+    "dueDate": "Fällig am",
+    "repeatLabel": "Wiederholung",
+    "rotationToggle": "Fair zwischen Profilen wechseln",
+    "rotationHint": "Nach jeder bestätigten Wiederholung ist automatisch die nächste Person dran.",
+    "category": "Bereich",
+    "categories": {
+      "household": "Haushalt",
+      "kitchen": "Küche",
+      "room": "Zimmer",
+      "school": "Schule",
+      "pet": "Haustier",
+      "garden": "Garten"
+    },
+    "managedNoteTitle": "Organisationsaufgabe",
+    "managedNoteHint": "Für verwaltete Profile gibt es keine Sterne und keine eigene Erledigt-Meldung.",
+    "starsLabel": "Sterne-Belohnung (+ Sterne)",
+    "submit": "Aufgabe Erstellen"
+  },
+  "rewardIcon": {
+    "defaultLabel": "Belohnung",
+    "customImage": "Eigenes Bild",
+    "customSymbol": "Eigenes Symbol",
+    "customImageTitle": "{{label}}: eigenes Bild"
+  },
+  "presets": {
+    "gift": "Geschenk",
+    "iceCream": "Eis essen",
+    "gaming": "Spielzeit",
+    "movie": "Filmabend",
+    "popcorn": "Kino",
+    "pizza": "Pizza",
+    "trip": "Ausflug",
+    "outdoors": "Draußen",
+    "bike": "Fahrradtour",
+    "swimming": "Schwimmen",
+    "creative": "Kreativzeit",
+    "music": "Musik",
+    "book": "Buch",
+    "party": "Party",
+    "animal": "Tiererlebnis",
+    "cake": "Nascherei",
+    "rocket": "Abenteuer",
+    "trophy": "Hauptgewinn",
+    "crown": "Wunsch bestimmen",
+    "surprise": "Überraschung"
+  },
+  "iconPicker": {
+    "hint": "Ein klares Bild, das Kinder sofort wiedererkennen.",
+    "uploadAriaLabel": "Eigenes Belohnungsbild auswählen",
+    "presetsAriaLabel": "Belohnungs-Icons",
+    "removeCustomImage": "Eigenes Bild entfernen",
+    "errors": {
+      "invalidType": "Bitte ein PNG-, JPG- oder WebP-Bild auswählen.",
+      "tooLarge": "Das Bild darf höchstens 5 MB groß sein.",
+      "stillTooLarge": "Das Bild ist nach dem Verkleinern noch zu groß.",
+      "readFailed": "Das Bild konnte nicht gelesen werden."
+    }
+  }
+}

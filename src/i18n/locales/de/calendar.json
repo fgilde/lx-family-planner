@@ -1,0 +1,160 @@
+{
+  "view": {
+    "hero": {
+      "eyebrow": "Familienzeit",
+      "title": "Euer Kalender, ohne Terminchaos.",
+      "todayCount_one": "Heute stehen <1>{{count}}</1> Termin an.",
+      "todayCount_other": "Heute stehen <1>{{count}}</1> Termine an.",
+      "nextUp": "Als Nächstes: {{title}}.",
+      "noNext": "Der nächste freie Moment gehört euch."
+    },
+    "actions": {
+      "sources": "Kalenderquellen",
+      "newEvent": "Neuer Termin"
+    },
+    "filter": {
+      "ariaLabel": "Personen filtern",
+      "all": "Alle",
+      "managed": "verwaltet"
+    },
+    "tools": {
+      "hidePast": "Vergangene aus",
+      "showPast": "Vergangene zeigen",
+      "export": "Export",
+      "import": "Datei importieren"
+    },
+    "agenda": {
+      "kicker": "Agenda",
+      "title": "Was als Nächstes ansteht",
+      "count_one": "{{count}} Termin",
+      "count_other": "{{count}} Termine"
+    },
+    "empty": {
+      "title": "Hier ist noch Platz für Schönes",
+      "description": "Trage einen Termin ein oder verbinde einen bestehenden Kalender.",
+      "cta": "Ersten Termin eintragen"
+    },
+    "day": {
+      "today": "Heute",
+      "tomorrow": "Morgen"
+    },
+    "event": {
+      "allDay": "Ganztags",
+      "until": "bis {{time}}",
+      "fromSubscriptionTitle": "Aus einem Kalenderabo",
+      "fromFamily": "Von {{name}}",
+      "subscriptionFallback": "Kalenderabo",
+      "sharedWithTitle": "Mit verbundenen Familien geteilt",
+      "sharedWith": "Mit {{names}}",
+      "memberManaged": "{{name}} · verwaltet",
+      "wholeFamily": "Ganze Familie",
+      "readOnlyTitle": "Dieser Termin wird von der Kalenderquelle verwaltet",
+      "editRemindersTitle": "Erinnerungen bearbeiten",
+      "editRemindersAria": "Erinnerungen für {{title}} bearbeiten",
+      "deleteTitle": "Termin löschen",
+      "deleteAria": "{{title}} löschen"
+    }
+  },
+  "trash": {
+    "header": {
+      "title": "Digitaler Müllkalender",
+      "description": "Importiere die .ics-Datei eures Entsorgers oder trage eine Abholung selbst ein. LX erinnert standardmäßig am Vortag.",
+      "import": "Müllkalender importieren",
+      "add": "Termin eintragen"
+    },
+    "next": {
+      "kicker": "Nächste Müllabfuhr",
+      "callout": "Tonne rausstellen"
+    },
+    "schedule": {
+      "kicker": "Abholplan",
+      "title": "Anstehende Termine",
+      "emptyTitle": "Noch keine Abholtermine",
+      "emptyDescription": "Lade die .ics-Datei eures Entsorgers hoch.",
+      "reminderOff": "Erinnerung aus",
+      "editReminderTitle": "Erinnerung ändern",
+      "editReminderAria": "Erinnerung für {{title}} ändern",
+      "removeTitle": "Termin entfernen",
+      "removeAria": "{{title}} entfernen"
+    },
+    "dialog": {
+      "eyebrow": "Neue Abholung",
+      "title": "Mülltermin eintragen",
+      "typeLabel": "Müllart",
+      "nameLabel": "Bezeichnung",
+      "dateLabel": "Abholdatum",
+      "save": "Termin speichern"
+    },
+    "toast": {
+      "importFailedTitle": "Import nicht möglich",
+      "importFailedBody": "In dieser Datei wurden keine Mülltermine gefunden.",
+      "importSuccessTitle": "Müllkalender importiert",
+      "importSuccessBody_one": "{{count}} Abholtermin wurde übernommen und erinnert standardmäßig einen Tag vorher.",
+      "importSuccessBody_other": "{{count}} Abholtermine wurden übernommen und erinnern standardmäßig einen Tag vorher.",
+      "addedTitle": "Mülltermin eingetragen",
+      "addedBody": "Die Abholung am {{date}} ist gespeichert.",
+      "reminderSavedTitle": "Erinnerung gespeichert",
+      "reminderOffTitle": "Erinnerung ausgeschaltet",
+      "reminderSavedBody": "LX erinnert {{leads}}.",
+      "reminderOffBody": "Für {{title}} wird keine Erinnerung gesendet."
+    }
+  },
+  "sources": {
+    "header": {
+      "kicker": "Kalenderbrücke",
+      "title": "Externe Kalender",
+      "description": "Termine aus Google, Outlook, Nextcloud und anderen ICS-Kalendern automatisch einlesen.",
+      "closeAria": "Kalenderquellen schließen"
+    },
+    "list": {
+      "heading": "Verbundene Quellen",
+      "activeCount": "{{count}} aktiv",
+      "syncAll": "Alle abgleichen",
+      "emptyTitle": "Noch keine Kalenderbrücke",
+      "emptyDescription": "Füge rechts einen privaten ICS-Link ein. Danach laufen neue Termine automatisch in euren Familienkalender.",
+      "everyone": "Alle",
+      "eventCount_one": "{{count}} Termin",
+      "eventCount_other": "{{count}} Termine",
+      "syncNever": "Noch nicht erfolgreich abgeglichen",
+      "syncToday": "Heute um {{time}}",
+      "syncNowTitle": "Jetzt abgleichen",
+      "syncNowAria": "{{name}} jetzt abgleichen",
+      "pauseAria": "{{name}} pausieren",
+      "resumeAria": "{{name}} aktivieren",
+      "removeTitle": "Quelle entfernen",
+      "removeAria": "{{name}} entfernen",
+      "confirmRemove": "\"{{name}}\" und alle darüber eingelesenen Termine entfernen?"
+    },
+    "form": {
+      "connect": "Kalender verbinden",
+      "connectHint": "Der Link bleibt verschlüsselt auf eurem Server.",
+      "nameLabel": "Name der Quelle",
+      "namePlaceholder": "z. B. Schulkalender",
+      "urlLabel": "Privater ICS-Link",
+      "visibilityLabel": "Sichtbar für",
+      "allMembers": "Alle Familienmitglieder",
+      "householdLabel": "Planungsort",
+      "householdFamily": "Unser Zuhause",
+      "householdGrandparents": "Zuhause Oma & Opa",
+      "colorLegend": "Kalenderfarbe",
+      "pickColorAria": "Farbe {{color}} wählen",
+      "privacyNote": "Nur lesen: Der Familienplaner kann im fremden Kalender nichts ändern oder löschen. Teile den geheimen Link trotzdem nicht öffentlich.",
+      "connecting": "Wird verbunden …"
+    }
+  },
+  "reminderDialog": {
+    "trashKicker": "Abhol-Wecker",
+    "eventKicker": "Termin-Wecker",
+    "atTime": "{{time}} Uhr",
+    "noneActive": "Keine Erinnerung aktiv",
+    "note": "Benachrichtigungen müssen im jeweiligen Profil einmal aktiviert sein. Der Hinweis erscheint zusätzlich im Familien-Posteingang.",
+    "save": "Erinnerungen speichern"
+  },
+  "reminderPicker": {
+    "title": "Wann soll LX erinnern?",
+    "subtitle": "Wähle einen oder mehrere Zeitpunkte",
+    "off": "Aus",
+    "activeHint": "LX erinnert auf allen für das Profil freigeschalteten Geräten.",
+    "inactiveHint": "Ohne Auswahl wird für diesen Eintrag keine Erinnerung gesendet."
+  }
+}

@@ -16,8 +16,9 @@
     "audit": "node --env-file-if-exists=.env server/dataIntegrity.js",
     "simulate-update": "node --env-file-if-exists=.env server/updateSimulation.js",
     "test": "node --test server/*.test.js",
+    "check:i18n": "node scripts/check-i18n.js",
     "build:apk": "powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
-    "check": "node --check server.js && node --check server/app.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && npm run test && vite build"
+    "check": "node --check server.js && node --check server/app.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && npm run check:i18n && npm run test && vite build"
   },
   "dependencies": {
     "@capacitor/core": "^8.4.2",
@@ -28,10 +29,12 @@
     "express": "^5.2.1",
     "fast-xml-parser": "^5.10.1",
     "google-auth-library": "^10.9.1",
+    "i18next": "^26.3.6",
     "lucide-react": "^0.453.0",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.11",
     "web-push": "3.6.7"
   },
   "devDependencies": {

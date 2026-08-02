@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Archive,
   Check,
@@ -20,9 +21,10 @@ import {
   DEFAULT_FAMILY_AVATAR,
   handleImgError
 } from '../../utils/imageFallback';
+import { formatDateTime } from '../../utils/formatting';
 
 function letterDate(value) {
-  return new Date(Number(value || Date.now())).toLocaleString('de-DE', {
+  return formatDateTime(Number(value || Date.now()), {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -35,6 +37,7 @@ function replySubject(subject = '') {
 }
 
 export default function FamilyMailbox() {
+  const { t } = useTranslation('familyMail');
   const {
     activeMember,
     familyRelationships,
@@ -157,11 +160,10 @@ export default function FamilyMailbox() {
       <header className="family-mail-hero">
         <span className="family-mail-seal"><Mail size={29} /></span>
         <div>
-          <small>Verbundene Familien · bewusst privat</small>
-          <h1>Familienbriefkasten</h1>
+          <small>{t('hero.kicker')}</small>
+          <h1>{t('hero.title')}</h1>
           <p>
-            Plant in Ruhe miteinander oder ladet Oma und Opa gezielt in
-            euren Familienchat ein.
+            {t('hero.description')}
           </p>
         </div>
         <button
@@ -177,7 +179,7 @@ export default function FamilyMailbox() {
           }}
           disabled={!connectedFamilies.length}
         >
-          <PenLine size={17} /> Brief schreiben
+          <PenLine size={17} /> {t('hero.writeLetter')}
         </button>
       </header>
 
@@ -190,7 +192,7 @@ export default function FamilyMailbox() {
               onClick={() => setMailFilter('inbox')}
             >
               <Inbox size={17} />
-              Eingang
+              {t('filters.inbox')}
               {unreadCount > 0 && <b>{unreadCount}</b>}
             </button>
             <button
@@ -198,7 +200,7 @@ export default function FamilyMailbox() {
               className={mailFilter === 'sent' ? 'active' : ''}
               onClick={() => setMailFilter('sent')}
             >
-              <Send size={17} /> Gesendet
+              <Send size={17} /> {t('filters.sent')}
             </button>
           </div>
 
@@ -234,11 +236,11 @@ export default function FamilyMailbox() {
             )) : (
               <div className="family-mail-empty-list">
                 <MailOpen size={25} />
-                <strong>Noch keine Briefe</strong>
+                <strong>{t('list.emptyTitle')}</strong>
                 <span>
                   {connectedFamilies.length
-                    ? 'Ein ruhiger Anfang für euren Familienaustausch.'
-                    : 'Verknüpft zuerst eine andere Familie im Familiennetz.'}
+                    ? t('list.emptyConnected')
+                    : t('list.emptyUnconnected')}
                 </span>
               </div>
             )}
@@ -252,10 +254,12 @@ export default function FamilyMailbox() {
                 <div>
                   <small>
                     {selectedLetter.direction === 'sent'
-                      ? 'Gesendet an'
-                      : 'Brief von'}
-                    {' '}
-                    {selectedLetter.otherFamily.familyName}
+                      ? t('reader.sentTo', {
+                          family: selectedLetter.otherFamily.familyName
+                        })
+                      : t('reader.from', {
+                          family: selectedLetter.otherFamily.familyName
+                        })}
                   </small>
                   <h2>{selectedLetter.subject}</h2>
                   <span>
@@ -269,11 +273,11 @@ export default function FamilyMailbox() {
                     type="button"
                     onClick={() => startReply(selectedLetter)}
                   >
-                    <Reply size={16} /> Antworten
+                    <Reply size={16} /> {t('reader.reply')}
                   </button>
                   <button
                     type="button"
-                    title="Brief archivieren"
+                    title={t('reader.archiveLetter')}
                     onClick={async () => {
                       await updateFamilyLetter(
                         selectedLetter.id,
@@ -289,17 +293,15 @@ export default function FamilyMailbox() {
               <article>{selectedLetter.body}</article>
               <footer>
                 <ShieldCheck size={16} />
-                Nur Erwachsene beider verbundenen Familien sehen diesen
-                Brief.
+                {t('reader.privacyNote')}
               </footer>
             </>
           ) : (
             <div className="family-letter-placeholder">
               <span>✉</span>
-              <h2>Ein Brief wartet auf deine Auswahl</h2>
+              <h2>{t('reader.placeholderTitle')}</h2>
               <p>
-                Persönlicher als Chat, übersichtlicher für Absprachen und
-                gemeinsame Pläne.
+                {t('reader.placeholderText')}
               </p>
             </div>
           )}
@@ -310,18 +312,17 @@ export default function FamilyMailbox() {
         <header>
           <span><MessageCircleMore size={23} /></span>
           <div>
-            <small>Familienfunk mit Zustimmung</small>
-            <h2>Gäste im Familienchat</h2>
+            <small>{t('guests.kicker')}</small>
+            <h2>{t('guests.title')}</h2>
             <p>
-              Erwachsene Profile wie Oma oder Opa sehen nur neue
-              Gruppennachrichten ab ihrer Zustimmung.
+              {t('guests.description')}
             </p>
           </div>
         </header>
 
         <form onSubmit={submitInvitation}>
           <label>
-            <span>Verbundene Familie</span>
+            <span>{t('guests.connectedFamily')}</span>
             <select
               value={inviteForm.relationshipId}
               onChange={event => setInviteForm({
@@ -337,7 +338,7 @@ export default function FamilyMailbox() {
             </select>
           </label>
           <label>
-            <span>Erwachsenes Profil</span>
+            <span>{t('guests.adultProfile')}</span>
             <select
               value={inviteForm.guestMemberId}
               onChange={event => setInviteForm(previous => ({
@@ -345,7 +346,7 @@ export default function FamilyMailbox() {
                 guestMemberId: event.target.value
               }))}
             >
-              <option value="">Profil auswählen</option>
+              <option value="">{t('guests.selectProfile')}</option>
               {guestCandidates.map(member => (
                 <option value={member.id} key={member.id}>
                   {member.name} · {getPositionLabel(member)}
@@ -363,7 +364,7 @@ export default function FamilyMailbox() {
             {busy === 'invite'
               ? <LoaderCircle className="spin" size={17} />
               : <UserPlus size={17} />}
-            Einladung senden
+            {t('guests.sendInvitation')}
           </button>
         </form>
 
@@ -387,12 +388,12 @@ export default function FamilyMailbox() {
                 <strong>{invitation.guestMember.name}</strong>
                 <em className={`guest-state ${invitation.status}`}>
                   {invitation.status === 'accepted'
-                    ? 'Im Chat'
+                    ? t('guests.status.accepted')
                     : invitation.status === 'pending'
-                      ? 'Wartet auf Zustimmung'
+                      ? t('guests.status.pending')
                       : invitation.status === 'revoked'
-                        ? 'Zugang beendet'
-                        : 'Abgelehnt'}
+                        ? t('guests.status.revoked')
+                        : t('guests.status.declined')}
                 </em>
               </span>
               {invitation.direction === 'guest' &&
@@ -405,7 +406,7 @@ export default function FamilyMailbox() {
                         updateFamilyChatGuest(invitation.id, 'accepted')
                       }
                     >
-                      <Check size={15} /> Annehmen
+                      <Check size={15} /> {t('guests.accept')}
                     </button>
                     <button
                       type="button"
@@ -413,7 +414,7 @@ export default function FamilyMailbox() {
                         updateFamilyChatGuest(invitation.id, 'declined')
                       }
                     >
-                      <X size={15} /> Ablehnen
+                      <X size={15} /> {t('guests.decline')}
                     </button>
                   </div>
                 )}
@@ -425,14 +426,14 @@ export default function FamilyMailbox() {
                       updateFamilyChatGuest(invitation.id, 'revoked')
                     }
                   >
-                    Zugang beenden
+                    {t('guests.endAccess')}
                   </button>
                 )}
             </article>
           )) : (
             <div className="family-guest-empty">
               <UserPlus size={23} />
-              Noch keine Chatgäste eingeladen.
+              {t('guests.empty')}
             </div>
           )}
         </div>
@@ -451,19 +452,19 @@ export default function FamilyMailbox() {
             <header>
               <span><PenLine size={21} /></span>
               <div>
-                <small>Neue Familienpost</small>
-                <h2>Brief schreiben</h2>
+                <small>{t('compose.kicker')}</small>
+                <h2>{t('compose.title')}</h2>
               </div>
               <button
                 type="button"
                 onClick={() => setComposeOpen(false)}
-                aria-label="Schließen"
+                aria-label={t('common:actions.close')}
               >
                 <X size={18} />
               </button>
             </header>
             <label>
-              <span>Empfängerfamilie</span>
+              <span>{t('compose.recipientFamily')}</span>
               <select
                 value={letterForm.recipientFamilyId}
                 onChange={event => setLetterForm(previous => ({
@@ -483,7 +484,7 @@ export default function FamilyMailbox() {
               </select>
             </label>
             <label>
-              <span>Betreff</span>
+              <span>{t('compose.subject')}</span>
               <input
                 value={letterForm.subject}
                 onChange={event => setLetterForm(previous => ({
@@ -493,11 +494,11 @@ export default function FamilyMailbox() {
                 maxLength={120}
                 required
                 autoFocus
-                placeholder="Worum geht es?"
+                placeholder={t('compose.subjectPlaceholder')}
               />
             </label>
             <label>
-              <span>Dein Brief</span>
+              <span>{t('compose.body')}</span>
               <textarea
                 value={letterForm.body}
                 onChange={event => setLetterForm(previous => ({
@@ -507,19 +508,19 @@ export default function FamilyMailbox() {
                 maxLength={6000}
                 rows={10}
                 required
-                placeholder="Hallo ihr Lieben, …"
+                placeholder={t('compose.bodyPlaceholder')}
               />
             </label>
             <footer>
               <span>
                 <ShieldCheck size={15} />
-                Nur über die bestätigte Familienverbindung
+                {t('compose.privacyNote')}
               </span>
               <button disabled={Boolean(busy)}>
                 {busy === 'letter'
                   ? <LoaderCircle className="spin" size={17} />
                   : <Send size={17} />}
-                Brief einwerfen
+                {t('compose.submit')}
               </button>
             </footer>
           </form>

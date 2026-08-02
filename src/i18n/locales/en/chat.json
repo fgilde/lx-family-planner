@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "attachmentLoad": "The attachment could not be loaded."
+  },
+  "imageViewer": {
+    "label": "Chat image",
+    "viewLarge": "View {{name}} full size",
+    "closeAria": "Close image view",
+    "tapToClose": "Tap outside the image to close"
+  },
+  "attachment": {
+    "open": "Open",
+    "download": "Download",
+    "kinds": {
+      "apk": "Android app",
+      "archive": "Archive",
+      "pdf": "PDF document",
+      "video": "Video",
+      "audio": "Audio",
+      "document": "Document"
+    }
+  },
+  "toasts": {
+    "attachmentOpenFailedTitle": "Attachment not opened",
+    "downloadFailedTitle": "Download failed",
+    "attachmentLimitTitle": "Attachment limit reached",
+    "attachmentLimitBody": "A message can include at most {{max}} files.",
+    "fileTooLargeTitle": "File too large",
+    "fileTooLargeBody": "{{name}} is larger than 100 MB.",
+    "selectionTrimmedTitle": "Selection shortened",
+    "selectionTrimmedBody_one": "The first file was attached.",
+    "selectionTrimmedBody_other": "The first {{count}} files were attached.",
+    "attachmentSendFailedTitle": "Attachment not sent",
+    "attachmentSendFailedBody": "The file could not be saved to the Family Cloud."
+  },
+  "preview": {
+    "fileShared": "📎 File shared",
+    "invitedChat": "Invited family chat",
+    "openGroup": "Open group",
+    "noMessages": "No messages yet",
+    "photo": "📷 Photo",
+    "file": "📎 File",
+    "newMessage": "New message"
+  },
+  "directory": {
+    "kicker": "Family talk",
+    "title": "Chats",
+    "groupChannel": "Everyone together",
+    "directLabel": "Direct",
+    "invitedLabel": "Invited"
+  },
+  "room": {
+    "familyProfiles_one": "{{count}} family profile",
+    "familyProfiles_other": "{{count}} family profiles",
+    "guestInvited": "You have been personally invited",
+    "groupTitle": "Family chat",
+    "visibleToAll": "Visible to everyone",
+    "guestAccess": "Guest access once accepted",
+    "directMessage": "Direct message"
+  },
+  "empty": {
+    "title": "Still quiet in here",
+    "prompt": "Write the first message to {{name}}.",
+    "familyName": "your family"
+  },
+  "message": {
+    "you": "You",
+    "chatPhoto": "Chat photo",
+    "sentAttachmentAlt": "Sent attachment",
+    "viewLarge": "View full size"
+  },
+  "composer": {
+    "removeAttachment": "Remove {{name}}",
+    "uploadingFile": "Saving file {{current}} of {{total}} to the cloud",
+    "sendingMessage": "Sending message",
+    "attachFiles": "Attach files",
+    "placeholder": "Message to {{name}} …",
+    "placeholderFamilyName": "the family",
+    "sending": "Sending …",
+    "send": "Send",
+    "cloudNote": "Attachments are filed automatically in the family archive · up to 100 MB"
+  }
+}

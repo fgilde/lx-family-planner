@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   CheckSquare,
@@ -23,16 +24,11 @@ import {
   isChildProfile,
   isManagedProfile
 } from '../../constants/roles';
+import { formatDate } from '../../utils/formatting';
 import RewardIcon, { DEFAULT_REWARD_ICON } from './RewardIcon';
 import RewardIconPicker from './RewardIconPicker';
 
-const REPEAT_LABELS = {
-  none: 'Einmalig',
-  daily: 'Jeden Tag',
-  weekdays: 'Montag bis Freitag',
-  weekly: 'Jede Woche',
-  monthly: 'Jeden Monat'
-};
+const REPEAT_RULES = ['none', 'daily', 'weekdays', 'weekly', 'monthly'];
 
 function formatTaskDate(value) {
   if (!value) return '';
@@ -40,7 +36,7 @@ function formatTaskDate(value) {
   const date = new Date(year, month - 1, day);
   return Number.isNaN(date.getTime())
     ? value
-    : date.toLocaleDateString('de-DE', {
+    : formatDate(date, {
         weekday: 'short',
         day: '2-digit',
         month: 'short'
@@ -55,6 +51,7 @@ function currentLocalDate() {
 }
 
 export default function ChoreRewardsPlanner() {
+  const { t } = useTranslation('tasks');
   const {
     tasks, toggleTask, reviewTask, addTask, rewards, addReward, updateReward, deleteReward, redeemReward,
     members, activeMember, activeHousehold, showToast
@@ -184,28 +181,27 @@ export default function ChoreRewardsPlanner() {
       <div className="card" style={{ padding: 20 }}>
         <div className="card-header" style={{ marginBottom: 12 }}>
           <h2 className="card-title" style={{ color: 'var(--primary)' }}>
-            <CheckSquare size={24} /> Aufgaben & Sterne-Belohnungsshop
+            <CheckSquare size={24} /> {t('header.title')}
           </h2>
           <div style={{ display: 'flex', gap: 10 }}>
             {isParent && (
               <button className="btn-secondary" onClick={handleOpenCreateReward}>
-                <Gift size={18} /> Eigene Belohnung anlegen
+                <Gift size={18} /> {t('header.createReward')}
               </button>
             )}
             {isParent && <button className="btn-primary" onClick={() => setIsAddTaskOpen(true)}>
-              <Plus size={18} /> Neue Aufgabe zuteilen
+              <Plus size={18} /> {t('header.assignTask')}
             </button>}
           </div>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Kinder melden eine Aufgabe als erledigt. Sterne gibt es erst, wenn der
-          Elternteil, der sie erstellt hat, die Erledigung bestätigt.
+          {t('header.intro')}
         </p>
         {isParent && approvalsForMe > 0 && (
           <div className="task-approval-callout">
             <ShieldCheck size={18} />
             <strong>
-              {approvalsForMe} {approvalsForMe === 1 ? 'Aufgabe wartet' : 'Aufgaben warten'} auf deine Prüfung
+              {t('header.approvalsWaiting', { count: approvalsForMe })}
             </strong>
           </div>
         )}
@@ -240,7 +236,7 @@ export default function ChoreRewardsPlanner() {
 
                 {isManagedProfile(member) ? (
                   <div className="task-managed-badge">
-                    <ShieldCheck size={16} /> Nur organisiert
+                    <ShieldCheck size={16} /> {t('memberCard.managedOnly')}
                   </div>
                 ) : (
                   <div style={{ background: 'color-mix(in srgb, var(--warning) 11%, var(--bg-elevated))', border: '1px solid color-mix(in srgb, var(--warning) 35%, var(--border-color))', color: 'var(--warning)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontWeight: 800, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -253,11 +249,11 @@ export default function ChoreRewardsPlanner() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {memberTasks.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Keine Aufgaben für{' '}
-                    {isManagedProfile(member)
-                      ? member.name
-                      : member.name.split(' ')[0]}{' '}
-                    zugeteilt.
+                    {t('memberCard.noTasks', {
+                      name: isManagedProfile(member)
+                        ? member.name
+                        : member.name.split(' ')[0]
+                    })}
                   </div>
                 ) : (
                   memberTasks.map(task => {
@@ -288,7 +284,11 @@ export default function ChoreRewardsPlanner() {
                           disabled={!canUseMainAction}
                           title={
                             isPending && !canReview
-                              ? `Die Prüfung wartet auf ${task.createdByName || 'den Ersteller'}.`
+                              ? t('taskItem.reviewWaitingFor', {
+                                  name:
+                                    task.createdByName ||
+                                    t('taskItem.fallbackCreator')
+                                })
                               : undefined
                           }
                         >
@@ -305,12 +305,20 @@ export default function ChoreRewardsPlanner() {
                             <strong>{task.title}</strong>
                             <small>
                               {task.completed
-                                ? 'Bestätigt und gutgeschrieben'
+                                ? t('taskItem.statusConfirmed')
                                 : isPending
-                                  ? `Zur Prüfung bei ${task.createdByName || 'einem Elternteil'}`
+                                  ? t('taskItem.statusPendingWith', {
+                                      name:
+                                        task.createdByName ||
+                                        t('taskItem.fallbackParent')
+                                    })
                                   : isParent
-                                    ? `Erstellt von ${task.createdByName || 'einem Elternteil'}`
-                                    : 'Tippen, wenn du fertig bist'}
+                                    ? t('taskItem.statusCreatedBy', {
+                                        name:
+                                          task.createdByName ||
+                                          t('taskItem.fallbackParent')
+                                      })
+                                    : t('taskItem.statusTapWhenDone')}
                             </small>
                             {(task.dueDate ||
                               (task.repeatRule &&
@@ -326,14 +334,17 @@ export default function ChoreRewardsPlanner() {
                                   task.repeatRule !== 'none' && (
                                     <span>
                                       <Repeat2 size={12} />
-                                      {REPEAT_LABELS[task.repeatRule] ||
-                                        'Wiederkehrend'}
+                                      {REPEAT_RULES.includes(task.repeatRule)
+                                        ? t(`repeat.${task.repeatRule}`)
+                                        : t('repeat.recurring')}
                                     </span>
                                   )}
                                 {task.rotationMemberIds?.length > 1 && (
-                                  <span title="Wechselt bei jeder Wiederholung">
+                                  <span title={t('taskItem.rotationTitle')}>
                                     <RotateCcw size={12} />
-                                    Fairer Wechsel ({task.rotationMemberIds.length})
+                                    {t('taskItem.fairRotation', {
+                                      count: task.rotationMemberIds.length
+                                    })}
                                   </span>
                                 )}
                               </span>
@@ -353,14 +364,14 @@ export default function ChoreRewardsPlanner() {
                               className="task-review-approve"
                               onClick={() => reviewTask(task.id, true)}
                             >
-                              <Check size={16} /> Wirklich erledigt
+                              <Check size={16} /> {t('taskItem.approve')}
                             </button>
                             <button
                               type="button"
                               className="task-review-reject"
                               onClick={() => reviewTask(task.id, false)}
                             >
-                              <RotateCcw size={15} /> Noch einmal
+                              <RotateCcw size={15} /> {t('taskItem.reject')}
                             </button>
                           </div>
                         )}
@@ -377,7 +388,9 @@ export default function ChoreRewardsPlanner() {
       {/* SECTION 2: PER-CHILD REWARDS SHOP */}
       <div className="card">
         <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: 16, color: '#d97706', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Gift size={24} /> Sterne-Belohnungsshop {isChildProfile(activeMember) ? `für ${activeMember.name}` : ''}
+          <Gift size={24} /> {isChildProfile(activeMember)
+            ? t('shop.titleForChild', { name: activeMember.name })
+            : t('shop.title')}
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
@@ -414,7 +427,7 @@ export default function ChoreRewardsPlanner() {
                           className="icon-circle-btn"
                           style={{ width: 30, height: 30, background: 'var(--bg-elevated)' }}
                           onClick={() => handleOpenEditReward(reward)}
-                          title="Belohnung bearbeiten"
+                          title={t('shop.editRewardTitle')}
                         >
                           <Edit3 size={13} />
                         </button>
@@ -422,7 +435,7 @@ export default function ChoreRewardsPlanner() {
                           className="icon-circle-btn"
                           style={{ width: 30, height: 30, background: 'var(--bg-elevated)', color: 'var(--danger)' }}
                           onClick={() => deleteReward(reward.id)}
-                          title="Belohnung löschen"
+                          title={t('shop.deleteRewardTitle')}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -435,12 +448,14 @@ export default function ChoreRewardsPlanner() {
                   {/* Child Specific Badge */}
                   <div style={{ marginBottom: 8 }}>
                     <span className="badge" style={{ background: targetChild ? targetChild.color : 'var(--primary)', color: 'white', fontSize: '0.75rem' }}>
-                      {targetChild ? `🧒 Für ${targetChild.name}` : '✨ Für alle Kinder'}
+                      {targetChild
+                        ? t('shop.forChild', { name: targetChild.name })
+                        : t('shop.forAllChildren')}
                     </span>
                   </div>
 
                   <div style={{ fontWeight: 800, color: '#d97706', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 14 }}>
-                    <Star size={16} fill="#f59e0b" /> Benötigt {reward.costStars} Sterne
+                    <Star size={16} fill="#f59e0b" /> {t('shop.requiresStars', { count: reward.costStars })}
                   </div>
                 </div>
 
@@ -450,7 +465,7 @@ export default function ChoreRewardsPlanner() {
                   style={{ width: '100%', background: '#d97706', justifyContent: 'center' }}
                   onClick={() => redeemReward(reward, activeMember.id)}
                 >
-                  Für {activeMember.name.split(' ')[0]} einlösen!
+                  {t('shop.redeemFor', { name: activeMember.name.split(' ')[0] })}
                 </button>
               </div>
             );
@@ -464,7 +479,7 @@ export default function ChoreRewardsPlanner() {
           <div className="modal-card reward-editor-modal" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
               <h2 className="card-title">
-                {editingReward ? 'Belohnung bearbeiten' : 'Neue Belohnung anlegen'}
+                {editingReward ? t('rewardModal.editTitle') : t('rewardModal.createTitle')}
               </h2>
               <button className="icon-circle-btn" onClick={() => setIsRewardModalOpen(false)}>
                 <X size={20} />
@@ -473,11 +488,11 @@ export default function ChoreRewardsPlanner() {
 
             <form onSubmit={handleSaveReward}>
               <div className="form-group">
-                <label className="form-label">Titel der Belohnung</label>
+                <label className="form-label">{t('rewardModal.titleLabel')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="z. B. 1x Zoo Ausflug, 30 Min Zocken..."
+                  placeholder={t('rewardModal.titlePlaceholder')}
                   value={rewardTitle}
                   onChange={e => setRewardTitle(e.target.value)}
                   required
@@ -486,21 +501,21 @@ export default function ChoreRewardsPlanner() {
 
               {/* Select Target Child / Member */}
               <div className="form-group">
-                <label className="form-label">Für welches Kind ist diese Belohnung?</label>
+                <label className="form-label">{t('rewardModal.forWhichChild')}</label>
                 <select
                   className="form-select"
                   value={rewardForMemberId}
                   onChange={e => setRewardForMemberId(e.target.value)}
                 >
-                  <option value="all">✨ Für alle Kinder</option>
+                  <option value="all">{t('shop.forAllChildren')}</option>
                   {members.filter(isChildProfile).map(child => (
-                    <option key={child.id} value={child.id}>🧒 {child.name}</option>
+                    <option key={child.id} value={child.id}>{t('rewardModal.childOption', { name: child.name })}</option>
                   ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Sterne-Kosten</label>
+                <label className="form-label">{t('rewardModal.starCost')}</label>
                 <input
                   type="number"
                   min="5"
@@ -513,7 +528,7 @@ export default function ChoreRewardsPlanner() {
               </div>
 
               <div className="form-group">
-                <span className="form-label">Bild der Belohnung</span>
+                <span className="form-label">{t('rewardModal.imageLabel')}</span>
                 <RewardIconPicker
                   value={rewardIcon}
                   image={rewardIconImage}
@@ -526,10 +541,10 @@ export default function ChoreRewardsPlanner() {
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  Speichern
+                  {t('common:actions.save')}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setIsRewardModalOpen(false)}>
-                  Abbrechen
+                  {t('common:actions.cancel')}
                 </button>
               </div>
             </form>
@@ -542,7 +557,7 @@ export default function ChoreRewardsPlanner() {
         <div className="modal-backdrop" onClick={() => setIsAddTaskOpen(false)}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
-              <h2 className="card-title">Neue Aufgabe zuteilen</h2>
+              <h2 className="card-title">{t('header.assignTask')}</h2>
               <button className="icon-circle-btn" onClick={() => setIsAddTaskOpen(false)}>
                 <X size={20} />
               </button>
@@ -550,11 +565,11 @@ export default function ChoreRewardsPlanner() {
 
             <form onSubmit={handleCreateTask}>
               <div className="form-group">
-                <label className="form-label">Aufgabe / Pflicht</label>
+                <label className="form-label">{t('taskModal.taskLabel')}</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="z. B. Zimmer aufräumen, Spülmaschine ausräumen..."
+                  placeholder={t('taskModal.taskPlaceholder')}
                   value={taskTitle}
                   onChange={e => setTaskTitle(e.target.value)}
                   required
@@ -562,12 +577,12 @@ export default function ChoreRewardsPlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Zuteilen an</label>
+                <label className="form-label">{t('taskModal.assignTo')}</label>
                 <select className="form-select" value={taskMemberId} onChange={e => setTaskMemberId(e.target.value)}>
                   {members.map(m => (
                     <option key={m.id} value={m.id}>
                       {m.name} ({getPositionLabel(m)}
-                      {isManagedProfile(m) ? ', verwaltet' : ''})
+                      {isManagedProfile(m) ? t('taskModal.managedSuffix') : ''})
                     </option>
                   ))}
                 </select>
@@ -577,16 +592,15 @@ export default function ChoreRewardsPlanner() {
                 <div className="task-schedule-editor-title">
                   <CalendarDays size={18} />
                   <div>
-                    <strong>Wann ist die Aufgabe dran?</strong>
+                    <strong>{t('taskModal.scheduleTitle')}</strong>
                     <span>
-                      Wiederholungen werden nach der Bestätigung automatisch
-                      neu eingeplant.
+                      {t('taskModal.scheduleHint')}
                     </span>
                   </div>
                 </div>
                 <div className="task-schedule-fields">
                   <label className="form-group">
-                    <span className="form-label">Fällig am</span>
+                    <span className="form-label">{t('taskModal.dueDate')}</span>
                     <input
                       type="date"
                       className="form-input"
@@ -596,7 +610,7 @@ export default function ChoreRewardsPlanner() {
                     />
                   </label>
                   <label className="form-group">
-                    <span className="form-label">Wiederholung</span>
+                    <span className="form-label">{t('taskModal.repeatLabel')}</span>
                     <select
                       className="form-select"
                       value={taskRepeatRule}
@@ -604,8 +618,8 @@ export default function ChoreRewardsPlanner() {
                         setTaskRepeatRule(event.target.value)
                       }
                     >
-                      {Object.entries(REPEAT_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
+                      {REPEAT_RULES.map(value => (
+                        <option key={value} value={value}>{t(`repeat.${value}`)}</option>
                       ))}
                     </select>
                   </label>
@@ -626,10 +640,9 @@ export default function ChoreRewardsPlanner() {
                         }}
                       />
                       <span>
-                        <strong>Fair zwischen Profilen wechseln</strong>
+                        <strong>{t('taskModal.rotationToggle')}</strong>
                         <small>
-                          Nach jeder bestätigten Wiederholung ist automatisch
-                          die nächste Person dran.
+                          {t('taskModal.rotationHint')}
                         </small>
                       </span>
                     </label>
@@ -672,18 +685,18 @@ export default function ChoreRewardsPlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Bereich</label>
+                <label className="form-label">{t('taskModal.category')}</label>
                 <select
                   className="form-select"
                   value={taskCategory}
                   onChange={event => setTaskCategory(event.target.value)}
                 >
-                  <option value="Haushalt">Haushalt</option>
-                  <option value="Küche">Küche</option>
-                  <option value="Zimmer">Zimmer</option>
-                  <option value="Schule">Schule</option>
-                  <option value="Haustier">Haustier</option>
-                  <option value="Garten">Garten</option>
+                  <option value="Haushalt">{t('taskModal.categories.household')}</option>
+                  <option value="Küche">{t('taskModal.categories.kitchen')}</option>
+                  <option value="Zimmer">{t('taskModal.categories.room')}</option>
+                  <option value="Schule">{t('taskModal.categories.school')}</option>
+                  <option value="Haustier">{t('taskModal.categories.pet')}</option>
+                  <option value="Garten">{t('taskModal.categories.garden')}</option>
                 </select>
               </div>
 
@@ -691,16 +704,15 @@ export default function ChoreRewardsPlanner() {
                 <div className="managed-task-form-note">
                   <ShieldCheck size={18} />
                   <span>
-                    <strong>Organisationsaufgabe</strong>
+                    <strong>{t('taskModal.managedNoteTitle')}</strong>
                     <small>
-                      Für verwaltete Profile gibt es keine Sterne und keine
-                      eigene Erledigt-Meldung.
+                      {t('taskModal.managedNoteHint')}
                     </small>
                   </span>
                 </div>
               ) : (
                 <div className="form-group">
-                  <label className="form-label">Sterne-Belohnung (+ Sterne)</label>
+                  <label className="form-label">{t('taskModal.starsLabel')}</label>
                   <input
                     type="number"
                     min="5"
@@ -715,10 +727,10 @@ export default function ChoreRewardsPlanner() {
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  Aufgabe Erstellen
+                  {t('taskModal.submit')}
                 </button>
                 <button type="button" className="btn-secondary" onClick={() => setIsAddTaskOpen(false)}>
-                  Abbrechen
+                  {t('common:actions.cancel')}
                 </button>
               </div>
             </form>

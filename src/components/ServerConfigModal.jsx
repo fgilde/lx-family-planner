@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Check, Globe, Server, Wifi, X } from 'lucide-react';
 import {
   DEFAULT_SERVER_URL,
@@ -8,6 +9,7 @@ import {
 } from '../utils/apiConfig';
 
 export default function ServerConfigModal({ isOpen, onClose, onSave }) {
+  const { t } = useTranslation('chrome');
   const [url, setUrl] = useState(
     () => getStoredServerUrl() || DEFAULT_SERVER_URL
   );
@@ -28,7 +30,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
     try {
       const target = normalizeServerUrl(url);
       if (!target) {
-        throw new Error('Bitte gib eine Server-Adresse ein.');
+        throw new Error(t('serverConfig.errors.emptyUrl'));
       }
       const response = await fetch(`${target}/api/health`, {
         method: 'GET',
@@ -36,23 +38,23 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
         signal: AbortSignal.timeout(5000)
       });
       if (!response.ok) {
-        throw new Error(`Der Server antwortet mit Status ${response.status}.`);
+        throw new Error(t('serverConfig.errors.badStatus', { status: response.status }));
       }
       const data = await response.json();
       if (data.status !== 'ok') {
-        throw new Error('Die Adresse gehört nicht zu einem LX-Family-Server.');
+        throw new Error(t('serverConfig.errors.notLxServer'));
       }
       setUrl(target);
       setStatus({
         success: true,
-        message: `Verbindung steht · LX Family Planner ${data.version || ''}`
+        message: t('serverConfig.connected', { version: data.version || '' })
       });
     } catch (error) {
       setStatus({
         success: false,
         message:
           error?.message ||
-          'Keine Verbindung möglich. Prüfe IP, Domain und Netzwerk.'
+          t('serverConfig.errors.noConnection')
       });
     } finally {
       setTesting(false);
@@ -70,7 +72,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
     } catch (error) {
       setStatus({
         success: false,
-        message: error?.message || 'Die Server-Adresse ist nicht gültig.'
+        message: error?.message || t('serverConfig.errors.invalidUrl')
       });
     }
   };
@@ -91,21 +93,21 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
         <header>
           <span className="server-config-mark"><Server size={24} /></span>
           <div>
-            <span>Verbindung</span>
-            <h2 id="server-config-title">Dein Familien-Server</h2>
-            <p>Für Zuhause, NAS oder eure eigene Domain.</p>
+            <span>{t('serverConfig.kicker')}</span>
+            <h2 id="server-config-title">{t('serverConfig.title')}</h2>
+            <p>{t('serverConfig.subtitle')}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Server-Einstellungen schließen"
+            aria-label={t('serverConfig.close')}
           >
             <X size={19} />
           </button>
         </header>
 
         <div className="server-config-content">
-          <label htmlFor="server-config-url">Server-Adresse</label>
+          <label htmlFor="server-config-url">{t('serverConfig.urlLabel')}</label>
           <div className="server-config-input">
             <Globe size={18} />
             <input
@@ -119,13 +121,15 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
                 setUrl(event.target.value);
                 setStatus(null);
               }}
-              placeholder="https://familie.example.de"
+              placeholder={t('serverConfig.urlPlaceholder')}
             />
           </div>
           <p>
-            Im Heimnetz kannst du zum Beispiel
-            <code>192.168.178.50:3001</code> eintragen. Außerhalb des
-            Heimnetzes sollte die Adresse immer HTTPS verwenden.
+            <Trans
+              t={t}
+              i18nKey="serverConfig.hint"
+              components={{ code: <code /> }}
+            />
           </p>
 
           {status && (
@@ -150,7 +154,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
             onClick={handleTestConnection}
             disabled={testing}
           >
-            {testing ? 'Verbindung wird geprüft …' : 'Verbindung testen'}
+            {testing ? t('serverConfig.testing') : t('serverConfig.test')}
           </button>
           <div>
             <button
@@ -158,7 +162,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
               className="server-config-cancel"
               onClick={onClose}
             >
-              Abbrechen
+              {t('common:actions.cancel')}
             </button>
             <button
               type="button"
@@ -166,7 +170,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
               onClick={handleSave}
               disabled={testing}
             >
-              Speichern
+              {t('common:actions.save')}
             </button>
           </div>
         </footer>

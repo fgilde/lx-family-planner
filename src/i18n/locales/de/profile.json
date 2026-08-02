@@ -1,0 +1,148 @@
+{
+  "positions": {
+    "mama": "Mama",
+    "papa": "Papa",
+    "kind": "Kind",
+    "teenager": "Teenager",
+    "oma": "Oma",
+    "opa": "Opa",
+    "betreute_person": "Betreute Person",
+    "tante": "Tante",
+    "onkel": "Onkel",
+    "patin": "Patin",
+    "pate": "Pate",
+    "haustier": "Haustier",
+    "familienmitglied": "Familienmitglied"
+  },
+  "roleLabels": {
+    "adult": "Erwachsen",
+    "child": "Kind",
+    "teen": "Teenager",
+    "senior": "Großeltern",
+    "member": "Familienmitglied",
+    "pet": "Haustier"
+  },
+  "modal": {
+    "eyebrow": {
+      "protected": "Geschütztes Profil",
+      "edit": "Profil bearbeiten",
+      "new": "Neues Profil",
+      "family": "Eure Familie"
+    },
+    "title": {
+      "unlock": "{{name}} entsperren",
+      "edit": "Profil bearbeiten",
+      "create": "Profil anlegen",
+      "whoseTurn": "Wer ist gerade dran?"
+    }
+  },
+  "toasts": {
+    "switched": "Profil gewechselt",
+    "greeting": "Hallo {{name}}!",
+    "locked": "Profil gesperrt",
+    "pinIncorrect": "PIN nicht korrekt",
+    "updated": "Profil aktualisiert",
+    "savedMessage": "{{name}} ist gespeichert."
+  },
+  "confirmDelete": "Dieses Familienprofil wirklich löschen?",
+  "pin": {
+    "protectedHeading": "{{name}}s Profil ist geschützt",
+    "enterPin": "Gib die persönliche Profil-PIN ein.",
+    "petPasswordNeeded": "Für den Wechsel aus einem Haustierprofil wird das Familienpasswort benötigt.",
+    "childPasswordNeeded": "Für den Wechsel aus einem Kinderprofil wird das Familienpasswort benötigt.",
+    "pinPlaceholder": "Profil-PIN",
+    "familyPasswordPlaceholder": "Familienpasswort",
+    "unlock": "Entsperren"
+  },
+  "list": {
+    "intro": "Tippe auf ein Profil, um direkt in seine persönliche Familienwelt zu wechseln.",
+    "selectAria": "{{name}}, {{position}} auswählen",
+    "activeProfile": "Aktives Profil",
+    "pinProtected": "Mit PIN geschützt",
+    "petBadge": "Pfotenprofil",
+    "editMember": "{{name}} bearbeiten",
+    "managedHeading": "Von euch verwaltet",
+    "managedSubheading": "Ohne Anmeldung · für Termine und Aufgaben",
+    "managedNoAccess": "{{position}} · kein eigener Zugang",
+    "eventsTitle": "Termine",
+    "tasksTitle": "Aufgaben",
+    "addMember": "Mitglied hinzufügen"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "deviceHint": "Für {{name}} auf diesem Gerät",
+    "petModeActive": "Haustiermodus aktiv",
+    "petModeHint": "Ohne Chat, Meldungen und Kontofunktionen",
+    "headingFor": "Benachrichtigungen für {{name}}",
+    "savedPerDevice": "Diese Auswahl wird für dieses Profil und dieses Gerät gespeichert.",
+    "on": "An",
+    "off": "Aus",
+    "serverNotConfigured": "Native Android-Meldungen sind auf dem Server noch nicht eingerichtet. Die Anleitung findest du in der Elternzentrale.",
+    "deniedNative": "Android blockiert Meldungen. Bitte erlaube sie unter Apps → LX Family Planner → Benachrichtigungen.",
+    "deniedBrowser": "Der Browser blockiert Meldungen. Bitte erlaube sie einmal in den Website-Einstellungen des Browsers.",
+    "showPreviews": "Inhalt in Meldungen zeigen",
+    "sendTest": "Testmeldung senden"
+  },
+  "form": {
+    "usage": "Wie wird das Profil genutzt?",
+    "ownLogin": "Mit eigener Anmeldung",
+    "ownLoginHint": "Erscheint beim Profilwechsel und kann den Planer selbst öffnen.",
+    "managedOnly": "Nur von uns verwaltet",
+    "managedOnlyHint": "Für Oma, Opa oder betreute Personen ohne eigenen Zugang.",
+    "managedNote": "Organisationsprofil ohne Anmeldung",
+    "managedNoteHint": "Das Profil erscheint in Kalendern und Aufgaben, aber nicht bei der Anmeldung, im Profilwechsel oder im Chat.",
+    "petNote": "Haustierprofil",
+    "petNoteHint": "Zeigt Pflegeaufgaben und Tiertermine – ohne Chat, Benachrichtigungen oder Sterneshop.",
+    "petName": "Name des Haustiers",
+    "petNamePlaceholder": "z. B. Luna",
+    "namePlaceholder": "z. B. Testname",
+    "position": "Position in der Familie",
+    "avatar": "Profilbild",
+    "ownPhoto": "Eigenes Foto",
+    "color": "Profilfarbe",
+    "newPin": "Neue Profil-PIN (optional)",
+    "pin": "Profil-PIN (optional)",
+    "pinKeepPlaceholder": "Leer lassen = unverändert",
+    "pinPlaceholder": "Persönlicher Schutz",
+    "saving": "Speichert …",
+    "save": "Profil speichern",
+    "delete": "Profil löschen"
+  },
+  "quickAdd": {
+    "title": "Schnell Hinzufügen",
+    "types": {
+      "event": "Termin",
+      "shopping": "Einkauf",
+      "task": "Aufgabe",
+      "note": "Notiz"
+    },
+    "titleLabels": {
+      "event": "Termintitel",
+      "shopping": "Artikelname",
+      "task": "Aufgabe",
+      "note": "Notiz-Titel"
+    },
+    "titlePlaceholder": "Eingeben...",
+    "forWhom": "Für wer?",
+    "everyone": "Alle (Gemeinsam)",
+    "managed": "verwaltet",
+    "locationOptional": "Ort (optional)",
+    "locationPlaceholder": "z. B. Dr. Weber, Schule",
+    "inviteFamilies": "Verbundene Familien einladen",
+    "inviteFamiliesHint": "Der Termin erscheint bei allen ausgewählten Familien, private Termine bleiben getrennt.",
+    "categoryLabel": "Kategorie",
+    "shoppingCategories": {
+      "produce": "Obst & Gemüse",
+      "dairy": "Kühlung & Milch",
+      "bakery": "Bäckerei",
+      "pantry": "Vorräte",
+      "drinks": "Getränke",
+      "household": "Drogerie & Haushalt"
+    },
+    "quantity": "Menge",
+    "assignedTo": "Zugewiesen an",
+    "starPoints": "Sterne-Punkte",
+    "noteText": "Notiztext",
+    "notePlaceholder": "Inhalt eingeben..."
+  }
+}

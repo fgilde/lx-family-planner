@@ -27,20 +27,26 @@ import {
   UsersRound,
   Vote
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   canManageFamily,
   isChildProfile,
   isManagedProfile
 } from '../../constants/roles';
+import {
+  formatCurrency,
+  formatDate,
+  getWeekdayNames
+} from '../../utils/formatting';
 
 const SECTIONS = [
-  { id: 'today', label: 'Wochenblick', icon: Sparkles },
-  { id: 'routines', label: 'Routinen', icon: AlarmClock },
-  { id: 'money', label: 'Taschengeld', icon: PiggyBank },
-  { id: 'school', label: 'Schule', icon: GraduationCap },
-  { id: 'polls', label: 'Abstimmen', icon: Vote },
-  { id: 'safety', label: 'Sicher & ruhig', icon: ShieldAlert }
+  { id: 'today', labelKey: 'sections.today', icon: Sparkles },
+  { id: 'routines', labelKey: 'sections.routines', icon: AlarmClock },
+  { id: 'money', labelKey: 'sections.money', icon: PiggyBank },
+  { id: 'school', labelKey: 'sections.school', icon: GraduationCap },
+  { id: 'polls', labelKey: 'sections.polls', icon: Vote },
+  { id: 'safety', labelKey: 'sections.safety', icon: ShieldAlert }
 ];
 
 const ROUTINE_ICONS = ['☀️', '🎒', '🪥', '🛁', '🌙', '⚡'];
@@ -48,20 +54,11 @@ const MISSION_ICONS = ['🤝', '🏡', '🌳', '🎲', '🍕', '🚲'];
 const ENCOURAGEMENT_ICONS = ['💛', '🌟', '🦁', '🚀', '🦄', '💪'];
 const GOAL_ICONS = ['🎯', '🚲', '🎮', '📚', '🎸', '🛼'];
 const SCHOOL_KIND = {
-  lesson: { label: 'Stundenplan', icon: '📘' },
-  homework: { label: 'Hausaufgabe', icon: '✏️' },
-  exam: { label: 'Klassenarbeit', icon: '🧠' },
-  bag: { label: 'Ranzen-Check', icon: '🎒' }
+  lesson: { labelKey: 'school.kinds.lesson', icon: '📘' },
+  homework: { labelKey: 'school.kinds.homework', icon: '✏️' },
+  exam: { labelKey: 'school.kinds.exam', icon: '🧠' },
+  bag: { labelKey: 'school.kinds.bag', icon: '🎒' }
 };
-const WEEKDAYS = [
-  'Sonntag',
-  'Montag',
-  'Dienstag',
-  'Mittwoch',
-  'Donnerstag',
-  'Freitag',
-  'Samstag'
-];
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -71,10 +68,7 @@ function localDateKey(date = new Date()) {
 }
 
 function euro(cents = 0) {
-  return new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR'
-  }).format(Number(cents || 0) / 100);
+  return formatCurrency(Number(cents || 0) / 100, 'EUR');
 }
 
 function lastSevenDateKeys() {
@@ -126,6 +120,7 @@ function Creator({ title, children, open = false }) {
 }
 
 export default function FamilyLifeHub() {
+  const { t } = useTranslation('familyLife');
   const {
     activeMember,
     members,
@@ -168,6 +163,7 @@ export default function FamilyLifeHub() {
     activeMember;
   const selectedId = selectedMember?.id || '';
   const today = localDateKey();
+  const weekdays = getWeekdayNames('long', false);
 
   useEffect(() => {
     if (isChildProfile(activeMember)) {
@@ -178,10 +174,10 @@ export default function FamilyLifeHub() {
   }, [activeMember, children, members, selectedMemberId]);
 
   const [routineForm, setRoutineForm] = useState({
-    title: 'Morgenstart',
+    title: t('routines.defaults.title'),
     timeOfDay: 'morning',
     icon: '☀️',
-    steps: 'Aufstehen\nAnziehen\nZähne putzen\nSchulranzen prüfen'
+    steps: t('routines.defaults.steps')
   });
   const [goalForm, setGoalForm] = useState({
     title: '',
@@ -191,7 +187,7 @@ export default function FamilyLifeHub() {
   const [moneyForm, setMoneyForm] = useState({
     amount: '2',
     starCost: '0',
-    note: 'Taschengeld'
+    note: t('money.booking.defaultNote')
   });
   const [schoolForm, setSchoolForm] = useState({
     kind: 'homework',
@@ -204,7 +200,7 @@ export default function FamilyLifeHub() {
   });
   const [pollForm, setPollForm] = useState({
     question: '',
-    options: '🍕 Pizza\n🍝 Nudeln\n🥞 Pfannkuchen',
+    options: t('polls.form.defaultOptions'),
     closesAt: ''
   });
   const [encouragementForm, setEncouragementForm] = useState({
@@ -226,7 +222,7 @@ export default function FamilyLifeHub() {
     mediaScheduleEnabled: false,
     mediaStart: '15:00',
     mediaEnd: '19:30',
-    emergencyTitle: 'Wichtige Hilfe für unsere Familie',
+    emergencyTitle: t('safety.emergency.defaultTitle'),
     emergencyContacts: '',
     emergencyNotes: ''
   });
@@ -242,7 +238,7 @@ export default function FamilyLifeHub() {
       mediaStart: settings.mediaStart || '15:00',
       mediaEnd: settings.mediaEnd || '19:30',
       emergencyTitle:
-        settings.emergencyTitle || 'Wichtige Hilfe für unsere Familie',
+        settings.emergencyTitle || t('safety.emergency.defaultTitle'),
       emergencyContacts: (settings.emergencyContacts || [])
         .map(contact =>
           [contact.name, contact.phone, contact.note].filter(Boolean).join(' | ')
@@ -305,22 +301,22 @@ export default function FamilyLifeHub() {
   const achievements = [
     {
       icon: '🌱',
-      title: 'Erster Schritt',
+      title: t('achievements.firstStep'),
       reached: completedTasksThisWeek > 0 || routineDays > 0
     },
     {
       icon: '🔥',
-      title: 'Routine-Profi',
+      title: t('achievements.routinePro'),
       reached: Math.max(0, ...myRoutines.map(routineStreak)) >= 3
     },
     {
       icon: '⭐',
-      title: 'Sternensammler',
+      title: t('achievements.starCollector'),
       reached: Number(selectedMember?.stars || 0) >= 50
     },
     {
       icon: '🤝',
-      title: 'Teamgeist',
+      title: t('achievements.teamSpirit'),
       reached: myMissions.some(mission =>
         mission.completedMemberIds?.includes(selectedId)
       )
@@ -466,12 +462,9 @@ export default function FamilyLifeHub() {
     <div className="family-life">
       <section className="family-life-hero">
         <div className="family-life-hero-copy">
-          <span><HeartHandshake size={17} /> Euer Alltag, ein gutes Team</span>
-          <h1>Familienreise</h1>
-          <p>
-            Routinen, Schule, Taschengeld und Entscheidungen greifen hier
-            ineinander – verständlich für Kinder, verlässlich für Eltern.
-          </p>
+          <span><HeartHandshake size={17} /> {t('hero.kicker')}</span>
+          <h1>{t('hero.title')}</h1>
+          <p>{t('hero.intro')}</p>
         </div>
         <div className="family-life-hero-orbit" aria-hidden="true">
           <i>☀️</i><i>🎒</i><i>⭐</i>
@@ -479,7 +472,7 @@ export default function FamilyLifeHub() {
         <div className="family-life-person">
           {isAdult && children.length > 0 ? (
             <label>
-              <span>Ansicht für</span>
+              <span>{t('hero.viewFor')}</span>
               <select
                 value={selectedId}
                 onChange={event => setSelectedMemberId(event.target.value)}
@@ -491,14 +484,14 @@ export default function FamilyLifeHub() {
             </label>
           ) : (
             <>
-              <span>Deine Reise</span>
+              <span>{t('hero.yourJourney')}</span>
               <strong>{selectedMember?.name}</strong>
             </>
           )}
         </div>
       </section>
 
-      <nav className="family-life-nav" aria-label="Bereiche der Familienreise">
+      <nav className="family-life-nav" aria-label={t('hero.navAria')}>
         {SECTIONS.map(item => {
           const Icon = item.icon;
           return (
@@ -509,7 +502,7 @@ export default function FamilyLifeHub() {
               onClick={() => setSection(item.id)}
             >
               <Icon size={18} />
-              <span>{item.label}</span>
+              <span>{t(item.labelKey)}</span>
             </button>
           );
         })}
@@ -519,35 +512,35 @@ export default function FamilyLifeHub() {
         <div className="family-life-section family-weekly">
           <section className="family-life-panel weekly-story">
             <PanelHeader
-              kicker="Die letzten sieben Tage"
-              title={`Das war ${selectedMember?.name}s Woche`}
+              kicker={t('weekly.kicker')}
+              title={t('weekly.title', { name: selectedMember?.name })}
               icon={Trophy}
             />
             <div className="weekly-metrics">
-              <article><Check /><strong>{completedTasksThisWeek}</strong><span>Missionen</span></article>
-              <article><RotateCw /><strong>{routineDays}</strong><span>Routinetage</span></article>
-              <article><Vote /><strong>{participation}</strong><span>Abstimmungen</span></article>
-              <article><Star /><strong>{selectedMember?.stars || 0}</strong><span>Sterne</span></article>
+              <article><Check /><strong>{completedTasksThisWeek}</strong><span>{t('weekly.metrics.missions')}</span></article>
+              <article><RotateCw /><strong>{routineDays}</strong><span>{t('weekly.metrics.routineDays')}</span></article>
+              <article><Vote /><strong>{participation}</strong><span>{t('weekly.metrics.polls')}</span></article>
+              <article><Star /><strong>{selectedMember?.stars || 0}</strong><span>{t('weekly.metrics.stars')}</span></article>
             </div>
             <div className="weekly-message">
               <span>{completedTasksThisWeek + routineDays >= 5 ? '🏆' : '🌱'}</span>
               <div>
                 <strong>
                   {completedTasksThisWeek + routineDays >= 5
-                    ? 'Das war eine richtig starke Woche!'
-                    : 'Jeder kleine Schritt zählt.'}
+                    ? t('weekly.strongWeek')
+                    : t('weekly.everyStepCounts')}
                 </strong>
                 <p>
                   {nextEvent
-                    ? `Als Nächstes wartet „${nextEvent.title}“ auf euch.`
-                    : 'Der nächste Familienmoment kann ganz spontan entstehen.'}
+                    ? t('weekly.nextEvent', { title: nextEvent.title })
+                    : t('weekly.spontaneousMoment')}
                 </p>
               </div>
             </div>
           </section>
 
           <section className="family-life-panel achievement-cabinet">
-            <PanelHeader kicker="Sammelkabinett" title="Abzeichen" icon={Medal} />
+            <PanelHeader kicker={t('achievements.kicker')} title={t('achievements.title')} icon={Medal} />
             <div className="achievement-grid">
               {achievements.map(achievement => (
                 <article
@@ -556,14 +549,14 @@ export default function FamilyLifeHub() {
                 >
                   <span>{achievement.icon}</span>
                   <strong>{achievement.title}</strong>
-                  <small>{achievement.reached ? 'Gesammelt' : 'Noch geheim'}</small>
+                  <small>{achievement.reached ? t('achievements.collected') : t('achievements.stillSecret')}</small>
                 </article>
               ))}
             </div>
           </section>
 
           <section className="family-life-panel team-missions">
-            <PanelHeader kicker="Gemeinsam statt allein" title="Familien-Missionen" icon={UsersRound} />
+            <PanelHeader kicker={t('missions.kicker')} title={t('missions.title')} icon={UsersRound} />
             <div className="team-mission-list">
               {myMissions.map(mission => {
                 const done = mission.completedMemberIds?.includes(selectedId);
@@ -578,7 +571,7 @@ export default function FamilyLifeHub() {
                       <span>{mission.icon || '🤝'}</span>
                       <div>
                         <strong>{mission.title}</strong>
-                        <small>{mission.description || `${completed} von ${total} sind dabei`}</small>
+                        <small>{mission.description || t('missions.progress', { completed, total })}</small>
                       </div>
                       <i>{done ? <Check size={17} /> : <ChevronRight size={17} />}</i>
                     </button>
@@ -587,22 +580,22 @@ export default function FamilyLifeHub() {
                 );
               })}
               {!myMissions.length && (
-                <div className="family-life-empty">Noch keine gemeinsame Mission.</div>
+                <div className="family-life-empty">{t('missions.empty')}</div>
               )}
             </div>
             {isAdult && children.length > 0 && (
-              <Creator title="Neue Familien-Mission">
+              <Creator title={t('missions.creatorTitle')}>
                 <form onSubmit={createMission} className="family-life-form">
                   <input
                     value={missionForm.title}
                     onChange={event => setMissionForm(previous => ({ ...previous, title: event.target.value }))}
-                    placeholder="Zum Beispiel: Gemeinsam den Garten retten"
+                    placeholder={t('missions.titlePlaceholder')}
                     required
                   />
                   <textarea
                     value={missionForm.description}
                     onChange={event => setMissionForm(previous => ({ ...previous, description: event.target.value }))}
-                    placeholder="Was macht ihr zusammen?"
+                    placeholder={t('missions.descriptionPlaceholder')}
                   />
                   <div className="emoji-choice">
                     {MISSION_ICONS.map(icon => (
@@ -619,22 +612,22 @@ export default function FamilyLifeHub() {
                     value={missionForm.dueDate}
                     onChange={event => setMissionForm(previous => ({ ...previous, dueDate: event.target.value }))}
                   />
-                  <button className="family-life-primary"><Plus size={16} /> Mission starten</button>
+                  <button className="family-life-primary"><Plus size={16} /> {t('missions.start')}</button>
                 </form>
               </Creator>
             )}
           </section>
 
           <section className="family-life-panel encouragement-panel">
-            <PanelHeader kicker="Kleine Worte, große Wirkung" title="Mutmacher" icon={MessageCircleHeart} />
+            <PanelHeader kicker={t('encouragement.kicker')} title={t('encouragement.title')} icon={MessageCircleHeart} />
             {myEncouragements[0] ? (
               <blockquote>
                 <span>{myEncouragements[0].icon || '💛'}</span>
-                <p>„{myEncouragements[0].message}“</p>
-                <footer>– {myEncouragements[0].createdByName || 'Deine Familie'}</footer>
+                <p>{t('encouragement.quote', { message: myEncouragements[0].message })}</p>
+                <footer>– {myEncouragements[0].createdByName || t('encouragement.fromFamily')}</footer>
               </blockquote>
             ) : (
-              <div className="family-life-empty">Hier wartet bald ein lieber Mutmacher.</div>
+              <div className="family-life-empty">{t('encouragement.empty')}</div>
             )}
             {isAdult && selectedId && (
               <form onSubmit={sendEncouragement} className="encouragement-form">
@@ -651,10 +644,10 @@ export default function FamilyLifeHub() {
                 <input
                   value={encouragementForm.message}
                   onChange={event => setEncouragementForm(previous => ({ ...previous, message: event.target.value }))}
-                  placeholder={`Was möchtest du ${selectedMember?.name} sagen?`}
+                  placeholder={t('encouragement.messagePlaceholder', { name: selectedMember?.name })}
                   required
                 />
-                <button className="family-life-primary">Senden</button>
+                <button className="family-life-primary">{t('encouragement.send')}</button>
               </form>
             )}
           </section>
@@ -664,7 +657,7 @@ export default function FamilyLifeHub() {
       {section === 'routines' && (
         <div className="family-life-section routines-workshop">
           <section className="family-life-panel">
-            <PanelHeader kicker="Schritt für Schritt" title={`${selectedMember?.name}s Routinen`} icon={AlarmClock} />
+            <PanelHeader kicker={t('routines.kicker')} title={t('routines.title', { name: selectedMember?.name })} icon={AlarmClock} />
             <div className="routine-grid">
               {myRoutines.map(routine => {
                 const completed = new Set(routine.completions?.[today] || []);
@@ -676,7 +669,7 @@ export default function FamilyLifeHub() {
                     <header>
                       <span>{routine.icon || '☀️'}</span>
                       <div>
-                        <small>{routine.timeOfDay === 'evening' ? 'Abends' : routine.timeOfDay === 'afternoon' ? 'Nachmittags' : 'Morgens'}</small>
+                        <small>{routine.timeOfDay === 'evening' ? t('routines.timeOfDay.evening') : routine.timeOfDay === 'afternoon' ? t('routines.timeOfDay.afternoon') : t('routines.timeOfDay.morning')}</small>
                         <h3>{routine.title}</h3>
                       </div>
                       <strong>{percent}%</strong>
@@ -696,12 +689,12 @@ export default function FamilyLifeHub() {
                       ))}
                     </div>
                     <footer>
-                      <span>🔥 {routineStreak(routine)} Tage in Folge</span>
+                      <span>{t('routines.streak', { count: routineStreak(routine) })}</span>
                       {isAdult && (
                         <button
                           type="button"
                           onClick={() => deleteFamilyLifeRecord('dailyRoutines', routine.id)}
-                          aria-label="Routine löschen"
+                          aria-label={t('routines.deleteAria')}
                         ><Trash2 size={15} /></button>
                       )}
                     </footer>
@@ -711,30 +704,30 @@ export default function FamilyLifeHub() {
               {!myRoutines.length && (
                 <div className="family-life-empty large">
                   <span>☀️</span>
-                  <strong>Noch keine Routine</strong>
-                  <p>Ein guter Ablauf nimmt morgens und abends den Stress raus.</p>
+                  <strong>{t('routines.emptyTitle')}</strong>
+                  <p>{t('routines.emptyText')}</p>
                 </div>
               )}
             </div>
           </section>
           {isAdult && selectedId && (
             <section className="family-life-panel">
-              <PanelHeader kicker="Routinen-Werkstatt" title="Ablauf anlegen" icon={ClipboardList} />
+              <PanelHeader kicker={t('routines.workshop.kicker')} title={t('routines.workshop.title')} icon={ClipboardList} />
               <form onSubmit={createRoutine} className="family-life-form routine-form">
                 <div className="form-row">
                   <input
                     value={routineForm.title}
                     onChange={event => setRoutineForm(previous => ({ ...previous, title: event.target.value }))}
-                    placeholder="Name der Routine"
+                    placeholder={t('routines.workshop.namePlaceholder')}
                     required
                   />
                   <select
                     value={routineForm.timeOfDay}
                     onChange={event => setRoutineForm(previous => ({ ...previous, timeOfDay: event.target.value }))}
                   >
-                    <option value="morning">Morgens</option>
-                    <option value="afternoon">Nachmittags</option>
-                    <option value="evening">Abends</option>
+                    <option value="morning">{t('routines.timeOfDay.morning')}</option>
+                    <option value="afternoon">{t('routines.timeOfDay.afternoon')}</option>
+                    <option value="evening">{t('routines.timeOfDay.evening')}</option>
                   </select>
                 </div>
                 <div className="emoji-choice">
@@ -748,7 +741,7 @@ export default function FamilyLifeHub() {
                   ))}
                 </div>
                 <label>
-                  <span>Ein Schritt pro Zeile</span>
+                  <span>{t('routines.workshop.stepsLabel')}</span>
                   <textarea
                     rows="6"
                     value={routineForm.steps}
@@ -756,7 +749,7 @@ export default function FamilyLifeHub() {
                     required
                   />
                 </label>
-                <button className="family-life-primary"><Plus size={16} /> Routine speichern</button>
+                <button className="family-life-primary"><Plus size={16} /> {t('routines.workshop.save')}</button>
               </form>
             </section>
           )}
@@ -766,11 +759,11 @@ export default function FamilyLifeHub() {
       {section === 'money' && (
         <div className="family-life-section money-world">
           <section className="family-life-panel pocket-account">
-            <PanelHeader kicker="Familienkonto" title={`${selectedMember?.name}s Taschengeld`} icon={Coins} />
+            <PanelHeader kicker={t('money.kicker')} title={t('money.title', { name: selectedMember?.name })} icon={Coins} />
             <div className="pocket-balance">
               <span><PiggyBank size={35} /></span>
-              <div><small>Aktuelles Guthaben</small><strong>{euro(pocketBalance)}</strong></div>
-              <i>{selectedMember?.stars || 0} ⭐ verfügbar</i>
+              <div><small>{t('money.balanceLabel')}</small><strong>{euro(pocketBalance)}</strong></div>
+              <i>{t('money.starsAvailable', { count: selectedMember?.stars || 0 })}</i>
             </div>
             <div className="pocket-ledger">
               {myTransactions.slice(0, 8).map(transaction => (
@@ -779,8 +772,8 @@ export default function FamilyLifeHub() {
                   <div>
                     <strong>{transaction.note}</strong>
                     <small>
-                      {new Date(transaction.createdAt).toLocaleDateString('de-DE')}
-                      {transaction.starCost ? ` · ${transaction.starCost} Sterne` : ''}
+                      {formatDate(transaction.createdAt)}
+                      {transaction.starCost ? ` · ${t('money.starCost', { count: transaction.starCost })}` : ''}
                     </small>
                   </div>
                   <b className={transaction.amountCents < 0 ? 'minus' : ''}>
@@ -789,13 +782,13 @@ export default function FamilyLifeHub() {
                 </article>
               ))}
               {!myTransactions.length && (
-                <div className="family-life-empty">Das Taschengeldbuch ist noch leer.</div>
+                <div className="family-life-empty">{t('money.emptyLedger')}</div>
               )}
             </div>
           </section>
 
           <section className="family-life-panel savings-panel">
-            <PanelHeader kicker="Wünsche werden sichtbar" title="Sparziele" icon={Target} />
+            <PanelHeader kicker={t('money.goals.kicker')} title={t('money.goals.title')} icon={Target} />
             <div className="saving-goals">
               {myGoals.map(goal => {
                 const percent = Math.min(
@@ -807,7 +800,7 @@ export default function FamilyLifeHub() {
                     <span>{goal.icon || '🎯'}</span>
                     <div>
                       <strong>{goal.title}</strong>
-                      <small>{euro(pocketBalance)} von {euro(goal.targetCents)}</small>
+                      <small>{t('money.goals.progress', { current: euro(pocketBalance), target: euro(goal.targetCents) })}</small>
                       <div><i style={{ width: `${percent}%` }} /></div>
                     </div>
                     <b>{percent}%</b>
@@ -815,23 +808,23 @@ export default function FamilyLifeHub() {
                       <button
                         type="button"
                         onClick={() => deleteFamilyLifeRecord('savingsGoals', goal.id)}
-                        aria-label="Sparziel löschen"
+                        aria-label={t('money.goals.deleteAria')}
                       ><Trash2 size={14} /></button>
                     )}
                   </article>
                 );
               })}
               {!myGoals.length && (
-                <div className="family-life-empty">Noch kein Wunsch zum Daraufsparen.</div>
+                <div className="family-life-empty">{t('money.goals.empty')}</div>
               )}
             </div>
             {isAdult && selectedId && (
-              <Creator title="Sparziel hinzufügen">
+              <Creator title={t('money.goals.creatorTitle')}>
                 <form onSubmit={createGoal} className="family-life-form">
                   <input
                     value={goalForm.title}
                     onChange={event => setGoalForm(previous => ({ ...previous, title: event.target.value }))}
-                    placeholder="Worauf wird gespart?"
+                    placeholder={t('money.goals.titlePlaceholder')}
                     required
                   />
                   <div className="form-row">
@@ -841,7 +834,7 @@ export default function FamilyLifeHub() {
                       step="0.50"
                       value={goalForm.amount}
                       onChange={event => setGoalForm(previous => ({ ...previous, amount: event.target.value }))}
-                      aria-label="Zielbetrag in Euro"
+                      aria-label={t('money.goals.amountAria')}
                       required
                     />
                     <div className="emoji-choice compact">
@@ -855,7 +848,7 @@ export default function FamilyLifeHub() {
                       ))}
                     </div>
                   </div>
-                  <button className="family-life-primary">Ziel anlegen</button>
+                  <button className="family-life-primary">{t('money.goals.create')}</button>
                 </form>
               </Creator>
             )}
@@ -863,9 +856,9 @@ export default function FamilyLifeHub() {
 
           {isAdult && selectedId && (
             <section className="family-life-panel money-booking">
-              <PanelHeader kicker="Nur für Erwachsene" title="Taschengeld buchen" icon={BadgeEuro} />
+              <PanelHeader kicker={t('adultsOnly')} title={t('money.booking.title')} icon={BadgeEuro} />
               <form onSubmit={bookMoney} className="family-life-form">
-                <label><span>Betrag in Euro – negativ für Ausgabe</span>
+                <label><span>{t('money.booking.amountLabel')}</span>
                   <input
                     type="number"
                     step="0.01"
@@ -874,14 +867,14 @@ export default function FamilyLifeHub() {
                     required
                   />
                 </label>
-                <label><span>Buchungstext</span>
+                <label><span>{t('money.booking.noteLabel')}</span>
                   <input
                     value={moneyForm.note}
                     onChange={event => setMoneyForm(previous => ({ ...previous, note: event.target.value }))}
                     required
                   />
                 </label>
-                <label><span>Dafür Sterne umwandeln (optional)</span>
+                <label><span>{t('money.booking.starsLabel')}</span>
                   <input
                     type="number"
                     min="0"
@@ -890,7 +883,7 @@ export default function FamilyLifeHub() {
                     onChange={event => setMoneyForm(previous => ({ ...previous, starCost: event.target.value }))}
                   />
                 </label>
-                <button className="family-life-primary"><Coins size={16} /> Sicher buchen</button>
+                <button className="family-life-primary"><Coins size={16} /> {t('money.booking.submit')}</button>
               </form>
             </section>
           )}
@@ -900,7 +893,7 @@ export default function FamilyLifeHub() {
       {section === 'school' && (
         <div className="family-life-section school-desk">
           <section className="family-life-panel school-overview">
-            <PanelHeader kicker="Alles für den Schultag" title={`${selectedMember?.name}s Schulbereich`} icon={GraduationCap} />
+            <PanelHeader kicker={t('school.kicker')} title={t('school.title', { name: selectedMember?.name })} icon={GraduationCap} />
             <div className="school-kind-grid">
               {Object.entries(SCHOOL_KIND).map(([kind, meta]) => {
                 const items = mySchoolItems
@@ -912,7 +905,7 @@ export default function FamilyLifeHub() {
                   );
                 return (
                   <section key={kind}>
-                    <header><span>{meta.icon}</span><h3>{meta.label}</h3><b>{items.length}</b></header>
+                    <header><span>{meta.icon}</span><h3>{t(meta.labelKey)}</h3><b>{items.length}</b></header>
                     <div>
                       {items.map(item => (
                         <article key={item.id} className={item.completed ? 'done' : ''}>
@@ -926,8 +919,8 @@ export default function FamilyLifeHub() {
                               <strong>{item.title}</strong>
                               <small>
                                 {item.subject}
-                                {item.date ? ` · ${new Date(`${item.date}T12:00:00`).toLocaleDateString('de-DE')}` : ''}
-                                {kind === 'lesson' ? ` · ${WEEKDAYS[item.weekday]}` : ''}
+                                {item.date ? ` · ${formatDate(`${item.date}T12:00:00`)}` : ''}
+                                {kind === 'lesson' ? ` · ${weekdays[item.weekday]}` : ''}
                                 {item.time ? ` · ${item.time}` : ''}
                               </small>
                             </span>
@@ -936,12 +929,12 @@ export default function FamilyLifeHub() {
                             <button
                               type="button"
                               onClick={() => deleteFamilyLifeRecord('schoolItems', item.id)}
-                              aria-label="Schuleintrag löschen"
+                              aria-label={t('school.deleteAria')}
                             ><Trash2 size={14} /></button>
                           )}
                         </article>
                       ))}
-                      {!items.length && <p>Noch nichts eingetragen.</p>}
+                      {!items.length && <p>{t('school.emptyKind')}</p>}
                     </div>
                   </section>
                 );
@@ -950,7 +943,7 @@ export default function FamilyLifeHub() {
           </section>
           {isAdult && selectedId && (
             <section className="family-life-panel">
-              <PanelHeader kicker="Einmal eintragen, ruhig bleiben" title="Schuleintrag anlegen" icon={BookOpenCheck} />
+              <PanelHeader kicker={t('school.form.kicker')} title={t('school.form.title')} icon={BookOpenCheck} />
               <form onSubmit={createSchoolItem} className="family-life-form">
                 <div className="form-row">
                   <select
@@ -958,19 +951,19 @@ export default function FamilyLifeHub() {
                     onChange={event => setSchoolForm(previous => ({ ...previous, kind: event.target.value }))}
                   >
                     {Object.entries(SCHOOL_KIND).map(([value, meta]) => (
-                      <option key={value} value={value}>{meta.icon} {meta.label}</option>
+                      <option key={value} value={value}>{meta.icon} {t(meta.labelKey)}</option>
                     ))}
                   </select>
                   <input
                     value={schoolForm.subject}
                     onChange={event => setSchoolForm(previous => ({ ...previous, subject: event.target.value }))}
-                    placeholder="Fach"
+                    placeholder={t('school.form.subjectPlaceholder')}
                   />
                 </div>
                 <input
                   value={schoolForm.title}
                   onChange={event => setSchoolForm(previous => ({ ...previous, title: event.target.value }))}
-                  placeholder="Was steht an?"
+                  placeholder={t('school.form.titlePlaceholder')}
                   required
                 />
                 {schoolForm.kind === 'lesson' ? (
@@ -979,7 +972,7 @@ export default function FamilyLifeHub() {
                       value={schoolForm.weekday}
                       onChange={event => setSchoolForm(previous => ({ ...previous, weekday: event.target.value }))}
                     >
-                      {WEEKDAYS.slice(1, 6).map((day, index) => (
+                      {weekdays.slice(1, 6).map((day, index) => (
                         <option key={day} value={index + 1}>{day}</option>
                       ))}
                     </select>
@@ -999,9 +992,9 @@ export default function FamilyLifeHub() {
                 <textarea
                   value={schoolForm.details}
                   onChange={event => setSchoolForm(previous => ({ ...previous, details: event.target.value }))}
-                  placeholder="Buch, Material oder kurze Notiz"
+                  placeholder={t('school.form.detailsPlaceholder')}
                 />
-                <button className="family-life-primary"><Plus size={16} /> Eintragen</button>
+                <button className="family-life-primary"><Plus size={16} /> {t('school.form.submit')}</button>
               </form>
             </section>
           )}
@@ -1011,7 +1004,7 @@ export default function FamilyLifeHub() {
       {section === 'polls' && (
         <div className="family-life-section poll-studio">
           <section className="family-life-panel">
-            <PanelHeader kicker="Jede Stimme zählt" title="Familien-Abstimmungen" icon={Vote} />
+            <PanelHeader kicker={t('polls.kicker')} title={t('polls.title')} icon={Vote} />
             <div className="family-poll-grid">
               {familyPolls
                 .slice()
@@ -1023,12 +1016,12 @@ export default function FamilyLifeHub() {
                     <article className="family-poll-card" key={poll.id}>
                       <header>
                         <span><Vote size={18} /></span>
-                        <div><small>{total} Stimmen</small><h3>{poll.question}</h3></div>
+                        <div><small>{t('polls.votes', { count: total })}</small><h3>{poll.question}</h3></div>
                         {isAdult && (
                           <button
                             type="button"
                             onClick={() => deleteFamilyLifeRecord('familyPolls', poll.id)}
-                            aria-label="Abstimmung löschen"
+                            aria-label={t('polls.deleteAria')}
                           ><Trash2 size={14} /></button>
                         )}
                       </header>
@@ -1057,23 +1050,23 @@ export default function FamilyLifeHub() {
                 })}
               {!familyPolls.length && (
                 <div className="family-life-empty large">
-                  <span>🗳️</span><strong>Noch keine Abstimmung</strong>
-                  <p>Die nächste Essens- oder Ausflugsfrage gehört der ganzen Familie.</p>
+                  <span>🗳️</span><strong>{t('polls.emptyTitle')}</strong>
+                  <p>{t('polls.emptyText')}</p>
                 </div>
               )}
             </div>
           </section>
           {isAdult && (
             <section className="family-life-panel">
-              <PanelHeader kicker="Schnell entschieden" title="Neue Frage stellen" icon={CircleHelp} />
+              <PanelHeader kicker={t('polls.form.kicker')} title={t('polls.form.title')} icon={CircleHelp} />
               <form onSubmit={createPoll} className="family-life-form">
                 <input
                   value={pollForm.question}
                   onChange={event => setPollForm(previous => ({ ...previous, question: event.target.value }))}
-                  placeholder="Was möchtet ihr gemeinsam entscheiden?"
+                  placeholder={t('polls.form.questionPlaceholder')}
                   required
                 />
-                <label><span>Eine Antwort pro Zeile – Emoji ist erlaubt</span>
+                <label><span>{t('polls.form.optionsLabel')}</span>
                   <textarea
                     rows="5"
                     value={pollForm.options}
@@ -1081,14 +1074,14 @@ export default function FamilyLifeHub() {
                     required
                   />
                 </label>
-                <label><span>Abstimmung endet optional am</span>
+                <label><span>{t('polls.form.closesLabel')}</span>
                   <input
                     type="date"
                     value={pollForm.closesAt}
                     onChange={event => setPollForm(previous => ({ ...previous, closesAt: event.target.value }))}
                   />
                 </label>
-                <button className="family-life-primary"><Vote size={16} /> Abstimmung starten</button>
+                <button className="family-life-primary"><Vote size={16} /> {t('polls.form.submit')}</button>
               </form>
             </section>
           )}
@@ -1098,7 +1091,7 @@ export default function FamilyLifeHub() {
       {section === 'safety' && (
         <div className="family-life-section safety-center">
           <section className="family-life-panel emergency-card">
-            <PanelHeader kicker="Im Fall der Fälle" title={settings?.emergencyTitle || 'Notfallkarte'} icon={ShieldAlert} />
+            <PanelHeader kicker={t('safety.emergency.kicker')} title={settings?.emergencyTitle || t('safety.emergency.fallbackTitle')} icon={ShieldAlert} />
             <div className="emergency-contact-grid">
               {(settings?.emergencyContacts || []).map(contact => (
                 <a key={contact.id} href={contact.phone ? `tel:${contact.phone.replace(/[^\d+]/g, '')}` : undefined}>
@@ -1108,7 +1101,7 @@ export default function FamilyLifeHub() {
                 </a>
               ))}
               {!settings?.emergencyContacts?.length && (
-                <div className="family-life-empty">Eltern können hier sichere Notfallkontakte hinterlegen.</div>
+                <div className="family-life-empty">{t('safety.emergency.empty')}</div>
               )}
             </div>
             {settings?.emergencyNotes && (
@@ -1120,34 +1113,31 @@ export default function FamilyLifeHub() {
           </section>
 
           <section className="family-life-panel quiet-status">
-            <PanelHeader kicker="Geschützte Familienzeit" title="Ruhe- und Medienzeiten" icon={BellOff} />
+            <PanelHeader kicker={t('safety.quiet.kicker')} title={t('safety.quiet.title')} icon={BellOff} />
             <div className="quiet-status-grid">
               <article className={settings?.quietHoursEnabled ? 'active' : ''}>
                 <BellOff size={22} />
-                <span><strong>Benachrichtigungsruhe</strong><small>
+                <span><strong>{t('safety.quiet.notifications')}</strong><small>
                   {settings?.quietHoursEnabled
-                    ? `${settings.quietStart} bis ${settings.quietEnd} Uhr`
-                    : 'Nicht aktiviert'}
+                    ? t('safety.quiet.range', { start: settings.quietStart, end: settings.quietEnd })
+                    : t('safety.quiet.notActive')}
                 </small></span>
               </article>
               <article className={settings?.mediaScheduleEnabled ? 'active' : ''}>
                 <Clock3 size={22} />
-                <span><strong>Medien-Lounge</strong><small>
+                <span><strong>{t('safety.quiet.mediaLounge')}</strong><small>
                   {settings?.mediaScheduleEnabled
-                    ? `${settings.mediaStart} bis ${settings.mediaEnd} Uhr`
-                    : 'Immer sichtbar'}
+                    ? t('safety.quiet.range', { start: settings.mediaStart, end: settings.mediaEnd })
+                    : t('safety.quiet.alwaysVisible')}
                 </small></span>
               </article>
             </div>
-            <p className="quiet-explanation">
-              Dringende „Brauche Nähe“-Hinweise dürfen auf Wunsch auch während
-              der Ruhezeit ankommen. Normale Meldungen bleiben im Familien-Posteingang.
-            </p>
+            <p className="quiet-explanation">{t('safety.quiet.explanation')}</p>
           </section>
 
           {isAdult && (
             <section className="family-life-panel safety-editor">
-              <PanelHeader kicker="Nur für Erwachsene" title="Schutzregeln bearbeiten" icon={ShieldAlert} />
+              <PanelHeader kicker={t('adultsOnly')} title={t('safety.editor.title')} icon={ShieldAlert} />
               <form onSubmit={saveSettings} className="family-life-form">
                 <label className="setting-switch">
                   <input
@@ -1155,11 +1145,11 @@ export default function FamilyLifeHub() {
                     checked={settingsForm.quietHoursEnabled}
                     onChange={event => setSettingsForm(previous => ({ ...previous, quietHoursEnabled: event.target.checked }))}
                   />
-                  <span><strong>Ruhezeit für Benachrichtigungen</strong><small>Normale Push-Meldungen pausieren.</small></span>
+                  <span><strong>{t('safety.editor.quietSwitch')}</strong><small>{t('safety.editor.quietSwitchHint')}</small></span>
                 </label>
                 <div className="form-row">
-                  <label><span>Beginn</span><input type="time" value={settingsForm.quietStart} onChange={event => setSettingsForm(previous => ({ ...previous, quietStart: event.target.value }))} /></label>
-                  <label><span>Ende</span><input type="time" value={settingsForm.quietEnd} onChange={event => setSettingsForm(previous => ({ ...previous, quietEnd: event.target.value }))} /></label>
+                  <label><span>{t('safety.editor.startLabel')}</span><input type="time" value={settingsForm.quietStart} onChange={event => setSettingsForm(previous => ({ ...previous, quietStart: event.target.value }))} /></label>
+                  <label><span>{t('safety.editor.endLabel')}</span><input type="time" value={settingsForm.quietEnd} onChange={event => setSettingsForm(previous => ({ ...previous, quietEnd: event.target.value }))} /></label>
                 </div>
                 <label className="setting-switch">
                   <input
@@ -1167,7 +1157,7 @@ export default function FamilyLifeHub() {
                     checked={settingsForm.urgentDuringQuietHours}
                     onChange={event => setSettingsForm(previous => ({ ...previous, urgentDuringQuietHours: event.target.checked }))}
                   />
-                  <span><strong>Dringende Hilferufe durchlassen</strong><small>„Brauche Nähe“ bleibt erreichbar.</small></span>
+                  <span><strong>{t('safety.editor.urgentSwitch')}</strong><small>{t('safety.editor.urgentSwitchHint')}</small></span>
                 </label>
                 <label className="setting-switch">
                   <input
@@ -1175,33 +1165,33 @@ export default function FamilyLifeHub() {
                     checked={settingsForm.mediaScheduleEnabled}
                     onChange={event => setSettingsForm(previous => ({ ...previous, mediaScheduleEnabled: event.target.checked }))}
                   />
-                  <span><strong>Medienzeiten verwenden</strong><small>YouTube und Spotify nur im Zeitfenster zeigen.</small></span>
+                  <span><strong>{t('safety.editor.mediaSwitch')}</strong><small>{t('safety.editor.mediaSwitchHint')}</small></span>
                 </label>
                 <div className="form-row">
-                  <label><span>Medien ab</span><input type="time" value={settingsForm.mediaStart} onChange={event => setSettingsForm(previous => ({ ...previous, mediaStart: event.target.value }))} /></label>
-                  <label><span>Medien bis</span><input type="time" value={settingsForm.mediaEnd} onChange={event => setSettingsForm(previous => ({ ...previous, mediaEnd: event.target.value }))} /></label>
+                  <label><span>{t('safety.editor.mediaFromLabel')}</span><input type="time" value={settingsForm.mediaStart} onChange={event => setSettingsForm(previous => ({ ...previous, mediaStart: event.target.value }))} /></label>
+                  <label><span>{t('safety.editor.mediaToLabel')}</span><input type="time" value={settingsForm.mediaEnd} onChange={event => setSettingsForm(previous => ({ ...previous, mediaEnd: event.target.value }))} /></label>
                 </div>
                 <hr />
-                <label><span>Titel der Notfallkarte</span>
+                <label><span>{t('safety.editor.emergencyTitleLabel')}</span>
                   <input value={settingsForm.emergencyTitle} onChange={event => setSettingsForm(previous => ({ ...previous, emergencyTitle: event.target.value }))} />
                 </label>
-                <label><span>Kontakte – Name | Telefonnummer | Hinweis</span>
+                <label><span>{t('safety.editor.contactsLabel')}</span>
                   <textarea
                     rows="5"
                     value={settingsForm.emergencyContacts}
                     onChange={event => setSettingsForm(previous => ({ ...previous, emergencyContacts: event.target.value }))}
-                    placeholder={'Kinderarzt | 0123 456789 | Impfpass mitnehmen\nOma | 0987 654321 | Darf abholen'}
+                    placeholder={t('safety.editor.contactsPlaceholder')}
                   />
                 </label>
-                <label><span>Wichtige Notizen</span>
+                <label><span>{t('safety.editor.notesLabel')}</span>
                   <textarea
                     rows="4"
                     value={settingsForm.emergencyNotes}
                     onChange={event => setSettingsForm(previous => ({ ...previous, emergencyNotes: event.target.value }))}
-                    placeholder="Allergien, Medikamente oder wichtige Hinweise"
+                    placeholder={t('safety.editor.notesPlaceholder')}
                   />
                 </label>
-                <button className="family-life-primary"><Check size={16} /> Schutzregeln speichern</button>
+                <button className="family-life-primary"><Check size={16} /> {t('safety.editor.save')}</button>
               </form>
             </section>
           )}

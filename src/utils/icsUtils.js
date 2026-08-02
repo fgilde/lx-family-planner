@@ -1,4 +1,5 @@
 import { parseICalendar } from '../../shared/icsCalendar.js';
+import i18n from '../i18n';
 
 function escapeIcsText(value = '') {
   return String(value)
@@ -12,12 +13,17 @@ function dateStamp() {
   return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 }
 
-export function exportEventsToICS(events, familyName = 'LX Familie') {
+export function exportEventsToICS(
+  events,
+  familyName = i18n.t('context:ics.defaultFamilyName')
+) {
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//LX Family Planner//DE',
-    `X-WR-CALNAME:${escapeIcsText(familyName)} Kalender`,
+    `X-WR-CALNAME:${escapeIcsText(
+      i18n.t('context:ics.calendarName', { familyName })
+    )}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH'
   ];
@@ -40,7 +46,9 @@ export function exportEventsToICS(events, familyName = 'LX Familie') {
         icsContent.push(`DTSTART:${formattedDate}T${formattedTime}`);
       }
       icsContent.push(
-        `SUMMARY:${escapeIcsText(event.title || 'Familientermin')}`
+        `SUMMARY:${escapeIcsText(
+          event.title || i18n.t('context:ics.defaultEventTitle')
+        )}`
       );
       if (event.location) {
         icsContent.push(`LOCATION:${escapeIcsText(event.location)}`);
@@ -62,7 +70,9 @@ export function exportEventsToICS(events, familyName = 'LX Familie') {
   link.href = objectUrl;
   link.setAttribute(
     'download',
-    `familien_kalender_${new Date().toISOString().split('T')[0]}.ics`
+    i18n.t('context:ics.exportFileName', {
+      date: new Date().toISOString().split('T')[0]
+    })
   );
   document.body.appendChild(link);
   link.click();

@@ -1,0 +1,152 @@
+{
+  "center": {
+    "trigger": {
+      "unread_one": "{{count}} unread notification in the family inbox",
+      "unread_other": "{{count}} unread notifications in the family inbox",
+      "open": "Open family inbox",
+      "title": "Family inbox"
+    },
+    "header": {
+      "kicker": "Family radio",
+      "title": "Family inbox",
+      "subtitle": "Daily overview and notifications for {{name}} in one place.",
+      "subtitleFallbackName": "you",
+      "close": "Close notifications"
+    },
+    "tabs": {
+      "label": "Choose inbox",
+      "today": "Today",
+      "notifications": "Notifications"
+    },
+    "markAllRead": "Mark all read",
+    "time": {
+      "today": "Today, {{time}}",
+      "yesterday": "Yesterday, {{time}}"
+    },
+    "digest": {
+      "summary_one": "{{count}} thing needs your attention today.",
+      "summary_other": "{{count}} things need your attention today.",
+      "allClear": "Everything is pleasantly calm today.",
+      "intro": "A quick glance is enough – then the day can begin.",
+      "events": {
+        "label": "Events",
+        "free": "Today is free",
+        "count_one": "{{count}} event today",
+        "count_other": "{{count}} events today",
+        "empty": "No entries in the calendar"
+      },
+      "tasks": {
+        "label": "Tasks",
+        "approvals_one": "{{count}} waiting for approval",
+        "approvals_other": "{{count}} waiting for approval",
+        "open_one": "{{count}} open today",
+        "open_other": "{{count}} open today",
+        "done": "All done",
+        "empty": "No urgent task"
+      },
+      "meals": {
+        "label": "Today's meals",
+        "unplanned": "Not planned yet",
+        "empty": "The meal plan still has room"
+      },
+      "shopping": {
+        "label": "Shopping",
+        "missing_one": "{{count}} item missing",
+        "missing_other": "{{count}} items missing",
+        "listEmpty": "List is empty",
+        "nothingToBuy": "Nothing to buy right now"
+      }
+    },
+    "empty": {
+      "title": "All quiet here",
+      "text": "New events, messages and tasks will reliably show up here."
+    },
+    "meta": {
+      "groupChat": "Family chat",
+      "directMessages": "Direct message",
+      "taskAssigned": "New task",
+      "taskApproval": "Task approval",
+      "taskCompleted": "Done",
+      "events": "Family calendar",
+      "moodHelp": "Family compass",
+      "moodUpdates": "Mood",
+      "problemReports": "Problem report",
+      "encouragements": "Encouragement",
+      "familyPolls": "Family poll",
+      "familyMissions": "Family mission",
+      "schoolItems": "School",
+      "rewards": "Reward",
+      "pocketMoney": "Pocket money",
+      "familyConnections": "Family network",
+      "familyMail": "Family mail",
+      "familyChatInvites": "Chat invitation",
+      "default": "Family planner"
+    },
+    "footer": {
+      "today": "The daily overview is generated live from your family plan.",
+      "notifications": "Notifications are kept for 90 days."
+    }
+  },
+  "permissionBanner": {
+    "child": {
+      "eyebrow": "Never miss anything important",
+      "title": "Should I let you know, {{name}}?",
+      "textNative": "When a message or new mission arrives for you, the LX app will let you know.",
+      "textWeb": "When a message or new mission arrives for you, this device will let you know.",
+      "action": "Yes, let me know"
+    },
+    "adult": {
+      "eyebrow": "Keep the family up to date",
+      "titleNative": "Real Android notifications",
+      "titleWeb": "Notifications on this device",
+      "textNative": "Chat, events and tasks appear in the Android notification area – even when the LX app is closed.",
+      "textWeb": "Chat, events and tasks reach you even when the planner is closed.",
+      "action": "Turn on now"
+    },
+    "profileOnly": "Only for {{name}}'s profile",
+    "busy": "One moment …",
+    "later": "Later",
+    "close": "Dismiss"
+  },
+  "webPush": {
+    "secureContext": "Notifications require a secure HTTPS address.",
+    "iosHomeScreen": "On iPhone and iPad, first choose \"Add to Home Screen\" and open the family app from there.",
+    "unsupported": "This browser does not support web notifications.",
+    "permissionDenied": "Notifications were declined in the browser.",
+    "permissionNotGranted": "Notifications have not been allowed yet.",
+    "deviceNames": {
+      "apple": "Apple mobile device",
+      "android": "Android device",
+      "windows": "Windows PC",
+      "mac": "Mac",
+      "chromebook": "Chromebook",
+      "fallback": "Family device"
+    }
+  },
+  "nativePush": {
+    "timeoutDefault": "Android did not respond in time.",
+    "registrationFailed": "The Android app could not register for push.",
+    "serviceStartFailed": "Android could not start the notification service. Fully close LX and open the app again.",
+    "channels": {
+      "updatesName": "Family updates",
+      "updatesDescription": "Messages, events, tasks and family activity",
+      "urgentName": "Urgent family updates",
+      "urgentDescription": "Urgent help requests and time-critical reminders",
+      "createFailed": "Android could not create the notification channels. Check the app notifications in the Android settings."
+    },
+    "onlyInApp": "Real Android notifications are available in the LX Android app.",
+    "onlyInAppRegister": "Real Android notifications are only available in the app.",
+    "permissionCheckTimeout": "Android is not responding to the permission check. Fully close LX and open the app again.",
+    "diagnoseTimeout": "Android could not check the state of Google Play services.",
+    "firebaseNotReady": "Firebase is not ready in the Android app: {{error}}",
+    "firebaseNotConfigured": "Firebase is not set up in the Android app.",
+    "playServicesUnavailable": "Google Play services are not ready on this device: {{status}}. Update Google Play services and try again.",
+    "playServicesUnknownStatus": "unknown state",
+    "tokenTimeout": "Firebase did not deliver a device key. Google Play services are available; check VPN, firewall and private DNS on the phone.",
+    "tokenEmpty": "Firebase delivered an empty device key.",
+    "permissionRequestTimeout": "The Android permission request was not completed. Allow notifications in the app settings and try again.",
+    "permissionDenied": "Notifications are turned off in the Android app settings.",
+    "permissionNotGranted": "Notifications have not been allowed yet.",
+    "deviceName": "LX Android app"
+  }
+}

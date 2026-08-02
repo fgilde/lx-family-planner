@@ -18,7 +18,9 @@ import {
   Unplug,
   UsersRound
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
+import { formatDateTime } from '../../utils/formatting';
 
 function suggestedPublicUrl() {
   const url = new URL(window.location.origin);
@@ -37,33 +39,38 @@ function suggestedPublicUrl() {
   return url.origin;
 }
 
-function relativeTime(timestamp) {
-  if (!timestamp) return 'Noch nicht';
+function relativeTime(timestamp, t) {
+  if (!timestamp) return t('nextcloud.notYet');
   const distance = Date.now() - Number(timestamp);
-  if (distance < 60_000) return 'Gerade eben';
+  if (distance < 60_000) return t('nextcloud.justNow');
   if (distance < 3_600_000) {
-    return `Vor ${Math.max(1, Math.round(distance / 60_000))} Min.`;
+    return t('nextcloud.minutesAgo', {
+      minutes: Math.max(1, Math.round(distance / 60_000))
+    });
   }
   if (distance < 86_400_000) {
-    return `Vor ${Math.max(1, Math.round(distance / 3_600_000))} Std.`;
+    return t('nextcloud.hoursAgo', {
+      hours: Math.max(1, Math.round(distance / 3_600_000))
+    });
   }
-  return new Date(timestamp).toLocaleString('de-DE', {
+  return formatDateTime(timestamp, {
     dateStyle: 'medium',
     timeStyle: 'short'
   });
 }
 
-const STAT_LABELS = {
-  imported: 'Neu aus Cloud',
-  exported: 'Neu in Cloud',
-  updatedLocal: 'Lokal erneuert',
-  updatedRemote: 'Cloud erneuert',
-  deletedLocal: 'Lokal entfernt',
-  deletedRemote: 'Cloud entfernt',
-  conflicts: 'Konflikte gerettet'
+const STAT_LABEL_KEYS = {
+  imported: 'nextcloud.stats.imported',
+  exported: 'nextcloud.stats.exported',
+  updatedLocal: 'nextcloud.stats.updatedLocal',
+  updatedRemote: 'nextcloud.stats.updatedRemote',
+  deletedLocal: 'nextcloud.stats.deletedLocal',
+  deletedRemote: 'nextcloud.stats.deletedRemote',
+  conflicts: 'nextcloud.stats.conflicts'
 };
 
 export default function NextcloudSettings() {
+  const { t } = useTranslation('adminCloud');
   const {
     members,
     showToast,
@@ -226,14 +233,14 @@ export default function NextcloudSettings() {
         field.remove();
       }
       showToast(
-        `${label} kopiert`,
-        'Du kannst den Wert jetzt in Nextcloud einfügen.',
+        t('nextcloud.copiedTitle', { label }),
+        t('nextcloud.copiedBody'),
         'success'
       );
     } catch {
       showToast(
-        'Kopieren nicht möglich',
-        'Markiere den Wert bitte direkt im Feld.',
+        t('nextcloud.copyFailedTitle'),
+        t('nextcloud.copyFailedBody'),
         'warning'
       );
     }
@@ -256,17 +263,14 @@ export default function NextcloudSettings() {
         </div>
         <div>
           <span className="admin-section-kicker">
-            Cloud-Einstellungen
+            {t('nextcloud.kicker')}
           </span>
-          <h2>Family Cloud</h2>
-          <p>
-            Verbindet euren Planer mit Nextcloud, ohne Familienkonten oder
-            Kinderregeln aus der Hand zu geben.
-          </p>
+          <h2>{t('nextcloud.title')}</h2>
+          <p>{t('nextcloud.intro')}</p>
         </div>
         <span className={`nextcloud-state ${connected ? 'online' : ''}`}>
           <i />
-          {connected ? 'Verbunden' : 'Bereit zur Einrichtung'}
+          {connected ? t('nextcloud.stateConnected') : t('nextcloud.stateReady')}
         </span>
       </header>
 
@@ -289,8 +293,8 @@ export default function NextcloudSettings() {
             >
               <HardDrive size={18} />
               <span>
-                <strong>Mit LX Family Docker</strong>
-                <small>Empfohlen für die neue Komplettinstallation</small>
+                <strong>{t('nextcloud.dockerModeTitle')}</strong>
+                <small>{t('nextcloud.dockerModeHint')}</small>
               </span>
               {dockerMode && <Check size={16} />}
             </button>
@@ -301,8 +305,8 @@ export default function NextcloudSettings() {
             >
               <CloudCog size={18} />
               <span>
-                <strong>Vorhandene Nextcloud</strong>
-                <small>Im Heimnetz oder über eure eigene Domain</small>
+                <strong>{t('nextcloud.existingModeTitle')}</strong>
+                <small>{t('nextcloud.existingModeHint')}</small>
               </span>
               {!dockerMode && <Check size={16} />}
             </button>
@@ -313,19 +317,19 @@ export default function NextcloudSettings() {
             <span>
               <strong>
                 {dockerMode
-                  ? 'Eigenes Cloud-Konto nur für eure Familie'
-                  : 'Ein widerrufbares App-Passwort verwenden'}
+                  ? t('nextcloud.securityDockerTitle')
+                  : t('nextcloud.securityExistingTitle')}
               </strong>
               {dockerMode
-                ? 'LX Family erstellt Konto, Kalender und App-Passwort automatisch. Andere Familien erhalten getrennte Cloud-Bereiche.'
-                : 'Dein normales Nextcloud-Passwort wird nicht benötigt. Das App-Passwort liegt verschlüsselt auf eurem LX-Family-Server.'}
+                ? t('nextcloud.securityDockerBody')
+                : t('nextcloud.securityExistingBody')}
             </span>
           </div>
 
           <div className="nextcloud-form-grid">
             {!dockerMode && (
               <label>
-                <span>Adresse für LX Family</span>
+                <span>{t('nextcloud.baseUrlLabel')}</span>
                 <input
                   value={form.baseUrl}
                   onChange={event => setForm(previous => ({
@@ -336,11 +340,11 @@ export default function NextcloudSettings() {
                   inputMode="url"
                   required
                 />
-                <small>Vom LX-Family-Server aus erreichbare Adresse.</small>
+                <small>{t('nextcloud.baseUrlHint')}</small>
               </label>
             )}
             <label>
-              <span>Adresse für eure Browser</span>
+              <span>{t('nextcloud.publicUrlLabel')}</span>
               <input
                 value={form.publicBaseUrl}
                 onChange={event => setForm(previous => ({
@@ -353,16 +357,16 @@ export default function NextcloudSettings() {
               />
               <small>
                 {dockerMode && nextcloudIntegration?.bundledPublicBaseUrl
-                  ? 'Vom LX-Server vorgegeben – kein erfundener Port an der Planer-Domain.'
+                  ? t('nextcloud.publicUrlHintBundled')
                   : dockerMode
-                    ? 'Im Heimnetz meist http://SERVER-IP:8080; öffentlich eine eigene Cloud-Domain ohne Port.'
-                    : 'Diese Adresse öffnet später euren Familienordner.'}
+                    ? t('nextcloud.publicUrlHintDocker')
+                    : t('nextcloud.publicUrlHintExisting')}
               </small>
             </label>
             {!dockerMode && (
               <>
                 <label>
-                  <span>Nextcloud-Benutzer</span>
+                  <span>{t('nextcloud.usernameLabel')}</span>
                   <input
                     value={form.username}
                     onChange={event => setForm(previous => ({
@@ -370,12 +374,12 @@ export default function NextcloudSettings() {
                       username: event.target.value
                     }))}
                     autoComplete="username"
-                    placeholder="familie"
+                    placeholder={t('nextcloud.usernamePlaceholder')}
                     required
                   />
                 </label>
                 <label>
-                  <span><KeyRound size={14} /> App-Passwort</span>
+                  <span><KeyRound size={14} /> {t('nextcloud.appPasswordLabel')}</span>
                   <input
                     type="password"
                     value={form.appPassword}
@@ -384,7 +388,7 @@ export default function NextcloudSettings() {
                       appPassword: event.target.value
                     }))}
                     autoComplete="new-password"
-                    placeholder="Nur für LX Family erzeugen"
+                    placeholder={t('nextcloud.appPasswordPlaceholder')}
                     required
                   />
                   {settingsUrl && (
@@ -393,14 +397,14 @@ export default function NextcloudSettings() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      In Nextcloud erstellen <ExternalLink size={12} />
+                      {t('nextcloud.createInNextcloud')} <ExternalLink size={12} />
                     </a>
                   )}
                 </label>
               </>
             )}
             <label className="nextcloud-folder-field">
-              <span><FolderHeart size={14} /> Familienordner</span>
+              <span><FolderHeart size={14} /> {t('nextcloud.folderLabel')}</span>
               <input
                 value={form.folder}
                 onChange={event => setForm(previous => ({
@@ -421,10 +425,10 @@ export default function NextcloudSettings() {
               ? <LoaderCircle className="spin" size={18} />
               : <Sparkles size={18} />}
             {busy === 'connect'
-              ? 'Family Cloud wird vorbereitet …'
+              ? t('nextcloud.connectPreparing')
               : dockerMode
-                ? 'Family Cloud automatisch einrichten'
-                : 'Verbinden & sicher einrichten'}
+                ? t('nextcloud.connectDocker')
+                : t('nextcloud.connectExisting')}
           </button>
         </form>
       ) : (
@@ -434,7 +438,7 @@ export default function NextcloudSettings() {
               <Cloud size={23} />
             </span>
             <span>
-              <small>Verbunden als</small>
+              <small>{t('nextcloud.connectedAs')}</small>
               <strong>{nextcloudIntegration.displayName}</strong>
               <em>
                 {nextcloudIntegration.host}
@@ -448,7 +452,7 @@ export default function NextcloudSettings() {
               onClick={() => setActiveTab('cloud')}
             >
               <FolderHeart size={15} />
-              Familienarchiv öffnen
+              {t('nextcloud.openArchive')}
             </button>
           </div>
 
@@ -457,7 +461,7 @@ export default function NextcloudSettings() {
             <div className="nextcloud-error-note" role="status">
               <CloudCog size={18} />
               <span>
-                <strong>Family Cloud braucht kurz Aufmerksamkeit</strong>
+                <strong>{t('nextcloud.attentionTitle')}</strong>
                 {nextcloudIntegration.lastSyncError ||
                   nextcloudIntegration.lastBackupError}
               </span>
@@ -468,8 +472,8 @@ export default function NextcloudSettings() {
             <article>
               <span><CalendarDays size={21} /></span>
               <div>
-                <strong>Familienkalender</strong>
-                <small>Änderungen laufen sicher in beide Richtungen.</small>
+                <strong>{t('nextcloud.calendarCapabilityTitle')}</strong>
+                <small>{t('nextcloud.calendarCapabilityBody')}</small>
               </div>
               <label className="nextcloud-switch">
                 <input
@@ -486,8 +490,8 @@ export default function NextcloudSettings() {
             <article>
               <span><ArchiveRestore size={21} /></span>
               <div>
-                <strong>Verschlüsselte Sicherung</strong>
-                <small>Jede Familie erhält ihr eigenes Datenarchiv.</small>
+                <strong>{t('nextcloud.backupCapabilityTitle')}</strong>
+                <small>{t('nextcloud.backupCapabilityBody')}</small>
               </div>
               <label className="nextcloud-switch">
                 <input
@@ -505,7 +509,7 @@ export default function NextcloudSettings() {
 
           <div className="nextcloud-settings-grid">
             <label>
-              <span>Nextcloud-Kalender</span>
+              <span>{t('nextcloud.calendarLabel')}</span>
               <select
                 value={settings.eventCalendarHref}
                 onChange={event => setSettings(previous => ({
@@ -514,7 +518,7 @@ export default function NextcloudSettings() {
                 }))}
                 disabled={!settings.eventSyncEnabled}
               >
-                <option value="">Keinen Kalender verbinden</option>
+                <option value="">{t('nextcloud.noCalendar')}</option>
                 {eventCalendars.map(calendar => (
                   <option value={calendar.href} key={calendar.href}>
                     {calendar.name}
@@ -523,7 +527,7 @@ export default function NextcloudSettings() {
               </select>
             </label>
             <label>
-              <span>Unzugeordnete Cloud-Termine</span>
+              <span>{t('nextcloud.unassignedEventsLabel')}</span>
               <select
                 value={settings.defaultMemberId}
                 onChange={event => setSettings(previous => ({
@@ -531,7 +535,7 @@ export default function NextcloudSettings() {
                   defaultMemberId: event.target.value
                 }))}
               >
-                <option value="all">Ganze Familie</option>
+                <option value="all">{t('nextcloud.wholeFamily')}</option>
                 {members
                   .filter(member => member.role !== 'pet')
                   .map(member => (
@@ -542,7 +546,7 @@ export default function NextcloudSettings() {
               </select>
             </label>
             <label>
-              <span>Familienordner</span>
+              <span>{t('nextcloud.folderLabel')}</span>
               <input
                 value={settings.folder}
                 onChange={event => setSettings(previous => ({
@@ -552,7 +556,7 @@ export default function NextcloudSettings() {
               />
             </label>
             <label>
-              <span>Tägliche Sicherung ab</span>
+              <span>{t('nextcloud.backupHourLabel')}</span>
               <select
                 value={settings.backupHour}
                 onChange={event => setSettings(previous => ({
@@ -563,7 +567,9 @@ export default function NextcloudSettings() {
               >
                 {[0, 1, 2, 3, 4, 5, 6, 12, 18, 21, 22, 23].map(hour => (
                   <option value={hour} key={hour}>
-                    {String(hour).padStart(2, '0')}:00 Uhr
+                    {t('nextcloud.backupHourOption', {
+                      hour: String(hour).padStart(2, '0')
+                    })}
                   </option>
                 ))}
               </select>
@@ -581,9 +587,8 @@ export default function NextcloudSettings() {
             />
             <span><UsersRound size={17} /></span>
             <span>
-              <strong>„Zuhause Oma & Opa“ ebenfalls synchronisieren</strong>
-              Nur einschalten, wenn diese Termine bewusst im gemeinsamen
-              Nextcloud-Kalender erscheinen sollen.
+              <strong>{t('nextcloud.grandparentsTitle')}</strong>
+              {t('nextcloud.grandparentsBody')}
             </span>
           </label>
 
@@ -591,15 +596,15 @@ export default function NextcloudSettings() {
             <article>
               <span><RefreshCw size={17} /></span>
               <div>
-                <small>Letzter Kalenderabgleich</small>
-                <strong>{relativeTime(nextcloudIntegration.lastSyncAt)}</strong>
+                <small>{t('nextcloud.lastSync')}</small>
+                <strong>{relativeTime(nextcloudIntegration.lastSyncAt, t)}</strong>
               </div>
             </article>
             <article>
               <span><CloudUpload size={17} /></span>
               <div>
-                <small>Letzte Cloud-Sicherung</small>
-                <strong>{relativeTime(nextcloudIntegration.lastBackupAt)}</strong>
+                <small>{t('nextcloud.lastBackup')}</small>
+                <strong>{relativeTime(nextcloudIntegration.lastBackupAt, t)}</strong>
               </div>
             </article>
           </div>
@@ -612,7 +617,7 @@ export default function NextcloudSettings() {
                 .map(([key, value]) => (
                   <span key={key}>
                     <strong>{value}</strong>
-                    {STAT_LABELS[key] || key}
+                    {STAT_LABEL_KEYS[key] ? t(STAT_LABEL_KEYS[key]) : key}
                   </span>
                 ))}
             </div>
@@ -628,7 +633,7 @@ export default function NextcloudSettings() {
               {busy === 'save'
                 ? <LoaderCircle className="spin" size={16} />
                 : <Check size={16} />}
-              Einstellungen speichern
+              {t('nextcloud.saveSettings')}
             </button>
             <button
               type="button"
@@ -639,7 +644,7 @@ export default function NextcloudSettings() {
                 className={busy === 'sync' ? 'spin' : ''}
                 size={16}
               />
-              Jetzt abgleichen
+              {t('nextcloud.syncNow')}
             </button>
             <button
               type="button"
@@ -647,12 +652,12 @@ export default function NextcloudSettings() {
               disabled={Boolean(busy)}
             >
               <CloudUpload size={16} />
-              Jetzt sichern
+              {t('nextcloud.backupNow')}
             </button>
           </div>
 
           <details className="nextcloud-connection-details">
-            <summary>Verbindung verwalten</summary>
+            <summary>{t('nextcloud.manageConnection')}</summary>
             <div>
               {nextcloudIntegration.bundled && (
                 <button
@@ -662,8 +667,8 @@ export default function NextcloudSettings() {
                 >
                   <KeyRound size={15} />
                   {cloudAccess
-                    ? 'Cloud-Zugang ausblenden'
-                    : 'Cloud-Zugang anzeigen'}
+                    ? t('nextcloud.hideAccess')
+                    : t('nextcloud.showAccess')}
                 </button>
               )}
               <button
@@ -672,7 +677,7 @@ export default function NextcloudSettings() {
                 disabled={Boolean(busy)}
               >
                 <CloudCog size={15} />
-                Verbindung & Kalender neu prüfen
+                {t('nextcloud.recheck')}
               </button>
               <button
                 type="button"
@@ -682,48 +687,45 @@ export default function NextcloudSettings() {
               >
                 <Unplug size={15} />
                 {confirmDisconnect
-                  ? 'Wirklich trennen?'
-                  : 'Family Cloud trennen'}
+                  ? t('nextcloud.confirmDisconnect')
+                  : t('nextcloud.disconnect')}
               </button>
             </div>
             {cloudAccess && (
               <div className="nextcloud-access-card">
                 <span>
-                  <strong>Nextcloud-Adresse</strong>
+                  <strong>{t('nextcloud.addressLabel')}</strong>
                   <code>{cloudAccess.url}</code>
                 </span>
                 <span>
-                  <strong>Benutzername</strong>
+                  <strong>{t('nextcloud.usernameField')}</strong>
                   <code>{cloudAccess.username}</code>
                   <button
                     type="button"
                     onClick={() => copyAccessValue(
                       cloudAccess.username,
-                      'Benutzername'
+                      t('nextcloud.usernameField')
                     )}
                   >
                     <Copy size={14} />
-                    Kopieren
+                    {t('nextcloud.copy')}
                   </button>
                 </span>
                 <span>
-                  <strong>Passwort</strong>
+                  <strong>{t('nextcloud.passwordField')}</strong>
                   <code>{cloudAccess.password}</code>
                   <button
                     type="button"
                     onClick={() => copyAccessValue(
                       cloudAccess.password,
-                      'Passwort'
+                      t('nextcloud.passwordField')
                     )}
                   >
                     <Copy size={14} />
-                    Kopieren
+                    {t('nextcloud.copy')}
                   </button>
                 </span>
-                <small>
-                  Diese Daten werden nur auf deinen ausdrücklichen Klick
-                  geladen und nicht im Browser gespeichert.
-                </small>
+                <small>{t('nextcloud.accessNote')}</small>
               </div>
             )}
           </details>

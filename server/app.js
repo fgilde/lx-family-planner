@@ -152,6 +152,7 @@ import {
   uploadNextcloudFile,
   uploadNextcloudUserFile
 } from './nextcloud.js';
+import { createTranslator } from './i18n.js';
 
 const SESSION_COOKIE = 'lx_session';
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30;
@@ -183,6 +184,16 @@ const APP_SECRET =
   'lx-family-development-secret-change-me';
 const ENCRYPTION_KEY = createHash('sha256').update(APP_SECRET).digest();
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const SUPPORTED_APP_LANGUAGES = ['de', 'en'];
+const APP_LANGUAGE = (() => {
+  const configured = String(process.env.APP_LANGUAGE || '')
+    .trim()
+    .toLowerCase()
+    .slice(0, 2);
+  return SUPPORTED_APP_LANGUAGES.includes(configured) ? configured : 'de';
+})();
+const translate = createTranslator(APP_LANGUAGE);
+const APP_LOCALE = APP_LANGUAGE === 'en' ? 'en-GB' : 'de-DE';
 const CALENDAR_ALLOW_PRIVATE_HOSTS =
   process.env.CALENDAR_ALLOW_PRIVATE_HOSTS === 'true';
 const CALENDAR_ALLOW_LOOPBACK_FOR_TESTS =
@@ -326,7 +337,7 @@ function cleanText(value, fallback = '', maxLength = 160) {
   return text.slice(0, maxLength);
 }
 
-function ensureObject(value, message = 'Ungültige Eingabe') {
+function ensureObject(value, message = translate('errors.invalidInput')) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     const error = new Error(message);
     error.statusCode = 400;
@@ -368,7 +379,7 @@ function normalizeChatCloudPath(value) {
     pieces.length > 12 ||
     pieces.some(piece => piece === '.' || piece === '..')
   ) {
-    const error = new Error('Der Cloud-Pfad des Anhangs ist ungültig.');
+    const error = new Error(translate('errors.attachmentCloudPathInvalid'));
     error.statusCode = 400;
     throw error;
   }
@@ -378,7 +389,7 @@ function normalizeChatCloudPath(value) {
     !normalized.startsWith(`${PRIVATE_CHAT_ATTACHMENT_FOLDER}/`)
   ) {
     const error = new Error(
-      'Der Anhang stammt nicht aus dem geschützten Chat-Archiv.'
+      translate('errors.attachmentNotFromChatArchive')
     );
     error.statusCode = 400;
     throw error;
@@ -394,7 +405,7 @@ function publicFamilyCloudPath(value) {
     normalized === '.LX-Privat' ||
     normalized.startsWith('.LX-Privat/')
   ) {
-    const error = new Error('Dieser private Chatbereich ist nicht sichtbar.');
+    const error = new Error(translate('errors.privateChatAreaHidden'));
     error.statusCode = 404;
     throw error;
   }
@@ -431,7 +442,7 @@ function decodeLegacyChatPhoto(value) {
   );
   if (!match) {
     const error = new Error(
-      'Das eingebettete Chatfoto besitzt kein unterstütztes Bildformat.'
+      translate('errors.chatPhotoUnsupportedFormat')
     );
     error.statusCode = 400;
     throw error;
@@ -439,7 +450,7 @@ function decodeLegacyChatPhoto(value) {
   const content = Buffer.from(match[2].replace(/\s/g, ''), 'base64');
   if (!content.length || content.length > CHAT_ATTACHMENT_MAX_BYTES) {
     const error = new Error(
-      'Das eingebettete Chatfoto ist leer oder größer als 100 MB.'
+      translate('errors.chatPhotoEmptyOrTooLarge')
     );
     error.statusCode = 400;
     throw error;
@@ -478,21 +489,23 @@ function chatAttachmentClaim(familyId, attachment) {
 function sanitizeChatAttachments(value, familyId, expectedTarget = 'group') {
   if (value === undefined || value === null) return [];
   if (!Array.isArray(value)) {
-    const error = new Error('Die Anhänge sind ungültig.');
+    const error = new Error(translate('errors.attachmentsInvalid'));
     error.statusCode = 400;
     throw error;
   }
   if (value.length > CHAT_ATTACHMENT_MAX_COUNT) {
     const error = new Error(
-      `Pro Nachricht sind höchstens ${CHAT_ATTACHMENT_MAX_COUNT} Anhänge möglich.`
+      translate('errors.attachmentLimit', {
+        count: CHAT_ATTACHMENT_MAX_COUNT
+      })
     );
     error.statusCode = 400;
     throw error;
   }
   return value.map(item => {
-    const input = ensureObject(item, 'Ein Chat-Anhang ist ungültig.');
+    const input = ensureObject(item, translate('errors.chatAttachmentInvalid'));
     const attachment = {
-      id: requireText(input.id, 'Anhang-ID', 100),
+      id: requireText(input.id, translate('fields.attachmentId'), 100),
       name: safeCloudName(input.name, 'Datei'),
       cloudPath: normalizeChatCloudPath(input.cloudPath),
       mimeType: cleanText(
@@ -512,14 +525,14 @@ function sanitizeChatAttachments(value, familyId, expectedTarget = 'group') {
       attachment.size > CHAT_ATTACHMENT_MAX_BYTES
     ) {
       const error = new Error(
-        'Der Chat-Anhang ist leer oder größer als 100 MB.'
+        translate('errors.chatAttachmentEmptyOrTooLarge')
       );
       error.statusCode = 400;
       throw error;
     }
     if (attachment.chatTarget !== expectedTarget) {
       const error = new Error(
-        'Der Anhang wurde für einen anderen Chat vorbereitet.'
+        translate('errors.attachmentWrongChat')
       );
       error.statusCode = 400;
       throw error;
@@ -532,7 +545,7 @@ function sanitizeChatAttachments(value, familyId, expectedTarget = 'group') {
       )
     ) {
       const error = new Error(
-        'Die Verschlüsselungsdaten des privaten Anhangs sind ungültig.'
+        translate('errors.attachmentEncryptionInvalid')
       );
       error.statusCode = 400;
       throw error;
@@ -540,7 +553,7 @@ function sanitizeChatAttachments(value, familyId, expectedTarget = 'group') {
     const expectedClaim = chatAttachmentClaim(familyId, attachment);
     if (!safeCompare(input.claim, expectedClaim)) {
       const error = new Error(
-        'Der Chat-Anhang konnte nicht sicher bestätigt werden.'
+        translate('errors.attachmentClaimInvalid')
       );
       error.statusCode = 400;
       throw error;
@@ -582,24 +595,26 @@ function decryptPrivateChatAttachment(familyId, attachment, content) {
   return Buffer.concat([decipher.update(content), decipher.final()]);
 }
 
-function chatAttachmentMessageCopy(record, fallback = 'Neue Nachricht') {
+function chatAttachmentMessageCopy(record, fallback = translate('push.newMessage')) {
   if (record?.text) return record.text;
   const attachments = Array.isArray(record?.attachments)
     ? record.attachments
     : [];
   if (attachments.length === 1) {
     return attachments[0].kind === 'image'
-      ? '📷 Foto gesendet'
-      : `📎 ${attachments[0].name}`;
+      ? translate('push.photoSent')
+      : translate('push.fileAttachment', { name: attachments[0].name });
   }
-  if (attachments.length > 1) return `📎 ${attachments.length} Dateien`;
-  return record?.photo ? '📷 Foto gesendet' : fallback;
+  if (attachments.length > 1) {
+    return translate('push.filesAttachment', { count: attachments.length });
+  }
+  return record?.photo ? translate('push.photoSent') : fallback;
 }
 
 function requireText(value, label, maxLength = 160) {
   const text = cleanText(value, '', maxLength);
   if (!text) {
-    const error = new Error(`${label} fehlt`);
+    const error = new Error(translate('errors.required', { label }));
     error.statusCode = 400;
     throw error;
   }
@@ -614,7 +629,7 @@ function sanitizeRewardIconImage(value) {
     !/^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=\r\n]+$/i.test(image)
   ) {
     const error = new Error(
-      'Das eigene Belohnungsbild ist ungültig oder zu groß.'
+      translate('errors.rewardImageInvalid')
     );
     error.statusCode = 400;
     throw error;
@@ -632,7 +647,7 @@ function sanitizeRewardRecord(familyId, value, existing = {}) {
     const target = getMember(familyId, forMemberId);
     if (!target || !['child', 'teen'].includes(target.role) || target.isManaged) {
       const error = new Error(
-        'Belohnungen können nur einem Kinderprofil zugeordnet werden.'
+        translate('errors.rewardChildOnly')
       );
       error.statusCode = 400;
       throw error;
@@ -641,7 +656,7 @@ function sanitizeRewardRecord(familyId, value, existing = {}) {
   const iconImage = sanitizeRewardIconImage(input.iconImage);
   return {
     ...input,
-    title: requireText(input.title, 'Belohnung', 120),
+    title: requireText(input.title, translate('fields.reward'), 120),
     costStars: Math.max(
       1,
       Math.min(100_000, Math.round(Number(input.costStars) || 1))
@@ -682,7 +697,7 @@ function normalizeMemberInput(value = {}) {
   const isManaged = member.isManaged === true;
   return {
     ...member,
-    name: requireText(member.name, 'Name', 80),
+    name: requireText(member.name, translate('fields.name'), 80),
     role: normalizeRole(member.role),
     position: cleanText(member.position, 'familienmitglied', 40).toLowerCase(),
     avatar: cleanText(member.avatar, '', 1_200_000),
@@ -808,7 +823,7 @@ function encryptJson(value) {
 function decryptJson(value) {
   const [ivEncoded, tagEncoded, encryptedEncoded] = String(value || '').split('.');
   if (!ivEncoded || !tagEncoded || !encryptedEncoded) {
-    throw new Error('Integration ist beschädigt');
+    throw new Error(translate('errors.integrationCorrupted'));
   }
   const decipher = createDecipheriv(
     'aes-256-gcm',
@@ -838,20 +853,20 @@ function isCalendarSubscriptionEvent(record) {
 function normalizeCalendarFeedUrl(value) {
   let url;
   try {
-    url = new URL(requireText(value, 'Kalender-Link', 4000));
+    url = new URL(requireText(value, translate('fields.calendarLink'), 4000));
   } catch {
-    const error = new Error('Bitte gib einen vollständigen Kalender-Link ein.');
+    const error = new Error(translate('errors.calendarLinkIncomplete'));
     error.statusCode = 400;
     throw error;
   }
   if (!['http:', 'https:'].includes(url.protocol)) {
-    const error = new Error('Kalender-Links müssen mit http:// oder https:// beginnen.');
+    const error = new Error(translate('errors.calendarLinkProtocol'));
     error.statusCode = 400;
     throw error;
   }
   if (url.username || url.password) {
     const error = new Error(
-      'Benutzername und Passwort dürfen nicht direkt im Kalender-Link stehen.'
+      translate('errors.calendarLinkCredentials')
     );
     error.statusCode = 400;
     throw error;
@@ -918,7 +933,7 @@ async function validateCalendarFeedTarget(url) {
       ? [{ address: url.hostname }]
       : await dns.lookup(url.hostname, { all: true, verbatim: true });
   } catch {
-    const error = new Error('Der Kalender-Server konnte nicht gefunden werden.');
+    const error = new Error(translate('errors.calendarServerNotFound'));
     error.statusCode = 400;
     throw error;
   }
@@ -928,8 +943,8 @@ async function validateCalendarFeedTarget(url) {
   ) {
     const error = new Error(
       CALENDAR_ALLOW_PRIVATE_HOSTS
-        ? 'Lokale Geräteadressen und Link-Local-Adressen sind nicht erlaubt.'
-        : 'Private Heimnetz-Adressen sind für Kalenderquellen nicht freigeschaltet.'
+        ? translate('errors.calendarLocalAddressesBlocked')
+        : translate('errors.calendarPrivateAddressesBlocked')
     );
     error.statusCode = 400;
     throw error;
@@ -939,7 +954,7 @@ async function validateCalendarFeedTarget(url) {
 async function readLimitedCalendarBody(response) {
   const announcedLength = Number(response.headers.get('content-length') || 0);
   if (announcedLength > CALENDAR_MAX_BYTES) {
-    const error = new Error('Die Kalenderdatei ist größer als 2 MB.');
+    const error = new Error(translate('errors.calendarFileTooLarge'));
     error.statusCode = 413;
     throw error;
   }
@@ -953,7 +968,7 @@ async function readLimitedCalendarBody(response) {
     total += value.byteLength;
     if (total > CALENDAR_MAX_BYTES) {
       await reader.cancel();
-      const error = new Error('Die Kalenderdatei ist größer als 2 MB.');
+      const error = new Error(translate('errors.calendarFileTooLarge'));
       error.statusCode = 413;
       throw error;
     }
@@ -977,14 +992,14 @@ async function fetchCalendarFeed(rawUrl) {
         }
       });
     } catch {
-      const error = new Error('Der Kalender-Server antwortet gerade nicht.');
+      const error = new Error(translate('errors.calendarServerUnavailable'));
       error.statusCode = 502;
       throw error;
     }
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       const location = response.headers.get('location');
       if (!location || redirect === 3) {
-        const error = new Error('Der Kalender-Link leitet zu oft weiter.');
+        const error = new Error(translate('errors.calendarTooManyRedirects'));
         error.statusCode = 502;
         throw error;
       }
@@ -994,21 +1009,21 @@ async function fetchCalendarFeed(rawUrl) {
     if (!response.ok) {
       const error = new Error(
         response.status === 401 || response.status === 403
-          ? 'Der Kalender-Link ist nicht öffentlich freigegeben oder abgelaufen.'
-          : `Der Kalender-Server meldet Fehler ${response.status}.`
+          ? translate('errors.calendarLinkNotPublic')
+          : translate('errors.calendarServerError', { status: response.status })
       );
       error.statusCode = 502;
       throw error;
     }
     const content = await readLimitedCalendarBody(response);
     if (!/BEGIN:VCALENDAR/i.test(content)) {
-      const error = new Error('Unter diesem Link wurde kein ICS-Kalender gefunden.');
+      const error = new Error(translate('errors.calendarNoIcs'));
       error.statusCode = 422;
       throw error;
     }
     return content;
   }
-  throw new Error('Kalender konnte nicht geladen werden.');
+  throw new Error(translate('errors.calendarLoadFailed'));
 }
 
 function calendarEventRecord(subscription, event) {
@@ -1023,7 +1038,7 @@ function calendarEventRecord(subscription, event) {
     id,
     externalUid: event.uid,
     externalOccurrence: occurrenceKey,
-    title: cleanText(event.title, 'Kalendertermin', 300),
+    title: cleanText(event.title, translate('labels.calendarEvent'), 300),
     date: event.date,
     time: event.time || '',
     allDay: Boolean(event.allDay),
@@ -1031,7 +1046,9 @@ function calendarEventRecord(subscription, event) {
     endTime: event.endTime || '',
     location: cleanText(event.location, '', 500),
     notes: cleanText(event.notes, '', 4000),
-    category: `Abo · ${subscription.name}`,
+    category: translate('labels.subscriptionCategory', {
+      name: subscription.name
+    }),
     memberId: subscription.memberId || 'all',
     household: subscription.household || 'familie',
     readOnly: true,
@@ -1073,7 +1090,7 @@ async function syncCalendarSubscription(subscription) {
         success: false,
         error: cleanText(
           error.message,
-          'Kalender konnte nicht aktualisiert werden.',
+          translate('errors.calendarUpdateFailed'),
           300
         )
       }
@@ -1178,7 +1195,7 @@ async function sendWebPushEvent(
     title,
     body,
     privateTitle = title,
-    privateBody = 'Im Familienplaner gibt es etwas Neues.',
+    privateBody = translate('push.defaultPrivateBody'),
     url = '/',
     tag = eventKey,
     priority = 'normal',
@@ -1292,7 +1309,7 @@ async function sendNativePushEvent(
     title,
     body,
     privateTitle = title,
-    privateBody = 'Im Familienplaner gibt es etwas Neues.',
+    privateBody = translate('push.defaultPrivateBody'),
     url = '/',
     tag = eventKey,
     priority = 'normal',
@@ -1521,24 +1538,24 @@ function eventReminderRecipientMemberIds(familyId, event) {
 
 const MOOD_NOTIFICATION_COPY = Object.freeze({
   super: {
-    label: 'super',
-    title: 'hat gerade richtig gute Laune',
-    detail: 'Im Familienkompass wurde „Super!“ ausgewählt.'
+    label: translate('mood.super.label'),
+    title: translate('mood.super.title'),
+    detail: translate('mood.super.detail')
   },
   gut: {
-    label: 'gut',
-    title: 'fühlt sich gut',
-    detail: 'Im Familienkompass wurde „Gut“ ausgewählt.'
+    label: translate('mood.gut.label'),
+    title: translate('mood.gut.title'),
+    detail: translate('mood.gut.detail')
   },
   okay: {
-    label: 'geht so',
-    title: 'fühlt sich gerade nur okay',
-    detail: 'Im Familienkompass wurde „Geht so“ ausgewählt.'
+    label: translate('mood.okay.label'),
+    title: translate('mood.okay.title'),
+    detail: translate('mood.okay.detail')
   },
   hilfe: {
-    label: 'braucht Nähe',
-    title: 'braucht gerade Nähe',
-    detail: 'Im Familienkompass wurde „Brauche Nähe“ ausgewählt.'
+    label: translate('mood.hilfe.label'),
+    title: translate('mood.hilfe.title'),
+    detail: translate('mood.hilfe.detail')
   }
 });
 
@@ -1559,11 +1576,11 @@ function notifyMoodCheckin(req, record) {
       title: `${member.name} ${copy.title}`,
       body: copy.detail,
       privateTitle: urgent
-        ? 'Ein Kind braucht gerade Nähe'
-        : 'Neue Gefühlslage im Familienkompass',
+        ? translate('mood.helpPrivateTitle')
+        : translate('mood.updatePrivateTitle'),
       privateBody: urgent
-        ? 'Bitte schau zeitnah in den Familienplaner.'
-        : 'Ein Kind hat seine Gefühlslage eingetragen.',
+        ? translate('mood.helpPrivateBody')
+        : translate('mood.updatePrivateBody'),
       url: '/?view=dashboard',
       tag: `mood-${record.id}`,
       priority: urgent ? 'high' : 'normal',
@@ -1573,7 +1590,7 @@ function notifyMoodCheckin(req, record) {
     {
       title: `${member.name} ${copy.title}`,
       message: urgent
-        ? `${copy.detail} Schau bitte zeitnah nach.`
+        ? translate('mood.urgentGotifyMessage', { detail: copy.detail })
         : copy.detail,
       priority: urgent ? 8 : 4
     }
@@ -1590,7 +1607,9 @@ function calendarEventBody(event, prefix = '') {
       })
     : '';
   const timeLabel =
-    !event.allDay && event.time ? `${event.time} Uhr` : 'ganztägig';
+    !event.allDay && event.time
+      ? translate('push.eventTimeAt', { time: event.time })
+      : translate('push.eventAllDay');
   const details = [dateLabel, timeLabel, event.location]
     .filter(Boolean)
     .join(' · ');
@@ -1632,19 +1651,19 @@ function notifyCalendarChange(
   }
   const copy = {
     created: {
-      title: 'Neuer Termin',
+      title: translate('push.eventCreatedTitle'),
       prefix: '',
-      privateBody: 'Im Familienkalender gibt es einen neuen Termin.'
+      privateBody: translate('push.eventCreatedPrivateBody')
     },
     updated: {
-      title: 'Termin wurde geändert',
-      prefix: 'Geändert',
-      privateBody: 'Ein Termin im Familienkalender wurde geändert.'
+      title: translate('push.eventUpdatedTitle'),
+      prefix: translate('push.eventUpdatedPrefix'),
+      privateBody: translate('push.eventUpdatedPrivateBody')
     },
     deleted: {
-      title: 'Termin wurde abgesagt',
-      prefix: 'Abgesagt',
-      privateBody: 'Ein Termin im Familienkalender wurde abgesagt.'
+      title: translate('push.eventDeletedTitle'),
+      prefix: translate('push.eventDeletedPrefix'),
+      privateBody: translate('push.eventDeletedPrivateBody')
     }
   }[kind];
   if (!copy) return;
@@ -1691,22 +1710,22 @@ function notifyChatViaWebPush(req, record) {
   );
   const body = cleanText(
     chatAttachmentMessageCopy(record),
-    'Neue Nachricht',
+    translate('push.newMessage'),
     800
   );
   queueWebPushEvent(req.session.familyId, isGroup ? 'groupChat' : 'directMessages', {
     recipientMemberIds: isGroup ? null : [record.target],
     excludeMemberIds: [record.senderId],
     title: isGroup
-      ? `${record.senderName} im Familienchat`
-      : `Nachricht von ${record.senderName}`,
+      ? translate('push.groupChatTitle', { name: record.senderName })
+      : translate('push.directMessageTitle', { name: record.senderName }),
     body,
     privateTitle: isGroup
-      ? 'Neue Nachricht im Familienchat'
-      : 'Neue Direktnachricht',
+      ? translate('push.groupChatPrivateTitle')
+      : translate('push.directMessagePrivateTitle'),
     privateBody: hasAttachment
-      ? 'Eine neue Nachricht mit Anhang ist da.'
-      : 'Eine neue Nachricht ist da.',
+      ? translate('push.newMessageWithAttachment')
+      : translate('push.newMessageArrived'),
     url: `/?view=chat&chat=${encodeURIComponent(
       isGroup ? 'group' : record.senderId
     )}`,
@@ -1722,12 +1741,17 @@ function notifyChatViaWebPush(req, record) {
         'groupChat',
         {
           recipientMemberIds: [invitation.guestMember.id],
-          title: `${record.senderName} bei ${hostFamily.familyName}`,
+          title: translate('push.guestChatTitle', {
+            name: record.senderName,
+            family: hostFamily.familyName
+          }),
           body,
-          privateTitle: `Neue Nachricht bei ${hostFamily.familyName}`,
+          privateTitle: translate('push.guestChatPrivateTitle', {
+            family: hostFamily.familyName
+          }),
           privateBody: hasAttachment
-            ? 'Im eingeladenen Familienchat wurde ein Anhang geteilt.'
-            : 'Im eingeladenen Familienchat gibt es eine neue Nachricht.',
+            ? translate('push.guestChatAttachmentShared')
+            : translate('push.guestChatNewMessage'),
           url: `/?view=chat&chat=guest:${invitation.id}`,
           tag: `guest-chat-${invitation.id}-${record.id}`,
           priority: 'normal'
@@ -1751,21 +1775,21 @@ function notifyCreatedResource(req, type, record) {
           record.memberId
         ),
         excludeMemberIds: [actorMemberId],
-        title: 'Neue Mission für dich',
+        title: translate('push.taskAssignedTitle'),
         body: cleanText(
           record.title,
-          'Eine neue Aufgabe wartet auf dich.',
+          translate('push.taskAssignedFallbackBody'),
           240
         ),
-        privateBody: 'Eine neue Aufgabe wartet im Familienplaner auf dich.',
+        privateBody: translate('push.taskAssignedPrivateBody'),
         url: '/?view=tasks',
         tag: `task-${record.id}`
       },
       {
-        title: 'Neue Familienaufgabe',
+        title: translate('push.taskAssignedGotifyTitle'),
         message: cleanText(
           record.title,
-          'Eine neue Aufgabe wurde eingetragen.',
+          translate('push.taskAssignedGotifyFallback'),
           240
         ),
         priority: 3
@@ -1785,19 +1809,19 @@ function notifyCreatedResource(req, type, record) {
           record.memberId
         ),
         excludeMemberIds: [actorMemberId],
-        title: `${record.icon || '💛'} Ein Mutmacher für dich`,
+        title: `${record.icon || '💛'} ${translate('push.encouragementTitle')}`,
         body: cleanText(
           record.message,
-          'Deine Familie denkt an dich.',
+          translate('push.encouragementFallbackBody'),
           240
         ),
-        privateBody: 'In deiner Kinderwelt wartet ein neuer Mutmacher.',
+        privateBody: translate('push.encouragementPrivateBody'),
         url: '/?view=dashboard',
         tag: `encouragement-${record.id}`
       },
       {
-        title: 'Ein neuer Mutmacher',
-        message: 'In der Kinderwelt wurde ein Mutmacher hinterlegt.',
+        title: translate('push.encouragementGotifyTitle'),
+        message: translate('push.encouragementGotifyMessage'),
         priority: 3
       }
     );
@@ -1808,21 +1832,21 @@ function notifyCreatedResource(req, type, record) {
       'familyPolls',
       {
         excludeMemberIds: [actorMemberId],
-        title: 'Neue Familien-Abstimmung',
+        title: translate('push.pollTitle'),
         body: cleanText(
           record.question,
-          'Deine Stimme ist gefragt.',
+          translate('push.pollFallbackBody'),
           240
         ),
-        privateBody: 'Im Familienplaner wartet eine neue Abstimmung.',
+        privateBody: translate('push.pollPrivateBody'),
         url: '/?view=family-life',
         tag: `poll-${record.id}`
       },
       {
-        title: 'Neue Familien-Abstimmung',
+        title: translate('push.pollTitle'),
         message: cleanText(
           record.question,
-          'Deine Stimme ist gefragt.',
+          translate('push.pollFallbackBody'),
           240
         ),
         priority: 3
@@ -1832,8 +1856,8 @@ function notifyCreatedResource(req, type, record) {
   if (type === 'schoolItems' && record.memberId) {
     const title =
       record.kind === 'exam'
-        ? 'Neue Klassenarbeit eingetragen'
-        : 'Neuer Schuleintrag';
+        ? translate('push.examTitle')
+        : translate('push.schoolItemTitle');
     queueNotificationChannels(
       req.session.familyId,
       'schoolItems',
@@ -1846,10 +1870,10 @@ function notifyCreatedResource(req, type, record) {
         title,
         body: cleanText(
           record.title,
-          'Im Schulbereich gibt es etwas Neues.',
+          translate('push.schoolFallbackBody'),
           240
         ),
-        privateBody: 'Im Schulbereich gibt es etwas Neues.',
+        privateBody: translate('push.schoolFallbackBody'),
         url: '/?view=family-life',
         tag: `school-${record.id}`
       },
@@ -1857,7 +1881,7 @@ function notifyCreatedResource(req, type, record) {
         title,
         message: cleanText(
           record.title,
-          'Im Schulbereich gibt es etwas Neues.',
+          translate('push.schoolFallbackBody'),
           240
         ),
         priority: record.kind === 'exam' ? 5 : 3
@@ -1876,21 +1900,21 @@ function notifyCreatedResource(req, type, record) {
       {
         recipientMemberIds: [...new Set(recipients)],
         excludeMemberIds: [actorMemberId],
-        title: 'Neue Familienmission',
+        title: translate('push.familyMissionTitle'),
         body: cleanText(
           record.title,
-          'Eine neue gemeinsame Mission wartet.',
+          translate('push.familyMissionFallbackBody'),
           240
         ),
-        privateBody: 'Im Familienplaner wartet eine neue Familienmission.',
+        privateBody: translate('push.familyMissionPrivateBody'),
         url: '/?view=family-life',
         tag: `family-mission-${record.id}`
       },
       {
-        title: 'Neue Familienmission',
+        title: translate('push.familyMissionTitle'),
         message: cleanText(
           record.title,
-          'Eine neue gemeinsame Mission wartet.',
+          translate('push.familyMissionFallbackBody'),
           240
         ),
         priority: 3
@@ -1910,21 +1934,21 @@ function notifyCreatedResource(req, type, record) {
       {
         recipientMemberIds: recipients,
         excludeMemberIds: [actorMemberId],
-        title: 'Neue Belohnung im Shop',
+        title: translate('push.rewardNewTitle'),
         body: cleanText(
           record.title,
-          'Eine neue Belohnung wartet auf dich.',
+          translate('push.rewardNewFallbackBody'),
           240
         ),
-        privateBody: 'Im Belohnungsshop gibt es etwas Neues.',
+        privateBody: translate('push.rewardNewPrivateBody'),
         url: '/?view=tasks',
         tag: `reward-new-${record.id}`
       },
       {
-        title: 'Neue Belohnung',
+        title: translate('push.rewardNewGotifyTitle'),
         message: cleanText(
           record.title,
-          'Eine neue Belohnung wurde angelegt.',
+          translate('push.rewardNewGotifyFallback'),
           240
         ),
         priority: 3
@@ -1936,10 +1960,15 @@ function notifyCreatedResource(req, type, record) {
 function notifyTaskCompleted(req, result, actorMemberId) {
   const targetIsManaged = Boolean(result.member?.isManaged);
   const completionMessage = targetIsManaged
-    ? `"${result.task.title}" wurde erledigt.`
-    : `"${result.task.title}" · +${result.task.stars ?? 10} Sterne`;
+    ? translate('push.taskDoneBody', { title: result.task.title })
+    : translate('push.taskDoneStarsBody', {
+        title: result.task.title,
+        stars: result.task.stars ?? 10
+      });
   queueGotifyNotification(req.session.familyId, 'taskCompleted', {
-    title: `${result.member?.name || 'Jemand'} hat etwas geschafft`,
+    title: translate('push.taskCompletedTitle', {
+      name: result.member?.name || translate('labels.someone')
+    }),
     message: completionMessage,
     priority: 3
   });
@@ -1949,10 +1978,12 @@ function notifyTaskCompleted(req, result, actorMemberId) {
   queueWebPushEvent(req.session.familyId, 'taskCompleted', {
     recipientMemberIds: [...new Set([result.task.memberId, ...adultIds].filter(Boolean))],
     excludeMemberIds: [actorMemberId],
-    title: `${result.member?.name || 'Jemand'} hat etwas geschafft`,
+    title: translate('push.taskCompletedTitle', {
+      name: result.member?.name || translate('labels.someone')
+    }),
     body: completionMessage,
-    privateTitle: 'Eine Aufgabe ist bestätigt',
-    privateBody: 'Im Familienplaner wurden neue Sterne verdient.',
+    privateTitle: translate('push.taskCompletedPrivateTitle'),
+    privateBody: translate('push.taskCompletedPrivateBody'),
     url: '/?view=tasks',
     tag: `task-complete-${result.task.id}`
   });
@@ -1964,16 +1995,18 @@ function notifyTaskCompleted(req, result, actorMemberId) {
         recipientMemberIds: adultMemberIds(
           result.task.createdByExternalFamilyId
         ),
-        title: `${result.member?.name || 'Jemand'} hat deine Aufgabe geschafft`,
+        title: translate('push.externalTaskCompletedTitle', {
+          name: result.member?.name || translate('labels.someone')
+        }),
         body: result.task.title,
         privateBody:
-          'Eine Aufgabe für eine verbundene Familie wurde bestätigt.',
+          translate('push.externalTaskCompletedPrivateBody'),
         url: '/?view=admin',
         tag: `external-task-complete-${result.task.id}`
       },
       {
-        title: 'Aufgabe in verbundener Familie geschafft',
-        message: `${result.member?.name || 'Jemand'}: ${result.task.title}`,
+        title: translate('push.externalTaskCompletedGotifyTitle'),
+        message: `${result.member?.name || translate('labels.someone')}: ${result.task.title}`,
         priority: 3
       }
     );
@@ -1985,13 +2018,13 @@ function notifyTaskCompleted(req, result, actorMemberId) {
     queueWebPushEvent(req.session.familyId, 'taskAssigned', {
       recipientMemberIds: [result.nextTask.memberId],
       excludeMemberIds: [actorMemberId],
-      title: 'Du bist als Nächstes dran',
+      title: translate('push.taskRotationTitle'),
       body: cleanText(
         result.nextTask.title,
-        'Eine rotierende Familienaufgabe wartet auf dich.',
+        translate('push.taskRotationFallbackBody'),
         240
       ),
-      privateBody: 'Eine Familienaufgabe wurde fair weitergegeben.',
+      privateBody: translate('push.taskRotationPrivateBody'),
       url: '/?view=tasks',
       tag: `task-rotation-${result.nextTask.id}`
     });
@@ -2021,7 +2054,7 @@ function authRateLimit(req, res, next) {
   if (entry.count > 30) {
     return res.status(429).json({
       success: false,
-      error: 'Zu viele Anmeldeversuche. Bitte kurz warten.'
+      error: translate('errors.tooManyLoginAttempts')
     });
   }
   return next();
@@ -2076,7 +2109,7 @@ function protectReadOnlyDemo(req, res, next) {
     success: false,
     readOnlyDemo: true,
     error:
-      'Die öffentliche Demo ist schreibgeschützt. Schau dich gerne um – Änderungen sind nur in deiner eigenen Installation möglich.'
+      translate('errors.readOnlyDemo')
   });
 }
 
@@ -2084,7 +2117,7 @@ function requireAuth(req, res, next) {
   if (!req.session) {
     return res.status(401).json({
       success: false,
-      error: 'Bitte zuerst anmelden.'
+      error: translate('errors.loginRequired')
     });
   }
   return next();
@@ -2094,14 +2127,14 @@ function requireAdult(req, res, next) {
   if (!req.session?.memberId) {
     return res.status(403).json({
       success: false,
-      error: 'Bitte zuerst ein Erwachsenenprofil wählen.'
+      error: translate('errors.adultProfileRequired')
     });
   }
   const member = getMember(req.session.familyId, req.session.memberId);
   if (!isAdultMember(member)) {
     return res.status(403).json({
       success: false,
-      error: 'Diese Änderung ist Erwachsenen vorbehalten.'
+      error: translate('errors.adultsOnlyChange')
     });
   }
   req.activeMember = member;
@@ -2115,14 +2148,14 @@ function requireResourceManager(req, res, next) {
   if (member?.role === 'pet') {
     return res.status(403).json({
       success: false,
-      error: 'Haustierprofile sind eine geschützte Übersicht.'
+      error: translate('errors.petProfilesProtected')
     });
   }
   if (!ADULT_MANAGED_RESOURCES.has(req.params.type)) return next();
   if (!isAdultMember(member)) {
     return res.status(403).json({
       success: false,
-      error: 'Diese Einträge werden von einem Erwachsenen verwaltet.'
+      error: translate('errors.entriesManagedByAdult')
     });
   }
   return next();
@@ -2136,7 +2169,7 @@ function rejectPetChatAccess(req, res) {
   if (member?.role !== 'pet') return false;
   res.status(403).json({
     success: false,
-    error: 'Haustierprofile verwenden keinen Chat.'
+    error: translate('errors.petNoChat')
   });
   return true;
 }
@@ -2148,13 +2181,13 @@ function requireChatMember(req, res, next) {
   if (!member) {
     return res.status(403).json({
       success: false,
-      error: 'Bitte zuerst ein Profil auswählen.'
+      error: translate('errors.profileRequired')
     });
   }
   if (member.role === 'pet' || isManagedMember(member)) {
     return res.status(403).json({
       success: false,
-      error: 'Dieses Profil verwendet keinen Chat.'
+      error: translate('errors.profileNoChat')
     });
   }
   req.activeMember = member;
@@ -2164,22 +2197,22 @@ function requireChatMember(req, res, next) {
 function normalizeHomeAssistantBaseUrl(value) {
   let url;
   try {
-    url = new URL(requireText(value, 'Home-Assistant-Adresse', 2000));
+    url = new URL(requireText(value, translate('fields.homeAssistantAddress'), 2000));
   } catch {
-    const error = new Error('Die Home-Assistant-Adresse ist ungültig.');
+    const error = new Error(translate('errors.homeAssistantAddressInvalid'));
     error.statusCode = 400;
     throw error;
   }
   if (!['http:', 'https:'].includes(url.protocol)) {
     const error = new Error(
-      'Home Assistant muss über HTTP oder HTTPS erreichbar sein.'
+      translate('errors.homeAssistantProtocol')
     );
     error.statusCode = 400;
     throw error;
   }
   if (url.username || url.password || url.search || url.hash) {
     const error = new Error(
-      'Die Home-Assistant-Adresse darf keine Zugangsdaten oder Parameter enthalten.'
+      translate('errors.homeAssistantAddressExtras')
     );
     error.statusCode = 400;
     throw error;
@@ -2283,7 +2316,7 @@ async function homeAssistantFetch(integration, pathname, options = {}) {
     });
   } catch {
     const error = new Error(
-      'Home Assistant ist unter dieser Adresse nicht erreichbar.'
+      translate('errors.homeAssistantUnreachable')
     );
     error.statusCode = 502;
     throw error;
@@ -2291,8 +2324,10 @@ async function homeAssistantFetch(integration, pathname, options = {}) {
   if (!response.ok) {
     const error = new Error(
       response.status === 401 || response.status === 403
-        ? 'Home Assistant hat den Zugriffsschlüssel abgelehnt.'
-        : `Home Assistant meldet Fehler ${response.status}.`
+        ? translate('errors.homeAssistantTokenRejected')
+        : translate('errors.homeAssistantServerError', {
+            status: response.status
+          })
     );
     error.statusCode = 502;
     throw error;
@@ -2389,7 +2424,7 @@ function bundledNextcloudPublicUrl() {
   try {
     return normalizeNextcloudBaseUrl(
       configured,
-      'Öffentliche Nextcloud-Adresse'
+      translate('fields.publicNextcloudAddress')
     );
   } catch {
     return '';
@@ -2416,7 +2451,7 @@ async function provisionBundledNextcloudForFamily(
   if (!bundled) {
     throw Object.assign(
       new Error(
-        'Die mitgelieferte Family Cloud ist auf diesem Server noch nicht aktiviert.'
+        translate('errors.bundledCloudNotActivated')
       ),
       { statusCode: 503 }
     );
@@ -2424,7 +2459,7 @@ async function provisionBundledNextcloudForFamily(
   const family = getFamily(familyId);
   if (!family) {
     throw Object.assign(
-      new Error('Die Familie wurde nicht gefunden.'),
+      new Error(translate('errors.familyNotFound')),
       { statusCode: 404 }
     );
   }
@@ -2434,7 +2469,7 @@ async function provisionBundledNextcloudForFamily(
   }
   const publicBaseUrl = normalizeNextcloudBaseUrl(
     options.publicBaseUrl || bundledNextcloudPublicUrl(),
-    'Nextcloud-Adresse für Browser'
+    translate('fields.nextcloudBrowserAddress')
   );
   const folder = normalizeNextcloudFolder(
     options.folder || existing?.config?.folder || 'LX Family'
@@ -2491,7 +2526,7 @@ async function provisionBundledNextcloudForFamily(
   if (!eventCalendarHref) {
     throw Object.assign(
       new Error(
-        'Nextcloud konnte keinen Familienkalender bereitstellen.'
+        translate('errors.nextcloudNoFamilyCalendar')
       ),
       { statusCode: 502 }
     );
@@ -2690,7 +2725,7 @@ function nextcloudConnection(integration) {
 function nextcloudWorkspace(familyId) {
   const integration = getIntegration(familyId, 'nextcloud');
   if (!integration || integration.config?.enabled === false) {
-    const error = new Error('Family Cloud ist noch nicht verbunden.');
+    const error = new Error(translate('errors.familyCloudNotConnected'));
     error.statusCode = 404;
     throw error;
   }
@@ -2865,7 +2900,7 @@ async function performNextcloudSyncUnlocked(familyId, existing = null) {
         lastSyncAt: Date.now(),
         lastSyncError: cleanText(
           error.message,
-          'Nextcloud-Synchronisation fehlgeschlagen.',
+          translate('errors.nextcloudSyncFailed'),
           300
         )
       },
@@ -2949,7 +2984,7 @@ async function performNextcloudBackupUnlocked(familyId, existing = null) {
         lastBackupAttemptAt: Date.now(),
         lastBackupError: cleanText(
           error.message,
-          'Nextcloud-Sicherung fehlgeschlagen.',
+          translate('errors.nextcloudBackupFailed'),
           300
         )
       },
@@ -2998,20 +3033,20 @@ function nextcloudBackupIsDue(integration, now = new Date()) {
 function normalizeGotifyBaseUrl(value) {
   let url;
   try {
-    url = new URL(requireText(value, 'Gotify-Adresse', 2000));
+    url = new URL(requireText(value, translate('fields.gotifyAddress'), 2000));
   } catch {
-    const error = new Error('Die Gotify-Adresse ist ungültig.');
+    const error = new Error(translate('errors.gotifyAddressInvalid'));
     error.statusCode = 400;
     throw error;
   }
   if (!['http:', 'https:'].includes(url.protocol)) {
-    const error = new Error('Gotify muss über HTTP oder HTTPS erreichbar sein.');
+    const error = new Error(translate('errors.gotifyProtocol'));
     error.statusCode = 400;
     throw error;
   }
   if (url.username || url.password || url.search || url.hash) {
     const error = new Error(
-      'Die Gotify-Adresse darf keine Zugangsdaten oder Parameter enthalten.'
+      translate('errors.gotifyAddressExtras')
     );
     error.statusCode = 400;
     throw error;
@@ -3032,7 +3067,7 @@ function normalizePlannerUrl(value) {
     url.hash = '';
     return url.href.replace(/\/$/, '');
   } catch {
-    const error = new Error('Die Adresse des Familienplaners ist ungültig.');
+    const error = new Error(translate('errors.plannerUrlInvalid'));
     error.statusCode = 400;
     throw error;
   }
@@ -3074,14 +3109,14 @@ async function postGotifyMessage(baseUrl, token, payload, plannerUrl = '') {
     },
     body: JSON.stringify({
       title: cleanText(payload.title, 'LX Family Planner', 140),
-      message: cleanText(payload.message, 'Neue Familiennachricht', 3000),
+      message: cleanText(payload.message, translate('push.gotifyDefaultMessage'), 3000),
       priority: Math.max(-2, Math.min(10, Number(payload.priority || 4))),
       extras
     })
   });
   if (!response.ok) {
     const error = new Error(
-      `Gotify hat die Nachricht abgelehnt (${response.status}).`
+      translate('errors.gotifyMessageRejected', { status: response.status })
     );
     error.statusCode = 502;
     throw error;
@@ -3145,19 +3180,21 @@ function notifyChatViaGotify(req, record) {
   const messageText = rules.includeMessageText
     ? cleanText(
         chatAttachmentMessageCopy(record),
-        'Neue Nachricht',
+        translate('push.newMessage'),
         800
       )
     : (
         record.photo ||
         (Array.isArray(record.attachments) && record.attachments.length)
-          ? 'Eine neue Nachricht mit Anhang ist da.'
-          : 'Eine neue Nachricht ist da.'
+          ? translate('push.newMessageWithAttachment')
+          : translate('push.newMessageArrived')
       );
   queueGotifyNotification(req.session.familyId, eventKey, {
     title: isGroup
-      ? `Familienchat · ${record.senderName}`
-      : `Direktnachricht · ${record.senderName}`,
+      ? translate('push.gotifyGroupChatTitle', { name: record.senderName })
+      : translate('push.gotifyDirectMessageTitle', {
+          name: record.senderName
+        }),
     message: messageText,
     priority: isGroup ? 4 : 5
   });
@@ -3261,7 +3298,7 @@ function sessionChatRecord(req, record) {
     ? getMember(req.session.familyId, req.session.memberId)
     : null;
   if (!member) {
-    const error = new Error('Bitte zuerst ein Profil auswählen.');
+    const error = new Error(translate('errors.profileRequired'));
     error.statusCode = 403;
     throw error;
   }
@@ -3269,15 +3306,15 @@ function sessionChatRecord(req, record) {
   if (target !== 'group') {
     const targetMember = getMember(req.session.familyId, target);
     if (!targetMember) {
-      const error = new Error('Das Zielprofil wurde nicht gefunden.');
+      const error = new Error(translate('errors.targetProfileNotFound'));
       error.statusCode = 404;
       throw error;
     }
     if (targetMember.role === 'pet' || targetMember.isManaged) {
       const error = new Error(
         targetMember.isManaged
-          ? 'Verwaltete Profile verwenden keinen Chat.'
-          : 'Haustierprofile können keine Chatnachrichten empfangen.'
+          ? translate('errors.managedProfileNoChat')
+          : translate('errors.petCannotReceiveChat')
       );
       error.statusCode = 403;
       throw error;
@@ -3291,7 +3328,7 @@ function sessionChatRecord(req, record) {
     target
   );
   if (!text && !photo && !attachments.length) {
-    const error = new Error('Die Nachricht ist leer.');
+    const error = new Error(translate('errors.messageEmpty'));
     error.statusCode = 400;
     throw error;
   }
@@ -3321,23 +3358,23 @@ function canModifyChatRecord(req, record) {
 
 function sanitizeDashboardLink(req, value) {
   const input = ensureObject(value);
-  const memberId = requireText(input.memberId, 'Kinderprofil', 100);
+  const memberId = requireText(input.memberId, translate('fields.childProfile'), 100);
   const member = getMember(req.session.familyId, memberId);
   if (
     !member ||
     member.isManaged ||
     !['child', 'teen'].includes(member.role)
   ) {
-    const error = new Error('Bitte ein Kinder- oder Teenagerprofil auswählen.');
+    const error = new Error(translate('errors.childProfileRequired'));
     error.statusCode = 400;
     throw error;
   }
 
   let url;
   try {
-    url = new URL(requireText(input.url, 'Medien-Adresse', 2000));
+    url = new URL(requireText(input.url, translate('fields.mediaAddress'), 2000));
   } catch {
-    const error = new Error('Die Medien-Adresse ist ungültig.');
+    const error = new Error(translate('errors.mediaUrlInvalid'));
     error.statusCode = 400;
     throw error;
   }
@@ -3349,7 +3386,7 @@ function sanitizeDashboardLink(req, value) {
       : '';
   if (url.protocol !== 'https:' || !kind) {
     const error = new Error(
-      'Erlaubt sind sichere Links zu YouTube und Spotify.'
+      translate('errors.mediaLinkAllowed')
     );
     error.statusCode = 400;
     throw error;
@@ -3357,7 +3394,9 @@ function sanitizeDashboardLink(req, value) {
   const requestedKind = cleanText(input.kind, '', 20).toLowerCase();
   if (requestedKind && requestedKind !== kind) {
     const error = new Error(
-      `Der Link passt nicht zur ausgewählten Medienart ${requestedKind === 'spotify' ? 'Spotify' : 'YouTube'}.`
+      translate('errors.mediaKindMismatch', {
+        kind: requestedKind === 'spotify' ? 'Spotify' : 'YouTube'
+      })
     );
     error.statusCode = 400;
     throw error;
@@ -3367,7 +3406,7 @@ function sanitizeDashboardLink(req, value) {
     !/^\/(?:playlist|album|artist|track|show|episode)\//i.test(url.pathname)
   ) {
     const error = new Error(
-      'Bitte verwende einen direkten Spotify-Link zu einer Playlist oder einem Inhalt.'
+      translate('errors.spotifyDirectLinkRequired')
     );
     error.statusCode = 400;
     throw error;
@@ -3382,7 +3421,7 @@ function sanitizeDashboardLink(req, value) {
   return {
     ...input,
     memberId,
-    title: requireText(input.title, 'Titel', 80),
+    title: requireText(input.title, translate('fields.title'), 80),
     url: url.href,
     kind,
     color,
@@ -3447,7 +3486,7 @@ const PROFILE_SCOPED_FAMILY_LIFE_TYPES = new Set([
 function familyLifeMember(req, memberId, { childrenOnly = false } = {}) {
   const member = getMember(
     req.session.familyId,
-    requireText(memberId, 'Familienprofil', 100)
+    requireText(memberId, translate('fields.familyProfile'), 100)
   );
   if (
     !member ||
@@ -3457,8 +3496,8 @@ function familyLifeMember(req, memberId, { childrenOnly = false } = {}) {
   ) {
     const error = new Error(
       childrenOnly
-        ? 'Bitte ein Kinder- oder Teenagerprofil auswählen.'
-        : 'Das Familienprofil wurde nicht gefunden.'
+        ? translate('errors.childProfileRequired')
+        : translate('errors.familyProfileNotFound')
     );
     error.statusCode = 400;
     throw error;
@@ -3480,7 +3519,7 @@ function sanitizeCalendarEvent(req, value, existing = null) {
   const input = ensureObject(value);
   const date = cleanDate(input.date, '');
   if (!date) {
-    const error = new Error('Bitte wähle ein gültiges Termindatum.');
+    const error = new Error(translate('errors.eventDateInvalid'));
     error.statusCode = 400;
     throw error;
   }
@@ -3490,7 +3529,7 @@ function sanitizeCalendarEvent(req, value, existing = null) {
       ? null
       : getMember(req.session.familyId, memberId);
   if (memberId !== 'all' && !targetMember) {
-    const error = new Error('Das ausgewählte Familienprofil wurde nicht gefunden.');
+    const error = new Error(translate('errors.selectedFamilyProfileNotFound'));
     error.statusCode = 400;
     throw error;
   }
@@ -3502,7 +3541,7 @@ function sanitizeCalendarEvent(req, value, existing = null) {
     )
   ) {
     const error = new Error(
-      'Termine für verwaltete Profile werden von einem Erwachsenen eingetragen.'
+      translate('errors.managedEventsAdultOnly')
     );
     error.statusCode = 403;
     throw error;
@@ -3511,7 +3550,7 @@ function sanitizeCalendarEvent(req, value, existing = null) {
   return {
     ...(existing || {}),
     ...input,
-    title: requireText(input.title, 'Termintitel', 240),
+    title: requireText(input.title, translate('fields.eventTitle'), 240),
     date,
     time: allDay ? '' : cleanTime(input.time, ''),
     endTime: allDay ? '' : cleanTime(input.endTime, ''),
@@ -3528,14 +3567,14 @@ function sanitizeTrashEvent(value, existing = null) {
   const input = ensureObject(value);
   const date = cleanDate(input.date, '');
   if (!date) {
-    const error = new Error('Bitte wähle ein gültiges Abholdatum.');
+    const error = new Error(translate('errors.trashDateInvalid'));
     error.statusCode = 400;
     throw error;
   }
   return {
     ...(existing || {}),
     ...input,
-    title: requireText(input.title, 'Bezeichnung', 240),
+    title: requireText(input.title, translate('fields.trashLabel'), 240),
     date,
     type: cleanText(input.type, 'rest', 40),
     household: cleanText(input.household, 'familie', 100),
@@ -3556,11 +3595,15 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       .slice(0, 16)
       .map((step, index) => ({
         id: cleanText(step?.id, `step-${index + 1}`, 80),
-        title: requireText(step?.title, `Routinenschritt ${index + 1}`, 100),
+        title: requireText(
+          step?.title,
+          translate('fields.routineStepN', { index: index + 1 }),
+          100
+        ),
         icon: cleanText(step?.icon, '✓', 12)
       }));
     if (!steps.length) {
-      const error = new Error('Eine Routine braucht mindestens einen Schritt.');
+      const error = new Error(translate('errors.routineStepsRequired'));
       error.statusCode = 400;
       throw error;
     }
@@ -3568,7 +3611,7 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       ...existing,
       ...input,
       memberId: member.id,
-      title: requireText(input.title, 'Routinenname', 100),
+      title: requireText(input.title, translate('fields.routineName'), 100),
       icon: cleanText(input.icon, '☀️', 12),
       timeOfDay: ['morning', 'afternoon', 'evening'].includes(input.timeOfDay)
         ? input.timeOfDay
@@ -3592,7 +3635,7 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       ...existing,
       ...input,
       memberId: member.id,
-      title: requireText(input.title, 'Sparziel', 100),
+      title: requireText(input.title, translate('fields.savingsGoal'), 100),
       icon: cleanText(input.icon, '🎯', 12),
       targetCents: Math.max(
         100,
@@ -3616,7 +3659,7 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       ...input,
       memberId: member.id,
       kind,
-      title: requireText(input.title, 'Schuleintrag', 140),
+      title: requireText(input.title, translate('fields.schoolItem'), 140),
       subject: cleanText(input.subject, '', 80),
       details: cleanText(input.details, '', 500),
       date: cleanDate(input.date, ''),
@@ -3631,18 +3674,22 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       .slice(0, 8)
       .map((option, index) => ({
         id: cleanText(option?.id, `option-${index + 1}`, 80),
-        label: requireText(option?.label, `Antwort ${index + 1}`, 100),
+        label: requireText(
+          option?.label,
+          translate('fields.answerN', { index: index + 1 }),
+          100
+        ),
         emoji: cleanText(option?.emoji, ['👍', '🎉', '💛'][index] || '✨', 12)
       }));
     if (options.length < 2) {
-      const error = new Error('Eine Abstimmung braucht mindestens zwei Antworten.');
+      const error = new Error(translate('errors.pollOptionsRequired'));
       error.statusCode = 400;
       throw error;
     }
     return {
       ...existing,
       ...input,
-      question: requireText(input.question, 'Frage', 180),
+      question: requireText(input.question, translate('fields.question'), 180),
       options,
       votes:
         existing?.votes &&
@@ -3665,11 +3712,11 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       ...existing,
       ...input,
       memberId: member.id,
-      message: requireText(input.message, 'Mutmacher', 240),
+      message: requireText(input.message, translate('fields.encouragement'), 240),
       icon: cleanText(input.icon, '💛', 12),
       createdByMemberId:
         existing?.createdByMemberId || sender?.id || '',
-      createdByName: existing?.createdByName || sender?.name || 'Deine Familie',
+      createdByName: existing?.createdByName || sender?.name || translate('labels.yourFamily'),
       createdAt: Number(existing?.createdAt || input.createdAt || now)
     };
   }
@@ -3689,14 +3736,14 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       )
     ];
     if (!memberIds.length) {
-      const error = new Error('Wähle mindestens ein Kinderprofil aus.');
+      const error = new Error(translate('errors.missionChildRequired'));
       error.statusCode = 400;
       throw error;
     }
     return {
       ...existing,
       ...input,
-      title: requireText(input.title, 'Familienmission', 140),
+      title: requireText(input.title, translate('fields.familyMission'), 140),
       description: cleanText(input.description, '', 400),
       icon: cleanText(input.icon, '🤝', 12),
       memberIds,
@@ -3720,7 +3767,7 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       mediaEnd: cleanTime(input.mediaEnd, '19:30'),
       emergencyTitle: cleanText(
         input.emergencyTitle,
-        'Wichtige Hilfe für unsere Familie',
+        translate('labels.emergencyTitle'),
         100
       ),
       emergencyContacts: (Array.isArray(input.emergencyContacts)
@@ -3728,7 +3775,7 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
         : []
       ).slice(0, 12).map(contact => ({
         id: cleanText(contact?.id, `contact-${randomUUID()}`, 100),
-        name: requireText(contact?.name, 'Kontaktname', 80),
+        name: requireText(contact?.name, translate('fields.contactName'), 80),
         phone: cleanText(contact?.phone, '', 40),
         note: cleanText(contact?.note, '', 160),
         icon: cleanText(contact?.icon, '☎️', 12)
@@ -3773,7 +3820,7 @@ function isWithinTimeWindow(start, end, date = new Date()) {
 async function fetchBringClient(familyId) {
   const integration = getIntegration(familyId, 'bring');
   if (!integration) {
-    const error = new Error('Bring! ist noch nicht verbunden.');
+    const error = new Error(translate('errors.bringNotConnected'));
     error.statusCode = 404;
     throw error;
   }
@@ -3843,9 +3890,13 @@ function sanitizeAgentRecord(type, data, familyId) {
   if (type === 'chatMessages') {
     return {
       ...record,
-      text: requireText(input.text || input.message, 'Nachricht', 2000),
+      text: requireText(input.text || input.message, translate('fields.message'), 2000),
       senderId: cleanText(input.senderId || 'agent', 'agent', 100),
-      senderName: cleanText(input.senderName || 'Familienassistent', 'Familienassistent', 100),
+      senderName: cleanText(
+        input.senderName || translate('labels.familyAssistant'),
+        translate('labels.familyAssistant'),
+        100
+      ),
       timestamp: Number(input.timestamp || Date.now()),
       isAgent: true
     };
@@ -3853,7 +3904,7 @@ function sanitizeAgentRecord(type, data, familyId) {
   if (type === 'tasks') {
     return {
       ...record,
-      title: requireText(input.title || input.text, 'Aufgabe', 200),
+      title: requireText(input.title || input.text, translate('fields.task'), 200),
       memberId: cleanText(input.memberId || input.assigneeId, '', 100),
       stars: Math.max(0, Math.min(1000, Number(input.stars || 10))),
       completed: Boolean(input.completed)
@@ -4062,7 +4113,7 @@ export function createApp() {
   ) => {
     fileName = cleanText(fileName, '', 1000);
     if (!fileName) {
-      const error = new Error('Der Dateiname fehlt.');
+      const error = new Error(translate('errors.fileNameMissing'));
       error.statusCode = 400;
       throw error;
     }
@@ -4070,12 +4121,12 @@ export function createApp() {
       ? content
       : Buffer.from(content || '');
     if (!content.length) {
-      const error = new Error('Die ausgewählte Datei ist leer.');
+      const error = new Error(translate('errors.fileEmpty'));
       error.statusCode = 400;
       throw error;
     }
     if (content.length > CHAT_ATTACHMENT_MAX_BYTES) {
-      const error = new Error('Chat-Anhänge dürfen höchstens 100 MB groß sein.');
+      const error = new Error(translate('errors.chatAttachmentTooLarge'));
       error.statusCode = 413;
       throw error;
     }
@@ -4088,7 +4139,7 @@ export function createApp() {
         isManagedMember(targetMember)
       ) {
         const error = new Error(
-          'Das Zielprofil für den privaten Anhang wurde nicht gefunden.'
+          translate('errors.privateAttachmentTargetNotFound')
         );
         error.statusCode = 404;
         throw error;
@@ -4161,7 +4212,9 @@ export function createApp() {
       : [];
     if (existingAttachments.length >= CHAT_ATTACHMENT_MAX_COUNT) {
       const error = new Error(
-        `Pro Nachricht sind höchstens ${CHAT_ATTACHMENT_MAX_COUNT} Anhänge möglich.`
+        translate('errors.attachmentLimit', {
+        count: CHAT_ATTACHMENT_MAX_COUNT
+      })
       );
       error.statusCode = 400;
       throw error;
@@ -4239,7 +4292,7 @@ export function createApp() {
   ) => {
     const attachment = chatAttachmentById(message, attachmentId);
     if (!attachment) {
-      const error = new Error('Der Chat-Anhang wurde nicht gefunden.');
+      const error = new Error(translate('errors.chatAttachmentNotFound'));
       error.statusCode = 404;
       throw error;
     }
@@ -4288,10 +4341,17 @@ export function createApp() {
               event
             ),
             notificationCopy: () => ({
-              title: `⏰ ${cleanText(event.title, 'Terminerinnerung', 180)}`,
-              body: eventReminderMessage(event, now),
-              privateTitle: 'Terminerinnerung',
-              privateBody: 'Ein Termin beginnt bald.'
+              title: `⏰ ${cleanText(
+                event.title,
+                translate('push.eventReminderFallbackTitle'),
+                180
+              )}`,
+              body: eventReminderMessage(event, now, {
+                t: translate,
+                locale: APP_LOCALE
+              }),
+              privateTitle: translate('push.eventReminderFallbackTitle'),
+              privateBody: translate('eventReminder.fallback')
             }),
             url: '/?view=calendar',
             tagPrefix: 'event-reminder',
@@ -4304,9 +4364,9 @@ export function createApp() {
               eventId: `trash-${String(record.id || '')}`,
               recipientMemberIds: signedInMemberIds(family.id),
               notificationCopy: reminderMinutes => ({
-                ...trashReminderCopy(record, reminderMinutes),
-                privateTitle: 'Müllabfuhr-Erinnerung',
-                privateBody: 'Eine Müllabholung steht an.'
+                ...trashReminderCopy(record, reminderMinutes, { t: translate }),
+                privateTitle: translate('push.trashReminderPrivateTitle'),
+                privateBody: translate('push.trashReminderPrivateBody')
               }),
               url: '/?view=trash',
               tagPrefix: 'trash-reminder',
@@ -4615,6 +4675,14 @@ export function createApp() {
   app.use(sessionMiddleware);
   app.use(protectReadOnlyDemo);
 
+  app.get('/api/config', (_req, res) => {
+    res.json({
+      success: true,
+      language: APP_LANGUAGE,
+      supportedLanguages: SUPPORTED_APP_LANGUAGES
+    });
+  });
+
   app.get('/api/health', (_req, res) => {
     res.json({
       success: true,
@@ -4741,26 +4809,26 @@ export function createApp() {
 
   app.post('/api/public/register', authRateLimit, (req, res) => {
     const input = ensureObject(req.body);
-    const familyName = requireText(input.familyName, 'Familienname', 100);
-    const password = requireText(input.password, 'Passwort', 100);
+    const familyName = requireText(input.familyName, translate('fields.familyName'), 100);
+    const password = requireText(input.password, translate('fields.password'), 100);
     if (password.length < 4) {
       return res.status(400).json({
         success: false,
-        error: 'Das Familienpasswort muss mindestens 4 Zeichen lang sein.'
+        error: translate('errors.familyPasswordTooShort')
       });
     }
     const members = Array.isArray(input.members) ? input.members : [];
     if (members.length === 0) {
       return res.status(400).json({
         success: false,
-        error: 'Lege mindestens ein Familienmitglied an.'
+        error: translate('errors.membersRequired')
       });
     }
     const normalizedMembers = members.slice(0, 20).map(normalizeMemberInput);
     if (!normalizedMembers.some(member => !member.isManaged)) {
       return res.status(400).json({
         success: false,
-        error: 'Die Familie braucht mindestens ein Profil mit Anmeldung.'
+        error: translate('errors.loginProfileRequired')
       });
     }
     const result = createFamily({
@@ -4805,13 +4873,13 @@ export function createApp() {
 
   app.post('/api/auth/family', authRateLimit, (req, res) => {
     const input = ensureObject(req.body);
-    const familyId = requireText(input.familyId, 'Familie', 100);
-    const password = requireText(input.password, 'Passwort', 100);
+    const familyId = requireText(input.familyId, translate('fields.family'), 100);
+    const password = requireText(input.password, translate('fields.password'), 100);
     const familyRow = getFamilyAuthRow(familyId);
     if (!familyRow || !verifySecret(password, familyRow.password_hash)) {
       return res.status(401).json({
         success: false,
-        error: 'Familie oder Passwort ist nicht korrekt.'
+        error: translate('errors.familyOrPasswordIncorrect')
       });
     }
     const sessionToken = createSession(familyId, {
@@ -4834,19 +4902,19 @@ export function createApp() {
 
   app.post('/api/auth/member', requireAuth, (req, res) => {
     const input = ensureObject(req.body);
-    const memberId = requireText(input.memberId, 'Profil', 100);
+    const memberId = requireText(input.memberId, translate('fields.profile'), 100);
     const memberRow = getMemberAuthRow(req.session.familyId, memberId);
     if (!memberRow) {
       return res.status(404).json({
         success: false,
-        error: 'Profil nicht gefunden.'
+        error: translate('errors.profileNotFound')
       });
     }
     if (isManagedMember(memberRow)) {
       return res.status(403).json({
         success: false,
         error:
-          'Dieses Profil wird nur organisiert und besitzt keine eigene Anmeldung.'
+          translate('errors.managedProfileNoLogin')
       });
     }
     const currentMember = req.session.memberId
@@ -4864,7 +4932,7 @@ export function createApp() {
       ) {
         return res.status(401).json({
           success: false,
-          error: 'Für ein Erwachsenenprofil wird das Familienpasswort benötigt.',
+          error: translate('errors.familyPasswordRequiredForAdult'),
           requiresFamilyPassword: true
         });
       }
@@ -4872,7 +4940,7 @@ export function createApp() {
     if (memberRow.pin_hash && !verifySecret(cleanText(input.pin, '', 12), memberRow.pin_hash)) {
       return res.status(401).json({
         success: false,
-        error: 'Die Profil-PIN ist nicht korrekt.'
+        error: translate('errors.pinIncorrect')
       });
     }
     setSessionMember(req.sessionToken, req.session.familyId, memberId);
@@ -4938,7 +5006,7 @@ export function createApp() {
     if (!member || !isAdultMember(member)) {
       return res.status(403).json({
         success: false,
-        error: 'Versionshinweise sind für angemeldete Erwachsenenprofile bestimmt.'
+        error: translate('errors.releaseNotesAdultsOnly')
       });
     }
     const updatedMember = acknowledgeMemberReleaseNotes(
@@ -5018,7 +5086,7 @@ export function createApp() {
       if (!req.session.memberId) {
         return res.status(403).json({
           success: false,
-          error: 'Bitte zuerst ein Profil auswählen.'
+          error: translate('errors.profileRequired')
         });
       }
       const notification = markInboxNotificationRead(
@@ -5030,7 +5098,7 @@ export function createApp() {
       if (!notification) {
         return res.status(404).json({
           success: false,
-          error: 'Benachrichtigung nicht gefunden.'
+          error: translate('errors.notificationNotFound')
         });
       }
       publishFamilyChange(req.session.familyId, 'notifications');
@@ -5050,7 +5118,7 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Profil auswählen.'
+        error: translate('errors.profileRequired')
       });
     }
     const changed = markAllInboxNotificationsRead(
@@ -5072,7 +5140,7 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Profil auswählen.'
+        error: translate('errors.profileRequired')
       });
     }
     const category = cleanText(req.body?.category, 'problem', 40);
@@ -5083,10 +5151,10 @@ export function createApp() {
         category: ['problem', 'idea', 'content'].includes(category)
           ? category
           : 'problem',
-        title: requireText(req.body?.title, 'Kurztitel', 120),
+        title: requireText(req.body?.title, translate('fields.shortTitle'), 120),
         description: requireText(
           req.body?.description,
-          'Beschreibung',
+          translate('fields.description'),
           4000
         ),
         page: cleanText(req.body?.page, '', 300),
@@ -5105,18 +5173,18 @@ export function createApp() {
       {
         recipientMemberIds: adultMemberIds(req.session.familyId),
         excludeMemberIds: [req.session.memberId],
-        title: 'Neue Problemmeldung',
-        body: `${reporter?.name || 'Jemand'}: ${report.title}`,
-        privateTitle: 'Neue Problemmeldung',
+        title: translate('push.problemReportNewTitle'),
+        body: `${reporter?.name || translate('labels.someone')}: ${report.title}`,
+        privateTitle: translate('push.problemReportNewTitle'),
         privateBody:
-          'In der Elternzentrale wartet eine neue Meldung.',
+          translate('push.problemReportNewPrivateBody'),
         url: '/?view=admin',
         tag: `problem-new-${report.id}`,
         priority: 'high'
       },
       {
-        title: 'Neue Problemmeldung',
-        message: `${reporter?.name || 'Jemand'}: ${report.title}`,
+        title: translate('push.problemReportNewTitle'),
+        message: `${reporter?.name || translate('labels.someone')}: ${report.title}`,
         priority: 6
       }
     );
@@ -5144,7 +5212,7 @@ export function createApp() {
       if (!['open', 'resolved'].includes(status)) {
         return res.status(400).json({
           success: false,
-          error: 'Der Meldungsstatus ist ungültig.'
+          error: translate('errors.reportStatusInvalid')
         });
       }
       const report = updateProblemReportStatus(
@@ -5155,7 +5223,7 @@ export function createApp() {
       if (!report) {
         return res.status(404).json({
           success: false,
-          error: 'Die Problemmeldung wurde nicht gefunden.'
+          error: translate('errors.problemReportNotFound')
         });
       }
       publishFamilyChange(req.session.familyId, 'problem-reports');
@@ -5167,19 +5235,19 @@ export function createApp() {
           recipientMemberIds: [report.memberId].filter(Boolean),
           excludeMemberIds: [req.session.memberId],
           title: resolved
-            ? 'Deine Meldung wurde erledigt'
-            : 'Deine Meldung ist wieder offen',
+            ? translate('push.problemResolvedTitle')
+            : translate('push.problemReopenedTitle'),
           body: report.title,
-          privateTitle: 'Rückmeldung zu deiner Problemmeldung',
+          privateTitle: translate('push.problemFeedbackPrivateTitle'),
           privateBody:
-            'Der Status einer Meldung im Familienplaner wurde geändert.',
+            translate('push.problemFeedbackPrivateBody'),
           url: '/?view=dashboard',
           tag: `problem-${status}-${report.id}`
         },
         {
           title: resolved
-            ? 'Problemmeldung erledigt'
-            : 'Problemmeldung wieder geöffnet',
+            ? translate('push.problemResolvedGotifyTitle')
+            : translate('push.problemReopenedGotifyTitle'),
           message: report.title,
           priority: 3
         }
@@ -5210,7 +5278,7 @@ export function createApp() {
       ) {
         return res.status(400).json({
           success: false,
-          error: 'Das ausgewählte Profil wurde nicht gefunden.'
+          error: translate('errors.selectedProfileNotFound')
         });
       }
       const household = ['familie', 'grosseltern'].includes(input.household)
@@ -5220,7 +5288,7 @@ export function createApp() {
         ? String(input.color)
         : '#2563eb';
       const created = createCalendarSubscription(req.session.familyId, {
-        name: requireText(input.name, 'Kalendername', 100),
+        name: requireText(input.name, translate('fields.calendarName'), 100),
         host: url.hostname,
         secretEncrypted: encryptJson({ url: url.toString() }),
         color,
@@ -5267,7 +5335,7 @@ export function createApp() {
       if (!existing) {
         return res.status(404).json({
           success: false,
-          error: 'Kalenderquelle nicht gefunden.'
+          error: translate('errors.calendarSourceNotFound')
         });
       }
       const input = ensureObject(req.body);
@@ -5280,7 +5348,7 @@ export function createApp() {
       ) {
         return res.status(400).json({
           success: false,
-          error: 'Das ausgewählte Profil wurde nicht gefunden.'
+          error: translate('errors.selectedProfileNotFound')
         });
       }
       const nextUrl = Object.hasOwn(input, 'url')
@@ -5291,7 +5359,7 @@ export function createApp() {
         existing.id,
         {
           name: Object.hasOwn(input, 'name')
-            ? requireText(input.name, 'Kalendername', 100)
+            ? requireText(input.name, translate('fields.calendarName'), 100)
             : existing.name,
           host: nextUrl?.hostname || existing.host,
           secretEncrypted: nextUrl
@@ -5360,7 +5428,7 @@ export function createApp() {
       if (!subscription) {
         return res.status(404).json({
           success: false,
-          error: 'Kalenderquelle nicht gefunden.'
+          error: translate('errors.calendarSourceNotFound')
         });
       }
       const result = await syncCalendarSubscription(subscription);
@@ -5425,7 +5493,7 @@ export function createApp() {
       if (!subscription) {
         return res.status(404).json({
           success: false,
-          error: 'Kalenderquelle nicht gefunden.'
+          error: translate('errors.calendarSourceNotFound')
         });
       }
       replaceRecordsBySource(
@@ -5455,7 +5523,7 @@ export function createApp() {
     const input = ensureObject(req.body);
     const targetFamilyId = requireText(
       input.targetFamilyId,
-      'Verwandte Familie',
+      translate('fields.relatedFamily'),
       100
     );
     const relationType = cleanText(
@@ -5466,7 +5534,7 @@ export function createApp() {
     if (!FAMILY_RELATION_TYPES.has(relationType)) {
       return res.status(400).json({
         success: false,
-        error: 'Diese Familienbeziehung wird nicht unterstützt.'
+        error: translate('errors.relationTypeUnsupported')
       });
     }
     const relationship = createFamilyRelationshipRequest(
@@ -5483,16 +5551,20 @@ export function createApp() {
       'familyConnections',
       {
         recipientMemberIds: adultMemberIds(targetFamilyId),
-        title: 'Neue Familienanfrage',
-        body: `${sourceFamily.familyName} möchte das Familiennetz verbinden.`,
+        title: translate('push.familyRequestTitle'),
+        body: translate('push.familyRequestBody', {
+          family: sourceFamily.familyName
+        }),
         privateBody:
-          'Im Familiennetz wartet eine neue Verbindungsanfrage.',
+          translate('push.familyRequestPrivateBody'),
         url: '/?view=admin',
         tag: `family-connection-request-${relationship.id}`
       },
       {
-        title: 'Neue Familienanfrage',
-        message: `${sourceFamily.familyName} möchte das Familiennetz verbinden.`,
+        title: translate('push.familyRequestTitle'),
+        message: translate('push.familyRequestBody', {
+          family: sourceFamily.familyName
+        }),
         priority: 5
       }
     );
@@ -5513,7 +5585,7 @@ export function createApp() {
       if (!['accepted', 'declined'].includes(status)) {
         return res.status(400).json({
           success: false,
-          error: 'Bitte die Anfrage annehmen oder ablehnen.'
+          error: translate('errors.respondAcceptOrDecline')
         });
       }
       const pendingRelationship = getFamilyRelationship(
@@ -5529,7 +5601,7 @@ export function createApp() {
       if (!relationship) {
         return res.status(404).json({
           success: false,
-          error: 'Die offene Familienanfrage wurde nicht gefunden.'
+          error: translate('errors.pendingFamilyRequestNotFound')
         });
       }
       const requesterFamilyId =
@@ -5547,26 +5619,34 @@ export function createApp() {
             recipientMemberIds: adultMemberIds(requesterFamilyId),
             title:
               status === 'accepted'
-                ? 'Familienanfrage angenommen'
-                : 'Familienanfrage abgelehnt',
+                ? translate('push.familyRequestAcceptedTitle')
+                : translate('push.familyRequestDeclinedTitle'),
             body:
               status === 'accepted'
-                ? `${responderFamily.familyName} ist jetzt mit euch verbunden.`
-                : `${responderFamily.familyName} hat die Anfrage abgelehnt.`,
+                ? translate('push.familyRequestAcceptedBody', {
+                    family: responderFamily.familyName
+                  })
+                : translate('push.familyRequestDeclinedBody', {
+                    family: responderFamily.familyName
+                  }),
             privateBody:
-              'Im Familiennetz hat sich der Status einer Anfrage geändert.',
+              translate('push.familyRequestStatusPrivateBody'),
             url: '/?view=admin',
             tag: `family-connection-${status}-${req.params.relationshipId}`
           },
           {
             title:
               status === 'accepted'
-                ? 'Familiennetz verbunden'
-                : 'Familienanfrage abgelehnt',
+                ? translate('push.familyConnectedGotifyTitle')
+                : translate('push.familyRequestDeclinedTitle'),
             message:
               status === 'accepted'
-                ? `${responderFamily.familyName} ist jetzt mit euch verbunden.`
-                : `${responderFamily.familyName} hat die Anfrage abgelehnt.`,
+                ? translate('push.familyRequestAcceptedBody', {
+                    family: responderFamily.familyName
+                  })
+                : translate('push.familyRequestDeclinedBody', {
+                    family: responderFamily.familyName
+                  }),
             priority: 4
           }
         );
@@ -5598,7 +5678,7 @@ export function createApp() {
       ) {
         return res.status(404).json({
           success: false,
-          error: 'Die Familienverknüpfung wurde nicht gefunden.'
+          error: translate('errors.familyLinkNotFound')
         });
       }
       const otherFamilyId = relationship?.otherFamily?.id;
@@ -5610,16 +5690,20 @@ export function createApp() {
           'familyConnections',
           {
             recipientMemberIds: adultMemberIds(otherFamilyId),
-            title: 'Familienverbindung beendet',
-            body: `${actorFamily.familyName} hat die Verbindung entfernt.`,
+            title: translate('push.familyConnectionEndedTitle'),
+            body: translate('push.familyConnectionEndedBody', {
+              family: actorFamily.familyName
+            }),
             privateBody:
-              'Eine Verbindung im Familiennetz wurde beendet.',
+              translate('push.familyConnectionEndedPrivateBody'),
             url: '/?view=admin',
             tag: `family-connection-deleted-${req.params.relationshipId}`
           },
           {
-            title: 'Familienverbindung beendet',
-            message: `${actorFamily.familyName} hat die Verbindung entfernt.`,
+            title: translate('push.familyConnectionEndedTitle'),
+            message: translate('push.familyConnectionEndedBody', {
+              family: actorFamily.familyName
+            }),
             priority: 4
           }
         );
@@ -5652,7 +5736,7 @@ export function createApp() {
       if (!relationship) {
         return res.status(404).json({
           success: false,
-          error: 'Die bestätigte Familienverbindung wurde nicht gefunden.'
+          error: translate('errors.confirmedFamilyConnectionNotFound')
         });
       }
       publishFamilyChange(req.session.familyId, 'family-relationship-grants');
@@ -5668,16 +5752,20 @@ export function createApp() {
           recipientMemberIds: adultMemberIds(
             relationship.otherFamily.id
           ),
-          title: 'Freigaben im Familiennetz geändert',
-          body: `${actorFamily.familyName} hat die gemeinsamen Freigaben angepasst.`,
+          title: translate('push.familyGrantsChangedTitle'),
+          body: translate('push.familyGrantsChangedBody', {
+            family: actorFamily.familyName
+          }),
           privateBody:
-            'Die Freigaben einer Familienverbindung wurden geändert.',
+            translate('push.familyGrantsChangedPrivateBody'),
           url: '/?view=admin',
           tag: `family-connection-grants-${relationship.id}-${Date.now()}`
         },
         {
-          title: 'Familiennetz aktualisiert',
-          message: `${actorFamily.familyName} hat die gemeinsamen Freigaben angepasst.`,
+          title: translate('push.familyGrantsChangedGotifyTitle'),
+          message: translate('push.familyGrantsChangedBody', {
+            family: actorFamily.familyName
+          }),
           priority: 3
         }
       );
@@ -5708,7 +5796,7 @@ export function createApp() {
     const input = ensureObject(req.body);
     const recipientFamilyId = requireText(
       input.recipientFamilyId,
-      'Empfängerfamilie',
+      translate('fields.recipientFamily'),
       100
     );
     const relationship = listFamilyRelationships(
@@ -5721,7 +5809,7 @@ export function createApp() {
       return res.status(403).json({
         success: false,
         error:
-          'Briefe können nur an bestätigte Familienverbindungen geschickt werden.'
+          translate('errors.lettersRequireConfirmedConnection')
       });
     }
     const letter = createFamilyLetter(
@@ -5729,8 +5817,8 @@ export function createApp() {
       req.session.memberId,
       recipientFamilyId,
       {
-        subject: requireText(input.subject, 'Betreff', 120),
-        body: requireText(input.body, 'Brieftext', 6000),
+        subject: requireText(input.subject, translate('fields.subject'), 120),
+        body: requireText(input.body, translate('fields.letterBody'), 6000),
         replyToId: cleanText(input.replyToId, '', 120)
       }
     );
@@ -5742,15 +5830,19 @@ export function createApp() {
       'familyMail',
       {
         recipientMemberIds: adultMemberIds(recipientFamilyId),
-        title: `Post von ${senderFamily.familyName}`,
+        title: translate('push.familyMailTitle', {
+          family: senderFamily.familyName
+        }),
         body: letter.subject,
-        privateBody: 'Im Familienbriefkasten liegt ein neuer Brief.',
+        privateBody: translate('push.familyMailPrivateBody'),
         url: '/?view=mail',
         tag: `family-letter-${letter.id}`,
         priority: 'normal'
       },
       {
-        title: `Post von ${senderFamily.familyName}`,
+        title: translate('push.familyMailTitle', {
+          family: senderFamily.familyName
+        }),
         message: letter.subject,
         priority: 4
       }
@@ -5787,7 +5879,7 @@ export function createApp() {
       if (!letter) {
         return res.status(404).json({
           success: false,
-          error: 'Der Brief wurde nicht gefunden.'
+          error: translate('errors.letterNotFound')
         });
       }
       res.json({
@@ -5820,8 +5912,8 @@ export function createApp() {
     (req, res) => {
       const invitation = createFamilyChatGuestInvite(
         req.session.familyId,
-        requireText(req.body?.relationshipId, 'Familienverbindung', 120),
-        requireText(req.body?.guestMemberId, 'Gastprofil', 120),
+        requireText(req.body?.relationshipId, translate('fields.familyConnection'), 120),
+        requireText(req.body?.guestMemberId, translate('fields.guestProfile'), 120),
         req.session.memberId
       );
       publishFamilyChange(invitation.hostFamily.id, 'family-chat-guests');
@@ -5831,18 +5923,22 @@ export function createApp() {
         'familyChatInvites',
         {
           recipientMemberIds: [invitation.guestMember.id],
-          title: `Einladung von ${invitation.hostFamily.familyName}`,
-          body: 'Du wurdest in den Familienchat eingeladen.',
-          privateBody: 'Eine verbundene Familie hat dich zum Chat eingeladen.',
+          title: translate('push.invitationFrom', {
+            family: invitation.hostFamily.familyName
+          }),
+          body: translate('push.chatInviteBody'),
+          privateBody: translate('push.chatInvitePrivateBody'),
           url: '/?view=mail',
           tag: `family-chat-invite-${invitation.id}`,
           priority: 'high'
         },
         {
-          title: 'Neue Chat-Einladung',
+          title: translate('push.chatInviteGotifyTitle'),
           message:
-            `${invitation.guestMember.name} wurde von ` +
-            `${invitation.hostFamily.familyName} eingeladen.`,
+            translate('push.chatInviteGotifyMessage', {
+              name: invitation.guestMember.name,
+              family: invitation.hostFamily.familyName
+            }),
           priority: 5
         }
       );
@@ -5869,7 +5965,7 @@ export function createApp() {
       if (!invitation) {
         return res.status(404).json({
           success: false,
-          error: 'Die Chat-Einladung wurde nicht gefunden.'
+          error: translate('errors.chatInviteNotFound')
         });
       }
       const member = getMember(
@@ -5885,7 +5981,7 @@ export function createApp() {
         if (!canRespond || invitation.status !== 'pending') {
           return res.status(403).json({
             success: false,
-            error: 'Diese Einladung kann von diesem Profil nicht beantwortet werden.'
+            error: translate('errors.inviteNotAnswerableByProfile')
           });
         }
         nextStatus = requestedStatus;
@@ -5896,14 +5992,14 @@ export function createApp() {
         ) {
           return res.status(403).json({
             success: false,
-            error: 'Nur die einladende Familie kann den Gastzugang beenden.'
+            error: translate('errors.onlyHostCanRevokeGuest')
           });
         }
         nextStatus = 'revoked';
       } else {
         return res.status(400).json({
           success: false,
-          error: 'Bitte Einladung annehmen, ablehnen oder den Zugang beenden.'
+          error: translate('errors.inviteRespondOptions')
         });
       }
       const updated = updateFamilyChatGuestStatus(
@@ -5919,9 +6015,13 @@ export function createApp() {
           'familyChatInvites',
           {
             recipientMemberIds: adultMemberIds(updated.hostFamily.id),
-            title: `${updated.guestMember.name} ist jetzt im Familienchat`,
-            body: `${updated.guestFamily.familyName} hat die Einladung angenommen.`,
-            privateBody: 'Eine Chat-Einladung wurde angenommen.',
+            title: translate('push.chatGuestJoinedTitle', {
+              name: updated.guestMember.name
+            }),
+            body: translate('push.chatGuestJoinedBody', {
+              family: updated.guestFamily.familyName
+            }),
+            privateBody: translate('push.chatGuestJoinedPrivateBody'),
             url: '/?view=chat',
             tag: `family-chat-accepted-${updated.id}`
           }
@@ -5961,7 +6061,7 @@ export function createApp() {
       if (!canRead) {
         return res.status(403).json({
           success: false,
-          error: 'Dieser Gastchat ist für das Profil nicht freigegeben.'
+          error: translate('errors.guestChatNotAllowed')
         });
       }
       const messages = listRecords(
@@ -6008,7 +6108,7 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Dieser Gastchat ist für das Profil nicht freigegeben.'
+          error: translate('errors.guestChatNotAllowed')
         });
       }
       const attachment = await uploadChatAttachment(
@@ -6041,7 +6141,7 @@ export function createApp() {
       if (!canRead) {
         return res.status(403).json({
           success: false,
-          error: 'Dieser Gastchat ist für das Profil nicht freigegeben.'
+          error: translate('errors.guestChatNotAllowed')
         });
       }
       const message = getRecord(
@@ -6056,7 +6156,7 @@ export function createApp() {
       ) {
         return res.status(404).json({
           success: false,
-          error: 'Die Chatnachricht wurde nicht gefunden.'
+          error: translate('errors.chatMessageNotFound')
         });
       }
       await sendChatAttachmentContent(
@@ -6088,7 +6188,7 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Nur das eingeladene Profil kann hier schreiben.'
+          error: translate('errors.onlyInvitedProfileCanWrite')
         });
       }
       const text = cleanText(req.body?.text, '', 4000);
@@ -6100,7 +6200,7 @@ export function createApp() {
       if (!text && !photo && !attachments.length) {
         return res.status(400).json({
           success: false,
-          error: 'Die Nachricht ist leer.'
+          error: translate('errors.messageEmpty')
         });
       }
       const preparedMessage = await archiveLegacyChatPhoto(
@@ -6138,11 +6238,11 @@ export function createApp() {
         'groupChat',
         {
           recipientMemberIds: signedInMemberIds(invitation.hostFamily.id),
-          title: `${member.name} im Familienchat`,
+          title: translate('push.groupChatTitle', { name: member.name }),
           body: chatAttachmentMessageCopy(record),
           privateBody: photo || attachments.length
-            ? 'Ein Chatgast hat einen Anhang geteilt.'
-            : 'Ein Chatgast hat eine Nachricht geschickt.',
+            ? translate('push.guestSharedAttachment')
+            : translate('push.guestSentMessage'),
           url: '/?view=chat',
           tag: `guest-chat-message-${record.id}`
         }
@@ -6168,7 +6268,7 @@ export function createApp() {
         req.session.memberId,
         {
           id: cleanText(input.id, `shared-event-${randomUUID()}`, 100),
-          title: requireText(input.title, 'Termintitel', 240),
+          title: requireText(input.title, translate('fields.eventTitle'), 240),
           date: cleanDate(input.date, ''),
           time: cleanTime(input.time, ''),
           endTime: cleanTime(input.endTime, ''),
@@ -6191,15 +6291,19 @@ export function createApp() {
           family.id,
           'events',
           {
-            title: `Einladung von ${ownerFamily.familyName}`,
+            title: translate('push.invitationFrom', {
+              family: ownerFamily.familyName
+            }),
             body: calendarEventBody(event),
             privateBody:
-              'Eine verbundene Familie hat einen gemeinsamen Termin eingetragen.',
+              translate('push.sharedEventCreatedPrivateBody'),
             url: '/?view=calendar',
             tag: `shared-event-${event.sharedEventId}`
           },
           {
-            title: `Einladung von ${ownerFamily.familyName}`,
+            title: translate('push.invitationFrom', {
+              family: ownerFamily.familyName
+            }),
             message: calendarEventBody(event),
             priority: 4
           }
@@ -6226,7 +6330,7 @@ export function createApp() {
       if (!result) {
         return res.status(404).json({
           success: false,
-          error: 'Der gemeinsame Termin wurde nicht gefunden.'
+          error: translate('errors.sharedEventNotFound')
         });
       }
       const ownerFamily = getFamily(req.session.familyId);
@@ -6236,16 +6340,16 @@ export function createApp() {
           familyId,
           'events',
           {
-            title: 'Gemeinsamer Termin abgesagt',
-            body: calendarEventBody(result.event, 'Abgesagt'),
+            title: translate('push.sharedEventCancelledTitle'),
+            body: calendarEventBody(result.event, translate('push.eventDeletedPrefix')),
             privateBody:
-              'Eine verbundene Familie hat einen gemeinsamen Termin abgesagt.',
+              translate('push.sharedEventCancelledPrivateBody'),
             url: '/?view=calendar',
             tag: `shared-event-deleted-${result.event.sharedEventId}`,
             priority: 'high'
           },
           {
-            title: 'Gemeinsamer Termin abgesagt',
+            title: translate('push.sharedEventCancelledTitle'),
             message: `${ownerFamily.familyName}: ${calendarEventBody(
               result.event
             )}`,
@@ -6278,12 +6382,12 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Diese Familie hat Aufgaben noch nicht freigegeben.'
+          error: translate('errors.tasksNotShared')
         });
       }
       const targetMember = getMember(
         targetFamilyId,
-        requireText(req.body?.memberId, 'Enkelkind', 100)
+        requireText(req.body?.memberId, translate('fields.grandchild'), 100)
       );
       if (
         !targetMember ||
@@ -6292,7 +6396,7 @@ export function createApp() {
       ) {
         return res.status(404).json({
           success: false,
-          error: 'Das ausgewählte Kinderprofil wurde nicht gefunden.'
+          error: translate('errors.selectedChildProfileNotFound')
         });
       }
       const rewardsAllowed = relationshipAllows(
@@ -6304,7 +6408,7 @@ export function createApp() {
       const task = createRecord(targetFamilyId, 'tasks', {
         id: `task-${randomUUID()}`,
         ...normalizeTaskSchedule(req.body || {}),
-        title: requireText(req.body?.title, 'Aufgabe', 200),
+        title: requireText(req.body?.title, translate('fields.task'), 200),
         memberId: targetMember.id,
         category: cleanText(req.body?.category, 'Familie', 80),
         stars: rewardsAllowed
@@ -6324,14 +6428,14 @@ export function createApp() {
         'taskAssigned',
         {
           recipientMemberIds: [targetMember.id],
-          title: `Neue Aufgabe von ${req.activeMember.name}`,
+          title: translate('push.taskFromTitle', { name: req.activeMember.name }),
           body: task.title,
-          privateBody: 'Im Familienplaner wartet eine neue Aufgabe.',
+          privateBody: translate('push.taskWaitingPrivateBody'),
           url: '/?view=tasks',
           tag: `task-${task.id}`
         },
         {
-          title: `Neue Aufgabe von ${req.activeMember.name}`,
+          title: translate('push.taskFromTitle', { name: req.activeMember.name }),
           message: `${targetMember.name}: ${task.title}`,
           priority: 3
         }
@@ -6357,12 +6461,12 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Diese Familie hat Belohnungen noch nicht freigegeben.'
+          error: translate('errors.rewardsNotShared')
         });
       }
       const targetMember = getMember(
         targetFamilyId,
-        requireText(req.body?.memberId, 'Enkelkind', 100)
+        requireText(req.body?.memberId, translate('fields.grandchild'), 100)
       );
       if (
         !targetMember ||
@@ -6371,7 +6475,7 @@ export function createApp() {
       ) {
         return res.status(404).json({
           success: false,
-          error: 'Das ausgewählte Kinderprofil wurde nicht gefunden.'
+          error: translate('errors.selectedChildProfileNotFound')
         });
       }
       const actorFamily = getFamily(req.session.familyId);
@@ -6393,15 +6497,15 @@ export function createApp() {
         'rewards',
         {
           recipientMemberIds: [targetMember.id],
-          title: `Neue Belohnung von ${req.activeMember.name}`,
+          title: translate('push.rewardFromTitle', { name: req.activeMember.name }),
           body: reward.title,
           privateBody:
-            'Im Belohnungsshop wartet etwas Neues auf dich.',
+            translate('push.rewardWaitingPrivateBody'),
           url: '/?view=tasks',
           tag: `reward-new-${reward.id}`
         },
         {
-          title: `Neue Belohnung von ${req.activeMember.name}`,
+          title: translate('push.rewardFromTitle', { name: req.activeMember.name }),
           message: `${targetMember.name}: ${reward.title}`,
           priority: 3
         }
@@ -6427,12 +6531,12 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Diese Familie hat Taschengeldbuchungen nicht freigegeben.'
+          error: translate('errors.pocketMoneyNotShared')
         });
       }
       const targetMember = getMember(
         targetFamilyId,
-        requireText(req.body?.memberId, 'Enkelkind', 100)
+        requireText(req.body?.memberId, translate('fields.grandchild'), 100)
       );
       if (
         !targetMember ||
@@ -6441,7 +6545,7 @@ export function createApp() {
       ) {
         return res.status(404).json({
           success: false,
-          error: 'Das ausgewählte Kinderprofil wurde nicht gefunden.'
+          error: translate('errors.selectedChildProfileNotFound')
         });
       }
       const actorFamily = getFamily(req.session.familyId);
@@ -6452,7 +6556,7 @@ export function createApp() {
           id: `pocket-${randomUUID()}`,
           amountCents: Number(req.body?.amountCents || 0),
           starCost: 0,
-          note: requireText(req.body?.note, 'Buchungstext', 160),
+          note: requireText(req.body?.note, translate('fields.transactionNote'), 160),
           icon: cleanText(req.body?.icon, '💶', 12),
           createdByMemberId: null,
           createdByName: req.activeMember.name,
@@ -6470,16 +6574,18 @@ export function createApp() {
           recipientMemberIds: [targetMember.id],
           title:
             result.transaction.amountCents > 0
-              ? 'Taschengeld bekommen'
-              : 'Taschengeld geändert',
+              ? translate('push.pocketMoneyReceivedTitle')
+              : translate('push.pocketMoneyChangedTitle'),
           body: `${amount} · ${result.transaction.note}`,
           privateBody:
-            'In deinem Taschengeldkonto gibt es eine neue Buchung.',
+            translate('push.pocketMoneyPrivateBody'),
           url: '/?view=family-life',
           tag: `pocket-money-${result.transaction.id}`
         },
         {
-          title: `Taschengeld für ${targetMember.name}`,
+          title: translate('push.pocketMoneyGotifyTitle', {
+            name: targetMember.name
+          }),
           message: `${amount} · ${result.transaction.note}`,
           priority: 3
         }
@@ -6492,7 +6598,7 @@ export function createApp() {
     const input = ensureObject(req.body);
     const changes = {};
     if (Object.hasOwn(input, 'familyName')) {
-      changes.familyName = requireText(input.familyName, 'Familienname', 100);
+      changes.familyName = requireText(input.familyName, translate('fields.familyName'), 100);
     }
     if (Object.hasOwn(input, 'familyAvatar')) {
       changes.familyAvatar = cleanText(input.familyAvatar, '', 1_200_000);
@@ -6504,18 +6610,18 @@ export function createApp() {
       if (typeof input.grandparentsHouseholdEnabled !== 'boolean') {
         return res.status(400).json({
           success: false,
-          error: 'Die Einstellung für den zweiten Planungsort ist ungültig.'
+          error: translate('errors.secondHouseholdSettingInvalid')
         });
       }
       changes.grandparentsHouseholdEnabled =
         input.grandparentsHouseholdEnabled;
     }
     if (input.password) {
-      changes.password = requireText(input.password, 'Passwort', 100);
+      changes.password = requireText(input.password, translate('fields.password'), 100);
       if (changes.password.length < 4) {
         return res.status(400).json({
           success: false,
-          error: 'Das Passwort muss mindestens 4 Zeichen lang sein.'
+          error: translate('errors.passwordTooShort')
         });
       }
     }
@@ -6525,12 +6631,12 @@ export function createApp() {
 
   app.delete('/api/family', requireAuth, requireAdult, (req, res) => {
     const input = ensureObject(req.body || {});
-    const password = requireText(input.password, 'Passwort', 100);
+    const password = requireText(input.password, translate('fields.password'), 100);
     const familyRow = getFamilyAuthRow(req.session.familyId);
     if (!familyRow || !verifySecret(password, familyRow.password_hash)) {
       return res.status(401).json({
         success: false,
-        error: 'Das Familienpasswort ist nicht korrekt.'
+        error: translate('errors.familyPasswordIncorrect')
       });
     }
     const familyId = req.session.familyId;
@@ -6558,7 +6664,9 @@ export function createApp() {
   app.patch('/api/members/:memberId', requireAuth, (req, res) => {
     const target = getMember(req.session.familyId, req.params.memberId);
     if (!target) {
-      return res.status(404).json({ success: false, error: 'Profil nicht gefunden.' });
+      return res
+        .status(404)
+        .json({ success: false, error: translate('errors.profileNotFound') });
     }
     const active = req.session.memberId
       ? getMember(req.session.familyId, req.session.memberId)
@@ -6568,7 +6676,7 @@ export function createApp() {
     if (!isSelf && !isAdult) {
       return res.status(403).json({
         success: false,
-        error: 'Du darfst dieses Profil nicht bearbeiten.'
+        error: translate('errors.cannotEditProfile')
       });
     }
     const input = ensureObject(req.body);
@@ -6585,7 +6693,7 @@ export function createApp() {
       if (Object.hasOwn(input, key)) changes[key] = input[key];
     }
     if (Object.hasOwn(changes, 'name')) {
-      changes.name = requireText(changes.name, 'Name', 80);
+      changes.name = requireText(changes.name, translate('fields.name'), 80);
     }
     if (Object.hasOwn(changes, 'role')) {
       changes.role = normalizeRole(changes.role);
@@ -6599,7 +6707,7 @@ export function createApp() {
         return res.status(409).json({
           success: false,
           error:
-            'Das aktuell verwendete Profil kann nicht auf „ohne Anmeldung“ umgestellt werden.'
+            translate('errors.cannotDemoteActiveProfile')
         });
       }
       if (changes.isManaged) changes.pin = '';
@@ -6616,11 +6724,13 @@ export function createApp() {
     if (req.session.memberId === req.params.memberId) {
       return res.status(409).json({
         success: false,
-        error: 'Das aktuell verwendete Profil kann nicht gelöscht werden.'
+        error: translate('errors.cannotDeleteActiveProfile')
       });
     }
     if (!deleteMember(req.session.familyId, req.params.memberId)) {
-      return res.status(404).json({ success: false, error: 'Profil nicht gefunden.' });
+      return res
+        .status(404)
+        .json({ success: false, error: translate('errors.profileNotFound') });
     }
     res.json({
       success: true,
@@ -6637,7 +6747,7 @@ export function createApp() {
       if (!target || target.role === 'pet') {
         return res.status(404).json({
           success: false,
-          error: 'Das Familienprofil wurde nicht gefunden.'
+          error: translate('errors.familyProfileNotFound')
         });
       }
       const member = updateMember(req.session.familyId, target.id, {
@@ -6656,7 +6766,7 @@ export function createApp() {
     if (memberId && !getMember(req.session.familyId, memberId)) {
       return res.status(404).json({
         success: false,
-        error: 'Das ausgewählte Profil wurde nicht gefunden.'
+        error: translate('errors.selectedProfileNotFound')
       });
     }
     const result = deleteTaskRecords(req.session.familyId, {
@@ -6709,7 +6819,7 @@ export function createApp() {
       ) {
         return res.status(404).json({
           success: false,
-          error: 'Die Chatnachricht wurde nicht gefunden.'
+          error: translate('errors.chatMessageNotFound')
         });
       }
       await sendChatAttachmentContent(
@@ -6764,13 +6874,13 @@ export function createApp() {
     if (!BULK_RESOURCE_TYPES.has(req.params.type)) {
       return res.status(405).json({
         success: false,
-        error: 'Für diesen Bereich ist kein Sammelimport vorgesehen.'
+        error: translate('errors.bulkImportUnavailable')
       });
     }
     if (!Array.isArray(req.body?.records)) {
       return res.status(400).json({
         success: false,
-        error: 'Eine Datensatzliste wird benötigt.'
+        error: translate('errors.recordListRequired')
       });
     }
     const inputRecords = req.body.records
@@ -6799,7 +6909,7 @@ export function createApp() {
     if (req.params.type === 'pocketMoneyTransactions') {
       return res.status(405).json({
         success: false,
-        error: 'Taschengeldbuchungen werden über das geschützte Familienkonto angelegt.'
+        error: translate('errors.pocketMoneyProtectedEndpoint')
       });
     }
     if (req.params.type === 'chatMessages') {
@@ -6813,7 +6923,7 @@ export function createApp() {
       if (!req.session.memberId) {
         return res.status(403).json({
           success: false,
-          error: 'Bitte zuerst ein Profil auswählen.'
+          error: translate('errors.profileRequired')
         });
       }
       input = {
@@ -6841,12 +6951,12 @@ export function createApp() {
     }
     if (req.params.type === 'tasks') {
       const creator = getMember(req.session.familyId, req.session.memberId);
-      const memberId = requireText(input.memberId, 'Zielprofil', 100);
+      const memberId = requireText(input.memberId, translate('fields.targetProfile'), 100);
       const targetMember = getMember(req.session.familyId, memberId);
       if (!targetMember) {
         return res.status(400).json({
           success: false,
-          error: 'Das ausgewählte Profil wurde nicht gefunden.'
+          error: translate('errors.selectedProfileNotFound')
         });
       }
       const rotationMemberIds = targetMember.isManaged ? [] : [
@@ -6872,7 +6982,7 @@ export function createApp() {
       input = {
         ...input,
         ...normalizeTaskSchedule(input),
-        title: requireText(input.title, 'Aufgabe', 200),
+        title: requireText(input.title, translate('fields.task'), 200),
         memberId,
         rotationMemberIds,
         rotationIndex: Math.max(0, rotationMemberIds.indexOf(memberId)),
@@ -6883,7 +6993,7 @@ export function createApp() {
         completed: false,
         completionStatus: 'open',
         createdByMemberId: creator?.id || null,
-        createdByName: creator?.name || 'Elternteil',
+        createdByName: creator?.name || translate('labels.parent'),
         createdAt: Number(input.createdAt) || Date.now()
       };
     }
@@ -6927,7 +7037,7 @@ export function createApp() {
         return res.status(409).json({
           success: false,
           error:
-            'Dieser Termin wird von einer Kalenderquelle verwaltet und ist schreibgeschützt.'
+            translate('errors.eventReadOnlySubscription')
         });
       }
     }
@@ -6947,13 +7057,13 @@ export function createApp() {
       if (!existing) {
         return res.status(404).json({
           success: false,
-          error: 'Nachricht nicht gefunden.'
+          error: translate('errors.messageNotFound')
         });
       }
       if (!canModifyChatRecord(req, existing)) {
         return res.status(403).json({
           success: false,
-          error: 'Du darfst diese Nachricht nicht bearbeiten.'
+          error: translate('errors.cannotEditMessage')
         });
       }
     }
@@ -6972,7 +7082,7 @@ export function createApp() {
       if (!existing) {
         return res.status(404).json({
           success: false,
-          error: 'Dashboard-Link nicht gefunden.'
+          error: translate('errors.dashboardLinkNotFound')
         });
       }
       changes = await enrichDashboardLinkPreview(sanitizeDashboardLink(req, {
@@ -6994,7 +7104,7 @@ export function createApp() {
       if (!existing) {
         return res.status(404).json({
           success: false,
-          error: 'Belohnung nicht gefunden.'
+          error: translate('errors.rewardNotFound')
         });
       }
       changes = sanitizeRewardRecord(
@@ -7006,7 +7116,7 @@ export function createApp() {
       if (!existingEvent) {
         return res.status(404).json({
           success: false,
-          error: 'Termin nicht gefunden.'
+          error: translate('errors.eventNotFound')
         });
       }
       changes = sanitizeCalendarEvent(
@@ -7021,7 +7131,7 @@ export function createApp() {
       if (!existingTrashEvent) {
         return res.status(404).json({
           success: false,
-          error: 'Abholtermin nicht gefunden.'
+          error: translate('errors.trashEventNotFound')
         });
       }
       changes = sanitizeTrashEvent(
@@ -7040,7 +7150,7 @@ export function createApp() {
       if (!existing) {
         return res.status(404).json({
           success: false,
-          error: 'Eintrag nicht gefunden.'
+          error: translate('errors.entryNotFound')
         });
       }
       changes = sanitizeFamilyLifeRecord(
@@ -7062,7 +7172,9 @@ export function createApp() {
       changes
     );
     if (!record) {
-      return res.status(404).json({ success: false, error: 'Eintrag nicht gefunden.' });
+      return res
+        .status(404)
+        .json({ success: false, error: translate('errors.entryNotFound') });
     }
     if (req.params.type === 'events') {
       notifyCalendarChange(req, record, {
@@ -7094,7 +7206,7 @@ export function createApp() {
         return res.status(409).json({
           success: false,
           error:
-            'Dieser Termin wird von einer Kalenderquelle verwaltet und ist schreibgeschützt.'
+            translate('errors.eventReadOnlySubscription')
         });
       }
     }
@@ -7107,18 +7219,20 @@ export function createApp() {
       if (!existing) {
         return res.status(404).json({
           success: false,
-          error: 'Nachricht nicht gefunden.'
+          error: translate('errors.messageNotFound')
         });
       }
       if (!canModifyChatRecord(req, existing)) {
         return res.status(403).json({
           success: false,
-          error: 'Du darfst diese Nachricht nicht löschen.'
+          error: translate('errors.cannotDeleteMessage')
         });
       }
     }
     if (!deleteRecord(req.session.familyId, req.params.type, req.params.id)) {
-      return res.status(404).json({ success: false, error: 'Eintrag nicht gefunden.' });
+      return res
+        .status(404)
+        .json({ success: false, error: translate('errors.entryNotFound') });
     }
     if (existingEvent) {
       notifyCalendarChange(req, existingEvent, { kind: 'deleted' });
@@ -7140,7 +7254,7 @@ export function createApp() {
     if (!routine) {
       return res.status(404).json({
         success: false,
-        error: 'Routine nicht gefunden.'
+        error: translate('errors.routineNotFound')
       });
     }
     const member = req.session.memberId
@@ -7150,14 +7264,14 @@ export function createApp() {
     if (!member || (!isAdult && routine.memberId !== member.id)) {
       return res.status(403).json({
         success: false,
-        error: 'Du kannst nur deine eigene Routine abhaken.'
+        error: translate('errors.onlyOwnRoutine')
       });
     }
-    const stepId = requireText(req.body?.stepId, 'Routinenschritt', 80);
+    const stepId = requireText(req.body?.stepId, translate('fields.routineStep'), 80);
     if (!routine.steps?.some(step => step.id === stepId)) {
       return res.status(404).json({
         success: false,
-        error: 'Routinenschritt nicht gefunden.'
+        error: translate('errors.routineStepNotFound')
       });
     }
     const today = new Date().toLocaleDateString('en-CA');
@@ -7165,7 +7279,7 @@ export function createApp() {
     if (!isAdult && date !== today) {
       return res.status(403).json({
         success: false,
-        error: 'Kinder können nur die heutige Routine bearbeiten.'
+        error: translate('errors.childrenOnlyToday')
       });
     }
     const completed = new Set(
@@ -7198,15 +7312,15 @@ export function createApp() {
         {
           recipientMemberIds: adultMemberIds(req.session.familyId),
           excludeMemberIds: [member.id],
-          title: `${member.name} hat die Tagesroutine geschafft`,
+          title: translate('push.routineCompletedTitle', { name: member.name }),
           body: routine.title,
           privateBody:
-            'Eine Kinder-Routine wurde vollständig erledigt.',
+            translate('push.routineCompletedPrivateBody'),
           url: '/?view=family-life',
           tag: `routine-complete-${routine.id}-${date}`
         },
         {
-          title: `${member.name} hat die Tagesroutine geschafft`,
+          title: translate('push.routineCompletedTitle', { name: member.name }),
           message: routine.title,
           priority: 3
         }
@@ -7230,13 +7344,13 @@ export function createApp() {
     if (!item) {
       return res.status(404).json({
         success: false,
-        error: 'Schuleintrag nicht gefunden.'
+        error: translate('errors.schoolItemNotFound')
       });
     }
     if (!['homework', 'bag'].includes(item.kind)) {
       return res.status(409).json({
         success: false,
-        error: 'Dieser Schuleintrag kann nicht abgehakt werden.'
+        error: translate('errors.schoolItemNotToggleable')
       });
     }
     const member = req.session.memberId
@@ -7246,7 +7360,7 @@ export function createApp() {
     if (!member || (!isAdult && item.memberId !== member.id)) {
       return res.status(403).json({
         success: false,
-        error: 'Du kannst nur deine eigenen Schulsachen abhaken.'
+        error: translate('errors.onlyOwnSchoolItems')
       });
     }
     const record = updateRecord(
@@ -7262,15 +7376,15 @@ export function createApp() {
         {
           recipientMemberIds: adultMemberIds(req.session.familyId),
           excludeMemberIds: [member.id],
-          title: `${member.name} hat etwas für die Schule erledigt`,
+          title: translate('push.schoolCompletedTitle', { name: member.name }),
           body: item.title,
           privateBody:
-            'Ein Schuleintrag wurde als erledigt markiert.',
+            translate('push.schoolCompletedPrivateBody'),
           url: '/?view=family-life',
           tag: `school-complete-${item.id}`
         },
         {
-          title: `${member.name} hat etwas für die Schule erledigt`,
+          title: translate('push.schoolCompletedTitle', { name: member.name }),
           message: item.title,
           priority: 3
         }
@@ -7293,7 +7407,7 @@ export function createApp() {
     if (!poll) {
       return res.status(404).json({
         success: false,
-        error: 'Abstimmung nicht gefunden.'
+        error: translate('errors.pollNotFound')
       });
     }
     const member = req.session.memberId
@@ -7302,20 +7416,20 @@ export function createApp() {
     if (!member || member.role === 'pet') {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     if (poll.closesAt && new Date().toLocaleDateString('en-CA') > poll.closesAt) {
       return res.status(409).json({
         success: false,
-        error: 'Diese Abstimmung ist bereits beendet.'
+        error: translate('errors.pollClosed')
       });
     }
-    const optionId = requireText(req.body?.optionId, 'Antwort', 80);
+    const optionId = requireText(req.body?.optionId, translate('fields.answer'), 80);
     if (!poll.options?.some(option => option.id === optionId)) {
       return res.status(404).json({
         success: false,
-        error: 'Antwort nicht gefunden.'
+        error: translate('errors.pollOptionNotFound')
       });
     }
     const record = updateRecord(
@@ -7349,7 +7463,7 @@ export function createApp() {
       if (!mission) {
         return res.status(404).json({
           success: false,
-          error: 'Familienmission nicht gefunden.'
+          error: translate('errors.familyMissionNotFound')
         });
       }
       const active = req.session.memberId
@@ -7367,7 +7481,7 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Diese Familienmission ist nicht für dieses Profil freigegeben.'
+          error: translate('errors.familyMissionNotAllowed')
         });
       }
       const completed = new Set(mission.completedMemberIds || []);
@@ -7397,16 +7511,20 @@ export function createApp() {
           {
             recipientMemberIds: [...new Set(recipients)],
             excludeMemberIds: [active.id],
-            title: `${completedMember?.name || 'Jemand'} hat eine Familienmission geschafft`,
+            title: translate('push.familyMissionCompletedTitle', {
+              name: completedMember?.name || translate('labels.someone')
+            }),
             body: mission.title,
             privateBody:
-              'Bei einer Familienmission gibt es einen neuen Erfolg.',
+              translate('push.familyMissionCompletedPrivateBody'),
             url: '/?view=family-life',
             tag: `family-mission-complete-${mission.id}-${memberId}`
           },
           {
-            title: 'Familienmission geschafft',
-            message: `${completedMember?.name || 'Jemand'}: ${mission.title}`,
+            title: translate('push.familyMissionCompletedGotifyTitle'),
+            message: `${
+              completedMember?.name || translate('labels.someone')
+            }: ${mission.title}`,
             priority: 3
           }
         );
@@ -7425,7 +7543,7 @@ export function createApp() {
     requireAuth,
     requireAdult,
     (req, res) => {
-      const memberId = requireText(req.body?.memberId, 'Kinderprofil', 100);
+      const memberId = requireText(req.body?.memberId, translate('fields.childProfile'), 100);
       const result = createPocketMoneyTransaction(
         req.session.familyId,
         memberId,
@@ -7437,7 +7555,7 @@ export function createApp() {
           ),
           amountCents: Number(req.body?.amountCents || 0),
           starCost: Number(req.body?.starCost || 0),
-          note: requireText(req.body?.note, 'Buchungstext', 160),
+          note: requireText(req.body?.note, translate('fields.transactionNote'), 160),
           icon: cleanText(req.body?.icon, '💶', 12),
           createdByMemberId: req.activeMember.id,
           createdByName: req.activeMember.name,
@@ -7454,16 +7572,18 @@ export function createApp() {
           excludeMemberIds: [req.activeMember.id],
           title:
             result.transaction.amountCents > 0
-              ? 'Taschengeld bekommen'
-              : 'Taschengeld geändert',
+              ? translate('push.pocketMoneyReceivedTitle')
+              : translate('push.pocketMoneyChangedTitle'),
           body: `${amount} · ${result.transaction.note}`,
           privateBody:
-            'In deinem Taschengeldkonto gibt es eine neue Buchung.',
+            translate('push.pocketMoneyPrivateBody'),
           url: '/?view=family-life',
           tag: `pocket-money-${result.transaction.id}`
         },
         {
-          title: `Taschengeld für ${result.member.name}`,
+          title: translate('push.pocketMoneyGotifyTitle', {
+            name: result.member.name
+          }),
           message: `${amount} · ${result.transaction.note}`,
           priority: 3
         }
@@ -7492,7 +7612,7 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Du darfst diese Kinderwelt nicht verändern.'
+          error: translate('errors.cannotEditKidWorld')
         });
       }
       const existing = getRecord(
@@ -7528,7 +7648,7 @@ export function createApp() {
     if (!task) {
       return res.status(404).json({
         success: false,
-        error: 'Aufgabe nicht gefunden.'
+        error: translate('errors.taskNotFound')
       });
     }
     const member = req.session.memberId
@@ -7537,13 +7657,13 @@ export function createApp() {
     if (member?.role === 'pet') {
       return res.status(403).json({
         success: false,
-        error: 'Pflegepunkte werden von einem Erwachsenen bestätigt.'
+        error: translate('errors.petCarePointsAdultOnly')
       });
     }
     if (!member || (!isAdultMember(member) && task.memberId !== member.id)) {
       return res.status(403).json({
         success: false,
-        error: 'Du kannst nur deine eigenen Missionen abschließen.'
+        error: translate('errors.onlyOwnMissions')
       });
     }
 
@@ -7552,7 +7672,7 @@ export function createApp() {
       if (task.completed) {
         return res.status(409).json({
           success: false,
-          error: 'Diese Aufgabe wurde bereits bestätigt.'
+          error: translate('errors.taskAlreadyApproved')
         });
       }
       result = requestTaskApprovalRecord(
@@ -7570,17 +7690,17 @@ export function createApp() {
               .filter(isAdultMember)
               .map(entry => entry.id);
         queueGotifyNotification(req.session.familyId, 'taskApproval', {
-          title: `${member.name} wartet auf deine Freigabe`,
-          message: `"${task.title}" wurde als erledigt gemeldet.`,
+          title: translate('push.taskApprovalTitle', { name: member.name }),
+          message: translate('push.taskApprovalBody', { title: task.title }),
           priority: 6
         });
         queueWebPushEvent(req.session.familyId, 'taskApproval', {
           recipientMemberIds,
           excludeMemberIds: [member.id],
-          title: `${member.name} wartet auf deine Freigabe`,
-          body: `"${task.title}" wurde als erledigt gemeldet.`,
-          privateTitle: 'Eine Aufgabe wartet auf Freigabe',
-          privateBody: 'Bitte prüfe eine erledigte Mission im Familienplaner.',
+          title: translate('push.taskApprovalTitle', { name: member.name }),
+          body: translate('push.taskApprovalBody', { title: task.title }),
+          privateTitle: translate('push.taskApprovalPrivateTitle'),
+          privateBody: translate('push.taskApprovalPrivateBody'),
           url: '/?view=tasks',
           tag: `task-approval-${task.id}`,
           priority: 'high',
@@ -7598,7 +7718,9 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: `Diese Aufgabe muss von ${task.createdByName || 'dem Ersteller'} bestätigt werden.`
+          error: translate('errors.taskApprovalOnlyBy', {
+            name: task.createdByName || translate('labels.theCreator')
+          })
         });
       }
       result = toggleTaskRecord(
@@ -7627,7 +7749,7 @@ export function createApp() {
       if (!task) {
         return res.status(404).json({
           success: false,
-          error: 'Aufgabe nicht gefunden.'
+          error: translate('errors.taskNotFound')
         });
       }
       if (
@@ -7637,19 +7759,21 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: `Diese Aufgabe kann nur von ${task.createdByName || 'dem Ersteller'} geprüft werden.`
+          error: translate('errors.taskReviewOnlyBy', {
+            name: task.createdByName || translate('labels.theCreator')
+          })
         });
       }
       if (task.completionStatus !== 'pending_approval' || task.completed) {
         return res.status(409).json({
           success: false,
-          error: 'Für diese Aufgabe liegt keine offene Prüfung vor.'
+          error: translate('errors.noPendingReview')
         });
       }
       if (typeof req.body?.approved !== 'boolean') {
         return res.status(400).json({
           success: false,
-          error: 'Bitte bestätige oder lehne die Prüfung eindeutig ab.'
+          error: translate('errors.reviewDecisionRequired')
         });
       }
       const approved = req.body.approved;
@@ -7668,16 +7792,16 @@ export function createApp() {
           {
             recipientMemberIds: [task.memberId],
             excludeMemberIds: [req.activeMember.id],
-            title: 'Bitte schau noch einmal nach',
-            body: `"${task.title}" wurde noch nicht bestätigt.`,
-            privateTitle: 'Eine Aufgabe braucht noch einen Versuch',
+            title: translate('push.taskRejectedTitle'),
+            body: translate('push.taskRejectedBody', { title: task.title }),
+            privateTitle: translate('push.taskRejectedPrivateTitle'),
             privateBody:
-              'Im Familienplaner wartet eine Mission wieder auf dich.',
+              translate('push.taskRejectedPrivateBody'),
             url: '/?view=tasks',
             tag: `task-rejected-${task.id}`
           },
           {
-            title: 'Aufgabe braucht noch einen Versuch',
+            title: translate('push.taskRejectedGotifyTitle'),
             message: task.title,
             priority: 4
           }
@@ -7697,7 +7821,7 @@ export function createApp() {
     if (!memberId) {
       return res.status(400).json({
         success: false,
-        error: 'Bitte ein Profil auswählen.'
+        error: translate('errors.selectProfile')
       });
     }
     const activeMember = req.session.memberId
@@ -7710,7 +7834,7 @@ export function createApp() {
     ) {
       return res.status(403).json({
         success: false,
-        error: 'Du kannst Belohnungen nur für dich selbst einlösen.'
+        error: translate('errors.redeemOnlySelf')
       });
     }
     const result = redeemRewardRecord(
@@ -7721,7 +7845,7 @@ export function createApp() {
     if (!result) {
       return res.status(404).json({
         success: false,
-        error: 'Belohnung oder Profil nicht gefunden.'
+        error: translate('errors.rewardOrProfileNotFound')
       });
     }
     const recipientMemberIds = [
@@ -7734,16 +7858,16 @@ export function createApp() {
       {
         recipientMemberIds: [...new Set(recipientMemberIds)],
         excludeMemberIds: [activeMember?.id],
-        title: `${result.member.name} hat eine Belohnung eingelöst`,
+        title: translate('push.rewardRedeemedTitle', { name: result.member.name }),
         body: result.reward.title,
-        privateTitle: 'Eine Belohnung wurde eingelöst',
+        privateTitle: translate('push.rewardRedeemedPrivateTitle'),
         privateBody:
-          'Im Belohnungsshop wurde eine Belohnung eingelöst.',
+          translate('push.rewardRedeemedPrivateBody'),
         url: '/?view=tasks',
         tag: `reward-redeemed-${result.reward.id}-${Date.now()}`
       },
       {
-        title: `${result.member.name} hat eine Belohnung eingelöst`,
+        title: translate('push.rewardRedeemedTitle', { name: result.member.name }),
         message: result.reward.title,
         priority: 5
       }
@@ -7756,15 +7880,17 @@ export function createApp() {
           recipientMemberIds: adultMemberIds(
             result.reward.createdByExternalFamilyId
           ),
-          title: `${result.member.name} hat deine Belohnung eingelöst`,
+          title: translate('push.externalRewardRedeemedTitle', {
+            name: result.member.name
+          }),
           body: result.reward.title,
           privateBody:
-            'Eine Belohnung in einer verbundenen Familie wurde eingelöst.',
+            translate('push.externalRewardRedeemedPrivateBody'),
           url: '/?view=admin',
           tag: `external-reward-redeemed-${result.reward.id}-${Date.now()}`
         },
         {
-          title: 'Belohnung in verbundener Familie eingelöst',
+          title: translate('push.externalRewardRedeemedGotifyTitle'),
           message: `${result.member.name}: ${result.reward.title}`,
           priority: 4
         }
@@ -7782,7 +7908,7 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     const vapid = getVapidConfig();
@@ -7807,7 +7933,7 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     const installationId = cleanText(
@@ -7834,7 +7960,7 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     const firebaseStatus = publicFirebasePushStatus();
@@ -7842,27 +7968,27 @@ export function createApp() {
       return res.status(503).json({
         success: false,
         error:
-          'Android-Push ist auf diesem Server noch nicht eingerichtet.',
+          translate('errors.nativePushNotConfigured'),
         server: firebaseStatus
       });
     }
     const input = ensureObject(req.body);
     const installationId = requireText(
       input.installationId,
-      'App-Gerätekennung',
+      translate('fields.installationId'),
       120
     );
     if (!/^[a-z0-9][a-z0-9._:-]{15,119}$/i.test(installationId)) {
       return res.status(400).json({
         success: false,
-        error: 'Die App-Gerätekennung ist ungültig.'
+        error: translate('errors.installationIdInvalid')
       });
     }
-    const token = requireText(input.token, 'Firebase-Geräteschlüssel', 4096);
+    const token = requireText(input.token, translate('fields.firebaseToken'), 4096);
     if (token.length < 20 || /\s/.test(token)) {
       return res.status(400).json({
         success: false,
-        error: 'Der Firebase-Geräteschlüssel ist ungültig.'
+        error: translate('errors.firebaseTokenInvalid')
       });
     }
     const existing = listNativePushDevices(req.session.familyId, {
@@ -7875,7 +8001,7 @@ export function createApp() {
       installationId,
       token,
       platform: 'android',
-      deviceName: cleanText(input.deviceName, 'Android-Gerät', 100),
+      deviceName: cleanText(input.deviceName, translate('labels.androidDevice'), 100),
       appVersion: cleanText(input.appVersion, APP_VERSION, 30),
       preferences: normalizePushPreferences(
         Object.hasOwn(input, 'preferences')
@@ -7893,12 +8019,12 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     const installationId = requireText(
       req.body?.installationId,
-      'App-Gerätekennung',
+      translate('fields.installationId'),
       120
     );
     deleteNativePushDevice(
@@ -7920,19 +8046,19 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     if (!publicFirebasePushStatus().configured) {
       return res.status(503).json({
         success: false,
         error:
-          'Android-Push ist auf diesem Server noch nicht eingerichtet.'
+          translate('errors.nativePushNotConfigured')
       });
     }
     const installationId = requireText(
       req.body?.installationId,
-      'App-Gerätekennung',
+      translate('fields.installationId'),
       120
     );
     const device = listNativePushDevices(req.session.familyId, {
@@ -7942,14 +8068,14 @@ export function createApp() {
     if (!device) {
       return res.status(409).json({
         success: false,
-        error: 'Diese App ist für das Profil noch nicht angemeldet.'
+        error: translate('errors.appNotRegistered')
       });
     }
     const member = getMember(req.session.familyId, req.session.memberId);
     await sendFirebaseNotification({
       token: device.token,
-      title: `Hallo ${member?.name || ''}!`,
-      body: 'Die Android-App kann dir jetzt zuverlässig Bescheid sagen.',
+      title: translate('push.testGreeting', { name: member?.name || '' }),
+      body: translate('push.nativeTestBody'),
       tag: `native-push-test-${device.id}`,
       priority: 'high',
       ttl: 300,
@@ -7968,17 +8094,17 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     const input = ensureObject(req.body);
     const subscriptionInput = ensureObject(
       input.subscription,
-      'Die Browser-Anmeldung fehlt.'
+      translate('errors.browserSubscriptionMissing')
     );
     const endpoint = requireText(
       subscriptionInput.endpoint,
-      'Push-Endpunkt',
+      translate('fields.pushEndpoint'),
       4000
     );
     let endpointUrl;
@@ -7987,28 +8113,28 @@ export function createApp() {
     } catch {
       return res.status(400).json({
         success: false,
-        error: 'Der Push-Endpunkt ist ungültig.'
+        error: translate('errors.pushEndpointInvalid')
       });
     }
     if (endpointUrl.protocol !== 'https:') {
       return res.status(400).json({
         success: false,
-        error: 'Der Push-Endpunkt muss HTTPS verwenden.'
+        error: translate('errors.pushEndpointHttpsRequired')
       });
     }
     const keys = ensureObject(
       subscriptionInput.keys,
-      'Die Browser-Schlüssel fehlen.'
+      translate('errors.browserKeysMissing')
     );
     const saved = savePushSubscription({
       familyId: req.session.familyId,
       memberId: req.session.memberId,
       endpoint,
       keys: {
-        p256dh: requireText(keys.p256dh, 'Browser-Schlüssel', 1000),
-        auth: requireText(keys.auth, 'Browser-Anmeldeschlüssel', 1000)
+        p256dh: requireText(keys.p256dh, translate('fields.browserKey'), 1000),
+        auth: requireText(keys.auth, translate('fields.browserAuthKey'), 1000)
       },
-      deviceName: cleanText(input.deviceName, 'Dieses Gerät', 100),
+      deviceName: cleanText(input.deviceName, translate('labels.thisDevice'), 100),
       preferences: normalizePushPreferences(input.preferences)
     });
     res.status(201).json({
@@ -8021,10 +8147,10 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
-    const endpoint = requireText(req.body?.endpoint, 'Push-Endpunkt', 4000);
+    const endpoint = requireText(req.body?.endpoint, translate('fields.pushEndpoint'), 4000);
     deletePushSubscription(
       req.session.familyId,
       req.session.memberId,
@@ -8040,16 +8166,16 @@ export function createApp() {
     if (!req.session.memberId) {
       return res.status(403).json({
         success: false,
-        error: 'Bitte zuerst ein Familienprofil auswählen.'
+        error: translate('errors.familyProfileRequired')
       });
     }
     const member = getMember(req.session.familyId, req.session.memberId);
     const result = await sendWebPushEvent(req.session.familyId, null, {
       recipientMemberIds: [req.session.memberId],
-      title: `Hallo ${member?.name || ''}!`,
-      body: 'Browser-Benachrichtigungen funktionieren auf diesem Gerät.',
+      title: translate('push.testGreeting', { name: member?.name || '' }),
+      body: translate('push.webTestBody'),
       privateTitle: 'LX Family Planner',
-      privateBody: 'Deine Benachrichtigungen sind startklar.',
+      privateBody: translate('push.testPrivateBody'),
       url: '/?view=dashboard',
       tag: `push-test-${req.session.memberId}`,
       ttl: 300
@@ -8057,7 +8183,7 @@ export function createApp() {
     if (!result.sent) {
       return res.status(409).json({
         success: false,
-        error: 'Für dieses Profil ist noch kein erreichbares Gerät angemeldet.'
+        error: translate('errors.noReachableDevice')
       });
     }
     res.json({ success: true, ...result });
@@ -8071,14 +8197,14 @@ export function createApp() {
       subscription => ({
         ...publicPushDevice(subscription),
         memberName:
-          membersById.get(subscription.memberId)?.name || 'Familienprofil'
+          membersById.get(subscription.memberId)?.name || translate('labels.familyProfile')
       })
     );
     const nativeDevices = listNativePushDevices(req.session.familyId).map(
       device => ({
         ...publicNativePushDevice(device),
         memberName:
-          membersById.get(device.memberId)?.name || 'Familienprofil'
+          membersById.get(device.memberId)?.name || translate('labels.familyProfile')
       })
     );
     const devices = [...nativeDevices, ...browserDevices].sort(
@@ -8102,7 +8228,7 @@ export function createApp() {
       if (!deleted) {
         return res.status(404).json({
           success: false,
-          error: 'Dieses Gerät wurde nicht gefunden.'
+          error: translate('errors.deviceNotFound')
         });
       }
       res.json({ success: true });
@@ -8167,7 +8293,7 @@ export function createApp() {
         return res.status(404).json({
           success: false,
           error:
-            'Für diese Verbindung verwaltest du den Nextcloud-Zugang selbst.'
+            translate('errors.nextcloudSelfManaged')
         });
       }
       const secret = decryptJson(integration.secretEncrypted);
@@ -8175,7 +8301,7 @@ export function createApp() {
         return res.status(409).json({
           success: false,
           error:
-            'Für diese ältere Verbindung ist noch kein Web-Zugang gespeichert. Bitte Family Cloud einmal trennen und automatisch neu verbinden.'
+            translate('errors.nextcloudLegacyNoWebAccess')
         });
       }
       res.setHeader('Cache-Control', 'no-store');
@@ -8272,7 +8398,7 @@ export function createApp() {
         workspace.userId,
         workspace.folder,
         publicFamilyCloudPath(req.body?.path),
-        requireText(req.body?.name, 'Ordnername', 240)
+        requireText(req.body?.name, translate('fields.folderName'), 240)
       );
       res.status(201).json({ success: true, entry });
     }
@@ -8293,7 +8419,7 @@ export function createApp() {
         return res.status(400).json({
           success: false,
           error:
-            'Bitte öffne oder wähle zuerst einen Ordner. Im Stammverzeichnis werden keine Dateien abgelegt.'
+            translate('errors.folderRequired')
         });
       }
       let fileName = cleanText(
@@ -8309,7 +8435,7 @@ export function createApp() {
       if (!fileName) {
         return res.status(400).json({
           success: false,
-          error: 'Der Dateiname fehlt.'
+          error: translate('errors.fileNameMissing')
         });
       }
       const content = Buffer.isBuffer(req.body)
@@ -8318,7 +8444,7 @@ export function createApp() {
       if (!content.length) {
         return res.status(400).json({
           success: false,
-          error: 'Die ausgewählte Datei ist leer.'
+          error: translate('errors.fileEmpty')
         });
       }
       const uploaded = await uploadNextcloudUserFile(
@@ -8364,20 +8490,20 @@ export function createApp() {
     async (req, res) => {
       const baseUrl = normalizeNextcloudBaseUrl(
         req.body?.baseUrl,
-        'Interne Nextcloud-Adresse'
+        translate('fields.internalNextcloudAddress')
       );
       const publicBaseUrl = normalizeNextcloudBaseUrl(
         req.body?.publicBaseUrl || baseUrl,
-        'Nextcloud-Adresse für Browser'
+        translate('fields.nextcloudBrowserAddress')
       );
       const username = requireText(
         req.body?.username,
-        'Nextcloud-Benutzer',
+        translate('fields.nextcloudUser'),
         300
       );
       const appPassword = requireText(
         req.body?.appPassword,
-        'Nextcloud-App-Passwort',
+        translate('fields.nextcloudAppPassword'),
         1000
       );
       const folder = normalizeNextcloudFolder(
@@ -8499,7 +8625,7 @@ export function createApp() {
       if (!integration) {
         return res.status(404).json({
           success: false,
-          error: 'Nextcloud ist noch nicht verbunden.'
+          error: translate('errors.nextcloudNotConnected')
         });
       }
       const calendars = Array.isArray(integration.config.calendars)
@@ -8521,7 +8647,7 @@ export function createApp() {
       ) {
         return res.status(400).json({
           success: false,
-          error: 'Dieser Kalender ist in Nextcloud nicht mehr verfügbar.'
+          error: translate('errors.nextcloudCalendarUnavailable')
         });
       }
       const requestedMemberId = Object.hasOwn(
@@ -8536,7 +8662,7 @@ export function createApp() {
       ) {
         return res.status(400).json({
           success: false,
-          error: 'Das gewählte Standardprofil wurde nicht gefunden.'
+          error: translate('errors.defaultProfileNotFound')
         });
       }
       const folder = Object.hasOwn(req.body || {}, 'folder')
@@ -8548,7 +8674,7 @@ export function createApp() {
       )
         ? normalizeNextcloudBaseUrl(
             req.body.publicBaseUrl,
-            'Nextcloud-Adresse für Browser'
+            translate('fields.nextcloudBrowserAddress')
           )
         : integration.config.publicBaseUrl;
       const config = {
@@ -8615,7 +8741,7 @@ export function createApp() {
       if (!integration) {
         return res.status(404).json({
           success: false,
-          error: 'Nextcloud ist noch nicht verbunden.'
+          error: translate('errors.nextcloudNotConnected')
         });
       }
       const inspection = await inspectNextcloud(
@@ -8653,8 +8779,10 @@ export function createApp() {
       res.json({
         success: true,
         message:
-          `Nextcloud ${inspection.version} antwortet. ` +
-          `${inspection.calendars.length} Kalender gefunden.`,
+          translate('messages.nextcloudTest', {
+            version: inspection.version,
+            count: inspection.calendars.length
+          }),
         integration: integrationStatus(
           req.session.familyId,
           req.activeMember
@@ -8672,7 +8800,7 @@ export function createApp() {
       if (!getIntegration(req.session.familyId, 'nextcloud')) {
         return res.status(404).json({
           success: false,
-          error: 'Nextcloud ist noch nicht verbunden.'
+          error: translate('errors.nextcloudNotConnected')
         });
       }
       const stats = await performNextcloudSync(req.session.familyId);
@@ -8697,7 +8825,7 @@ export function createApp() {
       if (!getIntegration(req.session.familyId, 'nextcloud')) {
         return res.status(404).json({
           success: false,
-          error: 'Nextcloud ist noch nicht verbunden.'
+          error: translate('errors.nextcloudNotConnected')
         });
       }
       const backup = await performNextcloudBackup(
@@ -8757,12 +8885,16 @@ export function createApp() {
       if (getIntegration(req.session.familyId, 'gotify')) {
         return res.status(409).json({
           success: false,
-          error: 'Gotify ist für diese Familie bereits eingerichtet.'
+          error: translate('errors.gotifyAlreadyConfigured')
         });
       }
       const baseUrl = normalizeGotifyBaseUrl(req.body?.baseUrl);
-      const username = requireText(req.body?.username, 'Gotify-Benutzer', 160);
-      const password = requireText(req.body?.password, 'Gotify-Passwort', 300);
+      const username = requireText(req.body?.username, translate('fields.gotifyUser'), 160);
+      const password = requireText(
+        req.body?.password,
+        translate('fields.gotifyPassword'),
+        300
+      );
       const plannerUrl = normalizePlannerUrl(req.body?.plannerUrl);
       const rules = gotifyRules(req.body?.rules);
 
@@ -8770,7 +8902,7 @@ export function createApp() {
       if (!versionResponse.ok) {
         return res.status(502).json({
           success: false,
-          error: 'Der Gotify-Server antwortet nicht korrekt.'
+          error: translate('errors.gotifyServerNotResponding')
         });
       }
 
@@ -8780,7 +8912,7 @@ export function createApp() {
       form.set('name', applicationName);
       form.set(
         'description',
-        'Benachrichtigungen aus dem privaten LX Family Planner'
+        translate('messages.gotifyAppDescription')
       );
       const authorization = Buffer.from(
         `${username}:${password}`,
@@ -8800,8 +8932,8 @@ export function createApp() {
           success: false,
           error:
             applicationResponse.status === 401
-              ? 'Gotify-Benutzer oder Passwort ist nicht korrekt.'
-              : 'Die Gotify-Anwendung konnte nicht angelegt werden.'
+              ? translate('errors.gotifyCredentialsIncorrect')
+              : translate('errors.gotifyAppCreateFailed')
         });
       }
       const application = await applicationResponse.json();
@@ -8809,7 +8941,7 @@ export function createApp() {
       if (!token) {
         return res.status(502).json({
           success: false,
-          error: 'Gotify hat keinen App-Token zurückgegeben.'
+          error: translate('errors.gotifyNoToken')
         });
       }
 
@@ -8817,9 +8949,9 @@ export function createApp() {
         baseUrl,
         token,
         {
-          title: 'LX Family Planner ist verbunden',
+          title: translate('push.gotifyConnectedTitle'),
           message:
-            'Push-Benachrichtigungen für eure Familie sind jetzt aktiv.',
+            translate('push.gotifyConnectedMessage'),
           priority: 5
         },
         plannerUrl
@@ -8853,7 +8985,7 @@ export function createApp() {
       if (!integration) {
         return res.status(404).json({
           success: false,
-          error: 'Gotify ist noch nicht verbunden.'
+          error: translate('errors.gotifyNotConnected')
         });
       }
       const config = {
@@ -8885,12 +9017,14 @@ export function createApp() {
       if (!getIntegration(req.session.familyId, 'gotify')) {
         return res.status(404).json({
           success: false,
-          error: 'Gotify ist noch nicht verbunden.'
+          error: translate('errors.gotifyNotConnected')
         });
       }
       await sendGotifyNotification(req.session.familyId, null, {
-        title: 'Test vom LX Family Planner',
-        message: `Hallo ${req.activeMember.name}, die Verbindung funktioniert.`,
+        title: translate('push.gotifyTestTitle'),
+        message: translate('push.gotifyTestMessage', {
+          name: req.activeMember.name
+        }),
         priority: 5
       });
       res.json({ success: true });
@@ -8922,7 +9056,7 @@ export function createApp() {
       const baseUrl = normalizeHomeAssistantBaseUrl(req.body?.baseUrl);
       const token = requireText(
         req.body?.token,
-        'Langlebiger Zugriffsschlüssel',
+        translate('fields.accessToken'),
         4000
       );
       const existing = getIntegration(
@@ -8976,7 +9110,7 @@ export function createApp() {
       if (!integration) {
         return res.status(404).json({
           success: false,
-          error: 'Home Assistant ist noch nicht verbunden.'
+          error: translate('errors.homeAssistantNotConnected')
         });
       }
       const entities = await fetchHomeAssistantEntities(integration);
@@ -8996,7 +9130,7 @@ export function createApp() {
       if (!integration) {
         return res.status(404).json({
           success: false,
-          error: 'Home Assistant ist noch nicht verbunden.'
+          error: translate('errors.homeAssistantNotConnected')
         });
       }
       const allMembers = new Set(
@@ -9055,14 +9189,14 @@ export function createApp() {
       if (!integration) {
         return res.status(404).json({
           success: false,
-          error: 'Home Assistant ist noch nicht verbunden.'
+          error: translate('errors.homeAssistantNotConnected')
         });
       }
       const entities = await fetchHomeAssistantEntities(integration);
       res.json({
         success: true,
         entityCount: entities.length,
-        message: `${entities.length} Geräte und Sensoren erreichbar.`
+        message: translate('messages.homeAssistantTest', { count: entities.length })
       });
     }
   );
@@ -9097,7 +9231,7 @@ export function createApp() {
       if (!member || member.role === 'pet') {
         return res.status(403).json({
           success: false,
-          error: 'Für dieses Profil ist keine Haussteuerung freigegeben.'
+          error: translate('errors.homeControlNotAllowed')
         });
       }
       const integration = getIntegration(
@@ -9107,11 +9241,11 @@ export function createApp() {
       if (!integration || integration.config?.enabled === false) {
         return res.status(404).json({
           success: false,
-          error: 'Home Assistant ist nicht aktiv.'
+          error: translate('errors.homeAssistantInactive')
         });
       }
-      const entityId = requireText(req.body?.entityId, 'Gerät', 180);
-      const action = requireText(req.body?.action, 'Aktion', 60);
+      const entityId = requireText(req.body?.entityId, translate('fields.device'), 180);
+      const action = requireText(req.body?.action, translate('fields.action'), 60);
       const config = normalizeHomeAssistantEntities(
         integration.config?.selectedEntities
       ).find(entity => entity.entityId === entityId);
@@ -9124,7 +9258,7 @@ export function createApp() {
       ) {
         return res.status(403).json({
           success: false,
-          error: 'Diese Aktion wurde von den Eltern nicht freigegeben.'
+          error: translate('errors.actionNotAllowedByParents')
         });
       }
       const currentState = await homeAssistantFetch(
@@ -9135,7 +9269,7 @@ export function createApp() {
       if (publicState.requiresAdult && !isAdultMember(member)) {
         return res.status(403).json({
           success: false,
-          error: 'Garagentore und Einfahrten dürfen nur Erwachsene steuern.'
+          error: translate('errors.garageAdultsOnly')
         });
       }
       const serviceData = { entity_id: entityId };
@@ -9144,7 +9278,7 @@ export function createApp() {
         if (!Number.isFinite(temperature) || temperature < 5 || temperature > 35) {
           return res.status(400).json({
             success: false,
-            error: 'Die Temperatur muss zwischen 5 und 35 °C liegen.'
+            error: translate('errors.temperatureRange')
           });
         }
         serviceData.temperature = temperature;
@@ -9198,8 +9332,8 @@ export function createApp() {
   });
 
   app.post('/api/integrations/bring/login', requireAuth, requireAdult, async (req, res) => {
-    const email = requireText(req.body?.email, 'E-Mail', 180);
-    const password = requireText(req.body?.password, 'Passwort', 300);
+    const email = requireText(req.body?.email, translate('fields.email'), 180);
+    const password = requireText(req.body?.password, translate('fields.password'), 300);
     const client = new BringApi({ mail: email, password });
     await client.login();
     const result = await client.loadLists();
@@ -9213,7 +9347,7 @@ export function createApp() {
     if (lists.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'In diesem Bring!-Konto wurde keine Liste gefunden.'
+        error: translate('errors.bringNoLists')
       });
     }
     const connectionToken = randomUUID();
@@ -9229,7 +9363,7 @@ export function createApp() {
   app.post('/api/integrations/bring/connect', requireAuth, requireAdult, async (req, res) => {
     const connectionToken = requireText(
       req.body?.connectionToken,
-      'Verbindung',
+      translate('fields.connection'),
       100
     );
     const pending = pendingBringLogins.get(connectionToken);
@@ -9241,10 +9375,10 @@ export function createApp() {
     ) {
       return res.status(410).json({
         success: false,
-        error: 'Die Bring!-Anmeldung ist abgelaufen. Bitte erneut anmelden.'
+        error: translate('errors.bringLoginExpired')
       });
     }
-    const listUuid = requireText(req.body?.listUuid, 'Liste', 180);
+    const listUuid = requireText(req.body?.listUuid, translate('fields.list'), 180);
     const listName = cleanText(req.body?.listName, 'Bring! Liste', 160);
     saveIntegration(
       req.session.familyId,
@@ -9281,14 +9415,14 @@ export function createApp() {
     if (requestedItems.length === 0 || requestedItems.length > 50) {
       return res.status(400).json({
         success: false,
-        error: 'Bitte zwischen einem und 50 Artikeln übertragen.'
+        error: translate('errors.bringItemCount')
       });
     }
 
     const seen = new Set();
     const items = requestedItems
       .map(item => ({
-        name: requireText(item?.name, 'Artikel', 160),
+        name: requireText(item?.name, translate('fields.item'), 160),
         specification: cleanText(
           item?.specification || item?.quantity,
           '',
@@ -9325,7 +9459,7 @@ export function createApp() {
   });
 
   app.post('/api/integrations/bring/items/toggle', requireAuth, async (req, res) => {
-    const name = requireText(req.body?.name, 'Artikel', 160);
+    const name = requireText(req.body?.name, translate('fields.item'), 160);
     const specification = cleanText(
       req.body?.specification || req.body?.quantity,
       '',
@@ -9367,7 +9501,7 @@ export function createApp() {
   });
 
   app.post('/api/recipes/import', requireAuth, async (req, res) => {
-    const rawUrl = requireText(req.body?.url, 'URL', 2000);
+    const rawUrl = requireText(req.body?.url, translate('fields.url'), 2000);
     const imported = await importRecipeFromUrl(rawUrl);
     res.json({
       success: true,
@@ -9380,12 +9514,12 @@ export function createApp() {
     if (!configuredKey) {
       return res.status(503).json({
         success: false,
-        error: 'Die Agent-Schnittstelle ist nicht aktiviert.'
+        error: translate('errors.agentApiDisabled')
       });
     }
     const suppliedKey = req.headers.authorization?.replace(/^Bearer\s+/i, '');
     if (!safeCompare(suppliedKey, configuredKey)) {
-      return res.status(401).json({ success: false, error: 'Nicht autorisiert.' });
+      return res.status(401).json({ success: false, error: translate('errors.unauthorized') });
     }
     const familyId = cleanText(
       req.headers['x-family-id'] || req.body?.familyId || req.query?.familyId,
@@ -9395,7 +9529,7 @@ export function createApp() {
     if (!familyId || !getFamily(familyId)) {
       return res.status(400).json({
         success: false,
-        error: 'Eine gültige x-family-id wird benötigt.'
+        error: translate('errors.familyIdHeaderRequired')
       });
     }
     req.agentFamilyId = familyId;
@@ -9408,7 +9542,9 @@ export function createApp() {
 
   app.post('/api/agent/:type', (req, res) => {
     if (!RECORD_TYPES.has(req.params.type)) {
-      return res.status(404).json({ success: false, error: 'Datentyp unbekannt.' });
+      return res
+        .status(404)
+        .json({ success: false, error: translate('errors.unknownRecordType') });
     }
     const record = createRecord(
       req.agentFamilyId,
@@ -9423,7 +9559,7 @@ export function createApp() {
     if (!release) {
       return res
         .status(404)
-        .send('Keine freigegebene APK-Datei auf dem Server hinterlegt.');
+        .send(translate('errors.apkNotAvailable'));
     }
     res.setHeader('Content-Type', 'application/vnd.android.package-archive');
     res.setHeader('Content-Disposition', 'attachment; filename="LX-Family-Planner.apk"');
@@ -9461,7 +9597,7 @@ export function createApp() {
   }
 
   app.use((req, res) => {
-    res.status(404).json({ success: false, error: 'Route nicht gefunden.' });
+    res.status(404).json({ success: false, error: translate('errors.routeNotFound') });
   });
 
   app.use((error, _req, res, _next) => {
@@ -9474,11 +9610,11 @@ export function createApp() {
       error:
         status === 413
           ? error.type === 'entity.too.large'
-            ? 'Die Datei oder das Bild ist zu groß. Bitte wähle eine kleinere Datei; Bilder werden vor dem Speichern automatisch optimiert.'
-            : error.message || 'Die importierte Seite ist zu groß.'
+            ? translate('errors.payloadTooLarge')
+            : error.message || translate('errors.importedPageTooLarge')
           : status >= 500
-          ? 'Es ist ein interner Fehler aufgetreten.'
-          : error.message || 'Die Anfrage konnte nicht verarbeitet werden.'
+          ? translate('errors.internal')
+          : error.message || translate('errors.requestFailed')
     });
   });
 

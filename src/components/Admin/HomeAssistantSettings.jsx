@@ -15,8 +15,10 @@ import {
   Trash2,
   Wifi
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { isManagedProfile } from '../../constants/roles';
+import { toLocaleLowerCase } from '../../utils/formatting';
 
 const CONTROLLABLE_DOMAINS = new Set([
   'button',
@@ -57,6 +59,7 @@ function selectedMap(items) {
 }
 
 export default function HomeAssistantSettings() {
+  const { t } = useTranslation('admin');
   const {
     members,
     homeAssistantIntegration,
@@ -78,6 +81,12 @@ export default function HomeAssistantSettings() {
   const [busy, setBusy] = useState('');
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const connected = Boolean(homeAssistantIntegration?.connected);
+  const domainLabel = domain =>
+    DOMAIN_LABELS[domain]
+      ? t(`homeAssistant.domains.${domain}`, {
+          defaultValue: DOMAIN_LABELS[domain]
+        })
+      : '';
   const assignableProfiles = members.filter(
     member =>
       !isManagedProfile(member) &&
@@ -152,39 +161,38 @@ export default function HomeAssistantSettings() {
   };
 
   const filtered = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase('de-DE');
+    const term = toLocaleLowerCase(search.trim());
     return available.filter(entity =>
       !term ||
-      `${entity.name} ${entity.entityId} ${DOMAIN_LABELS[entity.domain] || ''}`
-        .toLocaleLowerCase('de-DE')
-        .includes(term)
+      toLocaleLowerCase(
+        `${entity.name} ${entity.entityId} ${domainLabel(entity.domain)}`
+      ).includes(term)
     );
-  }, [available, search]);
+  }, [available, search, t]);
 
   return (
     <section className="admin-panel ha-settings-panel">
       <header className="admin-panel-header">
         <div>
           <span className="admin-section-kicker">
-            Smart Home · lokal & geschützt
+            {t('homeAssistant.kicker')}
           </span>
           <h2><Home size={22} /> Home Assistant</h2>
         </div>
         <span className={`ha-connection-badge ${connected ? 'online' : ''}`}>
           <i />
-          {connected ? 'Verbunden' : 'Nicht verbunden'}
+          {connected
+            ? t('homeAssistant.connected')
+            : t('homeAssistant.notConnected')}
         </span>
       </header>
 
-      <p className="admin-panel-intro">
-        Holt ausgewählte Hauszustände als echte Kacheln in den Familienplaner.
-        Der Zugriffsschlüssel bleibt verschlüsselt auf eurem Server.
-      </p>
+      <p className="admin-panel-intro">{t('homeAssistant.intro')}</p>
 
       {!connected ? (
         <form className="ha-connect-form" onSubmit={connect}>
           <label>
-            <span><Link2 size={14} /> Home-Assistant-Adresse</span>
+            <span><Link2 size={14} /> {t('homeAssistant.connect.addressLabel')}</span>
             <input
               value={baseUrl}
               onChange={event => setBaseUrl(event.target.value)}
@@ -192,27 +200,25 @@ export default function HomeAssistantSettings() {
               inputMode="url"
               required
             />
-            <small>
-              Bei Docker am zuverlässigsten die feste IP im Heimnetz verwenden.
-            </small>
+            <small>{t('homeAssistant.connect.addressHint')}</small>
           </label>
           <label>
-            <span><KeyRound size={14} /> Langlebiger Zugriffsschlüssel</span>
+            <span><KeyRound size={14} /> {t('homeAssistant.connect.tokenLabel')}</span>
             <input
               type="password"
               value={token}
               onChange={event => setToken(event.target.value)}
               autoComplete="new-password"
-              placeholder="Token aus dem Home-Assistant-Profil"
+              placeholder={t('homeAssistant.connect.tokenPlaceholder')}
               required
             />
-            <small>Der Schlüssel wird nach dem Speichern nicht mehr angezeigt.</small>
+            <small>{t('homeAssistant.connect.tokenHint')}</small>
           </label>
           <button className="admin-primary-button" disabled={busy === 'connect'}>
             {busy === 'connect'
               ? <LoaderCircle className="spin" size={17} />
               : <Wifi size={17} />}
-            Verbindung prüfen
+            {t('homeAssistant.connect.submit')}
           </button>
         </form>
       ) : (
@@ -222,8 +228,9 @@ export default function HomeAssistantSettings() {
             <span>
               <strong>{homeAssistantIntegration.host}</strong>
               <small>
-                {selection.size} Kachel{selection.size === 1 ? '' : 'n'} im
-                Dashboard freigegeben
+                {t('homeAssistant.summary.tilesShared', {
+                  count: selection.size
+                })}
               </small>
             </span>
             <label className="ha-master-switch">
@@ -234,7 +241,7 @@ export default function HomeAssistantSettings() {
                   updateHomeAssistant({ enabled: event.target.checked })
                 }
               />
-              <span><Power size={14} /> Aktiv</span>
+              <span><Power size={14} /> {t('homeAssistant.summary.active')}</span>
             </label>
           </div>
 
@@ -247,10 +254,10 @@ export default function HomeAssistantSettings() {
               {busy === 'load'
                 ? <LoaderCircle className="spin" size={16} />
                 : <RefreshCw size={16} />}
-              Geräte laden
+              {t('homeAssistant.toolbar.loadDevices')}
             </button>
             <button type="button" onClick={testHomeAssistant}>
-              <Wifi size={16} /> Verbindung testen
+              <Wifi size={16} /> {t('homeAssistant.toolbar.testConnection')}
             </button>
             {available.length > 0 && (
               <label>
@@ -258,7 +265,7 @@ export default function HomeAssistantSettings() {
                 <input
                   value={search}
                   onChange={event => setSearch(event.target.value)}
-                  placeholder="Gerät oder Sensor suchen"
+                  placeholder={t('homeAssistant.toolbar.searchPlaceholder')}
                 />
               </label>
             )}
@@ -272,11 +279,8 @@ export default function HomeAssistantSettings() {
             >
               <SlidersHorizontal size={23} />
               <span>
-                <strong>Dashboard-Kacheln auswählen</strong>
-                <small>
-                  Lade die Geräte und entscheide genau, was sichtbar und
-                  steuerbar sein darf.
-                </small>
+                <strong>{t('homeAssistant.callout.title')}</strong>
+                <small>{t('homeAssistant.callout.description')}</small>
               </span>
               <ChevronDown size={18} />
             </button>
@@ -303,7 +307,7 @@ export default function HomeAssistantSettings() {
                         <span>
                           <strong>{entity.name}</strong>
                           <small>
-                            {DOMAIN_LABELS[entity.domain] || entity.domain}
+                            {domainLabel(entity.domain) || entity.domain}
                             {' · '}{entity.entityId}
                           </small>
                         </span>
@@ -323,12 +327,12 @@ export default function HomeAssistantSettings() {
                                   { allowControl: event.target.checked }
                                 )}
                               />
-                              <span><ShieldCheck size={13} /> Bedienung erlauben</span>
+                              <span><ShieldCheck size={13} /> {t('homeAssistant.entity.allowControl')}</span>
                             </label>
                           )}
                           {assignableProfiles.length > 0 && (
                             <div>
-                              <span>Auch sichtbar für:</span>
+                              <span>{t('homeAssistant.entity.visibleFor')}</span>
                               {assignableProfiles.map(member => {
                                 const active =
                                   configured.profileIds.includes(member.id);
@@ -364,14 +368,18 @@ export default function HomeAssistantSettings() {
                 })}
                 {!filtered.length && (
                   <div className="admin-inline-empty">
-                    Keine passenden Geräte gefunden.
+                    {t('homeAssistant.noMatches')}
                   </div>
                 )}
               </div>
               <div className="ha-save-bar">
                 <span>
-                  <strong>{selection.size} ausgewählt</strong>
-                  <small>Erwachsene sehen alle, Kinder nur ihre Freigaben.</small>
+                  <strong>
+                    {t('homeAssistant.saveBar.selectedCount', {
+                      count: selection.size
+                    })}
+                  </strong>
+                  <small>{t('homeAssistant.saveBar.hint')}</small>
                 </span>
                 <button
                   type="button"
@@ -382,31 +390,31 @@ export default function HomeAssistantSettings() {
                   {busy === 'save'
                     ? <LoaderCircle className="spin" size={16} />
                     : <Check size={16} />}
-                  Auswahl speichern
+                  {t('homeAssistant.saveBar.save')}
                 </button>
               </div>
             </>
           )}
 
           <details className="ha-danger-zone">
-            <summary>Verbindung verwalten</summary>
+            <summary>{t('homeAssistant.manage.summary')}</summary>
             <div>
               <form onSubmit={connect}>
                 <input
                   value={baseUrl}
                   onChange={event => setBaseUrl(event.target.value)}
-                  aria-label="Home-Assistant-Adresse"
+                  aria-label={t('homeAssistant.connect.addressLabel')}
                   required
                 />
                 <input
                   type="password"
                   value={token}
                   onChange={event => setToken(event.target.value)}
-                  placeholder="Neuer Zugriffsschlüssel"
-                  aria-label="Neuer Zugriffsschlüssel"
+                  placeholder={t('homeAssistant.manage.newTokenPlaceholder')}
+                  aria-label={t('homeAssistant.manage.newTokenPlaceholder')}
                   required
                 />
-                <button>Verbindung erneuern</button>
+                <button>{t('homeAssistant.manage.renew')}</button>
               </form>
               <button
                 type="button"
@@ -422,7 +430,9 @@ export default function HomeAssistantSettings() {
                 }}
               >
                 <Trash2 size={15} />
-                {confirmDisconnect ? 'Wirklich trennen?' : 'Verbindung trennen'}
+                {confirmDisconnect
+                  ? t('homeAssistant.manage.disconnectConfirm')
+                  : t('homeAssistant.manage.disconnect')}
               </button>
             </div>
           </details>

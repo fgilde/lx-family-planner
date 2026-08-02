@@ -1,0 +1,148 @@
+{
+  "positions": {
+    "mama": "Mom",
+    "papa": "Dad",
+    "kind": "Child",
+    "teenager": "Teenager",
+    "oma": "Grandma",
+    "opa": "Grandpa",
+    "betreute_person": "Cared-for person",
+    "tante": "Aunt",
+    "onkel": "Uncle",
+    "patin": "Godmother",
+    "pate": "Godfather",
+    "haustier": "Pet",
+    "familienmitglied": "Family member"
+  },
+  "roleLabels": {
+    "adult": "Adult",
+    "child": "Child",
+    "teen": "Teenager",
+    "senior": "Grandparents",
+    "member": "Family member",
+    "pet": "Pet"
+  },
+  "modal": {
+    "eyebrow": {
+      "protected": "Protected profile",
+      "edit": "Edit profile",
+      "new": "New profile",
+      "family": "Your family"
+    },
+    "title": {
+      "unlock": "Unlock {{name}}",
+      "edit": "Edit profile",
+      "create": "Create profile",
+      "whoseTurn": "Who's up right now?"
+    }
+  },
+  "toasts": {
+    "switched": "Profile switched",
+    "greeting": "Hello {{name}}!",
+    "locked": "Profile locked",
+    "pinIncorrect": "Incorrect PIN",
+    "updated": "Profile updated",
+    "savedMessage": "{{name}} has been saved."
+  },
+  "confirmDelete": "Really delete this family profile?",
+  "pin": {
+    "protectedHeading": "{{name}}'s profile is protected",
+    "enterPin": "Enter the personal profile PIN.",
+    "petPasswordNeeded": "Switching out of a pet profile requires the family password.",
+    "childPasswordNeeded": "Switching out of a child profile requires the family password.",
+    "pinPlaceholder": "Profile PIN",
+    "familyPasswordPlaceholder": "Family password",
+    "unlock": "Unlock"
+  },
+  "list": {
+    "intro": "Tap a profile to switch straight into its personal family world.",
+    "selectAria": "Select {{name}}, {{position}}",
+    "activeProfile": "Active profile",
+    "pinProtected": "Protected with a PIN",
+    "petBadge": "Paw profile",
+    "editMember": "Edit {{name}}",
+    "managedHeading": "Managed by you",
+    "managedSubheading": "No login · for events and tasks",
+    "managedNoAccess": "{{position}} · no own login",
+    "eventsTitle": "Events",
+    "tasksTitle": "Tasks",
+    "addMember": "Add member"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "deviceHint": "For {{name}} on this device",
+    "petModeActive": "Pet mode active",
+    "petModeHint": "Without chat, notifications, and account features",
+    "headingFor": "Notifications for {{name}}",
+    "savedPerDevice": "This selection is saved for this profile and this device.",
+    "on": "On",
+    "off": "Off",
+    "serverNotConfigured": "Native Android notifications are not set up on the server yet. You can find the instructions in the Parent Center.",
+    "deniedNative": "Android is blocking notifications. Please allow them under Apps → LX Family Planner → Notifications.",
+    "deniedBrowser": "The browser is blocking notifications. Please allow them once in the browser's site settings.",
+    "showPreviews": "Show content in notifications",
+    "sendTest": "Send test notification"
+  },
+  "form": {
+    "usage": "How will the profile be used?",
+    "ownLogin": "With their own login",
+    "ownLoginHint": "Appears in the profile switcher and can open the planner independently.",
+    "managedOnly": "Managed by us only",
+    "managedOnlyHint": "For grandma, grandpa, or cared-for people without their own access.",
+    "managedNote": "Organization profile without login",
+    "managedNoteHint": "The profile appears in calendars and tasks, but not at login, in the profile switcher, or in chat.",
+    "petNote": "Pet profile",
+    "petNoteHint": "Shows care tasks and pet appointments – without chat, notifications, or the star shop.",
+    "petName": "Pet's name",
+    "petNamePlaceholder": "e.g. Luna",
+    "namePlaceholder": "e.g. Sample name",
+    "position": "Position in the family",
+    "avatar": "Profile picture",
+    "ownPhoto": "Own photo",
+    "color": "Profile color",
+    "newPin": "New profile PIN (optional)",
+    "pin": "Profile PIN (optional)",
+    "pinKeepPlaceholder": "Leave empty = unchanged",
+    "pinPlaceholder": "Personal protection",
+    "saving": "Saving …",
+    "save": "Save profile",
+    "delete": "Delete profile"
+  },
+  "quickAdd": {
+    "title": "Quick Add",
+    "types": {
+      "event": "Event",
+      "shopping": "Shopping",
+      "task": "Task",
+      "note": "Note"
+    },
+    "titleLabels": {
+      "event": "Event title",
+      "shopping": "Item name",
+      "task": "Task",
+      "note": "Note title"
+    },
+    "titlePlaceholder": "Type here...",
+    "forWhom": "For whom?",
+    "everyone": "Everyone (shared)",
+    "managed": "managed",
+    "locationOptional": "Location (optional)",
+    "locationPlaceholder": "e.g. Dr. Weber, school",
+    "inviteFamilies": "Invite connected families",
+    "inviteFamiliesHint": "The event appears for all selected families; private events stay separate.",
+    "categoryLabel": "Category",
+    "shoppingCategories": {
+      "produce": "Fruit & vegetables",
+      "dairy": "Dairy & chilled",
+      "bakery": "Bakery",
+      "pantry": "Pantry",
+      "drinks": "Drinks",
+      "household": "Drugstore & household"
+    },
+    "quantity": "Quantity",
+    "assignedTo": "Assigned to",
+    "starPoints": "Star points",
+    "noteText": "Note text",
+    "notePlaceholder": "Enter content..."
+  }
+}

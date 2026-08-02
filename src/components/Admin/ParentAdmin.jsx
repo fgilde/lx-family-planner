@@ -21,11 +21,13 @@ import {
   UsersRound,
   Youtube
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   POSITION_OPTIONS,
   canManageFamily,
   getPositionLabel,
+  getPositionOptionLabel,
   isManagedProfile,
   roleForPosition
 } from '../../constants/roles';
@@ -45,6 +47,7 @@ const YOUNG_POSITIONS = POSITION_OPTIONS.filter(option =>
 );
 
 export default function ParentAdmin({ onOpenFamilyTree }) {
+  const { t } = useTranslation('admin');
   const {
     activeMember,
     members,
@@ -132,8 +135,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     return (
       <section className="admin-access-card">
         <ShieldCheck size={32} />
-        <h1>Elternbereich</h1>
-        <p>Dieser Bereich ist nur für erwachsene Familienprofile sichtbar.</p>
+        <h1>{t('parentAdmin.accessDenied.title')}</h1>
+        <p>{t('parentAdmin.accessDenied.description')}</p>
       </section>
     );
   }
@@ -176,8 +179,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     if (updated) {
       setProfileForm(previous => ({ ...previous, pin: '' }));
       showToast(
-        'Kinderprofil aktualisiert',
-        `${updated.name}s Einstellungen sind gespeichert.`,
+        t('parentAdmin.toasts.profileUpdatedTitle'),
+        t('parentAdmin.toasts.profileUpdatedBody', { name: updated.name }),
         'success'
       );
     }
@@ -209,34 +212,31 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
       <section className="admin-hero">
         <div className="admin-hero-copy">
           <span className="admin-eyebrow">
-            <ShieldCheck size={16} /> Nur für Erwachsene
+            <ShieldCheck size={16} /> {t('parentAdmin.hero.kicker')}
           </span>
-          <h1>Elternzentrale</h1>
-          <p>
-            Profile, Aufgaben und Kinder-Dashboards an einem ruhigen Ort
-            verwalten – ohne zwischen mehreren Bereichen zu springen.
-          </p>
+          <h1>{t('parentAdmin.hero.title')}</h1>
+          <p>{t('parentAdmin.hero.description')}</p>
         </div>
         <div className="admin-overview-grid">
           <article>
             <UsersRound size={19} />
             <strong>{children.length}</strong>
-            <span>Kinderprofile</span>
+            <span>{t('parentAdmin.overview.childProfiles')}</span>
           </article>
           <article>
             <CircleGauge size={19} />
             <strong>{pendingTasks}</strong>
-            <span>Offene Aufgaben</span>
+            <span>{t('parentAdmin.overview.openTasks')}</span>
           </article>
           <article>
             <Star size={19} fill="currentColor" />
             <strong>{totalStars}</strong>
-            <span>Sterne gesamt</span>
+            <span>{t('parentAdmin.overview.totalStars')}</span>
           </article>
           <article>
             <ClipboardList size={19} />
             <strong>{managedProfiles.length}</strong>
-            <span>Verwaltete Profile</span>
+            <span>{t('parentAdmin.overview.managedProfiles')}</span>
           </article>
         </div>
       </section>
@@ -245,21 +245,18 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <section className="admin-panel admin-managed-panel">
           <header className="admin-panel-header">
             <div>
-              <span className="admin-section-kicker">Ohne eigenen Zugang</span>
-              <h2><ClipboardList size={21} /> Verwaltete Profile</h2>
+              <span className="admin-section-kicker">{t('parentAdmin.managed.kicker')}</span>
+              <h2><ClipboardList size={21} /> {t('parentAdmin.managed.title')}</h2>
             </div>
             <button
               type="button"
               className="admin-text-button"
               onClick={() => setIsProfileModalOpen(true)}
             >
-              <Plus size={16} /> Profil anlegen
+              <Plus size={16} /> {t('parentAdmin.managed.create')}
             </button>
           </header>
-          <p className="admin-panel-intro">
-            Für Oma, Opa oder betreute Personen: Sie erscheinen bei Terminen
-            und Aufgaben, aber nicht bei der Anmeldung oder im Chat.
-          </p>
+          <p className="admin-panel-intro">{t('parentAdmin.managed.intro')}</p>
           {managedProfiles.length > 0 ? (
             <div className="admin-managed-list">
               {managedProfiles.map(member => (
@@ -274,9 +271,13 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                   />
                   <span>
                     <strong>{member.name}</strong>
-                    <small>{getPositionLabel(member)} · ohne Anmeldung</small>
+                    <small>
+                      {t('parentAdmin.managed.positionWithoutLogin', {
+                        position: getPositionLabel(member)
+                      })}
+                    </small>
                   </span>
-                  <b>Planbar</b>
+                  <b>{t('parentAdmin.managed.plannable')}</b>
                 </article>
               ))}
             </div>
@@ -284,10 +285,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             <div className="admin-managed-empty">
               <ClipboardList size={24} />
               <span>
-                <strong>Noch niemand eingetragen</strong>
-                <small>
-                  Beim Anlegen „Nur von uns verwaltet“ auswählen.
-                </small>
+                <strong>{t('parentAdmin.managed.emptyTitle')}</strong>
+                <small>{t('parentAdmin.managed.emptyHint')}</small>
               </span>
             </div>
           )}
@@ -296,15 +295,15 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <section className="admin-panel admin-children-panel">
           <header className="admin-panel-header">
             <div>
-              <span className="admin-section-kicker">Kinder & Teenager</span>
-              <h2><UserCog size={21} /> Profile administrieren</h2>
+              <span className="admin-section-kicker">{t('parentAdmin.children.kicker')}</span>
+              <h2><UserCog size={21} /> {t('parentAdmin.children.title')}</h2>
             </div>
             <button
               type="button"
               className="admin-text-button"
               onClick={() => setIsProfileModalOpen(true)}
             >
-              <Plus size={16} /> Profil hinzufügen
+              <Plus size={16} /> {t('parentAdmin.children.add')}
             </button>
           </header>
 
@@ -336,14 +335,14 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
               <form className="admin-profile-form" onSubmit={saveProfile}>
                 <div className="admin-profile-heading">
                   <div>
-                    <span>Ausgewähltes Profil</span>
+                    <span>{t('parentAdmin.children.selectedProfile')}</span>
                     <strong>{selectedChild?.name}</strong>
                   </div>
                 </div>
 
                 <div className="admin-form-grid">
                   <label>
-                    <span>Name</span>
+                    <span>{t('common:labels.name')}</span>
                     <input
                       value={profileForm.name}
                       onChange={event => setProfileForm(previous => ({
@@ -355,7 +354,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                     />
                   </label>
                   <label>
-                    <span>Position</span>
+                    <span>{t('parentAdmin.children.positionLabel')}</span>
                     <select
                       value={profileForm.position}
                       onChange={event => setProfileForm(previous => ({
@@ -365,13 +364,13 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                     >
                       {YOUNG_POSITIONS.map(option => (
                         <option value={option.value} key={option.value}>
-                          {option.emoji} {option.label}
+                          {option.emoji} {getPositionOptionLabel(option)}
                         </option>
                       ))}
                     </select>
                   </label>
                   <label>
-                    <span>Neue Profil-PIN (optional)</span>
+                    <span>{t('parentAdmin.children.pinLabel')}</span>
                     <div className="admin-input-icon">
                       <KeyRound size={16} />
                       <input
@@ -384,28 +383,30 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                           ...previous,
                           pin: event.target.value
                         }))}
-                        placeholder="Leer = unverändert"
+                        placeholder={t('parentAdmin.children.pinPlaceholder')}
                       />
                     </div>
                   </label>
                 </div>
                 <button className="admin-primary-button" disabled={busy}>
                   <PencilLine size={16} />
-                  {busy ? 'Speichert …' : 'Profil speichern'}
+                  {busy
+                    ? t('parentAdmin.children.saving')
+                    : t('parentAdmin.children.save')}
                 </button>
               </form>
             </>
           ) : (
             <div className="admin-empty-state">
               <span>🪁</span>
-              <h3>Noch kein Kinderprofil</h3>
-              <p>Lege zuerst ein Profil als Kind oder Teenager an.</p>
+              <h3>{t('parentAdmin.children.emptyTitle')}</h3>
+              <p>{t('parentAdmin.children.emptyDescription')}</p>
               <button
                 type="button"
                 className="admin-primary-button"
                 onClick={() => setIsProfileModalOpen(true)}
               >
-                <Plus size={16} /> Kinderprofil anlegen
+                <Plus size={16} /> {t('parentAdmin.children.emptyCta')}
               </button>
             </div>
           )}
@@ -414,16 +415,16 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <section className="admin-panel admin-task-panel">
           <header className="admin-panel-header">
             <div>
-              <span className="admin-section-kicker">Ordnung schaffen</span>
-              <h2><Eraser size={21} /> Aufgabenliste bereinigen</h2>
+              <span className="admin-section-kicker">{t('parentAdmin.tasks.kicker')}</span>
+              <h2><Eraser size={21} /> {t('parentAdmin.tasks.title')}</h2>
             </div>
           </header>
           <div className="admin-task-summary">
-            <span><i className="open" /> {pendingTasks} offen</span>
-            <span><i className="done" /> {completedTasks} erledigt</span>
+            <span><i className="open" /> {t('parentAdmin.tasks.openCount', { count: pendingTasks })}</span>
+            <span><i className="done" /> {t('parentAdmin.tasks.doneCount', { count: completedTasks })}</span>
           </div>
           <label className="admin-full-field">
-            <span>Nur Aufgaben von</span>
+            <span>{t('parentAdmin.tasks.filterLabel')}</span>
             <select
               value={taskMemberId}
               onChange={event => {
@@ -431,7 +432,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                 setConfirmAction('');
               }}
             >
-              <option value="">Allen Familienmitgliedern</option>
+              <option value="">{t('parentAdmin.tasks.allMembers')}</option>
               {members.map(member => (
                 <option value={member.id} key={member.id}>{member.name}</option>
               ))}
@@ -448,8 +449,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             >
               <CheckCircle2 size={17} />
               {confirmAction === `tasks-completed-${taskMemberId}`
-                ? 'Erledigte wirklich löschen?'
-                : 'Erledigte löschen'}
+                ? t('parentAdmin.tasks.deleteCompletedConfirm')
+                : t('parentAdmin.tasks.deleteCompleted')}
             </button>
             <button
               type="button"
@@ -462,8 +463,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             >
               <Trash2 size={17} />
               {confirmAction === `tasks-all-${taskMemberId}`
-                ? 'Wirklich alle löschen?'
-                : 'Aufgabenliste leeren'}
+                ? t('parentAdmin.tasks.clearAllConfirm')
+                : t('parentAdmin.tasks.clearAll')}
             </button>
           </div>
         </section>
@@ -471,14 +472,11 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <section className="admin-panel admin-points-panel">
           <header className="admin-panel-header">
             <div>
-              <span className="admin-section-kicker">Sternenkonten</span>
-              <h2><Star size={21} fill="currentColor" /> Belohnungspunkte</h2>
+              <span className="admin-section-kicker">{t('parentAdmin.points.kicker')}</span>
+              <h2><Star size={21} fill="currentColor" /> {t('parentAdmin.points.title')}</h2>
             </div>
           </header>
-          <p className="admin-panel-intro">
-            Setze die Punkte von Kindern und Erwachsenen getrennt zurück.
-            Haustiere sammeln keine Belohnungspunkte.
-          </p>
+          <p className="admin-panel-intro">{t('parentAdmin.points.intro')}</p>
           <div className="admin-points-grid">
             {rewardMembers.map(member => (
               <article
@@ -505,8 +503,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                 >
                   <RotateCcw size={14} />
                   {confirmAction === `points-${member.id}`
-                    ? 'Wirklich auf 0?'
-                    : 'Zurücksetzen'}
+                    ? t('parentAdmin.points.resetConfirm')
+                    : t('common:actions.reset')}
                 </button>
               </article>
             ))}
@@ -522,14 +520,11 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <section className="admin-panel admin-media-panel">
           <header className="admin-panel-header">
             <div>
-              <span className="admin-section-kicker">Kinder-Dashboard</span>
-              <h2><Headphones size={22} /> Medien-Lounge</h2>
+              <span className="admin-section-kicker">{t('parentAdmin.media.kicker')}</span>
+              <h2><Headphones size={22} /> {t('parentAdmin.media.title')}</h2>
             </div>
           </header>
-          <p className="admin-panel-intro">
-            Lege geprüfte YouTube-Kanäle und Spotify-Playlists als große,
-            kindgerechte Kacheln ab. Sichtbar ist nur, was ihr hier freigebt.
-          </p>
+          <p className="admin-panel-intro">{t('parentAdmin.media.intro')}</p>
           <form className="admin-link-form" onSubmit={addLink}>
             <select
               value={linkForm.memberId}
@@ -539,7 +534,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
               }))}
               required
             >
-              <option value="">Kinderprofil wählen</option>
+              <option value="">{t('parentAdmin.media.chooseChild')}</option>
               {children.map(member => (
                 <option value={member.id} key={member.id}>{member.name}</option>
               ))}
@@ -551,7 +546,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                 kind: event.target.value,
                 url: ''
               }))}
-              aria-label="Medienart"
+              aria-label={t('parentAdmin.media.kindAriaLabel')}
             >
               <option value="youtube">▶ YouTube</option>
               <option value="spotify">♫ Spotify</option>
@@ -562,7 +557,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                 ...previous,
                 title: event.target.value
               }))}
-              placeholder="z. B. Die Maus"
+              placeholder={t('parentAdmin.media.titlePlaceholder')}
               maxLength={80}
               required
             />
@@ -583,7 +578,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
               />
             </div>
             <button disabled={busy || !children.length}>
-              <Plus size={17} /> Widget freigeben
+              <Plus size={17} /> {t('parentAdmin.media.share')}
             </button>
           </form>
           <div className="admin-link-list">
@@ -609,21 +604,24 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
                   <div>
                     <strong>{link.title}</strong>
                     <small>
-                      {isSpotify ? 'Spotify' : 'YouTube'} · auf{' '}
-                      {member?.name || 'Kinderprofil'}s Dashboard
+                      {t('parentAdmin.media.linkMeta', {
+                        kind: isSpotify ? 'Spotify' : 'YouTube',
+                        name: member?.name ||
+                          t('parentAdmin.media.childProfileFallback')
+                      })}
                     </small>
                   </div>
                   <button
                     type="button"
                     disabled={busy}
-                    aria-label={`${link.title} entfernen`}
+                    aria-label={t('parentAdmin.media.removeLink', { title: link.title })}
                     onClick={() => requestConfirmation(
                       `link-${link.id}`,
                       () => deleteDashboardLink(link.id)
                     )}
                   >
                     {confirmAction === `link-${link.id}`
-                      ? <span>Bestätigen</span>
+                      ? <span>{t('common:actions.confirm')}</span>
                       : <Trash2 size={16} />}
                   </button>
                 </article>
@@ -632,7 +630,7 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             {!dashboardLinks.length && (
               <div className="admin-inline-empty">
                 <Sparkles size={18} />
-                Noch keine Medien-Widgets freigegeben.
+                {t('parentAdmin.media.empty')}
               </div>
             )}
           </div>
@@ -641,19 +639,19 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         <section className="admin-panel admin-family-panel">
           <div className="admin-family-icon"><Network size={24} /></div>
           <div>
-            <span className="admin-section-kicker">Familiennetz</span>
-            <h2>Verwandte Familienkonten</h2>
+            <span className="admin-section-kicker">{t('parentAdmin.family.kicker')}</span>
+            <h2>{t('parentAdmin.family.title')}</h2>
             <p>
-              {familyRelationships.filter(item => item.status === 'accepted').length}
-              {' '}bestätigte Verbindung
-              {familyRelationships.filter(item => item.status === 'accepted').length === 1 ? '' : 'en'}
+              {t('parentAdmin.family.confirmedConnections', {
+                count: familyRelationships.filter(item => item.status === 'accepted').length
+              })}
               {pendingRelationships
-                ? ` · ${pendingRelationships} offene Anfrage${pendingRelationships === 1 ? '' : 'n'}`
+                ? ` · ${t('parentAdmin.family.pendingRequests', { count: pendingRelationships })}`
                 : ''}
             </p>
           </div>
           <button type="button" onClick={onOpenFamilyTree}>
-            Stammbaum öffnen <ChevronRight size={17} />
+            {t('parentAdmin.family.openTree')} <ChevronRight size={17} />
           </button>
         </section>
       </div>

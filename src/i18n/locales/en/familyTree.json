@@ -1,0 +1,178 @@
+{
+  "toggle": {
+    "on": "On",
+    "off": "Off"
+  },
+  "access": {
+    "grants": {
+      "sharedCalendar": {
+        "label": "Shared events",
+        "help": "This family may invite you to events visible to both families."
+      },
+      "tasks": {
+        "label": "Tasks",
+        "help": "Adults in this family may give your children tasks."
+      },
+      "rewards": {
+        "label": "Stars & rewards",
+        "help": "Allows star points on tasks and custom rewards."
+      },
+      "pocketMoney": {
+        "label": "Pocket money",
+        "help": "Allows traceable pocket-money entries for your children."
+      }
+    },
+    "childPosition": {
+      "teenager": "Teenager",
+      "grandchild": "Grandchild"
+    },
+    "header": {
+      "kicker": "Organize together safely",
+      "title": "Permissions in the family network",
+      "description": "You decide per connection. The other family cannot see private calendars, chats, or pinboard content."
+    },
+    "card": {
+      "subtitle": "What this family may do for your children",
+      "grantedFromOther": "Shared with you from there:",
+      "nothingYet": "nothing yet"
+    },
+    "planner": {
+      "kicker": "For grandchildren",
+      "title": "From family to family",
+      "description": "Tasks, rewards, or pocket money land directly and traceably in the child's family account.",
+      "familyBranch": "Family branch",
+      "tools": {
+        "task": "Task",
+        "reward": "Reward",
+        "money": "Pocket money"
+      },
+      "task": {
+        "label": "Task",
+        "placeholder": "e.g. Help Grandma in the garden",
+        "dueDate": "By when?",
+        "stars": "Stars"
+      },
+      "reward": {
+        "label": "Reward",
+        "placeholder": "e.g. An afternoon at the zoo",
+        "costStars": "Star price",
+        "image": "Reward image"
+      },
+      "money": {
+        "amount": "Amount in euros",
+        "note": "What for?",
+        "defaultNote": "From Grandma & Grandpa"
+      },
+      "submit": "Send to the child's profile"
+    }
+  },
+  "tree": {
+    "relations": {
+      "parent": {
+        "label": "Parent family",
+        "help": "The selected family sits above your family."
+      },
+      "child": {
+        "label": "Child family",
+        "help": "The selected family is a family branch below you."
+      },
+      "sibling": {
+        "label": "Sibling family",
+        "help": "Both families are on the same level."
+      },
+      "relative": {
+        "label": "Other relatives",
+        "help": "For example aunts, uncles, cousins, or close chosen family."
+      },
+      "fallback": "Related family"
+    },
+    "node": {
+      "ourFamily": "Our family",
+      "profiles_one": "{{count}} profile",
+      "profiles_other": "{{count}} profiles"
+    },
+    "branch": {
+      "membersAria": "Members of {{familyName}}",
+      "thisFamily": "this family",
+      "noProfiles": "No profiles yet"
+    },
+    "header": {
+      "kicker": "Connections only with confirmation",
+      "title": "Your family network",
+      "description": "Link real family accounts. A connection only becomes visible once the other family agrees.",
+      "closeAria": "Close family tree"
+    },
+    "generations": {
+      "parents": "Parent families",
+      "parentsEmpty": "Not linked yet",
+      "children": "Child families",
+      "childrenEmpty": "No family branch yet",
+      "ourAccount": "Your account"
+    },
+    "inbox": {
+      "kicker": "Needs your decision",
+      "title": "Family requests",
+      "request": "{{familyName}} would like to add you as their {{relation}}.",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "request": {
+      "kicker": "Connect a family account",
+      "title": "New connection",
+      "registeredFamily": "Registered family",
+      "selectFamily": "Select a family …",
+      "relationLabel": "This family is your …",
+      "send": "Send request",
+      "allConnected": "All currently registered families are already connected or requested.",
+      "adultsOnly": "Only adults can link family accounts."
+    },
+    "manage": {
+      "kicker": "Management",
+      "title": "Connections & requests",
+      "pending": "Waiting for confirmation",
+      "removeTitle": "Remove connection",
+      "empty": "No connections yet."
+    }
+  },
+  "settings": {
+    "header": {
+      "eyebrow": "Family administration",
+      "title": "Our home"
+    },
+    "form": {
+      "newImage": "New family picture",
+      "familyName": "Family name",
+      "badge": "Short tagline",
+      "badgePlaceholder": "e.g. Our home",
+      "newPassword": "New family password (optional)",
+      "passwordPlaceholder": "Leave empty = unchanged"
+    },
+    "household": {
+      "title": "Show a second planning place",
+      "description": "Shows “Grandma & Grandpa's home” as its own planning area in the app header.",
+      "why": "Why does this exist?",
+      "explainer": "Ideal when Grandma and Grandpa don't use their own family account: events, tasks, meal plan, waste-collection dates, and the pinboard can be planned separately for their home."
+    },
+    "about": {
+      "version": "Version {{version}}"
+    },
+    "github": {
+      "aria": "View LX Family Planner on GitHub",
+      "kicker": "Open Source",
+      "title": "Enjoying LX?",
+      "description": "Visit the project or leave a star."
+    },
+    "actions": {
+      "saving": "Saving …",
+      "save": "Save changes",
+      "deleteAccount": "Delete family account"
+    },
+    "delete": {
+      "title": "Permanently delete this family account?",
+      "description": "This removes profiles, events, tasks, and all other family content. This action cannot be undone.",
+      "passwordLabel": "Enter the family password to confirm",
+      "deleting": "Deleting …",
+      "confirm": "Permanently delete family"
+    }
+  }
+}

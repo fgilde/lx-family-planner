@@ -1,0 +1,151 @@
+{
+  "app": {
+    "loading": "Getting your family space ready …"
+  },
+  "navigation": {
+    "myArea": "My Space ({{name}})",
+    "myAreaFallback": "Home",
+    "chat": "Family Chat & DMs",
+    "calendar": "Calendar",
+    "trash": "Trash Calendar",
+    "shopping": "Bring! Shopping",
+    "meals": "Meal Plan",
+    "tasks": "Tasks & Stars",
+    "familyLife": "Family Journey",
+    "board": "Pinboard",
+    "childDashboard": "My Adventure",
+    "childTasks": "Missions & Stars",
+    "childFamilyLife": "My Journey",
+    "childCalendar": "Family Calendar",
+    "childChat": "Family Radio",
+    "petDashboard": "For {{name}}",
+    "petDashboardFallback": "our pet",
+    "petCalendar": "Vet & Appointments",
+    "cloud": "Family Cloud",
+    "mail": "Family Mail",
+    "admin": "Parent Hub",
+    "familyTree": "Family Tree",
+    "familyTreeTitle": "Family tree & link families"
+  },
+  "header": {
+    "tagline": "Our Family Home",
+    "householdSwitched": "🏠 Household switched",
+    "householdViewFamily": "View: Our Family Home",
+    "householdViewGrandparents": "View: Grandma & Grandpa's Home",
+    "planLocationAria": "Choose planning location",
+    "planLocation": "Planning location",
+    "ourHome": "Our Home",
+    "grandparentsHome": "Grandma & Grandpa's Home",
+    "manageFamily": "Manage family",
+    "pet": "Pet",
+    "serverConfigTitle": "Configure server connection / IP",
+    "logoutTitle": "Switch family / Log out",
+    "themePicker": {
+      "openPet": "Choose paw world",
+      "openChild": "Choose my theme world",
+      "openAdult": "Choose theme world",
+      "kicker": "Design world",
+      "titlePet": "{{name}}'s Paw World",
+      "petNameFallback": "Your furry friend",
+      "titleChild": "Your Theme World",
+      "titleAdult": "Your home, your style",
+      "descriptionPet": "Choose a calm world for the pet profile.",
+      "descriptionChild": "Pick your favorite world.",
+      "descriptionAdult": "Calm or loud – your choice is saved in your profile.",
+      "close": "Close theme selection"
+    },
+    "tabletMode": {
+      "exitTitle": "Leave tablet mode",
+      "enterTitle": "Open tablet mode",
+      "exit": "Leave Tablet",
+      "enter": "Tablet Mode"
+    },
+    "themes": {
+      "adult": {
+        "light": { "name": "Forest Calm", "description": "warm & natural" },
+        "ocean": { "name": "Coastal Calm", "description": "airy & relaxed" },
+        "midnight": { "name": "Night Lounge", "description": "calm & dark" },
+        "rock": { "name": "Backstage", "description": "rocking & warm" },
+        "festival": { "name": "Neon Night", "description": "bold & colorful" }
+      },
+      "child": {
+        "space": { "name": "Rocket Base", "description": "rockets & planets" },
+        "unicorn": { "name": "Unicorn Land", "description": "rainbows & magic" },
+        "fairy": { "name": "Fairy Magic", "description": "fairies & enchanted forest" },
+        "dino": { "name": "Dino World", "description": "dinos & jungle" },
+        "sunshine": { "name": "Sunshine Island", "description": "summer & good vibes" },
+        "adventure": { "name": "Hero Camp", "description": "heroes & lightning" }
+      },
+      "pet": {
+        "light": { "name": "Green Meadow", "description": "calm & natural" },
+        "ocean": { "name": "Coastal Paws", "description": "fresh & relaxed" },
+        "rock": { "name": "Wild Snout", "description": "bold & playful" },
+        "midnight": { "name": "Night Paw", "description": "gentle & dark" }
+      }
+    }
+  },
+  "appUpdate": {
+    "dismiss": "Install update later",
+    "source": "Straight from your LX server",
+    "title": "Version {{version}} is here",
+    "body": "LX can download the update now and then open the Android install dialog right away.",
+    "downloading": "Downloading update securely",
+    "permissionMessage": "Allow LX to install app updates once on the Android page that just opened. Then come back and tap \"Update now\" again.",
+    "installerMessage": "Android is now showing the install dialog. Your data and settings will be kept.",
+    "errorMessage": "The update could not be downloaded. Please try again.",
+    "checkPermission": "Check permission",
+    "updateNow": "Update now",
+    "later": "Later"
+  },
+  "releaseNotes": {
+    "close": "Close what's new",
+    "version": "Version {{version}}",
+    "confirm": "Got it, let's go"
+  },
+  "problemReport": {
+    "launcher": "Report a problem",
+    "kicker": "Direct line",
+    "close": "Close report",
+    "categories": {
+      "problem": "Something isn't working",
+      "content": "Content is wrong",
+      "idea": "I have an idea"
+    },
+    "success": {
+      "title": "Thanks, we got it.",
+      "body": "The report is now in the Parent Hub along with version and section. No credentials are sent.",
+      "done": "Done"
+    },
+    "titleLabel": "In short, what happened?",
+    "titlePlaceholder": "e.g. Event cannot be deleted",
+    "descriptionLabel": "How can we reproduce it?",
+    "descriptionPlaceholder": "What did you do, what should have happened, and what happened instead?",
+    "meta": "We store the section, screen size, browser type and version {{version}}. No passwords or tokens.",
+    "submit": "Save report"
+  },
+  "planLocationHelp": {
+    "trigger": "What for?",
+    "title": "Two homes, one family plan",
+    "body": "Handy when Grandma and Grandpa don't have their own family account: events, tasks, meal plan, trash dates and pinboard are kept separately for their home.",
+    "hint": "Show or hide: gear icon → family settings."
+  },
+  "serverConfig": {
+    "kicker": "Connection",
+    "title": "Your Family Server",
+    "subtitle": "For home, NAS or your own domain.",
+    "close": "Close server settings",
+    "urlLabel": "Server address",
+    "urlPlaceholder": "https://family.example.com",
+    "hint": "On your home network you can enter, for example, <code>192.168.178.50:3001</code>. Outside your home network the address should always use HTTPS.",
+    "connected": "Connected · LX Family Planner {{version}}",
+    "testing": "Testing connection …",
+    "test": "Test connection",
+    "errors": {
+      "emptyUrl": "Please enter a server address.",
+      "badStatus": "The server responded with status {{status}}.",
+      "notLxServer": "This address does not belong to an LX Family server.",
+      "noConnection": "No connection possible. Check IP, domain and network.",
+      "invalidUrl": "The server address is not valid."
+    }
+  }
+}
