@@ -80,6 +80,15 @@ const EMPTY_INTEGRATIONS = {
     backupEnabled: false
   }
 };
+const DEFAULT_PUBLIC_ACCESS = {
+  directoryEnabled: false,
+  demo: null,
+  registration: {
+    mode: 'closed',
+    allowed: false,
+    requiresInvite: false
+  }
+};
 
 function initialWebPushState() {
   const capability = webPushCapability();
@@ -169,6 +178,7 @@ export function FamilyProvider({ children }) {
     () => localStorage.getItem('lx_active_household') || 'familie'
   );
   const [familiesList, setFamiliesList] = useState([]);
+  const [publicAccess, setPublicAccess] = useState(DEFAULT_PUBLIC_ACCESS);
   const [familyAccount, setFamilyAccount] = useState(null);
   const [members, setMembers] = useState([]);
   const [activeMemberIdState, setActiveMemberIdState] = useState('');
@@ -213,6 +223,14 @@ export function FamilyProvider({ children }) {
     try {
       const data = await apiRequest('/api/public/families');
       setFamiliesList(data.families || []);
+      setPublicAccess({
+        directoryEnabled: Boolean(data.directoryEnabled),
+        demo: data.demo || null,
+        registration: {
+          ...DEFAULT_PUBLIC_ACCESS.registration,
+          ...(data.registration || {})
+        }
+      });
       return data.families || [];
     } catch (error) {
       showToast(
@@ -3298,6 +3316,7 @@ export function FamilyProvider({ children }) {
     setActiveHousehold,
     familyAccount,
     familiesList,
+    publicAccess,
     currentFamily,
     activeFamilyId,
     updateFamilyAccount,

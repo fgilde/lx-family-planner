@@ -1,4 +1,45 @@
 const RELEASE_NOTES = {
+  '1.13.2': {
+    version: '1.13.2',
+    eyebrow: 'Euer Familienraum bleibt jetzt wirklich privat',
+    title: 'Sichere Anmeldung und kontrollierte Registrierung',
+    intro:
+      'Familiennamen werden vor der Anmeldung nicht mehr öffentlich aufgelistet. Neue Familien kommen nur noch kontrolliert auf den eigenen Server.',
+    highlights: [
+      {
+        id: 'private-family-login',
+        title: 'Keine öffentliche Familienliste mehr',
+        description:
+          'Zur Anmeldung werden Familienname und Familienpasswort selbst eingegeben. Andere Familienkonten bleiben unsichtbar.'
+      },
+      {
+        id: 'first-family-registration',
+        title: 'Nach der ersten Familie automatisch geschlossen',
+        description:
+          'Eine frische Installation lässt die erste Einrichtung zu und sperrt danach weitere freie Registrierungen.'
+      },
+      {
+        id: 'invite-only-registration',
+        title: 'Weitere Familien nur mit Einladung',
+        description:
+          'Serverbetreiber können bei Bedarf einen persönlichen Einladungscode für kontrollierte neue Konten aktivieren.'
+      },
+      {
+        id: 'demo-remains-public',
+        title: 'Die öffentliche Demo bleibt leicht erreichbar',
+        description:
+          'Eine ausdrücklich eingerichtete Nur-Lese-Demo darf weiterhin auf der Startseite erscheinen, private Familien dagegen nicht.'
+      },
+      {
+        id: 'stronger-new-passwords',
+        title: 'Stärkere neue Familienpasswörter',
+        description:
+          'Neu angelegte oder geänderte Familienpasswörter benötigen jetzt mindestens zehn Zeichen.'
+      }
+    ],
+    closing:
+      'Bestehende Familieninhalte bleiben unverändert. Der Server schützt nur Anmeldung und Neuregistrierung deutlich strenger.'
+  },
   '1.13.1': {
     version: '1.13.1',
     eyebrow: 'LX zeigt jetzt, wo es gemeinsam weitergeht',

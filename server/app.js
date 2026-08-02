@@ -42,6 +42,7 @@ import {
 import {
   RECORD_TYPES,
   acknowledgeMemberReleaseNotes,
+  countFamilies,
   countUnreadInboxNotifications,
   createFamilyChatGuestInvite,
   createFamilyLetter,
@@ -72,6 +73,7 @@ import {
   deleteRecord,
   deleteTaskRecords,
   deleteSession,
+  findFamilyAuthCandidates,
   getBootstrap,
   getCalendarSubscription,
   getFamily,
@@ -194,6 +196,19 @@ const APP_LANGUAGE = (() => {
 })();
 const translate = createTranslator(APP_LANGUAGE);
 const APP_LOCALE = APP_LANGUAGE === 'en' ? 'en-GB' : 'de-DE';
+const REGISTRATION_MODE = (() => {
+  const configured = String(
+    process.env.REGISTRATION_MODE || 'first-family'
+  ).trim().toLowerCase();
+  return new Set(['closed', 'first-family', 'invite', 'open']).has(configured)
+    ? configured
+    : 'first-family';
+})();
+const REGISTRATION_INVITE_CODE = String(
+  process.env.REGISTRATION_INVITE_CODE || ''
+).trim();
+const PUBLIC_FAMILY_DIRECTORY =
+  process.env.PUBLIC_FAMILY_DIRECTORY === 'true';
 const CALENDAR_ALLOW_PRIVATE_HOSTS =
   process.env.CALENDAR_ALLOW_PRIVATE_HOSTS === 'true';
 const CALENDAR_ALLOW_LOOPBACK_FOR_TESTS =
@@ -335,6 +350,26 @@ let cachedVapidConfig = null;
 function cleanText(value, fallback = '', maxLength = 160) {
   const text = String(value ?? fallback).trim();
   return text.slice(0, maxLength);
+}
+
+function constantTimeTextMatch(value, expected) {
+  const left = createHash('sha256').update(String(value || '')).digest();
+  const right = createHash('sha256').update(String(expected || '')).digest();
+  return timingSafeEqual(left, right);
+}
+
+function publicRegistrationStatus() {
+  const firstFamily = countFamilies() === 0;
+  const inviteReady = Boolean(REGISTRATION_INVITE_CODE);
+  const allowed =
+    REGISTRATION_MODE === 'open' ||
+    (REGISTRATION_MODE === 'first-family' && firstFamily) ||
+    (REGISTRATION_MODE === 'invite' && inviteReady);
+  return {
+    mode: REGISTRATION_MODE,
+    allowed,
+    requiresInvite: REGISTRATION_MODE === 'invite' && inviteReady
+  };
 }
 
 function ensureObject(value, message = translate('errors.invalidInput')) {
@@ -4804,14 +4839,46 @@ export function createApp() {
   });
 
   app.get('/api/public/families', (_req, res) => {
-    res.json({ success: true, families: listPublicFamilies() });
+    const demoFamily = process.env.DEMO_FAMILY_ID
+      ? getFamily(process.env.DEMO_FAMILY_ID)
+      : null;
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+      success: true,
+      directoryEnabled: PUBLIC_FAMILY_DIRECTORY,
+      families: PUBLIC_FAMILY_DIRECTORY ? listPublicFamilies() : [],
+      demo: demoFamily
+        ? {
+            familyName: demoFamily.familyName,
+            familyAvatar: demoFamily.familyAvatar,
+            badge: demoFamily.badge
+          }
+        : null,
+      registration: publicRegistrationStatus()
+    });
   });
 
   app.post('/api/public/register', authRateLimit, (req, res) => {
     const input = ensureObject(req.body);
+    const registration = publicRegistrationStatus();
+    if (!registration.allowed) {
+      return res.status(403).json({
+        success: false,
+        error: translate('errors.registrationClosed')
+      });
+    }
+    if (
+      registration.requiresInvite &&
+      !constantTimeTextMatch(input.inviteCode, REGISTRATION_INVITE_CODE)
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: translate('errors.inviteCodeInvalid')
+      });
+    }
     const familyName = requireText(input.familyName, translate('fields.familyName'), 100);
     const password = requireText(input.password, translate('fields.password'), 100);
-    if (password.length < 4) {
+    if (password.length < 10) {
       return res.status(400).json({
         success: false,
         error: translate('errors.familyPasswordTooShort')
@@ -4873,15 +4940,22 @@ export function createApp() {
 
   app.post('/api/auth/family', authRateLimit, (req, res) => {
     const input = ensureObject(req.body);
-    const familyId = requireText(input.familyId, translate('fields.family'), 100);
+    const familyReference = requireText(
+      input.familyId || input.familyName,
+      translate('fields.family'),
+      100
+    );
     const password = requireText(input.password, translate('fields.password'), 100);
-    const familyRow = getFamilyAuthRow(familyId);
-    if (!familyRow || !verifySecret(password, familyRow.password_hash)) {
+    const familyRow = findFamilyAuthCandidates(familyReference).find(
+      candidate => verifySecret(password, candidate.password_hash)
+    );
+    if (!familyRow) {
       return res.status(401).json({
         success: false,
         error: translate('errors.familyOrPasswordIncorrect')
       });
     }
+    const familyId = familyRow.id;
     const sessionToken = createSession(familyId, {
       maxAgeMs: SESSION_MAX_AGE_MS
     });
@@ -6618,7 +6692,7 @@ export function createApp() {
     }
     if (input.password) {
       changes.password = requireText(input.password, translate('fields.password'), 100);
-      if (changes.password.length < 4) {
+      if (changes.password.length < 10) {
         return res.status(400).json({
           success: false,
           error: translate('errors.passwordTooShort')

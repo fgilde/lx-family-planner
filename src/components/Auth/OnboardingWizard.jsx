@@ -45,20 +45,30 @@ function emptyMember(index = 0) {
 
 export default function OnboardingWizard({ onComplete, onBack }) {
   const { t } = useTranslation('auth');
-  const { registerFamily } = useFamily();
+  const { registerFamily, publicAccess } = useFamily();
   const [step, setStep] = useState(1);
   const [familyName, setFamilyName] = useState('');
   const [badge, setBadge] = useState(() => t('onboarding.badgeDefault'));
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [members, setMembers] = useState([emptyMember(0)]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const canContinue = useMemo(() => {
-    if (step === 1) return familyName.trim() && password.length >= 4;
+    if (step === 1) {
+      return Boolean(
+        familyName.trim() &&
+        password.length >= 10 &&
+        (
+          !publicAccess?.registration?.requiresInvite ||
+          inviteCode.trim()
+        )
+      );
+    }
     if (step === 2) return members.length > 0 && members.every(member => member.name.trim());
     return true;
-  }, [familyName, members, password, step]);
+  }, [familyName, inviteCode, members, password, publicAccess, step]);
 
   const updateDraftMember = (id, changes) => {
     setMembers(previous =>
@@ -89,6 +99,7 @@ export default function OnboardingWizard({ onComplete, onBack }) {
         familyName,
         badge,
         password,
+        inviteCode: inviteCode.trim() || undefined,
         members: members.map(({ id, ...member }) => member)
       });
       onComplete?.();
@@ -168,6 +179,19 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                   maxLength={100}
                 />
               </label>
+              {publicAccess?.registration?.requiresInvite && (
+                <label className="auth-field">
+                  <span>{t('onboarding.step1.inviteCodeLabel')}</span>
+                  <input
+                    type="password"
+                    autoComplete="one-time-code"
+                    value={inviteCode}
+                    onChange={event => setInviteCode(event.target.value)}
+                    placeholder={t('onboarding.step1.inviteCodePlaceholder')}
+                    maxLength={200}
+                  />
+                </label>
+              )}
               <div className="privacy-note">
                 <ShieldCheck size={18} />
                 <span>{t('onboarding.step1.privacyNote')}</span>

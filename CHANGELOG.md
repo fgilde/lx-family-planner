@@ -2,6 +2,23 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.13.2] – 2026-08-03
+
+### Private Familienanmeldung und geschlossene Registrierung
+
+- Familiennamen und Profilanzahlen werden standardmäßig nicht mehr ohne
+  Anmeldung veröffentlicht
+- Anmeldung funktioniert direkt mit Familienname und Familienpasswort
+- sichere Voreinstellung `first-family`: Nur die erste Familie einer neuen
+  Installation darf sich selbst anlegen
+- optionale kontrollierte Registrierung über einen persönlichen Einladungscode
+- ausdrücklich konfigurierte Nur-Lese-Demo bleibt separat erreichbar
+- neue oder geänderte Familienpasswörter benötigen mindestens zehn Zeichen
+- Regressionstest verhindert dauerhaft eine zweite freie Registrierung und
+  eine versehentlich öffentliche Familienliste
+- vorhandene Familiendaten, Profile, Cloud-Dateien und Einstellungen bleiben
+  beim Update unverändert
+
 ## [1.13.1] – 2026-07-30
 
 ### Das öffentliche Projekt ist direkt erreichbar

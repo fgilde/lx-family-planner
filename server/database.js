@@ -807,6 +807,32 @@ export function listPublicFamilies() {
   }));
 }
 
+export function countFamilies() {
+  return Number(
+    database.prepare('SELECT COUNT(*) AS count FROM families').get()?.count || 0
+  );
+}
+
+export function findFamilyAuthCandidates(reference) {
+  const normalized = String(reference || '').trim();
+  if (!normalized) return [];
+
+  const exact = database
+    .prepare('SELECT * FROM families WHERE id = ?')
+    .get(normalized);
+  const named = database
+    .prepare(`
+      SELECT * FROM families
+      WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))
+      ORDER BY created_at ASC
+    `)
+    .all(normalized);
+
+  return exact
+    ? [exact, ...named.filter(row => row.id !== exact.id)]
+    : named;
+}
+
 export function getFamily(familyId) {
   return mapFamilyRow(
     database.prepare('SELECT * FROM families WHERE id = ?').get(familyId)

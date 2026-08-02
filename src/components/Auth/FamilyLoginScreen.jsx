@@ -31,6 +31,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
   const {
     authStatus,
     familiesList,
+    publicAccess,
     familyAccount,
     members,
     loginFamily,
@@ -38,6 +39,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
     logout
   } = useFamily();
   const [selectedFamilyId, setSelectedFamilyId] = useState(null);
+  const [familyName, setFamilyName] = useState('');
   const [password, setPassword] = useState('');
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [pin, setPin] = useState('');
@@ -55,14 +57,17 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
   const managedProfilesCount = members.length - loginMembers.length;
   const selectedMember = members.find(member => member.id === selectedMemberId);
   const isProfileStep = authStatus === 'profile-required';
+  const familyReference = selectedFamilyId || familyName.trim();
+  const directoryEnabled = Boolean(publicAccess?.directoryEnabled);
+  const registration = publicAccess?.registration || {};
 
   const handleFamilyLogin = async event => {
     event.preventDefault();
-    if (!selectedFamilyId) return;
+    if (!familyReference) return;
     setError('');
     setLoading(true);
     try {
-      await loginFamily(selectedFamilyId, password);
+      await loginFamily(familyReference, password);
       setPassword('');
     } catch (loginError) {
       setError(loginError.message);
@@ -265,49 +270,114 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
           <div className="auth-card-heading">
             <div className="auth-icon"><Users size={24} /></div>
             <div>
-              <span className="eyebrow">{t('login.familyStep.eyebrow')}</span>
+              <span className="eyebrow">
+                {directoryEnabled
+                  ? t('login.familyStep.eyebrow')
+                  : t('login.familyStep.secureEyebrow')}
+              </span>
               <h2>{t('login.familyStep.title')}</h2>
             </div>
           </div>
 
           <form onSubmit={handleFamilyLogin}>
-            <div className="family-choice-grid">
-              {familiesList.map(family => (
-                <button
-                  type="button"
-                  key={family.id}
-                  className={`family-choice ${
-                    selectedFamilyId === family.id ? 'selected' : ''
-                  }`}
-                  onClick={() => {
-                    setSelectedFamilyId(family.id);
-                    setError('');
-                  }}
-                >
-                  <img
-                    src={family.familyAvatar || DEFAULT_FAMILY_AVATAR}
-                    onError={handleImgError}
-                    alt=""
-                  />
+            {directoryEnabled ? (
+              <div className="family-choice-grid">
+                {familiesList.map(family => (
+                  <button
+                    type="button"
+                    key={family.id}
+                    className={`family-choice ${
+                      selectedFamilyId === family.id ? 'selected' : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedFamilyId(family.id);
+                      setError('');
+                    }}
+                  >
+                    <img
+                      src={family.familyAvatar || DEFAULT_FAMILY_AVATAR}
+                      onError={handleImgError}
+                      alt=""
+                    />
+                    <span>
+                      <strong>{family.familyName}</strong>
+                      <small>
+                        {family.badge || t('login.familyStep.badgeFallback')} ·{' '}
+                        {t('login.familyStep.profileCount', {
+                          count: family.membersCount || 0
+                        })}
+                      </small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="private-family-login">
+                <div className="private-family-login-note">
+                  <ShieldCheck size={19} />
                   <span>
-                    <strong>{family.familyName}</strong>
+                    <strong>{t('login.familyStep.privateTitle')}</strong>
                     <small>
-                      {family.badge || t('login.familyStep.badgeFallback')} ·{' '}
-                      {t('login.familyStep.profileCount', {
-                        count: family.membersCount || 0
-                      })}
+                      {t('login.familyStep.privateDescription')}
                     </small>
                   </span>
-                </button>
-              ))}
-            </div>
+                </div>
+                <label className="auth-field">
+                  <span>{t('login.familyStep.familyNameLabel')}</span>
+                  <div className="auth-input-wrap">
+                    <Users size={18} />
+                    <input
+                      value={familyName}
+                      onChange={event => {
+                        setFamilyName(event.target.value);
+                        setError('');
+                      }}
+                      autoComplete="organization"
+                      placeholder={t('login.familyStep.familyNamePlaceholder')}
+                      maxLength={100}
+                      autoFocus
+                    />
+                  </div>
+                </label>
+                {publicAccess?.demo && (
+                  <button
+                    type="button"
+                    className="public-demo-choice"
+                    onClick={() => {
+                      setFamilyName(publicAccess.demo.familyName);
+                      setError('');
+                    }}
+                  >
+                    <img
+                      src={
+                        publicAccess.demo.familyAvatar ||
+                        DEFAULT_FAMILY_AVATAR
+                      }
+                      onError={handleImgError}
+                      alt=""
+                    />
+                    <span>
+                      <strong>{t('login.familyStep.demoTitle')}</strong>
+                      <small>
+                        {t('login.familyStep.demoDescription', {
+                          name: publicAccess.demo.familyName
+                        })}
+                      </small>
+                    </span>
+                    <ArrowRight size={17} />
+                  </button>
+                )}
+              </div>
+            )}
 
-            {selectedFamily && (
+            {familyReference && (
               <label className="auth-field">
                 <span>
-                  {t('login.familyStep.passwordLabel', {
-                    name: selectedFamily.familyName
-                  })}
+                  {selectedFamily
+                    ? t('login.familyStep.passwordLabel', {
+                        name: selectedFamily.familyName
+                      })
+                    : t('login.familyStep.passwordLabelGeneric')}
                 </span>
                 <div className="auth-input-wrap">
                   <KeyRound size={18} />
@@ -317,7 +387,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                     value={password}
                     onChange={event => setPassword(event.target.value)}
                     placeholder={t('login.familyStep.passwordPlaceholder')}
-                    autoFocus
+                    autoFocus={Boolean(selectedFamily)}
                   />
                 </div>
               </label>
@@ -326,7 +396,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
             {error && <div className="auth-error">{error}</div>}
             <button
               className="auth-primary"
-              disabled={!selectedFamilyId || !password || loading}
+              disabled={!familyReference || !password || loading}
               type="submit"
             >
               {loading
@@ -336,15 +406,30 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
             </button>
           </form>
 
-          <div className="auth-divider"><span>{t('login.familyStep.or')}</span></div>
+          <div className="auth-divider">
+            <span>{t('login.familyStep.serverDivider')}</span>
+          </div>
           <div className="flex gap-2">
-            <button
-              type="button"
-              className="auth-secondary flex-1"
-              onClick={onStartOnboarding}
-            >
-              <Plus size={18} /> {t('login.familyStep.createFamily')}
-            </button>
+            {registration.allowed ? (
+              <button
+                type="button"
+                className="auth-secondary flex-1"
+                onClick={onStartOnboarding}
+              >
+                <Plus size={18} />
+                {registration.requiresInvite
+                  ? t('login.familyStep.createWithInvite')
+                  : t('login.familyStep.createFamily')}
+              </button>
+            ) : (
+              <div className="registration-closed-note">
+                <LockKeyhole size={17} />
+                <span>
+                  <strong>{t('login.familyStep.registrationClosedTitle')}</strong>
+                  <small>{t('login.familyStep.registrationClosedDescription')}</small>
+                </span>
+              </div>
+            )}
             {onOpenServerConfig && (
               <button
                 type="button"

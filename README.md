@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.13.1" src="https://img.shields.io/badge/version-1.13.1-17483F">
+  <img alt="Version 1.13.2" src="https://img.shields.io/badge/version-1.13.2-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -91,6 +91,28 @@ docker compose up -d --build
 Danach `http://SERVER-IP:3001` öffnen, Familie anlegen und losplanen. Unter
 Windows erledigt `Start-Familienplaner.cmd` dieselben Schritte bequem per
 Doppelklick. Für Proxmox gibt es weiter unten einen eigenen LXC-Helper.
+
+### Private Anmeldung und neue Familien
+
+LX zeigt Familiennamen vor der Anmeldung standardmäßig **nicht öffentlich an**.
+Die Familie gibt ihren Namen und ihr Familienpasswort selbst ein. Auch die
+Registrierung ist sicher voreingestellt: Mit `REGISTRATION_MODE=first-family`
+darf sich nur die erste Familie selbst anlegen; anschließend schließt der Server
+die Registrierung automatisch.
+
+Wer auf einer Installation kontrolliert weitere Familien aufnehmen möchte,
+verwendet einen langen persönlichen Einladungscode:
+
+```env
+REGISTRATION_MODE=invite
+REGISTRATION_INVITE_CODE=hier-einen-langen-zufaelligen-code-eintragen
+PUBLIC_FAMILY_DIRECTORY=false
+```
+
+`REGISTRATION_MODE=open` ist ausschließlich für bewusst öffentlich betriebene
+Mehrfamilien-Portale gedacht. `PUBLIC_FAMILY_DIRECTORY=true` veröffentlicht
+Familiennamen und Profilanzahlen bereits vor der Anmeldung und sollte im Internet
+nicht verwendet werden.
 
 ## Das ist enthalten
 
@@ -483,7 +505,7 @@ docker compose up -d
 ```
 
 Die Daten bleiben in `data/`, Sicherungen in `backups/`. Eine bestimmte
-Programmversion lässt sich mit `LX_FAMILY_VERSION=1.13.1` fest anheften.
+Programmversion lässt sich mit `LX_FAMILY_VERSION=1.13.2` fest anheften.
 
 ## Proxmox VE Helper-Script
 
