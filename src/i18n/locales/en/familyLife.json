@@ -119,7 +119,7 @@
       "enabled": "Timetable on",
       "disabled": "Timetable off",
       "disabledTitle": "The school area is turned off for this child",
-      "disabledHint": "Enable it only for schoolchildren. Parents can then edit it and the child can view their own timetable.",
+      "disabledHint": "Enable it only for school children. Parents can then edit it and the child can view their own timetable.",
       "enable": "Enable school area"
     },
     "timetable": {

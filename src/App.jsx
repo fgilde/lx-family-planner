@@ -34,6 +34,21 @@ import { isCapacitorNative } from './utils/apiConfig';
 
 const EMPTY_DISABLED_MODULES = [];
 
+const DEEP_LINK_VIEWS = new Set([
+  'dashboard',
+  'chat',
+  'calendar',
+  'trash',
+  'tasks',
+  'board',
+  'shopping',
+  'meals',
+  'family-life',
+  'cloud',
+  'mail',
+  'admin'
+]);
+
 function MainContent() {
   const { t } = useTranslation('chrome');
   const {
@@ -60,21 +75,8 @@ function MainContent() {
     const requestedView = isRecipeShareTarget
       ? 'meals'
       : url.searchParams.get('view');
-    const allowedViews = new Set([
-      'dashboard',
-      'chat',
-      'calendar',
-      'tasks',
-      'board',
-      'shopping',
-      'meals',
-      'family-life',
-      'cloud',
-      'mail',
-      'admin'
-    ]);
     if (
-      allowedViews.has(requestedView) &&
+      DEEP_LINK_VIEWS.has(requestedView) &&
       (!readOnlyDemo || requestedView !== 'cloud') &&
       canAccessAppView(activeMember, requestedView, disabledModules)
     ) {
@@ -112,20 +114,7 @@ function MainContent() {
       try {
         const target = new URL(data.url || '/', window.location.origin);
         const requestedView = target.searchParams.get('view') || 'dashboard';
-        const allowedViews = new Set([
-          'dashboard',
-          'chat',
-          'calendar',
-          'tasks',
-          'board',
-          'shopping',
-          'meals',
-          'family-life',
-          'cloud',
-          'mail',
-          'admin'
-        ]);
-        if (!allowedViews.has(requestedView)) return;
+        if (!DEEP_LINK_VIEWS.has(requestedView)) return;
         if (readOnlyDemo && requestedView === 'cloud') return;
         if (!canAccessAppView(activeMember, requestedView, disabledModules)) {
           return;

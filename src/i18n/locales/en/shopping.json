@@ -12,7 +12,7 @@
     "connectBring": "Connect Bring!"
   },
   "search": {
-    "placeholder": "Eier, Nutella, Brötchen, Porree …",
+    "placeholder": "Eggs, Nutella, bread rolls, leek …",
     "searchAria": "Search for an item or create a new one",
     "quantityLabel": "Quantity",
     "quantityAria": "Quantity or note",
@@ -20,7 +20,7 @@
   },
   "list": {
     "kicker": "Your list",
-    "title": "Still to buy",
+    "title": "Shopping list",
     "emptyTitle": "The shopping basket is waiting.",
     "emptyHint": "Tap a standard item below or search for it directly.",
     "recentToggle": "Recently bought ({{count}})",

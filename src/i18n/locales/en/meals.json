@@ -90,7 +90,9 @@
       "dishTitlePlaceholder": "e.g. Dad's famous Bolognese",
       "prepTimeLabel": "Preparation time",
       "servingsLabel": "Servings",
-      "submit": "Save Recipe"
+      "submit": "Save Recipe",
+      "placeholderIngredient": "{{number}}x ingredient {{number}}",
+      "placeholderStep": "Preparation step {{number}}"
     }
   },
   "cookingMode": {

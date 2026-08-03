@@ -155,7 +155,7 @@
         "action": "Meal plan"
       },
       "shopping": {
-        "label": "Still to buy",
+        "label": "Shopping list",
         "description": "The most important open items at a glance",
         "action": "Shopping list"
       },

@@ -116,6 +116,12 @@
       "dateLabel": "Abholdatum",
       "save": "Termin speichern"
     },
+    "types": {
+      "rest": "Restmüll (Schwarze Tonne)",
+      "papier": "Altpapier (Blaue Tonne)",
+      "bio": "Biomüll (Braune/Grüne Tonne)",
+      "gelb": "Gelber Sack / Wertstoff"
+    },
     "toast": {
       "importFailedTitle": "Import nicht möglich",
       "importFailedBody": "In dieser Datei wurden keine Mülltermine gefunden.",

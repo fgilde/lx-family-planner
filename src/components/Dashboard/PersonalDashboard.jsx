@@ -15,7 +15,7 @@ import {
   UtensilsCrossed
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
-import { INITIAL_TRASH_EVENTS } from '../Calendar/TrashCalendarView';
+import { initialTrashEvents } from '../Calendar/TrashCalendarView';
 import ChildDashboard from './ChildDashboard';
 import PetDashboard from './PetDashboard';
 import HomeAssistantWidget from './HomeAssistantWidget';
@@ -106,6 +106,7 @@ function EmptyWidget({ icon, children }) {
 
 export default function PersonalDashboard() {
   const { t } = useTranslation('dashboard');
+  const { t: tCalendar } = useTranslation('calendar');
   const {
     activeMember,
     events,
@@ -244,7 +245,7 @@ export default function PersonalDashboard() {
   const trashEvents = householdTrashEvents.length
     ? householdTrashEvents
     : activeHousehold === 'familie'
-      ? INITIAL_TRASH_EVENTS
+      ? initialTrashEvents(tCalendar)
       : [];
   const nextTrash = trashEvents
     .filter(item => item.date >= todayKey)
