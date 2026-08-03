@@ -2,6 +2,30 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.14.0] – 2026-08-03
+
+### Mehr Kontrolle, bessere Aufgaben und echte Dauertermine
+
+- Unraid-Container reparieren die Rechte ihrer Datenordner beim Start sicher
+  und benötigen kein unsicheres `chmod 777` mehr
+- Erwachsene können Funktionsbereiche für die ganze Familie oder einzelne
+  Profile ein- und ausblenden
+- beim Profilwechsel schließt LX geschützte Ansichten sofort und wechselt zum
+  passenden Dashboard
+- neue Positionen „Tochter (erwachsen)“ und „Sohn (erwachsen)“ erhalten die
+  normale Erwachsenenansicht einschließlich Family Cloud
+- einzelne Aufgaben lassen sich vollständig bearbeiten und mit einer
+  Sicherheitsabfrage löschen
+- Aufgaben unterstützen Beschreibung, Fälligkeitsdatum und Uhrzeit
+- Termine können jetzt eine Dauer haben, mehrere Tage umfassen oder als
+  ganztägig markiert werden
+- Home-Assistant-Entitäten behalten bei langen Listen ihre volle Höhe und
+  Detailoptionen bleiben erreichbar
+- Cloud-Fehler nennen den konkreten HTTP-Status, damit blockierte Uploads
+  verständlich werden
+- alle Änderungen sind für Handy, Tablet und Desktop geprüft; vorhandene
+  Familieninhalte und Einstellungen bleiben beim Update erhalten
+
 ## [1.13.2] – 2026-08-03
 
 ### Private Familienanmeldung und geschlossene Registrierung

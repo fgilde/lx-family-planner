@@ -4,6 +4,8 @@
     "papa": "Dad",
     "kind": "Child",
     "teenager": "Teenager",
+    "tochter_erwachsen": "Adult daughter",
+    "sohn_erwachsen": "Adult son",
     "oma": "Grandma",
     "opa": "Grandpa",
     "betreute_person": "Cared-for person",
@@ -83,6 +85,22 @@
     "showPreviews": "Show content in notifications",
     "sendTest": "Send test notification"
   },
+  "modules": {
+    "profileTitle": "Visible sections",
+    "profileHint": "Choose which sections this profile may see and open from navigation.",
+    "labels": {
+      "chat": "Chat",
+      "calendar": "Calendar",
+      "trash": "Waste calendar",
+      "shopping": "Shopping",
+      "meals": "Meal plan",
+      "tasks": "Tasks",
+      "family-life": "Family life",
+      "board": "Pinboard",
+      "cloud": "Family Cloud",
+      "mail": "Family mail"
+    }
+  },
   "form": {
     "usage": "How will the profile be used?",
     "ownLogin": "With their own login",
@@ -126,6 +144,13 @@
     "forWhom": "For whom?",
     "everyone": "Everyone (shared)",
     "managed": "managed",
+    "allDay": "All-day event",
+    "allDayHint": "No fixed time – can span several days.",
+    "startsOn": "Starts on",
+    "startsAt": "Start time",
+    "endsOn": "Ends on (optional)",
+    "endsOnInclusive": "Through (optional)",
+    "endsAt": "End time (optional)",
     "locationOptional": "Location (optional)",
     "locationPlaceholder": "e.g. Dr. Weber, school",
     "inviteFamilies": "Invite connected families",

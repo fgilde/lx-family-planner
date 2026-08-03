@@ -12,6 +12,7 @@ const scriptPaths = [
   path.join(projectRoot, 'scripts', 'nextcloud-public-url.sh'),
   path.join(projectRoot, 'scripts', 'docker-update.sh'),
   path.join(projectRoot, 'scripts', 'docker-auto-update.sh'),
+  path.join(projectRoot, 'scripts', 'docker-entrypoint.sh'),
   path.join(projectRoot, 'scripts', 'install-auto-update.sh')
 ];
 const scripts = Object.fromEntries(
@@ -146,4 +147,22 @@ test('Docker and PVE builds retain the signed public Android package', () => {
     ).size > 1_000_000,
     true
   );
+});
+
+test('Docker startup repairs Unraid bind-mount permissions before dropping privileges', () => {
+  const entrypoint = scripts['docker-entrypoint.sh'];
+  const dockerfile = fs.readFileSync(
+    path.join(projectRoot, 'Dockerfile'),
+    'utf8'
+  );
+  const unraidTemplate = fs.readFileSync(
+    path.join(projectRoot, 'templates', 'lx-family-planner.xml'),
+    'utf8'
+  );
+  assert.match(entrypoint, /chown -R "\$data_uid:\$data_gid" \/app\/data \/app\/backups/);
+  assert.match(entrypoint, /exec gosu "\$data_uid:\$data_gid" "\$@"/);
+  assert.match(dockerfile, /apt-get install -y --no-install-recommends gosu/);
+  assert.match(dockerfile, /ENTRYPOINT \["\/usr\/local\/bin\/lx-family-entrypoint"\]/);
+  assert.match(unraidTemplate, /Target="PUID" Default="99"/);
+  assert.match(unraidTemplate, /Target="PGID" Default="100"/);
 });

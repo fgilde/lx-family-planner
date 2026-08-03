@@ -4,6 +4,8 @@
     "papa": "Papa",
     "kind": "Kind",
     "teenager": "Teenager",
+    "tochter_erwachsen": "Tochter (erwachsen)",
+    "sohn_erwachsen": "Sohn (erwachsen)",
     "oma": "Oma",
     "opa": "Opa",
     "betreute_person": "Betreute Person",
@@ -83,6 +85,22 @@
     "showPreviews": "Inhalt in Meldungen zeigen",
     "sendTest": "Testmeldung senden"
   },
+  "modules": {
+    "profileTitle": "Sichtbare Bereiche",
+    "profileHint": "Lege fest, welche Bereiche dieses Profil in der Navigation öffnen darf.",
+    "labels": {
+      "chat": "Chat",
+      "calendar": "Kalender",
+      "trash": "Müllkalender",
+      "shopping": "Einkaufen",
+      "meals": "Speiseplan",
+      "tasks": "Aufgaben",
+      "family-life": "Familienleben",
+      "board": "Pinnwand",
+      "cloud": "Family Cloud",
+      "mail": "Familienpost"
+    }
+  },
   "form": {
     "usage": "Wie wird das Profil genutzt?",
     "ownLogin": "Mit eigener Anmeldung",
@@ -126,6 +144,13 @@
     "forWhom": "Für wer?",
     "everyone": "Alle (Gemeinsam)",
     "managed": "verwaltet",
+    "allDay": "Ganztägiger Termin",
+    "allDayHint": "Ohne feste Uhrzeit – auch über mehrere Tage möglich.",
+    "startsOn": "Beginnt am",
+    "startsAt": "Beginn",
+    "endsOn": "Endet am (optional)",
+    "endsOnInclusive": "Bis einschließlich (optional)",
+    "endsAt": "Ende (optional)",
     "locationOptional": "Ort (optional)",
     "locationPlaceholder": "z. B. Dr. Weber, Schule",
     "inviteFamilies": "Verbundene Familien einladen",

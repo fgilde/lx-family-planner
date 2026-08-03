@@ -41,6 +41,8 @@
     "event": {
       "allDay": "Ganztags",
       "until": "bis {{time}}",
+      "throughDate": "bis einschließlich {{date}}",
+      "untilDateTime": "bis {{date}}, {{time}} Uhr",
       "fromSubscriptionTitle": "Aus einem Kalenderabo",
       "fromFamily": "Von {{name}}",
       "subscriptionFallback": "Kalenderabo",

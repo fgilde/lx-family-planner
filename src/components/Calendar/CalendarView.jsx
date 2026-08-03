@@ -61,6 +61,20 @@ function eventDateValue(event) {
   return new Date(`${event.date}T${event.time || '00:00'}:00`).getTime();
 }
 
+function previousLocalDate(value) {
+  const date = dateFromKey(value);
+  date.setDate(date.getDate() - 1);
+  return localDateKey(date);
+}
+
+function eventLastDate(event) {
+  if (!event.endDate) return event.date;
+  const endDate = event.allDay
+    ? previousLocalDate(event.endDate)
+    : event.endDate;
+  return endDate < event.date ? event.date : endDate;
+}
+
 export default function CalendarView() {
   const { t } = useTranslation('calendar');
   const { t: tShared } = useTranslation('shared');
@@ -95,7 +109,7 @@ export default function CalendarView() {
   const filteredEvents = useMemo(
     () =>
       householdEvents
-        .filter(event => showPast || event.date >= todayKey)
+        .filter(event => showPast || eventLastDate(event) >= todayKey)
         .filter(
           event =>
             selectedMemberFilter === 'all' ||
@@ -109,16 +123,20 @@ export default function CalendarView() {
   const groupedEvents = useMemo(() => {
     const groups = new Map();
     filteredEvents.forEach(event => {
-      const date = event.date || todayKey;
+      const date = event.date < todayKey && eventLastDate(event) >= todayKey
+        ? todayKey
+        : event.date || todayKey;
       if (!groups.has(date)) groups.set(date, []);
       groups.get(date).push(event);
     });
     return [...groups.entries()];
   }, [filteredEvents, todayKey]);
 
-  const todayEvents = householdEvents.filter(event => event.date === todayKey);
+  const todayEvents = householdEvents.filter(
+    event => event.date <= todayKey && eventLastDate(event) >= todayKey
+  );
   const upcomingEvents = householdEvents
-    .filter(event => event.date >= todayKey)
+    .filter(event => eventLastDate(event) >= todayKey)
     .sort((left, right) => eventDateValue(left) - eventDateValue(right));
   const nextEvent = upcomingEvents[0];
 
@@ -293,6 +311,14 @@ export default function CalendarView() {
                     const reminders = normalizeEventReminders(
                       event.reminders
                     );
+                    const lastDate = eventLastDate(event);
+                    const formattedLastDate = lastDate !== event.date
+                      ? formatDate(dateFromKey(lastDate), {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })
+                      : '';
                     return (
                       <article
                         key={event.id}
@@ -307,11 +333,22 @@ export default function CalendarView() {
                               ? t('view.event.allDay')
                               : event.time}
                           </strong>
-                          {event.endTime && (
+                          {formattedLastDate ? (
+                            <span>
+                              {event.allDay
+                                ? t('view.event.throughDate', {
+                                    date: formattedLastDate
+                                  })
+                                : t('view.event.untilDateTime', {
+                                    date: formattedLastDate,
+                                    time: event.endTime || event.time
+                                  })}
+                            </span>
+                          ) : event.endTime ? (
                             <span>
                               {t('view.event.until', { time: event.endTime })}
                             </span>
-                          )}
+                          ) : null}
                         </div>
 
                         <div className="calendar-event-copy">

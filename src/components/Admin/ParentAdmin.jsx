@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Eraser,
   Headphones,
+  LayoutGrid,
   KeyRound,
   Link2,
   Music2,
@@ -25,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import {
   POSITION_OPTIONS,
+  PROFILE_MODULE_OPTIONS,
   canManageFamily,
   getPositionLabel,
   getPositionOptionLabel,
@@ -59,6 +61,9 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     addDashboardLink,
     deleteDashboardLink,
     familyRelationships,
+    familySettings,
+    addFamilyLifeRecord,
+    updateFamilyLifeRecord,
     setIsProfileModalOpen,
     showToast
   } = useFamily();
@@ -99,6 +104,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     url: ''
   });
   const [busy, setBusy] = useState(false);
+  const settings = familySettings[0] || null;
+  const disabledModules = settings?.disabledModules || [];
 
   const selectedChild =
     children.find(member => member.id === selectedChildId) || children[0];
@@ -207,6 +214,28 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
     }
   };
 
+  const toggleFamilyModule = async moduleId => {
+    if (busy) return;
+    const nextDisabledModules = disabledModules.includes(moduleId)
+      ? disabledModules.filter(value => value !== moduleId)
+      : [...disabledModules, moduleId];
+    setBusy(true);
+    try {
+      if (settings) {
+        await updateFamilyLifeRecord('familySettings', settings.id, {
+          disabledModules: nextDisabledModules
+        });
+      } else {
+        await addFamilyLifeRecord('familySettings', {
+          id: 'family-settings',
+          disabledModules: nextDisabledModules
+        });
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="parent-admin">
       <section className="admin-hero">
@@ -239,6 +268,44 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
             <span>{t('parentAdmin.overview.managedProfiles')}</span>
           </article>
         </div>
+      </section>
+
+      <section className="admin-panel admin-modules-panel">
+        <header className="admin-panel-header">
+          <div>
+            <span className="admin-section-kicker">
+              {t('parentAdmin.modules.kicker')}
+            </span>
+            <h2><LayoutGrid size={21} /> {t('parentAdmin.modules.title')}</h2>
+          </div>
+        </header>
+        <p className="admin-panel-intro">{t('parentAdmin.modules.intro')}</p>
+        <div className="admin-module-grid">
+          {PROFILE_MODULE_OPTIONS.map(moduleId => {
+            const enabled = !disabledModules.includes(moduleId);
+            return (
+              <label className={enabled ? 'enabled' : ''} key={moduleId}>
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  disabled={busy}
+                  onChange={() => toggleFamilyModule(moduleId)}
+                />
+                <span>
+                  <strong>{t(`parentAdmin.modules.labels.${moduleId}`)}</strong>
+                  <small>
+                    {enabled
+                      ? t('parentAdmin.modules.visible')
+                      : t('parentAdmin.modules.hidden')}
+                  </small>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+        <p className="admin-module-hint">
+          {t('parentAdmin.modules.profileHint')}
+        </p>
       </section>
 
       <div className="admin-layout">

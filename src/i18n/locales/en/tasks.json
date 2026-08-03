@@ -30,7 +30,10 @@
     "rotationTitle": "Rotates with each repetition",
     "fairRotation": "Fair rotation ({{count}})",
     "approve": "Really done",
-    "reject": "Try again"
+    "reject": "Try again",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Really delete?"
   },
   "shop": {
     "title": "Star Rewards Shop",
@@ -53,13 +56,17 @@
     "imageLabel": "Reward image"
   },
   "taskModal": {
+    "editTitle": "Edit task",
     "taskLabel": "Task / chore",
     "taskPlaceholder": "e.g. tidy up the room, unload the dishwasher...",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Details, tips, or what exactly needs to be done …",
     "assignTo": "Assign to",
     "managedSuffix": ", managed",
     "scheduleTitle": "When is the task due?",
     "scheduleHint": "Repeats are rescheduled automatically after confirmation.",
     "dueDate": "Due on",
+    "dueTime": "Time (optional)",
     "repeatLabel": "Repeat",
     "rotationToggle": "Rotate fairly between profiles",
     "rotationHint": "After each confirmed repetition, the next person is automatically up.",
@@ -75,7 +82,8 @@
     "managedNoteTitle": "Organization task",
     "managedNoteHint": "Managed profiles get no stars and no separate done report.",
     "starsLabel": "Star reward (+ stars)",
-    "submit": "Create Task"
+    "submit": "Create task",
+    "save": "Save changes"
   },
   "rewardIcon": {
     "defaultLabel": "Reward",

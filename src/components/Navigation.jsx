@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake, Cloud, Mail } from 'lucide-react';
-import { canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
+import { canAccessAppView, canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
 
 export default function Navigation({ onOpenFamilyTree }) {
   const { t } = useTranslation('chrome');
@@ -13,7 +13,8 @@ export default function Navigation({ onOpenFamilyTree }) {
     tasks,
     activeMember,
     members,
-    familyLetters
+    familyLetters,
+    familySettings
   } = useFamily();
 
   // Active shopping items selected but not in cart
@@ -58,7 +59,7 @@ export default function Navigation({ onOpenFamilyTree }) {
     { id: 'calendar', label: t('navigation.petCalendar'), icon: Calendar }
   ];
 
-  // Granular access filter: If member has allowedModules restriction, filter tabs accordingly
+  const disabledModules = familySettings[0]?.disabledModules || [];
   const roleTabs = isPetProfile(activeMember)
     ? petTabs
     : isChildProfile(activeMember)
@@ -77,17 +78,9 @@ export default function Navigation({ onOpenFamilyTree }) {
             { id: 'admin', label: t('navigation.admin'), icon: ShieldCheck }
           ]
         : allTabs;
-  const visibleTabs = activeMember?.allowedModules
-    ? roleTabs.filter(
-        tab =>
-          tab.id === 'dashboard' ||
-          activeMember.allowedModules.includes(tab.id) ||
-          (
-            canManageFamily(activeMember) &&
-            ['cloud', 'mail', 'admin'].includes(tab.id)
-          )
-      )
-    : roleTabs;
+  const visibleTabs = roleTabs.filter(tab =>
+    canAccessAppView(activeMember, tab.id, disabledModules)
+  );
 
   return (
     <nav className="main-nav">

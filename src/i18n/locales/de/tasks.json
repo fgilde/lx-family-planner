@@ -30,7 +30,10 @@
     "rotationTitle": "Wechselt bei jeder Wiederholung",
     "fairRotation": "Fairer Wechsel ({{count}})",
     "approve": "Wirklich erledigt",
-    "reject": "Noch einmal"
+    "reject": "Noch einmal",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "confirmDelete": "Wirklich löschen?"
   },
   "shop": {
     "title": "Sterne-Belohnungsshop",
@@ -53,13 +56,17 @@
     "imageLabel": "Bild der Belohnung"
   },
   "taskModal": {
+    "editTitle": "Aufgabe bearbeiten",
     "taskLabel": "Aufgabe / Pflicht",
     "taskPlaceholder": "z. B. Zimmer aufräumen, Spülmaschine ausräumen...",
+    "descriptionLabel": "Beschreibung (optional)",
+    "descriptionPlaceholder": "Details, Hinweise oder was genau erledigt werden soll …",
     "assignTo": "Zuteilen an",
     "managedSuffix": ", verwaltet",
     "scheduleTitle": "Wann ist die Aufgabe dran?",
     "scheduleHint": "Wiederholungen werden nach der Bestätigung automatisch neu eingeplant.",
     "dueDate": "Fällig am",
+    "dueTime": "Uhrzeit (optional)",
     "repeatLabel": "Wiederholung",
     "rotationToggle": "Fair zwischen Profilen wechseln",
     "rotationHint": "Nach jeder bestätigten Wiederholung ist automatisch die nächste Person dran.",
@@ -75,7 +82,8 @@
     "managedNoteTitle": "Organisationsaufgabe",
     "managedNoteHint": "Für verwaltete Profile gibt es keine Sterne und keine eigene Erledigt-Meldung.",
     "starsLabel": "Sterne-Belohnung (+ Sterne)",
-    "submit": "Aufgabe Erstellen"
+    "submit": "Aufgabe erstellen",
+    "save": "Änderungen speichern"
   },
   "rewardIcon": {
     "defaultLabel": "Belohnung",

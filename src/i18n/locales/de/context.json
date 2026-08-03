@@ -286,6 +286,14 @@
       "title": "Aufgabe erstellt",
       "message": "\"{{title}}\" kann losgehen."
     },
+    "taskUpdated": {
+      "title": "Aufgabe aktualisiert",
+      "message": "\"{{title}}\" wurde gespeichert."
+    },
+    "taskDeleted": {
+      "title": "Aufgabe gelöscht",
+      "message": "Der Eintrag wurde dauerhaft entfernt."
+    },
     "rewardCreated": {
       "title": "Belohnung angelegt",
       "message": "\"{{title}}\" ist im Sterneshop.",

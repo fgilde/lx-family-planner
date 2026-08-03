@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.13.2" src="https://img.shields.io/badge/version-1.13.2-17483F">
+  <img alt="Version 1.14.0" src="https://img.shields.io/badge/version-1.14.0-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -505,7 +505,7 @@ docker compose up -d
 ```
 
 Die Daten bleiben in `data/`, Sicherungen in `backups/`. Eine bestimmte
-Programmversion lässt sich mit `LX_FAMILY_VERSION=1.13.2` fest anheften.
+Programmversion lässt sich mit `LX_FAMILY_VERSION=1.14.0` fest anheften.
 
 ## Proxmox VE Helper-Script
 
@@ -568,6 +568,19 @@ LX Family Planner ist für **Unraid Community Applications** und den
 **Umbrel App Store** vorbereitet. Nach der Prüfung durch die jeweiligen
 Store-Teams erscheint LX dort als normale App: Installieren anklicken,
 Speicherort und Zugang festlegen, fertig.
+
+### Unraid-Datenordner
+
+Das Community-Applications-Template verwendet standardmäßig `PUID=99` und
+`PGID=100` (`nobody:users`). Beim Start prüft LX die eingebundenen Ordner
+`/app/data` und `/app/backups`, repariert ihre Schreibrechte und wechselt erst
+danach auf diese eingeschränkte Benutzerkennung. Dadurch startet SQLite auch
+bei einer frischen Unraid-Installation zuverlässig, ohne den Planer dauerhaft
+als `root` laufen zu lassen.
+
+Wer für Appdata eine andere Benutzerkennung verwendet, kann PUID und PGID in
+der erweiterten Container-Konfiguration anpassen. Bereits vorhandene Dateien
+und alle späteren Updates bleiben in den beiden Appdata-Ordnern erhalten.
 
 Bis zur Freischaltung funktionieren Docker, das fertige GHCR-Image und der
 Proxmox-Helper unverändert weiter. Die Store-Pakete und ihre Prüfschritte sind

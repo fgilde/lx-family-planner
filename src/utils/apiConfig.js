@@ -134,3 +134,11 @@ export async function plannerApiRequest(path, options = {}) {
   }
   return data;
 }
+
+export function describeApiError(error) {
+  const message = error?.message || 'Die Anfrage konnte nicht verarbeitet werden.';
+  const status = Number(error?.status || 0);
+  return status >= 400 && status <= 599
+    ? `${message} (HTTP ${status})`
+    : message;
+}

@@ -29,8 +29,10 @@ import ProblemReportButton from './components/ProblemReportButton';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
 import ServerConfigModal from './components/ServerConfigModal';
 import AppUpdateBanner from './components/AppUpdateBanner';
-import { isPetProfile } from './constants/roles';
+import { canAccessAppView } from './constants/roles';
 import { isCapacitorNative } from './utils/apiConfig';
+
+const EMPTY_DISABLED_MODULES = [];
 
 function MainContent() {
   const { t } = useTranslation('chrome');
@@ -40,9 +42,12 @@ function MainContent() {
     logout,
     setActiveTab,
     activeMember,
+    familySettings,
     toast,
     setToast
   } = useFamily();
+  const disabledModules =
+    familySettings[0]?.disabledModules || EMPTY_DISABLED_MODULES;
   const [isCreatingNewFamily, setIsCreatingNewFamily] = useState(false);
   const [isFamilyTreeOpen, setIsFamilyTreeOpen] = useState(false);
 
@@ -67,28 +72,25 @@ function MainContent() {
       'mail',
       'admin'
     ]);
-    if (allowedViews.has(requestedView)) {
-      if (
-        !isPetProfile(activeMember) ||
-        ['dashboard', 'calendar'].includes(requestedView)
-      ) {
-        setActiveTab(requestedView);
-      }
+    if (
+      allowedViews.has(requestedView) &&
+      canAccessAppView(activeMember, requestedView, disabledModules)
+    ) {
+      setActiveTab(requestedView);
       if (isRecipeShareTarget) return;
       url.searchParams.delete('view');
       window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
     }
-  }, [activeMember, authStatus, setActiveTab]);
+  }, [activeMember, authStatus, disabledModules, setActiveTab]);
 
   useEffect(() => {
     if (
       authStatus === 'authenticated' &&
-      isPetProfile(activeMember) &&
-      !['dashboard', 'calendar'].includes(activeTab)
+      !canAccessAppView(activeMember, activeTab, disabledModules)
     ) {
       setActiveTab('dashboard');
     }
-  }, [activeMember, activeTab, authStatus, setActiveTab]);
+  }, [activeMember, activeTab, authStatus, disabledModules, setActiveTab]);
 
   useEffect(() => {
     if (authStatus !== 'authenticated') return undefined;
@@ -112,10 +114,7 @@ function MainContent() {
           'admin'
         ]);
         if (!allowedViews.has(requestedView)) return;
-        if (
-          isPetProfile(activeMember) &&
-          !['dashboard', 'calendar'].includes(requestedView)
-        ) {
+        if (!canAccessAppView(activeMember, requestedView, disabledModules)) {
           return;
         }
         const chatTarget = target.searchParams.get('chat');
@@ -143,7 +142,7 @@ function MainContent() {
         openNativeNotification
       );
     };
-  }, [activeMember, authStatus, setActiveTab]);
+  }, [activeMember, authStatus, disabledModules, setActiveTab]);
 
   const [isServerConfigOpen, setIsServerConfigOpen] = useState(false);
   const canConfigureServer = isCapacitorNative();

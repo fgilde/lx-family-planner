@@ -286,6 +286,14 @@
       "title": "Task created",
       "message": "\"{{title}}\" is ready to go."
     },
+    "taskUpdated": {
+      "title": "Task updated",
+      "message": "\"{{title}}\" has been saved."
+    },
+    "taskDeleted": {
+      "title": "Task deleted",
+      "message": "The entry was permanently removed."
+    },
     "rewardCreated": {
       "title": "Reward created",
       "message": "\"{{title}}\" is in the star shop.",

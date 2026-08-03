@@ -397,10 +397,10 @@ test('native API access only accepts trusted app origins', async () => {
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.13.2');
+  assert.equal(health.body.version, '1.14.0');
   const appRelease = await request('/api/app/version');
-  assert.equal(appRelease.body.versionName, '1.13.2');
-  assert.equal(appRelease.body.versionCode, 31);
+  assert.equal(appRelease.body.versionName, '1.14.0');
+  assert.equal(appRelease.body.versionCode, 32);
   assert.equal(appRelease.body.apkUrl, '/apk/latest.apk');
   assert.equal(
     appRelease.body.publicApkUrl,
@@ -448,8 +448,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.13.2');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.13.2');
+  assert.equal(bootstrap.body.appVersion, '1.14.0');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.14.0');
   assert.equal(bootstrap.body.nativePushServer.configured, false);
   assert.equal(
     bootstrap.body.nativePushServer.reason,
@@ -489,7 +489,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     installationId: 'lx-android-1234567890abcdef',
     token: 'fcm-test-token-1234567890abcdef',
     deviceName: 'Test Android-App',
-    appVersion: '1.13.2',
+    appVersion: '1.14.0',
     preferences: { groupChat: true, showPreviews: false }
   });
   assert.equal(storedNativeDevice.platform, 'android');
@@ -515,10 +515,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.13.2');
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.14.0');
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.13.2'
+    '1.14.0'
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -532,7 +532,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.13.2');
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.14.0');
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -585,6 +585,20 @@ test('family flow stays isolated, authorized and internally consistent', async (
       body: JSON.stringify({ isManaged: true })
     },
     409
+  );
+  const childModuleAccess = await request(
+    `/api/members/${childOne.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        allowedModules: ['calendar', 'tasks', 'not-a-module', 'tasks']
+      })
+    }
+  );
+  assert.deepEqual(
+    childModuleAccess.body.member.allowedModules,
+    ['calendar', 'tasks']
   );
 
   const managedEvent = await request(
@@ -713,8 +727,42 @@ test('family flow stays isolated, authorized and internally consistent', async (
     {
       method: 'PATCH',
       headers: authenticatedHeaders,
-      body: JSON.stringify({ time: '16:00' })
+      body: JSON.stringify({
+        time: '16:00',
+        endDate: '2026-08-07',
+        endTime: '12:00'
+      })
     }
+  );
+  const allDayEvent = await request(
+    '/api/resources/events',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Familienwochenende',
+        date: '2026-08-07',
+        time: '09:00',
+        allDay: true,
+        endDate: '2026-08-10',
+        endTime: '18:00',
+        memberId: 'all'
+      })
+    },
+    201
+  );
+  assert.equal(allDayEvent.body.record.allDay, true);
+  assert.equal(allDayEvent.body.record.time, '');
+  assert.equal(allDayEvent.body.record.endTime, '');
+  assert.equal(allDayEvent.body.record.endDate, '2026-08-10');
+  await request(
+    `/api/resources/events/${allDayEvent.body.record.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ endDate: '2026-08-06' })
+    },
+    400
   );
   await request(
     `/api/resources/events/${childNotificationEvent.body.record.id}`,
@@ -834,6 +882,50 @@ test('family flow stays isolated, authorized and internally consistent', async (
       })
     },
     201
+  );
+
+  const editableTask = await request(
+    '/api/resources/tasks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Flur aufräumen',
+        description: 'Schuhe ordentlich ins Regal stellen',
+        memberId: childOne.id,
+        stars: 10
+      })
+    },
+    201
+  );
+  const editedTask = await request(
+    `/api/resources/tasks/${editableTask.body.record.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Flur und Schuhe aufräumen',
+        description: 'Danach kurz durchfegen',
+        dueDate: '2026-08-02',
+        dueTime: '17:30',
+        completed: true,
+        completionStatus: 'approved'
+      })
+    }
+  );
+  assert.equal(editedTask.body.record.title, 'Flur und Schuhe aufräumen');
+  assert.equal(editedTask.body.record.description, 'Danach kurz durchfegen');
+  assert.equal(editedTask.body.record.dueTime, '17:30');
+  assert.equal(editedTask.body.record.completed, false);
+  assert.equal(editedTask.body.record.completionStatus, 'open');
+  await request(
+    `/api/resources/tasks/${editableTask.body.record.id}`,
+    { method: 'DELETE', headers: authenticatedHeaders }
+  );
+  await request(
+    `/api/resources/tasks/${editableTask.body.record.id}`,
+    { method: 'DELETE', headers: authenticatedHeaders },
+    404
   );
 
   const directMessage = await request(
@@ -1285,7 +1377,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.13.2');
+  assert.equal(problemReport.body.report.appVersion, '1.14.0');
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },
@@ -1716,6 +1808,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
         mediaScheduleEnabled: true,
         mediaStart: '15:00',
         mediaEnd: '19:30',
+        disabledModules: ['trash', 'mail', 'invalid-module', 'trash'],
         emergencyContacts: [
           {
             id: 'doctor',
@@ -1730,6 +1823,19 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   assert.equal(settings.body.record.quietStart, '20:30');
   assert.equal(settings.body.record.emergencyContacts.length, 1);
+  assert.deepEqual(settings.body.record.disabledModules, ['trash', 'mail']);
+  const settingsWithoutModuleField = await request(
+    `/api/resources/familySettings/${settings.body.record.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ quietStart: '21:00' })
+    }
+  );
+  assert.deepEqual(
+    settingsWithoutModuleField.body.record.disabledModules,
+    ['trash', 'mail']
+  );
 
   const childWithStars = await request(`/api/members/${childOne.id}`, {
     method: 'PATCH',

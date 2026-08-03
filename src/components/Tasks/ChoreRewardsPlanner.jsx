@@ -53,21 +53,26 @@ function currentLocalDate() {
 export default function ChoreRewardsPlanner() {
   const { t } = useTranslation('tasks');
   const {
-    tasks, toggleTask, reviewTask, addTask, rewards, addReward, updateReward, deleteReward, redeemReward,
+    tasks, toggleTask, reviewTask, addTask, updateTask, deleteTask,
+    rewards, addReward, updateReward, deleteReward, redeemReward,
     members, activeMember, activeHousehold, showToast
   } = useFamily();
 
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const [taskTitle, setTaskTitle] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
   const [taskMemberId, setTaskMemberId] = useState(members[0]?.id || '');
   const [taskStars, setTaskStars] = useState(15);
   const [taskCategory, setTaskCategory] = useState('Haushalt');
   const [taskDueDate, setTaskDueDate] = useState(
     currentLocalDate
   );
+  const [taskDueTime, setTaskDueTime] = useState('');
   const [taskRepeatRule, setTaskRepeatRule] = useState('none');
   const [taskRotationEnabled, setTaskRotationEnabled] = useState(false);
   const [taskRotationMemberIds, setTaskRotationMemberIds] = useState([]);
+  const [confirmDeleteTaskId, setConfirmDeleteTaskId] = useState(null);
 
   // Reward Creator / Editor State
   const [isRewardModalOpen, setIsRewardModalOpen] = useState(false);
@@ -82,16 +87,59 @@ export default function ChoreRewardsPlanner() {
   );
   const taskIsForManagedProfile = isManagedProfile(selectedTaskMember);
 
-  const handleCreateTask = (e) => {
+  const openCreateTask = () => {
+    setEditingTask(null);
+    setTaskTitle('');
+    setTaskDescription('');
+    setTaskMemberId(activeMemberIdForTask());
+    setTaskStars(15);
+    setTaskCategory('Haushalt');
+    setTaskDueDate(currentLocalDate());
+    setTaskDueTime('');
+    setTaskRepeatRule('none');
+    setTaskRotationEnabled(false);
+    setTaskRotationMemberIds([]);
+    setIsAddTaskOpen(true);
+  };
+
+  const activeMemberIdForTask = () =>
+    members.find(member => member.id === activeMember?.id)?.id ||
+    members[0]?.id ||
+    '';
+
+  const openEditTask = task => {
+    setEditingTask(task);
+    setTaskTitle(task.title || '');
+    setTaskDescription(task.description || '');
+    setTaskMemberId(task.memberId || members[0]?.id || '');
+    setTaskStars(Number(task.stars ?? 15));
+    setTaskCategory(task.category || 'Haushalt');
+    setTaskDueDate(task.dueDate || '');
+    setTaskDueTime(task.dueTime || '');
+    setTaskRepeatRule(task.repeatRule || 'none');
+    setTaskRotationEnabled((task.rotationMemberIds?.length || 0) > 1);
+    setTaskRotationMemberIds(task.rotationMemberIds || []);
+    setConfirmDeleteTaskId(null);
+    setIsAddTaskOpen(true);
+  };
+
+  const closeTaskModal = () => {
+    setIsAddTaskOpen(false);
+    setEditingTask(null);
+  };
+
+  const handleSaveTask = async (e) => {
     e.preventDefault();
     if (!taskTitle.trim()) return;
 
-    addTask({
-      title: taskTitle,
+    const changes = {
+      title: taskTitle.trim(),
+      description: taskDescription.trim(),
       memberId: taskMemberId,
       stars: taskIsForManagedProfile ? 0 : Number(taskStars),
       category: taskCategory,
       dueDate: taskDueDate,
+      dueTime: taskDueTime,
       repeatRule: taskRepeatRule,
       rotationMemberIds:
         !taskIsForManagedProfile &&
@@ -102,12 +150,12 @@ export default function ChoreRewardsPlanner() {
               ...taskRotationMemberIds.filter(id => id !== taskMemberId)
             ]
           : []
-    });
+    };
 
-    setTaskTitle('');
-    setTaskRotationEnabled(false);
-    setTaskRotationMemberIds([]);
-    setIsAddTaskOpen(false);
+    const saved = editingTask
+      ? await updateTask(editingTask.id, changes)
+      : await addTask(changes);
+    if (saved) closeTaskModal();
   };
 
   const handleOpenCreateReward = () => {
@@ -189,7 +237,7 @@ export default function ChoreRewardsPlanner() {
                 <Gift size={18} /> {t('header.createReward')}
               </button>
             )}
-            {isParent && <button className="btn-primary" onClick={() => setIsAddTaskOpen(true)}>
+            {isParent && <button className="btn-primary" onClick={openCreateTask}>
               <Plus size={18} /> {t('header.assignTask')}
             </button>}
           </div>
@@ -303,6 +351,9 @@ export default function ChoreRewardsPlanner() {
                           </span>
                           <span className="task-approval-copy">
                             <strong>{task.title}</strong>
+                            {task.description && (
+                              <span className="task-description">{task.description}</span>
+                            )}
                             <small>
                               {task.completed
                                 ? t('taskItem.statusConfirmed')
@@ -328,6 +379,7 @@ export default function ChoreRewardsPlanner() {
                                   <span>
                                     <CalendarDays size={12} />
                                     {formatTaskDate(task.dueDate)}
+                                    {task.dueTime ? ` · ${task.dueTime}` : ''}
                                   </span>
                                 )}
                                 {task.repeatRule &&
@@ -356,6 +408,36 @@ export default function ChoreRewardsPlanner() {
                             </span>
                           )}
                         </button>
+
+                        {isParent && (
+                          <div className="task-manage-actions">
+                            <button
+                              type="button"
+                              onClick={() => openEditTask(task)}
+                              title={t('taskItem.edit')}
+                            >
+                              <Edit3 size={14} /> {t('taskItem.edit')}
+                            </button>
+                            <button
+                              type="button"
+                              className={confirmDeleteTaskId === task.id ? 'confirm' : ''}
+                              onClick={async () => {
+                                if (confirmDeleteTaskId !== task.id) {
+                                  setConfirmDeleteTaskId(task.id);
+                                  return;
+                                }
+                                const deleted = await deleteTask(task.id);
+                                if (deleted) setConfirmDeleteTaskId(null);
+                              }}
+                              title={t('taskItem.delete')}
+                            >
+                              <Trash2 size={14} />
+                              {confirmDeleteTaskId === task.id
+                                ? t('taskItem.confirmDelete')
+                                : t('taskItem.delete')}
+                            </button>
+                          </div>
+                        )}
 
                         {canReview && (
                           <div className="task-review-actions">
@@ -554,16 +636,18 @@ export default function ChoreRewardsPlanner() {
 
       {/* CREATE TASK MODAL */}
       {isAddTaskOpen && (
-        <div className="modal-backdrop" onClick={() => setIsAddTaskOpen(false)}>
+        <div className="modal-backdrop" onClick={closeTaskModal}>
           <div className="modal-card" onClick={e => e.stopPropagation()}>
             <div className="card-header" style={{ marginBottom: 16 }}>
-              <h2 className="card-title">{t('header.assignTask')}</h2>
-              <button className="icon-circle-btn" onClick={() => setIsAddTaskOpen(false)}>
+              <h2 className="card-title">
+                {editingTask ? t('taskModal.editTitle') : t('header.assignTask')}
+              </h2>
+              <button className="icon-circle-btn" onClick={closeTaskModal}>
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask}>
+            <form onSubmit={handleSaveTask}>
               <div className="form-group">
                 <label className="form-label">{t('taskModal.taskLabel')}</label>
                 <input
@@ -573,6 +657,17 @@ export default function ChoreRewardsPlanner() {
                   value={taskTitle}
                   onChange={e => setTaskTitle(e.target.value)}
                   required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t('taskModal.descriptionLabel')}</label>
+                <textarea
+                  className="form-textarea"
+                  rows="3"
+                  placeholder={t('taskModal.descriptionPlaceholder')}
+                  value={taskDescription}
+                  onChange={event => setTaskDescription(event.target.value)}
                 />
               </div>
 
@@ -607,6 +702,15 @@ export default function ChoreRewardsPlanner() {
                       value={taskDueDate}
                       onChange={event => setTaskDueDate(event.target.value)}
                       required={taskRepeatRule !== 'none'}
+                    />
+                  </label>
+                  <label className="form-group">
+                    <span className="form-label">{t('taskModal.dueTime')}</span>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={taskDueTime}
+                      onChange={event => setTaskDueTime(event.target.value)}
                     />
                   </label>
                   <label className="form-group">
@@ -727,9 +831,9 @@ export default function ChoreRewardsPlanner() {
 
               <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  {t('taskModal.submit')}
+                  {editingTask ? t('taskModal.save') : t('taskModal.submit')}
                 </button>
-                <button type="button" className="btn-secondary" onClick={() => setIsAddTaskOpen(false)}>
+                <button type="button" className="btn-secondary" onClick={closeTaskModal}>
                   {t('common:actions.cancel')}
                 </button>
               </div>
