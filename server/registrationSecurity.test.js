@@ -27,6 +27,30 @@ await new Promise((resolve, reject) => {
 });
 const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
+test('public login copy never suggests a concrete family account', () => {
+  const projectRoot = path.resolve(import.meta.dirname, '..');
+  const german = JSON.parse(
+    fs.readFileSync(
+      path.join(projectRoot, 'src', 'i18n', 'locales', 'de', 'auth.json'),
+      'utf8'
+    )
+  );
+  const english = JSON.parse(
+    fs.readFileSync(
+      path.join(projectRoot, 'src', 'i18n', 'locales', 'en', 'auth.json'),
+      'utf8'
+    )
+  );
+  assert.equal(
+    german.login.familyStep.familyNamePlaceholder,
+    'Familienname eingeben'
+  );
+  assert.equal(
+    english.login.familyStep.familyNamePlaceholder,
+    'Enter family name'
+  );
+});
+
 async function request(pathname, options = {}, expectedStatus = 200) {
   const response = await fetch(`${baseUrl}${pathname}`, options);
   const body = await response.json();

@@ -2,6 +2,17 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.14.1] – 2026-08-03
+
+### Neutrale Anmeldung ohne verräterisches Beispiel
+
+- das Feld „Familienname“ nennt öffentlich keinen echten Familiennamen mehr
+- der Platzhalter fordert nur noch neutral zur Eingabe des Familiennamens auf
+- die Korrektur gilt gleichzeitig für die deutsche und englische Anmeldung
+- ein Regressionstest verhindert, dass dort künftig wieder ein konkretes
+  Familienkonto als Beispiel erscheint
+- ausdrücklich freigegebene Nur-Lese-Demos bleiben davon unberührt
+
 ## [1.14.0] – 2026-08-03
 
 ### Mehr Kontrolle, bessere Aufgaben und echte Dauertermine

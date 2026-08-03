@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.14.0" src="https://img.shields.io/badge/version-1.14.0-17483F">
+  <img alt="Version 1.14.1" src="https://img.shields.io/badge/version-1.14.1-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -505,7 +505,7 @@ docker compose up -d
 ```
 
 Die Daten bleiben in `data/`, Sicherungen in `backups/`. Eine bestimmte
-Programmversion lässt sich mit `LX_FAMILY_VERSION=1.14.0` fest anheften.
+Programmversion lässt sich mit `LX_FAMILY_VERSION=1.14.1` fest anheften.
 
 ## Proxmox VE Helper-Script
 

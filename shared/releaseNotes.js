@@ -1,4 +1,27 @@
 const RELEASE_NOTES = {
+  '1.14.1': {
+    version: '1.14.1',
+    eyebrow: 'Ein kleines Detail schützt euren Zugang besser',
+    title: 'Die Anmeldung bleibt jetzt vollständig neutral',
+    intro:
+      'Im Eingabefeld für den Familiennamen wird kein konkreter Familienname mehr als Beispiel gezeigt.',
+    highlights: [
+      {
+        id: 'neutral-family-login',
+        title: 'Kein Kontoname als Beispiel',
+        description:
+          'Die Anmeldung fordert nur noch neutral zur Eingabe auf. Private Familiennamen werden weder aufgelistet noch als Hinweis vorgeschlagen.'
+      },
+      {
+        id: 'public-demo-exception',
+        title: 'Die Demo bleibt klar erkennbar',
+        description:
+          'Nur das ausdrücklich freigegebene, schreibgeschützte Demo-Konto darf weiterhin öffentlich angeboten werden.'
+      }
+    ],
+    closing:
+      'An euren Familienkonten, Passwörtern und gespeicherten Inhalten ändert sich nichts.'
+  },
   '1.14.0': {
     version: '1.14.0',
     eyebrow: 'Mehr Überblick, ohne euch einzuschränken',
