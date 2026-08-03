@@ -2,24 +2,26 @@ import BringApi from 'bring-shopping';
 
 const CATALOG_TTL_MS = 12 * 60 * 60 * 1000;
 const CATALOG_TIMEOUT_MS = 8_000;
+const SUPPORTED_CATALOG_LOCALES = ['de-DE', 'en-GB'];
+const DEFAULT_CATALOG_LOCALE = 'de-DE';
 
 const SECTION_ICONS = [
-  [/obst|gemüse|früchte/i, '🥦'],
-  [/brot|gebäck/i, '🥨'],
-  [/milch|käse/i, '🥛'],
-  [/fleisch|fisch/i, '🐟'],
-  [/zutaten|gewürze/i, '🫙'],
-  [/fertig|tiefkühl/i, '❄️'],
-  [/getreide/i, '🌾'],
-  [/snacks|süss|süß/i, '🍫'],
-  [/getränke|tabak/i, '🧃'],
-  [/haushalt/i, '🧽'],
-  [/pflege|gesundheit/i, '🧴'],
-  [/tierbedarf/i, '🐾'],
-  [/baumarkt|garten/i, '🌿']
+  [/obst|gemüse|früchte|fruit|vegetable/i, '🥦'],
+  [/brot|gebäck|bread|bakery|pastr/i, '🥨'],
+  [/milch|käse|dairy|milk|cheese|egg/i, '🥛'],
+  [/fleisch|fisch|meat|fish|seafood/i, '🐟'],
+  [/zutaten|gewürze|ingredient|spice|condiment/i, '🫙'],
+  [/fertig|tiefkühl|frozen|convenience|ready/i, '❄️'],
+  [/getreide|grain|cereal|pasta/i, '🌾'],
+  [/snacks|süss|süß|sweet|candy/i, '🍫'],
+  [/getränke|tabak|beverage|drink|tobacco/i, '🧃'],
+  [/haushalt|household|cleaning/i, '🧽'],
+  [/pflege|gesundheit|care|health|hygiene/i, '🧴'],
+  [/tierbedarf|pet/i, '🐾'],
+  [/baumarkt|garten|diy|garden|hardware/i, '🌿']
 ];
 
-const FALLBACK_SECTIONS = [
+const FALLBACK_SECTIONS_DE = [
   {
     name: 'Obst & Gemüse',
     icon: '🥦',
@@ -120,8 +122,117 @@ const FALLBACK_SECTIONS = [
   }
 ];
 
-let cachedCatalog = null;
-let pendingCatalog = null;
+const FALLBACK_SECTIONS_EN = [
+  {
+    name: 'Fruits & Vegetables',
+    icon: '🥦',
+    items: [
+      'Apples', 'Bananas', 'Pears', 'Strawberries', 'Grapes', 'Lemons',
+      'Oranges', 'Avocado', 'Tomatoes', 'Cucumbers', 'Peppers', 'Potatoes',
+      'Onions', 'Garlic', 'Carrots', 'Broccoli', 'Cauliflower',
+      'Mushrooms', 'Lettuce', 'Spinach', 'Leek', 'Chives'
+    ]
+  },
+  {
+    name: 'Bread & Pastries',
+    icon: '🥨',
+    items: [
+      'Bread', 'Bread rolls', 'Toast', 'Baguette', 'Crispbread',
+      'Croissants', 'Wraps'
+    ]
+  },
+  {
+    name: 'Milk & Cheese',
+    icon: '🥛',
+    items: [
+      'Milk', 'Oat milk', 'Butter', 'Margarine', 'Eggs', 'Yoghurt',
+      'Quark', 'Cream', 'Crème fraîche', 'Cheese', 'Cream cheese',
+      'Mozzarella', 'Feta'
+    ]
+  },
+  {
+    name: 'Meat & Fish',
+    icon: '🐟',
+    items: [
+      'Minced meat', 'Chicken', 'Sausages', 'Cold cuts', 'Ham',
+      'Salmon', 'Tuna'
+    ]
+  },
+  {
+    name: 'Ingredients & Spices',
+    icon: '🫙',
+    items: [
+      'Flour', 'Sugar', 'Salt', 'Pepper', 'Oil', 'Vinegar', 'Ketchup',
+      'Mayonnaise', 'Mustard', 'Tomato paste', 'Tinned tomatoes', 'Stock',
+      'Baking powder'
+    ]
+  },
+  {
+    name: 'Frozen & Convenience',
+    icon: '❄️',
+    items: [
+      'Frozen pizza', 'Chips', 'Frozen vegetables', 'Fish fingers',
+      'Ice cream', 'Ready meal'
+    ]
+  },
+  {
+    name: 'Grain Products',
+    icon: '🌾',
+    items: [
+      'Pasta', 'Rice', 'Oats', 'Muesli', 'Cornflakes', 'Couscous',
+      'Lentils'
+    ]
+  },
+  {
+    name: 'Snacks & Sweets',
+    icon: '🍫',
+    items: [
+      'Chocolate spread', 'Chocolate', 'Biscuits', 'Crisps', 'Nuts',
+      'Gummy bears', 'Cereal bars'
+    ]
+  },
+  {
+    name: 'Beverages',
+    icon: '🧃',
+    items: [
+      'Sparkling water', 'Juice', 'Coffee', 'Tea', 'Cocoa', 'Lemonade',
+      'Beer', 'Wine'
+    ]
+  },
+  {
+    name: 'Household',
+    icon: '🧽',
+    items: [
+      'Washing-up liquid', 'Dishwasher tabs', 'Laundry detergent',
+      'Kitchen roll', 'Toilet paper', 'Bin bags', 'Aluminium foil',
+      'Baking paper', 'All-purpose cleaner', 'Sponges'
+    ]
+  },
+  {
+    name: 'Care & Health',
+    icon: '🧴',
+    items: [
+      'Toothpaste', 'Toothbrushes', 'Shower gel', 'Shampoo', 'Soap',
+      'Deodorant', 'Tissues', 'Plasters'
+    ]
+  },
+  {
+    name: 'Pet Supplies',
+    icon: '🐾',
+    items: ['Dog food', 'Cat food', 'Cat litter', 'Treats']
+  }
+];
+
+const cachedCatalogs = new Map();
+const pendingCatalogs = new Map();
+
+function normalizeCatalogLocale(locale) {
+  const cleaned = String(locale || '').trim();
+  if (SUPPORTED_CATALOG_LOCALES.includes(cleaned)) return cleaned;
+  return cleaned.toLowerCase().startsWith('en')
+    ? 'en-GB'
+    : DEFAULT_CATALOG_LOCALE;
+}
 
 function cleanLabel(value, fallback = '') {
   return String(value || fallback).trim().slice(0, 120);
@@ -145,7 +256,15 @@ function makeSectionId(name, index) {
   return slug || `bereich-${index + 1}`;
 }
 
-export function normalizeBringCatalog(payload, source = 'bring') {
+export function normalizeBringCatalog(
+  payload,
+  source = 'bring',
+  locale = DEFAULT_CATALOG_LOCALE
+) {
+  const catalogLocale = normalizeCatalogLocale(payload?.language || locale);
+  const sectionFallbackLabel = catalogLocale.startsWith('en')
+    ? 'Section'
+    : 'Bereich';
   const sourceSections = Array.isArray(payload?.catalog?.sections)
     ? payload.catalog.sections
     : [];
@@ -154,7 +273,7 @@ export function normalizeBringCatalog(payload, source = 'bring') {
     .map((section, sectionIndex) => {
       const name = cleanLabel(
         section?.name || section?.sectionId,
-        `Bereich ${sectionIndex + 1}`
+        `${sectionFallbackLabel} ${sectionIndex + 1}`
       );
       const icon = sectionIcon(name);
       const items = (Array.isArray(section?.items) ? section.items : [])
@@ -181,7 +300,7 @@ export function normalizeBringCatalog(payload, source = 'bring') {
     .filter(section => section.items.length > 0);
 
   return {
-    locale: cleanLabel(payload?.language, 'de-DE'),
+    locale: cleanLabel(payload?.language, locale),
     source,
     sections,
     total: sections.reduce((sum, section) => sum + section.items.length, 0),
@@ -189,28 +308,33 @@ export function normalizeBringCatalog(payload, source = 'bring') {
   };
 }
 
-function fallbackCatalog() {
+function fallbackCatalog(locale = DEFAULT_CATALOG_LOCALE) {
+  const catalogLocale = normalizeCatalogLocale(locale);
+  const fallbackSections = catalogLocale === 'en-GB'
+    ? FALLBACK_SECTIONS_EN
+    : FALLBACK_SECTIONS_DE;
   return normalizeBringCatalog(
     {
-      language: 'de-DE',
+      language: catalogLocale,
       catalog: {
-        sections: FALLBACK_SECTIONS.map(section => ({
+        sections: fallbackSections.map(section => ({
           sectionId: section.name,
           name: section.name,
           items: section.items.map(name => ({ itemId: name, name }))
         }))
       }
     },
-    'fallback'
+    'fallback',
+    catalogLocale
   );
 }
 
-async function fetchLiveCatalog() {
+async function fetchLiveCatalog(locale) {
   const client = new BringApi({ mail: '', password: '' });
   let timer;
   try {
     return await Promise.race([
-      client.loadCatalog('de-DE'),
+      client.loadCatalog(locale),
       new Promise((_, reject) => {
         timer = setTimeout(
           () => reject(new Error('Bring!-Katalog Zeitüberschreitung')),
@@ -223,35 +347,37 @@ async function fetchLiveCatalog() {
   }
 }
 
-export async function loadBringCatalog() {
-  if (
-    cachedCatalog &&
-    Date.now() - cachedCatalog.updatedAt < CATALOG_TTL_MS
-  ) {
-    return cachedCatalog;
+export async function loadBringCatalog(locale = DEFAULT_CATALOG_LOCALE) {
+  const catalogLocale = normalizeCatalogLocale(locale);
+  const cached = cachedCatalogs.get(catalogLocale);
+  if (cached && Date.now() - cached.updatedAt < CATALOG_TTL_MS) {
+    return cached;
   }
-  if (pendingCatalog) return pendingCatalog;
+  if (pendingCatalogs.has(catalogLocale)) {
+    return pendingCatalogs.get(catalogLocale);
+  }
 
-  pendingCatalog = (async () => {
+  const pending = (async () => {
     try {
       const liveCatalog = normalizeBringCatalog(
-        await fetchLiveCatalog(),
-        'bring'
+        await fetchLiveCatalog(catalogLocale),
+        'bring',
+        catalogLocale
       );
       if (liveCatalog.total === 0) {
         throw new Error('Bring!-Katalog ist leer');
       }
-      cachedCatalog = liveCatalog;
+      cachedCatalogs.set(catalogLocale, liveCatalog);
     } catch (error) {
-      if (!cachedCatalog) {
-        cachedCatalog = fallbackCatalog();
+      if (!cachedCatalogs.has(catalogLocale)) {
+        cachedCatalogs.set(catalogLocale, fallbackCatalog(catalogLocale));
       }
       console.warn(`Bring!-Katalog nicht erreichbar: ${error.message}`);
     } finally {
-      pendingCatalog = null;
+      pendingCatalogs.delete(catalogLocale);
     }
-    return cachedCatalog;
+    return cachedCatalogs.get(catalogLocale);
   })();
-
-  return pendingCatalog;
+  pendingCatalogs.set(catalogLocale, pending);
+  return pending;
 }

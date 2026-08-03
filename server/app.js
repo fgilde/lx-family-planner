@@ -9656,7 +9656,7 @@ export function createApp() {
   );
 
   app.get('/api/integrations/bring/catalog', requireAuth, async (_req, res) => {
-    const catalog = await loadBringCatalog();
+    const catalog = await loadBringCatalog(APP_LOCALE);
     res.set('Cache-Control', 'private, max-age=21600');
     res.json({ success: true, catalog });
   });
@@ -9920,9 +9920,23 @@ export function createApp() {
         }
       }
     }));
+    const localizeIndexHtml = html => html
+      .replace('<html lang="de">', `<html lang="${APP_LANGUAGE}">`)
+      .replace(
+        /<title>.*?<\/title>/,
+        `<title>${translate('labels.htmlTitle')}</title>`
+      )
+      .replace(
+        /(<meta name="description" content=").*?(" \/>)/,
+        `$1${translate('labels.htmlDescription')}$2`
+      );
     app.get(/^(?!\/api\/).*/, (_req, res) => {
       res.setHeader('Cache-Control', 'no-cache');
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.type('html').send(
+        localizeIndexHtml(
+          fs.readFileSync(path.join(distPath, 'index.html'), 'utf8')
+        )
+      );
     });
   }
 

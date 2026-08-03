@@ -21,79 +21,54 @@ import EventReminderDialog from './EventReminderDialog';
 import EventReminderPicker from './EventReminderPicker';
 
 const TRASH_TYPES = [
-  {
-    id: 'rest',
-    name: 'Restmüll (Schwarze Tonne)',
-    color: '#4b5563',
-    icon: '🗑️'
-  },
-  {
-    id: 'papier',
-    name: 'Altpapier (Blaue Tonne)',
-    color: '#2563eb',
-    icon: '📦'
-  },
-  {
-    id: 'bio',
-    name: 'Biomüll (Braune/Grüne Tonne)',
-    color: '#15803d',
-    icon: '🍎'
-  },
-  {
-    id: 'gelb',
-    name: 'Gelber Sack / Wertstoff',
-    color: '#d97706',
-    icon: '🟡'
-  }
+  { id: 'rest', color: '#4b5563', icon: '🗑️' },
+  { id: 'papier', color: '#2563eb', icon: '📦' },
+  { id: 'bio', color: '#15803d', icon: '🍎' },
+  { id: 'gelb', color: '#d97706', icon: '🟡' }
 ];
 
-export const INITIAL_TRASH_EVENTS = [
-  {
-    id: 'trsh-1',
-    title: 'Restmüll (Schwarze Tonne)',
-    date: new Date(Date.now() + 86_400_000).toISOString().split('T')[0],
-    type: 'rest',
+export function initialTrashEvents(t) {
+  return TRASH_TYPES.map((type, index) => ({
+    id: `trsh-${index + 1}`,
+    title: t(`trash.types.${type.id}`),
+    date: new Date(Date.now() + 86_400_000 * (index * 2 + 1))
+      .toISOString()
+      .split('T')[0],
+    type: type.id,
     reminders: [...TRASH_DEFAULT_REMINDERS]
-  },
-  {
-    id: 'trsh-2',
-    title: 'Altpapier (Blaue Tonne)',
-    date: new Date(Date.now() + 86_400_000 * 3).toISOString().split('T')[0],
-    type: 'papier',
-    reminders: [...TRASH_DEFAULT_REMINDERS]
-  },
-  {
-    id: 'trsh-3',
-    title: 'Biomüll (Braune Tonne)',
-    date: new Date(Date.now() + 86_400_000 * 5).toISOString().split('T')[0],
-    type: 'bio',
-    reminders: [...TRASH_DEFAULT_REMINDERS]
-  },
-  {
-    id: 'trsh-4',
-    title: 'Gelber Sack',
-    date: new Date(Date.now() + 86_400_000 * 7).toISOString().split('T')[0],
-    type: 'gelb',
-    reminders: [...TRASH_DEFAULT_REMINDERS]
-  }
-];
+  }));
+}
 
 function detectTrashType(title) {
   const normalized = String(title || '').toLocaleLowerCase('de-DE');
-  if (normalized.includes('papier') || normalized.includes('blau')) {
+  if (
+    normalized.includes('papier') ||
+    normalized.includes('blau') ||
+    normalized.includes('paper') ||
+    normalized.includes('cardboard') ||
+    normalized.includes('blue')
+  ) {
     return 'papier';
   }
   if (
     normalized.includes('bio') ||
     normalized.includes('braun') ||
-    normalized.includes('grün')
+    normalized.includes('grün') ||
+    normalized.includes('organic') ||
+    normalized.includes('compost') ||
+    normalized.includes('brown') ||
+    normalized.includes('green')
   ) {
     return 'bio';
   }
   if (
     normalized.includes('gelb') ||
     normalized.includes('wertstoff') ||
-    normalized.includes('sack')
+    normalized.includes('sack') ||
+    normalized.includes('yellow') ||
+    normalized.includes('recycl') ||
+    normalized.includes('packaging') ||
+    normalized.includes('plastic')
   ) {
     return 'gelb';
   }
@@ -118,7 +93,7 @@ export default function TrashCalendarView() {
   } = useFamily();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState('Restmüll (Schwarze Tonne)');
+  const [newTitle, setNewTitle] = useState(() => t('trash.types.rest'));
   const [newDate, setNewDate] = useState(
     new Date().toISOString().split('T')[0]
   );
@@ -419,15 +394,12 @@ export default function TrashCalendarView() {
                   value={newType}
                   onChange={event => {
                     setNewType(event.target.value);
-                    const type = TRASH_TYPES.find(
-                      item => item.id === event.target.value
-                    );
-                    if (type) setNewTitle(type.name);
+                    setNewTitle(t(`trash.types.${event.target.value}`));
                   }}
                 >
                   {TRASH_TYPES.map(type => (
                     <option key={type.id} value={type.id}>
-                      {type.name}
+                      {t(`trash.types.${type.id}`)}
                     </option>
                   ))}
                 </select>

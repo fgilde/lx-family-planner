@@ -381,6 +381,8 @@
     "internalNextcloudAddress": "Interne Nextcloud-Adresse"
   },
   "labels": {
+    "htmlTitle": "LX Family Planner - Unser Familienplaner",
+    "htmlDescription": "Übersichtlicher, intuitiver Familienplaner mit Kalender, Bring!-Einkaufsliste, Essensplaner, Haushaltsaufgaben, Belohnungssystem und Pinnwand.",
     "someone": "Jemand",
     "theCreator": "dem Ersteller",
     "parent": "Elternteil",

@@ -90,7 +90,9 @@
       "dishTitlePlaceholder": "z. B. Papas berühmte Bolognese",
       "prepTimeLabel": "Zubereitungszeit",
       "servingsLabel": "Portionen",
-      "submit": "Rezept Speichern"
+      "submit": "Rezept Speichern",
+      "placeholderIngredient": "{{number}}x Zutat {{number}}",
+      "placeholderStep": "Zubereitungsschritt {{number}}"
     }
   },
   "cookingMode": {

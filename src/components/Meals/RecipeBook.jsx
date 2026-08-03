@@ -140,8 +140,12 @@ export default function RecipeBook() {
       prepTime: manualPrepTime,
       servings: manualServings,
       image: manualImage || 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80',
-      ingredients: ['1x Zutat 1', '2x Zutat 2'],
-      instructions: ['Zubereitungsschritt 1', 'Zubereitungsschritt 2']
+      ingredients: [1, 2].map(number =>
+        t('recipeBook.manual.placeholderIngredient', { number })
+      ),
+      instructions: [1, 2].map(number =>
+        t('recipeBook.manual.placeholderStep', { number })
+      )
     });
 
     setManualTitle('');

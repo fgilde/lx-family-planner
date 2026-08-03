@@ -21,44 +21,55 @@ import { useFamily } from '../../context/FamilyContext';
 import BringAccountModal from './BringAccountModal';
 
 const POPULAR_NAMES = [
-  'Eier',
-  'Milch',
-  'Butter',
-  'Käse',
-  'Joghurt',
-  'Brötchen',
-  'Brot',
-  'Bananen',
-  'Äpfel',
-  'Tomaten',
-  'Gurken',
-  'Kartoffeln',
-  'Lauch',
-  'Nudeln',
-  'Reis',
-  'Mineralwasser',
-  'Kaffee',
-  'Nougatcreme',
-  'Toilettenpapier',
-  'Spülmittel'
+  ['Eier', 'Eggs'],
+  ['Milch', 'Milk'],
+  ['Butter', 'Butter'],
+  ['Käse', 'Cheese'],
+  ['Joghurt', 'Yoghurt'],
+  ['Brötchen', 'Bread roll'],
+  ['Brot', 'Bread'],
+  ['Bananen', 'Bananas'],
+  ['Äpfel', 'Apples'],
+  ['Tomaten', 'Tomatoes'],
+  ['Gurken', 'Cucumber'],
+  ['Kartoffeln', 'Potatoes'],
+  ['Lauch', 'Leek'],
+  ['Nudeln', 'Pasta'],
+  ['Reis', 'Rice'],
+  ['Mineralwasser', 'Water'],
+  ['Kaffee', 'Coffee'],
+  ['Nougatcreme', 'Nougat cream'],
+  ['Toilettenpapier', 'Toilet paper'],
+  ['Spülmittel', 'Washing-up liquid']
 ];
 
-const PERSONAL_FAVORITES = [
-  {
-    id: 'custom-nutella',
-    name: 'Nutella',
-    category: 'Snacks & Süsswaren',
-    icon: '🍫',
-    aliases: 'nougatcreme nuss nougat aufstrich'
-  },
-  {
-    id: 'custom-porree',
-    name: 'Porree',
-    category: 'Obst & Gemüse',
-    icon: '🥦',
-    aliases: 'lauch poree'
-  }
-];
+const PERSONAL_FAVORITES = {
+  de: [
+    {
+      id: 'custom-nutella',
+      name: 'Nutella',
+      category: 'Snacks & Süsswaren',
+      icon: '🍫',
+      aliases: 'nougatcreme nuss nougat aufstrich'
+    },
+    {
+      id: 'custom-porree',
+      name: 'Porree',
+      category: 'Obst & Gemüse',
+      icon: '🥦',
+      aliases: 'lauch poree'
+    }
+  ],
+  en: [
+    {
+      id: 'custom-nutella',
+      name: 'Nutella',
+      category: 'Snacks & Sweets',
+      icon: '🍫',
+      aliases: 'nougat cream chocolate spread'
+    }
+  ]
+};
 
 const NAME_ALIASES = {
   lauch: 'porree poree',
@@ -99,7 +110,10 @@ function rankMatch(item, query) {
 }
 
 export default function BringShoppingList() {
-  const { t } = useTranslation('shopping');
+  const { t, i18n } = useTranslation('shopping');
+  const personalFavorites = i18n.language?.startsWith('en')
+    ? PERSONAL_FAVORITES.en
+    : PERSONAL_FAVORITES.de;
   const {
     shoppingItems,
     toggleShoppingSelected,
@@ -141,21 +155,21 @@ export default function BringShoppingList() {
       shoppingItems.map(item => ({
         id: `remembered-${item.id}`,
         name: item.name,
-        category: item.category || 'Eigene Artikel',
+        category: item.category || t('catalog.customCategory'),
         icon: item.icon || '🛒',
         aliases: ''
       })),
-    [shoppingItems]
+    [shoppingItems, t]
   );
 
   const allChoices = useMemo(
     () =>
       uniqueByName([
-        ...PERSONAL_FAVORITES,
+        ...personalFavorites,
         ...catalogItems,
         ...rememberedItems
       ]),
-    [catalogItems, rememberedItems]
+    [catalogItems, personalFavorites, rememberedItems]
   );
 
   const popularItems = useMemo(() => {
@@ -163,10 +177,14 @@ export default function BringShoppingList() {
       allChoices.map(item => [normalizeSearch(item.name), item])
     );
     return uniqueByName([
-      ...POPULAR_NAMES.map(name => byName.get(normalizeSearch(name))).filter(Boolean),
-      ...PERSONAL_FAVORITES
+      ...POPULAR_NAMES
+        .map(names =>
+          names.map(name => byName.get(normalizeSearch(name))).find(Boolean)
+        )
+        .filter(Boolean),
+      ...personalFavorites
     ]);
-  }, [allChoices]);
+  }, [allChoices, personalFavorites]);
 
   const visibleCatalog = useMemo(() => {
     const normalizedQuery = normalizeSearch(query);

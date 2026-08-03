@@ -116,6 +116,12 @@
       "dateLabel": "Pickup date",
       "save": "Save pickup"
     },
+    "types": {
+      "rest": "General waste (black bin)",
+      "papier": "Paper (blue bin)",
+      "bio": "Organic waste (brown/green bin)",
+      "gelb": "Yellow bag / recyclables"
+    },
     "toast": {
       "importFailedTitle": "Import not possible",
       "importFailedBody": "No waste collection dates were found in this file.",
