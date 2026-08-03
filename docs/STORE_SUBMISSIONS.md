@@ -8,13 +8,13 @@ Registry, Unraid Community Applications and the Umbrel App Store.
 All stores use the same signed release source:
 
 ```text
-ghcr.io/laxxx-lab/lx-family-planner:1.14.0
+ghcr.io/laxxx-lab/lx-family-planner:1.14.1
 ```
 
 Immutable release digest:
 
 ```text
-sha256:952301dffc9d5a5a9c85660f66c7f415f0b019acfece7c9694ca8ba6b9e3a551
+sha256:f61b21e7a3e41c8a6546a969e691ff3fc0d59f07a0ced5dcc82ed2058c40c3f2
 ```
 
 Supported platforms:
