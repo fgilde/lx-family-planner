@@ -166,3 +166,34 @@ test('Docker startup repairs Unraid bind-mount permissions before dropping privi
   assert.match(unraidTemplate, /Target="PUID" Default="99"/);
   assert.match(unraidTemplate, /Target="PGID" Default="100"/);
 });
+
+test('Umbrel package uses the current release without root capabilities', () => {
+  const compose = fs.readFileSync(
+    path.join(
+      projectRoot,
+      'deploy',
+      'umbrel',
+      'lx-family-planner',
+      'docker-compose.yml'
+    ),
+    'utf8'
+  );
+  const manifest = fs.readFileSync(
+    path.join(
+      projectRoot,
+      'deploy',
+      'umbrel',
+      'lx-family-planner',
+      'umbrel-app.yml'
+    ),
+    'utf8'
+  );
+  assert.match(
+    compose,
+    /image: ghcr\.io\/laxxx-lab\/lx-family-planner:1\.14\.0@sha256:[a-f0-9]{64}/
+  );
+  assert.match(compose, /user: "1000:1000"/);
+  assert.doesNotMatch(compose, /cap_add:/);
+  assert.match(manifest, /version: "1\.14\.0"/);
+  assert.match(manifest, /releaseNotes: ""/);
+});
