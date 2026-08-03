@@ -39,6 +39,7 @@ import {
   formatDate,
   getWeekdayNames
 } from '../../utils/formatting';
+import { eventIsForMember } from '../../../shared/calendarAudience.js';
 
 const SECTIONS = [
   { id: 'today', labelKey: 'sections.today', icon: Sparkles },
@@ -77,6 +78,21 @@ function lastSevenDateKeys() {
     date.setDate(date.getDate() - (6 - index));
     return localDateKey(date);
   });
+}
+
+function dateKeyForWeekday(weekday, { next = false } = {}) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  const currentWeekday = date.getDay();
+  let offset = Number(weekday) - currentWeekday;
+  if (next && offset < 0) offset += 7;
+  if (!next) {
+    const mondayOffset = (currentWeekday + 6) % 7;
+    date.setDate(date.getDate() - mondayOffset);
+    offset = Number(weekday) - 1;
+  }
+  date.setDate(date.getDate() + offset);
+  return localDateKey(date);
 }
 
 function routineStreak(routine) {
@@ -134,6 +150,7 @@ export default function FamilyLifeHub() {
     encouragements,
     familyMissions,
     familySettings,
+    kidProfiles,
     addFamilyLifeRecord,
     updateFamilyLifeRecord,
     deleteFamilyLifeRecord,
@@ -141,7 +158,8 @@ export default function FamilyLifeHub() {
     toggleSchoolItem,
     voteFamilyPoll,
     toggleFamilyMission,
-    addPocketMoneyTransaction
+    addPocketMoneyTransaction,
+    updateKidProfile
   } = useFamily();
   const isAdult = canManageFamily(activeMember);
   const children = useMemo(
@@ -196,8 +214,13 @@ export default function FamilyLifeHub() {
     date: today,
     weekday: String(new Date().getDay()),
     time: '',
+    endTime: '',
+    period: '1',
+    room: '',
+    teacher: '',
     details: ''
   });
+  const [cancellationDates, setCancellationDates] = useState({});
   const [pollForm, setPollForm] = useState({
     question: '',
     options: t('polls.form.defaultOptions'),
@@ -252,6 +275,31 @@ export default function FamilyLifeHub() {
     routine => routine.memberId === selectedId && routine.active !== false
   );
   const mySchoolItems = schoolItems.filter(item => item.memberId === selectedId);
+  const selectedKidProfile = kidProfiles.find(
+    profile => profile.memberId === selectedId
+  );
+  const schoolEnabled =
+    selectedKidProfile &&
+    Object.hasOwn(selectedKidProfile, 'schoolEnabled')
+      ? selectedKidProfile.schoolEnabled === true
+      : mySchoolItems.length > 0;
+  const visibleSections =
+    isAdult || schoolEnabled
+      ? SECTIONS
+      : SECTIONS.filter(item => item.id !== 'school');
+  const timetableLessons = mySchoolItems
+    .filter(item => item.kind === 'lesson')
+    .sort((left, right) =>
+      `${left.weekday}${String(left.period || 0).padStart(2, '0')}${left.time || ''}`
+        .localeCompare(
+          `${right.weekday}${String(right.period || 0).padStart(2, '0')}${right.time || ''}`
+        )
+    );
+  useEffect(() => {
+    if (!isAdult && !schoolEnabled && section === 'school') {
+      setSection('today');
+    }
+  }, [isAdult, schoolEnabled, section]);
   const myTransactions = pocketMoneyTransactions
     .filter(transaction => transaction.memberId === selectedId)
     .sort((left, right) => Number(right.createdAt || 0) - Number(left.createdAt || 0));
@@ -288,9 +336,7 @@ export default function FamilyLifeHub() {
   ).length;
   const nextEvent = events
     .filter(event =>
-      (!event.memberId ||
-        event.memberId === 'all' ||
-        event.memberId === selectedId) &&
+      eventIsForMember(event, selectedId) &&
       (!event.date || event.date >= today)
     )
     .sort((left, right) =>
@@ -377,6 +423,29 @@ export default function FamilyLifeHub() {
       weekday: Number(schoolForm.weekday)
     });
     if (created) setSchoolForm(previous => ({ ...previous, title: '', details: '' }));
+  };
+
+  const setSchoolEnabled = async enabled => {
+    if (!isAdult || !selectedId) return;
+    await updateKidProfile(selectedId, { schoolEnabled: enabled });
+  };
+
+  const toggleLessonCancellation = async lesson => {
+    if (!isAdult) return;
+    const date = cancellationDates[lesson.id] ||
+      dateKeyForWeekday(lesson.weekday, { next: true });
+    if (new Date(`${date}T12:00:00`).getDay() !== Number(lesson.weekday)) {
+      return;
+    }
+    const current = Array.isArray(lesson.cancellations)
+      ? lesson.cancellations
+      : [];
+    const cancellations = current.includes(date)
+      ? current.filter(entry => entry !== date)
+      : [...current, date];
+    await updateFamilyLifeRecord('schoolItems', lesson.id, {
+      cancellations
+    });
   };
 
   const createPoll = async event => {
@@ -492,7 +561,7 @@ export default function FamilyLifeHub() {
       </section>
 
       <nav className="family-life-nav" aria-label={t('hero.navAria')}>
-        {SECTIONS.map(item => {
+        {visibleSections.map(item => {
           const Icon = item.icon;
           return (
             <button
@@ -893,9 +962,146 @@ export default function FamilyLifeHub() {
       {section === 'school' && (
         <div className="family-life-section school-desk">
           <section className="family-life-panel school-overview">
-            <PanelHeader kicker={t('school.kicker')} title={t('school.title', { name: selectedMember?.name })} icon={GraduationCap} />
-            <div className="school-kind-grid">
-              {Object.entries(SCHOOL_KIND).map(([kind, meta]) => {
+            <PanelHeader kicker={t('school.kicker')} title={t('school.title', { name: selectedMember?.name })} icon={GraduationCap}>
+              {isAdult && (
+                <button
+                  type="button"
+                  className={`school-feature-switch ${schoolEnabled ? 'is-on' : ''}`}
+                  onClick={() => setSchoolEnabled(!schoolEnabled)}
+                  aria-pressed={schoolEnabled}
+                >
+                  {schoolEnabled
+                    ? t('school.settings.enabled')
+                    : t('school.settings.disabled')}
+                </button>
+              )}
+            </PanelHeader>
+            {!schoolEnabled ? (
+              <div className="school-disabled-state">
+                <span><GraduationCap size={28} /></span>
+                <div>
+                  <strong>{t('school.settings.disabledTitle')}</strong>
+                  <p>{t('school.settings.disabledHint')}</p>
+                </div>
+                {isAdult && (
+                  <button type="button" onClick={() => setSchoolEnabled(true)}>
+                    {t('school.settings.enable')}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="school-timetable">
+                  {[1, 2, 3, 4, 5].map(weekday => {
+                    const dayLessons = timetableLessons.filter(
+                      lesson => Number(lesson.weekday) === weekday
+                    );
+                    const currentDate = dateKeyForWeekday(weekday);
+                    return (
+                      <section key={weekday}>
+                        <header>
+                          <strong>{weekdays[weekday]}</strong>
+                          <small>{formatDate(`${currentDate}T12:00:00`, {
+                            day: '2-digit',
+                            month: '2-digit'
+                          })}</small>
+                        </header>
+                        <div>
+                          {dayLessons.map(lesson => {
+                            const cancelled = lesson.cancellations?.includes(
+                              currentDate
+                            );
+                            const cancellationDate =
+                              cancellationDates[lesson.id] ||
+                              dateKeyForWeekday(lesson.weekday, { next: true });
+                            const cancellationDateMatches =
+                              new Date(`${cancellationDate}T12:00:00`).getDay() ===
+                              Number(lesson.weekday);
+                            const selectedDateCancelled =
+                              lesson.cancellations?.includes(cancellationDate);
+                            return (
+                              <article
+                                key={lesson.id}
+                                className={cancelled ? 'is-cancelled' : ''}
+                              >
+                                <div className="school-lesson-time">
+                                  <b>
+                                    {lesson.period
+                                      ? t('school.timetable.period', {
+                                          count: lesson.period
+                                        })
+                                      : lesson.time || '–'}
+                                  </b>
+                                  {lesson.period && lesson.time && (
+                                    <small>
+                                      {lesson.time}
+                                      {lesson.endTime ? `–${lesson.endTime}` : ''}
+                                    </small>
+                                  )}
+                                </div>
+                                <div className="school-lesson-copy">
+                                  <strong>{lesson.subject || lesson.title}</strong>
+                                  <span>{lesson.title}</span>
+                                  {(lesson.room || lesson.teacher) && (
+                                    <small>
+                                      {[lesson.room, lesson.teacher]
+                                        .filter(Boolean)
+                                        .join(' · ')}
+                                    </small>
+                                  )}
+                                  {cancelled && (
+                                    <em>{t('school.timetable.cancelled')}</em>
+                                  )}
+                                </div>
+                                {isAdult && (
+                                  <div className="school-lesson-actions">
+                                    <input
+                                      type="date"
+                                      min={today}
+                                      value={cancellationDate}
+                                      onChange={event =>
+                                        setCancellationDates(previous => ({
+                                          ...previous,
+                                          [lesson.id]: event.target.value
+                                        }))
+                                      }
+                                      aria-label={t('school.timetable.cancellationDate')}
+                                    />
+                                    <button
+                                      type="button"
+                                      disabled={!cancellationDateMatches}
+                                      onClick={() => toggleLessonCancellation(lesson)}
+                                    >
+                                      <BellOff size={13} />
+                                      {selectedDateCancelled
+                                        ? t('school.timetable.restore')
+                                        : t('school.timetable.cancelOnce')}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="is-delete"
+                                      onClick={() => deleteFamilyLifeRecord('schoolItems', lesson.id)}
+                                      aria-label={t('school.deleteAria')}
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                )}
+                              </article>
+                            );
+                          })}
+                          {!dayLessons.length && (
+                            <p>{t('school.timetable.free')}</p>
+                          )}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
+                <div className="school-kind-grid">
+              {Object.entries(SCHOOL_KIND)
+                .filter(([kind]) => kind !== 'lesson')
+                .map(([kind, meta]) => {
                 const items = mySchoolItems
                   .filter(item => item.kind === kind)
                   .sort((left, right) =>
@@ -939,9 +1145,11 @@ export default function FamilyLifeHub() {
                   </section>
                 );
               })}
-            </div>
+                </div>
+              </>
+            )}
           </section>
-          {isAdult && selectedId && (
+          {isAdult && selectedId && schoolEnabled && (
             <section className="family-life-panel">
               <PanelHeader kicker={t('school.form.kicker')} title={t('school.form.title')} icon={BookOpenCheck} />
               <form onSubmit={createSchoolItem} className="family-life-form">
@@ -967,20 +1175,60 @@ export default function FamilyLifeHub() {
                   required
                 />
                 {schoolForm.kind === 'lesson' ? (
-                  <div className="form-row">
-                    <select
-                      value={schoolForm.weekday}
-                      onChange={event => setSchoolForm(previous => ({ ...previous, weekday: event.target.value }))}
-                    >
-                      {weekdays.slice(1, 6).map((day, index) => (
-                        <option key={day} value={index + 1}>{day}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="time"
-                      value={schoolForm.time}
-                      onChange={event => setSchoolForm(previous => ({ ...previous, time: event.target.value }))}
-                    />
+                  <div className="school-lesson-form-fields">
+                    <div className="form-row">
+                      <label>
+                        <span>{t('school.form.weekday')}</span>
+                        <select
+                          value={schoolForm.weekday}
+                          onChange={event => setSchoolForm(previous => ({ ...previous, weekday: event.target.value }))}
+                        >
+                          {weekdays.slice(1, 6).map((day, index) => (
+                            <option key={day} value={index + 1}>{day}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>{t('school.form.period')}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={schoolForm.period}
+                          onChange={event => setSchoolForm(previous => ({ ...previous, period: event.target.value }))}
+                        />
+                      </label>
+                    </div>
+                    <div className="form-row">
+                      <label>
+                        <span>{t('school.form.startsAt')}</span>
+                        <input
+                          type="time"
+                          value={schoolForm.time}
+                          onChange={event => setSchoolForm(previous => ({ ...previous, time: event.target.value }))}
+                        />
+                      </label>
+                      <label>
+                        <span>{t('school.form.endsAt')}</span>
+                        <input
+                          type="time"
+                          value={schoolForm.endTime}
+                          onChange={event => setSchoolForm(previous => ({ ...previous, endTime: event.target.value }))}
+                        />
+                      </label>
+                    </div>
+                    <div className="form-row">
+                      <input
+                        value={schoolForm.room}
+                        onChange={event => setSchoolForm(previous => ({ ...previous, room: event.target.value }))}
+                        placeholder={t('school.form.roomPlaceholder')}
+                      />
+                      <input
+                        value={schoolForm.teacher}
+                        onChange={event => setSchoolForm(previous => ({ ...previous, teacher: event.target.value }))}
+                        placeholder={t('school.form.teacherPlaceholder')}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <input

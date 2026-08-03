@@ -33,6 +33,7 @@ import { formatCurrency } from '../../utils/formatting';
 import HomeAssistantWidget from './HomeAssistantWidget';
 import MediaCover from './MediaCover';
 import RewardIcon from '../Tasks/RewardIcon';
+import { eventIsForMember } from '../../../shared/calendarAudience.js';
 
 // Die label-Werte werden als heroTitle im Profil gespeichert und bleiben
 // deshalb deutsch – angezeigt wird die Übersetzung (child.worlds.*).
@@ -126,11 +127,7 @@ export default function ChildDashboard() {
     })
     .sort((a, b) => Number(a.costStars || 0) - Number(b.costStars || 0));
   const upcomingEvents = events
-    .filter(event =>
-      !event.memberId ||
-      event.memberId === 'all' ||
-      event.memberId === activeMember?.id
-    )
+    .filter(event => eventIsForMember(event, activeMember?.id))
     .filter(event => !event.date || event.date >= new Date().toISOString().slice(0, 10))
     .sort((a, b) => `${a.date}${a.time || ''}`.localeCompare(`${b.date}${b.time || ''}`))
     .slice(0, 3);

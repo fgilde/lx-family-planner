@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
+import { eventAudienceMembers } from '../../../shared/calendarAudience.js';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { isChildProfile } from '../../constants/roles';
 import DashboardCustomizer from './DashboardCustomizer';
@@ -349,7 +350,8 @@ export default function KitchenTabletView() {
           {todayEvents.length ? (
             <div className="tablet-event-list">
               {todayEvents.slice(0, 4).map(event => {
-                const member = members.find(entry => entry.id === event.memberId);
+                const audience = eventAudienceMembers(event, members);
+                const member = audience[0];
                 return (
                   <button
                     type="button"
@@ -361,7 +363,7 @@ export default function KitchenTabletView() {
                       <strong>{event.title}</strong>
                       <small>
                         {event.location ||
-                          member?.name ||
+                          audience.map(entry => entry.name).join(', ') ||
                           t('kitchen.cards.calendar.familyFallback')}
                       </small>
                     </span>

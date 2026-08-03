@@ -34,6 +34,7 @@
     "calendarsSyncFailed": "Calendars could not be refreshed",
     "calendarSourceRemoveFailed": "Calendar source could not be removed",
     "eventRemindersSaveFailed": "Event reminders could not be saved",
+    "eventSaveFailed": "The event could not be saved",
     "shoppingItemAddFailed": "Item could not be added",
     "bringItemUpdateFailed": "Bring! item could not be updated",
     "bringIngredientsTransferFailed": "Ingredients could not be transferred to Bring!",
@@ -210,6 +211,10 @@
     "eventAdded": {
       "title": "Event added",
       "message": "\"{{title}}\" is now in the calendar."
+    },
+    "eventUpdated": {
+      "title": "Event saved",
+      "message": "\"{{title}}\" was updated for everyone selected."
     },
     "eventRemindersSaved": {
       "title": "Event reminders saved",

@@ -50,11 +50,40 @@
       "sharedWith": "With {{names}}",
       "memberManaged": "{{name}} · managed",
       "wholeFamily": "Whole family",
+      "openAria": "Open event {{title}}",
       "readOnlyTitle": "This event is managed by its calendar source",
       "editRemindersTitle": "Edit reminders",
       "editRemindersAria": "Edit reminders for {{title}}",
       "deleteTitle": "Delete event",
       "deleteAria": "Delete {{title}}"
+    }
+  },
+  "editor": {
+    "kicker": "Event details",
+    "title": "Edit event",
+    "description": "Change the time, people, location and reminders together.",
+    "readOnlyKicker": "Calendar source",
+    "readOnlyDescription": "This event is managed by its connected calendar source and can only be viewed here.",
+    "save": "Save changes",
+    "delete": "Delete event",
+    "deleteConfirm": "Really delete \"{{title}}\"?",
+    "fields": {
+      "title": "Title",
+      "allDay": "All-day event",
+      "allDayHint": "No fixed time – can span several days.",
+      "startDate": "Starts on",
+      "startTime": "Start time",
+      "endDate": "Ends on (optional)",
+      "endDateInclusive": "Through (optional)",
+      "endTime": "End time (optional)",
+      "location": "Location (optional)",
+      "locationPlaceholder": "e.g. school or doctor's office",
+      "notes": "Notes (optional)"
+    },
+    "audience": {
+      "title": "Who is this event for?",
+      "hint": "Choose the whole family or select several people.",
+      "everyone": "Whole family"
     }
   },
   "trash": {

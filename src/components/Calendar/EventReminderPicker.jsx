@@ -10,7 +10,8 @@ import {
 export default function EventReminderPicker({
   value,
   onChange,
-  maxSelections = 6
+  maxSelections = 6,
+  disabled = false
 }) {
   const { t } = useTranslation('calendar');
   const { t: tShared } = useTranslation('shared');
@@ -49,7 +50,7 @@ export default function EventReminderPicker({
               key={option.minutes}
               className={active ? 'is-selected' : ''}
               aria-pressed={active}
-              disabled={limitReached}
+              disabled={disabled || limitReached}
               onClick={() => toggle(option.minutes)}
             >
               <span>

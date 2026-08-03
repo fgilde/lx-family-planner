@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
+import { eventIsForMember } from '../../../shared/calendarAudience.js';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../../utils/imageFallback';
 import { formatDate } from '../../utils/formatting';
 
@@ -60,8 +61,7 @@ export default function PetDashboard() {
   const appointments = events
     .filter(
       event =>
-        event.memberId === activeMember?.id ||
-        event.memberId === 'all'
+        eventIsForMember(event, activeMember?.id)
     )
     .filter(event => !event.date || event.date >= today)
     .sort((left, right) => upcomingDateValue(left) - upcomingDateValue(right));

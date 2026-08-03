@@ -115,6 +115,21 @@
   "school": {
     "kicker": "Alles für den Schultag",
     "title": "{{name}}s Schulbereich",
+    "settings": {
+      "enabled": "Stundenplan aktiv",
+      "disabled": "Stundenplan aus",
+      "disabledTitle": "Der Schulbereich ist für dieses Kind ausgeschaltet",
+      "disabledHint": "Aktiviere ihn nur für Schulkinder. Danach sehen Eltern den Editor und das Kind seinen eigenen Stundenplan.",
+      "enable": "Schulbereich aktivieren"
+    },
+    "timetable": {
+      "period": "{{count}}. Std.",
+      "free": "Noch frei",
+      "cancelled": "Fällt diese Woche aus",
+      "cancellationDate": "Datum des einmaligen Unterrichtsausfalls",
+      "cancelOnce": "Einmalig ausfallen lassen",
+      "restore": "Ausfall zurücknehmen"
+    },
     "kinds": {
       "lesson": "Stundenplan",
       "homework": "Hausaufgabe",
@@ -128,6 +143,12 @@
       "title": "Schuleintrag anlegen",
       "subjectPlaceholder": "Fach",
       "titlePlaceholder": "Was steht an?",
+      "weekday": "Wochentag",
+      "period": "Schulstunde",
+      "startsAt": "Beginn",
+      "endsAt": "Ende",
+      "roomPlaceholder": "Raum (optional)",
+      "teacherPlaceholder": "Lehrkraft (optional)",
       "detailsPlaceholder": "Buch, Material oder kurze Notiz",
       "submit": "Eintragen"
     }

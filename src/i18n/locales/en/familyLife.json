@@ -115,6 +115,21 @@
   "school": {
     "kicker": "Everything for the school day",
     "title": "{{name}}'s school area",
+    "settings": {
+      "enabled": "Timetable on",
+      "disabled": "Timetable off",
+      "disabledTitle": "The school area is turned off for this child",
+      "disabledHint": "Enable it only for schoolchildren. Parents can then edit it and the child can view their own timetable.",
+      "enable": "Enable school area"
+    },
+    "timetable": {
+      "period": "Period {{count}}",
+      "free": "Free",
+      "cancelled": "Cancelled this week",
+      "cancellationDate": "Date of the one-off lesson cancellation",
+      "cancelOnce": "Cancel once",
+      "restore": "Restore lesson"
+    },
     "kinds": {
       "lesson": "Timetable",
       "homework": "Homework",
@@ -128,6 +143,12 @@
       "title": "Create school entry",
       "subjectPlaceholder": "Subject",
       "titlePlaceholder": "What's coming up?",
+      "weekday": "Weekday",
+      "period": "Period",
+      "startsAt": "Starts at",
+      "endsAt": "Ends at",
+      "roomPlaceholder": "Room (optional)",
+      "teacherPlaceholder": "Teacher (optional)",
       "detailsPlaceholder": "Book, materials or a short note",
       "submit": "Add entry"
     }

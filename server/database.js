@@ -2147,6 +2147,9 @@ function mapSharedFamilyEvent(row, familyId) {
     ...data,
     id: owner ? row.id : `shared-${row.id}`,
     memberId: owner ? (data.memberId || 'all') : 'all',
+    memberIds: owner
+      ? (Array.isArray(data.memberIds) ? data.memberIds : [])
+      : [],
     household: owner ? (data.household || 'familie') : 'familie',
     readOnly: !owner,
     sharedEventId: row.id,
@@ -2245,6 +2248,59 @@ export function createSharedFamilyEvent(
       `)
       .get(id);
     return mapSharedFamilyEvent(row, ownerFamilyId);
+  });
+}
+
+export function updateSharedFamilyEvent(
+  ownerFamilyId,
+  eventId,
+  changes = {}
+) {
+  const existing = database
+    .prepare(`
+      SELECT event.*, owner.name AS owner_family_name
+      FROM shared_family_events event
+      JOIN families owner ON owner.id = event.owner_family_id
+      WHERE event.id = ? AND event.owner_family_id = ?
+    `)
+    .get(eventId, ownerFamilyId);
+  if (!existing) return null;
+  const recipientFamilyIds = database
+    .prepare(`
+      SELECT family_id
+      FROM shared_family_event_recipients
+      WHERE event_id = ?
+    `)
+    .all(eventId)
+    .map(row => row.family_id);
+  const updatedAt = Date.now();
+  const data = {
+    ...parseJsonObject(existing.data_json),
+    ...(changes || {}),
+    id: eventId
+  };
+  return withTransaction(() => {
+    database
+      .prepare(`
+        UPDATE shared_family_events
+        SET data_json = ?, updated_at = ?
+        WHERE id = ? AND owner_family_id = ?
+      `)
+      .run(JSON.stringify(data), updatedAt, eventId, ownerFamilyId);
+    bumpFamilyVersion(ownerFamilyId);
+    recipientFamilyIds.forEach(familyId => bumpFamilyVersion(familyId));
+    const row = database
+      .prepare(`
+        SELECT event.*, owner.name AS owner_family_name
+        FROM shared_family_events event
+        JOIN families owner ON owner.id = event.owner_family_id
+        WHERE event.id = ?
+      `)
+      .get(eventId);
+    return {
+      event: mapSharedFamilyEvent(row, ownerFamilyId),
+      recipientFamilyIds
+    };
   });
 }
 

@@ -34,6 +34,7 @@
     "calendarsSyncFailed": "Kalender konnten nicht aktualisiert werden",
     "calendarSourceRemoveFailed": "Kalenderquelle konnte nicht entfernt werden",
     "eventRemindersSaveFailed": "Terminerinnerungen konnten nicht gespeichert werden",
+    "eventSaveFailed": "Der Termin konnte nicht gespeichert werden",
     "shoppingItemAddFailed": "Artikel konnte nicht hinzugefügt werden",
     "bringItemUpdateFailed": "Bring!-Artikel konnte nicht aktualisiert werden",
     "bringIngredientsTransferFailed": "Zutaten konnten nicht an Bring! übertragen werden",
@@ -210,6 +211,10 @@
     "eventAdded": {
       "title": "Termin hinzugefügt",
       "message": "\"{{title}}\" steht jetzt im Kalender."
+    },
+    "eventUpdated": {
+      "title": "Termin gespeichert",
+      "message": "\"{{title}}\" wurde für alle ausgewählten Personen aktualisiert."
     },
     "eventRemindersSaved": {
       "title": "Terminerinnerungen gespeichert",

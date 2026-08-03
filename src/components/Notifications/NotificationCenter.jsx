@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
+import { eventIsForMember } from '../../../shared/calendarAudience.js';
 import { canManageFamily } from '../../constants/roles';
 import {
   formatDate,
@@ -211,9 +212,7 @@ export default function NotificationCenter() {
           event.date === today &&
           belongsToHousehold(event) &&
           (
-            !event.memberId ||
-            event.memberId === 'all' ||
-            event.memberId === activeMember?.id
+            eventIsForMember(event, activeMember?.id)
           )
       )
       .sort((left, right) =>

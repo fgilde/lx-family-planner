@@ -2,6 +2,28 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.15.0] – 2026-08-03
+
+### Kalenderbearbeitung, mehrere Teilnehmer und Kinder-Stundenplan
+
+- Termine lassen sich über die gesamte Kalenderkarte öffnen und anschließend
+  vollständig bearbeiten oder löschen
+- Titel, Datum, Uhrzeit, Ganztägigkeit, Ende, Ort, Notizen, Erinnerungen und
+  Teilnehmer bleiben gemeinsam änderbar
+- ein Termin kann nun mehreren Familienmitgliedern gleichzeitig zugeordnet
+  werden; vorhandene Einzeltermine bleiben vollständig kompatibel
+- geteilte Termine lassen sich von ihrer Besitzerfamilie ebenfalls bearbeiten
+  und werden bei verbundenen Familien aktualisiert
+- Erwachsene können für jedes Kind einzeln einen Schulbereich aktivieren
+- der neue Stundenplan zeigt Montag bis Freitag sowie Fach, Schulstunde,
+  Uhrzeit, Raum und Lehrkraft
+- einzelne Unterrichtsstunden können für ein konkretes Datum als ausgefallen
+  markiert und wiederhergestellt werden; abgelaufene Ausfälle werden bereinigt
+- die Rezeptbuch-Aktionen brechen auf schmalen Handys sauber um und bleiben
+  vollständig innerhalb der Oberfläche
+- bestehende Familien, Termine, Kalenderquellen, Kinderprofile und
+  Einstellungen werden unverändert übernommen
+
 ## [1.14.3] – 2026-08-03
 
 ### Sicherheitsfix für das öffentliche Demo-Konto

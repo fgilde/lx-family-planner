@@ -29,6 +29,11 @@ import {
 import { formatDate } from '../../utils/formatting';
 import CalendarSubscriptionManager from './CalendarSubscriptionManager';
 import EventReminderDialog from './EventReminderDialog';
+import CalendarEventDialog from './CalendarEventDialog';
+import {
+  eventAudienceMembers,
+  eventIsForMember
+} from '../../../shared/calendarAudience.js';
 import {
   formatReminderLead,
   normalizeEventReminders
@@ -95,6 +100,7 @@ export default function CalendarView() {
   const [showPast, setShowPast] = useState(false);
   const [isSourcesOpen, setIsSourcesOpen] = useState(false);
   const [selectedReminderEvent, setSelectedReminderEvent] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const todayKey = localDateKey();
   const canManage = canManageFamily(activeMember);
 
@@ -113,8 +119,7 @@ export default function CalendarView() {
         .filter(
           event =>
             selectedMemberFilter === 'all' ||
-            event.memberId === 'all' ||
-            event.memberId === selectedMemberFilter
+            eventIsForMember(event, selectedMemberFilter)
         )
         .sort((left, right) => eventDateValue(left) - eventDateValue(right)),
     [householdEvents, selectedMemberFilter, showPast, todayKey]
@@ -303,9 +308,8 @@ export default function CalendarView() {
 
                 <div className="calendar-day-events">
                   {dayEvents.map(event => {
-                    const member = members.find(
-                      entry => entry.id === event.memberId
-                    );
+                    const audienceMembers = eventAudienceMembers(event, members);
+                    const member = audienceMembers[0];
                     const accent =
                       event.sourceColor || member?.color || 'var(--primary)';
                     const reminders = normalizeEventReminders(
@@ -326,6 +330,21 @@ export default function CalendarView() {
                           event.readOnly ? 'is-subscribed' : ''
                         }`}
                         style={{ '--event-color': accent }}
+                        role="button"
+                        tabIndex="0"
+                        aria-label={t('view.event.openAria', {
+                          title: event.title
+                        })}
+                        onClick={() => setSelectedEvent(event)}
+                        onKeyDown={keyboardEvent => {
+                          if (
+                            keyboardEvent.key === 'Enter' ||
+                            keyboardEvent.key === ' '
+                          ) {
+                            keyboardEvent.preventDefault();
+                            setSelectedEvent(event);
+                          }
+                        }}
                       >
                         <div className="calendar-event-time">
                           <strong>
@@ -387,12 +406,10 @@ export default function CalendarView() {
                             )}
                             <span>
                               <UserRound size={13} />
-                              {member
-                                ? isManagedProfile(member)
-                                  ? t('view.event.memberManaged', {
-                                      name: member.name
-                                    })
-                                  : member.name
+                              {audienceMembers.length
+                                ? audienceMembers
+                                    .map(entry => entry.name)
+                                    .join(', ')
                                 : t('view.event.wholeFamily')}
                             </span>
                             {reminders.length > 0 && (
@@ -426,9 +443,10 @@ export default function CalendarView() {
                               <button
                                 type="button"
                                 className="calendar-event-reminder-button"
-                                onClick={() =>
+                                onClick={clickEvent => {
+                                  clickEvent.stopPropagation();
                                   setSelectedReminderEvent(event)
-                                }
+                                }}
                                 title={t('view.event.editRemindersTitle')}
                                 aria-label={t('view.event.editRemindersAria', {
                                   title: event.title
@@ -440,7 +458,10 @@ export default function CalendarView() {
                             <button
                               type="button"
                               className="calendar-event-delete"
-                              onClick={() => deleteEvent(event.id)}
+                              onClick={clickEvent => {
+                                clickEvent.stopPropagation();
+                                deleteEvent(event.id);
+                              }}
                               title={t('view.event.deleteTitle')}
                               aria-label={t('view.event.deleteAria', {
                                 title: event.title
@@ -475,6 +496,13 @@ export default function CalendarView() {
         onSave={(event, reminders) =>
           updateEvent(event.id, { reminders })
         }
+      />
+      <CalendarEventDialog
+        event={selectedEvent}
+        members={members}
+        onClose={() => setSelectedEvent(null)}
+        onSave={(event, changes) => updateEvent(event, changes)}
+        onDelete={event => deleteEvent(event.id)}
       />
     </div>
   );

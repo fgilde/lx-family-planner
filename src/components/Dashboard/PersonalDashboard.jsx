@@ -26,6 +26,7 @@ import OrderedDashboardGrid, {
 } from './OrderedDashboardGrid';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { formatDate } from '../../utils/formatting';
+import { eventIsForMember } from '../../../shared/calendarAudience.js';
 import { isChildProfile, isPetProfile } from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
@@ -174,8 +175,7 @@ export default function PersonalDashboard() {
       events
         .filter(
           event =>
-            (event.memberId === activeMember.id ||
-              event.memberId === 'all') &&
+            eventIsForMember(event, activeMember.id) &&
             belongsToHousehold(event)
         )
         .sort(

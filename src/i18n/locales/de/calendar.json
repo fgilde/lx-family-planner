@@ -50,11 +50,40 @@
       "sharedWith": "Mit {{names}}",
       "memberManaged": "{{name}} · verwaltet",
       "wholeFamily": "Ganze Familie",
+      "openAria": "Termin {{title}} öffnen",
       "readOnlyTitle": "Dieser Termin wird von der Kalenderquelle verwaltet",
       "editRemindersTitle": "Erinnerungen bearbeiten",
       "editRemindersAria": "Erinnerungen für {{title}} bearbeiten",
       "deleteTitle": "Termin löschen",
       "deleteAria": "{{title}} löschen"
+    }
+  },
+  "editor": {
+    "kicker": "Termindetails",
+    "title": "Termin bearbeiten",
+    "description": "Zeit, Personen, Ort und Erinnerungen gemeinsam anpassen.",
+    "readOnlyKicker": "Kalenderquelle",
+    "readOnlyDescription": "Dieser Termin wird von der verbundenen Kalenderquelle verwaltet und kann hier nur angesehen werden.",
+    "save": "Änderungen speichern",
+    "delete": "Termin löschen",
+    "deleteConfirm": "\"{{title}}\" wirklich löschen?",
+    "fields": {
+      "title": "Titel",
+      "allDay": "Ganztägiger Termin",
+      "allDayHint": "Ohne feste Uhrzeit – auch über mehrere Tage möglich.",
+      "startDate": "Beginnt am",
+      "startTime": "Beginn",
+      "endDate": "Endet am (optional)",
+      "endDateInclusive": "Bis einschließlich (optional)",
+      "endTime": "Ende (optional)",
+      "location": "Ort (optional)",
+      "locationPlaceholder": "z. B. Schule oder Arztpraxis",
+      "notes": "Notizen (optional)"
+    },
+    "audience": {
+      "title": "Für wen ist der Termin?",
+      "hint": "Wähle die ganze Familie oder mehrere einzelne Personen aus.",
+      "everyone": "Ganze Familie"
     }
   },
   "trash": {

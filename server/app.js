@@ -15,6 +15,7 @@ import { isIP } from 'net';
 import BringApi from 'bring-shopping';
 import webPush from 'web-push';
 import { parseICalendar } from '../shared/icsCalendar.js';
+import { eventAudienceIds } from '../shared/calendarAudience.js';
 import {
   TASK_REPEAT_RULES,
   normalizeTaskDate
@@ -127,6 +128,7 @@ import {
   updateMember,
   updateProblemReportStatus,
   updateRecord,
+  updateSharedFamilyEvent,
   upsertRecord,
   upsertRecords,
   verifySecret
@@ -1577,17 +1579,17 @@ function eventReminderRecipientMemberIds(familyId, event) {
   ) {
     return signedInMembers.map(member => member.id);
   }
-  if (!event?.memberId || event.memberId === 'all') {
+  const audienceIds = eventAudienceIds(event);
+  if (!audienceIds.length) {
     return signedInMembers.map(member => member.id);
   }
-  const target = members.find(member => member.id === event.memberId);
-  if (!target) return signedInMembers.map(member => member.id);
-  if (isManagedMember(target) || target.role === 'pet') {
-    return signedInMembers
-      .filter(isAdultMember)
-      .map(member => member.id);
-  }
-  return [target.id];
+  return [
+    ...new Set(
+      audienceIds.flatMap(memberId =>
+        profileNotificationRecipientIds(familyId, memberId)
+      )
+    )
+  ];
 }
 
 const MOOD_NOTIFICATION_COPY = Object.freeze({
@@ -1685,7 +1687,8 @@ function calendarEventWasMateriallyChanged(before, after) {
     'endTime',
     'allDay',
     'location',
-    'memberId'
+    'memberId',
+    'memberIds'
   ].some(key => JSON.stringify(before?.[key]) !== JSON.stringify(after?.[key]));
 }
 
@@ -3347,7 +3350,10 @@ function bootstrapForSession(session) {
       entry => !isManagedMember(entry)
     );
     bootstrap.resources.events = bootstrap.resources.events.filter(
-      event => !managedMemberIds.has(event.memberId)
+      event =>
+        !eventAudienceIds(event).some(memberId =>
+          managedMemberIds.has(memberId)
+        )
     );
     bootstrap.resources.tasks = bootstrap.resources.tasks.filter(
       task => !managedMemberIds.has(task.memberId)
@@ -3615,18 +3621,29 @@ function sanitizeCalendarEvent(req, value, existing = null) {
     error.statusCode = 400;
     throw error;
   }
-  const memberId = cleanText(input.memberId, 'all', 100) || 'all';
-  const targetMember =
-    memberId === 'all'
-      ? null
-      : getMember(req.session.familyId, memberId);
-  if (memberId !== 'all' && !targetMember) {
+  const memberIds = [
+    ...new Set(
+      (
+        Array.isArray(input.memberIds)
+          ? input.memberIds
+          : input.memberId && input.memberId !== 'all'
+            ? [input.memberId]
+            : []
+      )
+        .map(value => cleanText(value, '', 100))
+        .filter(value => value && value !== 'all')
+    )
+  ].slice(0, 20);
+  const targetMembers = memberIds.map(memberId =>
+    getMember(req.session.familyId, memberId)
+  );
+  if (targetMembers.some(member => !member)) {
     const error = new Error(translate('errors.selectedFamilyProfileNotFound'));
     error.statusCode = 400;
     throw error;
   }
   if (
-    targetMember?.isManaged &&
+    targetMembers.some(member => member.isManaged) &&
     !isAdultMember(
       req.activeMember ||
       getMember(req.session.familyId, req.session.memberId)
@@ -3662,7 +3679,8 @@ function sanitizeCalendarEvent(req, value, existing = null) {
     endDate,
     endTime,
     allDay,
-    memberId,
+    memberId: memberIds[0] || 'all',
+    memberIds,
     location: cleanText(input.location, '', 300),
     notes: cleanText(input.notes, '', 2000),
     category: cleanText(input.category, 'Allgemein', 80),
@@ -3761,6 +3779,18 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
     const kind = ['lesson', 'homework', 'exam', 'bag'].includes(input.kind)
       ? input.kind
       : 'homework';
+    const monday = new Date();
+    const weekdayOffset = (monday.getDay() + 6) % 7;
+    monday.setHours(12, 0, 0, 0);
+    monday.setDate(monday.getDate() - weekdayOffset);
+    const currentWeekStart = monday.toLocaleDateString('en-CA');
+    const cancellations = [
+      ...new Set(
+        (Array.isArray(input.cancellations) ? input.cancellations : [])
+          .map(value => cleanDate(value, ''))
+          .filter(value => value && value >= currentWeekStart)
+      )
+    ].sort().slice(0, 24);
     return {
       ...existing,
       ...input,
@@ -3772,6 +3802,11 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       date: cleanDate(input.date, ''),
       weekday: Math.max(0, Math.min(6, Math.trunc(Number(input.weekday || 0)))),
       time: cleanTime(input.time, ''),
+      endTime: cleanTime(input.endTime, ''),
+      period: Math.max(0, Math.min(20, Math.trunc(Number(input.period || 0)))),
+      room: cleanText(input.room, '', 80),
+      teacher: cleanText(input.teacher, '', 100),
+      cancellations: kind === 'lesson' ? cancellations : [],
       completed: Boolean(existing?.completed && kind !== 'lesson' && kind !== 'exam'),
       createdAt: Number(existing?.createdAt || input.createdAt || now)
     };
@@ -3911,6 +3946,9 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       memberId: member.id,
       buddy: cleanText(input.buddy, '🦊', 12),
       heroTitle: cleanText(input.heroTitle, 'Familienheld', 40),
+      schoolEnabled: Object.hasOwn(input, 'schoolEnabled')
+        ? Boolean(input.schoolEnabled)
+        : existing?.schoolEnabled,
       updatedAt: now
     };
   }
@@ -6431,21 +6469,13 @@ export function createApp() {
       const recipientFamilyIds = Array.isArray(input.recipientFamilyIds)
         ? input.recipientFamilyIds
         : [];
+      const normalized = sanitizeCalendarEvent(req, input);
       const event = createSharedFamilyEvent(
         req.session.familyId,
         req.session.memberId,
         {
+          ...normalized,
           id: cleanText(input.id, `shared-event-${randomUUID()}`, 100),
-          title: requireText(input.title, translate('fields.eventTitle'), 240),
-          date: cleanDate(input.date, ''),
-          time: cleanTime(input.time, ''),
-          endTime: cleanTime(input.endTime, ''),
-          allDay: Boolean(input.allDay),
-          location: cleanText(input.location, '', 300),
-          notes: cleanText(input.notes, '', 2000),
-          category: cleanText(input.category, 'Familienzeit', 80),
-          memberId: cleanText(input.memberId, 'all', 100),
-          reminders: normalizeEventReminders(input.reminders),
           household: 'familie',
           createdByMemberId: req.activeMember.id,
           createdByName: req.activeMember.name
@@ -6481,6 +6511,58 @@ export function createApp() {
       res.status(201).json({
         success: true,
         event,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.patch(
+    '/api/family/shared-events/:eventId',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const normalized = sanitizeCalendarEvent(req, ensureObject(req.body));
+      const result = updateSharedFamilyEvent(
+        req.session.familyId,
+        req.params.eventId,
+        {
+          ...normalized,
+          household: 'familie'
+        }
+      );
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          error: translate('errors.sharedEventNotFound')
+        });
+      }
+      const ownerFamily = getFamily(req.session.familyId);
+      result.recipientFamilyIds.forEach(familyId => {
+        publishFamilyChange(familyId, 'shared-events');
+        queueNotificationChannels(
+          familyId,
+          'events',
+          {
+            title: translate('push.eventUpdatedTitle'),
+            body: calendarEventBody(
+              result.event,
+              ownerFamily.familyName
+            ),
+            privateBody: translate('push.eventUpdatedPrivateBody'),
+            url: '/?view=calendar',
+            tag: `shared-event-updated-${result.event.sharedEventId}`
+          },
+          {
+            title: translate('push.eventUpdatedTitle'),
+            message: calendarEventBody(result.event),
+            priority: 4
+          }
+        );
+      });
+      publishFamilyChange(req.session.familyId, 'shared-events');
+      res.json({
+        success: true,
+        event: result.event,
         version: getFamilyVersion(req.session.familyId)
       });
     }
@@ -7030,7 +7112,12 @@ export function createApp() {
           .map(member => member.id)
       );
       records = records.filter(
-        record => !managedMemberIds.has(record.memberId)
+        record =>
+          req.params.type === 'events'
+            ? !eventAudienceIds(record).some(memberId =>
+                managedMemberIds.has(memberId)
+              )
+            : !managedMemberIds.has(record.memberId)
       );
     }
     if (PROFILE_SCOPED_FAMILY_LIFE_TYPES.has(req.params.type)) {
@@ -7859,6 +7946,10 @@ export function createApp() {
         'kidProfiles',
         `kid-profile-${target.id}`
       );
+      const requestedChanges = ensureObject(req.body);
+      if (!isAdultMember(active)) {
+        delete requestedChanges.schoolEnabled;
+      }
       const record = upsertRecord(
         req.session.familyId,
         'kidProfiles',
@@ -7867,7 +7958,7 @@ export function createApp() {
           'kidProfiles',
           {
             ...existing,
-            ...ensureObject(req.body),
+            ...requestedChanges,
             memberId: target.id
           },
           existing

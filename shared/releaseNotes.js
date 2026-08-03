@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.15.0': {
+    version: '1.15.0',
+    eyebrow: 'Termine und Schulalltag lassen sich jetzt richtig planen',
+    title: 'Ein Kalender für die ganze Familie',
+    intro:
+      'Termine können wieder geöffnet und vollständig bearbeitet werden. Außerdem darf ein Termin jetzt mehreren Personen gehören.',
+    highlights: [
+      {
+        id: 'calendar-event-editor',
+        title: 'Termine öffnen und bearbeiten',
+        description:
+          'Ein Klick auf einen Termin öffnet alle Details. Titel, Zeit, Ort, Notizen, Erinnerungen und Personen lassen sich ändern; eigene Termine können auch gelöscht werden.'
+      },
+      {
+        id: 'calendar-multiple-members',
+        title: 'Mehrere Personen pro Termin',
+        description:
+          'Elternabend, Ausflug oder Arztbesuch können gezielt für mehrere Familienmitglieder eingetragen werden – ohne den Termin doppelt anzulegen.'
+      },
+      {
+        id: 'child-timetable',
+        title: 'Eigener Stundenplan für Kinder',
+        description:
+          'Eltern können den Schulbereich pro Kind einschalten und einen Wochenplan mit Fach, Stunde, Uhrzeit, Raum und Lehrkraft pflegen. Einmaliger Unterrichtsausfall wird deutlich rot markiert.'
+      },
+      {
+        id: 'mobile-recipe-actions',
+        title: 'Rezeptbuch auf kleinen Handys aufgeräumt',
+        description:
+          'Die Aktionen zum Anzeigen, Importieren und Anlegen von Rezepten bleiben auch auf schmalen Bildschirmen vollständig erreichbar.'
+      }
+    ],
+    closing:
+      'Bestehende Familien, Termine, Kalenderquellen, Profile und Einstellungen bleiben beim Update erhalten.'
+  },
   '1.14.3': {
     version: '1.14.3',
     eyebrow: 'Die öffentliche Demo ist jetzt strikt abgeschottet',

@@ -3,6 +3,7 @@ import { promises as dns } from 'dns';
 import { isIP } from 'net';
 import { XMLParser } from 'fast-xml-parser';
 import { parseICalendar } from '../shared/icsCalendar.js';
+import { eventAudienceIds } from '../shared/calendarAudience.js';
 import {
   deleteIntegrationSyncItem,
   deleteRecord,
@@ -1003,6 +1004,9 @@ function serializeEvent(event, uid, timeZone) {
   lines.push(`X-LX-FAMILY-ID:${escapeIcs(event.familyId || '')}`);
   lines.push(`X-LX-EVENT-ID:${escapeIcs(event.id || '')}`);
   lines.push(`X-LX-MEMBER-ID:${escapeIcs(event.memberId || 'all')}`);
+  lines.push(
+    `X-LX-MEMBER-IDS:${escapeIcs(JSON.stringify(eventAudienceIds(event)))}`
+  );
   lines.push(`X-LX-HOUSEHOLD:${escapeIcs(event.household || 'familie')}`);
   lines.push('END:VEVENT', 'END:VCALENDAR', '');
   return lines.join('\r\n');
@@ -1021,6 +1025,7 @@ function eventContentHash(event) {
       notes: clean(event?.notes),
       category: clean(event?.category),
       memberId: clean(event?.memberId, 'all'),
+      memberIds: eventAudienceIds(event),
       household: clean(event?.household, 'familie')
     }))
     .digest('hex');
@@ -1044,14 +1049,34 @@ function remoteEvent(
     resource.calendarData,
     'X-LX-MEMBER-ID'
   );
+  let remoteMemberIds = [];
+  try {
+    const parsedMemberIds = JSON.parse(
+      customIcsValue(resource.calendarData, 'X-LX-MEMBER-IDS') || '[]'
+    );
+    remoteMemberIds = Array.isArray(parsedMemberIds)
+      ? [...new Set(parsedMemberIds
+          .map(value => clean(value, '', 100))
+          .filter(value => value && allowedMemberIds?.has(value)))]
+      : [];
+  } catch {
+    remoteMemberIds = [];
+  }
+  const fallbackMemberId =
+    remoteMemberId &&
+    (remoteMemberId === 'all' || allowedMemberIds?.has(remoteMemberId))
+      ? remoteMemberId
+      : defaultMemberId || 'all';
   return {
     ...parsed,
     familyId,
-    memberId:
-      remoteMemberId &&
-      (remoteMemberId === 'all' || allowedMemberIds?.has(remoteMemberId))
-        ? remoteMemberId
-        : defaultMemberId || 'all',
+    memberId: remoteMemberIds[0] || fallbackMemberId,
+    memberIds:
+      remoteMemberIds.length
+        ? remoteMemberIds
+        : fallbackMemberId === 'all'
+          ? []
+          : [fallbackMemberId],
     household:
       customIcsValue(resource.calendarData, 'X-LX-HOUSEHOLD') || 'familie',
     category:

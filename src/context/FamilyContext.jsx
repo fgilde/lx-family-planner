@@ -1606,24 +1606,56 @@ export function FamilyProvider({ children }) {
       withActionError
     ]);
 
-  const updateEvent = useCallback((eventId, changes) =>
+  const updateEvent = useCallback((eventOrId, changes) =>
     withActionError(async () => {
-      const event = await patchResource('events', eventId, changes);
+      const sourceEvent =
+        typeof eventOrId === 'object'
+          ? eventOrId
+          : resources.events.find(event => event.id === eventOrId);
+      let event;
+      if (sourceEvent?.sharedEventId) {
+        const data = await apiRequest(
+          `/api/family/shared-events/${sourceEvent.sharedEventId}`,
+          {
+            method: 'PATCH',
+            body: JSON.stringify(changes)
+          }
+        );
+        await refreshBootstrap({ silent: true });
+        event = data.event;
+      } else {
+        const eventId =
+          typeof eventOrId === 'object' ? eventOrId.id : eventOrId;
+        event = await patchResource('events', eventId, changes);
+      }
+      const reminderOnly = Object.keys(changes || {}).every(
+        key => key === 'reminders'
+      );
       showToast(
-        i18n.t('context:toasts.eventRemindersSaved.title'),
-        event.reminders?.length
+        i18n.t(
+          reminderOnly
+            ? 'context:toasts.eventRemindersSaved.title'
+            : 'context:toasts.eventUpdated.title'
+        ),
+        reminderOnly && event.reminders?.length
           ? i18n.t('context:toasts.eventRemindersSaved.enabledMessage', {
               title: event.title,
               count: event.reminders.length
             })
-          : i18n.t('context:toasts.eventRemindersSaved.disabledMessage', {
-              title: event.title
-            }),
+          : reminderOnly
+            ? i18n.t('context:toasts.eventRemindersSaved.disabledMessage', {
+                title: event.title
+              })
+            : i18n.t('context:toasts.eventUpdated.message', {
+                title: event.title
+              }),
         'success'
       );
       return event;
-    }, i18n.t('context:errors.eventRemindersSaveFailed')), [
+    }, i18n.t('context:errors.eventSaveFailed')), [
     patchResource,
+    refreshBootstrap,
+    resources.events,
     showToast,
     withActionError
   ]);

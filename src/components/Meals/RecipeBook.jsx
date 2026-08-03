@@ -150,10 +150,10 @@ export default function RecipeBook() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className="recipe-book-shell">
       {/* Header Bar */}
-      <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div>
+      <div className="card recipe-book-header">
+        <div className="recipe-book-header-copy">
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
             <BookOpen style={{ color: 'var(--primary)' }} /> {t('recipeBook.header.title')}
           </h2>
@@ -162,7 +162,7 @@ export default function RecipeBook() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="recipe-book-tabs">
           <button
             className={`btn-secondary ${activeTab === 'browse' ? 'active' : ''}`}
             onClick={() => setActiveTab('browse')}

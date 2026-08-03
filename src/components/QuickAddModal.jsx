@@ -15,6 +15,7 @@ import {
   isManagedProfile
 } from '../constants/roles';
 import EventReminderPicker from './Calendar/EventReminderPicker';
+import EventAudiencePicker from './Calendar/EventAudiencePicker';
 
 function addLocalDays(value, days) {
   const date = new Date(`${value}T12:00:00`);
@@ -45,6 +46,9 @@ export default function QuickAddModal() {
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('');
   const [memberId, setMemberId] = useState(activeMemberId);
+  const [eventMemberIds, setEventMemberIds] = useState(
+    activeMemberId ? [activeMemberId] : []
+  );
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   const [reminders, setReminders] = useState([60]);
@@ -72,6 +76,7 @@ export default function QuickAddModal() {
     if (!isQuickAddOpen) return;
     setType(quickAddDefaultType || 'event');
     setMemberId(activeMemberId || 'all');
+    setEventMemberIds(activeMemberId ? [activeMemberId] : []);
     setAllDay(false);
     setEndDate('');
     setEndTime('');
@@ -94,7 +99,8 @@ export default function QuickAddModal() {
           allDay,
           endDate: allDay && endDate ? addLocalDays(endDate, 1) : endDate,
           endTime: allDay ? '' : endTime,
-          memberId,
+          memberId: eventMemberIds[0] || 'all',
+          memberIds: eventMemberIds,
           location,
           notes,
           category: 'Allgemein',
@@ -133,6 +139,7 @@ export default function QuickAddModal() {
       setEndDate('');
       setEndTime('');
       setRecipientFamilyIds([]);
+      setEventMemberIds(activeMemberId ? [activeMemberId] : []);
       setIsQuickAddOpen(false);
     } finally {
       setSaving(false);
@@ -256,18 +263,11 @@ export default function QuickAddModal() {
                 value={reminders}
                 onChange={setReminders}
               />
-              <div className="form-group">
-                <label className="form-label">{t('quickAdd.forWhom')}</label>
-                <select className="form-select" value={memberId} onChange={e => setMemberId(e.target.value)}>
-                  <option value="all">{t('quickAdd.everyone')}</option>
-                  {members.map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                      {isManagedProfile(m) ? ` · ${t('quickAdd.managed')}` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <EventAudiencePicker
+                members={members}
+                value={eventMemberIds}
+                onChange={setEventMemberIds}
+              />
               <div className="form-group">
                 <label className="form-label">{t('quickAdd.locationOptional')}</label>
                 <input type="text" className="form-input" placeholder={t('quickAdd.locationPlaceholder')} value={location} onChange={e => setLocation(e.target.value)} />
