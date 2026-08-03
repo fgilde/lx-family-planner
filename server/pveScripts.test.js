@@ -5,6 +5,9 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
 const projectRoot = process.cwd();
+const currentVersion = JSON.parse(
+  fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
+).version;
 const scriptPaths = [
   path.join(projectRoot, 'scripts', 'pve-helper.sh'),
   path.join(projectRoot, 'scripts', 'pve-guest-install.sh'),
@@ -202,10 +205,12 @@ test('Umbrel package uses the current release without root capabilities', () => 
   );
   assert.match(
     compose,
-    /image: ghcr\.io\/laxxx-lab\/lx-family-planner:1\.14\.3@sha256:[a-f0-9]{64}/
+    new RegExp(
+      `image: ghcr\\.io/laxxx-lab/lx-family-planner:${currentVersion.replaceAll('.', '\\.')}@sha256:[a-f0-9]{64}`
+    )
   );
   assert.match(compose, /user: "1000:1000"/);
   assert.doesNotMatch(compose, /cap_add:/);
-  assert.match(manifest, /version: "1\.14\.3"/);
+  assert.match(manifest, new RegExp(`version: "${currentVersion.replaceAll('.', '\\.')}"`));
   assert.match(manifest, /releaseNotes: ""/);
 });
