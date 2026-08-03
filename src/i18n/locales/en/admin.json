@@ -19,6 +19,26 @@
       "totalStars": "Total stars",
       "managedProfiles": "Managed profiles"
     },
+    "modules": {
+      "kicker": "Less clutter",
+      "title": "Family sections",
+      "intro": "Turn off features your family does not use. They disappear for every profile and can be enabled again here at any time.",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "profileHint": "To customize one person, edit that profile and choose its visible sections.",
+      "labels": {
+        "chat": "Chat",
+        "calendar": "Calendar",
+        "trash": "Waste calendar",
+        "shopping": "Shopping",
+        "meals": "Meal plan",
+        "tasks": "Tasks",
+        "family-life": "Family life",
+        "board": "Pinboard",
+        "cloud": "Family Cloud",
+        "mail": "Family mail"
+      }
+    },
     "managed": {
       "kicker": "No login of their own",
       "title": "Managed profiles",

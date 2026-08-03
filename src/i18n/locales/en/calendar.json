@@ -41,6 +41,8 @@
     "event": {
       "allDay": "All day",
       "until": "until {{time}}",
+      "throughDate": "through {{date}}",
+      "untilDateTime": "until {{date}}, {{time}}",
       "fromSubscriptionTitle": "From a calendar subscription",
       "fromFamily": "From {{name}}",
       "subscriptionFallback": "Calendar subscription",

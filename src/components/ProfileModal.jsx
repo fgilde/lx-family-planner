@@ -23,6 +23,8 @@ import { FUNNY_COMIC_AVATARS, useFamily } from '../context/FamilyContext';
 import { compressImageDataUrl } from '../utils/imageCompressor';
 import {
   POSITION_OPTIONS,
+  PROFILE_MODULE_OPTIONS,
+  canAccessAppView,
   canManageFamily,
   getPositionLabel,
   getPositionOptionLabel,
@@ -51,7 +53,8 @@ const EMPTY_FORM = {
   color: '#E0A52E',
   avatar: FUNNY_COMIC_AVATARS[0]?.url || '',
   pin: '',
-  isManaged: false
+  isManaged: false,
+  allowedModules: null
 };
 
 const PROFILE_NOTIFICATION_RULES =
@@ -204,7 +207,10 @@ export default function ProfileModal() {
       color: member.color || COLOR_PRESETS[0],
       avatar: member.avatar || FUNNY_COMIC_AVATARS[0]?.url || '',
       pin: '',
-      isManaged: isManagedProfile(member)
+      isManaged: isManagedProfile(member),
+      allowedModules: Array.isArray(member.allowedModules)
+        ? member.allowedModules
+        : null
     });
     setShowNotifications(false);
     setMode('form');
@@ -238,6 +244,21 @@ export default function ProfileModal() {
     reader.readAsDataURL(file);
   };
 
+  const availableProfileModules = PROFILE_MODULE_OPTIONS.filter(moduleId =>
+    canAccessAppView(form, moduleId)
+  );
+
+  const toggleProfileModule = moduleId => {
+    const current = Array.isArray(form.allowedModules)
+      ? form.allowedModules
+      : availableProfileModules;
+    updateForm({
+      allowedModules: current.includes(moduleId)
+        ? current.filter(value => value !== moduleId)
+        : [...current, moduleId]
+    });
+  };
+
   const save = async event => {
     event.preventDefault();
     if (!form.name.trim()) return;
@@ -248,7 +269,9 @@ export default function ProfileModal() {
         ...form,
         name: form.name.trim(),
         avatar,
-        pin: form.pin || undefined
+        pin: form.pin || undefined,
+        allowedModules: (form.allowedModules || availableProfileModules)
+          .filter(moduleId => availableProfileModules.includes(moduleId))
       };
       if (editingMemberId) {
         await updateMember(editingMemberId, payload);
@@ -527,6 +550,7 @@ export default function ProfileModal() {
                   <Plus size={18} /> {t('list.addMember')}
                 </button>
               )}
+
             </div>
 
             {!activeProfileIsPet && showNotifications && (
@@ -726,6 +750,29 @@ export default function ProfileModal() {
                     ))}
                   </select>
                 </label>
+              )}
+
+              {canManage && !form.isManaged && availableProfileModules.length > 0 && (
+                <fieldset className="profile-module-choice">
+                  <legend className="form-label">{t('modules.profileTitle')}</legend>
+                  <p>{t('modules.profileHint')}</p>
+                  <div>
+                    {availableProfileModules.map(moduleId => {
+                      const selected = !Array.isArray(form.allowedModules) ||
+                        form.allowedModules.includes(moduleId);
+                      return (
+                        <label className={selected ? 'selected' : ''} key={moduleId}>
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleProfileModule(moduleId)}
+                          />
+                          <span>{t(`modules.labels.${moduleId}`)}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
               )}
 
               <div className="form-group">

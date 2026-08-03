@@ -263,6 +263,18 @@ const ROLE_TYPES = new Set([
   'pet'
 ]);
 const ADULT_ROLES = new Set(['adult', 'senior']);
+const PROFILE_MODULE_IDS = new Set([
+  'chat',
+  'calendar',
+  'trash',
+  'shopping',
+  'meals',
+  'tasks',
+  'family-life',
+  'board',
+  'cloud',
+  'mail'
+]);
 const ADULT_MANAGED_RESOURCES = new Set([
   'tasks',
   'rewards',
@@ -739,6 +751,13 @@ function normalizeMemberInput(value = {}) {
     color: cleanText(member.color, '#2563eb', 24),
     bgColor: cleanText(member.bgColor, '#eff6ff', 24),
     theme: cleanText(member.theme, 'light', 32),
+    allowedModules: Array.isArray(member.allowedModules)
+      ? [...new Set(
+          member.allowedModules
+            .map(value => cleanText(value, '', 40))
+            .filter(value => PROFILE_MODULE_IDS.has(value))
+        )]
+      : undefined,
     pin:
       !isManaged && member.pin
         ? cleanText(member.pin, '', 12)
@@ -3582,13 +3601,28 @@ function sanitizeCalendarEvent(req, value, existing = null) {
     throw error;
   }
   const allDay = Boolean(input.allDay);
+  const startTime = allDay ? '' : cleanTime(input.time, '');
+  const endDate = cleanDate(input.endDate, '');
+  const endTime = allDay ? '' : cleanTime(input.endTime, '');
+  if (
+    (endDate && endDate < date) ||
+    (allDay && endDate && endDate <= date) ||
+    (!allDay && endTime && !startTime) ||
+    (!allDay && (!endDate || endDate === date) && endTime &&
+      endTime <= startTime)
+  ) {
+    const error = new Error(translate('errors.eventEndInvalid'));
+    error.statusCode = 400;
+    throw error;
+  }
   return {
     ...(existing || {}),
     ...input,
     title: requireText(input.title, translate('fields.eventTitle'), 240),
     date,
-    time: allDay ? '' : cleanTime(input.time, ''),
-    endTime: allDay ? '' : cleanTime(input.endTime, ''),
+    time: startTime,
+    endDate,
+    endTime,
     allDay,
     memberId,
     location: cleanText(input.location, '', 300),
@@ -3800,6 +3834,15 @@ function sanitizeFamilyLifeRecord(req, type, value, existing = null) {
       mediaScheduleEnabled: Boolean(input.mediaScheduleEnabled),
       mediaStart: cleanTime(input.mediaStart, '15:00'),
       mediaEnd: cleanTime(input.mediaEnd, '19:30'),
+      disabledModules: Object.hasOwn(input, 'disabledModules')
+        ? [...new Set(
+            (Array.isArray(input.disabledModules) ? input.disabledModules : [])
+              .map(value => cleanText(value, '', 40))
+              .filter(value => PROFILE_MODULE_IDS.has(value))
+          )]
+        : Array.isArray(existing?.disabledModules)
+          ? existing.disabledModules
+          : [],
       emergencyTitle: cleanText(
         input.emergencyTitle,
         translate('labels.emergencyTitle'),
@@ -6761,7 +6804,8 @@ export function createApp() {
       'role',
       'position',
       'stars',
-      'isManaged'
+      'isManaged',
+      'allowedModules'
     ];
     for (const key of isAdult ? allowedAdultFields : allowedSelfFields) {
       if (Object.hasOwn(input, key)) changes[key] = input[key];
@@ -6774,6 +6818,15 @@ export function createApp() {
     }
     if (Object.hasOwn(changes, 'position')) {
       changes.position = cleanText(changes.position, 'familienmitglied', 40);
+    }
+    if (Object.hasOwn(changes, 'allowedModules')) {
+      changes.allowedModules = Array.isArray(changes.allowedModules)
+        ? [...new Set(
+            changes.allowedModules
+              .map(value => cleanText(value, '', 40))
+              .filter(value => PROFILE_MODULE_IDS.has(value))
+          )]
+        : [];
     }
     if (Object.hasOwn(changes, 'isManaged')) {
       changes.isManaged = changes.isManaged === true;
@@ -7057,10 +7110,12 @@ export function createApp() {
         ...input,
         ...normalizeTaskSchedule(input),
         title: requireText(input.title, translate('fields.task'), 200),
+        description: cleanText(input.description, '', 2000),
         memberId,
         rotationMemberIds,
         rotationIndex: Math.max(0, rotationMemberIds.indexOf(memberId)),
         category: cleanText(input.category, 'Haushalt', 80),
+        dueTime: cleanTime(input.dueTime, ''),
         stars: targetMember.isManaged
           ? 0
           : Math.max(0, Math.min(1000, Number(input.stars ?? 10))),
@@ -7164,11 +7219,70 @@ export function createApp() {
         ...ensureObject(req.body)
       }));
     } else if (req.params.type === 'tasks') {
-      changes = Object.fromEntries(
-        Object.entries(ensureObject(req.body)).filter(
-          ([key]) => !PROTECTED_TASK_FIELDS.has(key)
-        )
+      const existing = getRecord(
+        req.session.familyId,
+        'tasks',
+        req.params.id
       );
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          error: translate('errors.entryNotFound')
+        });
+      }
+      const candidate = {
+        ...existing,
+        ...Object.fromEntries(
+          Object.entries(ensureObject(req.body)).filter(
+            ([key]) => !PROTECTED_TASK_FIELDS.has(key)
+          )
+        )
+      };
+      const memberId = requireText(
+        candidate.memberId,
+        translate('fields.targetProfile'),
+        100
+      );
+      const targetMember = getMember(req.session.familyId, memberId);
+      if (!targetMember) {
+        return res.status(400).json({
+          success: false,
+          error: translate('errors.selectedProfileNotFound')
+        });
+      }
+      const rotationMemberIds = targetMember.isManaged ? [] : [
+        ...new Set(
+          (Array.isArray(candidate.rotationMemberIds)
+            ? candidate.rotationMemberIds
+            : []
+          )
+            .map(id => cleanText(id, '', 100))
+            .filter(id => {
+              const rotationMember = getMember(req.session.familyId, id);
+              return Boolean(
+                rotationMember &&
+                !rotationMember.isManaged &&
+                rotationMember.role !== 'pet'
+              );
+            })
+        )
+      ];
+      if (rotationMemberIds.length && !rotationMemberIds.includes(memberId)) {
+        rotationMemberIds.unshift(memberId);
+      }
+      changes = {
+        ...normalizeTaskSchedule(candidate),
+        title: requireText(candidate.title, translate('fields.task'), 200),
+        description: cleanText(candidate.description, '', 2000),
+        memberId,
+        rotationMemberIds,
+        rotationIndex: Math.max(0, rotationMemberIds.indexOf(memberId)),
+        category: cleanText(candidate.category, 'Haushalt', 80),
+        dueTime: cleanTime(candidate.dueTime, ''),
+        stars: targetMember.isManaged
+          ? 0
+          : Math.max(0, Math.min(1000, Number(candidate.stars ?? 10)))
+      };
     } else if (req.params.type === 'rewards') {
       const existing = getRecord(
         req.session.familyId,

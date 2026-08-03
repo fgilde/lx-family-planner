@@ -5,6 +5,18 @@ export const POSITION_OPTIONS = [
   { value: 'papa', label: 'Papa', role: 'adult', emoji: '🧢' },
   { value: 'kind', label: 'Kind', role: 'child', emoji: '🪁' },
   { value: 'teenager', label: 'Teenager', role: 'teen', emoji: '🎧' },
+  {
+    value: 'tochter_erwachsen',
+    label: 'Tochter (erwachsen)',
+    role: 'adult',
+    emoji: '🌻'
+  },
+  {
+    value: 'sohn_erwachsen',
+    label: 'Sohn (erwachsen)',
+    role: 'adult',
+    emoji: '🌱'
+  },
   { value: 'oma', label: 'Oma', role: 'senior', emoji: '🫶' },
   { value: 'opa', label: 'Opa', role: 'senior', emoji: '🌿' },
   {
@@ -34,6 +46,19 @@ export const ROLE_LABELS = {
   member: 'Familienmitglied',
   pet: 'Haustier'
 };
+
+export const PROFILE_MODULE_OPTIONS = [
+  'chat',
+  'calendar',
+  'trash',
+  'shopping',
+  'meals',
+  'tasks',
+  'family-life',
+  'board',
+  'cloud',
+  'mail'
+];
 
 export function getPositionOption(position) {
   return (
@@ -93,4 +118,53 @@ export function canManageFamily(member) {
     !isManagedProfile(member) &&
     (member?.role === 'adult' || member?.role === 'senior')
   );
+}
+
+const FAMILY_VIEWS = new Set([
+  'dashboard',
+  'chat',
+  'calendar',
+  'trash',
+  'shopping',
+  'meals',
+  'tasks',
+  'family-life',
+  'board'
+]);
+const YOUNG_PROFILE_VIEWS = new Set([
+  'dashboard',
+  'tasks',
+  'family-life',
+  'calendar',
+  'chat',
+  'board'
+]);
+const PET_PROFILE_VIEWS = new Set(['dashboard', 'calendar']);
+const MANAGEMENT_VIEWS = new Set(['cloud', 'mail', 'admin', 'kitchen']);
+
+export function canAccessAppView(member, view, disabledModules = []) {
+  const normalizedView = String(view || 'dashboard');
+  if (
+    !['dashboard', 'admin', 'kitchen'].includes(normalizedView) &&
+    disabledModules.includes(normalizedView)
+  ) {
+    return false;
+  }
+  if (
+    !['dashboard', 'admin', 'kitchen'].includes(normalizedView) &&
+    Array.isArray(member?.allowedModules) &&
+    !member.allowedModules.includes(normalizedView)
+  ) {
+    return false;
+  }
+  if (isPetProfile(member)) {
+    return PET_PROFILE_VIEWS.has(normalizedView);
+  }
+  if (isYoungProfile(member)) {
+    return YOUNG_PROFILE_VIEWS.has(normalizedView);
+  }
+  if (MANAGEMENT_VIEWS.has(normalizedView)) {
+    return canManageFamily(member);
+  }
+  return FAMILY_VIEWS.has(normalizedView);
 }

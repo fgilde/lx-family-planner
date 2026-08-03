@@ -16,6 +16,16 @@ import {
 } from '../constants/roles';
 import EventReminderPicker from './Calendar/EventReminderPicker';
 
+function addLocalDays(value, days) {
+  const date = new Date(`${value}T12:00:00`);
+  date.setDate(date.getDate() + days);
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+  ].join('-');
+}
+
 export default function QuickAddModal() {
   const {
     isQuickAddOpen, setIsQuickAddOpen,
@@ -31,6 +41,9 @@ export default function QuickAddModal() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('14:00');
+  const [allDay, setAllDay] = useState(false);
+  const [endDate, setEndDate] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [memberId, setMemberId] = useState(activeMemberId);
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
@@ -59,6 +72,9 @@ export default function QuickAddModal() {
     if (!isQuickAddOpen) return;
     setType(quickAddDefaultType || 'event');
     setMemberId(activeMemberId || 'all');
+    setAllDay(false);
+    setEndDate('');
+    setEndTime('');
   }, [activeMemberId, isQuickAddOpen, quickAddDefaultType]);
 
   if (!isQuickAddOpen) return null;
@@ -74,7 +90,10 @@ export default function QuickAddModal() {
         created = await addEvent({
           title,
           date,
-          time,
+          time: allDay ? '' : time,
+          allDay,
+          endDate: allDay && endDate ? addLocalDays(endDate, 1) : endDate,
+          endTime: allDay ? '' : endTime,
           memberId,
           location,
           notes,
@@ -110,6 +129,9 @@ export default function QuickAddModal() {
       setLocation('');
       setNotes('');
       setReminders([60]);
+      setAllDay(false);
+      setEndDate('');
+      setEndTime('');
       setRecipientFamilyIds([]);
       setIsQuickAddOpen(false);
     } finally {
@@ -177,15 +199,58 @@ export default function QuickAddModal() {
           {/* Event Fields */}
           {type === 'event' && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <label className="quick-add-all-day">
+                <input
+                  type="checkbox"
+                  checked={allDay}
+                  onChange={event => {
+                    setAllDay(event.target.checked);
+                    if (event.target.checked) setEndTime('');
+                  }}
+                />
+                <span>
+                  <strong>{t('quickAdd.allDay')}</strong>
+                  <small>{t('quickAdd.allDayHint')}</small>
+                </span>
+              </label>
+              <div className="quick-add-event-time-grid">
                 <div className="form-group">
-                  <label className="form-label">{t('common:labels.date')}</label>
-                  <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} />
+                  <label className="form-label">{t('quickAdd.startsOn')}</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={date}
+                    onChange={event => {
+                      setDate(event.target.value);
+                      if (endDate && endDate < event.target.value) setEndDate('');
+                    }}
+                    required
+                  />
                 </div>
+                {!allDay && (
+                  <div className="form-group">
+                    <label className="form-label">{t('quickAdd.startsAt')}</label>
+                    <input type="time" className="form-input" value={time} onChange={e => setTime(e.target.value)} required />
+                  </div>
+                )}
                 <div className="form-group">
-                  <label className="form-label">{t('common:labels.time')}</label>
-                  <input type="time" className="form-input" value={time} onChange={e => setTime(e.target.value)} />
+                  <label className="form-label">
+                    {allDay ? t('quickAdd.endsOnInclusive') : t('quickAdd.endsOn')}
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    min={date}
+                    value={endDate}
+                    onChange={event => setEndDate(event.target.value)}
+                  />
                 </div>
+                {!allDay && (
+                  <div className="form-group">
+                    <label className="form-label">{t('quickAdd.endsAt')}</label>
+                    <input type="time" className="form-input" value={endTime} onChange={e => setEndTime(e.target.value)} />
+                  </div>
+                )}
               </div>
               <EventReminderPicker
                 value={reminders}

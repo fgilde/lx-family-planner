@@ -11,7 +11,10 @@ import {
   X
 } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
-import { plannerApiRequest } from '../../utils/apiConfig';
+import {
+  describeApiError,
+  plannerApiRequest
+} from '../../utils/apiConfig';
 
 const FILE_LIMIT_BYTES = 100 * 1024 * 1024;
 const LAST_FOLDER_KEY = 'lx_cloud_upload_folder';
@@ -68,7 +71,11 @@ export default function CloudUploadDestinationDialog({
       setSelectedPath(nextSelection);
       setArea(folderArea(nextSelection));
     } catch (error) {
-      showToast(t('uploadDestination.foldersNotLoaded'), error.message, 'error');
+      showToast(
+        t('uploadDestination.foldersNotLoaded'),
+        describeApiError(error),
+        'error'
+      );
     } finally {
       setLoading(false);
     }
@@ -110,7 +117,11 @@ export default function CloudUploadDestinationDialog({
         'success'
       );
     } catch (error) {
-      showToast(t('uploadDestination.folderNotCreated'), error.message, 'error');
+      showToast(
+        t('uploadDestination.folderNotCreated'),
+        describeApiError(error),
+        'error'
+      );
     } finally {
       setCreating(false);
     }
@@ -156,7 +167,7 @@ export default function CloudUploadDestinationDialog({
       } catch (error) {
         showToast(
           t('uploadDestination.fileNotUploaded', { name: file.name }),
-          error.message,
+          describeApiError(error),
           'error'
         );
       }

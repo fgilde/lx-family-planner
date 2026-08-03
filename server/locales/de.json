@@ -304,6 +304,7 @@
     "mediaKindMismatch": "Der Link passt nicht zur ausgewählten Medienart {{kind}}.",
     "spotifyDirectLinkRequired": "Bitte verwende einen direkten Spotify-Link zu einer Playlist oder einem Inhalt.",
     "eventDateInvalid": "Bitte wähle ein gültiges Termindatum.",
+    "eventEndInvalid": "Das Terminende muss nach dem Beginn liegen.",
     "selectedFamilyProfileNotFound": "Das ausgewählte Familienprofil wurde nicht gefunden.",
     "managedEventsAdultOnly": "Termine für verwaltete Profile werden von einem Erwachsenen eingetragen.",
     "trashDateInvalid": "Bitte wähle ein gültiges Abholdatum.",

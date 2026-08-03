@@ -700,6 +700,7 @@ export function FamilyProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ memberId, pin, familyPassword })
     });
+    setActiveTab('dashboard');
     setActiveMemberIdState(memberId);
     setMembers(previous =>
       previous.map(member => (member.id === memberId ? data.member : member))
@@ -2016,6 +2017,30 @@ export function FamilyProvider({ children }) {
       );
       return created;
     }), [activeHouseholdState, createResource, showToast, withActionError]);
+
+  const updateTask = useCallback((taskId, changes) =>
+    withActionError(async () => {
+      const updated = await patchResource('tasks', taskId, changes);
+      showToast(
+        i18n.t('context:toasts.taskUpdated.title'),
+        i18n.t('context:toasts.taskUpdated.message', {
+          title: updated.title
+        }),
+        'success'
+      );
+      return updated;
+    }), [patchResource, showToast, withActionError]);
+
+  const deleteTask = useCallback(taskId =>
+    withActionError(async () => {
+      await removeResource('tasks', taskId);
+      showToast(
+        i18n.t('context:toasts.taskDeleted.title'),
+        i18n.t('context:toasts.taskDeleted.message'),
+        'info'
+      );
+      return true;
+    }), [removeResource, showToast, withActionError]);
 
   const addReward = useCallback(reward =>
     withActionError(async () => {
@@ -3416,6 +3441,8 @@ export function FamilyProvider({ children }) {
     toggleTask,
     reviewTask,
     addTask,
+    updateTask,
+    deleteTask,
     clearTasks,
     rewards: resources.rewards,
     addReward,

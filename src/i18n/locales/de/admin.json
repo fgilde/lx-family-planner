@@ -19,6 +19,26 @@
       "totalStars": "Sterne gesamt",
       "managedProfiles": "Verwaltete Profile"
     },
+    "modules": {
+      "kicker": "Weniger Ablenkung",
+      "title": "Bereiche für die Familie",
+      "intro": "Schalte Funktionen aus, die ihr nicht nutzt. Sie verschwinden für alle Profile und können hier jederzeit wieder aktiviert werden.",
+      "visible": "Sichtbar",
+      "hidden": "Ausgeblendet",
+      "profileHint": "Abweichende Freigaben für einzelne Personen findest du beim Bearbeiten des jeweiligen Profils.",
+      "labels": {
+        "chat": "Chat",
+        "calendar": "Kalender",
+        "trash": "Müllkalender",
+        "shopping": "Einkaufen",
+        "meals": "Speiseplan",
+        "tasks": "Aufgaben",
+        "family-life": "Familienleben",
+        "board": "Pinnwand",
+        "cloud": "Family Cloud",
+        "mail": "Familienpost"
+      }
+    },
     "managed": {
       "kicker": "Ohne eigenen Zugang",
       "title": "Verwaltete Profile",

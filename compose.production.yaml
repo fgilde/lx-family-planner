@@ -11,6 +11,8 @@ services:
       PORT: 3001
       TZ: "${TZ:-Europe/Berlin}"
       APP_LANGUAGE: "${APP_LANGUAGE:-de}"
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-1000}"
       DATABASE_FILE: /app/data/family_planner.sqlite
       LEGACY_DATABASE_FILE: /app/data/family_db.json
     ports:
@@ -23,6 +25,10 @@ services:
       - /tmp:size=64m,mode=1777
     cap_drop:
       - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
     security_opt:
       - no-new-privileges:true
     stop_grace_period: 15s

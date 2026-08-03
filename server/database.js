@@ -83,6 +83,7 @@ database.exec(`
     pin_hash TEXT,
     is_managed INTEGER NOT NULL DEFAULT 0
       CHECK(is_managed IN (0, 1)),
+    allowed_modules_json TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL
   );
@@ -631,6 +632,16 @@ applySchemaMigration(9, 'Familienbriefkasten und eingeladene Chatgaeste', () => 
   `);
 });
 
+applySchemaMigration(10, 'Sichtbare Module pro Familienprofil', () => {
+  const memberColumns = database.prepare('PRAGMA table_info(members)').all();
+  if (!memberColumns.some(column => column.name === 'allowed_modules_json')) {
+    database.exec(`
+      ALTER TABLE members
+      ADD COLUMN allowed_modules_json TEXT;
+    `);
+  }
+});
+
 function withTransaction(work) {
   database.exec('BEGIN IMMEDIATE');
   try {
@@ -709,6 +720,15 @@ function mapFamilyRow(row) {
 
 function mapMemberRow(row) {
   if (!row) return null;
+  let allowedModules;
+  if (row.allowed_modules_json !== null && row.allowed_modules_json !== undefined) {
+    try {
+      const parsed = JSON.parse(row.allowed_modules_json);
+      allowedModules = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      allowedModules = [];
+    }
+  }
   return {
     id: row.id,
     familyId: row.family_id,
@@ -722,6 +742,7 @@ function mapMemberRow(row) {
     stars: row.stars,
     hasPin: Boolean(row.pin_hash),
     isManaged: Number(row.is_managed || 0) === 1,
+    allowedModules,
     lastSeenReleaseVersion: row.last_seen_release_version || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -907,9 +928,10 @@ function insertMember(familyId, member, now = Date.now()) {
     .prepare(`
       INSERT INTO members(
         id, family_id, name, role, position, avatar, color, bg_color,
-        theme, stars, pin_hash, is_managed, created_at, updated_at
+        theme, stars, pin_hash, is_managed, allowed_modules_json,
+        created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -924,6 +946,9 @@ function insertMember(familyId, member, now = Date.now()) {
       Math.max(0, Number(member.stars || 0)),
       member.isManaged ? null : (member.pin ? hashSecret(member.pin) : null),
       member.isManaged ? 1 : 0,
+      Array.isArray(member.allowedModules)
+        ? JSON.stringify(member.allowedModules)
+        : null,
       now,
       now
     );
@@ -948,6 +973,12 @@ export function updateMember(familyId, memberId, changes) {
   const nextIsManaged = Object.prototype.hasOwnProperty.call(changes, 'isManaged')
     ? (changes.isManaged ? 1 : 0)
     : Number(existing.is_managed || 0);
+  const nextAllowedModules = Object.prototype.hasOwnProperty.call(
+    changes,
+    'allowedModules'
+  )
+    ? JSON.stringify(Array.isArray(changes.allowedModules) ? changes.allowedModules : [])
+    : existing.allowed_modules_json;
 
   return withTransaction(() => {
     database
@@ -963,6 +994,7 @@ export function updateMember(familyId, memberId, changes) {
           stars = ?,
           pin_hash = ?,
           is_managed = ?,
+          allowed_modules_json = ?,
           updated_at = ?
         WHERE family_id = ? AND id = ?
       `)
@@ -977,6 +1009,7 @@ export function updateMember(familyId, memberId, changes) {
         Math.max(0, Number(changes.stars ?? existing.stars)),
         nextIsManaged ? null : nextPinHash,
         nextIsManaged,
+        nextAllowedModules,
         now,
         familyId,
         memberId

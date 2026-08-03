@@ -304,6 +304,7 @@
     "mediaKindMismatch": "The link does not match the selected media type {{kind}}.",
     "spotifyDirectLinkRequired": "Please use a direct Spotify link to a playlist or other content.",
     "eventDateInvalid": "Please choose a valid event date.",
+    "eventEndInvalid": "The event must end after it starts.",
     "selectedFamilyProfileNotFound": "The selected family profile was not found.",
     "managedEventsAdultOnly": "Events for managed profiles are entered by an adult.",
     "trashDateInvalid": "Please choose a valid collection date.",

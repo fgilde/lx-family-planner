@@ -1,4 +1,45 @@
 const RELEASE_NOTES = {
+  '1.14.0': {
+    version: '1.14.0',
+    eyebrow: 'Mehr Überblick, ohne euch einzuschränken',
+    title: 'Aufgaben, Termine und Bereiche passen sich euch an',
+    intro:
+      'LX lässt sich jetzt besser auf eure Familie zuschneiden. Aufgaben können korrigiert werden, Termine dürfen mehrere Tage dauern und nicht benötigte Bereiche verschwinden auf Wunsch.',
+    highlights: [
+      {
+        id: 'editable-tasks',
+        title: 'Aufgaben bearbeiten und einzeln löschen',
+        description:
+          'Titel, Beschreibung, Person, Fälligkeit, Wiederholung und Sterne lassen sich nachträglich ändern. Eine einzelne Aufgabe kann mit Sicherheitsabfrage entfernt werden.'
+      },
+      {
+        id: 'calendar-duration',
+        title: 'Ganztägige und mehrtägige Termine',
+        description:
+          'Urlaub, Klassenfahrt oder Besuch können als ganzer Tag, mit Uhrzeit oder über mehrere Tage eingetragen werden.'
+      },
+      {
+        id: 'module-visibility',
+        title: 'Nur die Bereiche, die ihr braucht',
+        description:
+          'Erwachsene können Funktionen für die ganze Familie oder gezielt für einzelne Profile ein- und ausblenden.'
+      },
+      {
+        id: 'safe-profile-switch',
+        title: 'Sicherer Profilwechsel',
+        description:
+          'Beim Wechsel zu einem Kind oder Haustier schließt LX geschützte Ansichten sofort und öffnet das passende Dashboard.'
+      },
+      {
+        id: 'unraid-start',
+        title: 'Zuverlässiger Start unter Unraid',
+        description:
+          'Der Container richtet seine Datenordner beim Start korrekt ein. Unsichere Vollzugriffsrechte sind nicht mehr nötig.'
+      }
+    ],
+    closing:
+      'Vorhandene Familien, Termine, Aufgaben, Dateien und Einstellungen bleiben beim Update vollständig erhalten.'
+  },
   '1.13.2': {
     version: '1.13.2',
     eyebrow: 'Euer Familienraum bleibt jetzt wirklich privat',
