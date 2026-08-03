@@ -237,7 +237,11 @@ export default function TrashCalendarView() {
             <span className="trash-next-pickup-icon">{nextType.icon}</span>
             <div>
               <span>{t('trash.next.kicker')}</span>
-              <h3>{nextPickup.title}</h3>
+              <h3>
+                {nextPickup.titleKey
+                  ? t(nextPickup.titleKey)
+                  : nextPickup.title}
+              </h3>
               <p>
                 {formatDate(localTrashDate(nextPickup.date), {
                   weekday: 'long',
@@ -275,6 +279,9 @@ export default function TrashCalendarView() {
                 TRASH_TYPES.find(entry => entry.id === item.type) ||
                 TRASH_TYPES[0];
               const reminders = normalizeTrashReminders(item.reminders);
+              const itemTitle = item.titleKey
+                ? t(item.titleKey)
+                : item.title;
               return (
                 <article
                   key={item.id}
@@ -283,7 +290,7 @@ export default function TrashCalendarView() {
                 >
                   <span className="trash-schedule-icon">{type.icon}</span>
                   <div className="trash-schedule-copy">
-                    <strong>{item.title}</strong>
+                    <strong>{itemTitle}</strong>
                     <span>
                       {formatDate(localTrashDate(item.date), {
                         weekday: 'short',
@@ -336,7 +343,7 @@ export default function TrashCalendarView() {
                       }
                       title={t('trash.schedule.editReminderTitle')}
                       aria-label={t('trash.schedule.editReminderAria', {
-                        title: item.title
+                        title: itemTitle
                       })}
                     >
                       <Bell size={16} />
@@ -347,7 +354,7 @@ export default function TrashCalendarView() {
                       onClick={() => deleteTrashEvent(item.id)}
                       title={t('trash.schedule.removeTitle')}
                       aria-label={t('trash.schedule.removeAria', {
-                        title: item.title
+                        title: itemTitle
                       })}
                     >
                       <Trash2 size={16} />

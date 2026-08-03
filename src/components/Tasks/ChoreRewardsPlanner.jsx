@@ -70,6 +70,8 @@ export default function ChoreRewardsPlanner() {
   );
   const [taskDueTime, setTaskDueTime] = useState('');
   const [taskRepeatRule, setTaskRepeatRule] = useState('none');
+  const [taskAssignmentMode, setTaskAssignmentMode] = useState('individual');
+  const [taskEligibleMemberIds, setTaskEligibleMemberIds] = useState([]);
   const [taskRotationEnabled, setTaskRotationEnabled] = useState(false);
   const [taskRotationMemberIds, setTaskRotationMemberIds] = useState([]);
   const [confirmDeleteTaskId, setConfirmDeleteTaskId] = useState(null);
@@ -85,7 +87,11 @@ export default function ChoreRewardsPlanner() {
   const selectedTaskMember = members.find(
     member => member.id === taskMemberId
   );
-  const taskIsForManagedProfile = isManagedProfile(selectedTaskMember);
+  const taskIsForManagedProfile =
+    taskAssignmentMode !== 'shared' && isManagedProfile(selectedTaskMember);
+  const taskAssignableMembers = members.filter(
+    member => member.role !== 'pet' && !isManagedProfile(member)
+  );
 
   const openCreateTask = () => {
     setEditingTask(null);
@@ -97,6 +103,8 @@ export default function ChoreRewardsPlanner() {
     setTaskDueDate(currentLocalDate());
     setTaskDueTime('');
     setTaskRepeatRule('none');
+    setTaskAssignmentMode('individual');
+    setTaskEligibleMemberIds(taskAssignableMembers.map(member => member.id));
     setTaskRotationEnabled(false);
     setTaskRotationMemberIds([]);
     setIsAddTaskOpen(true);
@@ -117,6 +125,14 @@ export default function ChoreRewardsPlanner() {
     setTaskDueDate(task.dueDate || '');
     setTaskDueTime(task.dueTime || '');
     setTaskRepeatRule(task.repeatRule || 'none');
+    setTaskAssignmentMode(
+      task.assignmentMode === 'shared' ? 'shared' : 'individual'
+    );
+    setTaskEligibleMemberIds(
+      task.eligibleMemberIds?.length
+        ? task.eligibleMemberIds
+        : taskAssignableMembers.map(member => member.id)
+    );
     setTaskRotationEnabled((task.rotationMemberIds?.length || 0) > 1);
     setTaskRotationMemberIds(task.rotationMemberIds || []);
     setConfirmDeleteTaskId(null);
@@ -136,12 +152,16 @@ export default function ChoreRewardsPlanner() {
       title: taskTitle.trim(),
       description: taskDescription.trim(),
       memberId: taskMemberId,
+      assignmentMode: taskAssignmentMode,
+      eligibleMemberIds:
+        taskAssignmentMode === 'shared' ? taskEligibleMemberIds : [],
       stars: taskIsForManagedProfile ? 0 : Number(taskStars),
       category: taskCategory,
       dueDate: taskDueDate,
       dueTime: taskDueTime,
       repeatRule: taskRepeatRule,
       rotationMemberIds:
+        taskAssignmentMode !== 'shared' &&
         !taskIsForManagedProfile &&
         taskRotationEnabled &&
         taskRepeatRule !== 'none'
@@ -205,6 +225,26 @@ export default function ChoreRewardsPlanner() {
 
   const isParent = canManageFamily(activeMember);
   const visibleMembers = isParent ? members : [activeMember].filter(Boolean);
+  const sharedTasks = tasks.filter(task => {
+    if (
+      task.assignmentMode !== 'shared' ||
+      (task.household || 'familie') !== activeHousehold
+    ) {
+      return false;
+    }
+    if (isParent) return true;
+    return (
+      !task.eligibleMemberIds?.length ||
+      task.eligibleMemberIds.includes(activeMember?.id)
+    );
+  }).sort((left, right) => {
+    if (Boolean(left.completed) !== Boolean(right.completed)) {
+      return left.completed ? 1 : -1;
+    }
+    return String(left.dueDate || '9999-12-31').localeCompare(
+      String(right.dueDate || '9999-12-31')
+    );
+  });
   const approvalsForMe = tasks.filter(
     task =>
       task.completionStatus === 'pending_approval' &&
@@ -255,11 +295,137 @@ export default function ChoreRewardsPlanner() {
         )}
       </div>
 
+      {sharedTasks.length > 0 && (
+        <section className="card shared-task-card">
+          <div className="shared-task-heading">
+            <div className="shared-task-icon"><Sparkles size={21} /></div>
+            <div>
+              <h3>{t('shared.title')}</h3>
+              <p>{t('shared.description')}</p>
+            </div>
+          </div>
+          <div className="shared-task-list">
+            {sharedTasks.map(task => {
+              const isPending =
+                task.completionStatus === 'pending_approval';
+              const canReview =
+                isParent &&
+                isPending &&
+                (
+                  !task.createdByMemberId ||
+                  !members.some(member => member.id === task.createdByMemberId) ||
+                  task.createdByMemberId === activeMember?.id
+                );
+              const activeIsEligible =
+                !task.eligibleMemberIds?.length ||
+                task.eligibleMemberIds.includes(activeMember?.id);
+              const canUseMainAction = isParent
+                ? !isPending && (task.completed || activeIsEligible)
+                : !task.completed;
+              const reportedBy = members.find(
+                member => member.id === task.completionRequestedByMemberId
+              );
+              return (
+                <article
+                  key={task.id}
+                  className={`task-approval-item shared ${
+                    task.completed ? 'completed' : ''
+                  } ${isPending ? 'pending' : ''}`}
+                >
+                  <button
+                    type="button"
+                    className="task-approval-main"
+                    onClick={() => toggleTask(task.id)}
+                    disabled={!canUseMainAction}
+                  >
+                    <span className="task-status-mark">
+                      {task.completed ? <Check size={17} /> :
+                        isPending ? <Clock3 size={17} /> : <span />}
+                    </span>
+                    <span className="task-approval-copy">
+                      <strong>{task.title}</strong>
+                      {task.description && (
+                        <span className="task-description">
+                          {task.description}
+                        </span>
+                      )}
+                      <small>
+                        {task.completed
+                          ? t('shared.completedBy', {
+                              name:
+                                task.completedByName ||
+                                t('shared.someone')
+                            })
+                          : isPending
+                            ? t('shared.reportedBy', {
+                                name:
+                                  reportedBy?.name ||
+                                  t('shared.someone')
+                              })
+                            : t('shared.open')}
+                      </small>
+                    </span>
+                    <span className="task-star-value">
+                      <Star size={14} fill="#f59e0b" /> +{task.stars}
+                    </span>
+                  </button>
+                  {isParent && (
+                    <div className="task-manage-actions">
+                      <button type="button" onClick={() => openEditTask(task)}>
+                        <Edit3 size={14} /> {t('taskItem.edit')}
+                      </button>
+                      <button
+                        type="button"
+                        className={
+                          confirmDeleteTaskId === task.id ? 'confirm' : ''
+                        }
+                        onClick={async () => {
+                          if (confirmDeleteTaskId !== task.id) {
+                            setConfirmDeleteTaskId(task.id);
+                            return;
+                          }
+                          const deleted = await deleteTask(task.id);
+                          if (deleted) setConfirmDeleteTaskId(null);
+                        }}
+                      >
+                        <Trash2 size={14} />
+                        {confirmDeleteTaskId === task.id
+                          ? t('taskItem.confirmDelete')
+                          : t('taskItem.delete')}
+                      </button>
+                    </div>
+                  )}
+                  {canReview && (
+                    <div className="task-review-actions">
+                      <button
+                        type="button"
+                        className="task-review-approve"
+                        onClick={() => reviewTask(task.id, true)}
+                      >
+                        <Check size={16} /> {t('taskItem.approve')}
+                      </button>
+                      <button
+                        type="button"
+                        className="task-review-reject"
+                        onClick={() => reviewTask(task.id, false)}
+                      >
+                        <RotateCcw size={15} /> {t('taskItem.reject')}
+                      </button>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* SECTION 1: TASKS BY FAMILY MEMBER */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
         {visibleMembers.map(member => {
           const memberTasks = tasks.filter(
             task =>
+              task.assignmentMode !== 'shared' &&
               task.memberId === member.id &&
               (task.household || 'familie') === activeHousehold
           ).sort((left, right) => {
@@ -672,16 +838,70 @@ export default function ChoreRewardsPlanner() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">{t('taskModal.assignTo')}</label>
-                <select className="form-select" value={taskMemberId} onChange={e => setTaskMemberId(e.target.value)}>
-                  {members.map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({getPositionLabel(m)}
-                      {isManagedProfile(m) ? t('taskModal.managedSuffix') : ''})
-                    </option>
-                  ))}
-                </select>
+                <label className="task-assignment-toggle">
+                  <input
+                    type="checkbox"
+                    checked={taskAssignmentMode === 'shared'}
+                    onChange={event => {
+                      const shared = event.target.checked;
+                      setTaskAssignmentMode(shared ? 'shared' : 'individual');
+                      if (shared && !taskEligibleMemberIds.length) {
+                        setTaskEligibleMemberIds(
+                          taskAssignableMembers.map(member => member.id)
+                        );
+                      }
+                    }}
+                  />
+                  <span>
+                    <strong>{t('taskModal.sharedToggle')}</strong>
+                    <small>{t('taskModal.sharedHint')}</small>
+                  </span>
+                </label>
               </div>
+
+              {taskAssignmentMode === 'shared' ? (
+                <div className="form-group">
+                  <label className="form-label">
+                    {t('taskModal.eligibleProfiles')}
+                  </label>
+                  <div className="task-shared-members">
+                    {taskAssignableMembers.map(member => {
+                      const selected = taskEligibleMemberIds.includes(member.id);
+                      return (
+                        <button
+                          key={member.id}
+                          type="button"
+                          className={selected ? 'selected' : ''}
+                          onClick={() => setTaskEligibleMemberIds(previous =>
+                            previous.includes(member.id)
+                              ? previous.filter(id => id !== member.id)
+                              : [...previous, member.id]
+                          )}
+                        >
+                          <img src={member.avatar} alt="" />
+                          <span>{member.name}</span>
+                          {selected && <Check size={14} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <small className="form-hint">
+                    {t('taskModal.eligibleHint')}
+                  </small>
+                </div>
+              ) : (
+                <div className="form-group">
+                  <label className="form-label">{t('taskModal.assignTo')}</label>
+                  <select className="form-select" value={taskMemberId} onChange={e => setTaskMemberId(e.target.value)}>
+                    {members.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({getPositionLabel(m)}
+                        {isManagedProfile(m) ? t('taskModal.managedSuffix') : ''})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="task-schedule-editor">
                 <div className="task-schedule-editor-title">
@@ -728,7 +948,8 @@ export default function ChoreRewardsPlanner() {
                     </select>
                   </label>
                 </div>
-                {taskRepeatRule !== 'none' && !taskIsForManagedProfile && (
+                {taskAssignmentMode !== 'shared' &&
+                  taskRepeatRule !== 'none' && !taskIsForManagedProfile && (
                   <div className="task-rotation-editor">
                     <label>
                       <input

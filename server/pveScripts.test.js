@@ -5,9 +5,6 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
 const projectRoot = process.cwd();
-const currentVersion = JSON.parse(
-  fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
-).version;
 const scriptPaths = [
   path.join(projectRoot, 'scripts', 'pve-helper.sh'),
   path.join(projectRoot, 'scripts', 'pve-guest-install.sh'),
@@ -182,7 +179,7 @@ test('default Docker Compose grants only the capabilities needed for bind-mount 
   assert.match(compose, /cap_add:\s*\n\s*- CHOWN\s*\n\s*- SETGID\s*\n\s*- SETUID/);
 });
 
-test('Umbrel package uses the current release without root capabilities', () => {
+test('Umbrel package uses one internally consistent pinned release without root capabilities', () => {
   const compose = fs.readFileSync(
     path.join(
       projectRoot,
@@ -203,14 +200,15 @@ test('Umbrel package uses the current release without root capabilities', () => 
     ),
     'utf8'
   );
+  const umbrelVersion = manifest.match(/^version: "([^"]+)"/m)?.[1] || '';
+  assert.match(umbrelVersion, /^\d+\.\d+\.\d+$/);
   assert.match(
     compose,
     new RegExp(
-      `image: ghcr\\.io/laxxx-lab/lx-family-planner:${currentVersion.replaceAll('.', '\\.')}@sha256:[a-f0-9]{64}`
+      `image: ghcr\\.io/laxxx-lab/lx-family-planner:${umbrelVersion.replaceAll('.', '\\.')}@sha256:[a-f0-9]{64}`
     )
   );
   assert.match(compose, /user: "1000:1000"/);
   assert.doesNotMatch(compose, /cap_add:/);
-  assert.match(manifest, new RegExp(`version: "${currentVersion.replaceAll('.', '\\.')}"`));
   assert.match(manifest, /releaseNotes: ""/);
 });

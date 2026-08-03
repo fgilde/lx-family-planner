@@ -143,6 +143,7 @@
       "newImage": "New family picture",
       "familyName": "Family name",
       "badge": "Short tagline",
+      "badgeDefault": "Our family",
       "badgePlaceholder": "e.g. Our home",
       "newPassword": "New family password (optional)",
       "passwordPlaceholder": "Leave empty = unchanged"

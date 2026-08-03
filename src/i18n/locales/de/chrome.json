@@ -52,7 +52,39 @@
       "descriptionPet": "Wähle eine ruhige Welt für das Haustierprofil.",
       "descriptionChild": "Such dir deine Lieblingswelt aus.",
       "descriptionAdult": "Ruhig oder laut – die Auswahl wird im Profil gespeichert.",
+      "groups": {
+        "plain": "Schlicht & ruhig",
+        "expressive": "Mit Charakter"
+      },
       "close": "Designauswahl schließen"
+    },
+    "customTheme": {
+      "createLaunch": "Eigenes Theme erstellen",
+      "createLaunchHint": "Als zusätzliche Designkachel anlegen",
+      "editLaunch": "Mein Design bearbeiten",
+      "editLaunchHint": "Die eigene Designkachel weiter anpassen",
+      "kicker": "Eigenes Theme",
+      "title": "Mein Design gestalten",
+      "description": "Die Werte bilden ein eigenes Theme. Leinen, Graphit und alle anderen Designs bleiben unverändert.",
+      "safeTitle": "Bewusst eingeschränkt",
+      "safeDescription": "Erlaubt sind ausschließlich geprüfte Farben und Rundungen. Selektoren, externe URLs, Imports, versteckte Flächen und Positionsänderungen werden blockiert.",
+      "codeLabel": "CSS-Designvariablen",
+      "useExample": "Beispiel einsetzen",
+      "allowed": "Erlaubte Variablen",
+      "preview": "Vorschau",
+      "save": "Als Mein Design speichern",
+      "reset": "Eigenes Theme leeren",
+      "saved": "Mein Design wurde sicher gespeichert und als eigenes Theme aktiviert.",
+      "validation": {
+        "tooLong": "Der Designcode ist zu lang.",
+        "invalidComment": "Ein CSS-Kommentar ist nicht vollständig geschlossen.",
+        "selectorsNotAllowed": "Eigene Selektoren und CSS-Regeln sind aus Sicherheitsgründen nicht erlaubt.",
+        "tooManyDeclarations": "Es wurden mehr Designwerte eingetragen als erlaubt.",
+        "invalidDeclaration": "„{{property}}“ ist keine gültige CSS-Variable.",
+        "propertyNotAllowed": "Die Variable „{{property}}“ darf nicht verändert werden.",
+        "invalidValue": "Der Wert für „{{property}}“ ist keine gültige Farbe oder Rundung.",
+        "unsafeValue": "Der Wert für „{{property}}“ wurde aus Sicherheitsgründen blockiert."
+      }
     },
     "tabletMode": {
       "exitTitle": "Tablet Mode verlassen",
@@ -62,6 +94,10 @@
     },
     "themes": {
       "adult": {
+        "linen": { "name": "Leinen", "description": "warm, still & motivfrei" },
+        "clear": { "name": "Klar", "description": "hell, kühl & präzise" },
+        "graphite": { "name": "Graphit", "description": "neutral, dunkel & ruhig" },
+        "custom": { "name": "Mein Design", "description": "deine eigene, sichere Gestaltung" },
         "light": { "name": "Waldruhe", "description": "warm & natürlich" },
         "ocean": { "name": "Küstenruhe", "description": "luftig & entspannt" },
         "midnight": { "name": "Nachtlounge", "description": "ruhig & dunkel" },

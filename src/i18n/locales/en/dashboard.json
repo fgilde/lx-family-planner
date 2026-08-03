@@ -40,6 +40,7 @@
       "hilfe": "Need a hug"
     },
     "hero": {
+      "defaultTitle": "Family Hero",
       "kicker": "Level {{level}} · {{title}}",
       "hey": "Hey {{name}}!",
       "intro_zero": "There are no missions for you today. Every task you complete grows your treasure of stars.",
@@ -243,6 +244,15 @@
       "groupAria": "Select tile spacing",
       "comfortable": "Comfortable",
       "compact": "Compact"
+    },
+    "trash": {
+      "title": "Show trash collection automatically",
+      "hint": "Optionally reveal the tile only shortly before the next pickup.",
+      "visibility": "Show tile",
+      "always": "Always",
+      "upcoming": "Only before a pickup",
+      "never": "Never",
+      "days": "How many days before?"
     },
     "moveUp": "Move {{label}} up",
     "moveDown": "Move {{label}} down",

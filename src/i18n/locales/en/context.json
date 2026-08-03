@@ -111,6 +111,11 @@
     "themeNotSaved": {
       "title": "Theme not saved"
     },
+    "customThemeSaved": {
+      "title": "My Design saved",
+      "message": "The custom theme was created and activated for this profile.",
+      "resetMessage": "The custom theme was removed. The profile now uses Linen."
+    },
     "webPushUnreachable": {
       "title": "Push notifications unreachable"
     },
@@ -264,6 +269,10 @@
     "recipeDeleted": {
       "title": "Recipe deleted",
       "message": "The recipe was removed."
+    },
+    "recipeUpdated": {
+      "title": "Recipe updated",
+      "message": "\"{{name}}\" was saved."
     },
     "taskSentForReview": {
       "title": "Sent for review",

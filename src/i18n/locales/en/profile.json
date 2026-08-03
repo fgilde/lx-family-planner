@@ -101,6 +101,14 @@
       "mail": "Family mail"
     }
   },
+  "avatars": {
+    "av-1": "Brave lion",
+    "av-2": "Clever fox",
+    "av-3": "Adventure dog",
+    "av-4": "Ninja cat",
+    "av-5": "Red panda",
+    "av-6": "Space buddy"
+  },
   "form": {
     "usage": "How will the profile be used?",
     "ownLogin": "With their own login",
@@ -114,6 +122,8 @@
     "petName": "Pet's name",
     "petNamePlaceholder": "e.g. Luna",
     "namePlaceholder": "e.g. Sample name",
+    "birthDate": "Date of birth",
+    "birthDateHint": "Automatically creates family calendar entries and reminders.",
     "position": "Position in the family",
     "avatar": "Profile picture",
     "ownPhoto": "Own photo",

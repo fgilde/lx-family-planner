@@ -3,11 +3,14 @@ const SESSION_TOKEN_KEY = 'lx_family_session_token';
 
 export const DEFAULT_SERVER_URL = 'https://familie.laxxx-lab.de';
 
-export function normalizeServerUrl(value) {
+export function normalizeServerUrl(
+  value,
+  invalidMessage = 'Only HTTP and HTTPS addresses are allowed.'
+) {
   let clean = String(value || '').trim().replace(/\/+$/, '');
   if (!clean) return '';
   if (/^[a-z][a-z0-9+.-]*:/i.test(clean) && !/^https?:\/\//i.test(clean)) {
-    throw new Error('Es sind nur HTTP- und HTTPS-Adressen erlaubt.');
+    throw new Error(invalidMessage);
   }
   if (!/^https?:\/\//i.test(clean)) {
     const isLocalAddress =
@@ -17,7 +20,7 @@ export function normalizeServerUrl(value) {
   }
   const parsed = new URL(clean);
   if (!['http:', 'https:'].includes(parsed.protocol)) {
-    throw new Error('Es sind nur HTTP- und HTTPS-Adressen erlaubt.');
+    throw new Error(invalidMessage);
   }
   return parsed.toString().replace(/\/+$/, '');
 }
@@ -35,9 +38,12 @@ export function getStoredServerUrl() {
   }
 }
 
-export function setStoredServerUrl(url) {
+export function setStoredServerUrl(
+  url,
+  invalidMessage = 'The server address is not valid.'
+) {
   try {
-    const clean = normalizeServerUrl(url);
+    const clean = normalizeServerUrl(url, invalidMessage);
     const previous = getStoredServerUrl();
     if (clean) {
       localStorage.setItem(SERVER_URL_KEY, clean);
@@ -50,7 +56,7 @@ export function setStoredServerUrl(url) {
     return clean;
   } catch (error) {
     throw new Error(
-      error?.message || 'Die Server-Adresse ist nicht gültig.'
+      error?.message || invalidMessage
     );
   }
 }
@@ -98,6 +104,16 @@ export async function plannerApiFetch(path, options = {}) {
   if (isCapacitorNative() && !headers.has('X-LX-Client')) {
     headers.set('X-LX-Client', 'native');
   }
+  if (!headers.has('X-LX-Language')) {
+    try {
+      const language =
+        localStorage.getItem('lx_family_language') ||
+        document.documentElement.lang;
+      if (language) headers.set('X-LX-Language', String(language).slice(0, 2));
+    } catch {
+      // A request still works when storage or document access is unavailable.
+    }
+  }
   const token = getStoredSessionToken();
   if (token && !headers.has('X-Session-Token')) {
     headers.set('X-Session-Token', token);
@@ -127,7 +143,7 @@ export async function plannerApiRequest(path, options = {}) {
   if (data?.sessionToken) setStoredSessionToken(data.sessionToken);
   if (!response.ok) {
     const error = new Error(
-      data?.error || 'Die Anfrage konnte nicht verarbeitet werden.'
+      data?.error || 'The request could not be processed.'
     );
     error.status = response.status;
     throw error;
@@ -136,7 +152,7 @@ export async function plannerApiRequest(path, options = {}) {
 }
 
 export function describeApiError(error) {
-  const message = error?.message || 'Die Anfrage konnte nicht verarbeitet werden.';
+  const message = error?.message || 'The request could not be processed.';
   const status = Number(error?.status || 0);
   return status >= 400 && status <= 599
     ? `${message} (HTTP ${status})`

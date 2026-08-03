@@ -28,7 +28,10 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
     setTesting(true);
     setStatus(null);
     try {
-      const target = normalizeServerUrl(url);
+      const target = normalizeServerUrl(
+        url,
+        t('serverConfig.errors.invalidUrl')
+      );
       if (!target) {
         throw new Error(t('serverConfig.errors.emptyUrl'));
       }
@@ -63,9 +66,15 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
 
   const handleSave = () => {
     try {
-      let target = normalizeServerUrl(url);
+      let target = normalizeServerUrl(
+        url,
+        t('serverConfig.errors.invalidUrl')
+      );
       if (target === window.location.origin) target = '';
-      const saved = setStoredServerUrl(target);
+      const saved = setStoredServerUrl(
+        target,
+        t('serverConfig.errors.invalidUrl')
+      );
       setStatus(null);
       onSave?.(saved);
       onClose();

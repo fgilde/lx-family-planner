@@ -32,5 +32,17 @@
     "description": "Description",
     "location": "Location",
     "name": "Name"
+  },
+  "language": {
+    "label": "Language",
+    "title": "Choose language",
+    "choose": "Choose the interface language"
+  },
+  "birthdays": {
+    "eventTitle": "🎂 It's {{name}}'s birthday",
+    "location": "Family",
+    "ageNote_one": "{{name}} turns {{count}} year old.",
+    "ageNote_other": "{{name}} turns {{count}} years old.",
+    "sourceName": "Family birthday"
   }
 }

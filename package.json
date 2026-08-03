@@ -1,7 +1,24 @@
 {
   "name": "lx-family-planner",
   "private": true,
-  "version": "1.15.0",
+  "version": "1.16.0",
+  "description": "A self-hosted Family OS with dedicated spaces for parents, children, grandparents and pets.",
+  "homepage": "https://github.com/laxxx-lab/lx-family-planner",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laxxx-lab/lx-family-planner.git"
+  },
+  "keywords": [
+    "self-hosted",
+    "family-organizer",
+    "family-calendar",
+    "parenting",
+    "chores",
+    "meal-planner",
+    "nextcloud",
+    "home-assistant",
+    "docker"
+  ],
   "type": "module",
   "engines": {
     "node": ">=22.13"
@@ -28,6 +45,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "fast-xml-parser": "^5.10.1",
+    "fflate": "^0.8.3",
     "google-auth-library": "^10.9.1",
     "i18next": "^26.3.6",
     "lucide-react": "^0.453.0",

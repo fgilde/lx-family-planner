@@ -42,14 +42,28 @@
       "importFailed": "The recipe could not be imported.",
       "saveFailed": "The recipe could not be saved to the cookbook.",
       "shareMissingLink": "The sharing app did not pass along a recipe link. Please paste the link below."
+      ,"tandoorTooLarge": "The Tandoor export must be no larger than 120 MB.",
+      "tandoorEmpty": "No Tandoor recipes were found in this file.",
+      "tandoorInvalid": "The Tandoor export could not be read.",
+      "rtkTooLarge": "The My Recipe Box backup must be no larger than 120 MB.",
+      "rtkEmpty": "No My Recipe Box recipes were found in this file.",
+      "rtkInvalid": "The My Recipe Box backup could not be read."
     },
     "toasts": {
       "importedCheckTitle": "Recipe imported – please review",
       "importedTitle": "🎉 Recipe imported!",
       "importedBody": "\"{{title}}\" was imported successfully!",
+      "draftReadyTitle": "Recipe draft ready",
+      "draftReadyBody": "Review the ingredients and method. Nothing is saved until you confirm it.",
       "importErrorTitle": "⚠️ Import error",
       "manualCreatedTitle": "✨ Recipe created",
       "manualCreatedBody": "\"{{title}}\" was saved to the recipe book."
+      ,"tandoorImportedTitle": "Tandoor recipes imported",
+      "tandoorImportedBody": "{{count}} recipes were added to your LX cookbook.",
+      "tandoorErrorTitle": "Tandoor import failed",
+      "rtkImportedTitle": "My Recipe Box recipes imported",
+      "rtkImportedBody": "{{imported}} recipes imported, {{skipped}} existing recipes found and {{imagesRecovered}} missing images recovered.",
+      "rtkErrorTitle": "My Recipe Box import failed"
     },
     "header": {
       "title": "Our Cookbook & Recipe World",
@@ -61,6 +75,7 @@
       "manual": "New recipe"
     },
     "card": {
+      "editTitle": "Edit recipe",
       "deleteTitle": "Delete recipe",
       "defaultPrepTime": "30 min",
       "defaultServings": "4 servings",
@@ -68,31 +83,73 @@
       "addIngredientsTitle": "Add ingredients to the shopping list",
       "addIngredients": "Add ingredients to the list"
     },
+    "tandoor": {
+      "title": "Import from Tandoor Recipes",
+      "description": "Imports the official Tandoor export including ingredients, steps and available images.",
+      "hint": "In Tandoor: open a recipe → menu → export → select all recipes. Then choose the ZIP file here.",
+      "select": "Choose Tandoor file",
+      "loading": "Reading Tandoor …"
+    },
+    "rtk": {
+      "title": "Import from My Recipe Box",
+      "description": "Imports a complete .rtk backup including ingredients, instructions, images and source links.",
+      "hint": "In My Recipe Box: Sync/Backup → Export backup (RTK). On Android, send an individual recipe directly via Share → LX Familie.",
+      "select": "Choose RTK backup",
+      "loading": "Reading My Recipe Box …"
+    },
     "import": {
       "shareArrivalTitle": "Shared straight from your phone",
-      "shareArrivalBody": "LX picks up the recipe link and automatically saves the dish to your cookbook.",
+      "shareArrivalBody": "LX picks up the link. Social media recipes open as a reviewable draft first.",
       "importRunningAria": "Import in progress",
       "kicker": "Recipe Finder",
       "title": "Import a recipe from the web",
-      "description": "Paste the link to a recipe or Pinterest pin. Images, ingredients, times and instructions are imported automatically if the page provides recipe data.",
+      "description": "Paste a recipe link, Pinterest pin or public Facebook Reel. Social media content is always opened for review before saving.",
       "platformsAria": "Examples of supported sites",
       "morePlatforms": "more recipe sites",
-      "howto": "<strong>No copying needed on Android:</strong> Install LX as an app once. After that you can import from Chefkoch, Pinterest and other apps via <b>Share → LX Familie</b>.",
+      "howto": "<strong>No copying needed on Android:</strong> Install LX as an app once. Then import from recipe sites, Pinterest or Facebook via <b>Share → LX Familie</b>.",
       "urlLabel": "Public recipe link",
       "urlPlaceholder": "https://www.pinterest.de/pin/... or recipe page",
+      "socialTextTitle": "Add the Facebook caption",
+      "socialTextSummary": "Useful when Facebook only shares the link",
+      "socialTextLabel": "Caption or recipe text from the Reel",
+      "socialTextPlaceholder": "Paste the title, ingredients and method from the Reel caption …",
+      "socialTextHint": "The text stays on your LX server and opens as an editable draft.",
       "submitLoading": "Reading recipe …",
       "submit": "Import recipe now",
       "help": "Private pages, logins and internal home network addresses are not opened for security reasons. Some sites may technically block automatic retrieval."
     },
+    "review": {
+      "kicker": "Imported draft",
+      "facebookKicker": "Read from Facebook Reels",
+      "sharedKicker": "Shared from My Recipe Box",
+      "title": "Review once, then save",
+      "description": "Reel captions can omit quantities, ordering or individual steps. Add anything missing below.",
+      "sharedDescription": "Other recipe apps share different amounts of detail depending on their version. Quickly review quantities and order, and add an image if needed.",
+      "notSaved": "Not saved yet",
+      "editorKicker": "Your review",
+      "editorTitle": "Review recipe draft",
+      "saveReviewed": "Save reviewed recipe"
+    },
     "manual": {
+      "kicker": "Your family recipe",
       "title": "Create your own recipe",
+      "editTitle": "Edit recipe",
       "dishTitleLabel": "Title of the dish",
       "dishTitlePlaceholder": "e.g. Dad's famous Bolognese",
       "prepTimeLabel": "Preparation time",
       "servingsLabel": "Servings",
-      "submit": "Save Recipe",
-      "placeholderIngredient": "{{number}}x ingredient {{number}}",
-      "placeholderStep": "Preparation step {{number}}"
+      "imageLabel": "Image URL (optional)",
+      "imagePlaceholder": "https://…/recipe-image.jpg",
+      "ingredientsLabel": "Ingredients",
+      "addIngredient": "Add ingredient",
+      "ingredientPlaceholder": "e.g. 2 zucchini",
+      "removeIngredient": "Remove ingredient",
+      "instructionsLabel": "Preparation steps",
+      "addStep": "Add step",
+      "stepPlaceholder": "Describe one complete preparation step …",
+      "removeStep": "Remove step",
+      "saveChanges": "Save changes",
+      "submit": "Save Recipe"
     }
   },
   "cookingMode": {

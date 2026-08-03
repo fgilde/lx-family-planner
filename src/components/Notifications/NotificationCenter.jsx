@@ -30,6 +30,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
+import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
 import { canManageFamily } from '../../constants/roles';
 import {
   formatDate,
@@ -222,7 +223,7 @@ export default function NotificationCenter() {
       );
     const profileTasks = tasks.filter(
       task =>
-        task.memberId === activeMember?.id &&
+        taskIsAvailableToMember(task, activeMember?.id) &&
         !task.completed &&
         belongsToHousehold(task) &&
         (!task.dueDate || task.dueDate <= today)

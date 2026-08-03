@@ -5,8 +5,18 @@ import { parseInstructionSteps } from '../shared/recipeInstructions.js';
 
 const RECIPE_FETCH_TIMEOUT_MS = 12_000;
 const RECIPE_MAX_BYTES = 3 * 1024 * 1024;
+const RECIPE_IMAGE_MAX_BYTES = 3 * 1024 * 1024;
+const RECIPE_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif'
+]);
 const PINTEREST_HOST_PATTERN = /(^|\.)pinterest\.[a-z.]+$/i;
 const PINTEREST_SHORT_HOSTS = new Set(['pin.it', 'www.pin.it']);
+const FACEBOOK_HOST_PATTERN = /(^|\.)facebook\.com$/i;
+const FACEBOOK_SHORT_HOSTS = new Set(['fb.watch', 'www.fb.watch']);
+const SOCIAL_CAPTION_MAX_LENGTH = 12_000;
 
 function recipeError(message, statusCode = 422) {
   const error = new Error(message);
@@ -24,6 +34,207 @@ function cleanText(value, fallback = '', maxLength = 4000) {
 function isPinterestHost(hostname) {
   const host = String(hostname || '').toLowerCase();
   return PINTEREST_SHORT_HOSTS.has(host) || PINTEREST_HOST_PATTERN.test(host);
+}
+
+function isFacebookHost(hostname) {
+  const host = String(hostname || '').toLowerCase();
+  return FACEBOOK_SHORT_HOSTS.has(host) || FACEBOOK_HOST_PATTERN.test(host);
+}
+
+function normalizeSocialCaption(value) {
+  const raw = String(value || '');
+  const text = /<[a-z][\s\S]*>/i.test(raw)
+    ? cheerio.load(
+        raw
+          .replace(/<br\s*\/?\s*>/gi, '\n')
+          .replace(/<\/(?:p|div|li|h[1-6])\s*>/gi, '\n')
+      ).text()
+    : raw;
+  return text
+    .replace(/<br\s*\/?\s*>/gi, '\n')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, SOCIAL_CAPTION_MAX_LENGTH);
+}
+
+function urlsFromText(value) {
+  return (String(value || '').match(/https?:\/\/[^\s<>"']+/gi) || [])
+    .map(candidate => candidate.replace(/[\])},.;!?]+$/g, ''));
+}
+
+function withoutUrls(value) {
+  return normalizeSocialCaption(value)
+    .replace(/https?:\/\/[^\s<>"']+/gi, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function socialList(value) {
+  return normalizeSocialCaption(value)
+    .split(/\s*(?:\n+|[•●▪▫◦]|\s+\+\s+|\s+\|\s+|;\s+)\s*/u)
+    .map(entry => entry
+      .replace(/^\s*(?:[-–—*✓✅]+|\d{1,2}[.)])\s*/u, '')
+      .trim())
+    .filter(entry => entry.length > 1);
+}
+
+const INGREDIENT_HEADING =
+  /(?:(?:^|\n|[.!?]\s+)[ \t]*(?:🛒\s*)?(?:zutaten|ingredients|du brauchst|einkaufsliste)\s*:?\s*|\s+(?:🛒\s*)?(?:zutaten|ingredients|du brauchst|einkaufsliste)\s*:\s*)/i;
+const INSTRUCTION_HEADING =
+  /(?:(?:^|\n|[.!?]\s+)[ \t]*(?:👩‍🍳\s*|👨‍🍳\s*)?(?:zubereitung|anleitung|so geht(?:'|’)?s|instructions?|method|preparation)\s*:?\s*|\s+(?:👩‍🍳\s*|👨‍🍳\s*)?(?:zubereitung|anleitung|so geht(?:'|’)?s|instructions?|method|preparation)\s*:\s*)/i;
+
+function socialCaptionSections(value) {
+  const caption = withoutUrls(value);
+  const ingredientHeading = INGREDIENT_HEADING.exec(caption);
+  if (!ingredientHeading) {
+    return { caption, ingredients: [], instructions: [] };
+  }
+  const afterHeading = caption.slice(
+    ingredientHeading.index + ingredientHeading[0].length
+  );
+  const instructionHeading = INSTRUCTION_HEADING.exec(afterHeading);
+  const ingredientText = instructionHeading
+    ? afterHeading.slice(0, instructionHeading.index)
+    : afterHeading;
+  const instructionText = instructionHeading
+    ? afterHeading.slice(
+        instructionHeading.index + instructionHeading[0].length
+      )
+    : '';
+  const instructionInput = instructionText.replace(
+    /(?<=[.!?])\s+(?=[A-ZÄÖÜ])/gu,
+    '\n'
+  );
+  return {
+    caption,
+    ingredients: socialList(ingredientText).slice(0, 120),
+    instructions: instructionInput
+      ? parseInstructionSteps(instructionInput).slice(0, 80)
+      : []
+  };
+}
+
+function socialRecipeTitle(value, caption) {
+  const cleaned = cleanText(value, '', 240)
+    .replace(/\s*[|·-]\s*Facebook\s*$/i, '')
+    .replace(/\s+on Facebook\s*$/i, '')
+    .trim();
+  if (cleaned && !/^facebook$/i.test(cleaned)) return cleaned;
+  const firstLine = withoutUrls(caption)
+    .split('\n')
+    .map(line => cleanText(line, '', 160))
+    .find(line =>
+      line &&
+      !INGREDIENT_HEADING.test(line) &&
+      !INSTRUCTION_HEADING.test(line)
+    );
+  return firstLine || 'Rezept aus Facebook';
+}
+
+function sharedRecipeTitle(value, caption) {
+  const cleaned = cleanText(value, '', 240)
+    .replace(/\s*[|·-]\s*(?:My Recipe Box|RecetteTek)\s*$/i, '')
+    .trim();
+  if (
+    cleaned &&
+    !/^(?:rezept|recipe|rezept teilen|share recipe|my recipe box)$/i.test(cleaned)
+  ) {
+    return cleaned;
+  }
+  const firstLine = withoutUrls(caption)
+    .split('\n')
+    .map(line => cleanText(line, '', 160))
+    .find(line =>
+      line &&
+      !INGREDIENT_HEADING.test(line) &&
+      !INSTRUCTION_HEADING.test(line)
+    );
+  return firstLine || 'Geteiltes Rezept';
+}
+
+function socialTime(value) {
+  const match = /\b(\d{1,3})\s*(min(?:ute[n]?)?|mins?)\b/i.exec(value);
+  return match ? `${Number(match[1])} Min.` : '';
+}
+
+function socialServings(value) {
+  const match = /\b(\d{1,2})\s*(portion(?:en)?|servings?)\b/i.exec(value);
+  return match ? `${Number(match[1])} ${match[2]}` : '';
+}
+
+export function extractFacebookRecipeDraft(
+  caption,
+  { title = '', image = '', sourceUrl = '' } = {}
+) {
+  const sections = socialCaptionSections(caption);
+  if (!sections.ingredients.length && !sections.instructions.length) {
+    return null;
+  }
+  const warnings = [
+    'Aus einem Facebook-Beitrag übernommen. Bitte Zutaten und Zubereitung vor dem Speichern prüfen.'
+  ];
+  if (!sections.ingredients.length) {
+    warnings.push('In der Beschreibung wurde keine eindeutige Zutatenliste erkannt.');
+  }
+  if (!sections.instructions.length) {
+    warnings.push('Die Zubereitung steht offenbar nur im Reel und muss ergänzt werden.');
+  }
+  return {
+    recipe: {
+      title: socialRecipeTitle(title, sections.caption),
+      image: cleanText(image, '', 2000),
+      ingredients: sections.ingredients,
+      instructions: sections.instructions,
+      prepTime: socialTime(sections.caption),
+      cookTime: '',
+      totalTime: '',
+      servings: socialServings(sections.caption),
+      sourceUrl: cleanText(sourceUrl, '', 2000),
+      source: 'facebook-reel'
+    },
+    warnings,
+    reviewRequired: true,
+    platform: 'facebook'
+  };
+}
+
+export function extractSharedRecipeDraft(
+  caption,
+  { title = '', sourceUrl = '' } = {}
+) {
+  const sections = socialCaptionSections(caption);
+  if (!sections.ingredients.length && !sections.instructions.length) {
+    return null;
+  }
+  const warnings = [
+    'Aus einer anderen Rezept-App übernommen. Bitte Zutaten und Zubereitung vor dem Speichern kurz prüfen.'
+  ];
+  if (!sections.ingredients.length) {
+    warnings.push('Im geteilten Text wurde keine eindeutige Zutatenliste erkannt.');
+  }
+  if (!sections.instructions.length) {
+    warnings.push('Im geteilten Text wurde keine eindeutige Zubereitung erkannt.');
+  }
+  return {
+    recipe: {
+      title: sharedRecipeTitle(title, sections.caption),
+      image: '',
+      ingredients: sections.ingredients,
+      instructions: sections.instructions,
+      prepTime: socialTime(sections.caption),
+      cookTime: '',
+      totalTime: '',
+      servings: socialServings(sections.caption),
+      sourceUrl: cleanText(sourceUrl, '', 2000),
+      source: 'shared-recipe'
+    },
+    warnings,
+    reviewRequired: true,
+    platform: 'shared-recipe'
+  };
 }
 
 function ipv4Parts(address) {
@@ -137,6 +348,28 @@ async function readLimitedHtml(response) {
   return Buffer.concat(chunks).toString('utf8');
 }
 
+async function readLimitedBytes(response, limit) {
+  const announcedLength = Number(response.headers.get('content-length') || 0);
+  if (announcedLength > limit) {
+    throw recipeError('Das Rezeptbild ist größer als 3 MB.', 413);
+  }
+  if (!response.body) return Buffer.alloc(0);
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > limit) {
+      await reader.cancel();
+      throw recipeError('Das Rezeptbild ist größer als 3 MB.', 413);
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks);
+}
+
 async function fetchRecipePage(rawUrl) {
   let url = normalizeRecipeImportUrl(rawUrl);
   for (let redirect = 0; redirect <= 3; redirect += 1) {
@@ -182,6 +415,63 @@ async function fetchRecipePage(rawUrl) {
     };
   }
   throw recipeError('Die Rezeptseite konnte nicht geladen werden.', 502);
+}
+
+async function fetchRecipeImage(rawUrl) {
+  let url = normalizeRecipeImportUrl(rawUrl);
+  for (let redirect = 0; redirect <= 3; redirect += 1) {
+    await validatePublicTarget(url);
+    let response;
+    try {
+      response = await fetch(url, {
+        redirect: 'manual',
+        signal: AbortSignal.timeout(RECIPE_FETCH_TIMEOUT_MS),
+        headers: {
+          accept: 'image/avif,image/webp,image/png,image/jpeg,image/gif;q=0.9',
+          'user-agent':
+            'Mozilla/5.0 (compatible; LX-Family-Planner/2.0; +private-recipe-import)'
+        }
+      });
+    } catch {
+      throw recipeError('Das Rezeptbild antwortet gerade nicht.', 502);
+    }
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+      const location = response.headers.get('location');
+      if (!location || redirect === 3) {
+        throw recipeError('Das Rezeptbild leitet zu oft weiter.', 502);
+      }
+      url = normalizeRecipeImportUrl(new URL(location, url).toString());
+      continue;
+    }
+    if (!response.ok) {
+      throw recipeError(`Das Rezeptbild meldet Fehler ${response.status}.`, 502);
+    }
+    const contentType = String(response.headers.get('content-type') || '')
+      .split(';')[0]
+      .trim()
+      .toLowerCase();
+    if (!RECIPE_IMAGE_TYPES.has(contentType)) {
+      throw recipeError('Die Vorschau ist keine unterstützte Bilddatei.', 422);
+    }
+    const bytes = await readLimitedBytes(response, RECIPE_IMAGE_MAX_BYTES);
+    if (!bytes.length) return '';
+    return `data:${contentType};base64,${bytes.toString('base64')}`;
+  }
+  return '';
+}
+
+export async function importRecipePreviewImage(rawUrl) {
+  const page = await fetchRecipePage(rawUrl);
+  const $ = cheerio.load(page.html);
+  const candidate = [
+    $('meta[property="og:image:secure_url"]').attr('content'),
+    $('meta[property="og:image"]').attr('content'),
+    $('meta[name="twitter:image"]').attr('content'),
+    $('meta[name="twitter:image:src"]').attr('content')
+  ].find(Boolean);
+  const imageUrl = resolveExternalUrl(candidate, page.url.href);
+  if (!imageUrl) return { image: '' };
+  return { image: await fetchRecipeImage(imageUrl) };
 }
 
 function schemaTypes(value) {
@@ -436,6 +726,84 @@ function pinterestSourceUrl($, pageUrl) {
   return '';
 }
 
+function facebookExternalUrl(value, pageUrl) {
+  if (!value) return '';
+  try {
+    let candidate = new URL(value, pageUrl);
+    if (
+      isFacebookHost(candidate.hostname) &&
+      /\/l\.php$/i.test(candidate.pathname)
+    ) {
+      const redirected = candidate.searchParams.get('u');
+      if (!redirected) return '';
+      candidate = new URL(redirected);
+    }
+    if (!['http:', 'https:'].includes(candidate.protocol)) return '';
+    if (isFacebookHost(candidate.hostname)) return '';
+    if (candidate.protocol === 'http:') candidate.protocol = 'https:';
+    candidate.hash = '';
+    return candidate.href;
+  } catch {
+    return '';
+  }
+}
+
+function facebookSourceUrl($, pageUrl, caption = '') {
+  const candidates = [
+    $('meta[property="og:see_also"]').attr('content'),
+    ...urlsFromText(caption),
+    ...$('a[href*="/l.php?"]')
+      .toArray()
+      .map(element => $(element).attr('href'))
+  ];
+  for (const candidate of candidates) {
+    const source = facebookExternalUrl(candidate, pageUrl);
+    if (source) return source;
+  }
+  return '';
+}
+
+function facebookCaption($) {
+  return normalizeSocialCaption(
+    $('meta[property="og:description"]').attr('content') ||
+      $('meta[name="twitter:description"]').attr('content') ||
+      $('meta[name="description"]').attr('content')
+  );
+}
+
+function facebookRecipeDraft($, pageUrl, shared = {}) {
+  const pageCaption = facebookCaption($);
+  const caption = normalizeSocialCaption(
+    [shared.text, pageCaption].filter(Boolean).join('\n')
+  );
+  const title =
+    shared.title ||
+    $('meta[property="og:title"]').attr('content') ||
+    $('meta[name="twitter:title"]').attr('content') ||
+    '';
+  const image =
+    $('meta[property="og:image:secure_url"]').attr('content') ||
+    $('meta[property="og:image"]').attr('content') ||
+    $('meta[name="twitter:image"]').attr('content') ||
+    '';
+  return {
+    draft: extractFacebookRecipeDraft(caption, {
+      title,
+      image: resolveExternalUrl(image, pageUrl),
+      sourceUrl: pageUrl
+    }),
+    sourceUrl: facebookSourceUrl($, pageUrl, caption)
+  };
+}
+
+export function extractFacebookRecipePage(html, pageUrl, shared = {}) {
+  return facebookRecipeDraft(
+    cheerio.load(String(html || '')),
+    pageUrl,
+    shared
+  );
+}
+
 function normalizedRecipe(recipe, pageUrl, fallbackImage = '') {
   const image = [
     ...imageCandidates(recipe.image),
@@ -488,15 +856,110 @@ export function extractRecipeDocument(html, pageUrl) {
   };
 }
 
-export async function importRecipeFromUrl(rawUrl) {
+export async function importRecipeFromUrl(rawUrl, shared = {}) {
   const requestedUrl = normalizeRecipeImportUrl(rawUrl);
-  const firstPage = await fetchRecipePage(requestedUrl);
+  const facebookImport = isFacebookHost(requestedUrl.hostname);
+  const sharedRecipeDraft = !facebookImport
+    ? extractSharedRecipeDraft(shared.text, {
+        title: shared.title,
+        sourceUrl: requestedUrl.href
+      })
+    : null;
+  const sharedFacebookDraft = facebookImport
+    ? extractFacebookRecipeDraft(shared.text, {
+        title: shared.title,
+        sourceUrl: requestedUrl.href
+      })
+    : null;
+  if (facebookImport) {
+    const sharedSourceUrl = urlsFromText(shared.text)
+      .map(candidate => facebookExternalUrl(candidate, requestedUrl.href))
+      .find(Boolean);
+    if (sharedSourceUrl) {
+      try {
+        const sourcePage = await fetchRecipePage(sharedSourceUrl);
+        const sourceResult = extractRecipeDocument(
+          sourcePage.html,
+          sourcePage.url.href
+        );
+        if (sourceResult.recipe) {
+          return {
+            recipe: {
+              ...sourceResult.recipe,
+              importedFromUrl: requestedUrl.href
+            },
+            warnings: sourceResult.warning ? [sourceResult.warning] : []
+          };
+        }
+      } catch {
+        // The caption itself can still provide a useful editable draft.
+      }
+    }
+    if (sharedFacebookDraft) return sharedFacebookDraft;
+  }
+  let firstPage;
+  try {
+    firstPage = await fetchRecipePage(requestedUrl);
+  } catch (error) {
+    if (sharedFacebookDraft) {
+      return {
+        ...sharedFacebookDraft,
+        warnings: [
+          ...sharedFacebookDraft.warnings,
+          'Facebook hat das Vorschaubild blockiert; der geteilte Beschreibungstext wurde trotzdem übernommen.'
+        ]
+      };
+    }
+    if (facebookImport) {
+      throw recipeError(
+        'Facebook hat nur den Reel-Link geliefert oder verlangt eine Anmeldung. Teile das Reel direkt über die Android-App; wenn Facebook die Beschreibung mitsendet, erstellt LX daraus einen prüfbaren Entwurf.',
+        422
+      );
+    }
+    if (sharedRecipeDraft) return sharedRecipeDraft;
+    throw error;
+  }
   const firstResult = extractRecipeDocument(firstPage.html, firstPage.url.href);
   if (firstResult.recipe) {
     return {
       recipe: firstResult.recipe,
       warnings: firstResult.warning ? [firstResult.warning] : []
     };
+  }
+
+  if (facebookImport || isFacebookHost(firstPage.url.hostname)) {
+    const facebook = extractFacebookRecipePage(
+      firstPage.html,
+      firstPage.url.href,
+      shared
+    );
+    if (facebook.sourceUrl) {
+      try {
+        const sourcePage = await fetchRecipePage(facebook.sourceUrl);
+        const sourceResult = extractRecipeDocument(
+          sourcePage.html,
+          sourcePage.url.href
+        );
+        if (sourceResult.recipe) {
+          return {
+            recipe: {
+              ...sourceResult.recipe,
+              importedFromUrl: firstPage.url.href
+            },
+            warnings: sourceResult.warning ? [sourceResult.warning] : []
+          };
+        }
+      } catch {
+        // A usable caption draft is preferable to losing the whole import
+        // because an optional linked recipe page is temporarily unavailable.
+      }
+    }
+    if (facebook.draft) return facebook.draft;
+    if (sharedFacebookDraft) return sharedFacebookDraft;
+    throw recipeError(
+      'Im öffentlichen Facebook-Reel wurden weder eine Zutatenliste noch eine verlinkte Rezeptseite gefunden. Video-Ton wird aus Datenschutz- und Stabilitätsgründen nicht ungefragt heruntergeladen.',
+      422
+    );
   }
 
   if (firstResult.sourceUrl) {
@@ -515,6 +978,8 @@ export async function importRecipeFromUrl(rawUrl) {
       };
     }
   }
+
+  if (sharedRecipeDraft) return sharedRecipeDraft;
 
   throw recipeError(
     isPinterestHost(firstPage.url.hostname)

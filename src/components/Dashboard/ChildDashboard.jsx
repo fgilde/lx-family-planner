@@ -34,6 +34,11 @@ import HomeAssistantWidget from './HomeAssistantWidget';
 import MediaCover from './MediaCover';
 import RewardIcon from '../Tasks/RewardIcon';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
+import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
+import {
+  birthdayEventCopy,
+  nextBirthdayOccurrencesOnly
+} from '../../../shared/birthdays.js';
 
 // Die label-Werte werden als heroTitle im Profil gespeichert und bleiben
 // deshalb deutsch – angezeigt wird die Übersetzung (child.worlds.*).
@@ -113,7 +118,7 @@ export default function ChildDashboard() {
     : 'adventure';
   const world = CHILD_WORLDS[worldKey];
   const allMyTasks = tasks.filter(
-    task => task.memberId === activeMember?.id
+    task => taskIsAvailableToMember(task, activeMember?.id)
   );
   const myTasks = allMyTasks.filter(task => !task.completed);
   const completedMissions = allMyTasks.filter(task => task.completed).length;
@@ -126,9 +131,10 @@ export default function ChildDashboard() {
       return target === 'all' || target === activeMember?.id;
     })
     .sort((a, b) => Number(a.costStars || 0) - Number(b.costStars || 0));
-  const upcomingEvents = events
+  const today = localDateKey();
+  const upcomingEvents = nextBirthdayOccurrencesOnly(events, today)
     .filter(event => eventIsForMember(event, activeMember?.id))
-    .filter(event => !event.date || event.date >= new Date().toISOString().slice(0, 10))
+    .filter(event => !event.date || event.date >= today)
     .sort((a, b) => `${a.date}${a.time || ''}`.localeCompare(`${b.date}${b.time || ''}`))
     .slice(0, 3);
   const latestMood = [...moodCheckins]
@@ -137,7 +143,6 @@ export default function ChildDashboard() {
   const myDashboardLinks = dashboardLinks.filter(
     link => link.memberId === activeMember?.id
   );
-  const today = localDateKey();
   const myRoutines = dailyRoutines.filter(
     routine =>
       routine.memberId === activeMember?.id &&
@@ -179,6 +184,15 @@ export default function ChildDashboard() {
   const kidStyle = kidProfiles.find(
     profile => profile.memberId === activeMember?.id
   );
+  const storedWorldKey = Object.keys(CHILD_WORLDS).find(
+    key => CHILD_WORLDS[key].label === kidStyle?.heroTitle
+  );
+  const heroTitle = kidStyle?.heroTitle === 'Familienheld'
+    ? t('child.hero.defaultTitle')
+    : storedWorldKey
+      ? t(`child.worlds.${storedWorldKey}.label`)
+      : kidStyle?.heroTitle || t(`child.worlds.${worldKey}.label`);
+  const nextEventCopy = birthdayEventCopy(upcomingEvents[0], t);
   const familyRules = familySettings[0] || null;
   const mediaAllowed =
     !familyRules?.mediaScheduleEnabled ||
@@ -206,7 +220,7 @@ export default function ChildDashboard() {
             <Sparkles size={16} />{' '}
             {t('child.hero.kicker', {
               level,
-              title: kidStyle?.heroTitle || t(`child.worlds.${worldKey}.label`)
+              title: heroTitle
             })}
           </span>
           <h1>
@@ -657,7 +671,7 @@ export default function ChildDashboard() {
           <span>
             <small>{t('child.familyStrip.nextLabel')}</small>
             <strong>
-              {upcomingEvents[0]?.title || t('child.familyStrip.nothingPlanned')}
+              {nextEventCopy.title || t('child.familyStrip.nothingPlanned')}
             </strong>
           </span>
           <button type="button" onClick={() => setActiveTab('calendar')}>

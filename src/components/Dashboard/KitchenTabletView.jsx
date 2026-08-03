@@ -19,8 +19,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { eventAudienceMembers } from '../../../shared/calendarAudience.js';
+import { birthdayEventCopy } from '../../../shared/birthdays.js';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
-import { isChildProfile } from '../../constants/roles';
+import { dashboardLayoutForTrash } from '../../utils/dashboardLayout';
+import { isChildProfile, isManagedProfile } from '../../constants/roles';
 import DashboardCustomizer from './DashboardCustomizer';
 import OrderedDashboardGrid, {
   DashboardWidget
@@ -166,11 +168,13 @@ export default function KitchenTabletView() {
     tasks,
     toggleShoppingInCart,
     toggleTask,
+    completeTaskAs,
     trashEvents
   } = useFamily();
   const { t } = useTranslation('widgets');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const [taskForCompletion, setTaskForCompletion] = useState(null);
   const availableWidgets = useMemo(
     () => TABLET_WIDGETS.filter(
       widget =>
@@ -274,6 +278,11 @@ export default function KitchenTabletView() {
         .sort((left, right) => left.date.localeCompare(right.date))[0],
     [todayKey, trashEvents]
   );
+  const effectiveDashboardLayout = dashboardLayoutForTrash(
+    dashboardLayout.layout,
+    nextTrash?.date,
+    todayKey
+  );
 
   const openQuickAdd = type => {
     setQuickAddDefaultType(type);
@@ -281,15 +290,40 @@ export default function KitchenTabletView() {
   };
 
   const handleTask = task => {
-    if (
-      isChildProfile(activeMember) &&
-      task.memberId === activeMember?.id &&
-      !task.completed
-    ) {
-      toggleTask(task.id);
+    if (task.completionStatus === 'pending_approval') return;
+    const assigned = members.find(member => member.id === task.memberId);
+    if (isManagedProfile(assigned) || assigned?.role === 'pet') {
+      void toggleTask(task.id);
       return;
     }
-    setActiveTab('tasks');
+    setTaskForCompletion(task);
+  };
+
+  const completionMembers = useMemo(() => {
+    if (!taskForCompletion) return [];
+    const allowedIds = taskForCompletion.assignmentMode === 'shared'
+      ? new Set(taskForCompletion.eligibleMemberIds || [])
+      : new Set([taskForCompletion.memberId]);
+    return members.filter(member =>
+      member.role !== 'pet' &&
+      !isManagedProfile(member) &&
+      (
+        taskForCompletion.assignmentMode !== 'shared' ||
+        !allowedIds.size ||
+        allowedIds.has(member.id)
+      ) &&
+      (
+        taskForCompletion.assignmentMode === 'shared' ||
+        allowedIds.has(member.id)
+      )
+    );
+  }, [members, taskForCompletion]);
+
+  const completeTabletTask = async memberId => {
+    const task = taskForCompletion;
+    if (!task) return;
+    setTaskForCompletion(null);
+    await completeTaskAs(task.id, memberId);
   };
 
   return (
@@ -334,7 +368,7 @@ export default function KitchenTabletView() {
 
       <OrderedDashboardGrid
         className="tablet-command-grid"
-        layout={dashboardLayout.layout}
+        layout={effectiveDashboardLayout}
       >
         <TabletCard
           widgetId="calendar"
@@ -352,6 +386,7 @@ export default function KitchenTabletView() {
               {todayEvents.slice(0, 4).map(event => {
                 const audience = eventAudienceMembers(event, members);
                 const member = audience[0];
+                const displayEvent = birthdayEventCopy(event, t);
                 return (
                   <button
                     type="button"
@@ -360,9 +395,9 @@ export default function KitchenTabletView() {
                   >
                     <time>{event.time || t('kitchen.cards.calendar.allDay')}</time>
                     <span>
-                      <strong>{event.title}</strong>
+                      <strong>{displayEvent.title}</strong>
                       <small>
-                        {event.location ||
+                        {displayEvent.location ||
                           audience.map(entry => entry.name).join(', ') ||
                           t('kitchen.cards.calendar.familyFallback')}
                       </small>
@@ -447,7 +482,9 @@ export default function KitchenTabletView() {
                       <small>
                         {pendingApproval
                           ? t('kitchen.cards.tasks.pendingApproval')
-                          : member?.name}
+                          : task.assignmentMode === 'shared'
+                            ? t('kitchen.cards.tasks.shared')
+                            : member?.name}
                       </small>
                     </span>
                     <em><Star size={12} fill="currentColor" /> {task.stars}</em>
@@ -651,9 +688,55 @@ export default function KitchenTabletView() {
         profileName={activeMember?.name?.split(' ')[0]}
         resetLayout={dashboardLayout.resetLayout}
         setDensity={dashboardLayout.setDensity}
+        setPreference={dashboardLayout.setPreference}
         toggleWidget={dashboardLayout.toggleWidget}
         widgets={availableWidgets}
       />
+
+      {taskForCompletion && (
+        <div
+          className="modal-backdrop tablet-completer-backdrop"
+          onClick={() => setTaskForCompletion(null)}
+        >
+          <section
+            className="tablet-completer-dialog"
+            onClick={event => event.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="tablet-completer-kicker">
+              <CheckSquare size={18} />
+              {t('kitchen.completeTask.kicker')}
+            </div>
+            <h2>{t('kitchen.completeTask.title')}</h2>
+            <p>{taskForCompletion.title}</p>
+            <div className="tablet-completer-grid">
+              {completionMembers.map(member => (
+                <button
+                  key={member.id}
+                  type="button"
+                  onClick={() => completeTabletTask(member.id)}
+                >
+                  <img
+                    src={member.avatar || DEFAULT_FAMILY_AVATAR}
+                    alt=""
+                    onError={handleImgError}
+                  />
+                  <strong>{member.name}</strong>
+                  <small>{t('kitchen.completeTask.select')}</small>
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setTaskForCompletion(null)}
+            >
+              {t('kitchen.completeTask.cancel')}
+            </button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

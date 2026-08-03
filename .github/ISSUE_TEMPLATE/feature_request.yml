@@ -1,47 +1,47 @@
-name: Idee vorschlagen
-description: Eine Funktion, Integration oder Verbesserung für Familien.
-title: "[Idee] "
+name: Feature request
+description: Suggest a family-focused feature, integration or improvement.
+title: "[Idea] "
 labels:
   - enhancement
 body:
   - type: textarea
     id: situation
     attributes:
-      label: Welche Alltagssituation soll einfacher werden?
-      placeholder: Erzähl kurz, wann und für wen die Funktion hilfreich wäre.
+      label: Which everyday situation should become easier?
+      placeholder: Tell us when and for whom this would be useful.
     validations:
       required: true
 
   - type: textarea
     id: idea
     attributes:
-      label: Wie stellst du dir die Lösung vor?
+      label: What would a good solution look like?
     validations:
       required: true
 
   - type: dropdown
     id: audience
     attributes:
-      label: Für wen ist die Idee besonders wichtig?
+      label: Who benefits most?
       multiple: true
       options:
-        - Erwachsene
-        - Kinder
-        - Teenager
-        - Großeltern
-        - Pflege / verwaltete Profile
-        - Haustierprofile
-        - Alle
+        - Adults
+        - Children
+        - Teenagers
+        - Grandparents
+        - Care / managed profiles
+        - Pet profiles
+        - Everyone
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Was nutzt du heute als Ersatz?
+      label: What do you use today instead?
 
   - type: checkboxes
     id: scope
     attributes:
-      label: Einordnung
+      label: Fit
       options:
-        - label: Die Idee passt zu einem privaten, selbst gehosteten Familienplaner.
+        - label: This idea fits a private, self-hosted family planner.
           required: true

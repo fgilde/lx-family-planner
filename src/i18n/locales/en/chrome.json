@@ -52,7 +52,39 @@
       "descriptionPet": "Choose a calm world for the pet profile.",
       "descriptionChild": "Pick your favorite world.",
       "descriptionAdult": "Calm or loud – your choice is saved in your profile.",
+      "groups": {
+        "plain": "Plain & calm",
+        "expressive": "With character"
+      },
       "close": "Close theme selection"
+    },
+    "customTheme": {
+      "createLaunch": "Create a custom theme",
+      "createLaunchHint": "Add it as a separate design tile",
+      "editLaunch": "Edit My Design",
+      "editLaunchHint": "Continue refining your personal design tile",
+      "kicker": "Custom theme",
+      "title": "Create My Design",
+      "description": "These values form a separate theme. Linen, Graphite and every other built-in design stay unchanged.",
+      "safeTitle": "Intentionally restricted",
+      "safeDescription": "Only verified colors and corner radii are accepted. Selectors, external URLs, imports, hidden surfaces and positioning changes are blocked.",
+      "codeLabel": "CSS design variables",
+      "useExample": "Insert example",
+      "allowed": "Allowed variables",
+      "preview": "Preview",
+      "save": "Save as My Design",
+      "reset": "Clear custom theme",
+      "saved": "My Design was saved safely and activated as a separate theme.",
+      "validation": {
+        "tooLong": "The design code is too long.",
+        "invalidComment": "A CSS comment is not closed correctly.",
+        "selectorsNotAllowed": "Custom selectors and CSS rules are not allowed for security reasons.",
+        "tooManyDeclarations": "More design values were entered than allowed.",
+        "invalidDeclaration": "“{{property}}” is not a valid CSS variable.",
+        "propertyNotAllowed": "The variable “{{property}}” cannot be changed.",
+        "invalidValue": "The value for “{{property}}” is not a valid color or radius.",
+        "unsafeValue": "The value for “{{property}}” was blocked for security reasons."
+      }
     },
     "tabletMode": {
       "exitTitle": "Leave tablet mode",
@@ -62,6 +94,10 @@
     },
     "themes": {
       "adult": {
+        "linen": { "name": "Linen", "description": "warm, quiet & motif-free" },
+        "clear": { "name": "Clear", "description": "bright, cool & precise" },
+        "graphite": { "name": "Graphite", "description": "neutral, dark & calm" },
+        "custom": { "name": "My Design", "description": "your own safe styling" },
         "light": { "name": "Forest Calm", "description": "warm & natural" },
         "ocean": { "name": "Coastal Calm", "description": "airy & relaxed" },
         "midnight": { "name": "Night Lounge", "description": "calm & dark" },

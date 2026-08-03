@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake, Cloud, Mail } from 'lucide-react';
 import { canAccessAppView, canManageFamily, isChildProfile, isPetProfile } from '../constants/roles';
+import { taskIsAvailableToMember } from '../../shared/taskAssignments.js';
 
 export default function Navigation({ onOpenFamilyTree }) {
   const { t } = useTranslation('chrome');
@@ -22,7 +23,11 @@ export default function Navigation({ onOpenFamilyTree }) {
   const shoppingCount = shoppingItems.filter(i => i.isSelected && !i.inCart).length;
   // Children see their open missions; adults see approval requests addressed to them.
   const pendingTasksCount = isChildProfile(activeMember)
-    ? tasks.filter(task => task.memberId === activeMember?.id && !task.completed).length
+    ? tasks.filter(
+        task =>
+          taskIsAvailableToMember(task, activeMember?.id) &&
+          !task.completed
+      ).length
     : tasks.filter(
         task =>
           task.completionStatus === 'pending_approval' &&

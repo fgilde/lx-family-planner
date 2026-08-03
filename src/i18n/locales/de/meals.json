@@ -42,14 +42,28 @@
       "importFailed": "Rezept konnte nicht importiert werden.",
       "saveFailed": "Das Rezept konnte nicht im Kochbuch gespeichert werden.",
       "shareMissingLink": "Die geteilte App hat keinen Rezept-Link mitgegeben. Füge den Link bitte unten ein."
+      ,"tandoorTooLarge": "Der Tandoor-Export darf höchstens 120 MB groß sein.",
+      "tandoorEmpty": "In dieser Datei wurden keine Tandoor-Rezepte gefunden.",
+      "tandoorInvalid": "Der Tandoor-Export konnte nicht gelesen werden.",
+      "rtkTooLarge": "Das My-Recipe-Box-Backup darf höchstens 120 MB groß sein.",
+      "rtkEmpty": "In dieser Datei wurden keine My-Recipe-Box-Rezepte gefunden.",
+      "rtkInvalid": "Das My-Recipe-Box-Backup konnte nicht gelesen werden."
     },
     "toasts": {
       "importedCheckTitle": "Rezept importiert – bitte prüfen",
       "importedTitle": "🎉 Rezept importiert!",
       "importedBody": "\"{{title}}\" wurde erfolgreich importiert!",
+      "draftReadyTitle": "Rezeptentwurf ist bereit",
+      "draftReadyBody": "Prüfe Zutaten und Zubereitung. Gespeichert wird erst nach deiner Bestätigung.",
       "importErrorTitle": "⚠️ Import-Fehler",
       "manualCreatedTitle": "✨ Rezept erstellt",
       "manualCreatedBody": "\"{{title}}\" wurde im Rezeptbuch gespeichert."
+      ,"tandoorImportedTitle": "Tandoor-Rezepte übernommen",
+      "tandoorImportedBody": "{{count}} Rezepte wurden in euer LX-Kochbuch importiert.",
+      "tandoorErrorTitle": "Tandoor-Import fehlgeschlagen",
+      "rtkImportedTitle": "My-Recipe-Box-Rezepte übernommen",
+      "rtkImportedBody": "{{imported}} Rezepte importiert, {{skipped}} vorhandene erkannt und {{imagesRecovered}} fehlende Bilder nachgeladen.",
+      "rtkErrorTitle": "My-Recipe-Box-Import fehlgeschlagen"
     },
     "header": {
       "title": "Unser Kochbuch & Rezeptwelt",
@@ -61,6 +75,7 @@
       "manual": "Neues Rezept"
     },
     "card": {
+      "editTitle": "Rezept bearbeiten",
       "deleteTitle": "Rezept löschen",
       "defaultPrepTime": "30 Min",
       "defaultServings": "4 Portionen",
@@ -68,31 +83,73 @@
       "addIngredientsTitle": "Zutaten auf die Einkaufsliste setzen",
       "addIngredients": "Zutaten auf die Liste"
     },
+    "tandoor": {
+      "title": "Aus Tandoor Recipes übernehmen",
+      "description": "Importiert den offiziellen Tandoor-Export inklusive Zutaten, Schritten und vorhandenen Bildern.",
+      "hint": "In Tandoor: Rezept öffnen → Menü → Exportieren → alle Rezepte auswählen. Danach die ZIP-Datei hier ablegen.",
+      "select": "Tandoor-Datei wählen",
+      "loading": "Tandoor wird gelesen …"
+    },
+    "rtk": {
+      "title": "Aus My Recipe Box übernehmen",
+      "description": "Importiert ein vollständiges .rtk-Backup inklusive Zutaten, Zubereitung, Bildern und Quellen.",
+      "hint": "In My Recipe Box: Synchronisieren/Backup → Backup exportieren (RTK). Einzelne Rezepte kannst du auf Android direkt über Teilen → LX Familie senden.",
+      "select": "RTK-Backup wählen",
+      "loading": "My Recipe Box wird gelesen …"
+    },
     "import": {
       "shareArrivalTitle": "Direkt vom Handy geteilt",
-      "shareArrivalBody": "LX übernimmt den Rezept-Link und legt das Gericht automatisch in eurem Kochbuch ab.",
+      "shareArrivalBody": "LX übernimmt den Link. Social-Media-Rezepte werden zuerst als prüfbarer Entwurf geöffnet.",
       "importRunningAria": "Import läuft",
       "kicker": "Rezept-Finder",
       "title": "Rezept aus dem Web importieren",
-      "description": "Füge den Link zu einem Rezept oder Pinterest-Pin ein. Bilder, Zutaten, Zeiten und Zubereitung werden automatisch übernommen, wenn die Seite Rezeptdaten bereitstellt.",
+      "description": "Füge den Link zu einem Rezept, Pinterest-Pin oder öffentlichen Facebook-Reel ein. Social-Media-Inhalte werden vor dem Speichern immer zur Prüfung geöffnet.",
       "platformsAria": "Beispiele unterstützter Portale",
       "morePlatforms": "weitere Rezeptseiten",
-      "howto": "<strong>Ohne Kopieren auf Android:</strong> Installiere LX einmal als App. Danach kannst du bei Chefkoch, Pinterest und anderen Apps über <b>Teilen → LX Familie</b> importieren.",
+      "howto": "<strong>Ohne Kopieren auf Android:</strong> Installiere LX einmal als App. Danach kannst du bei Chefkoch, Pinterest oder Facebook über <b>Teilen → LX Familie</b> importieren.",
       "urlLabel": "Öffentlicher Rezept-Link",
       "urlPlaceholder": "https://www.pinterest.de/pin/... oder Rezeptseite",
+      "socialTextTitle": "Facebook-Beschreibung ergänzen",
+      "socialTextSummary": "Hilft, wenn Facebook nur den Link freigibt",
+      "socialTextLabel": "Beschreibung oder Rezepttext aus dem Reel",
+      "socialTextPlaceholder": "Titel, Zutaten und Zubereitung aus der Reel-Beschreibung einfügen …",
+      "socialTextHint": "Der Text bleibt auf deinem LX-Server und wird als bearbeitbarer Entwurf geöffnet.",
       "submitLoading": "Rezept wird gelesen …",
       "submit": "Rezept jetzt importieren",
       "help": "Private Seiten, Logins und interne Heimnetz-Adressen werden aus Sicherheitsgründen nicht geöffnet. Manche Portale können den automatischen Abruf technisch blockieren."
     },
+    "review": {
+      "kicker": "Importierter Entwurf",
+      "facebookKicker": "Aus Facebook Reels gelesen",
+      "sharedKicker": "Aus My Recipe Box geteilt",
+      "title": "Einmal drüberschauen, dann speichern",
+      "description": "Reel-Beschreibungen können Mengen, Reihenfolge oder einzelne Schritte auslassen. Ergänze fehlende Angaben direkt unten.",
+      "sharedDescription": "Andere Rezept-Apps teilen je nach Version unterschiedlich viele Angaben. Prüfe kurz Mengen und Reihenfolge und ergänze bei Bedarf ein Bild.",
+      "notSaved": "Noch nicht gespeichert",
+      "editorKicker": "Deine Kontrolle",
+      "editorTitle": "Rezeptentwurf prüfen",
+      "saveReviewed": "Geprüftes Rezept speichern"
+    },
     "manual": {
+      "kicker": "Eigenes Familienrezept",
       "title": "Eigenes Rezept anlegen",
+      "editTitle": "Rezept bearbeiten",
       "dishTitleLabel": "Titel des Gerichts",
       "dishTitlePlaceholder": "z. B. Papas berühmte Bolognese",
       "prepTimeLabel": "Zubereitungszeit",
       "servingsLabel": "Portionen",
-      "submit": "Rezept Speichern",
-      "placeholderIngredient": "{{number}}x Zutat {{number}}",
-      "placeholderStep": "Zubereitungsschritt {{number}}"
+      "imageLabel": "Bild-Adresse (optional)",
+      "imagePlaceholder": "https://…/rezeptbild.jpg",
+      "ingredientsLabel": "Zutaten",
+      "addIngredient": "Zutat hinzufügen",
+      "ingredientPlaceholder": "z. B. 2 Zucchini",
+      "removeIngredient": "Zutat entfernen",
+      "instructionsLabel": "Zubereitungsschritte",
+      "addStep": "Schritt hinzufügen",
+      "stepPlaceholder": "Beschreibe einen vollständigen Arbeitsschritt …",
+      "removeStep": "Schritt entfernen",
+      "saveChanges": "Änderungen speichern",
+      "submit": "Rezept Speichern"
     }
   },
   "cookingMode": {

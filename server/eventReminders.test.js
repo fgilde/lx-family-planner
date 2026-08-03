@@ -128,6 +128,13 @@ test('native server addresses prefer safe protocols without breaking LAN use', (
   );
   assert.throws(
     () => normalizeServerUrl('ftp://family.example.de'),
+    /HTTP.*HTTPS/i
+  );
+  assert.throws(
+    () => normalizeServerUrl(
+      'ftp://family.example.de',
+      'Es sind nur HTTP- und HTTPS-Adressen erlaubt.'
+    ),
     /HTTP- und HTTPS/
   );
 });

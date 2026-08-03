@@ -14,6 +14,7 @@ import {
 import { FUNNY_COMIC_AVATARS, useFamily } from '../../context/FamilyContext';
 import {
   POSITION_OPTIONS,
+  canManageFamily,
   getPositionOption,
   getPositionOptionLabel,
   roleForPosition
@@ -39,6 +40,7 @@ function emptyMember(index = 0) {
     color: MEMBER_COLORS[index % MEMBER_COLORS.length],
     bgColor: '#F4F1E8',
     theme: roleForPosition(position) === 'child' ? 'adventure' : 'light',
+    birthDate: '',
     pin: ''
   };
 }
@@ -54,6 +56,11 @@ export default function OnboardingWizard({ onComplete, onBack }) {
   const [members, setMembers] = useState([emptyMember(0)]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const managingMembers = useMemo(
+    () => members.filter(canManageFamily),
+    [members]
+  );
+  const hasAdminProfile = managingMembers.length > 0;
 
   const canContinue = useMemo(() => {
     if (step === 1) {
@@ -66,9 +73,15 @@ export default function OnboardingWizard({ onComplete, onBack }) {
         )
       );
     }
-    if (step === 2) return members.length > 0 && members.every(member => member.name.trim());
+    if (step === 2) {
+      return (
+        members.length > 0 &&
+        members.every(member => member.name.trim()) &&
+        hasAdminProfile
+      );
+    }
     return true;
-  }, [familyName, inviteCode, members, password, publicAccess, step]);
+  }, [familyName, hasAdminProfile, inviteCode, members, password, publicAccess, step]);
 
   const updateDraftMember = (id, changes) => {
     setMembers(previous =>
@@ -206,6 +219,29 @@ export default function OnboardingWizard({ onComplete, onBack }) {
             <h1>{t('onboarding.step2.title')}</h1>
             <p>{t('onboarding.step2.description')}</p>
 
+            <div
+              className={`onboarding-admin-note ${hasAdminProfile ? 'is-ready' : 'is-missing'}`}
+              id="onboarding-admin-requirement"
+              role={hasAdminProfile ? 'status' : 'alert'}
+            >
+              <ShieldCheck size={21} />
+              <span>
+                <strong>
+                  {hasAdminProfile
+                    ? t('onboarding.step2.adminReadyTitle')
+                    : t('onboarding.step2.adminRequiredTitle')}
+                </strong>
+                <small>
+                  {hasAdminProfile
+                    ? t('onboarding.step2.adminReadyDescription', {
+                        names: managingMembers.map(member => member.name).filter(Boolean).join(', ') ||
+                          t('onboarding.step2.adminProfileFallback')
+                      })
+                    : t('onboarding.step2.adminRequiredDescription')}
+                </small>
+              </span>
+            </div>
+
             <div className="member-builder-list">
               {members.map((member, index) => {
                 const position = getPositionOption(member.position);
@@ -240,6 +276,7 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                         <span>{t('onboarding.step2.positionLabel')}</span>
                         <select
                           value={member.position}
+                          aria-describedby="onboarding-admin-requirement"
                           onChange={event =>
                             changePosition(member.id, event.target.value)
                           }
@@ -250,6 +287,24 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                             </option>
                           ))}
                         </select>
+                      </label>
+                      <label className="auth-field">
+                        <span>{t('onboarding.step2.birthDateLabel')}</span>
+                        <input
+                          type="date"
+                          value={member.birthDate}
+                          max={new Date().toISOString().slice(0, 10)}
+                          onInput={event =>
+                            updateDraftMember(member.id, {
+                              birthDate: event.currentTarget.value
+                            })
+                          }
+                          onChange={event =>
+                            updateDraftMember(member.id, {
+                              birthDate: event.target.value
+                            })
+                          }
+                        />
                       </label>
                       <label className="auth-field">
                         <span>{t('onboarding.step2.pinLabel')}</span>

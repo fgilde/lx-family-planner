@@ -40,6 +40,7 @@
       "hilfe": "Brauche Nähe"
     },
     "hero": {
+      "defaultTitle": "Familienheld",
       "kicker": "Level {{level}} · {{title}}",
       "hey": "Hey {{name}}!",
       "intro_zero": "Heute gibt es keine Missionen für dich. Mit jeder erledigten Aufgabe wächst dein Sterneschatz.",
@@ -243,6 +244,15 @@
       "groupAria": "Kachelabstand auswählen",
       "comfortable": "Bequem",
       "compact": "Kompakt"
+    },
+    "trash": {
+      "title": "Müllabfuhr automatisch zeigen",
+      "hint": "Blendet die Kachel auf Wunsch erst kurz vor dem nächsten Abholtermin ein.",
+      "visibility": "Kachel anzeigen",
+      "always": "Immer",
+      "upcoming": "Nur vor einer Abholung",
+      "never": "Nie",
+      "days": "Wie viele Tage vorher?"
     },
     "moveUp": "{{label}} nach oben",
     "moveDown": "{{label}} nach unten",

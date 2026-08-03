@@ -44,6 +44,8 @@
       "throughDate": "bis einschließlich {{date}}",
       "untilDateTime": "bis {{date}}, {{time}} Uhr",
       "fromSubscriptionTitle": "Aus einem Kalenderabo",
+      "birthdayTitle": "Automatischer Familiengeburtstag",
+      "familyBirthday": "Familiengeburtstag",
       "fromFamily": "Von {{name}}",
       "subscriptionFallback": "Kalenderabo",
       "sharedWithTitle": "Mit verbundenen Familien geteilt",
@@ -64,6 +66,8 @@
     "description": "Zeit, Personen, Ort und Erinnerungen gemeinsam anpassen.",
     "readOnlyKicker": "Kalenderquelle",
     "readOnlyDescription": "Dieser Termin wird von der verbundenen Kalenderquelle verwaltet und kann hier nur angesehen werden.",
+    "birthdayKicker": "Familiengeburtstag",
+    "birthdayDescription": "Dieser Geburtstag entsteht automatisch aus dem Profil. LX erinnert die Familie eine Woche vorher und am Geburtstag.",
     "save": "Änderungen speichern",
     "delete": "Termin löschen",
     "deleteConfirm": "\"{{title}}\" wirklich löschen?",
@@ -87,6 +91,12 @@
     }
   },
   "trash": {
+    "types": {
+      "rest": "Restmüll (Schwarze Tonne)",
+      "paper": "Altpapier (Blaue Tonne)",
+      "bio": "Biomüll (Braune/Grüne Tonne)",
+      "yellow": "Gelber Sack / Wertstoff"
+    },
     "header": {
       "title": "Digitaler Müllkalender",
       "description": "Importiere die .ics-Datei eures Entsorgers oder trage eine Abholung selbst ein. LX erinnert standardmäßig am Vortag.",

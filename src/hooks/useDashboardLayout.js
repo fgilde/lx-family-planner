@@ -71,6 +71,16 @@ export default function useDashboardLayout(profileId, mode, widgetIds) {
     saveLayout(previous => ({ ...previous, density }));
   }, [saveLayout]);
 
+  const setPreference = useCallback((name, value) => {
+    saveLayout(previous => ({
+      ...previous,
+      preferences: {
+        ...previous.preferences,
+        [name]: value
+      }
+    }));
+  }, [saveLayout]);
+
   const resetLayout = useCallback(() => {
     try {
       localStorage.removeItem(key);
@@ -85,6 +95,7 @@ export default function useDashboardLayout(profileId, mode, widgetIds) {
     moveWidget,
     resetLayout,
     setDensity,
+    setPreference,
     toggleWidget
   };
 }

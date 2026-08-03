@@ -36,8 +36,38 @@ import {
 import { DEFAULT_GOTIFY_RULES } from '../../shared/notificationEvents';
 import i18n from '../i18n';
 import { formatDateTime } from '../utils/formatting';
+import {
+  CUSTOM_THEME_PROPERTIES,
+  parseCustomThemeCss
+} from '../../shared/customThemeCss.js';
+import { CUSTOM_THEME_ID, isPlainTheme } from '../constants/themes';
+import { birthdayEventsForMembers } from '../../shared/birthdays.js';
 
 const FamilyContext = createContext(null);
+
+function applyCustomThemeCss(css) {
+  const result = parseCustomThemeCss(css);
+  if (!result.valid) return result;
+  for (const property of CUSTOM_THEME_PROPERTIES) {
+    document.documentElement.style.removeProperty(property);
+  }
+  for (const [property, value] of Object.entries(result.variables)) {
+    document.documentElement.style.setProperty(property, value);
+  }
+  return result;
+}
+
+function applyThemePresentation(themeId, customThemeCss = '') {
+  const nextTheme = themeId || 'light';
+  document.documentElement.setAttribute('data-theme', nextTheme);
+  document.documentElement.setAttribute(
+    'data-theme-style',
+    isPlainTheme(nextTheme) ? 'plain' : 'illustrated'
+  );
+  return applyCustomThemeCss(
+    nextTheme === CUSTOM_THEME_ID ? customThemeCss : ''
+  );
+}
 
 const EMPTY_RESOURCES = {
   events: [],
@@ -506,6 +536,16 @@ export function FamilyProvider({ children }) {
       null,
     [activeMemberIdState, members]
   );
+  const calendarEvents = useMemo(
+    () => [
+      ...resources.events,
+      ...birthdayEventsForMembers(members, {
+        startYear: new Date().getFullYear(),
+        years: 2
+      })
+    ],
+    [members, resources.events]
+  );
 
   const refreshWebPushStatus = useCallback(async ({ silent = false } = {}) => {
     const capability = webPushCapability();
@@ -653,7 +693,7 @@ export function FamilyProvider({ children }) {
   useEffect(() => {
     const nextTheme = activeMember?.theme || theme || 'light';
     setThemeState(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
+    applyThemePresentation(nextTheme, activeMember?.customThemeCss || '');
     document.documentElement.setAttribute(
       'data-profile-mode',
       isPetProfile(activeMember)
@@ -662,7 +702,12 @@ export function FamilyProvider({ children }) {
           ? 'child'
           : 'adult'
     );
-  }, [activeMember?.id, activeMember?.role, activeMember?.theme]);
+  }, [
+    activeMember?.customThemeCss,
+    activeMember?.id,
+    activeMember?.role,
+    activeMember?.theme
+  ]);
 
   const setActiveHousehold = useCallback(value => {
     setActiveHouseholdState(value);
@@ -789,7 +834,7 @@ export function FamilyProvider({ children }) {
 
   const setTheme = useCallback(async nextTheme => {
     setThemeState(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
+    applyThemePresentation(nextTheme, activeMember?.customThemeCss || '');
     localStorage.setItem('lx_theme', nextTheme);
     if (!activeMember?.id) return;
     try {
@@ -808,7 +853,69 @@ export function FamilyProvider({ children }) {
         'error'
       );
     }
-  }, [activeMember?.id, showToast]);
+  }, [activeMember?.customThemeCss, activeMember?.id, showToast]);
+
+  const previewCustomThemeCss = useCallback(css =>
+    applyThemePresentation(CUSTOM_THEME_ID, css), []);
+
+  const restoreCustomThemeCss = useCallback(() => {
+    const savedTheme = activeMember?.theme || theme || 'light';
+    return applyThemePresentation(
+      savedTheme,
+      activeMember?.customThemeCss || ''
+    );
+  }, [
+    activeMember?.customThemeCss,
+    activeMember?.theme,
+    theme
+  ]);
+
+  const saveCustomThemeCss = useCallback(async css => {
+    const validation = parseCustomThemeCss(css);
+    if (!validation.valid || !activeMember?.id) return null;
+    const nextTheme = validation.css ? CUSTOM_THEME_ID : 'linen';
+    setThemeState(nextTheme);
+    applyThemePresentation(nextTheme, validation.css);
+    localStorage.setItem('lx_theme', nextTheme);
+    try {
+      const data = await apiRequest(`/api/members/${activeMember.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          customThemeCss: validation.css,
+          theme: nextTheme
+        })
+      });
+      setMembers(previous =>
+        previous.map(member =>
+          member.id === data.member.id ? data.member : member
+        )
+      );
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        i18n.t('context:toasts.customThemeSaved.title'),
+        validation.css
+          ? i18n.t('context:toasts.customThemeSaved.message')
+          : i18n.t('context:toasts.customThemeSaved.resetMessage'),
+        'success'
+      );
+      return data.member;
+    } catch (error) {
+      setThemeState(activeMember?.theme || theme || 'light');
+      restoreCustomThemeCss();
+      showToast(
+        i18n.t('context:toasts.themeNotSaved.title'),
+        error.message,
+        'error'
+      );
+      return null;
+    }
+  }, [
+    activeMember?.id,
+    activeMember?.theme,
+    restoreCustomThemeCss,
+    showToast,
+    theme
+  ]);
 
   const updateResourceState = useCallback((type, record) => {
     setResources(previous => ({
@@ -1723,7 +1830,7 @@ export function FamilyProvider({ children }) {
 
   const exportICS = useCallback(() => {
     exportEventsToICS(
-      resources.events,
+      calendarEvents,
       familyAccount?.familyName || i18n.t('context:defaults.familyName')
     );
     showToast(
@@ -1731,7 +1838,7 @@ export function FamilyProvider({ children }) {
       i18n.t('context:toasts.icsExported.message'),
       'info'
     );
-  }, [familyAccount?.familyName, resources.events, showToast]);
+  }, [calendarEvents, familyAccount?.familyName, showToast]);
 
   const addShoppingItem = useCallback(item =>
     withActionError(async () => {
@@ -1927,6 +2034,23 @@ export function FamilyProvider({ children }) {
       return created;
     }), [activeHouseholdState, createResource, showToast, withActionError]);
 
+  const updateRecipe = useCallback((recipeId, changes) =>
+    withActionError(async () => {
+      const updated = await patchResource(
+        'savedRecipes',
+        recipeId,
+        changes
+      );
+      showToast(
+        i18n.t('context:toasts.recipeUpdated.title'),
+        i18n.t('context:toasts.recipeUpdated.message', {
+          name: updated.name || updated.title
+        }),
+        'success'
+      );
+      return updated;
+    }), [patchResource, showToast, withActionError]);
+
   const deleteRecipe = useCallback(recipeId =>
     withActionError(async () => {
       await removeResource('savedRecipes', recipeId);
@@ -1992,6 +2116,47 @@ export function FamilyProvider({ children }) {
                 stars: data.task.stars || 10,
                 title: data.task.title
               }),
+          'star'
+        );
+      }
+      return data.task;
+    }), [showToast, updateResourceState, withActionError]);
+
+  const completeTaskAs = useCallback((taskId, memberId) =>
+    withActionError(async () => {
+      const data = await apiRequest(`/api/tasks/${taskId}/complete-as`, {
+        method: 'POST',
+        body: JSON.stringify({ memberId })
+      });
+      updateResourceState('tasks', data.task);
+      if (data.nextTask) {
+        updateResourceState('tasks', data.nextTask);
+      }
+      if (data.member) {
+        setMembers(previous =>
+          previous.map(member =>
+            member.id === data.member.id ? data.member : member
+          )
+        );
+      }
+      versionRef.current = Number(data.version || versionRef.current);
+      if (data.action === 'approval_requested') {
+        showToast(
+          i18n.t('context:toasts.taskSentForReview.title'),
+          i18n.t('context:toasts.taskSentForReview.message', {
+            title: data.task.title,
+            name:
+              data.task.createdByName || i18n.t('context:defaults.aParent')
+          }),
+          'success'
+        );
+      } else if (data.task.completed) {
+        showToast(
+          i18n.t('context:toasts.starsEarned.title'),
+          i18n.t('context:toasts.starsEarned.message', {
+            stars: data.task.stars || 10,
+            title: data.task.title
+          }),
           'star'
         );
       }
@@ -3372,6 +3537,9 @@ export function FamilyProvider({ children }) {
     refreshBootstrap,
     theme,
     setTheme,
+    previewCustomThemeCss,
+    restoreCustomThemeCss,
+    saveCustomThemeCss,
     activeTab,
     setActiveTab,
     activeHousehold: activeHouseholdState,
@@ -3459,8 +3627,9 @@ export function FamilyProvider({ children }) {
     setRawShoppingItems,
     savedRecipes: resources.savedRecipes,
     addRecipe,
+    updateRecipe,
     deleteRecipe,
-    events: resources.events,
+    events: calendarEvents,
     calendarSubscriptions,
     addCalendarSubscription,
     updateCalendarSubscription,
@@ -3477,6 +3646,7 @@ export function FamilyProvider({ children }) {
     deleteMeal,
     tasks: resources.tasks,
     toggleTask,
+    completeTaskAs,
     reviewTask,
     addTask,
     updateTask,

@@ -46,12 +46,15 @@ public class MainActivity extends BridgeActivity {
         if (
             intent == null ||
             !Intent.ACTION_SEND.equals(intent.getAction()) ||
-            !"text/plain".equals(intent.getType())
+            intent.getType() == null ||
+            !intent.getType().startsWith("text/")
         ) {
             return;
         }
-        String text = intent.getStringExtra(Intent.EXTRA_TEXT);
-        String title = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+        CharSequence sharedText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
+        CharSequence sharedTitle = intent.getCharSequenceExtra(Intent.EXTRA_SUBJECT);
+        String text = sharedText == null ? "" : sharedText.toString();
+        String title = sharedTitle == null ? "" : sharedTitle.toString();
         if (
             (text == null || text.trim().isEmpty()) &&
             (title == null || title.trim().isEmpty())

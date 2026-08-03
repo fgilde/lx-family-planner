@@ -25,6 +25,7 @@ import {
 } from '../../utils/imageFallback';
 import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import AndroidAppDownload from './AndroidAppDownload';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
   const { t } = useTranslation('auth');
@@ -108,6 +109,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
   if (isProfileStep) {
     return (
       <div className="auth-shell">
+        <LanguageSwitcher variant="auth" />
         <section className="auth-story-panel">
           <div className="auth-brand">
             <span className="auth-brand-mark">LX</span>
@@ -233,6 +235,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
 
   return (
     <div className="auth-shell">
+      <LanguageSwitcher variant="auth" />
       <section className="auth-story-panel">
         <div className="auth-brand">
           <span className="auth-brand-mark">LX</span>

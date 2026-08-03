@@ -1,7 +1,7 @@
 {
   "name": "LX Family Planner",
-  "short_name": "LX Familie",
-  "description": "Familienplaner mit Kalender, Einkauf, Essen, Aufgaben und mehr",
+  "short_name": "LX Family",
+  "description": "A self-hosted family planner for calendars, chores, meals, shopping and more",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -34,9 +34,9 @@
   },
   "shortcuts": [
     {
-      "name": "Rezept importieren",
-      "short_name": "Rezeptimport",
-      "description": "Einen Rezept-Link direkt ins Familienkochbuch übernehmen",
+      "name": "Import a recipe",
+      "short_name": "Recipe import",
+      "description": "Send a recipe link directly to the family cookbook",
       "url": "/share-recipe",
       "icons": [
         {

@@ -101,6 +101,14 @@
       "mail": "Familienpost"
     }
   },
+  "avatars": {
+    "av-1": "Mutiger Löwe",
+    "av-2": "Schlauer Fuchs",
+    "av-3": "Abenteuer-Hund",
+    "av-4": "Ninja-Katze",
+    "av-5": "Roter Panda",
+    "av-6": "Weltraum-Buddy"
+  },
   "form": {
     "usage": "Wie wird das Profil genutzt?",
     "ownLogin": "Mit eigener Anmeldung",
@@ -114,6 +122,8 @@
     "petName": "Name des Haustiers",
     "petNamePlaceholder": "z. B. Luna",
     "namePlaceholder": "z. B. Testname",
+    "birthDate": "Geburtsdatum",
+    "birthDateHint": "Erzeugt automatisch Familienkalender-Einträge und Erinnerungen.",
     "position": "Position in der Familie",
     "avatar": "Profilbild",
     "ownPhoto": "Eigenes Foto",

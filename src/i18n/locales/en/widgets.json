@@ -51,6 +51,12 @@
       "standardView": "Standard view",
       "tiles": "Tiles"
     },
+    "completeTask": {
+      "kicker": "Check off task",
+      "title": "Who completed this?",
+      "select": "It was me",
+      "cancel": "Not yet"
+    },
     "cards": {
       "calendar": {
         "title": "Today",
@@ -69,6 +75,7 @@
         "count_one": "{{count}} open",
         "count_other": "{{count}} open",
         "pendingApproval": "Waiting for review",
+        "shared": "Shared task",
         "empty": "All tasks are done."
       },
       "shopping": {

@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import {
   Calendar as CalendarIcon,
   CalendarPlus,
+  CakeSlice,
   BellRing,
   ChevronRight,
   Cloud,
@@ -38,6 +39,10 @@ import {
   formatReminderLead,
   normalizeEventReminders
 } from '../../../shared/eventReminders.js';
+import {
+  birthdayEventCopy,
+  nextBirthdayOccurrencesOnly
+} from '../../../shared/birthdays.js';
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -113,15 +118,21 @@ export default function CalendarView() {
   );
 
   const filteredEvents = useMemo(
-    () =>
-      householdEvents
+    () => {
+      const agendaEvents = nextBirthdayOccurrencesOnly(
+        householdEvents,
+        todayKey,
+        { includePast: showPast }
+      );
+      return agendaEvents
         .filter(event => showPast || eventLastDate(event) >= todayKey)
         .filter(
           event =>
             selectedMemberFilter === 'all' ||
             eventIsForMember(event, selectedMemberFilter)
         )
-        .sort((left, right) => eventDateValue(left) - eventDateValue(right)),
+        .sort((left, right) => eventDateValue(left) - eventDateValue(right));
+    },
     [householdEvents, selectedMemberFilter, showPast, todayKey]
   );
 
@@ -323,6 +334,7 @@ export default function CalendarView() {
                           year: 'numeric'
                         })
                       : '';
+                    const displayEvent = birthdayEventCopy(event, t);
                     return (
                       <article
                         key={event.id}
@@ -333,7 +345,7 @@ export default function CalendarView() {
                         role="button"
                         tabIndex="0"
                         aria-label={t('view.event.openAria', {
-                          title: event.title
+                          title: displayEvent.title
                         })}
                         onClick={() => setSelectedEvent(event)}
                         onKeyDown={keyboardEvent => {
@@ -372,17 +384,25 @@ export default function CalendarView() {
 
                         <div className="calendar-event-copy">
                           <div className="calendar-event-title">
-                            <h3>{event.title}</h3>
+                            <h3>{displayEvent.title}</h3>
                             {event.readOnly && (
-                              <span title={t('view.event.fromSubscriptionTitle')}>
-                                {event.sharedEventId
+                              <span title={
+                                event.birthdayMemberId
+                                  ? t('view.event.birthdayTitle')
+                                  : t('view.event.fromSubscriptionTitle')
+                              }>
+                                {event.birthdayMemberId
+                                  ? <CakeSlice size={12} />
+                                  : event.sharedEventId
                                   ? <HeartHandshake size={12} />
                                   : <LockKeyhole size={12} />}
-                                {event.sharedEventId
+                                {event.birthdayMemberId
+                                  ? t('view.event.familyBirthday')
+                                  : event.sharedEventId
                                   ? t('view.event.fromFamily', {
                                       name: event.sharedOwnerFamilyName
                                     })
-                                  : event.sourceName ||
+                                    : displayEvent.sourceName ||
                                     t('view.event.subscriptionFallback')}
                               </span>
                             )}
@@ -399,9 +419,9 @@ export default function CalendarView() {
                               )}
                           </div>
                           <div className="calendar-event-details">
-                            {event.location && (
+                            {displayEvent.location && (
                               <span>
-                                <MapPin size={13} /> {event.location}
+                                <MapPin size={13} /> {displayEvent.location}
                               </span>
                             )}
                             <span>
@@ -427,7 +447,7 @@ export default function CalendarView() {
                               </span>
                             )}
                           </div>
-                          {event.notes && <p>{event.notes}</p>}
+                          {displayEvent.notes && <p>{displayEvent.notes}</p>}
                         </div>
 
                         {event.readOnly ? (
@@ -435,7 +455,9 @@ export default function CalendarView() {
                             className="calendar-event-readonly"
                             title={t('view.event.readOnlyTitle')}
                           >
-                            <Cloud size={16} />
+                            {event.birthdayMemberId
+                              ? <CakeSlice size={16} />
+                              : <Cloud size={16} />}
                           </span>
                         ) : (
                           <div className="calendar-event-actions">
@@ -449,7 +471,7 @@ export default function CalendarView() {
                                 }}
                                 title={t('view.event.editRemindersTitle')}
                                 aria-label={t('view.event.editRemindersAria', {
-                                  title: event.title
+                                  title: displayEvent.title
                                 })}
                               >
                                 <BellRing size={16} />
@@ -464,7 +486,7 @@ export default function CalendarView() {
                               }}
                               title={t('view.event.deleteTitle')}
                               aria-label={t('view.event.deleteAria', {
-                                title: event.title
+                                title: displayEvent.title
                               })}
                             >
                               <Trash2 size={16} />

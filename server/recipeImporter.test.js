@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { extractRecipeDocument } from './recipeImporter.js';
+import {
+  extractFacebookRecipeDraft,
+  extractFacebookRecipePage,
+  extractRecipeDocument,
+  extractSharedRecipeDraft,
+  importRecipePreviewImage,
+  importRecipeFromUrl
+} from './recipeImporter.js';
 
 test('recipe importer reads nested Schema.org recipes with structured values', () => {
   const html = `
@@ -119,4 +126,166 @@ test('self-contained Pinterest recipes retain ingredients with a warning', () =>
     'Alles mischen Taler goldbraun braten'
   ]);
   assert.equal(result.warning, '');
+});
+
+test('Facebook Reel captions become reviewable recipe drafts', () => {
+  const result = extractFacebookRecipeDraft(`
+    Cremige Feierabend-Pasta
+    Fertig in 25 Minuten · 2 Portionen
+    Zutaten:
+    250 g Nudeln
+    2 Knoblauchzehen
+    200 ml Sahne
+    Zubereitung:
+    1. Nudeln bissfest kochen.
+    2. Knoblauch anbraten und mit Sahne ablöschen.
+    3. Alles vermengen und servieren.
+  `, {
+    title: 'Cremige Feierabend-Pasta | Facebook',
+    sourceUrl: 'https://www.facebook.com/reel/123456'
+  });
+
+  assert.equal(result.reviewRequired, true);
+  assert.equal(result.platform, 'facebook');
+  assert.equal(result.recipe.title, 'Cremige Feierabend-Pasta');
+  assert.deepEqual(result.recipe.ingredients, [
+    '250 g Nudeln',
+    '2 Knoblauchzehen',
+    '200 ml Sahne'
+  ]);
+  assert.equal(result.recipe.instructions.length, 3);
+  assert.equal(result.recipe.prepTime, '25 Min.');
+  assert.equal(result.recipe.servings, '2 Portionen');
+});
+
+test('incomplete Facebook captions stay editable and explain missing steps', () => {
+  const result = extractFacebookRecipeDraft(
+    'Zutaten: 2 Eier • 200 g Mehl • 250 ml Milch',
+    { sourceUrl: 'https://fb.watch/example' }
+  );
+
+  assert.deepEqual(result.recipe.ingredients, [
+    '2 Eier',
+    '200 g Mehl',
+    '250 ml Milch'
+  ]);
+  assert.deepEqual(result.recipe.instructions, []);
+  assert.match(result.warnings.join(' '), /Zubereitung/);
+});
+
+test('recipes shared as formatted text from another app become review drafts', () => {
+  const result = extractSharedRecipeDraft(`
+    Schnelle Tomatensuppe
+    25 Minuten · 4 Portionen
+    Zutaten:
+    • 800 g Tomaten
+    • 1 Zwiebel
+    Zubereitung:
+    1. Zwiebel anbraten.
+    2. Tomaten zugeben und köcheln lassen.
+  `, { title: 'Schnelle Tomatensuppe | My Recipe Box' });
+
+  assert.equal(result.reviewRequired, true);
+  assert.equal(result.platform, 'shared-recipe');
+  assert.equal(result.recipe.title, 'Schnelle Tomatensuppe');
+  assert.deepEqual(result.recipe.ingredients, ['800 g Tomaten', '1 Zwiebel']);
+  assert.deepEqual(result.recipe.instructions, [
+    'Zwiebel anbraten.',
+    'Tomaten zugeben und köcheln lassen.'
+  ]);
+  assert.equal(result.recipe.prepTime, '25 Min.');
+  assert.equal(result.recipe.servings, '4 Portionen');
+});
+
+test('HTML recipe shares are converted to readable recipe text', () => {
+  const result = extractSharedRecipeDraft(`
+    <h1>Ofenkartoffeln</h1>
+    <h2>Zutaten:</h2><p>1 kg Kartoffeln<br>2 EL Öl</p>
+    <h2>Zubereitung:</h2><p>Kartoffeln schneiden.<br>Im Ofen backen.</p>
+  `);
+  assert.equal(result.recipe.title, 'Ofenkartoffeln');
+  assert.deepEqual(result.recipe.ingredients, ['1 kg Kartoffeln', '2 EL Öl']);
+  assert.deepEqual(result.recipe.instructions, [
+    'Kartoffeln schneiden.',
+    'Im Ofen backen.'
+  ]);
+});
+
+test('Facebook pages expose only intentional outbound recipe links', () => {
+  const target = encodeURIComponent('https://food.example/pasta?from=facebook');
+  const result = extractFacebookRecipePage(`
+    <html><head>
+      <meta property="og:title" content="Pasta-Reel | Facebook">
+      <meta property="og:description" content="Das Rezept findet ihr im Link">
+    </head><body>
+      <a href="https://help.example/privacy">Datenschutz</a>
+      <a href="https://l.facebook.com/l.php?u=${target}&h=tracking">Rezept</a>
+    </body></html>
+  `, 'https://www.facebook.com/reel/123');
+
+  assert.equal(
+    result.sourceUrl,
+    'https://food.example/pasta?from=facebook'
+  );
+  assert.equal(result.draft, null);
+});
+
+test('shared Facebook captions create drafts without downloading the Reel', async () => {
+  const result = await importRecipeFromUrl(
+    'https://www.facebook.com/reel/999999999',
+    {
+      title: 'Schnelle Pfannkuchen',
+      text: 'Zutaten: 2 Eier • 200 g Mehl • 250 ml Milch Zubereitung: Alles verrühren. Portionsweise ausbacken.'
+    }
+  );
+
+  assert.equal(result.reviewRequired, true);
+  assert.equal(result.recipe.title, 'Schnelle Pfannkuchen');
+  assert.equal(result.recipe.ingredients.length, 3);
+  assert.equal(result.recipe.instructions.length, 2);
+});
+
+test('missing RTK images can be stored permanently from public page metadata', async context => {
+  const png = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  context.mock.method(globalThis, 'fetch', async input => {
+    const url = String(input);
+    if (url.endsWith('/cover.png')) {
+      return new Response(png, {
+        status: 200,
+        headers: {
+          'content-type': 'image/png',
+          'content-length': String(png.length)
+        }
+      });
+    }
+    return new Response(
+      '<meta property="og:image" content="/cover.png">',
+      {
+        status: 200,
+        headers: { 'content-type': 'text/html; charset=utf-8' }
+      }
+    );
+  });
+  const previousNodeEnv = process.env.NODE_ENV;
+  const previousLoopback = process.env.RECIPE_ALLOW_LOOPBACK_FOR_TESTS;
+  process.env.NODE_ENV = 'test';
+  process.env.RECIPE_ALLOW_LOOPBACK_FOR_TESTS = 'true';
+  try {
+    const result = await importRecipePreviewImage(
+      'https://127.0.0.1/recipe'
+    );
+    assert.match(result.image, /^data:image\/png;base64,/);
+    assert.equal(
+      Buffer.from(result.image.split(',')[1], 'base64').compare(png),
+      0
+    );
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+    if (previousLoopback === undefined) {
+      delete process.env.RECIPE_ALLOW_LOOPBACK_FOR_TESTS;
+    } else {
+      process.env.RECIPE_ALLOW_LOOPBACK_FOR_TESTS = previousLoopback;
+    }
+  }
 });

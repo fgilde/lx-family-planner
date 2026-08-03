@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   CalendarClock,
+  CakeSlice,
   Check,
   LockKeyhole,
   MapPin,
@@ -11,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { eventAudienceIds } from '../../../shared/calendarAudience.js';
 import { normalizeEventReminders } from '../../../shared/eventReminders.js';
+import { birthdayEventCopy } from '../../../shared/birthdays.js';
 import EventAudiencePicker from './EventAudiencePicker';
 import EventReminderPicker from './EventReminderPicker';
 
@@ -25,9 +27,10 @@ function addLocalDays(value, days) {
   ].join('-');
 }
 
-function formState(event) {
+function formState(event, t) {
+  const displayEvent = birthdayEventCopy(event, t);
   return {
-    title: event?.title || '',
+    title: displayEvent.title,
     date: event?.date || '',
     time: event?.time || '09:00',
     allDay: Boolean(event?.allDay),
@@ -37,8 +40,8 @@ function formState(event) {
         : event?.endDate || '',
     endTime: event?.endTime || '',
     memberIds: eventAudienceIds(event),
-    location: event?.location || '',
-    notes: event?.notes || '',
+    location: displayEvent.location,
+    notes: displayEvent.notes,
     reminders: normalizeEventReminders(event?.reminders)
   };
 }
@@ -51,11 +54,15 @@ export default function CalendarEventDialog({
   onDelete
 }) {
   const { t } = useTranslation('calendar');
-  const [form, setForm] = useState(() => formState(event));
+  const [form, setForm] = useState(() => formState(event, t));
   const [saving, setSaving] = useState(false);
   const editable = Boolean(event && !event.readOnly);
+  const isBirthday = Boolean(event?.birthdayMemberId);
 
-  useEffect(() => setForm(formState(event)), [event]);
+  useEffect(
+    () => setForm(formState(event, t)),
+    [event, t]
+  );
 
   useEffect(() => {
     const onKeyDown = keyboardEvent => {
@@ -71,6 +78,8 @@ export default function CalendarEventDialog({
   );
 
   if (!event) return null;
+
+  const displayEvent = birthdayEventCopy(event, t);
 
   const patch = changes => setForm(previous => ({ ...previous, ...changes }));
   const submit = async formEvent => {
@@ -129,19 +138,29 @@ export default function CalendarEventDialog({
       >
         <header>
           <span className="calendar-editor-mark">
-            {editable ? <CalendarClock size={25} /> : <LockKeyhole size={23} />}
+            {editable
+              ? <CalendarClock size={25} />
+              : isBirthday
+                ? <CakeSlice size={24} />
+                : <LockKeyhole size={23} />}
           </span>
           <div>
             <span>
-              {editable ? t('editor.kicker') : t('editor.readOnlyKicker')}
+              {editable
+                ? t('editor.kicker')
+                : isBirthday
+                  ? t('editor.birthdayKicker')
+                  : t('editor.readOnlyKicker')}
             </span>
             <h2 id="calendar-event-dialog-title">
-              {editable ? t('editor.title') : event.title}
+              {editable ? t('editor.title') : displayEvent.title}
             </h2>
             <p>
               {editable
                 ? t('editor.description')
-                : t('editor.readOnlyDescription')}
+                : isBirthday
+                  ? t('editor.birthdayDescription')
+                  : t('editor.readOnlyDescription')}
             </p>
           </div>
           <button

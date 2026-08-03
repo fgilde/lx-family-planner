@@ -2,35 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server } from 'lucide-react';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server, Code2 } from 'lucide-react';
 import { isChildProfile, isPetProfile } from '../constants/roles';
+import {
+  ADULT_THEMES,
+  CHILD_THEMES,
+  CUSTOM_THEME_ID,
+  PET_THEMES
+} from '../constants/themes';
+import { parseCustomThemeCss } from '../../shared/customThemeCss.js';
 import FamilyEditModal from './FamilyTree/FamilyEditModal';
 import PlanLocationHelp from './PlanLocationHelp';
 import NotificationCenter from './Notifications/NotificationCenter';
-
-const ADULT_THEMES = [
-  { id: 'light', icon: '❧', color: '#286a58', accent: '#d87058' },
-  { id: 'ocean', icon: '≈', color: '#17687a', accent: '#d99157' },
-  { id: 'midnight', icon: '☾', color: '#164f49', accent: '#e0a65b' },
-  { id: 'rock', icon: '⚡', color: '#70251f', accent: '#efb84d' },
-  { id: 'festival', icon: '✦', color: '#a22d78', accent: '#25aab4' }
-];
-
-const CHILD_THEMES = [
-  { id: 'space', icon: '🚀', color: '#4747a9', accent: '#ffbd4a' },
-  { id: 'unicorn', icon: '🦄', color: '#d84692', accent: '#8063d9' },
-  { id: 'fairy', icon: '🧚', color: '#728a35', accent: '#b84f91' },
-  { id: 'dino', icon: '🦖', color: '#287755', accent: '#d66d31' },
-  { id: 'sunshine', icon: '☀️', color: '#ed8d26', accent: '#e74757' },
-  { id: 'adventure', icon: '🦸', color: '#3169c8', accent: '#e7474f' }
-];
-
-const PET_THEMES = [
-  { id: 'light', icon: '🐾', color: '#286a58', accent: '#d87058' },
-  { id: 'ocean', icon: '🌊', color: '#17687a', accent: '#d99157' },
-  { id: 'rock', icon: '🦴', color: '#70251f', accent: '#efb84d' },
-  { id: 'midnight', icon: '🌙', color: '#164f49', accent: '#e0a65b' }
-];
+import CustomThemeEditor from './Theme/CustomThemeEditor';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header({ onLogout, onOpenServerConfig, unreadChatCount = 0 }) {
   const { t } = useTranslation('chrome');
@@ -39,20 +24,37 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
     activeTab, setActiveTab,
     activeHousehold, setActiveHousehold,
     activeMember, familyAccount,
-    setIsProfileModalOpen, showToast
+    setIsProfileModalOpen, showToast,
+    previewCustomThemeCss, restoreCustomThemeCss, saveCustomThemeCss
   } = useFamily();
 
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
+  const [isCustomThemeOpen, setIsCustomThemeOpen] = useState(false);
+  const [customThemePreviewActive, setCustomThemePreviewActive] = useState(false);
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
   const isChild = isChildProfile(activeMember);
   const isPet = isPetProfile(activeMember);
   const grandparentsHouseholdEnabled =
     familyAccount?.grandparentsHouseholdEnabled !== false;
+  const customThemeResult = parseCustomThemeCss(
+    activeMember?.customThemeCss || ''
+  );
+  const customThemeOption = customThemeResult.css
+    ? {
+        id: CUSTOM_THEME_ID,
+        plain: true,
+        custom: true,
+        color: customThemeResult.variables['--primary'] || '#365f55',
+        accent: customThemeResult.variables['--accent'] || '#b56f52'
+      }
+    : null;
   const availableThemes = isPet
     ? PET_THEMES
     : isChild
       ? CHILD_THEMES
-      : ADULT_THEMES;
+      : customThemeOption
+        ? [...ADULT_THEMES, customThemeOption]
+        : ADULT_THEMES;
   const themeGroup = isPet ? 'pet' : isChild ? 'child' : 'adult';
   const themePickerTitle = isPet
     ? t('header.themePicker.titlePet', {
@@ -68,15 +70,36 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
     : isChild
       ? t('header.themePicker.descriptionChild')
       : t('header.themePicker.descriptionAdult');
+  const themeGroups = !isChild && !isPet
+    ? [
+        {
+          id: 'plain',
+          title: t('header.themePicker.groups.plain'),
+          themes: availableThemes.filter(option => option.plain)
+        },
+        {
+          id: 'expressive',
+          title: t('header.themePicker.groups.expressive'),
+          themes: availableThemes.filter(option => !option.plain)
+        }
+      ]
+    : [{ id: 'worlds', title: '', themes: availableThemes }];
+
+  const closeThemePicker = () => {
+    if (customThemePreviewActive) restoreCustomThemeCss();
+    setCustomThemePreviewActive(false);
+    setIsCustomThemeOpen(false);
+    setIsThemePickerOpen(false);
+  };
 
   useEffect(() => {
     if (!isThemePickerOpen) return undefined;
     const closeOnEscape = event => {
-      if (event.key === 'Escape') setIsThemePickerOpen(false);
+      if (event.key === 'Escape') closeThemePicker();
     };
     document.addEventListener('keydown', closeOnEscape);
     return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isThemePickerOpen]);
+  }, [isThemePickerOpen, customThemePreviewActive, restoreCustomThemeCss]);
 
   const toggleHousehold = (targetHousehold) => {
     setActiveHousehold(targetHousehold);
@@ -128,6 +151,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
 
       <div className="header-right">
         {!isPet && <NotificationCenter />}
+        <LanguageSwitcher />
         {!isChild && !isPet && (
           <button
             className="icon-circle-btn"
@@ -141,7 +165,10 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         <div className="theme-picker-wrap">
           <button
             className="icon-circle-btn"
-            onClick={() => setIsThemePickerOpen(!isThemePickerOpen)}
+            onClick={() => {
+              if (isThemePickerOpen) closeThemePicker();
+              else setIsThemePickerOpen(true);
+            }}
             title={isPet ? t('header.themePicker.openPet') : isChild ? t('header.themePicker.openChild') : t('header.themePicker.openAdult')}
             aria-label={isPet ? t('header.themePicker.openPet') : isChild ? t('header.themePicker.openChild') : t('header.themePicker.openAdult')}
             aria-expanded={isThemePickerOpen}
@@ -153,10 +180,12 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
             createPortal(
               <div
                 className="theme-picker-layer"
-                onPointerDown={() => setIsThemePickerOpen(false)}
+                onPointerDown={closeThemePicker}
               >
                 <section
-                  className="theme-picker theme-picker-portal"
+                  className={`theme-picker theme-picker-portal ${
+                    isCustomThemeOpen ? 'is-customizing' : ''
+                  }`}
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="theme-picker-title"
@@ -171,30 +200,76 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
                     <button
                       type="button"
                       className="theme-picker-close"
-                      onClick={() => setIsThemePickerOpen(false)}
+                      onClick={closeThemePicker}
                       aria-label={t('header.themePicker.close')}
                     >
                       <X size={18} />
                     </button>
                   </div>
-                  {availableThemes.map(themeOption => (
-                    <button
-                      key={themeOption.id}
-                      onClick={() => {
-                        setTheme(themeOption.id);
-                        setIsThemePickerOpen(false);
-                      }}
-                      className={`theme-choice ${theme === themeOption.id ? 'active' : ''}`}
-                      style={{ '--choice-color': themeOption.color, '--choice-accent': themeOption.accent }}
-                      aria-pressed={theme === themeOption.id}
-                    >
-                      <span className="theme-choice-preview" aria-hidden="true">{themeOption.icon}</span>
-                      <span className="theme-choice-copy">
-                        <strong>{t(`header.themes.${themeGroup}.${themeOption.id}.name`)}</strong>
-                        <small>{t(`header.themes.${themeGroup}.${themeOption.id}.description`)}</small>
-                      </span>
-                    </button>
-                  ))}
+                  <div className="theme-library">
+                    {themeGroups.map(group => (
+                      <section className="theme-library-group" key={group.id}>
+                        {group.title && <h3>{group.title}</h3>}
+                        <div>
+                          {group.themes.map(themeOption => (
+                            <button
+                              key={themeOption.id}
+                              onClick={() => {
+                                setTheme(themeOption.id);
+                                closeThemePicker();
+                              }}
+                              className={`theme-choice ${theme === themeOption.id ? 'active' : ''}`}
+                              style={{ '--choice-color': themeOption.color, '--choice-accent': themeOption.accent }}
+                              aria-pressed={theme === themeOption.id}
+                            >
+                              <span
+                                className={`theme-choice-preview ${themeOption.plain ? 'is-plain' : ''} ${themeOption.custom ? 'is-custom' : ''}`}
+                                aria-hidden="true"
+                              >
+                                {themeOption.plain
+                                  ? <><i /><i /><i /></>
+                                  : themeOption.icon}
+                              </span>
+                              <span className="theme-choice-copy">
+                                <strong>{t(`header.themes.${themeGroup}.${themeOption.id}.name`)}</strong>
+                                <small>{t(`header.themes.${themeGroup}.${themeOption.id}.description`)}</small>
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                    {!isChild && !isPet && (
+                      <button
+                        type="button"
+                        className={`custom-theme-launch ${activeMember?.customThemeCss ? 'is-active' : ''}`}
+                        onClick={() => setIsCustomThemeOpen(value => !value)}
+                        aria-expanded={isCustomThemeOpen}
+                      >
+                        <Code2 size={17} />
+                        <span>
+                          <strong>
+                            {t(activeMember?.customThemeCss
+                              ? 'header.customTheme.editLaunch'
+                              : 'header.customTheme.createLaunch')}
+                          </strong>
+                          <small>
+                            {t(activeMember?.customThemeCss
+                              ? 'header.customTheme.editLaunchHint'
+                              : 'header.customTheme.createLaunchHint')}
+                          </small>
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                  {isCustomThemeOpen && !isChild && !isPet && (
+                    <CustomThemeEditor
+                      savedCss={activeMember?.customThemeCss || ''}
+                      onPreview={previewCustomThemeCss}
+                      onPreviewStateChange={setCustomThemePreviewActive}
+                      onSave={saveCustomThemeCss}
+                    />
+                  )}
                 </section>
               </div>,
               document.body

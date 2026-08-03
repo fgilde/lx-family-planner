@@ -143,6 +143,7 @@
       "newImage": "Neues Familienbild",
       "familyName": "Familienname",
       "badge": "Kurzer Zusatz",
+      "badgeDefault": "Unsere Familie",
       "badgePlaceholder": "z. B. Unser Zuhause",
       "newPassword": "Neues Familienpasswort (optional)",
       "passwordPlaceholder": "Leer lassen = unverändert"

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   BellOff,
   BellRing,
+  CakeSlice,
   CalendarDays,
   Check,
   ChevronDown,
@@ -52,6 +53,7 @@ const EMPTY_FORM = {
   role: 'child',
   color: '#E0A52E',
   avatar: FUNNY_COMIC_AVATARS[0]?.url || '',
+  birthDate: '',
   pin: '',
   isManaged: false,
   allowedModules: null
@@ -206,6 +208,7 @@ export default function ProfileModal() {
       role: member.role || 'member',
       color: member.color || COLOR_PRESETS[0],
       avatar: member.avatar || FUNNY_COMIC_AVATARS[0]?.url || '',
+      birthDate: member.birthDate || '',
       pin: '',
       isManaged: isManagedProfile(member),
       allowedModules: Array.isArray(member.allowedModules)
@@ -735,6 +738,23 @@ export default function ProfileModal() {
                 />
               </label>
 
+              {form.role !== 'pet' && (
+                <label className="form-group profile-birthday-field">
+                  <span className="form-label">
+                    <CakeSlice size={15} /> {t('form.birthDate')}
+                  </span>
+                  <input
+                    className="form-input"
+                    type="date"
+                    value={form.birthDate || ''}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onInput={event => updateForm({ birthDate: event.currentTarget.value })}
+                    onChange={event => updateForm({ birthDate: event.target.value })}
+                  />
+                  <small>{t('form.birthDateHint')}</small>
+                </label>
+              )}
+
               {canManage && (
                 <label className="form-group">
                   <span className="form-label">{t('form.position')}</span>
@@ -784,7 +804,9 @@ export default function ProfileModal() {
                       key={avatar.id}
                       className={form.avatar === avatar.url ? 'selected' : ''}
                       onClick={() => updateForm({ avatar: avatar.url })}
-                      title={avatar.name}
+                      title={t(`avatars.${avatar.id}`, {
+                        defaultValue: avatar.name
+                      })}
                     >
                       <img src={avatar.url} alt="" />
                     </button>

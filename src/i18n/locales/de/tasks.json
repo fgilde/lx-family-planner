@@ -19,6 +19,14 @@
     "managedOnly": "Nur organisiert",
     "noTasks": "Keine Aufgaben für {{name}} zugeteilt."
   },
+  "shared": {
+    "title": "Gemeinsam anpacken",
+    "description": "Diese Aufgaben kann jede ausgewählte Person übernehmen. Die Sterne bekommt, wer sie erledigt.",
+    "open": "Wer zuerst fertig ist, hakt die Aufgabe ab",
+    "reportedBy": "{{name}} meldet: erledigt – wartet auf Bestätigung",
+    "completedBy": "Erledigt von {{name}}",
+    "someone": "jemandem aus der Familie"
+  },
   "taskItem": {
     "reviewWaitingFor": "Die Prüfung wartet auf {{name}}.",
     "fallbackCreator": "den Ersteller",
@@ -62,6 +70,10 @@
     "descriptionLabel": "Beschreibung (optional)",
     "descriptionPlaceholder": "Details, Hinweise oder was genau erledigt werden soll …",
     "assignTo": "Zuteilen an",
+    "sharedToggle": "Gemeinsame Familienaufgabe",
+    "sharedHint": "Eine Aufgabe für mehrere Personen – die Sterne gehen an die Person, die sie erledigt.",
+    "eligibleProfiles": "Wer darf sie übernehmen?",
+    "eligibleHint": "Mindestens ein Profil auswählen. Kinder brauchen weiterhin die Bestätigung eines Elternteils.",
     "managedSuffix": ", verwaltet",
     "scheduleTitle": "Wann ist die Aufgabe dran?",
     "scheduleHint": "Wiederholungen werden nach der Bestätigung automatisch neu eingeplant.",

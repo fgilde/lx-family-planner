@@ -1,35 +1,34 @@
-# Sicherheit
+# Security policy
 
-LX Family verwaltet private Familieninformationen. Sicherheitsprobleme bitte
-nicht als öffentliches Issue veröffentlichen.
+LX Family Planner handles private family information. Please do not disclose a
+security vulnerability in a public issue.
 
-## Eine Schwachstelle melden
+## Reporting a vulnerability
 
-Nutze nach Möglichkeit eine private
-[GitHub Security Advisory](https://github.com/laxxx-lab/lx-family-planner/security/advisories/new).
-Beschreibe knapp:
+Use a private
+[GitHub Security Advisory](https://github.com/laxxx-lab/lx-family-planner/security/advisories/new)
+where possible. Include the affected version, potential impact, reproducible
+steps and any known prerequisites.
 
-- betroffene Version,
-- mögliche Auswirkung,
-- nachvollziehbare Schritte,
-- bekannte Voraussetzungen.
+Never include real family content, passwords, tokens, Firebase service-account
+keys, Nextcloud app passwords or other credentials.
 
-Bitte keine echten Familieninhalte, Passwörter, Firebase-Schlüssel,
-Nextcloud-App-Passwörter oder andere Zugangsdaten mitsenden.
+## Supported versions
 
-## Unterstützter Stand
+Security fixes are provided for the current release on `main`. Create a
+consistent backup with the bundled backup function before updating.
 
-Sicherheitskorrekturen werden für die jeweils aktuelle Version auf `main`
-bereitgestellt. Vor einem Update sollte über die mitgelieferte Backup-Funktion
-eine konsistente Sicherung erzeugt werden.
+## Secure operation
 
-## Betrieb
+- Expose LX publicly only through HTTPS and a deliberately configured reverse
+  proxy.
+- Never commit `.env`, `APP_SECRET`, Firebase keys or the data directory.
+- Keep the same `APP_SECRET` across updates and restores. It protects stored
+  integration secrets and private links.
+- Use the guarded update scripts. They back up the database and simulate its
+  migration before switching versions.
+- Set `DEMO_FAMILY_ID` only for an intentional public showroom. That family is
+  kept read-only on the server.
+- Keep `PUBLIC_FAMILY_DIRECTORY=false` on internet-facing installations.
 
-- Öffentlichen Zugriff nur über HTTPS und einen bewusst konfigurierten Reverse
-  Proxy erlauben.
-- `.env`, `APP_SECRET`, Firebase-Dienstschlüssel und Datenordner niemals in Git
-  aufnehmen.
-- Updates mit dem mitgelieferten Update-Skript einspielen; es sichert und
-  simuliert die Migration vor dem Wechsel.
-- Für einen öffentlichen Schauraum `DEMO_FAMILY_ID` setzen. Dieses
-  Familienkonto bleibt dann serverseitig schreibgeschützt.
+German version: [SECURITY.de.md](SECURITY.de.md)

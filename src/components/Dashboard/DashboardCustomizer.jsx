@@ -22,6 +22,7 @@ export default function DashboardCustomizer({
   profileName,
   resetLayout,
   setDensity,
+  setPreference,
   toggleWidget,
   widgets
 }) {
@@ -106,6 +107,44 @@ export default function DashboardCustomizer({
             </button>
           </div>
         </div>
+
+        {widgetMap.has('trash') && (
+          <div className="dashboard-trash-picker">
+            <div>
+              <strong>{t('customizer.trash.title')}</strong>
+              <span>{t('customizer.trash.hint')}</span>
+            </div>
+            <label>
+              <span>{t('customizer.trash.visibility')}</span>
+              <select
+                value={layout.preferences?.trashVisibility || 'always'}
+                onChange={event => setPreference(
+                  'trashVisibility',
+                  event.target.value
+                )}
+              >
+                <option value="always">{t('customizer.trash.always')}</option>
+                <option value="upcoming">{t('customizer.trash.upcoming')}</option>
+                <option value="never">{t('customizer.trash.never')}</option>
+              </select>
+            </label>
+            {layout.preferences?.trashVisibility === 'upcoming' && (
+              <label>
+                <span>{t('customizer.trash.days')}</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  value={layout.preferences?.trashWindowDays || 3}
+                  onChange={event => setPreference(
+                    'trashWindowDays',
+                    Number(event.target.value)
+                  )}
+                />
+              </label>
+            )}
+          </div>
+        )}
 
         <div className="dashboard-studio-list">
           {layout.order.map((widgetId, index) => {

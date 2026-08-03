@@ -23,7 +23,7 @@ const HIGHLIGHT_ICONS = {
 };
 
 export default function ReleaseNotesModal() {
-  const { t } = useTranslation('chrome');
+  const { t, i18n } = useTranslation('chrome');
   const { releaseNotes, acknowledgeReleaseNotes } = useFamily();
   const [isSaving, setIsSaving] = useState(false);
   const closeButtonRef = useRef(null);
@@ -59,6 +59,14 @@ export default function ReleaseNotesModal() {
 
   if (!releaseNotes) return null;
 
+  const language = String(i18n.resolvedLanguage || i18n.language || 'de')
+    .toLowerCase()
+    .split('-')[0];
+  const localizedReleaseNotes = {
+    ...releaseNotes,
+    ...(releaseNotes.localizations?.[language] || {})
+  };
+
   return (
     <div className="release-notes-layer">
       <section
@@ -85,17 +93,17 @@ export default function ReleaseNotesModal() {
           </span>
           <div>
             <div className="release-notes-meta">
-              <span>{releaseNotes.eyebrow}</span>
-              <strong>{t('releaseNotes.version', { version: releaseNotes.version })}</strong>
+              <span>{localizedReleaseNotes.eyebrow}</span>
+              <strong>{t('releaseNotes.version', { version: localizedReleaseNotes.version })}</strong>
             </div>
-            <h2 id="release-notes-title">{releaseNotes.title}</h2>
-            <p id="release-notes-intro">{releaseNotes.intro}</p>
+            <h2 id="release-notes-title">{localizedReleaseNotes.title}</h2>
+            <p id="release-notes-intro">{localizedReleaseNotes.intro}</p>
           </div>
         </header>
 
-        {releaseNotes.highlights?.length > 0 && (
+        {localizedReleaseNotes.highlights?.length > 0 && (
           <div className="release-notes-grid">
-            {releaseNotes.highlights.map(highlight => {
+            {localizedReleaseNotes.highlights.map(highlight => {
               const HighlightIcon = HIGHLIGHT_ICONS[highlight.id] || Sparkles;
               return (
                 <article className="release-notes-card" key={highlight.id}>
@@ -115,7 +123,7 @@ export default function ReleaseNotesModal() {
         <footer className="release-notes-footer">
           <p>
             <CheckCircle2 size={19} aria-hidden="true" />
-            <span>{releaseNotes.closing}</span>
+            <span>{localizedReleaseNotes.closing}</span>
           </p>
           <button
             type="button"

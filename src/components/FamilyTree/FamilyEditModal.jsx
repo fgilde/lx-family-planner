@@ -71,7 +71,7 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
     setBusy(true);
     const payload = {
       familyName: familyName.trim(),
-      badge: badge.trim() || 'Unsere Familie',
+      badge: badge.trim() || t('settings.form.badgeDefault'),
       familyAvatar,
       grandparentsHouseholdEnabled
     };

@@ -1,4 +1,147 @@
 const RELEASE_NOTES = {
+  '1.16.0': {
+    version: '1.16.0',
+    eyebrow: 'Mehr Familie, weniger doppelte Pflege',
+    title: 'Geburtstage, Team-Aufgaben und ein flexibleres Kochbuch',
+    intro:
+      'LX denkt jetzt an Familiengeburtstage, verteilt gemeinsame Aufgaben fair und lässt Rezepte endlich vollständig bearbeiten oder aus Tandoor übernehmen.',
+    highlights: [
+      {
+        id: 'family-birthdays',
+        title: 'Geburtstage automatisch im Kalender',
+        description:
+          'Jedes Profil kann ein Geburtsdatum speichern. Der Geburtstag erscheint jedes Jahr von selbst im Familienkalender; LX erinnert eine Woche vorher und am Geburtstag.'
+      },
+      {
+        id: 'safe-family-onboarding',
+        title: 'Familien können sich nicht mehr aussperren',
+        description:
+          'Beim ersten Einrichten achtet LX darauf, dass mindestens ein Erwachsenenprofil die Familie verwalten kann. Bereits betroffene Familien mit einem normalen Haushaltsprofil werden beim Update automatisch repariert.'
+      },
+      {
+        id: 'shared-tasks',
+        title: 'Gemeinsame Aufgaben mit fairen Sternen',
+        description:
+          'Mehrere Personen können dieselbe Aufgabe übernehmen. Die Sterne erhält wirklich die Person, die sie erledigt hat; bei Kindern bleibt die Bestätigung durch die Eltern erhalten.'
+      },
+      {
+        id: 'tablet-task-bubbles',
+        title: 'Aufgaben direkt am Tablet abhaken',
+        description:
+          'Nach dem Antippen fragt die Tabletansicht mit großen Profilbildern, wer die Aufgabe erledigt hat. Die Ansicht bleibt dabei im Tabletmodus.'
+      },
+      {
+        id: 'recipe-editor-tandoor',
+        title: 'Rezepte bearbeiten und aus Tandoor importieren',
+        description:
+          'Zutaten und Zubereitungsschritte lassen sich ergänzen, ändern oder entfernen. Offizielle Tandoor-Exporte werden inklusive vorhandener Bilder eingelesen.'
+      },
+      {
+        id: 'facebook-recipe-drafts',
+        title: 'Facebook-Reels als sicheren Rezeptentwurf teilen',
+        description:
+          'Öffentliche Reels können aus Android direkt an LX geteilt werden. Beschreibung und Original-Rezeptlink werden gelesen; gespeichert wird erst, nachdem jemand den Entwurf geprüft hat.'
+      },
+      {
+        id: 'birthday-dashboard-preview',
+        title: 'Geburtstage ohne doppelte Jahresvorschau',
+        description:
+          'Auf dem Dashboard erscheint pro Person nur der nächste anstehende Geburtstag. Weitere Jahre bleiben im Kalender erhalten, überladen aber nicht mehr die Startseite.'
+      },
+      {
+        id: 'calm-custom-themes',
+        title: 'Ruhige Designs und ein eigenes sicheres Theme',
+        description:
+          'Neue schlichte Themes kommen ohne Motive aus. Eigene Farben und Rundungen werden als separates Design gespeichert, ohne vorhandene Themes zu überschreiben.'
+      },
+      {
+        id: 'smart-trash-widget',
+        title: 'Müll-Kachel nur dann, wenn sie gebraucht wird',
+        description:
+          'Pro Profil und Gerät lässt sich einstellen, ob die Müllabfuhr immer, nie oder nur einige Tage vor der nächsten Abholung erscheint.'
+      },
+      {
+        id: 'language-switcher',
+        title: 'Deutsch und Englisch mit einem Klick',
+        description:
+          'Die Sprache lässt sich vor der Anmeldung oder direkt in der Kopfzeile wechseln. LX merkt sich die Auswahl auf diesem Gerät.'
+      }
+    ],
+    closing:
+      'Bestehende Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'More family life, less duplicate work',
+        title: 'Birthdays, team chores and a more flexible recipe book',
+        intro:
+          'LX now remembers family birthdays, shares chores fairly and lets you maintain or import complete recipes.',
+        highlights: [
+          {
+            id: 'family-birthdays',
+            title: 'Birthdays appear automatically',
+            description:
+              'Each profile can store a birthday. It returns in the family calendar every year, with a reminder one week before and on the day.'
+          },
+          {
+            id: 'safe-family-onboarding',
+            title: 'Families cannot lock themselves out',
+            description:
+              'Initial setup keeps at least one adult profile able to manage the family. Affected existing households are repaired during the update.'
+          },
+          {
+            id: 'shared-tasks',
+            title: 'Shared chores with fair stars',
+            description:
+              'Several people can take the same chore. Stars go to whoever completed it; children still need an adult approval.'
+          },
+          {
+            id: 'tablet-task-bubbles',
+            title: 'Complete chores from the tablet',
+            description:
+              'Large profile bubbles ask who completed a shared chore without leaving tablet mode.'
+          },
+          {
+            id: 'recipe-editor-tandoor',
+            title: 'Edit recipes and import from Tandoor',
+            description:
+              'Ingredients and preparation steps can be added, changed or removed. Official Tandoor exports include available images.'
+          },
+          {
+            id: 'facebook-recipe-drafts',
+            title: 'Share Facebook Reels as reviewable drafts',
+            description:
+              'Public Reels can be shared from Android. LX reads the description and original recipe link, but saves only after someone reviews the draft.'
+          },
+          {
+            id: 'birthday-dashboard-preview',
+            title: 'A clean birthday preview',
+            description:
+              'The dashboard shows only the next birthday for each person instead of duplicating future years.'
+          },
+          {
+            id: 'calm-custom-themes',
+            title: 'Calm designs and a safe custom theme',
+            description:
+              'New motif-free themes are joined by a separate custom design for approved colours and shapes, without overwriting built-in themes.'
+          },
+          {
+            id: 'smart-trash-widget',
+            title: 'Waste collection only when relevant',
+            description:
+              'Each profile and device can show the waste card always, never or only shortly before collection.'
+          },
+          {
+            id: 'language-switcher',
+            title: 'English and German in one tap',
+            description:
+              'Choose the interface language before login or from the main header. LX remembers the choice on this device.'
+          }
+        ],
+        closing:
+          'Existing families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.15.0': {
     version: '1.15.0',
     eyebrow: 'Termine und Schulalltag lassen sich jetzt richtig planen',

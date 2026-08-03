@@ -31,6 +31,9 @@ export function recipeShareTargetFromUrl(value) {
     isShareTarget: true,
     url: candidates[0] || '',
     title: String(title).trim().slice(0, 240),
-    text: String(text).trim().slice(0, 1000)
+    // Social apps often include the complete caption next to the shared URL.
+    // Keep enough of it for a recipe draft, but bound the value before it is
+    // forwarded to the server.
+    text: String(text).trim().slice(0, 8000)
   };
 }

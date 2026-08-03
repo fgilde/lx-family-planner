@@ -25,8 +25,14 @@ import OrderedDashboardGrid, {
   DashboardWidget
 } from './OrderedDashboardGrid';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
+import { dashboardLayoutForTrash } from '../../utils/dashboardLayout';
 import { formatDate } from '../../utils/formatting';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
+import {
+  birthdayEventCopy,
+  nextBirthdayOccurrencesOnly
+} from '../../../shared/birthdays.js';
+import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
 import { isChildProfile, isPetProfile } from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
@@ -173,7 +179,7 @@ export default function PersonalDashboard() {
 
   const myEvents = useMemo(
     () =>
-      events
+      nextBirthdayOccurrencesOnly(events, todayKey)
         .filter(
           event =>
             eventIsForMember(event, activeMember.id) &&
@@ -184,14 +190,14 @@ export default function PersonalDashboard() {
             new Date(`${left.date}T${left.time || '00:00'}`) -
             new Date(`${right.date}T${right.time || '00:00'}`)
         ),
-    [activeHousehold, activeMember.id, events]
+    [activeHousehold, activeMember.id, events, todayKey]
   );
   const myTasks = useMemo(
     () =>
       tasks
         .filter(
           task =>
-            task.memberId === activeMember.id &&
+            taskIsAvailableToMember(task, activeMember.id) &&
             !task.completed &&
             belongsToHousehold(task)
         )
@@ -250,6 +256,11 @@ export default function PersonalDashboard() {
   const nextTrash = trashEvents
     .filter(item => item.date >= todayKey)
     .sort((left, right) => left.date.localeCompare(right.date))[0];
+  const effectiveDashboardLayout = dashboardLayoutForTrash(
+    dashboardLayout.layout,
+    nextTrash?.date,
+    todayKey
+  );
 
   if (isChildProfile(activeMember)) return <ChildDashboard />;
   if (isPetProfile(activeMember)) return <PetDashboard />;
@@ -306,7 +317,7 @@ export default function PersonalDashboard() {
 
       <OrderedDashboardGrid
         className="adult-widget-grid"
-        layout={dashboardLayout.layout}
+        layout={effectiveDashboardLayout}
       >
         <DashboardWidget widgetId="calendar" className="card adult-dashboard-widget">
           <DashboardCardHeader
@@ -320,8 +331,9 @@ export default function PersonalDashboard() {
             <EmptyWidget icon="🎉">{t('personal.calendar.empty')}</EmptyWidget>
           ) : (
             <div className="adult-event-list">
-              {myEvents.slice(0, 4).map(event => (
-                <button
+              {myEvents.slice(0, 4).map(event => {
+                const displayEvent = birthdayEventCopy(event, t);
+                return <button
                   type="button"
                   key={event.id}
                   onClick={() => setActiveTab('calendar')}
@@ -335,11 +347,11 @@ export default function PersonalDashboard() {
                     </span>
                   </time>
                   <span>
-                    <strong>{event.title}</strong>
-                    <small>{event.location || t('personal.calendar.defaultLocation')}</small>
+                    <strong>{displayEvent.title}</strong>
+                    <small>{displayEvent.location || t('personal.calendar.defaultLocation')}</small>
                   </span>
-                </button>
-              ))}
+                </button>;
+              })}
             </div>
           )}
         </DashboardWidget>
@@ -469,7 +481,11 @@ export default function PersonalDashboard() {
             >
               <span>🗑️</span>
               <span>
-                <strong>{nextTrash.title}</strong>
+                <strong>
+                  {nextTrash.titleKey
+                    ? t(`calendar:${nextTrash.titleKey}`)
+                    : nextTrash.title}
+                </strong>
                 <small>
                   {t('personal.trash.pickupOn', {
                     date: formatDate(`${nextTrash.date}T12:00:00`, {
@@ -538,6 +554,7 @@ export default function PersonalDashboard() {
         profileName={activeMember.name.split(' ')[0]}
         resetLayout={dashboardLayout.resetLayout}
         setDensity={dashboardLayout.setDensity}
+        setPreference={dashboardLayout.setPreference}
         toggleWidget={dashboardLayout.toggleWidget}
         widgets={availableWidgets}
       />

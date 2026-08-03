@@ -1,20 +1,21 @@
-## Was ändert sich?
+## What changed?
 
-<!-- Kurz und alltagstauglich beschreiben. -->
+<!-- Describe the user-visible result in plain language. -->
 
-## Warum ist das für Familien hilfreich?
+## Why is this helpful for families?
 
-<!-- Betroffene Rollen nennen: Erwachsene, Kinder, Großeltern, Haustiere … -->
+<!-- Mention affected roles: adults, children, grandparents, pets, managed profiles. -->
 
-## Geprüft
+## Verification
 
-- [ ] `npm run check` ist erfolgreich.
-- [ ] Desktop-Ansicht geprüft.
-- [ ] Mobile Ansicht geprüft.
-- [ ] Rollen und Berechtigungen geprüft.
-- [ ] Bestehende Daten und Einstellungen bleiben erhalten.
-- [ ] Keine Zugangsdaten oder privaten Familiendaten eingecheckt.
+- [ ] `npm run check` succeeds.
+- [ ] Desktop layout was checked.
+- [ ] Mobile layout was checked.
+- [ ] Roles and server-side permissions were checked.
+- [ ] Existing data and settings remain intact.
+- [ ] English and German translation keys were updated where needed.
+- [ ] No credentials or private family data were committed.
 
-## Bilder
+## Screenshots
 
-<!-- Bei sichtbaren Änderungen bitte Vorher/Nachher-Screenshots ergänzen. -->
+<!-- Add before/after screenshots for visible changes. Remove private details. -->

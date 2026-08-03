@@ -9,6 +9,7 @@ import {
 } from 'crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { nextTaskDueDate } from '../shared/taskRecurrence.js';
+import { repairFamiliesWithoutAdmin } from './adminRecovery.js';
 
 const DATABASE_FILE = process.env.DATABASE_FILE
   ? path.resolve(process.env.DATABASE_FILE)
@@ -79,6 +80,8 @@ database.exec(`
     color TEXT NOT NULL DEFAULT '#2563eb',
     bg_color TEXT NOT NULL DEFAULT '#eff6ff',
     theme TEXT NOT NULL DEFAULT 'light',
+    custom_theme_css TEXT NOT NULL DEFAULT '',
+    birth_date TEXT NOT NULL DEFAULT '',
     stars INTEGER NOT NULL DEFAULT 0 CHECK(stars >= 0),
     pin_hash TEXT,
     is_managed INTEGER NOT NULL DEFAULT 0
@@ -642,6 +645,30 @@ applySchemaMigration(10, 'Sichtbare Module pro Familienprofil', () => {
   }
 });
 
+applySchemaMigration(11, 'Sichere Designvariablen pro Familienprofil', () => {
+  const memberColumns = database.prepare('PRAGMA table_info(members)').all();
+  if (!memberColumns.some(column => column.name === 'custom_theme_css')) {
+    database.exec(`
+      ALTER TABLE members
+      ADD COLUMN custom_theme_css TEXT NOT NULL DEFAULT '';
+    `);
+  }
+});
+
+applySchemaMigration(12, 'Geburtstage pro Familienprofil', () => {
+  const memberColumns = database.prepare('PRAGMA table_info(members)').all();
+  if (!memberColumns.some(column => column.name === 'birth_date')) {
+    database.exec(`
+      ALTER TABLE members
+      ADD COLUMN birth_date TEXT NOT NULL DEFAULT '';
+    `);
+  }
+});
+
+applySchemaMigration(13, 'Verwaltungszugang fuer gesperrte Familien reparieren', () => {
+  repairFamiliesWithoutAdmin(database);
+});
+
 function withTransaction(work) {
   database.exec('BEGIN IMMEDIATE');
   try {
@@ -739,6 +766,8 @@ function mapMemberRow(row) {
     color: row.color,
     bgColor: row.bg_color,
     theme: row.theme,
+    customThemeCss: row.custom_theme_css || '',
+    birthDate: row.birth_date || '',
     stars: row.stars,
     hasPin: Boolean(row.pin_hash),
     isManaged: Number(row.is_managed || 0) === 1,
@@ -928,10 +957,11 @@ function insertMember(familyId, member, now = Date.now()) {
     .prepare(`
       INSERT INTO members(
         id, family_id, name, role, position, avatar, color, bg_color,
-        theme, stars, pin_hash, is_managed, allowed_modules_json,
+        theme, custom_theme_css, birth_date, stars, pin_hash, is_managed,
+        allowed_modules_json,
         created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -943,6 +973,8 @@ function insertMember(familyId, member, now = Date.now()) {
       member.color || '#2563eb',
       member.bgColor || '#eff6ff',
       member.theme || (role === 'child' ? 'adventure' : 'light'),
+      member.customThemeCss || '',
+      member.birthDate || '',
       Math.max(0, Number(member.stars || 0)),
       member.isManaged ? null : (member.pin ? hashSecret(member.pin) : null),
       member.isManaged ? 1 : 0,
@@ -991,6 +1023,8 @@ export function updateMember(familyId, memberId, changes) {
           color = ?,
           bg_color = ?,
           theme = ?,
+          custom_theme_css = ?,
+          birth_date = ?,
           stars = ?,
           pin_hash = ?,
           is_managed = ?,
@@ -1006,6 +1040,8 @@ export function updateMember(familyId, memberId, changes) {
         changes.color ?? existing.color,
         changes.bgColor ?? existing.bg_color,
         changes.theme ?? existing.theme,
+        changes.customThemeCss ?? existing.custom_theme_css,
+        changes.birthDate ?? existing.birth_date,
         Math.max(0, Number(changes.stars ?? existing.stars)),
         nextIsManaged ? null : nextPinHash,
         nextIsManaged,
@@ -3394,9 +3430,14 @@ export function updateProblemReportStatus(familyId, reportId, status) {
   );
 }
 
-function updateTaskMemberStars(familyId, task, direction) {
-  if (!task.memberId || !direction) return null;
-  const existingMember = getMemberAuthRow(familyId, task.memberId);
+function updateTaskMemberStars(
+  familyId,
+  task,
+  direction,
+  memberId = task.memberId
+) {
+  if (!memberId || !direction) return null;
+  const existingMember = getMemberAuthRow(familyId, memberId);
   if (!existingMember) return null;
   const points = Math.max(0, Number(task.stars ?? 10));
   const nextStars = Math.max(
@@ -3408,8 +3449,8 @@ function updateTaskMemberStars(familyId, task, direction) {
       UPDATE members SET stars = ?, updated_at = ?
       WHERE family_id = ? AND id = ?
     `)
-    .run(nextStars, Date.now(), familyId, task.memberId);
-  return getMember(familyId, task.memberId);
+    .run(nextStars, Date.now(), familyId, memberId);
+  return getMember(familyId, memberId);
 }
 
 function createNextRecurringTask(familyId, task) {
@@ -3455,6 +3496,8 @@ function createNextRecurringTask(familyId, task) {
     previousOccurrenceId: task.id,
     completed: false,
     completionStatus: 'open',
+    completedByMemberId: null,
+    completedByName: '',
     completionRequestedByMemberId: null,
     completionRequestedAt: null,
     completionApprovedByMemberId: null,
@@ -3472,12 +3515,26 @@ function createNextRecurringTask(familyId, task) {
   );
 }
 
-export function toggleTaskRecord(familyId, taskId, actorMemberId = '') {
+export function toggleTaskRecord(
+  familyId,
+  taskId,
+  actorMemberId = '',
+  completedByMemberId = actorMemberId
+) {
   return withTransaction(() => {
     const task = getRecord(familyId, 'tasks', taskId);
     if (!task) return null;
     const completed = !task.completed;
     const now = Date.now();
+    const awardedMemberId = task.assignmentMode === 'shared'
+      ? completedByMemberId
+      : task.memberId;
+    const awardedMember = awardedMemberId
+      ? getMember(familyId, awardedMemberId)
+      : null;
+    const previousAwardedMemberId = task.completedByMemberId || (
+      task.assignmentMode === 'shared' ? '' : task.memberId
+    );
     const unusedNextTask = !completed && task.repeatRule !== 'none'
       ? listRecords(familyId, 'tasks').find(
           record =>
@@ -3502,6 +3559,8 @@ export function toggleTaskRecord(familyId, taskId, actorMemberId = '') {
             ...task,
             completed: true,
             completionStatus: 'approved',
+            completedByMemberId: awardedMember?.id || null,
+            completedByName: awardedMember?.name || '',
             completionApprovedByMemberId: actorMemberId || null,
             completionApprovedAt: now,
             completionRequestedByMemberId: null,
@@ -3511,6 +3570,8 @@ export function toggleTaskRecord(familyId, taskId, actorMemberId = '') {
             ...task,
             completed: false,
             completionStatus: 'open',
+            completedByMemberId: null,
+            completedByName: '',
             completionApprovedByMemberId: null,
             completionApprovedAt: null,
             completionRequestedByMemberId: null,
@@ -3518,7 +3579,12 @@ export function toggleTaskRecord(familyId, taskId, actorMemberId = '') {
           },
       { bump: false }
     );
-    const member = updateTaskMemberStars(familyId, task, completed ? 1 : -1);
+    const member = updateTaskMemberStars(
+      familyId,
+      task,
+      completed ? 1 : -1,
+      completed ? awardedMemberId : previousAwardedMemberId
+    );
     const nextTask = completed
       ? createNextRecurringTask(familyId, updatedTask)
       : null;
@@ -3548,6 +3614,8 @@ export function requestTaskApprovalRecord(familyId, taskId, memberId) {
         ? {
             ...task,
             completionStatus: 'open',
+            completedByMemberId: null,
+            completedByName: '',
             completionRequestedByMemberId: null,
             completionRequestedAt: null
           }
@@ -3555,6 +3623,8 @@ export function requestTaskApprovalRecord(familyId, taskId, memberId) {
             ...task,
             completed: false,
             completionStatus: 'pending_approval',
+            completedByMemberId: null,
+            completedByName: '',
             completionRequestedByMemberId: memberId,
             completionRequestedAt: Date.now(),
             completionRejectedByMemberId: null,
@@ -3592,6 +3662,9 @@ export function reviewTaskRecord(
             ...task,
             completed: true,
             completionStatus: 'approved',
+            completedByMemberId: task.completionRequestedByMemberId,
+            completedByName:
+              getMember(familyId, task.completionRequestedByMemberId)?.name || '',
             completionApprovedByMemberId: reviewerMemberId,
             completionApprovedAt: now,
             completionRejectedByMemberId: null,
@@ -3609,7 +3682,14 @@ export function reviewTaskRecord(
       { bump: false }
     );
     const member = approved
-      ? updateTaskMemberStars(familyId, task, 1)
+      ? updateTaskMemberStars(
+          familyId,
+          task,
+          1,
+          task.assignmentMode === 'shared'
+            ? task.completionRequestedByMemberId
+            : task.memberId
+        )
       : null;
     const nextTask = approved
       ? createNextRecurringTask(familyId, updatedTask)

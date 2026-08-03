@@ -52,16 +52,6 @@ const RULES = NOTIFICATION_EVENT_DEFINITIONS.map(definition => ({
   icon: RULE_ICONS[definition.key] || BellRing
 }));
 
-const NATIVE_ACTIVATION_LABELS = {
-  server: 'Server wird geprüft …',
-  android: 'Android wird vorbereitet …',
-  channels: 'Meldungen werden eingerichtet …',
-  permission: 'Berechtigung wird geprüft …',
-  'permission-request': 'Bitte Android-Abfrage bestätigen …',
-  firebase: 'Gerät wird bei Firebase angemeldet …',
-  save: 'Gerät wird gespeichert …'
-};
-
 export default function WebPushSettings() {
   const { t } = useTranslation('admin');
   const { t: tShared } = useTranslation('shared');
@@ -277,11 +267,8 @@ export default function WebPushSettings() {
             <button type="button" onClick={activate} disabled={Boolean(push.busy)}>
               <BellRing size={17} />
               {push.busy === 'enable'
-                ? (NATIVE_ACTIVATION_LABELS[push.activationStep]
-                    ? t(`webPush.activationSteps.${push.activationStep}`, {
-                        defaultValue:
-                          NATIVE_ACTIVATION_LABELS[push.activationStep]
-                      })
+                ? (push.activationStep
+                    ? t(`webPush.activationSteps.${push.activationStep}`)
                     : t('webPush.ready.connecting'))
                 : t('webPush.ready.enable')}
             </button>

@@ -1,47 +1,45 @@
-# Bei LX Family mitmachen
+# Contributing to LX Family Planner
 
-Dicke Feature-Listen sind schön – entscheidend ist, ob eine Funktion den
-Familienalltag wirklich leichter macht. Beiträge dürfen deshalb technisch
-ambitioniert sein, sollen sich in der App aber einfach und selbstverständlich
-anfühlen.
+The best contribution is not the longest feature list. It is a change that
+makes everyday family life easier without weakening privacy, reliability or the
+role-specific experience.
 
-## Gute Beiträge
+## What a good contribution protects
 
-- schützen Kinderprofile und private Familiendaten,
-- funktionieren auf PC, Smartphone und Tablet,
-- berücksichtigen Erwachsene, Kinder, Großeltern und verwaltete Profile,
-- erhalten bestehende Daten bei Updates,
-- erklären technische Einstellungen in normaler Sprache.
+- child profiles and private family data;
+- desktop, phone and tablet layouts;
+- adults, children, grandparents, managed profiles and pets;
+- existing data and settings during updates;
+- plain-language setup and error messages.
 
-## Lokale Entwicklung
+## Local development
 
 ```bash
 git clone https://github.com/laxxx-lab/lx-family-planner.git
 cd lx-family-planner
 npm ci
 cp .env.example .env
-npm run dev
-```
-
-Das Backend läuft separat mit:
-
-```bash
 npm run server
 ```
 
-Vor einem Pull Request:
+Run `npm run dev` in a second terminal. Before opening a pull request:
 
 ```bash
 npm run check
 ```
 
-## Pull Requests
+## Pull requests
 
-1. Für größere Änderungen zuerst ein Issue eröffnen.
-2. Einen kleinen, klar abgegrenzten Branch verwenden.
-3. Sichtbare Änderungen auf Desktop und Mobil testen.
-4. Bei Datenänderungen die Update-Simulation berücksichtigen.
-5. Keine echten Familiennamen, Fotos, Nachrichten oder Zugangsdaten in Tests
-   und Screenshots verwenden.
+1. Open an issue before a large or cross-cutting change.
+2. Keep the branch and pull request focused.
+3. Test visible changes on desktop and mobile.
+4. Consider every role and server-side permission, not only hidden buttons.
+5. Add a migration/update test when stored data changes.
+6. Do not include real names, photos, messages, server addresses or secrets.
+7. Add or update both English and German translation keys for visible text.
 
-Für Fehlermeldungen und Ideen stehen vorbereitete GitHub-Formulare bereit.
+For visible changes, include before/after screenshots with personal details
+removed. Automated or AI-assisted contributions are welcome, but the author is
+responsible for understanding, testing and reviewing the submitted result.
+
+German version: [CONTRIBUTING.de.md](CONTRIBUTING.de.md)

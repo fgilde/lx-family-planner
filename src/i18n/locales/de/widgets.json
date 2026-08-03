@@ -51,6 +51,12 @@
       "standardView": "Standardansicht",
       "tiles": "Kacheln"
     },
+    "completeTask": {
+      "kicker": "Aufgabe abhaken",
+      "title": "Wer hat das erledigt?",
+      "select": "Ich war's",
+      "cancel": "Doch noch nicht"
+    },
     "cards": {
       "calendar": {
         "title": "Heute",
@@ -69,6 +75,7 @@
         "count_one": "{{count}} offen",
         "count_other": "{{count}} offen",
         "pendingApproval": "Wartet auf Prüfung",
+        "shared": "Gemeinsame Aufgabe",
         "empty": "Alle Aufgaben sind geschafft."
       },
       "shopping": {

@@ -44,6 +44,8 @@
       "throughDate": "through {{date}}",
       "untilDateTime": "until {{date}}, {{time}}",
       "fromSubscriptionTitle": "From a calendar subscription",
+      "birthdayTitle": "Automatic family birthday",
+      "familyBirthday": "Family birthday",
       "fromFamily": "From {{name}}",
       "subscriptionFallback": "Calendar subscription",
       "sharedWithTitle": "Shared with connected families",
@@ -64,6 +66,8 @@
     "description": "Change the time, people, location and reminders together.",
     "readOnlyKicker": "Calendar source",
     "readOnlyDescription": "This event is managed by its connected calendar source and can only be viewed here.",
+    "birthdayKicker": "Family birthday",
+    "birthdayDescription": "This birthday is created automatically from the profile. LX reminds the family one week before and on the birthday.",
     "save": "Save changes",
     "delete": "Delete event",
     "deleteConfirm": "Really delete \"{{title}}\"?",
@@ -87,6 +91,12 @@
     }
   },
   "trash": {
+    "types": {
+      "rest": "Residual waste (black bin)",
+      "paper": "Paper recycling (blue bin)",
+      "bio": "Organic waste (brown/green bin)",
+      "yellow": "Packaging recycling (yellow bin/bag)"
+    },
     "header": {
       "title": "Digital waste calendar",
       "description": "Import your waste collector's .ics file or add a pickup yourself. LX reminds you the day before by default.",

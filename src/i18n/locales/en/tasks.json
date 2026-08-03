@@ -19,6 +19,14 @@
     "managedOnly": "Organized only",
     "noTasks": "No tasks assigned to {{name}}."
   },
+  "shared": {
+    "title": "Tackle it together",
+    "description": "Any selected person can take these tasks. Stars go to whoever completes them.",
+    "open": "Whoever finishes first checks the task off",
+    "reportedBy": "{{name}} says it is done – awaiting confirmation",
+    "completedBy": "Completed by {{name}}",
+    "someone": "someone in the family"
+  },
   "taskItem": {
     "reviewWaitingFor": "The review is waiting for {{name}}.",
     "fallbackCreator": "the creator",
@@ -62,6 +70,10 @@
     "descriptionLabel": "Description (optional)",
     "descriptionPlaceholder": "Details, tips, or what exactly needs to be done …",
     "assignTo": "Assign to",
+    "sharedToggle": "Shared family task",
+    "sharedHint": "One task for several people – stars go to the person who completes it.",
+    "eligibleProfiles": "Who can take it?",
+    "eligibleHint": "Select at least one profile. Children still need a parent's confirmation.",
     "managedSuffix": ", managed",
     "scheduleTitle": "When is the task due?",
     "scheduleHint": "Repeats are rescheduled automatically after confirmation.",

@@ -111,6 +111,11 @@
     "themeNotSaved": {
       "title": "Design nicht gespeichert"
     },
+    "customThemeSaved": {
+      "title": "Mein Design gespeichert",
+      "message": "Das eigene Theme wurde angelegt und für dieses Profil aktiviert.",
+      "resetMessage": "Das eigene Theme wurde entfernt. Das Profil verwendet jetzt Leinen."
+    },
     "webPushUnreachable": {
       "title": "Benachrichtigungen nicht erreichbar"
     },
@@ -264,6 +269,10 @@
     "recipeDeleted": {
       "title": "Rezept gelöscht",
       "message": "Das Rezept wurde entfernt."
+    },
+    "recipeUpdated": {
+      "title": "Rezept aktualisiert",
+      "message": "\"{{name}}\" wurde gespeichert."
     },
     "taskSentForReview": {
       "title": "Zur Prüfung geschickt",

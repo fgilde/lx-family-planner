@@ -1,4 +1,9 @@
 export const DASHBOARD_DENSITIES = new Set(['comfortable', 'compact']);
+export const DASHBOARD_TRASH_VISIBILITY = new Set([
+  'always',
+  'upcoming',
+  'never'
+]);
 
 export function normalizeDashboardLayout(value, allowedWidgetIds) {
   const allowed = [...new Set((allowedWidgetIds || []).filter(Boolean))];
@@ -26,7 +31,45 @@ export function normalizeDashboardLayout(value, allowedWidgetIds) {
     hidden,
     density: DASHBOARD_DENSITIES.has(input.density)
       ? input.density
-      : 'comfortable'
+      : 'comfortable',
+    preferences: {
+      trashVisibility: DASHBOARD_TRASH_VISIBILITY.has(
+        input.preferences?.trashVisibility
+      )
+        ? input.preferences.trashVisibility
+        : 'always',
+      trashWindowDays: Math.max(
+        1,
+        Math.min(30, Number(input.preferences?.trashWindowDays) || 3)
+      )
+    }
+  };
+}
+
+export function dashboardLayoutForTrash(
+  layout,
+  nextTrashDate,
+  todayDate
+) {
+  const mode = layout?.preferences?.trashVisibility || 'always';
+  let dynamicallyHidden = mode === 'never';
+  if (mode === 'upcoming') {
+    if (!nextTrashDate || !todayDate) {
+      dynamicallyHidden = true;
+    } else {
+      const today = new Date(`${todayDate}T12:00:00`);
+      const pickup = new Date(`${nextTrashDate}T12:00:00`);
+      const days = Math.round((pickup - today) / 86_400_000);
+      dynamicallyHidden =
+        !Number.isFinite(days) ||
+        days < 0 ||
+        days > Number(layout.preferences?.trashWindowDays || 3);
+    }
+  }
+  if (!dynamicallyHidden) return layout;
+  return {
+    ...layout,
+    hidden: [...new Set([...(layout?.hidden || []), 'trash'])]
   };
 }
 export function moveDashboardWidget(layout, widgetId, direction) {

@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import {
   createCipheriv,
   createDecipheriv,
@@ -16,6 +17,11 @@ import BringApi from 'bring-shopping';
 import webPush from 'web-push';
 import { parseICalendar } from '../shared/icsCalendar.js';
 import { eventAudienceIds } from '../shared/calendarAudience.js';
+import { parseCustomThemeCss } from '../shared/customThemeCss.js';
+import {
+  nextBirthdayEvent,
+  normalizeBirthDate
+} from '../shared/birthdays.js';
 import {
   TASK_REPEAT_RULES,
   normalizeTaskDate
@@ -35,7 +41,11 @@ import {
 } from '../shared/notificationEvents.js';
 import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 import { loadBringCatalog } from './bringCatalog.js';
-import { importRecipeFromUrl } from './recipeImporter.js';
+import {
+  extractSharedRecipeDraft,
+  importRecipePreviewImage,
+  importRecipeFromUrl
+} from './recipeImporter.js';
 import {
   resolveMediaPreview,
   safeCoverUrl
@@ -196,7 +206,22 @@ const APP_LANGUAGE = (() => {
     .slice(0, 2);
   return SUPPORTED_APP_LANGUAGES.includes(configured) ? configured : 'de';
 })();
-const translate = createTranslator(APP_LANGUAGE);
+const appTranslators = Object.fromEntries(
+  SUPPORTED_APP_LANGUAGES.map(language => [
+    language,
+    createTranslator(language)
+  ])
+);
+const requestLanguageContext = new AsyncLocalStorage();
+const normalizeRequestLanguage = value => {
+  const language = String(value || '').trim().toLowerCase().slice(0, 2);
+  return SUPPORTED_APP_LANGUAGES.includes(language) ? language : '';
+};
+const translate = (key, vars = {}) => {
+  const language =
+    requestLanguageContext.getStore()?.language || APP_LANGUAGE;
+  return (appTranslators[language] || appTranslators[APP_LANGUAGE])(key, vars);
+};
 const APP_LOCALE = APP_LANGUAGE === 'en' ? 'en-GB' : 'de-DE';
 const REGISTRATION_MODE = (() => {
   const configured = String(
@@ -296,6 +321,8 @@ const ADULT_MANAGED_RESOURCES = new Set([
 const PROTECTED_TASK_FIELDS = new Set([
   'completed',
   'completionStatus',
+  'completedByMemberId',
+  'completedByName',
   'createdByMemberId',
   'createdByName',
   'createdAt',
@@ -753,6 +780,7 @@ function normalizeMemberInput(value = {}) {
     color: cleanText(member.color, '#2563eb', 24),
     bgColor: cleanText(member.bgColor, '#eff6ff', 24),
     theme: cleanText(member.theme, 'light', 32),
+    birthDate: normalizeBirthDate(member.birthDate),
     allowedModules: Array.isArray(member.allowedModules)
       ? [...new Set(
           member.allowedModules
@@ -795,6 +823,71 @@ function normalizeTaskSchedule(value = {}) {
       dueDate
     )
   };
+}
+
+function normalizeTaskAssignment(familyId, value = {}) {
+  const input = ensureObject(value);
+  const requestedMode = cleanText(
+    input.assignmentMode,
+    'individual',
+    20
+  );
+  const assignmentMode = requestedMode === 'shared'
+    ? 'shared'
+    : 'individual';
+  const availableMembers = getMembers(familyId).filter(
+    member => !isManagedMember(member) && member.role !== 'pet'
+  );
+  const availableIds = new Set(availableMembers.map(member => member.id));
+  let eligibleMemberIds = [
+    ...new Set(
+      (Array.isArray(input.eligibleMemberIds)
+        ? input.eligibleMemberIds
+        : []
+      )
+        .map(id => cleanText(id, '', 100))
+        .filter(id => availableIds.has(id))
+    )
+  ];
+
+  if (assignmentMode === 'shared' && !eligibleMemberIds.length) {
+    eligibleMemberIds = availableMembers.map(member => member.id);
+  }
+
+  const requestedMemberId = cleanText(input.memberId, '', 100);
+  const memberId = assignmentMode === 'shared'
+    ? (
+        eligibleMemberIds.includes(requestedMemberId)
+          ? requestedMemberId
+          : eligibleMemberIds[0]
+      )
+    : requestedMemberId;
+  const targetMember = getMember(familyId, memberId);
+  if (!targetMember) {
+    const error = new Error(translate('errors.selectedProfileNotFound'));
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return {
+    assignmentMode,
+    eligibleMemberIds: assignmentMode === 'shared'
+      ? eligibleMemberIds
+      : [],
+    memberId,
+    targetMember
+  };
+}
+
+function taskCanBeCompletedBy(task, memberId) {
+  if (!task || !memberId) return false;
+  if (task.assignmentMode !== 'shared') {
+    return task.memberId === memberId;
+  }
+  const eligibleMemberIds = Array.isArray(task.eligibleMemberIds)
+    ? task.eligibleMemberIds
+    : [];
+  return !eligibleMemberIds.length || eligibleMemberIds.includes(memberId);
 }
 
 function parseCookies(header = '') {
@@ -2033,7 +2126,11 @@ function notifyTaskCompleted(req, result, actorMemberId) {
     .filter(isAdultMember)
     .map(entry => entry.id);
   queueWebPushEvent(req.session.familyId, 'taskCompleted', {
-    recipientMemberIds: [...new Set([result.task.memberId, ...adultIds].filter(Boolean))],
+    recipientMemberIds: [...new Set([
+      result.task.completedByMemberId,
+      result.task.memberId,
+      ...adultIds
+    ].filter(Boolean))],
     excludeMemberIds: [actorMemberId],
     title: translate('push.taskCompletedTitle', {
       name: result.member?.name || translate('labels.someone')
@@ -4531,7 +4628,39 @@ export function createApp() {
               tagPrefix: 'trash-reminder',
               publishReason: 'trash-reminder'
             };
-          })
+          }),
+          ...getMembers(family.id)
+            .map(member => ({
+              member,
+              event: nextBirthdayEvent(member, new Date(now))
+            }))
+            .filter(entry => entry.event)
+            .map(({ member, event }) => ({
+              event,
+              eventId: event.id,
+              recipientMemberIds: signedInMemberIds(family.id).filter(
+                memberId => memberId !== member.id
+              ),
+              notificationCopy: reminderMinutes => ({
+                title: Number(reminderMinutes) === 0
+                  ? translate('push.birthdayTodayTitle', { name: member.name })
+                  : translate('push.birthdayUpcomingTitle', { name: member.name }),
+                body: Number(reminderMinutes) === 0
+                  ? translate('push.birthdayTodayBody', { name: member.name })
+                  : translate('push.birthdayUpcomingBody', {
+                      name: member.name,
+                      date: new Date(`${event.date}T12:00:00`).toLocaleDateString(
+                        APP_LOCALE,
+                        { weekday: 'long', day: '2-digit', month: '2-digit' }
+                      )
+                    }),
+                privateTitle: translate('push.birthdayPrivateTitle'),
+                privateBody: translate('push.birthdayPrivateBody')
+              }),
+              url: '/?view=calendar',
+              tagPrefix: 'birthday-reminder',
+              publishReason: 'birthday-reminder'
+            }))
         ];
         for (const candidate of reminderCandidates) {
           const {
@@ -4801,6 +4930,13 @@ export function createApp() {
   };
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
+  app.use((req, _res, next) => {
+    const language =
+      normalizeRequestLanguage(req.headers['x-lx-language']) ||
+      normalizeRequestLanguage(req.headers['accept-language']) ||
+      APP_LANGUAGE;
+    requestLanguageContext.run({ language }, next);
+  });
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     const corsAllowed = isAllowedCorsOrigin(req, origin);
@@ -4813,7 +4949,7 @@ export function createApp() {
       );
       res.setHeader(
         'Access-Control-Allow-Headers',
-        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client, X-LX-File-Name, X-LX-File-Type, X-LX-Chat-Target'
+        'Content-Type, Authorization, X-Session-Token, X-Family-Id, X-LX-Client, X-LX-Language, X-LX-File-Name, X-LX-File-Type, X-LX-Chat-Target'
       );
       res.append('Vary', 'Origin');
     }
@@ -4845,6 +4981,22 @@ export function createApp() {
       language: APP_LANGUAGE,
       supportedLanguages: SUPPORTED_APP_LANGUAGES
     });
+  });
+
+  app.get('/manifest.json', (req, res) => {
+    const language =
+      normalizeRequestLanguage(req.headers['x-lx-language']) ||
+      normalizeRequestLanguage(req.headers['accept-language']) ||
+      APP_LANGUAGE;
+    const fileName = `manifest.${language}.json`;
+    const manifestPath = [
+      path.join(process.cwd(), 'dist', fileName),
+      path.join(process.cwd(), 'public', fileName)
+    ].find(candidate => fs.existsSync(candidate));
+    res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
+    res.append('Vary', 'Accept-Language');
+    if (!manifestPath) return res.sendStatus(404);
+    return res.sendFile(manifestPath);
   });
 
   app.get('/api/health', (_req, res) => {
@@ -5025,6 +5177,12 @@ export function createApp() {
       return res.status(400).json({
         success: false,
         error: translate('errors.loginProfileRequired')
+      });
+    }
+    if (!normalizedMembers.some(isAdultMember)) {
+      return res.status(400).json({
+        success: false,
+        error: translate('errors.adminProfileRequired')
       });
     }
     const result = createFamily({
@@ -6931,9 +7089,18 @@ export function createApp() {
     }
     const input = ensureObject(req.body);
     const changes = {};
-    const allowedSelfFields = ['name', 'avatar', 'color', 'bgColor', 'theme', 'pin'];
+    const allowedSelfFields = [
+      'name',
+      'avatar',
+      'color',
+      'bgColor',
+      'theme',
+      'birthDate',
+      'pin'
+    ];
     const allowedAdultFields = [
       ...allowedSelfFields,
+      'customThemeCss',
       'role',
       'position',
       'stars',
@@ -6960,6 +7127,26 @@ export function createApp() {
               .filter(value => PROFILE_MODULE_IDS.has(value))
           )]
         : [];
+    }
+    if (Object.hasOwn(changes, 'customThemeCss')) {
+      const customTheme = parseCustomThemeCss(changes.customThemeCss);
+      if (!customTheme.valid) {
+        return res.status(400).json({
+          success: false,
+          error: translate('errors.invalidCustomThemeCss')
+        });
+      }
+      changes.customThemeCss = customTheme.css;
+    }
+    if (Object.hasOwn(changes, 'birthDate')) {
+      const birthDate = normalizeBirthDate(changes.birthDate);
+      if (changes.birthDate && !birthDate) {
+        return res.status(400).json({
+          success: false,
+          error: translate('errors.invalidBirthDate')
+        });
+      }
+      changes.birthDate = birthDate;
     }
     if (Object.hasOwn(changes, 'isManaged')) {
       changes.isManaged = changes.isManaged === true;
@@ -7216,14 +7403,12 @@ export function createApp() {
     }
     if (req.params.type === 'tasks') {
       const creator = getMember(req.session.familyId, req.session.memberId);
-      const memberId = requireText(input.memberId, translate('fields.targetProfile'), 100);
-      const targetMember = getMember(req.session.familyId, memberId);
-      if (!targetMember) {
-        return res.status(400).json({
-          success: false,
-          error: translate('errors.selectedProfileNotFound')
-        });
-      }
+      const {
+        assignmentMode,
+        eligibleMemberIds,
+        memberId,
+        targetMember
+      } = normalizeTaskAssignment(req.session.familyId, input);
       const rotationMemberIds = targetMember.isManaged ? [] : [
         ...new Set(
           (Array.isArray(input.rotationMemberIds)
@@ -7250,6 +7435,8 @@ export function createApp() {
         title: requireText(input.title, translate('fields.task'), 200),
         description: cleanText(input.description, '', 2000),
         memberId,
+        assignmentMode,
+        eligibleMemberIds,
         rotationMemberIds,
         rotationIndex: Math.max(0, rotationMemberIds.indexOf(memberId)),
         category: cleanText(input.category, 'Haushalt', 80),
@@ -7376,18 +7563,12 @@ export function createApp() {
           )
         )
       };
-      const memberId = requireText(
-        candidate.memberId,
-        translate('fields.targetProfile'),
-        100
-      );
-      const targetMember = getMember(req.session.familyId, memberId);
-      if (!targetMember) {
-        return res.status(400).json({
-          success: false,
-          error: translate('errors.selectedProfileNotFound')
-        });
-      }
+      const {
+        assignmentMode,
+        eligibleMemberIds,
+        memberId,
+        targetMember
+      } = normalizeTaskAssignment(req.session.familyId, candidate);
       const rotationMemberIds = targetMember.isManaged ? [] : [
         ...new Set(
           (Array.isArray(candidate.rotationMemberIds)
@@ -7413,6 +7594,8 @@ export function createApp() {
         title: requireText(candidate.title, translate('fields.task'), 200),
         description: cleanText(candidate.description, '', 2000),
         memberId,
+        assignmentMode,
+        eligibleMemberIds,
         rotationMemberIds,
         rotationIndex: Math.max(0, rotationMemberIds.indexOf(memberId)),
         category: cleanText(candidate.category, 'Haushalt', 80),
@@ -7990,10 +8173,25 @@ export function createApp() {
         error: translate('errors.petCarePointsAdultOnly')
       });
     }
-    if (!member || (!isAdultMember(member) && task.memberId !== member.id)) {
+    if (
+      !member ||
+      (!isAdultMember(member) && !taskCanBeCompletedBy(task, member.id))
+    ) {
       return res.status(403).json({
         success: false,
         error: translate('errors.onlyOwnMissions')
+      });
+    }
+    if (
+      isAdultMember(member) &&
+      task.assignmentMode === 'shared' &&
+      !task.completed &&
+      task.completionStatus !== 'pending_approval' &&
+      !taskCanBeCompletedBy(task, member.id)
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: translate('errors.taskCompleterNotEligible')
       });
     }
 
@@ -8071,6 +8269,113 @@ export function createApp() {
   });
 
   app.post(
+    '/api/tasks/:taskId/complete-as',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const task = getRecord(
+        req.session.familyId,
+        'tasks',
+        req.params.taskId
+      );
+      if (!task) {
+        return res.status(404).json({
+          success: false,
+          error: translate('errors.taskNotFound')
+        });
+      }
+      const completedByMemberId = cleanText(
+        req.body?.memberId,
+        '',
+        100
+      );
+      const completedBy = getMember(
+        req.session.familyId,
+        completedByMemberId
+      );
+      if (
+        !completedBy ||
+        completedBy.role === 'pet' ||
+        isManagedMember(completedBy) ||
+        !taskCanBeCompletedBy(task, completedBy.id)
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: translate('errors.taskCompleterNotEligible')
+        });
+      }
+      if (task.completed) {
+        return res.status(409).json({
+          success: false,
+          error: translate('errors.taskAlreadyApproved')
+        });
+      }
+
+      let result;
+      if (['child', 'teen'].includes(completedBy.role)) {
+        result = requestTaskApprovalRecord(
+          req.session.familyId,
+          task.id,
+          completedBy.id
+        );
+        if (result?.action === 'approval_requested') {
+          const creator = task.createdByMemberId
+            ? getMember(req.session.familyId, task.createdByMemberId)
+            : null;
+          const recipientMemberIds = creator
+            ? [creator.id]
+            : adultMemberIds(req.session.familyId);
+          queueNotificationChannels(
+            req.session.familyId,
+            'taskApproval',
+            {
+              recipientMemberIds,
+              excludeMemberIds: [completedBy.id],
+              title: translate('push.taskApprovalTitle', {
+                name: completedBy.name
+              }),
+              body: translate('push.taskApprovalBody', {
+                title: task.title
+              }),
+              privateTitle: translate('push.taskApprovalPrivateTitle'),
+              privateBody: translate('push.taskApprovalPrivateBody'),
+              url: '/?view=tasks',
+              tag: `task-approval-${task.id}`,
+              priority: 'high',
+              ttl: 1800
+            },
+            {
+              title: translate('push.taskApprovalTitle', {
+                name: completedBy.name
+              }),
+              message: translate('push.taskApprovalBody', {
+                title: task.title
+              }),
+              priority: 6
+            }
+          );
+        }
+      } else {
+        result = toggleTaskRecord(
+          req.session.familyId,
+          task.id,
+          req.activeMember.id,
+          completedBy.id
+        );
+      }
+      if (result?.task.completed) {
+        notifyTaskCompleted(req, result, req.activeMember.id);
+      }
+      publishFamilyChange(req.session.familyId, 'tasks');
+      res.json({
+        success: true,
+        ...result,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
     '/api/tasks/:taskId/review',
     requireAuth,
     requireAdult,
@@ -8120,7 +8425,9 @@ export function createApp() {
           req.session.familyId,
           'taskApproval',
           {
-            recipientMemberIds: [task.memberId],
+            recipientMemberIds: [
+              task.completionRequestedByMemberId || task.memberId
+            ],
             excludeMemberIds: [req.activeMember.id],
             title: translate('push.taskRejectedTitle'),
             body: translate('push.taskRejectedBody', { title: task.title }),
@@ -9832,11 +10139,39 @@ export function createApp() {
 
   app.post('/api/recipes/import', requireAuth, async (req, res) => {
     const rawUrl = requireText(req.body?.url, translate('fields.url'), 2000);
-    const imported = await importRecipeFromUrl(rawUrl);
+    const imported = await importRecipeFromUrl(rawUrl, {
+      title: cleanText(req.body?.sharedTitle, '', 240),
+      text: String(req.body?.sharedText || '').trim().slice(0, 12_000)
+    });
     res.json({
       success: true,
       ...imported
     });
+  });
+
+  app.post('/api/recipes/import-shared', requireAuth, (req, res) => {
+    const title = cleanText(req.body?.sharedTitle, '', 240);
+    const text = String(req.body?.sharedText || '').trim().slice(0, 12_000);
+    if (!title && !text) {
+      return res.status(400).json({
+        success: false,
+        error: 'Die andere App hat keinen lesbaren Rezepttext mitgegeben.'
+      });
+    }
+    const imported = extractSharedRecipeDraft(text, { title });
+    if (!imported) {
+      return res.status(422).json({
+        success: false,
+        error: 'Im geteilten Text wurden keine Zutaten und Zubereitung erkannt. Exportiere das Rezept alternativ als My-Recipe-Box-Backup (.rtk).'
+      });
+    }
+    res.json({ success: true, ...imported });
+  });
+
+  app.post('/api/recipes/preview-image', requireAuth, async (req, res) => {
+    const rawUrl = requireText(req.body?.url, translate('fields.url'), 2000);
+    const preview = await importRecipePreviewImage(rawUrl);
+    res.json({ success: true, ...preview });
   });
 
   app.use('/api/agent', (req, res, next) => {

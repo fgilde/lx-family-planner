@@ -379,6 +379,10 @@ test('native API access only accepts trusted app origins', async () => {
     allowed.headers.get('access-control-allow-headers'),
     /X-LX-File-Name/
   );
+  assert.match(
+    allowed.headers.get('access-control-allow-headers'),
+    /X-LX-Language/
+  );
 
   const rejected = await fetch(`${baseUrl}/api/health`, {
     method: 'OPTIONS',
@@ -394,13 +398,43 @@ test('native API access only accepts trusted app origins', async () => {
   );
 });
 
+test('API errors follow the language selected by the device', async () => {
+  const english = await request(
+    '/api/bootstrap',
+    { headers: { 'x-lx-language': 'en' } },
+    401
+  );
+  assert.equal(english.body.error, 'Please sign in first.');
+
+  const german = await request(
+    '/api/bootstrap',
+    { headers: { 'x-lx-language': 'de' } },
+    401
+  );
+  assert.equal(german.body.error, 'Bitte zuerst anmelden.');
+});
+
+test('web app manifest follows the browser language', async () => {
+  const english = await request('/manifest.json', {
+    headers: { 'accept-language': 'en-GB,en;q=0.9' }
+  });
+  assert.equal(english.body.short_name, 'LX Family');
+  assert.equal(english.body.shortcuts[0].name, 'Import a recipe');
+
+  const german = await request('/manifest.json', {
+    headers: { 'accept-language': 'de-DE,de;q=0.9' }
+  });
+  assert.equal(german.body.short_name, 'LX Familie');
+  assert.equal(german.body.shortcuts[0].name, 'Rezept importieren');
+});
+
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.15.0');
+  assert.equal(health.body.version, '1.16.0');
   const appRelease = await request('/api/app/version');
-  assert.equal(appRelease.body.versionName, '1.15.0');
-  assert.equal(appRelease.body.versionCode, 36);
+  assert.equal(appRelease.body.versionName, '1.16.0');
+  assert.equal(appRelease.body.versionCode, 37);
   assert.equal(appRelease.body.apkUrl, '/apk/latest.apk');
   assert.equal(
     appRelease.body.publicApkUrl,
@@ -410,6 +444,34 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(appRelease.body.buildKind, 'release');
 
   const password = 'qa-family-4711';
+  const lockedFamilyRegistration = await request(
+    '/api/public/register',
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-lx-client': 'native'
+      },
+      body: JSON.stringify({
+        familyName: 'QA Familie ohne Verwaltung',
+        badge: 'Darf nicht angelegt werden',
+        password,
+        members: [
+          {
+            name: 'Nur Haushaltsmitglied',
+            position: 'familienmitglied',
+            role: 'member'
+          }
+        ]
+      })
+    },
+    400
+  );
+  assert.match(
+    lockedFamilyRegistration.body.error,
+    /Verwaltungsrechten/
+  );
+
   const registration = await request(
     '/api/public/register',
     {
@@ -448,8 +510,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.15.0');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.15.0');
+  assert.equal(bootstrap.body.appVersion, '1.16.0');
+  assert.equal(bootstrap.body.releaseNotes.version, '1.16.0');
   assert.equal(bootstrap.body.nativePushServer.configured, false);
   assert.equal(
     bootstrap.body.nativePushServer.reason,
@@ -489,7 +551,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     installationId: 'lx-android-1234567890abcdef',
     token: 'fcm-test-token-1234567890abcdef',
     deviceName: 'Test Android-App',
-    appVersion: '1.15.0',
+    appVersion: '1.16.0',
     preferences: { groupChat: true, showPreviews: false }
   });
   assert.equal(storedNativeDevice.platform, 'android');
@@ -515,10 +577,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.15.0');
+  assert.equal(acknowledgedReleaseNotes.body.version, '1.16.0');
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.15.0'
+    '1.16.0'
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -532,7 +594,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.15.0');
+  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.16.0');
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -599,6 +661,54 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.deepEqual(
     childModuleAccess.body.member.allowedModules,
     ['calendar', 'tasks']
+  );
+  const customTheme = await request(
+    `/api/members/${adult.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        theme: 'custom',
+        customThemeCss: `:root {
+          --primary: #365f55;
+          --bg-card: rgba(255, 253, 248, 0.96);
+          --radius-lg: 18px;
+        }`
+      })
+    }
+  );
+  assert.equal(
+    customTheme.body.member.customThemeCss,
+    '--primary: #365f55;\n' +
+      '--bg-card: rgba(255, 253, 248, 0.96);\n' +
+      '--radius-lg: 18px;'
+  );
+  assert.equal(customTheme.body.member.theme, 'custom');
+
+  const builtInTheme = await request(
+    `/api/members/${adult.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ theme: 'linen' })
+    }
+  );
+  assert.equal(builtInTheme.body.member.theme, 'linen');
+  assert.equal(
+    builtInTheme.body.member.customThemeCss,
+    customTheme.body.member.customThemeCss,
+    'switching to a built-in theme keeps the separate custom theme available'
+  );
+  await request(
+    `/api/members/${adult.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        customThemeCss: '--bg-main: url(https://example.test/track);'
+      })
+    },
+    400
   );
 
   const managedEvent = await request(
@@ -748,6 +858,16 @@ test('family flow stays isolated, authorized and internally consistent', async (
     }
   );
   assert.deepEqual(disabledTrashReminder.body.record.reminders, []);
+
+  const childBirthday = await request(
+    `/api/members/${childOne.id}`,
+    {
+      method: 'PATCH',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ birthDate: '2017-08-10' })
+    }
+  );
+  assert.equal(childBirthday.body.member.birthDate, '2017-08-10');
 
   const childNotificationEvent = await request(
     '/api/resources/events',
@@ -1239,6 +1359,83 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(approval.body.nextTask.dueDate, '2026-08-03');
   assert.equal(approval.body.nextTask.completed, false);
 
+  const sharedTask = await request(
+    '/api/resources/tasks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Gemeinsam den Tisch decken',
+        memberId: childOne.id,
+        assignmentMode: 'shared',
+        eligibleMemberIds: [childOne.id, secondAdult.id],
+        stars: 10
+      })
+    },
+    201
+  );
+  assert.equal(sharedTask.body.record.assignmentMode, 'shared');
+  assert.deepEqual(
+    sharedTask.body.record.eligibleMemberIds,
+    [childOne.id, secondAdult.id]
+  );
+  const sharedChildCompletion = await request(
+    `/api/tasks/${sharedTask.body.record.id}/complete-as`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ memberId: childOne.id })
+    }
+  );
+  assert.equal(sharedChildCompletion.body.action, 'approval_requested');
+  assert.equal(
+    sharedChildCompletion.body.task.completionRequestedByMemberId,
+    childOne.id
+  );
+  const sharedApproval = await request(
+    `/api/tasks/${sharedTask.body.record.id}/review`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ approved: true })
+    }
+  );
+  assert.equal(sharedApproval.body.task.completedByMemberId, childOne.id);
+  assert.equal(sharedApproval.body.task.completedByName, childOne.name);
+  assert.equal(sharedApproval.body.member.id, childOne.id);
+  assert.equal(sharedApproval.body.member.stars, 25);
+
+  const sharedAdultTask = await request(
+    '/api/resources/tasks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Gemeinsam Blumen gießen',
+        memberId: adult.id,
+        assignmentMode: 'shared',
+        eligibleMemberIds: [adult.id, secondAdult.id],
+        stars: 7
+      })
+    },
+    201
+  );
+  const sharedAdultCompletion = await request(
+    `/api/tasks/${sharedAdultTask.body.record.id}/complete-as`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({ memberId: secondAdult.id })
+    }
+  );
+  assert.equal(sharedAdultCompletion.body.task.completed, true);
+  assert.equal(
+    sharedAdultCompletion.body.task.completedByMemberId,
+    secondAdult.id
+  );
+  assert.equal(sharedAdultCompletion.body.member.id, secondAdult.id);
+  assert.equal(sharedAdultCompletion.body.member.stars, 7);
+
   const adultNotifications = await request('/api/notifications', {
     headers: authenticatedHeaders
   });
@@ -1418,7 +1615,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.15.0');
+  assert.equal(problemReport.body.report.appVersion, '1.16.0');
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },
@@ -1683,7 +1880,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders,
     body: JSON.stringify({ memberId: childOne.id, completedOnly: true })
   });
-  assert.equal(clearedTasks.body.deleted, 1);
+  assert.equal(clearedTasks.body.deleted, 2);
   const remainingChildTask = clearedTasks.body.records.find(
     entry => entry.memberId === childOne.id
   );
