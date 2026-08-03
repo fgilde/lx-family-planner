@@ -2,7 +2,7 @@
   "hero": {
     "eyebrow": "Family market",
     "title": "What's missing at home?",
-    "subtitle": "Browse the full German Bring! catalog or add an item of your own.",
+    "subtitle": "Browse the full Bring! catalog or add an item of your own.",
     "statusLive": "Live with “{{listName}}”",
     "statusLocal": "Local family list",
     "catalogItems": "{{total}} standard items",
@@ -31,6 +31,7 @@
     "sourceDefault": "Basic range",
     "resultsFor": "Results for “{{query}}”",
     "quickAdd": "Quick add",
+    "customCategory": "Own items",
     "shownCount": "{{count}} shown",
     "departmentsAria": "Product categories",
     "popular": "Popular",
