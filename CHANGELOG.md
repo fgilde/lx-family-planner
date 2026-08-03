@@ -2,6 +2,20 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.14.2] – 2026-08-03
+
+### Sicheres Docker-Update für die neutrale Anmeldung
+
+- Docker erhält ausschließlich die drei Rechte, die zum Vorbereiten der
+  eingebundenen Daten- und Sicherungsordner nötig sind
+- der Wartungscontainer kann vor einem Update wieder eine konsistente
+  Sicherung erstellen und prüfen
+- wenn Plattformen wie Umbrel bereits passende Ordnerrechte bereitstellen,
+  funktioniert LX weiterhin ohne zusätzliche Container-Rechte
+- der Schutz aus 1.14.1 bleibt enthalten: Die Anmeldung verrät keinen echten
+  Familiennamen als Beispiel
+- bestehende Familien, Profile und Inhalte werden nicht verändert
+
 ## [1.14.1] – 2026-08-03
 
 ### Neutrale Anmeldung ohne verräterisches Beispiel

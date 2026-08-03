@@ -13,7 +13,15 @@ esac
 
 if [ "$(id -u)" = "0" ]; then
   mkdir -p /app/data /app/backups
-  chown -R "$data_uid:$data_gid" /app/data /app/backups
+  if ! chown -R "$data_uid:$data_gid" /app/data /app/backups 2>/dev/null; then
+    if ! gosu "$data_uid:$data_gid" test -w /app/data ||
+       ! gosu "$data_uid:$data_gid" test -w /app/backups; then
+      echo "Die Datenordner konnten nicht für $data_uid:$data_gid vorbereitet werden." >&2
+      echo "Erlaube CHOWN, SETGID und SETUID oder passe PUID/PGID an." >&2
+      exit 1
+    fi
+    echo "Hinweis: Besitzrechte bleiben unverändert; die Datenordner sind bereits beschreibbar." >&2
+  fi
   exec gosu "$data_uid:$data_gid" "$@"
 fi
 

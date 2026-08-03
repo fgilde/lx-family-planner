@@ -160,11 +160,23 @@ test('Docker startup repairs Unraid bind-mount permissions before dropping privi
     'utf8'
   );
   assert.match(entrypoint, /chown -R "\$data_uid:\$data_gid" \/app\/data \/app\/backups/);
+  assert.match(entrypoint, /gosu "\$data_uid:\$data_gid" test -w \/app\/data/);
   assert.match(entrypoint, /exec gosu "\$data_uid:\$data_gid" "\$@"/);
   assert.match(dockerfile, /apt-get install -y --no-install-recommends gosu/);
   assert.match(dockerfile, /ENTRYPOINT \["\/usr\/local\/bin\/lx-family-entrypoint"\]/);
   assert.match(unraidTemplate, /Target="PUID" Default="99"/);
   assert.match(unraidTemplate, /Target="PGID" Default="100"/);
+});
+
+test('default Docker Compose grants only the capabilities needed for bind-mount repair', () => {
+  const compose = fs.readFileSync(
+    path.join(projectRoot, 'compose.yaml'),
+    'utf8'
+  );
+  assert.match(compose, /PUID: "\$\{PUID:-1000\}"/);
+  assert.match(compose, /PGID: "\$\{PGID:-1000\}"/);
+  assert.match(compose, /cap_drop:\s*\n\s*- ALL/);
+  assert.match(compose, /cap_add:\s*\n\s*- CHOWN\s*\n\s*- SETGID\s*\n\s*- SETUID/);
 });
 
 test('Umbrel package uses the current release without root capabilities', () => {

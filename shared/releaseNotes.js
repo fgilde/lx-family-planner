@@ -1,4 +1,27 @@
 const RELEASE_NOTES = {
+  '1.14.2': {
+    version: '1.14.2',
+    eyebrow: 'Das sichere Update läuft wieder zuverlässig',
+    title: 'Neutrale Anmeldung und geschützte Familieninhalte',
+    intro:
+      'LX verrät bei der Anmeldung keinen Familiennamen mehr und kann dieses Sicherheitsupdate jetzt zuverlässig über Docker einspielen.',
+    highlights: [
+      {
+        id: 'neutral-family-login',
+        title: 'Kein echter Familienname als Hinweis',
+        description:
+          'Im Anmeldefeld steht nur noch eine neutrale Aufforderung. Private Familien werden weder aufgelistet noch vorgeschlagen.'
+      },
+      {
+        id: 'safe-docker-update',
+        title: 'Sicherung vor jedem Update',
+        description:
+          'Der Docker-Updateweg kann die Familiendaten wieder sichern und prüfen, bevor die neue Version startet.'
+      }
+    ],
+    closing:
+      'Eure drei Familienkonten, Profile, Einstellungen und gespeicherten Inhalte bleiben unverändert.'
+  },
   '1.14.1': {
     version: '1.14.1',
     eyebrow: 'Ein kleines Detail schützt euren Zugang besser',
