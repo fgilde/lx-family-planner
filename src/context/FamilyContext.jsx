@@ -190,6 +190,7 @@ export function FamilyProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [integrations, setIntegrations] = useState(EMPTY_INTEGRATIONS);
+  const [readOnlyDemo, setReadOnlyDemo] = useState(false);
   const [appVersion, setAppVersion] = useState(APP_VERSION);
   const [releaseNotes, setReleaseNotes] = useState(null);
   const [homeAssistantEntities, setHomeAssistantEntities] = useState([]);
@@ -265,6 +266,7 @@ export function FamilyProvider({ children }) {
       Number(data.unreadNotificationCount || 0)
     );
     setIntegrations(data.integrations || EMPTY_INTEGRATIONS);
+    setReadOnlyDemo(Boolean(data.readOnlyDemo));
     setAppVersion(data.appVersion || APP_VERSION);
     setReleaseNotes(data.releaseNotes || null);
     if (data.nativePushServer) {
@@ -298,6 +300,7 @@ export function FamilyProvider({ children }) {
         setNotifications([]);
         setUnreadNotificationCount(0);
         setIntegrations(EMPTY_INTEGRATIONS);
+        setReadOnlyDemo(false);
         setReleaseNotes(null);
         setHomeAssistantEntities([]);
         setWebPush(initialWebPushState());
@@ -724,6 +727,7 @@ export function FamilyProvider({ children }) {
     setNotifications([]);
     setUnreadNotificationCount(0);
     setIntegrations(EMPTY_INTEGRATIONS);
+    setReadOnlyDemo(false);
     setReleaseNotes(null);
     setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
@@ -749,6 +753,7 @@ export function FamilyProvider({ children }) {
     setNotifications([]);
     setUnreadNotificationCount(0);
     setIntegrations(EMPTY_INTEGRATIONS);
+    setReadOnlyDemo(false);
     setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
     setNativePush(initialNativePushState());
@@ -3342,6 +3347,7 @@ export function FamilyProvider({ children }) {
     familyAccount,
     familiesList,
     publicAccess,
+    readOnlyDemo,
     currentFamily,
     activeFamilyId,
     updateFamilyAccount,

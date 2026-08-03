@@ -115,6 +115,7 @@ export default function PersonalDashboard() {
     shoppingItems,
     trashEvents: savedTrashEvents,
     homeAssistantIntegration,
+    readOnlyDemo,
     setActiveTab,
     setIsQuickAddOpen,
     activeHousehold
@@ -123,11 +124,14 @@ export default function PersonalDashboard() {
   const availableWidgets = useMemo(
     () => ADULT_WIDGETS.filter(
       widget =>
-        widget.id !== 'home-assistant' ||
+        (!readOnlyDemo || widget.id !== 'cloud') &&
         (
-          homeAssistantIntegration?.connected &&
-          homeAssistantIntegration?.enabled !== false &&
-          homeAssistantIntegration?.selectedEntities?.length > 0
+          widget.id !== 'home-assistant' ||
+          (
+            homeAssistantIntegration?.connected &&
+            homeAssistantIntegration?.enabled !== false &&
+            homeAssistantIntegration?.selectedEntities?.length > 0
+          )
         )
     ).map(widget => ({
       ...widget,
@@ -138,6 +142,7 @@ export default function PersonalDashboard() {
       homeAssistantIntegration?.connected,
       homeAssistantIntegration?.enabled,
       homeAssistantIntegration?.selectedEntities?.length,
+      readOnlyDemo,
       t
     ]
   );
@@ -506,12 +511,14 @@ export default function PersonalDashboard() {
           )}
         </DashboardWidget>
 
-        <DashboardWidget
-          widgetId="cloud"
-          className="card adult-dashboard-widget adult-cloud-widget"
-        >
-          <FamilyCloudWidget />
-        </DashboardWidget>
+        {!readOnlyDemo && (
+          <DashboardWidget
+            widgetId="cloud"
+            className="card adult-dashboard-widget adult-cloud-widget"
+          >
+            <FamilyCloudWidget />
+          </DashboardWidget>
+        )}
 
         <DashboardWidget
           widgetId="home-assistant"

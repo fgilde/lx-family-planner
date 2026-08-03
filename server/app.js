@@ -2136,6 +2136,8 @@ const DEMO_ALLOWED_MUTATIONS = new Set([
   '/api/auth/logout',
   '/api/release-notes/acknowledge'
 ]);
+const DEMO_BLOCKED_READ_PATHS = new Set(['/api/integrations']);
+const DEMO_BLOCKED_READ_PREFIXES = ['/api/integrations/'];
 
 function isReadOnlyDemoFamily(familyId) {
   const configuredFamilyId = String(
@@ -2149,12 +2151,21 @@ function isReadOnlyDemoFamily(familyId) {
 }
 
 function protectReadOnlyDemo(req, res, next) {
+  if (!req.session || !isReadOnlyDemoFamily(req.session.familyId)) {
+    return next();
+  }
+  const readRequest = ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  const blockedRead = readRequest && (
+    DEMO_BLOCKED_READ_PATHS.has(req.path) ||
+    DEMO_BLOCKED_READ_PREFIXES.some(prefix => req.path.startsWith(prefix))
+  );
   if (
-    !req.session ||
-    !isReadOnlyDemoFamily(req.session.familyId) ||
-    ['GET', 'HEAD', 'OPTIONS'].includes(req.method) ||
-    req.path.startsWith('/api/public/') ||
-    DEMO_ALLOWED_MUTATIONS.has(req.path)
+    !blockedRead &&
+    (
+      readRequest ||
+      req.path.startsWith('/api/public/') ||
+      DEMO_ALLOWED_MUTATIONS.has(req.path)
+    )
   ) {
     return next();
   }
@@ -2165,6 +2176,33 @@ function protectReadOnlyDemo(req, res, next) {
     error:
       translate('errors.readOnlyDemo')
   });
+}
+
+function demoIntegrationStatus() {
+  return {
+    bring: { connected: false },
+    gotify: {
+      connected: false,
+      rules: { ...DEFAULT_GOTIFY_RULES }
+    },
+    homeAssistant: {
+      connected: false,
+      enabled: false,
+      selectedEntities: []
+    },
+    nextcloud: {
+      connected: false,
+      enabled: false,
+      bundled: false,
+      bundledPublicBaseUrl: '',
+      eventSyncEnabled: false,
+      backupEnabled: false,
+      lastSyncAt: 0,
+      lastSyncError: '',
+      lastBackupAt: 0,
+      lastBackupError: ''
+    }
+  };
 }
 
 function requireAuth(req, res, next) {
@@ -4062,6 +4100,7 @@ export function createApp() {
   };
   const nextcloudSyncDebounces = new Map();
   const queueNextcloudEventSync = familyId => {
+    if (isReadOnlyDemoFamily(familyId)) return;
     if (nextcloudSyncDebounces.has(familyId)) {
       clearTimeout(nextcloudSyncDebounces.get(familyId));
     }
@@ -4090,6 +4129,9 @@ export function createApp() {
   };
   let bundledCloudProvisioning = false;
   app.locals.provisionBundledCloudFamily = async familyId => {
+    if (isReadOnlyDemoFamily(familyId)) {
+      return { skipped: true, familyId, readOnlyDemo: true };
+    }
     const integration = getIntegration(familyId, 'nextcloud');
     if (
       !NEXTCLOUD_AUTO_PROVISION ||
@@ -4349,6 +4391,7 @@ export function createApp() {
     const errors = [];
     try {
       for (const family of listPublicFamilies().slice(0, 500)) {
+        if (isReadOnlyDemoFamily(family.id)) continue;
         const integration = getIntegration(family.id, 'nextcloud');
         if (!integration || integration.config?.enabled === false) continue;
         const result =
@@ -4534,6 +4577,7 @@ export function createApp() {
       const integrations = listIntegrationsByProvider('nextcloud')
         .slice(0, 100);
       for (const integration of integrations) {
+        if (isReadOnlyDemoFamily(integration.familyId)) continue;
         if (integration.config?.enabled === false) continue;
         if (integration.config?.eventSyncEnabled !== false) {
           try {
@@ -4596,6 +4640,10 @@ export function createApp() {
     homeAssistantSockets.delete(familyId);
   };
   const ensureHomeAssistantSocket = familyId => {
+    if (isReadOnlyDemoFamily(familyId)) {
+      stopHomeAssistantSocket(familyId);
+      return;
+    }
     const integration = getIntegration(familyId, 'home-assistant');
     if (
       !integration ||
@@ -5094,7 +5142,8 @@ export function createApp() {
   });
 
   app.get('/api/bootstrap', requireAuth, (req, res) => {
-    ensureHomeAssistantSocket(req.session.familyId);
+    const readOnlyDemo = isReadOnlyDemoFamily(req.session.familyId);
+    if (!readOnlyDemo) ensureHomeAssistantSocket(req.session.familyId);
     const member = req.session.memberId
       ? getMember(req.session.familyId, req.session.memberId)
       : null;
@@ -5109,10 +5158,12 @@ export function createApp() {
       ...bootstrapForSession(req.session),
       activeMemberId: req.session.memberId,
       appVersion: APP_VERSION,
-      readOnlyDemo: isReadOnlyDemoFamily(req.session.familyId),
+      readOnlyDemo,
       releaseNotes,
       nativePushServer: publicFirebasePushStatus(),
-      integrations: integrationStatus(req.session.familyId, member)
+      integrations: readOnlyDemo
+        ? demoIntegrationStatus()
+        : integrationStatus(req.session.familyId, member)
     });
   });
 

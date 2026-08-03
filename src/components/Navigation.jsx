@@ -14,7 +14,8 @@ export default function Navigation({ onOpenFamilyTree }) {
     activeMember,
     members,
     familyLetters,
-    familySettings
+    familySettings,
+    readOnlyDemo
   } = useFamily();
 
   // Active shopping items selected but not in cart
@@ -79,6 +80,7 @@ export default function Navigation({ onOpenFamilyTree }) {
           ]
         : allTabs;
   const visibleTabs = roleTabs.filter(tab =>
+    (!readOnlyDemo || tab.id !== 'cloud') &&
     canAccessAppView(activeMember, tab.id, disabledModules)
   );
 

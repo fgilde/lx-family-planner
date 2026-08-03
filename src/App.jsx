@@ -43,6 +43,7 @@ function MainContent() {
     setActiveTab,
     activeMember,
     familySettings,
+    readOnlyDemo,
     toast,
     setToast
   } = useFamily();
@@ -74,6 +75,7 @@ function MainContent() {
     ]);
     if (
       allowedViews.has(requestedView) &&
+      (!readOnlyDemo || requestedView !== 'cloud') &&
       canAccessAppView(activeMember, requestedView, disabledModules)
     ) {
       setActiveTab(requestedView);
@@ -81,16 +83,26 @@ function MainContent() {
       url.searchParams.delete('view');
       window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
     }
-  }, [activeMember, authStatus, disabledModules, setActiveTab]);
+  }, [activeMember, authStatus, disabledModules, readOnlyDemo, setActiveTab]);
 
   useEffect(() => {
     if (
       authStatus === 'authenticated' &&
-      !canAccessAppView(activeMember, activeTab, disabledModules)
+      (
+        (readOnlyDemo && activeTab === 'cloud') ||
+        !canAccessAppView(activeMember, activeTab, disabledModules)
+      )
     ) {
       setActiveTab('dashboard');
     }
-  }, [activeMember, activeTab, authStatus, disabledModules, setActiveTab]);
+  }, [
+    activeMember,
+    activeTab,
+    authStatus,
+    disabledModules,
+    readOnlyDemo,
+    setActiveTab
+  ]);
 
   useEffect(() => {
     if (authStatus !== 'authenticated') return undefined;
@@ -114,6 +126,7 @@ function MainContent() {
           'admin'
         ]);
         if (!allowedViews.has(requestedView)) return;
+        if (readOnlyDemo && requestedView === 'cloud') return;
         if (!canAccessAppView(activeMember, requestedView, disabledModules)) {
           return;
         }
@@ -142,7 +155,13 @@ function MainContent() {
         openNativeNotification
       );
     };
-  }, [activeMember, authStatus, disabledModules, setActiveTab]);
+  }, [
+    activeMember,
+    authStatus,
+    disabledModules,
+    readOnlyDemo,
+    setActiveTab
+  ]);
 
   const [isServerConfigOpen, setIsServerConfigOpen] = useState(false);
   const canConfigureServer = isCapacitorNative();
@@ -215,7 +234,7 @@ function MainContent() {
         {activeTab === 'tasks' && <ChoreRewardsPlanner />}
         {activeTab === 'board' && <FamilyPinboard />}
         {activeTab === 'family-life' && <FamilyLifeHub />}
-        {activeTab === 'cloud' && (
+        {activeTab === 'cloud' && !readOnlyDemo && (
           <div className="family-cloud-page">
             <CloudFileBrowser />
           </div>

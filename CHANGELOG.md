@@ -2,6 +2,21 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [1.14.3] – 2026-08-03
+
+### Sicherheitsfix für das öffentliche Demo-Konto
+
+- Demo-Sitzungen können keine Integrations- oder Cloud-Routen mehr lesen
+- Nextcloud-Zugangsdaten, Dateien, Ordner und Sicherungen werden der Demo
+  serverseitig vollständig verweigert
+- der Bootstrap liefert für Demo-Sitzungen ausschließlich neutrale,
+  getrennte Integrationszustände ohne Adressen, Konten oder Geräte
+- Cloud-Navigation und Cloud-Widget werden im Demo-Modus ausgeblendet
+- automatische Cloud-Bereitstellung, Synchronisierung, Sicherung und
+  Home-Assistant-Verbindungen überspringen das Demo-Konto
+- bestehende echte Familienkonten und ihre getrennten Cloud-Speicher werden
+  nicht verändert
+
 ## [1.14.2] – 2026-08-03
 
 ### Sicheres Docker-Update für die neutrale Anmeldung

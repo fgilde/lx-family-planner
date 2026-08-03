@@ -1,4 +1,33 @@
 const RELEASE_NOTES = {
+  '1.14.3': {
+    version: '1.14.3',
+    eyebrow: 'Die öffentliche Demo ist jetzt strikt abgeschottet',
+    title: 'Cloud und Integrationen bleiben privat',
+    intro:
+      'Das Demo-Konto kann keine Cloud-Dateien, Zugangsdaten oder angebundenen Dienste mehr öffnen.',
+    highlights: [
+      {
+        id: 'demo-cloud-isolation',
+        title: 'Keine Cloud im Demo-Konto',
+        description:
+          'Cloud-Navigation, Dateien, Ordner, Sicherungen und Zugangsdaten sind für öffentliche Demo-Sitzungen vollständig gesperrt.'
+      },
+      {
+        id: 'demo-integration-isolation',
+        title: 'Anbindungen bleiben unsichtbar',
+        description:
+          'Auch Home Assistant, Bring, Gotify und Geräteinformationen werden der Demo nicht mehr bereitgestellt.'
+      },
+      {
+        id: 'real-families-unchanged',
+        title: 'Eure Familien bleiben getrennt',
+        description:
+          'Private Familien behalten ihre eigenen Cloud-Konten und sämtliche gespeicherten Inhalte.'
+      }
+    ],
+    closing:
+      'Der öffentliche Rundgang bleibt möglich, sensible Anbindungen sind darin ab jetzt grundsätzlich ausgeschlossen.'
+  },
   '1.14.2': {
     version: '1.14.2',
     eyebrow: 'Das sichere Update läuft wieder zuverlässig',
