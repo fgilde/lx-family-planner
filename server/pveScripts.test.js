@@ -202,10 +202,10 @@ test('Umbrel package uses the current release without root capabilities', () => 
   );
   assert.match(
     compose,
-    /image: ghcr\.io\/laxxx-lab\/lx-family-planner:1\.14\.2@sha256:[a-f0-9]{64}/
+    /image: ghcr\.io\/laxxx-lab\/lx-family-planner:1\.14\.3@sha256:[a-f0-9]{64}/
   );
   assert.match(compose, /user: "1000:1000"/);
   assert.doesNotMatch(compose, /cap_add:/);
-  assert.match(manifest, /version: "1\.14\.2"/);
+  assert.match(manifest, /version: "1\.14\.3"/);
   assert.match(manifest, /releaseNotes: ""/);
 });
