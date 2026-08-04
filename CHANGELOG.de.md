@@ -2,7 +2,23 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
-## [1.16.0] – 2026-08-03 (lokaler Release-Kandidat)
+## [1.16.1] – 2026-08-04
+
+### Hotfix für Android-Teilen und die mobile Sprachwahl
+
+- die Android-App erscheint nun beim Teilen von My-Recipe-Box-Backups im
+  `.rtk`-Format und bei kompatiblen ZIP-Dateien
+- geteilte RTK-Dateien öffnen automatisch den Rezeptbereich und übernehmen
+  Rezepte, eingebettete Bilder sowie Quellen ohne den Umweg über die Dateiwahl
+- eingehende Archive werden geschützt im temporären App-Speicher abgelegt,
+  auf 120 MB begrenzt und vor dem Import geprüft
+- die Auswahl zwischen Deutsch und Englisch bleibt auf schmalen
+  Android-Displays vollständig sichtbar und zeigt `DE` oder `EN` direkt in
+  der Kopfzeile
+- vorhandene Familien, Profile, Rezepte, Dateien und Einstellungen bleiben
+  unverändert erhalten
+
+## [1.16.0] – 2026-08-03
 
 ### Geburtstage, gemeinsame Aufgaben, Rezeptpflege und sichere Designs
 

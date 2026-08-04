@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.16.0" src="https://img.shields.io/badge/version-1.16.0-17483F">
+  <img alt="Version 1.16.1" src="https://img.shields.io/badge/version-1.16.1-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -520,7 +520,7 @@ docker compose up -d
 ```
 
 Die Daten bleiben in `data/`, Sicherungen in `backups/`. Eine bestimmte
-Programmversion lässt sich mit `LX_FAMILY_VERSION=1.16.0` fest anheften.
+Programmversion lässt sich mit `LX_FAMILY_VERSION=1.16.1` fest anheften.
 
 ## Proxmox VE Helper-Script
 
@@ -860,8 +860,10 @@ geteilte Rezepttext, die Zutaten und die Zubereitung als bearbeitbarer Entwurf
 geöffnet und erst nach der Prüfung gespeichert.
 
 Für eine vollständige Sammlung in My Recipe Box unter **Synchronisieren /
-Backup → Backup exportieren (RTK)** eine `.rtk`-Datei erstellen und diese im
-LX-Rezept-Finder unter **Aus My Recipe Box übernehmen** auswählen. LX liest das
+Backup → Backup exportieren (RTK)** eine `.rtk`-Datei erstellen. In Android
+anschließend **Teilen → LX Family Planner** wählen; LX öffnet den Rezeptbereich
+und startet den Import automatisch. Alternativ lässt sich die Datei weiterhin
+im Rezept-Finder unter **Aus My Recipe Box übernehmen** auswählen. LX liest das
 offene RTK-Format mit Rezepten, Bildern, Quellen, Kategorien und Stichwörtern.
 Bereits übernommene Rezepte mit derselben My-Recipe-Box-ID werden übersprungen,
 damit ein Backup nicht versehentlich doppelt importiert wird.
@@ -877,7 +879,7 @@ ohne Kopieren:
    installieren** wählen.
 3. In Chefkoch, Pinterest, einem öffentlichen Facebook-Reel oder einer anderen
    Rezept-App **Teilen** öffnen.
-4. **LX Familie** auswählen.
+4. **LX Family Planner** auswählen.
 
 LX öffnet das Kochbuch, liest den geteilten Link und startet den sicheren
 Rezeptimport. Die Funktion ist von der Web-Share-Target-Unterstützung des

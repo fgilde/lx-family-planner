@@ -1,4 +1,51 @@
 const RELEASE_NOTES = {
+  '1.16.1': {
+    version: '1.16.1',
+    eyebrow: 'Hotfix für die Android-App',
+    title: 'Teilen aus My Recipe Box funktioniert jetzt direkt',
+    intro:
+      'LX erscheint nun beim Teilen eines RTK-Backups und hält die Sprachwahl auch auf schmalen Handybildschirmen vollständig sichtbar.',
+    highlights: [
+      {
+        id: 'android-rtk-share',
+        title: 'RTK-Dateien direkt an LX teilen',
+        description:
+          'Exportiere dein Backup in My Recipe Box und wähle im Android-Teilen-Menü LX Family Planner. Rezepte und vorhandene Bilder werden anschließend automatisch übernommen.'
+      },
+      {
+        id: 'mobile-language-switcher',
+        title: 'Deutsch und Englisch gut erkennbar',
+        description:
+          'DE oder EN steht nun direkt im Kopfbereich. Das Auswahlmenü bleibt auch auf kleinen Displays vollständig innerhalb des Bildschirms.'
+      }
+    ],
+    closing:
+      'Eure Familien, Profile, Rezepte, Termine, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'Android app hotfix',
+        title: 'Share directly from My Recipe Box',
+        intro:
+          'LX now appears when sharing an RTK backup, while the language selector stays fully visible on narrow phone screens.',
+        highlights: [
+          {
+            id: 'android-rtk-share',
+            title: 'Share RTK files directly to LX',
+            description:
+              'Export a backup in My Recipe Box and choose LX Family Planner from the Android share sheet. Recipes and available images are imported automatically.'
+          },
+          {
+            id: 'mobile-language-switcher',
+            title: 'English and German remain readable',
+            description:
+              'EN or DE is visible in the header, and the selection menu stays completely inside small screens.'
+          }
+        ],
+        closing:
+          'Your families, profiles, recipes, events, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.16.0': {
     version: '1.16.0',
     eyebrow: 'Mehr Familie, weniger doppelte Pflege',

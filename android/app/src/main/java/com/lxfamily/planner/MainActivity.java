@@ -13,6 +13,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(LXNativePushPlugin.class);
         registerPlugin(LXAppUpdaterPlugin.class);
+        registerPlugin(LXShareReceiverPlugin.class);
         super.onCreate(savedInstanceState);
         String userAgent = getBridge().getWebView().getSettings().getUserAgentString();
         if (!userAgent.contains("LXFamilyAndroid/")) {
@@ -46,9 +47,17 @@ public class MainActivity extends BridgeActivity {
         if (
             intent == null ||
             !Intent.ACTION_SEND.equals(intent.getAction()) ||
-            intent.getType() == null ||
-            !intent.getType().startsWith("text/")
+            intent.getType() == null
         ) {
+            return;
+        }
+        if (!intent.getType().startsWith("text/")) {
+            if (!LXShareReceiverPlugin.canReceive(intent)) return;
+            LXShareReceiverPlugin.storeSharedRecipe(
+                this,
+                intent,
+                this::openStoredRecipeImport
+            );
             return;
         }
         CharSequence sharedText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT);
@@ -73,6 +82,25 @@ public class MainActivity extends BridgeActivity {
             .fragment(null)
             .appendQueryParameter("text", text == null ? "" : text)
             .appendQueryParameter("title", title == null ? "" : title)
+            .build();
+        getBridge().getWebView().post(
+            () -> getBridge().getWebView().loadUrl(target.toString())
+        );
+    }
+
+    private void openStoredRecipeImport() {
+        String currentUrl = getBridge().getWebView().getUrl();
+        Uri current = Uri.parse(
+            currentUrl == null || currentUrl.trim().isEmpty()
+                ? "http://localhost"
+                : currentUrl
+        );
+        Uri target = current.buildUpon()
+            .path("/")
+            .clearQuery()
+            .fragment(null)
+            .appendQueryParameter("view", "meals")
+            .appendQueryParameter("nativeRecipeShare", "1")
             .build();
         getBridge().getWebView().post(
             () -> getBridge().getWebView().loadUrl(target.toString())

@@ -19,6 +19,9 @@ export default function LanguageSwitcher({ variant = 'header' }) {
   const current =
     normalizeLanguage(i18n.resolvedLanguage || i18n.language) ||
     DEFAULT_LANGUAGE;
+  const currentLabel = LANGUAGE_OPTIONS.find(
+    option => option.code === current
+  )?.label || current.toUpperCase();
 
   const chooseLanguage = language => {
     setStoredLanguage(language);
@@ -62,8 +65,8 @@ export default function LanguageSwitcher({ variant = 'header' }) {
     >
       <summary
         className="icon-circle-btn"
-        title={t('language.choose')}
-        aria-label={t('language.choose')}
+        title={`${t('language.choose')}: ${currentLabel}`}
+        aria-label={`${t('language.choose')}: ${currentLabel}`}
       >
         <Languages size={17} />
         <span>{current.toUpperCase()}</span>

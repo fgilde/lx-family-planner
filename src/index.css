@@ -21448,12 +21448,21 @@ body:has(.modal-backdrop) .problem-report-launcher {
   }
 
   .language-switcher-header > summary {
-    min-width: 38px;
-    padding: 0 7px;
+    min-width: 48px;
+    padding: 0 6px;
+    gap: 3px;
   }
 
   .language-switcher-header > summary span {
-    display: none;
+    display: inline;
+    font-size: 0.6rem;
+  }
+
+  .language-switcher-menu {
+    right: auto;
+    left: 0;
+    width: min(210px, calc(100vw - 28px));
+    border-radius: 6px 18px 18px 18px;
   }
 }
 

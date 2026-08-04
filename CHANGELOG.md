@@ -4,7 +4,21 @@ All notable changes to LX Family Planner are documented here.
 
 German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
-## [1.16.0] — 2026-08-03 (local release candidate)
+## [1.16.1] — 2026-08-04
+
+### Android sharing and mobile language hotfix
+
+- the Android app now appears as a share target for My Recipe Box `.rtk`
+  backups and compatible ZIP streams;
+- shared RTK files open the recipe area automatically and import recipes,
+  embedded images and source links without a manual file-picker detour;
+- incoming archives are copied into protected temporary app storage, limited
+  to 120 MB and validated before import;
+- the German/English selector now remains fully visible on narrow Android
+  screens and shows the active `DE` or `EN` language directly in the header;
+- existing families, profiles, recipes, files and settings remain unchanged.
+
+## [1.16.0] — 2026-08-03
 
 ### Birthdays, shared chores, recipe maintenance and safe custom themes
 
@@ -28,8 +42,8 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
   login and from the main header;
 - the repository now has an English-first presentation, bilingual contribution
   and security documents, and English/German issue forms;
-- this build remains local for verification and has not been pushed, released
-  or deployed to the production server.
+- this release was verified locally before publication and keeps existing
+  family data compatible.
 
 ## [1.15.0] — 2026-08-03
 

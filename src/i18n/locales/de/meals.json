@@ -93,13 +93,15 @@
     "rtk": {
       "title": "Aus My Recipe Box übernehmen",
       "description": "Importiert ein vollständiges .rtk-Backup inklusive Zutaten, Zubereitung, Bildern und Quellen.",
-      "hint": "In My Recipe Box: Synchronisieren/Backup → Backup exportieren (RTK). Einzelne Rezepte kannst du auf Android direkt über Teilen → LX Familie senden.",
+      "hint": "In My Recipe Box: Synchronisieren/Backup → Backup exportieren (RTK). Auf Android kannst du die RTK-Datei anschließend direkt über Teilen → LX Family Planner senden.",
       "select": "RTK-Backup wählen",
       "loading": "My Recipe Box wird gelesen …"
     },
     "import": {
       "shareArrivalTitle": "Direkt vom Handy geteilt",
       "shareArrivalBody": "LX übernimmt den Link. Social-Media-Rezepte werden zuerst als prüfbarer Entwurf geöffnet.",
+      "shareRtkArrivalTitle": "My-Recipe-Box-Backup empfangen",
+      "shareRtkArrivalBody": "LX liest die geteilte RTK-Datei und übernimmt die enthaltenen Rezepte samt vorhandener Bilder.",
       "importRunningAria": "Import läuft",
       "kicker": "Rezept-Finder",
       "title": "Rezept aus dem Web importieren",

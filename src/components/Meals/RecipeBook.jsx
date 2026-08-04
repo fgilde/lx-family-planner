@@ -26,6 +26,12 @@ import { recipeShareTargetFromUrl } from '../../../shared/recipeShareTarget.js';
 import { parseRtkExport } from '../../../shared/rtkImport.js';
 import { parseTandoorExport } from '../../../shared/tandoorImport.js';
 import { plannerApiRequest } from '../../utils/apiConfig.js';
+import {
+  clearNativeRecipeShareRequest,
+  clearPendingNativeRecipeShare,
+  hasNativeRecipeShareRequest,
+  readPendingNativeRecipeShare
+} from '../../utils/nativeRecipeShare.js';
 
 function RecipeImage({ src, alt }) {
   const { t } = useTranslation('meals');
@@ -62,10 +68,16 @@ export default function RecipeBook() {
   const initialShareTarget = useRef(
     recipeShareTargetFromUrl(window.location.href)
   );
+  const initialNativeShare = useRef(
+    hasNativeRecipeShareRequest(window.location.href)
+  );
   const shareImportStarted = useRef(false);
+  const nativeShareImportStarted = useRef(false);
 
   const [activeTab, setActiveTab] = useState(
-    initialShareTarget.current.isShareTarget ? 'import' : 'browse'
+    initialShareTarget.current.isShareTarget || initialNativeShare.current
+      ? 'import'
+      : 'browse'
   ); // 'browse', 'import', 'manual'
   const [cookingRecipe, setCookingRecipe] = useState(null);
 
@@ -77,7 +89,7 @@ export default function RecipeBook() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sharedImport, setSharedImport] = useState(
-    initialShareTarget.current.isShareTarget
+    initialShareTarget.current.isShareTarget || initialNativeShare.current
   );
 
   // Manual Form State
@@ -351,6 +363,79 @@ export default function RecipeBook() {
     }
   };
 
+  const importRtkBytes = async bytes => {
+    if (bytes.byteLength > 120 * 1024 * 1024) {
+      throw new Error(t('recipeBook.errors.rtkTooLarge'));
+    }
+    const recipes = parseRtkExport(bytes);
+    if (!recipes.length) {
+      throw new Error(t('recipeBook.errors.rtkEmpty'));
+    }
+    const existingByExternalId = new Map(
+      savedRecipes
+        .filter(recipe => recipe.sourceExternalId)
+        .map(recipe => [recipe.sourceExternalId, recipe])
+    );
+    const recoveredImages = new Map();
+    const previewCandidates = recipes
+      .filter(recipe => !recipe.image && recipe.sourceUrl)
+      .slice(0, 30);
+    for (let index = 0; index < previewCandidates.length; index += 3) {
+      const batch = previewCandidates.slice(index, index + 3);
+      await Promise.all(batch.map(async recipe => {
+        try {
+          const preview = await plannerApiRequest(
+            '/api/recipes/preview-image',
+            {
+              method: 'POST',
+              body: JSON.stringify({ url: recipe.sourceUrl })
+            }
+          );
+          if (preview?.image) recoveredImages.set(recipe, preview.image);
+        } catch {
+          // A missing or blocked preview must not prevent the recipe import.
+        }
+      }));
+    }
+    let imported = 0;
+    let skipped = 0;
+    let imagesRecovered = 0;
+    for (const recipe of recipes) {
+      const existing = recipe.sourceExternalId
+        ? existingByExternalId.get(recipe.sourceExternalId)
+        : null;
+      if (existing) {
+        const recoveredImage = recoveredImages.get(recipe);
+        if (!existing.image && recoveredImage) {
+          if (await updateRecipe(existing.id, { image: recoveredImage })) {
+            imagesRecovered += 1;
+          }
+        }
+        skipped += 1;
+        continue;
+      }
+      const recipeToSave = recoveredImages.has(recipe)
+        ? { ...recipe, image: recoveredImages.get(recipe) }
+        : recipe;
+      if (await addRecipe(recipeToSave)) {
+        imported += 1;
+        if (recipe.sourceExternalId) {
+          existingByExternalId.set(recipe.sourceExternalId, recipeToSave);
+        }
+      }
+    }
+    showToast(
+      t('recipeBook.toasts.rtkImportedTitle'),
+      t('recipeBook.toasts.rtkImportedBody', {
+        imported,
+        skipped,
+        imagesRecovered
+      }),
+      'success'
+    );
+    setActiveTab('browse');
+  };
+
   const handleRtkFile = async event => {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -365,75 +450,7 @@ export default function RecipeBook() {
     }
     setRtkLoading(true);
     try {
-      const recipes = parseRtkExport(
-        new Uint8Array(await file.arrayBuffer())
-      );
-      if (!recipes.length) {
-        throw new Error(t('recipeBook.errors.rtkEmpty'));
-      }
-      const existingByExternalId = new Map(
-        savedRecipes
-          .filter(recipe => recipe.sourceExternalId)
-          .map(recipe => [recipe.sourceExternalId, recipe])
-      );
-      const recoveredImages = new Map();
-      const previewCandidates = recipes
-        .filter(recipe => !recipe.image && recipe.sourceUrl)
-        .slice(0, 30);
-      for (let index = 0; index < previewCandidates.length; index += 3) {
-        const batch = previewCandidates.slice(index, index + 3);
-        await Promise.all(batch.map(async recipe => {
-          try {
-            const preview = await plannerApiRequest(
-              '/api/recipes/preview-image',
-              {
-                method: 'POST',
-                body: JSON.stringify({ url: recipe.sourceUrl })
-              }
-            );
-            if (preview?.image) recoveredImages.set(recipe, preview.image);
-          } catch {
-            // A missing or blocked preview must not prevent the recipe import.
-          }
-        }));
-      }
-      let imported = 0;
-      let skipped = 0;
-      let imagesRecovered = 0;
-      for (const recipe of recipes) {
-        const existing = recipe.sourceExternalId
-          ? existingByExternalId.get(recipe.sourceExternalId)
-          : null;
-        if (existing) {
-          const recoveredImage = recoveredImages.get(recipe);
-          if (!existing.image && recoveredImage) {
-            if (await updateRecipe(existing.id, { image: recoveredImage })) {
-              imagesRecovered += 1;
-            }
-          }
-          skipped += 1;
-          continue;
-        }
-        const recipeToSave = recoveredImages.has(recipe)
-          ? { ...recipe, image: recoveredImages.get(recipe) }
-          : recipe;
-        if (await addRecipe(recipeToSave)) {
-          imported += 1;
-          if (recipe.sourceExternalId) {
-            existingByExternalId.set(recipe.sourceExternalId, recipeToSave);
-          }
-        }
-      }
-      showToast(
-        t('recipeBook.toasts.rtkImportedTitle'),
-        t('recipeBook.toasts.rtkImportedBody', {
-          imported,
-          skipped,
-          imagesRecovered
-        }),
-        'success'
-      );
-      setActiveTab('browse');
+      await importRtkBytes(new Uint8Array(await file.arrayBuffer()));
     } catch (importError) {
       showToast(
         t('recipeBook.toasts.rtkErrorTitle'),
@@ -444,6 +461,51 @@ export default function RecipeBook() {
       setRtkLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (
+      !initialNativeShare.current ||
+      nativeShareImportStarted.current
+    ) {
+      return;
+    }
+    nativeShareImportStarted.current = true;
+    setRtkLoading(true);
+    setActiveTab('import');
+    void (async () => {
+      try {
+        const pending = await readPendingNativeRecipeShare();
+        if (!pending?.available) {
+          throw new Error(
+            pending?.errorCode === 'too_large'
+              ? t('recipeBook.errors.rtkTooLarge')
+              : t('recipeBook.errors.rtkInvalid')
+          );
+        }
+        if (pending.size > 120 * 1024 * 1024) {
+          throw new Error(t('recipeBook.errors.rtkTooLarge'));
+        }
+        await importRtkBytes(pending.bytes);
+      } catch (importError) {
+        showToast(
+          t('recipeBook.toasts.rtkErrorTitle'),
+          importError.message === 'shared_recipe_unavailable'
+            ? t('recipeBook.errors.rtkInvalid')
+            : importError.message || t('recipeBook.errors.rtkInvalid'),
+          'error'
+        );
+      } finally {
+        try {
+          await clearPendingNativeRecipeShare();
+        } catch {
+          // The import result remains valid if Android cache cleanup fails.
+        }
+        clearNativeRecipeShareRequest();
+        setSharedImport(false);
+        setRtkLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <div className="recipe-book-shell">
@@ -553,12 +615,22 @@ export default function RecipeBook() {
             <div className="recipe-share-arrival">
               <span><Share2 size={19} /></span>
               <div>
-                <strong>{t('recipeBook.import.shareArrivalTitle')}</strong>
+                <strong>
+                  {t(
+                    initialNativeShare.current
+                      ? 'recipeBook.import.shareRtkArrivalTitle'
+                      : 'recipeBook.import.shareArrivalTitle'
+                  )}
+                </strong>
                 <small>
-                  {t('recipeBook.import.shareArrivalBody')}
+                  {t(
+                    initialNativeShare.current
+                      ? 'recipeBook.import.shareRtkArrivalBody'
+                      : 'recipeBook.import.shareArrivalBody'
+                  )}
                 </small>
               </div>
-              {loading
+              {loading || rtkLoading
                 ? <span className="recipe-share-pulse" aria-label={t('recipeBook.import.importRunningAria')} />
                 : <CheckCircle2 size={18} />}
             </div>

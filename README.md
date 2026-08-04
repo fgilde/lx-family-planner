@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.16.0" src="https://img.shields.io/badge/version-1.16.0-17483F">
+  <img alt="Version 1.16.1" src="https://img.shields.io/badge/version-1.16.1-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -87,7 +87,7 @@ role-aware app:
   routines and a four-eyes approval flow before children receive stars.
 - **Meals and recipes:** meal plan, cooking mode, shopping-list hand-off and
   safe imports from public recipe sites, Pinterest, Facebook Reels, Tandoor and
-  My Recipe Box exports.
+  My Recipe Box exports, including direct Android sharing of RTK backups.
 - **Family communication:** group chat, protected direct messages, a pinboard,
   attachments and a mailbox between explicitly connected families.
 - **Child spaces:** school timetable, pocket money, savings goals, moods,
