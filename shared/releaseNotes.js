@@ -1,4 +1,123 @@
 const RELEASE_NOTES = {
+  '1.16.2': {
+    version: '1.16.2',
+    eyebrow: 'Benachrichtigungen, Wanddisplay und Profilrechte',
+    title: 'Mehr Kontrolle über Mitteilungen, Tablet und Zugriffe',
+    intro:
+      'LX bekommt ntfy als weiteren Push-Kanal, ein sicheres Wanddisplay-Profil und feinere Profilrechte. Aufgaben lassen sich als gemeinsam markieren, und erwachsene Kinder erhalten die passenden Rechte.',
+    highlights: [
+      {
+        id: 'ntfy-channel',
+        title: 'ntfy als zusätzlicher Push-Kanal',
+        description:
+          'Neben Gotify lässt sich jetzt auch ntfy für Benachrichtigungen einrichten. Beide Kanäle können unabhängig voneinander genutzt werden.'
+      },
+      {
+        id: 'wall-display-profile',
+        title: 'Sicheres Wanddisplay-Profil',
+        description:
+          'Ein eigenes, schreibgeschütztes Profil erlaubt an einem geteilten Tablet nur Lesen und die beiden vorgesehenen Abhak-Aktionen. Einstellungen oder Profile können darüber nicht geändert werden.'
+      },
+      {
+        id: 'tablet-task-bubbles-1162',
+        title: 'Aufgaben am Tablet ohne Seitenwechsel',
+        description:
+          'Beim Abhaken einer Aufgabe fragt die Tabletansicht mit großen Profil-Bubbles, wer sie erledigt hat. Die Ansicht bleibt im Tabletmodus.'
+      },
+      {
+        id: 'shared-chores',
+        title: 'Gemeinsame Aufgaben mit fairen Sternen',
+        description:
+          'Aufgaben lassen sich als gemeinsam markieren. Sobald eine Person sie abhakt, gilt sie für den Tag für alle als erledigt; die Sterne erhält die Person, die es tatsächlich getan hat.'
+      },
+      {
+        id: 'adult-child-roles',
+        title: 'Erwachsene Kinder mit passenden Rechten',
+        description:
+          'Mit „Tochter (erwachsen)" und „Sohn (erwachsen)" gibt es eigene Positionen mit Familien-Admin-Rechten. Cloud- oder Briefkasten-Zugriff lässt sich außerdem pro Profil frei vergeben.'
+      },
+      {
+        id: 'safe-profile-switch-1162',
+        title: 'Sicherer Wechsel zum Kinderprofil',
+        description:
+          'Beim Wechsel von einem Erwachsenen- zu einem Kinderprofil schließen sich Cloud und Eltern-Bereiche sofort und die Ansicht springt zurück aufs Dashboard.'
+      },
+      {
+        id: 'module-visibility-1162',
+        title: 'Module gezielt ausblenden',
+        description:
+          'Briefkasten, Cloud und weitere Bereiche lassen sich global für die ganze Familie oder gezielt pro Profil ausblenden.'
+      },
+      {
+        id: 'smart-trash-card',
+        title: 'Müll-Kachel nur, wenn sie gebraucht wird',
+        description:
+          'Die Müllabfuhr-Kachel kann auf immer, nie oder nur eine einstellbare Anzahl Tage vor der nächsten Abholung erscheinen.'
+      }
+    ],
+    closing:
+      'Bestehende Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'Notifications, wall display and profile permissions',
+        title: 'More control over notifications, the tablet and access',
+        intro:
+          'LX adds ntfy as another push channel, a safe wall display profile and finer profile permissions. Chores can be marked as shared, and adult children receive the right permissions.',
+        highlights: [
+          {
+            id: 'ntfy-channel',
+            title: 'ntfy as an additional push channel',
+            description:
+              'Alongside Gotify, ntfy can now also be set up for notifications. Both channels can be used independently.'
+          },
+          {
+            id: 'wall-display-profile',
+            title: 'Safe wall display profile',
+            description:
+              'A dedicated read-only profile allows only reading and the two intended check-off actions on a shared tablet. Settings or profiles cannot be changed from it.'
+          },
+          {
+            id: 'tablet-task-bubbles-1162',
+            title: 'Complete chores on the tablet without leaving',
+            description:
+              'When checking off a chore, the tablet view asks with large profile bubbles who completed it, and stays in tablet mode.'
+          },
+          {
+            id: 'shared-chores',
+            title: 'Shared chores with fair stars',
+            description:
+              'Chores can be marked as shared. As soon as one person completes it, it counts as done for everyone that day, while the stars go to whoever actually did it.'
+          },
+          {
+            id: 'adult-child-roles',
+            title: 'Adult children with the right permissions',
+            description:
+              '“Tochter (erwachsen)" and “Sohn (erwachsen)" are dedicated positions with family-admin rights. Cloud or mailbox access can also be granted per profile.'
+          },
+          {
+            id: 'safe-profile-switch-1162',
+            title: 'Safe switch to a child profile',
+            description:
+              'When switching from an adult to a child profile, the cloud and parent areas close immediately and the view returns to the dashboard.'
+          },
+          {
+            id: 'module-visibility-1162',
+            title: 'Hide modules where they are not needed',
+            description:
+              'Mailbox, cloud and other areas can be hidden globally for the whole family or per profile.'
+          },
+          {
+            id: 'smart-trash-card',
+            title: 'Waste card only when it is needed',
+            description:
+              'The waste-collection card can be set to always, never, or only a configurable number of days before the next pickup.'
+          }
+        ],
+        closing:
+          'Existing families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.16.1': {
     version: '1.16.1',
     eyebrow: 'Hotfix für die Android-App',

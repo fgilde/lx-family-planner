@@ -6,6 +6,36 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.16.2] — 2026-08-04
+
+### Notifications, wall display and finer profile permissions
+
+- ntfy is available as an additional, optional push channel alongside Gotify;
+- a dedicated, read-only wall display profile exposes only reading and the two
+  intended check-off actions, so a shared tablet cannot change settings or
+  switch profiles;
+- the tablet view asks "who completed this?" with large profile bubbles instead
+  of navigating away, so checking off a chore stays fast at a central display;
+- chores can be marked as shared, so a single completion counts for everyone
+  that day while the stars go to the person who actually did it;
+- adult "Tochter (erwachsen)" and "Sohn (erwachsen)" positions receive
+  family-admin rights, and cloud or mailbox access can be granted per profile
+  independently of the role;
+- switching from an adult to a child profile now immediately closes the cloud
+  and parent areas and returns to the dashboard;
+- individual modules such as the mailbox or cloud can be hidden globally for the
+  whole family or per profile.
+
+### Calendar, Home Assistant and cloud uploads
+
+- the waste-collection card can be set to always, never, or only a configurable
+  number of days before the next pickup;
+- the Home Assistant entity list scrolls within a capped height instead of
+  collapsing many devices into thin lines, and selecting a device expands the
+  "allow control" detail panel;
+- failed cloud uploads now surface the concrete HTTP status code instead of
+  failing silently.
+
 ### Voluntary project support
 
 - the repository is prepared for the official GitHub Sponsors button;

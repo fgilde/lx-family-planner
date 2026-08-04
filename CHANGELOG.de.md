@@ -4,6 +4,39 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.16.2] – 2026-08-04
+
+### Benachrichtigungen, Wanddisplay und feinere Profilrechte
+
+- ntfy steht als zusätzlicher, optionaler Push-Kanal neben Gotify zur Verfügung
+- ein eigenes, schreibgeschütztes Wanddisplay-Profil erlaubt nur Lesen und die
+  beiden vorgesehenen Abhak-Aktionen, sodass an einem geteilten Tablet keine
+  Einstellungen geändert oder Profile gewechselt werden können
+- die Tabletansicht fragt beim Abhaken mit großen Profil-Bubbles „Wer hat die
+  Aufgabe erledigt?“, anstatt die Ansicht zu verlassen – so bleibt das Abhaken
+  am zentralen Display schnell
+- Aufgaben lassen sich als gemeinsam markieren, sodass ein einziges Abhaken an
+  dem Tag für alle zählt, während die Sterne an die Person gehen, die es
+  tatsächlich erledigt hat
+- die erwachsenen Positionen „Tochter (erwachsen)“ und „Sohn (erwachsen)“
+  erhalten Familien-Admin-Rechte, und der Zugriff auf Cloud oder Briefkasten
+  lässt sich pro Profil unabhängig von der Rolle vergeben
+- beim Wechsel von einem Erwachsenen- zu einem Kinderprofil werden Cloud und
+  Eltern-Bereiche nun sofort geschlossen und die Ansicht springt zurück aufs
+  Dashboard
+- einzelne Module wie Briefkasten oder Cloud lassen sich global für die ganze
+  Familie oder pro Profil ausblenden
+
+### Kalender, Home Assistant und Cloud-Uploads
+
+- die Müllabfuhr-Kachel kann auf immer, nie oder nur eine einstellbare Anzahl
+  Tage vor der nächsten Abholung gestellt werden
+- die Liste der Home-Assistant-Entitäten scrollt in einer begrenzten Höhe,
+  statt viele Geräte zu feinen Strichen zusammenzuquetschen, und bei Auswahl
+  eines Geräts klappt der Detailbereich „Bedienung erlauben“ auf
+- beim Fehlschlagen eines Cloud-Uploads wird jetzt der konkrete HTTP-Statuscode
+  angezeigt, statt still abzubrechen
+
 ### Freiwillige Projektunterstützung
 
 - das Repository ist für den offiziellen GitHub-Sponsors-Button vorbereitet
