@@ -18,6 +18,7 @@ import { useFamily } from '../../context/FamilyContext';
 import { compressImageDataUrl } from '../../utils/imageCompressor';
 import { DEFAULT_FAMILY_AVATAR } from '../../utils/imageFallback';
 import { GITHUB_REPOSITORY_URL } from '../../constants/project';
+import ProjectSupportCard from '../ProjectSupportCard';
 
 export default function FamilyEditModal({ family, isOpen, onClose }) {
   const { t } = useTranslation('familyTree');
@@ -210,6 +211,8 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
                 <Star size={15} /> GitHub <ArrowUpRight size={15} />
               </span>
             </a>
+
+            <ProjectSupportCard variant="settings" />
 
             <div className="modal-actions family-settings-actions">
               <button className="auth-primary" disabled={busy}>

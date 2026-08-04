@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server, Code2 } from 'lucide-react';
-import { isChildProfile, isPetProfile } from '../constants/roles';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server, Code2, Monitor } from 'lucide-react';
+import { isChildProfile, isPetProfile, isWallProfile } from '../constants/roles';
 import {
   ADULT_THEMES,
   CHILD_THEMES,
@@ -34,6 +34,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
   const isChild = isChildProfile(activeMember);
   const isPet = isPetProfile(activeMember);
+  const isWall = isWallProfile(activeMember);
   const grandparentsHouseholdEnabled =
     familyAccount?.grandparentsHouseholdEnabled !== false;
   const customThemeResult = parseCustomThemeCss(
@@ -150,9 +151,9 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
       </div>}
 
       <div className="header-right">
-        {!isPet && <NotificationCenter />}
-        <LanguageSwitcher />
-        {!isChild && !isPet && (
+        {!isPet && !isWall && <NotificationCenter />}
+        {!isWall && <LanguageSwitcher />}
+        {!isChild && !isPet && !isWall && (
           <button
             className="icon-circle-btn"
             onClick={() => setIsFamilySettingsOpen(true)}
@@ -162,7 +163,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           </button>
         )}
         {/* Role-aware theme worlds */}
-        <div className="theme-picker-wrap">
+        {!isWall && <div className="theme-picker-wrap">
           <button
             className="icon-circle-btn"
             onClick={() => {
@@ -274,10 +275,10 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
               </div>,
               document.body
             )}
-        </div>
+        </div>}
 
         {/* Tablet Dashboard Toggle */}
-        {!isChild && !isPet && <button
+        {!isChild && !isPet && !isWall && <button
           className={`tablet-mode-btn ${activeTab === 'kitchen' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'kitchen' ? 'dashboard' : 'kitchen')}
           title={activeTab === 'kitchen' ? t('header.tabletMode.exitTitle') : t('header.tabletMode.enterTitle')}
@@ -289,7 +290,12 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         </button>}
 
         {/* Profile Switcher Pill with Unread Chat Notification Badge */}
-        <div className="profile-pill-btn" onClick={() => setIsProfileModalOpen(true)}>
+        {isWall ? (
+          <div className="wall-display-badge" title={t('header.wallDisplayHint')}>
+            <Monitor size={17} />
+            <span>{t('header.wallDisplay')}</span>
+          </div>
+        ) : <div className="profile-pill-btn" onClick={() => setIsProfileModalOpen(true)}>
           {activeMember?.avatar ? (
             <img src={activeMember.avatar} alt={activeMember.name} className="avatar-img-sm" />
           ) : (
@@ -324,10 +330,10 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
               {unreadChatCount}
             </span>
           )}
-        </div>
+        </div>}
 
         {/* Server IP Config Button */}
-        {onOpenServerConfig && (
+        {onOpenServerConfig && !isWall && (
           <button
             className="icon-circle-btn"
             onClick={onOpenServerConfig}

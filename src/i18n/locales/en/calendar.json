@@ -100,8 +100,26 @@
     "header": {
       "title": "Digital waste calendar",
       "description": "Import your waste collector's .ics file or add a pickup yourself. LX reminds you the day before by default.",
+      "connectUrl": "Connect calendar link",
       "import": "Import waste calendar",
       "add": "Add pickup"
+    },
+    "feed": {
+      "kicker": "Automatic pickup schedule",
+      "title": "Waste calendar by link",
+      "description": "Connect the ICS address from your waste collector or Home Assistant. LX automatically syncs new pickup dates.",
+      "empty": "No waste calendar link connected yet.",
+      "name": "Source name",
+      "namePlaceholder": "e.g. district waste calendar",
+      "url": "ICS calendar address",
+      "security": "The link is stored encrypted on your server and accessed read-only.",
+      "connect": "Connect link",
+      "connecting": "Connecting …",
+      "sync": "Sync now",
+      "remove": "Remove source",
+      "confirmRemove": "Remove \"{{name}}\" and all pickup dates read from it?",
+      "pickupCount_one": "{{count}} pickup",
+      "pickupCount_other": "{{count}} pickups"
     },
     "next": {
       "kicker": "Next waste collection",

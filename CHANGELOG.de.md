@@ -2,6 +2,20 @@
 
 Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
+## [Unveröffentlicht]
+
+### Freiwillige Projektunterstützung
+
+- das Repository ist für den offiziellen GitHub-Sponsors-Button vorbereitet
+- eine ruhige, zweisprachige Unterstützen-Karte für einmalige oder monatliche
+  Beiträge ist für die öffentliche Anmeldung und die Erwachsenen-Einstellungen
+  fertig, bleibt aber bis zur tatsächlichen Freigabe des Sponsors-Profils
+  unsichtbar
+- Kinderprofile, Haustierprofile, Dashboards und die Profilauswahl zeigen
+  niemals einen Unterstützungsaufruf
+- Unterstützung bleibt freiwillig und schaltet weder Funktionen noch Grenzen
+  oder eine bezahlte Vorzugsbehandlung frei
+
 ## [1.16.1] – 2026-08-04
 
 ### Hotfix für Android-Teilen und die mobile Sprachwahl

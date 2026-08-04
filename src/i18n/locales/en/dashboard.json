@@ -245,6 +245,15 @@
       "comfortable": "Comfortable",
       "compact": "Compact"
     },
+    "tabletPreview": {
+      "title": "Tablet tile content",
+      "hint": "More entries remain scrollable directly inside the tile.",
+      "events": "Events",
+      "tasks": "Tasks",
+      "four": "4 entries",
+      "eight": "8 entries",
+      "all": "All"
+    },
     "trash": {
       "title": "Show trash collection automatically",
       "hint": "Optionally reveal the tile only shortly before the next pickup.",

@@ -27,3 +27,14 @@ export function eventAudienceMembers(event, members = []) {
     ? members.filter(member => ids.has(member.id))
     : [];
 }
+
+export function eventIsCurrentOrFuture(event, todayDate) {
+  const today = String(todayDate || '').slice(0, 10);
+  const eventDate = String(event?.date || '').slice(0, 10);
+  const eventEndDate = String(event?.endDate || '').slice(0, 10);
+  if (!today || !eventDate) return false;
+
+  // Mehrtägige Termine bleiben bis einschließlich ihres letzten Tages sichtbar.
+  const lastVisibleDate = eventEndDate >= eventDate ? eventEndDate : eventDate;
+  return lastVisibleDate >= today;
+}

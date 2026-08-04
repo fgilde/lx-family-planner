@@ -4,6 +4,19 @@ All notable changes to LX Family Planner are documented here.
 
 German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
+## [Unreleased]
+
+### Voluntary project support
+
+- the repository is prepared for the official GitHub Sponsors button;
+- a quiet, bilingual support card for one-time or monthly sponsorship is ready
+  for the public sign-in page and the adult family settings, but remains hidden
+  until the Sponsors profile has actually been approved;
+- child profiles, pet profiles, dashboards, and profile selection never show a
+  sponsorship prompt;
+- sponsorship stays optional and does not unlock features, remove limits, or
+  create a paid support lane.
+
 ## [1.16.1] — 2026-08-04
 
 ### Android sharing and mobile language hotfix

@@ -280,6 +280,30 @@
       "disconnect": "Disconnect"
     }
   },
+  "ntfy": {
+    "kicker": "Open push channel",
+    "title": "ntfy notifications",
+    "intro": "Sends the same selected family events to an ntfy topic – self-hosted or via ntfy.sh.",
+    "connected": "Connected",
+    "security": {
+      "title": "Treat the topic like a password",
+      "body": "Use a hard-to-guess topic name. An optional access token is stored encrypted."
+    },
+    "server": "ntfy server",
+    "topic": "Topic",
+    "token": "Access token (optional)",
+    "tokenPlaceholder": "tk_... for protected topics",
+    "plannerUrl": "Open this planner address when tapped",
+    "connect": "Connect & test",
+    "connecting": "Connecting …",
+    "open": "Open ntfy",
+    "includeText": "Show message text in the notification",
+    "includeTextHint": "Turned off by default for privacy reasons.",
+    "save": "Save rules",
+    "test": "Send test",
+    "disconnect": "Disconnect",
+    "disconnectConfirm": "Really disconnect?"
+  },
   "problemReports": {
     "kicker": "Feedback from the app",
     "title": "Problem reports",

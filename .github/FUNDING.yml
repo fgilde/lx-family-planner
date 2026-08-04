@@ -1,0 +1,4 @@
+# GitHub displays the Sponsor button once the maintainer profile is approved
+# and Sponsorships are enabled in the repository settings.
+github:
+  - laxxx-lab

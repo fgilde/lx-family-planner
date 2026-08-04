@@ -245,6 +245,15 @@
       "comfortable": "Bequem",
       "compact": "Kompakt"
     },
+    "tabletPreview": {
+      "title": "Inhalt der Tablet-Kacheln",
+      "hint": "Mehr Einträge bleiben direkt in der Kachel scrollbar.",
+      "events": "Termine",
+      "tasks": "Aufgaben",
+      "four": "4 Einträge",
+      "eight": "8 Einträge",
+      "all": "Alle"
+    },
     "trash": {
       "title": "Müllabfuhr automatisch zeigen",
       "hint": "Blendet die Kachel auf Wunsch erst kurz vor dem nächsten Abholtermin ein.",

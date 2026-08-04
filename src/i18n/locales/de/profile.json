@@ -14,7 +14,8 @@
     "patin": "Patin",
     "pate": "Pate",
     "haustier": "Haustier",
-    "familienmitglied": "Familienmitglied"
+    "familienmitglied": "Familienmitglied",
+    "wanddisplay": "Wanddisplay"
   },
   "roleLabels": {
     "adult": "Erwachsen",
@@ -22,7 +23,8 @@
     "teen": "Teenager",
     "senior": "Großeltern",
     "member": "Familienmitglied",
-    "pet": "Haustier"
+    "pet": "Haustier",
+    "wall": "Wanddisplay"
   },
   "modal": {
     "eyebrow": {

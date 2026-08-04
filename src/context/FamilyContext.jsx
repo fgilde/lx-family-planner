@@ -8,7 +8,11 @@ import React, {
   useState
 } from 'react';
 import { exportEventsToICS, parseICSContent } from '../utils/icsUtils';
-import { canManageFamily, isPetProfile } from '../constants/roles';
+import {
+  canManageFamily,
+  isPetProfile,
+  isWallProfile
+} from '../constants/roles';
 import {
   currentBrowserSubscription,
   friendlyDeviceName,
@@ -95,6 +99,10 @@ const EMPTY_RESOURCES = {
 const EMPTY_INTEGRATIONS = {
   bring: { connected: false },
   gotify: {
+    connected: false,
+    rules: { ...DEFAULT_GOTIFY_RULES }
+  },
+  ntfy: {
     connected: false,
     rules: { ...DEFAULT_GOTIFY_RULES }
   },
@@ -748,7 +756,7 @@ export function FamilyProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ memberId, pin, familyPassword })
     });
-    setActiveTab('dashboard');
+    setActiveTab(isWallProfile(data.member) ? 'kitchen' : 'dashboard');
     setActiveMemberIdState(memberId);
     setMembers(previous =>
       previous.map(member => (member.id === memberId ? data.member : member))
@@ -2673,6 +2681,64 @@ export function FamilyProvider({ children }) {
       return true;
     }), [showToast, withActionError]);
 
+  const setupNtfy = useCallback(payload =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/ntfy/setup', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      setIntegrations(previous => ({ ...previous, ntfy: data.integration }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        i18n.t('context:toasts.ntfyConnected.title'),
+        i18n.t('context:toasts.ntfyConnected.message'),
+        'success'
+      );
+      return data.integration;
+    }, i18n.t('context:errors.ntfyConnectFailed')), [showToast, withActionError]);
+
+  const updateNtfySettings = useCallback(changes =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/ntfy', {
+        method: 'PATCH',
+        body: JSON.stringify(changes)
+      });
+      setIntegrations(previous => ({ ...previous, ntfy: data.integration }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        i18n.t('context:toasts.notificationPrefsSaved.title'),
+        i18n.t('context:toasts.ntfySaved.message'),
+        'success'
+      );
+      return data.integration;
+    }, i18n.t('context:errors.ntfySettingsSaveFailed')), [showToast, withActionError]);
+
+  const testNtfy = useCallback(() =>
+    withActionError(async () => {
+      await apiRequest('/api/integrations/ntfy/test', { method: 'POST' });
+      showToast(
+        i18n.t('context:toasts.ntfyTestSent.title'),
+        i18n.t('context:toasts.ntfyTestSent.message'),
+        'success'
+      );
+      return true;
+    }, i18n.t('context:errors.ntfyTestFailed')), [showToast, withActionError]);
+
+  const disconnectNtfy = useCallback(() =>
+    withActionError(async () => {
+      const data = await apiRequest('/api/integrations/ntfy', {
+        method: 'DELETE'
+      });
+      setIntegrations(previous => ({ ...previous, ntfy: data.integration }));
+      versionRef.current = Number(data.version || versionRef.current);
+      showToast(
+        i18n.t('context:toasts.ntfyDisconnected.title'),
+        i18n.t('context:toasts.ntfyDisconnected.message'),
+        'info'
+      );
+      return true;
+    }), [showToast, withActionError]);
+
   const setupHomeAssistant = useCallback(payload =>
     withActionError(async () => {
       const data = await apiRequest(
@@ -3581,6 +3647,11 @@ export function FamilyProvider({ children }) {
     updateGotifySettings,
     testGotify,
     disconnectGotify,
+    ntfyIntegration: integrations.ntfy,
+    setupNtfy,
+    updateNtfySettings,
+    testNtfy,
+    disconnectNtfy,
     homeAssistantIntegration: integrations.homeAssistant,
     homeAssistantEntities,
     homeAssistantLoading,

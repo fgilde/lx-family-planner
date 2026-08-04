@@ -1178,6 +1178,11 @@ Formulare, die keine technischen Vorkenntnisse voraussetzen.
 - [Beitragen](CONTRIBUTING.de.md)
 - [Sicherheitsproblem vertraulich melden](SECURITY.de.md)
 
+Eine freiwillige einmalige oder monatliche Unterstützung über GitHub Sponsors
+wird vorbereitet. Dadurch werden keine Funktionen freigeschaltet und es
+entsteht keine bezahlte Vorzugsbehandlung: LX bleibt kostenlos und für jede
+Familie dieselbe Anwendung.
+
 <p align="center">
   <strong>Gebaut für echte Familien – nicht für Werbeprofile.</strong>
 </p>

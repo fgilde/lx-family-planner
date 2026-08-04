@@ -209,6 +209,7 @@ database.exec(`
     color TEXT NOT NULL DEFAULT '#2563eb',
     member_id TEXT NOT NULL DEFAULT 'all',
     household TEXT NOT NULL DEFAULT 'familie',
+    kind TEXT NOT NULL DEFAULT 'calendar',
     enabled INTEGER NOT NULL DEFAULT 1
       CHECK(enabled IN (0, 1)),
     last_synced_at INTEGER,
@@ -667,6 +668,18 @@ applySchemaMigration(12, 'Geburtstage pro Familienprofil', () => {
 
 applySchemaMigration(13, 'Verwaltungszugang fuer gesperrte Familien reparieren', () => {
   repairFamiliesWithoutAdmin(database);
+});
+
+applySchemaMigration(14, 'Kalenderquellen fuer Muellabfuhr unterscheiden', () => {
+  const columns = database
+    .prepare('PRAGMA table_info(calendar_subscriptions)')
+    .all();
+  if (!columns.some(column => column.name === 'kind')) {
+    database.exec(`
+      ALTER TABLE calendar_subscriptions
+      ADD COLUMN kind TEXT NOT NULL DEFAULT 'calendar';
+    `);
+  }
 });
 
 function withTransaction(work) {
@@ -2987,6 +3000,7 @@ function mapCalendarSubscriptionRow(row, { includeSecret = false } = {}) {
     color: row.color,
     memberId: row.member_id,
     household: row.household,
+    kind: row.kind || 'calendar',
     enabled: Boolean(row.enabled),
     lastSyncedAt: row.last_synced_at || null,
     lastSuccessAt: row.last_success_at || null,
@@ -3053,6 +3067,7 @@ export function createCalendarSubscription(
     color = '#2563eb',
     memberId = 'all',
     household = 'familie',
+    kind = 'calendar',
     enabled = true
   }
 ) {
@@ -3062,9 +3077,9 @@ export function createCalendarSubscription(
     .prepare(`
       INSERT INTO calendar_subscriptions(
         id, family_id, name, feed_host, secret_encrypted, color,
-        member_id, household, enabled, created_at, updated_at
+        member_id, household, kind, enabled, created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -3075,6 +3090,7 @@ export function createCalendarSubscription(
       color,
       memberId,
       household,
+      kind === 'trash' ? 'trash' : 'calendar',
       enabled ? 1 : 0,
       now,
       now
@@ -3108,6 +3124,7 @@ export function updateCalendarSubscription(
         color = ?,
         member_id = ?,
         household = ?,
+        kind = ?,
         enabled = ?,
         updated_at = ?
       WHERE family_id = ? AND id = ?
@@ -3119,6 +3136,7 @@ export function updateCalendarSubscription(
       updated.color,
       updated.memberId,
       updated.household,
+      updated.kind === 'trash' ? 'trash' : 'calendar',
       updated.enabled ? 1 : 0,
       updated.updatedAt,
       familyId,

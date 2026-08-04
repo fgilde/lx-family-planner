@@ -24,13 +24,12 @@ import { FUNNY_COMIC_AVATARS, useFamily } from '../context/FamilyContext';
 import { compressImageDataUrl } from '../utils/imageCompressor';
 import {
   POSITION_OPTIONS,
-  PROFILE_MODULE_OPTIONS,
-  canAccessAppView,
   canManageFamily,
   getPositionLabel,
   getPositionOptionLabel,
   isManagedProfile,
   isPetProfile,
+  profileModuleOptionsForMember,
   roleForPosition
 } from '../constants/roles';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../utils/imageFallback';
@@ -247,9 +246,7 @@ export default function ProfileModal() {
     reader.readAsDataURL(file);
   };
 
-  const availableProfileModules = PROFILE_MODULE_OPTIONS.filter(moduleId =>
-    canAccessAppView(form, moduleId)
-  );
+  const availableProfileModules = profileModuleOptionsForMember(form);
 
   const toggleProfileModule = moduleId => {
     const current = Array.isArray(form.allowedModules)

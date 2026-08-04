@@ -4,6 +4,15 @@ export const DASHBOARD_TRASH_VISIBILITY = new Set([
   'upcoming',
   'never'
 ]);
+export const DASHBOARD_PREVIEW_LIMITS = new Set(['4', '8', 'all']);
+
+export function dashboardPreviewItems(items, requestedLimit) {
+  const source = Array.isArray(items) ? items : [];
+  const limit = DASHBOARD_PREVIEW_LIMITS.has(String(requestedLimit))
+    ? String(requestedLimit)
+    : '4';
+  return limit === 'all' ? source : source.slice(0, Number(limit));
+}
 
 export function normalizeDashboardLayout(value, allowedWidgetIds) {
   const allowed = [...new Set((allowedWidgetIds || []).filter(Boolean))];
@@ -41,7 +50,17 @@ export function normalizeDashboardLayout(value, allowedWidgetIds) {
       trashWindowDays: Math.max(
         1,
         Math.min(30, Number(input.preferences?.trashWindowDays) || 3)
+      ),
+      tabletEventLimit: DASHBOARD_PREVIEW_LIMITS.has(
+        String(input.preferences?.tabletEventLimit)
       )
+        ? String(input.preferences.tabletEventLimit)
+        : '4',
+      tabletTaskLimit: DASHBOARD_PREVIEW_LIMITS.has(
+        String(input.preferences?.tabletTaskLimit)
+      )
+        ? String(input.preferences.tabletTaskLimit)
+        : '4'
     }
   };
 }

@@ -40,6 +40,8 @@
     "pet": "Pet",
     "serverConfigTitle": "Configure server connection / IP",
     "logoutTitle": "Switch family / Log out",
+    "wallDisplay": "Wall view",
+    "wallDisplayHint": "Protected view: display and check off items without changing settings",
     "themePicker": {
       "openPet": "Choose paw world",
       "openChild": "Choose my theme world",

@@ -66,16 +66,21 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
     color: SOURCE_COLORS[0],
     memberId: 'all',
     household:
-      activeHousehold === 'grosseltern' &&
+      activeHousehold === 'oma_opa' &&
       !familyAccount?.grandparentsHouseholdEnabled
         ? 'familie'
         : activeHousehold
   });
   const [busy, setBusy] = useState('');
 
-  const enabledSubscriptions = useMemo(
-    () => calendarSubscriptions.filter(subscription => subscription.enabled),
+  const regularSubscriptions = useMemo(
+    () => calendarSubscriptions.filter(subscription => subscription.kind !== 'trash'),
     [calendarSubscriptions]
+  );
+
+  const enabledSubscriptions = useMemo(
+    () => regularSubscriptions.filter(subscription => subscription.enabled),
+    [regularSubscriptions]
   );
 
   useEffect(() => {
@@ -83,7 +88,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
     setForm(previous => ({
       ...previous,
       household:
-        activeHousehold === 'grosseltern' &&
+        activeHousehold === 'oma_opa' &&
         !familyAccount?.grandparentsHouseholdEnabled
           ? 'familie'
           : activeHousehold
@@ -209,14 +214,14 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
             </div>
 
             <div className="calendar-source-list">
-              {calendarSubscriptions.length === 0 ? (
+              {regularSubscriptions.length === 0 ? (
                 <div className="calendar-source-empty">
                   <span><CloudDownload size={25} /></span>
                   <strong>{t('sources.list.emptyTitle')}</strong>
                   <p>{t('sources.list.emptyDescription')}</p>
                 </div>
               ) : (
-                calendarSubscriptions.map(subscription => {
+                regularSubscriptions.map(subscription => {
                   const isSyncing = busy === `sync:${subscription.id}`;
                   const isToggling = busy === `toggle:${subscription.id}`;
                   const member = members.find(
@@ -396,7 +401,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     {t('sources.form.householdFamily')}
                   </option>
                   {familyAccount?.grandparentsHouseholdEnabled && (
-                    <option value="grosseltern">
+                    <option value="oma_opa">
                       {t('sources.form.householdGrandparents')}
                     </option>
                   )}

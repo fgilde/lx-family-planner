@@ -100,8 +100,26 @@
     "header": {
       "title": "Digitaler Müllkalender",
       "description": "Importiere die .ics-Datei eures Entsorgers oder trage eine Abholung selbst ein. LX erinnert standardmäßig am Vortag.",
+      "connectUrl": "Kalender-Link verbinden",
       "import": "Müllkalender importieren",
       "add": "Termin eintragen"
+    },
+    "feed": {
+      "kicker": "Automatischer Abholplan",
+      "title": "Müllkalender per Link",
+      "description": "Verbinde die ICS-Adresse eures Entsorgers oder aus Home Assistant. LX gleicht neue Abholtermine automatisch ab.",
+      "empty": "Noch kein Müllkalender-Link verbunden.",
+      "name": "Name der Quelle",
+      "namePlaceholder": "z. B. Abfallkalender Landkreis",
+      "url": "ICS-Kalenderadresse",
+      "security": "Der Link wird verschlüsselt auf eurem Server gespeichert und nur lesend abgerufen.",
+      "connect": "Link verbinden",
+      "connecting": "Wird verbunden …",
+      "sync": "Jetzt abgleichen",
+      "remove": "Quelle entfernen",
+      "confirmRemove": "\"{{name}}\" und alle daraus gelesenen Abholtermine entfernen?",
+      "pickupCount_one": "{{count}} Abholung",
+      "pickupCount_other": "{{count}} Abholungen"
     },
     "next": {
       "kicker": "Nächste Müllabfuhr",

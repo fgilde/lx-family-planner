@@ -29,7 +29,7 @@ import ProblemReportButton from './components/ProblemReportButton';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
 import ServerConfigModal from './components/ServerConfigModal';
 import AppUpdateBanner from './components/AppUpdateBanner';
-import { canAccessAppView } from './constants/roles';
+import { canAccessAppView, isWallProfile } from './constants/roles';
 import { isCapacitorNative } from './utils/apiConfig';
 
 const EMPTY_DISABLED_MODULES = [];
@@ -155,6 +155,16 @@ function MainContent() {
   const [isServerConfigOpen, setIsServerConfigOpen] = useState(false);
   const canConfigureServer = isCapacitorNative();
 
+  useEffect(() => {
+    if (
+      authStatus === 'authenticated' &&
+      isWallProfile(activeMember) &&
+      activeTab === 'dashboard'
+    ) {
+      setActiveTab('kitchen');
+    }
+  }, [activeMember, activeTab, authStatus, setActiveTab]);
+
   if (authStatus === 'loading') {
     return (
       <div className="app-loading">
@@ -238,8 +248,8 @@ function MainContent() {
         isOpen={isFamilyTreeOpen}
         onClose={() => setIsFamilyTreeOpen(false)}
       />
-      <ProfileModal />
-      <QuickAddModal />
+      {!isWallProfile(activeMember) && <ProfileModal />}
+      {!isWallProfile(activeMember) && <QuickAddModal />}
       <BringAccountModal />
       <ReleaseNotesModal />
       <ServerConfigModal
@@ -247,7 +257,7 @@ function MainContent() {
         onClose={() => setIsServerConfigOpen(false)}
         onSave={() => window.location.reload()}
       />
-      <ProblemReportButton />
+      {!isWallProfile(activeMember) && <ProblemReportButton />}
       <ToastNotification toast={toast} onClose={() => setToast(null)} />
     </div>
   );

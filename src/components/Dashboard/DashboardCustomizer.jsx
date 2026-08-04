@@ -108,6 +108,31 @@ export default function DashboardCustomizer({
           </div>
         </div>
 
+        {isTablet && (
+          <div className="dashboard-tablet-preview-picker">
+            <div>
+              <strong>{t('customizer.tabletPreview.title')}</strong>
+              <span>{t('customizer.tabletPreview.hint')}</span>
+            </div>
+            {[
+              ['tabletEventLimit', 'events'],
+              ['tabletTaskLimit', 'tasks']
+            ].map(([preference, label]) => (
+              <label key={preference}>
+                <span>{t(`customizer.tabletPreview.${label}`)}</span>
+                <select
+                  value={layout.preferences?.[preference] || '4'}
+                  onChange={event => setPreference(preference, event.target.value)}
+                >
+                  <option value="4">{t('customizer.tabletPreview.four')}</option>
+                  <option value="8">{t('customizer.tabletPreview.eight')}</option>
+                  <option value="all">{t('customizer.tabletPreview.all')}</option>
+                </select>
+              </label>
+            ))}
+          </div>
+        )}
+
         {widgetMap.has('trash') && (
           <div className="dashboard-trash-picker">
             <div>

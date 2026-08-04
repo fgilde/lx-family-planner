@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { canAccessAppView } from '../src/constants/roles.js';
+import {
+  canAccessAppView,
+  profileModuleOptionsForMember
+} from '../src/constants/roles.js';
 
 test('profile changes cannot retain privileged or unsuitable views', () => {
   const parent = { role: 'adult' };
@@ -8,6 +11,7 @@ test('profile changes cannot retain privileged or unsuitable views', () => {
   const teenager = { role: 'teen' };
   const pet = { role: 'pet' };
   const familyMember = { role: 'member' };
+  const wallDisplay = { role: 'wall' };
 
   assert.equal(canAccessAppView(parent, 'admin'), true);
   assert.equal(canAccessAppView(parent, 'cloud'), true);
@@ -18,6 +22,13 @@ test('profile changes cannot retain privileged or unsuitable views', () => {
   assert.equal(canAccessAppView(pet, 'calendar'), true);
   assert.equal(canAccessAppView(familyMember, 'tasks'), true);
   assert.equal(canAccessAppView(familyMember, 'cloud'), false);
+  assert.equal(canAccessAppView(
+    { role: 'member', allowedModules: ['calendar', 'cloud'] },
+    'cloud'
+  ), true);
+  assert.equal(canAccessAppView(wallDisplay, 'kitchen'), true);
+  assert.equal(canAccessAppView(wallDisplay, 'chat'), false);
+  assert.equal(canAccessAppView(wallDisplay, 'admin'), false);
   assert.equal(canAccessAppView(parent, 'trash', ['trash']), false);
   assert.equal(
     canAccessAppView(
@@ -40,4 +51,6 @@ test('profile changes cannot retain privileged or unsuitable views', () => {
     ),
     true
   );
+  assert.equal(profileModuleOptionsForMember(familyMember).includes('cloud'), true);
+  assert.equal(profileModuleOptionsForMember(child).includes('cloud'), false);
 });

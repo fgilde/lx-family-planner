@@ -280,6 +280,30 @@
       "disconnect": "Verbindung trennen"
     }
   },
+  "ntfy": {
+    "kicker": "Offener Push-Kanal",
+    "title": "ntfy-Benachrichtigungen",
+    "intro": "Sendet dieselben ausgewählten Familienereignisse an ein ntfy-Topic – selbst gehostet oder über ntfy.sh.",
+    "connected": "Verbunden",
+    "security": {
+      "title": "Topic wie ein Passwort behandeln",
+      "body": "Verwende einen schwer erratbaren Topic-Namen. Ein optionaler Zugriffstoken wird verschlüsselt gespeichert."
+    },
+    "server": "ntfy-Server",
+    "topic": "Topic",
+    "token": "Zugriffstoken (optional)",
+    "tokenPlaceholder": "tk_... bei geschützten Topics",
+    "plannerUrl": "Beim Antippen diese Planer-Adresse öffnen",
+    "connect": "Verbinden & testen",
+    "connecting": "Verbindet …",
+    "open": "ntfy öffnen",
+    "includeText": "Nachrichtentext in der Meldung zeigen",
+    "includeTextHint": "Aus Datenschutzgründen standardmäßig ausgeschaltet.",
+    "save": "Regeln speichern",
+    "test": "Test senden",
+    "disconnect": "Verbindung trennen",
+    "disconnectConfirm": "Wirklich trennen?"
+  },
   "problemReports": {
     "kicker": "Rückmeldungen aus der App",
     "title": "Problemmeldungen",

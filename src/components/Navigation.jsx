@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import { Calendar, ShoppingBag, UtensilsCrossed, CheckSquare, Pin, UserCheck, Trash2, MessageSquare, Network, ShieldCheck, PawPrint, HeartHandshake, Cloud, Mail } from 'lucide-react';
@@ -6,6 +6,7 @@ import { canAccessAppView, canManageFamily, isChildProfile, isPetProfile } from 
 import { taskIsAvailableToMember } from '../../shared/taskAssignments.js';
 
 export default function Navigation({ onOpenFamilyTree }) {
+  const navigationRef = useRef(null);
   const { t } = useTranslation('chrome');
   const {
     activeTab,
@@ -89,8 +90,19 @@ export default function Navigation({ onOpenFamilyTree }) {
     canAccessAppView(activeMember, tab.id, disabledModules)
   );
 
+  useEffect(() => {
+    const activeButton = navigationRef.current?.querySelector(
+      '[aria-current="page"]'
+    );
+    activeButton?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'nearest'
+    });
+  }, [activeTab]);
+
   return (
-    <nav className="main-nav">
+    <nav className="main-nav" ref={navigationRef}>
       {visibleTabs.map(tab => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -99,6 +111,7 @@ export default function Navigation({ onOpenFamilyTree }) {
             key={tab.id}
             className={`nav-tab ${isActive ? 'active' : ''}`}
             onClick={() => setActiveTab(tab.id)}
+            aria-current={isActive ? 'page' : undefined}
           >
             <Icon size={19} />
             <span>{tab.label}</span>
@@ -108,8 +121,7 @@ export default function Navigation({ onOpenFamilyTree }) {
       })}
 
       {canManageFamily(activeMember) && <button
-        className="nav-tab"
-        style={{ marginLeft: 'auto', background: 'var(--bg-subtle)', color: 'var(--primary)' }}
+        className="nav-tab family-tree-nav-tab"
         onClick={onOpenFamilyTree}
         title={t('navigation.familyTreeTitle')}
       >

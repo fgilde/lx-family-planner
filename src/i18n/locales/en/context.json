@@ -45,6 +45,9 @@
     "gotifyConnectFailed": "Gotify could not be connected",
     "gotifySettingsSaveFailed": "Gotify settings could not be saved",
     "gotifyTestFailed": "Gotify test failed",
+    "ntfyConnectFailed": "ntfy could not be connected",
+    "ntfySettingsSaveFailed": "ntfy settings could not be saved",
+    "ntfyTestFailed": "ntfy test failed",
     "homeAssistantConnectFailed": "Home Assistant could not be connected",
     "deviceListLoadFailed": "Device list could not be loaded",
     "homeAssistantSettingsSaveFailed": "Home Assistant settings could not be saved",
@@ -394,6 +397,21 @@
     "gotifyDisconnected": {
       "title": "Gotify disconnected",
       "message": "The family planner will no longer send push messages."
+    },
+    "ntfyConnected": {
+      "title": "ntfy connected",
+      "message": "LX now also sends family notifications to your ntfy topic."
+    },
+    "ntfySaved": {
+      "message": "The ntfy event settings were saved."
+    },
+    "ntfyTestSent": {
+      "title": "ntfy test sent",
+      "message": "The test notification was sent to your topic."
+    },
+    "ntfyDisconnected": {
+      "title": "ntfy disconnected",
+      "message": "LX no longer sends notifications to ntfy."
     },
     "homeAssistantConnected": {
       "title": "Home Assistant connected",

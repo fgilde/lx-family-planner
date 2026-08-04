@@ -40,6 +40,8 @@
     "pet": "Haustier",
     "serverConfigTitle": "Server-Verbindung / IP einstellen",
     "logoutTitle": "Familie wechseln / Abmelden",
+    "wallDisplay": "Wandansicht",
+    "wallDisplayHint": "Geschützte Ansicht: anzeigen und abhaken, ohne Einstellungen zu verändern",
     "themePicker": {
       "openPet": "Pfotenwelt wählen",
       "openChild": "Meine Themenwelt wählen",

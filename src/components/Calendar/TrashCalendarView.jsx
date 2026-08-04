@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import {
   Bell,
   BellOff,
+  CloudDownload,
+  Link2,
   Plus,
+  RefreshCw,
   Trash2,
   Upload,
   X
@@ -17,6 +20,7 @@ import {
 import { useFamily } from '../../context/FamilyContext';
 import { formatDate } from '../../utils/formatting';
 import { parseICSContent } from '../../utils/icsUtils';
+import { canManageFamily } from '../../constants/roles';
 import EventReminderDialog from './EventReminderDialog';
 import EventReminderPicker from './EventReminderPicker';
 
@@ -89,7 +93,12 @@ export default function TrashCalendarView() {
     addTrashEvents,
     updateTrashEvent,
     deleteTrashEvent,
-    activeHousehold
+    activeHousehold,
+    activeMember,
+    calendarSubscriptions,
+    addCalendarSubscription,
+    syncCalendarSubscription,
+    deleteCalendarSubscription
   } = useFamily();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -102,6 +111,14 @@ export default function TrashCalendarView() {
     ...TRASH_DEFAULT_REMINDERS
   ]);
   const [reminderEvent, setReminderEvent] = useState(null);
+  const [isFeedOpen, setIsFeedOpen] = useState(false);
+  const [feedBusy, setFeedBusy] = useState('');
+  const [feedForm, setFeedForm] = useState({ name: '', url: '' });
+  const canManage = canManageFamily(activeMember);
+  const trashSubscriptions = useMemo(
+    () => calendarSubscriptions.filter(subscription => subscription.kind === 'trash'),
+    [calendarSubscriptions]
+  );
 
   const upcomingTrash = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -174,6 +191,35 @@ export default function TrashCalendarView() {
     );
   };
 
+  const connectTrashFeed = async event => {
+    event.preventDefault();
+    setFeedBusy('connect');
+    const result = await addCalendarSubscription({
+      ...feedForm,
+      kind: 'trash',
+      color: '#66736e',
+      memberId: 'all',
+      household: activeHousehold
+    });
+    setFeedBusy('');
+    if (result) setFeedForm({ name: '', url: '' });
+  };
+
+  const syncTrashFeed = async subscriptionId => {
+    setFeedBusy(`sync:${subscriptionId}`);
+    await syncCalendarSubscription(subscriptionId);
+    setFeedBusy('');
+  };
+
+  const removeTrashFeed = async subscription => {
+    if (!window.confirm(t('trash.feed.confirmRemove', { name: subscription.name }))) {
+      return;
+    }
+    setFeedBusy(`delete:${subscription.id}`);
+    await deleteCalendarSubscription(subscription.id);
+    setFeedBusy('');
+  };
+
   const saveTrashReminders = async (event, reminders) => {
     const result = await updateTrashEvent(event.id, { reminders });
     if (result) {
@@ -213,6 +259,15 @@ export default function TrashCalendarView() {
         </div>
 
         <div className="trash-calendar-actions">
+          {canManage && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => setIsFeedOpen(true)}
+            >
+              <Link2 size={16} /> {t('trash.header.connectUrl')}
+            </button>
+          )}
           <label className="btn-secondary trash-calendar-import">
             <Upload size={16} /> {t('trash.header.import')}
             <input
@@ -453,6 +508,116 @@ export default function TrashCalendarView() {
               </div>
             </form>
           </div>
+          </div>,
+          document.body
+        )
+        : null}
+
+      {isFeedOpen
+        ? createPortal(
+          <div className="modal-backdrop" onClick={() => setIsFeedOpen(false)}>
+            <section
+              className="modal-card trash-feed-dialog"
+              onClick={event => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="trash-feed-title"
+            >
+              <header className="trash-feed-heading">
+                <span><CloudDownload size={22} /></span>
+                <div>
+                  <small>{t('trash.feed.kicker')}</small>
+                  <h2 id="trash-feed-title">{t('trash.feed.title')}</h2>
+                  <p>{t('trash.feed.description')}</p>
+                </div>
+                <button
+                  type="button"
+                  className="icon-circle-btn"
+                  onClick={() => setIsFeedOpen(false)}
+                  aria-label={t('common:actions.close')}
+                >
+                  <X size={19} />
+                </button>
+              </header>
+
+              <div className="trash-feed-body">
+                <div className="trash-feed-list">
+                  {trashSubscriptions.length ? trashSubscriptions.map(subscription => (
+                    <article key={subscription.id}>
+                      <span><CloudDownload size={17} /></span>
+                      <div>
+                        <strong>{subscription.name}</strong>
+                        <small>
+                          {subscription.host} · {t('trash.feed.pickupCount', {
+                            count: subscription.eventCount
+                          })}
+                        </small>
+                        {subscription.lastError && <em>{subscription.lastError}</em>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => void syncTrashFeed(subscription.id)}
+                        disabled={Boolean(feedBusy)}
+                        title={t('trash.feed.sync')}
+                      >
+                        <RefreshCw
+                          size={16}
+                          className={feedBusy === `sync:${subscription.id}` ? 'spin' : ''}
+                        />
+                      </button>
+                      <button
+                        type="button"
+                        className="is-danger"
+                        onClick={() => void removeTrashFeed(subscription)}
+                        disabled={Boolean(feedBusy)}
+                        title={t('trash.feed.remove')}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </article>
+                  )) : (
+                    <div className="trash-feed-empty">{t('trash.feed.empty')}</div>
+                  )}
+                </div>
+
+                <form className="trash-feed-form" onSubmit={connectTrashFeed}>
+                  <label>
+                    <span>{t('trash.feed.name')}</span>
+                    <input
+                      value={feedForm.name}
+                      onChange={event => setFeedForm(previous => ({
+                        ...previous,
+                        name: event.target.value
+                      }))}
+                      placeholder={t('trash.feed.namePlaceholder')}
+                      maxLength={100}
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>{t('trash.feed.url')}</span>
+                    <input
+                      type="url"
+                      value={feedForm.url}
+                      onChange={event => setFeedForm(previous => ({
+                        ...previous,
+                        url: event.target.value
+                      }))}
+                      placeholder="https://…/abfallkalender.ics"
+                      maxLength={4000}
+                      required
+                    />
+                  </label>
+                  <p>{t('trash.feed.security')}</p>
+                  <button className="btn-primary" disabled={Boolean(feedBusy)}>
+                    <Link2 size={16} />
+                    {feedBusy === 'connect'
+                      ? t('trash.feed.connecting')
+                      : t('trash.feed.connect')}
+                  </button>
+                </form>
+              </div>
+            </section>
           </div>,
           document.body
         )

@@ -221,4 +221,8 @@ If LX solves a real problem for your household:
 - report a reproducible bug or propose a focused improvement;
 - help review an English or German translation.
 
+Optional one-time or monthly support through GitHub Sponsors is being prepared.
+Sponsorship will never unlock features or create a paid priority lane: LX
+remains free and the same application for every family.
+
 Built for families who want helpful software without giving up their home data.

@@ -26,6 +26,7 @@ import {
 import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import AndroidAppDownload from './AndroidAppDownload';
 import LanguageSwitcher from '../LanguageSwitcher';
+import ProjectSupportCard from '../ProjectSupportCard';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
   const { t } = useTranslation('auth');
@@ -241,20 +242,23 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
           <span className="auth-brand-mark">LX</span>
           <span>Family Planner</span>
         </div>
-        <a
-          className="auth-github-link"
-          href={GITHUB_REPOSITORY_URL}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={t('login.github.aria')}
-        >
-          <span className="auth-github-mark"><Github size={21} /></span>
-          <span className="auth-github-copy">
-            <strong>{t('login.github.title')}</strong>
-            <small>{t('login.github.subtitle')}</small>
-          </span>
-          <ArrowUpRight className="auth-github-arrow" size={19} />
-        </a>
+        <div className="auth-community-links">
+          <a
+            className="auth-github-link"
+            href={GITHUB_REPOSITORY_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={t('login.github.aria')}
+          >
+            <span className="auth-github-mark"><Github size={21} /></span>
+            <span className="auth-github-copy">
+              <strong>{t('login.github.title')}</strong>
+              <small>{t('login.github.subtitle')}</small>
+            </span>
+            <ArrowUpRight className="auth-github-arrow" size={19} />
+          </a>
+          <ProjectSupportCard variant="auth" />
+        </div>
         <div className="auth-story-copy">
           <span className="eyebrow">{t('login.hero.eyebrow')}</span>
           <h1>{t('login.hero.title')}</h1>

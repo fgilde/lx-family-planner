@@ -31,6 +31,7 @@ import {
   eventStartKey,
   normalizeEventReminders,
   normalizeTrashReminders,
+  TRASH_DEFAULT_REMINDERS,
   selectDueEventReminder,
   trashReminderCopy,
   trashReminderEvent
@@ -143,6 +144,14 @@ import {
   upsertRecords,
   verifySecret
 } from './database.js';
+import {
+  isWallDisplayMember,
+  wallDisplayMutationAllowed
+} from './wallDisplayAccess.js';
+import {
+  normalizeNtfyTopic,
+  ntfyMessageBody
+} from './ntfyClient.js';
 import {
   isExpiredFirebaseTarget,
   publicFirebasePushStatus,
@@ -287,7 +296,8 @@ const ROLE_TYPES = new Set([
   'teen',
   'senior',
   'member',
-  'pet'
+  'pet',
+  'wall'
 ]);
 const ADULT_ROLES = new Set(['adult', 'senior']);
 const PROFILE_MODULE_IDS = new Set([
@@ -1199,12 +1209,48 @@ function calendarEventRecord(subscription, event) {
       name: subscription.name
     }),
     memberId: subscription.memberId || 'all',
-    household: subscription.household || 'familie',
+    household: subscription.household === 'grosseltern'
+      ? 'oma_opa'
+      : subscription.household || 'familie',
     readOnly: true,
     sourceId: subscription.id,
     sourceName: subscription.name,
     sourceColor: subscription.color
   };
+}
+
+function calendarTrashType(title) {
+  const value = String(title || '').toLocaleLowerCase('de-DE');
+  if (/papier|pappe|blau|paper|cardboard|blue/.test(value)) return 'papier';
+  if (/bio|braun|grün|organic|compost|brown|green/.test(value)) return 'bio';
+  if (/gelb|wertstoff|sack|yellow|recycl|packaging|plastic/.test(value)) {
+    return 'gelb';
+  }
+  return 'rest';
+}
+
+function trashSubscriptionRecord(subscription, event) {
+  const occurrenceKey = event.occurrenceKey || `${event.date}T${event.time || ''}`;
+  const externalKey = `${subscription.id}|${event.uid}|${occurrenceKey}`;
+  const title = cleanText(event.title, translate('labels.calendarEvent'), 300);
+  return {
+    id: `trash-cal-${createHash('sha256').update(externalKey).digest('hex').slice(0, 24)}`,
+    externalUid: event.uid,
+    title,
+    date: event.date,
+    type: calendarTrashType(title),
+    reminders: [...TRASH_DEFAULT_REMINDERS],
+    household: subscription.household === 'grosseltern'
+      ? 'oma_opa'
+      : subscription.household || 'familie',
+    readOnly: true,
+    sourceId: subscription.id,
+    sourceName: subscription.name
+  };
+}
+
+function calendarSubscriptionResourceType(subscription) {
+  return subscription?.kind === 'trash' ? 'trashEvents' : 'events';
 }
 
 async function syncCalendarSubscription(subscription) {
@@ -1218,10 +1264,12 @@ async function syncCalendarSubscription(subscription) {
       rangeStart: now - 45 * 86_400_000,
       rangeEnd: now + 730 * 86_400_000,
       maxEvents: 1500
-    }).map(event => calendarEventRecord(subscription, event));
+    }).map(event => subscription.kind === 'trash'
+      ? trashSubscriptionRecord(subscription, event)
+      : calendarEventRecord(subscription, event));
     const records = replaceRecordsBySource(
       subscription.familyId,
-      'events',
+      calendarSubscriptionResourceType(subscription),
       calendarSourceKey(subscription.id),
       events
     );
@@ -2278,10 +2326,28 @@ function protectReadOnlyDemo(req, res, next) {
   });
 }
 
+function protectWallDisplay(req, res, next) {
+  if (!req.session?.memberId) return next();
+  const member = getMember(req.session.familyId, req.session.memberId);
+  if (!isWallDisplayMember(member)) return next();
+  if (wallDisplayMutationAllowed(req)) return next();
+
+  res.setHeader('Cache-Control', 'no-store');
+  return res.status(403).json({
+    success: false,
+    wallDisplayReadOnly: true,
+    error: translate('errors.wallDisplayReadOnly')
+  });
+}
+
 function demoIntegrationStatus() {
   return {
     bring: { connected: false },
     gotify: {
+      connected: false,
+      rules: { ...DEFAULT_GOTIFY_RULES }
+    },
+    ntfy: {
       connected: false,
       rules: { ...DEFAULT_GOTIFY_RULES }
     },
@@ -2332,6 +2398,44 @@ function requireAdult(req, res, next) {
   req.activeMember = member;
   return next();
 }
+
+function memberHasModuleAccess(member, moduleId) {
+  return Boolean(
+    member &&
+    !isManagedMember(member) &&
+    (
+      isAdultMember(member) ||
+      (
+        member.role === 'member' &&
+        Array.isArray(member.allowedModules) &&
+        member.allowedModules.includes(moduleId)
+      )
+    )
+  );
+}
+
+function requireAdultOrModule(moduleId) {
+  return (req, res, next) => {
+    if (!req.session?.memberId) {
+      return res.status(403).json({
+        success: false,
+        error: translate('errors.adultProfileRequired')
+      });
+    }
+    const member = getMember(req.session.familyId, req.session.memberId);
+    if (!memberHasModuleAccess(member, moduleId)) {
+      return res.status(403).json({
+        success: false,
+        error: translate('errors.moduleNotAllowed')
+      });
+    }
+    req.activeMember = member;
+    return next();
+  };
+}
+
+const requireCloudAccess = requireAdultOrModule('cloud');
+const requireMailAccess = requireAdultOrModule('mail');
 
 function requireResourceManager(req, res, next) {
   const member = req.session?.memberId
@@ -2778,6 +2882,7 @@ async function provisionBundledNextcloudForFamily(
 function integrationStatus(familyId, member = null) {
   const bring = getIntegration(familyId, 'bring');
   const gotify = getIntegration(familyId, 'gotify');
+  const ntfy = getIntegration(familyId, 'ntfy');
   const homeAssistant = getIntegration(familyId, 'home-assistant');
   const nextcloud = getIntegration(familyId, 'nextcloud');
   return {
@@ -2805,6 +2910,26 @@ function integrationStatus(familyId, member = null) {
       : {
         connected: false,
         rules: { ...DEFAULT_GOTIFY_RULES }
+        },
+    ntfy: ntfy
+      ? {
+          connected: true,
+          ...(!member || isAdultMember(member)
+            ? {
+                baseUrl: ntfy.config?.baseUrl || '',
+                topic: ntfy.config?.topic || '',
+                plannerUrl: ntfy.config?.plannerUrl || ''
+              }
+            : {}),
+          rules: {
+            ...DEFAULT_GOTIFY_RULES,
+            ...(ntfy.config?.rules || {})
+          },
+          updatedAt: ntfy.updatedAt
+        }
+      : {
+          connected: false,
+          rules: { ...DEFAULT_GOTIFY_RULES }
         },
     homeAssistant: homeAssistant
       ? (() => {
@@ -2834,7 +2959,7 @@ function integrationStatus(familyId, member = null) {
     nextcloud: nextcloud
       ? (() => {
           const config = nextcloud.config || {};
-          const adultView = !member || isAdultMember(member);
+          const adultView = !member || memberHasModuleAccess(member, 'cloud');
           const configuredPublicUrl = bundledNextcloudPublicUrl();
           const publicBaseUrl =
             config.bundled && configuredPublicUrl
@@ -3247,6 +3372,29 @@ function normalizeGotifyBaseUrl(value) {
   return url.href.replace(/\/$/, '');
 }
 
+function normalizeNtfyBaseUrl(value) {
+  let url;
+  try {
+    url = new URL(requireText(value, translate('fields.ntfyAddress'), 2000));
+  } catch {
+    const error = new Error(translate('errors.ntfyAddressInvalid'));
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    const error = new Error(translate('errors.ntfyProtocol'));
+    error.statusCode = 400;
+    throw error;
+  }
+  if (url.username || url.password || url.search || url.hash) {
+    const error = new Error(translate('errors.ntfyAddressExtras'));
+    error.statusCode = 400;
+    throw error;
+  }
+  url.pathname = url.pathname.replace(/\/+$/, '');
+  return url.href.replace(/\/$/, '');
+}
+
 function normalizePlannerUrl(value) {
   const input = cleanText(value, '', 2000);
   if (!input) return '';
@@ -3319,7 +3467,7 @@ async function postGotifyMessage(baseUrl, token, payload, plannerUrl = '') {
 async function sendGotifyNotification(
   familyId,
   eventKey,
-  { title, message, priority = 4 }
+  { title, message, privateMessage = '', priority = 4 }
 ) {
   const integration = getIntegration(familyId, 'gotify');
   if (!integration) return false;
@@ -3344,11 +3492,73 @@ async function sendGotifyNotification(
   };
   if (eventKey && !rules[eventKey]) return false;
   const secret = decryptJson(integration.secretEncrypted);
+  const chatEvent = eventKey === 'groupChat' || eventKey === 'directMessages';
   await postGotifyMessage(
     integration.config.baseUrl,
     secret.token,
-    { title, message, priority },
+    {
+      title,
+      message: chatEvent && !rules.includeMessageText
+        ? privateMessage || translate('push.newMessageArrived')
+        : message,
+      priority
+    },
     integration.config.plannerUrl
+  );
+  return true;
+}
+
+async function postNtfyMessage(config, secret, payload) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (secret?.token) headers.Authorization = `Bearer ${secret.token}`;
+  const response = await fetch(`${config.baseUrl}/`, {
+    method: 'POST',
+    redirect: 'error',
+    signal: AbortSignal.timeout(10_000),
+    headers,
+    body: JSON.stringify(ntfyMessageBody(config, payload))
+  });
+  if (!response.ok) {
+    const error = new Error(
+      translate('errors.ntfyMessageRejected', { status: response.status })
+    );
+    error.statusCode = 502;
+    throw error;
+  }
+  return true;
+}
+
+async function sendNtfyNotification(
+  familyId,
+  eventKey,
+  { title, message, privateMessage = '', priority = 4 }
+) {
+  const integration = getIntegration(familyId, 'ntfy');
+  if (!integration) return false;
+  const familySettings = getRecord(familyId, 'familySettings', 'family-settings');
+  const quietNow = familySettings?.quietHoursEnabled && isWithinTimeWindow(
+    familySettings.quietStart || '20:00',
+    familySettings.quietEnd || '07:00'
+  );
+  const urgentAllowed = familySettings?.urgentDuringQuietHours !== false &&
+    (priority >= 8 || eventKey === 'moodHelp');
+  if (quietNow && !urgentAllowed) return false;
+  const rules = {
+    ...DEFAULT_GOTIFY_RULES,
+    ...(integration.config?.rules || {})
+  };
+  if (eventKey && !rules[eventKey]) return false;
+  const chatEvent = eventKey === 'groupChat' || eventKey === 'directMessages';
+  await postNtfyMessage(
+    integration.config,
+    decryptJson(integration.secretEncrypted),
+    {
+      title,
+      message: chatEvent && !rules.includeMessageText
+        ? privateMessage || translate('push.newMessageArrived')
+        : message,
+      priority
+    }
   );
   return true;
 }
@@ -3357,30 +3567,26 @@ function queueGotifyNotification(familyId, eventKey, payload) {
   void sendGotifyNotification(familyId, eventKey, payload).catch(error => {
     console.error('Gotify-Benachrichtigung fehlgeschlagen:', error.message);
   });
+  void sendNtfyNotification(familyId, eventKey, payload).catch(error => {
+    console.error('ntfy-Benachrichtigung fehlgeschlagen:', error.message);
+  });
 }
 
 function notifyChatViaGotify(req, record) {
   const integration = getIntegration(req.session.familyId, 'gotify');
-  if (!integration) return;
-  const rules = {
-    ...DEFAULT_GOTIFY_RULES,
-    ...(integration.config?.rules || {})
-  };
+  const ntfyIntegration = getIntegration(req.session.familyId, 'ntfy');
+  if (!integration && !ntfyIntegration) return;
   const isGroup = !record.target || record.target === 'group';
   const eventKey = isGroup ? 'groupChat' : 'directMessages';
-  if (!rules[eventKey]) return;
-  const messageText = rules.includeMessageText
-    ? cleanText(
-        chatAttachmentMessageCopy(record),
-        translate('push.newMessage'),
-        800
-      )
-    : (
-        record.photo ||
-        (Array.isArray(record.attachments) && record.attachments.length)
-          ? translate('push.newMessageWithAttachment')
-          : translate('push.newMessageArrived')
-      );
+  const messageText = cleanText(
+    chatAttachmentMessageCopy(record),
+    translate('push.newMessage'),
+    800
+  );
+  const privateMessage = record.photo ||
+    (Array.isArray(record.attachments) && record.attachments.length)
+      ? translate('push.newMessageWithAttachment')
+      : translate('push.newMessageArrived');
   queueGotifyNotification(req.session.familyId, eventKey, {
     title: isGroup
       ? translate('push.gotifyGroupChatTitle', { name: record.senderName })
@@ -3388,6 +3594,7 @@ function notifyChatViaGotify(req, record) {
           name: record.senderName
         }),
     message: messageText,
+    privateMessage,
     priority: isGroup ? 4 : 5
   });
 }
@@ -3464,7 +3671,7 @@ function bootstrapForSession(session) {
     }
   }
   bootstrap.familyRelationships = listFamilyRelationships(session.familyId);
-  bootstrap.familyLetters = isAdultMember(member)
+  bootstrap.familyLetters = memberHasModuleAccess(member, 'mail')
     ? listFamilyLetters(session.familyId, session.memberId)
     : [];
   bootstrap.familyChatGuests = visibleFamilyChatGuests(
@@ -4974,6 +5181,7 @@ export function createApp() {
   app.use(express.json({ limit: JSON_LIMIT }));
   app.use(sessionMiddleware);
   app.use(protectReadOnlyDemo);
+  app.use(protectWallDisplay);
 
   app.get('/api/config', (_req, res) => {
     res.json({
@@ -5645,9 +5853,11 @@ export function createApp() {
           error: translate('errors.selectedProfileNotFound')
         });
       }
-      const household = ['familie', 'grosseltern'].includes(input.household)
-        ? input.household
-        : 'familie';
+      const household = input.household === 'grosseltern'
+        ? 'oma_opa'
+        : ['familie', 'oma_opa'].includes(input.household)
+          ? input.household
+          : 'familie';
       const color = /^#[0-9a-f]{6}$/i.test(String(input.color || ''))
         ? String(input.color)
         : '#2563eb';
@@ -5658,6 +5868,7 @@ export function createApp() {
         color,
         memberId,
         household,
+        kind: input.kind === 'trash' ? 'trash' : 'calendar',
         enabled: true
       });
       let syncResult = null;
@@ -5735,10 +5946,13 @@ export function createApp() {
               ? String(input.color)
               : existing.color,
           memberId,
-          household: Object.hasOwn(input, 'household') &&
-            ['familie', 'grosseltern'].includes(input.household)
-              ? input.household
-              : existing.household,
+          household: Object.hasOwn(input, 'household')
+            ? input.household === 'grosseltern'
+              ? 'oma_opa'
+              : ['familie', 'oma_opa'].includes(input.household)
+                ? input.household
+                : existing.household
+            : existing.household,
           enabled: Object.hasOwn(input, 'enabled')
             ? Boolean(input.enabled)
             : existing.enabled
@@ -5761,7 +5975,7 @@ export function createApp() {
       } else {
         replaceRecordsBySource(
           req.session.familyId,
-          'events',
+          calendarSubscriptionResourceType(updated),
           calendarSourceKey(updated.id),
           []
         );
@@ -5862,7 +6076,7 @@ export function createApp() {
       }
       replaceRecordsBySource(
         req.session.familyId,
-        'events',
+        calendarSubscriptionResourceType(subscription),
         calendarSourceKey(subscription.id),
         []
       );
@@ -6142,7 +6356,7 @@ export function createApp() {
     }
   );
 
-  app.get('/api/family/mail', requireAuth, requireAdult, (req, res) => {
+  app.get('/api/family/mail', requireAuth, requireMailAccess, (req, res) => {
     res.json({
       success: true,
       letters: listFamilyLetters(
@@ -6156,7 +6370,7 @@ export function createApp() {
     });
   });
 
-  app.post('/api/family/mail', requireAuth, requireAdult, (req, res) => {
+  app.post('/api/family/mail', requireAuth, requireMailAccess, (req, res) => {
     const input = ensureObject(req.body);
     const recipientFamilyId = requireText(
       input.recipientFamilyId,
@@ -6225,7 +6439,7 @@ export function createApp() {
   app.patch(
     '/api/family/mail/:letterId',
     requireAuth,
-    requireAdult,
+    requireMailAccess,
     (req, res) => {
       const letter = updateFamilyLetterState(
         req.session.familyId,
@@ -8167,6 +8381,7 @@ export function createApp() {
     const member = req.session.memberId
       ? getMember(req.session.familyId, req.session.memberId)
       : null;
+    const wallDisplay = isWallDisplayMember(member);
     if (member?.role === 'pet') {
       return res.status(403).json({
         success: false,
@@ -8175,7 +8390,7 @@ export function createApp() {
     }
     if (
       !member ||
-      (!isAdultMember(member) && !taskCanBeCompletedBy(task, member.id))
+      (!isAdultMember(member) && !wallDisplay && !taskCanBeCompletedBy(task, member.id))
     ) {
       return res.status(403).json({
         success: false,
@@ -8196,7 +8411,7 @@ export function createApp() {
     }
 
     let result;
-    if (!isAdultMember(member)) {
+    if (!isAdultMember(member) && !wallDisplay) {
       if (task.completed) {
         return res.status(409).json({
           success: false,
@@ -8959,7 +9174,7 @@ export function createApp() {
   app.get(
     '/api/integrations/nextcloud/files',
     requireAuth,
-    requireAdult,
+    requireCloudAccess,
     async (req, res) => {
       const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       const currentPath = publicFamilyCloudPath(req.query.path);
@@ -8986,7 +9201,7 @@ export function createApp() {
   app.get(
     '/api/integrations/nextcloud/folders',
     requireAuth,
-    requireAdult,
+    requireCloudAccess,
     async (req, res) => {
       const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       const folders = await listFamilyCloudFolders(workspace);
@@ -9001,7 +9216,7 @@ export function createApp() {
   app.get(
     '/api/integrations/nextcloud/files/content',
     requireAuth,
-    requireAdult,
+    requireCloudAccess,
     async (req, res) => {
       const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       const file = await downloadNextcloudFile(
@@ -9027,7 +9242,7 @@ export function createApp() {
   app.post(
     '/api/integrations/nextcloud/files/folder',
     requireAuth,
-    requireAdult,
+    requireCloudAccess,
     async (req, res) => {
       const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       const entry = await createNextcloudFolder(
@@ -9044,7 +9259,7 @@ export function createApp() {
   app.put(
     '/api/integrations/nextcloud/files/file',
     requireAuth,
-    requireAdult,
+    requireCloudAccess,
     express.raw({
       type: 'application/octet-stream',
       limit: '100mb'
@@ -9107,7 +9322,7 @@ export function createApp() {
   app.delete(
     '/api/integrations/nextcloud/files/entry',
     requireAuth,
-    requireAdult,
+    requireCloudAccess,
     async (req, res) => {
       const workspace = await cloudWorkspaceForFamily(req.session.familyId);
       await deleteNextcloudEntry(
@@ -9674,6 +9889,129 @@ export function createApp() {
     requireAdult,
     (req, res) => {
       deleteIntegration(req.session.familyId, 'gotify');
+      res.json({
+        success: true,
+        integration: {
+          connected: false,
+          rules: { ...DEFAULT_GOTIFY_RULES }
+        },
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/integrations/ntfy/setup',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const baseUrl = normalizeNtfyBaseUrl(req.body?.baseUrl);
+      const topic = normalizeNtfyTopic(req.body?.topic);
+      if (!topic) {
+        return res.status(400).json({
+          success: false,
+          error: translate('errors.ntfyTopicInvalid')
+        });
+      }
+      const token = cleanText(req.body?.token, '', 500);
+      const plannerUrl = normalizePlannerUrl(req.body?.plannerUrl);
+      const rules = gotifyRules(req.body?.rules);
+      const config = { baseUrl, topic, plannerUrl, rules };
+      await postNtfyMessage(config, { token }, {
+        title: translate('push.ntfyConnectedTitle'),
+        message: translate('push.ntfyConnectedMessage'),
+        priority: 5
+      });
+      saveIntegration(
+        req.session.familyId,
+        'ntfy',
+        config,
+        encryptJson({ token })
+      );
+      res.status(201).json({
+        success: true,
+        integration: integrationStatus(req.session.familyId).ntfy,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.patch(
+    '/api/integrations/ntfy',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      const integration = getIntegration(req.session.familyId, 'ntfy');
+      if (!integration) {
+        return res.status(404).json({
+          success: false,
+          error: translate('errors.ntfyNotConnected')
+        });
+      }
+      const input = ensureObject(req.body);
+      const topic = Object.hasOwn(input, 'topic')
+        ? normalizeNtfyTopic(input.topic)
+        : integration.config.topic;
+      if (!topic) {
+        return res.status(400).json({
+          success: false,
+          error: translate('errors.ntfyTopicInvalid')
+        });
+      }
+      const config = {
+        ...integration.config,
+        topic,
+        plannerUrl: Object.hasOwn(input, 'plannerUrl')
+          ? normalizePlannerUrl(input.plannerUrl)
+          : integration.config.plannerUrl,
+        rules: gotifyRules(input.rules ?? integration.config.rules)
+      };
+      const secret = decryptJson(integration.secretEncrypted);
+      if (Object.hasOwn(input, 'token')) {
+        secret.token = cleanText(input.token, '', 500);
+      }
+      saveIntegration(
+        req.session.familyId,
+        'ntfy',
+        config,
+        encryptJson(secret)
+      );
+      res.json({
+        success: true,
+        integration: integrationStatus(req.session.familyId).ntfy,
+        version: getFamilyVersion(req.session.familyId)
+      });
+    }
+  );
+
+  app.post(
+    '/api/integrations/ntfy/test',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      if (!getIntegration(req.session.familyId, 'ntfy')) {
+        return res.status(404).json({
+          success: false,
+          error: translate('errors.ntfyNotConnected')
+        });
+      }
+      await sendNtfyNotification(req.session.familyId, null, {
+        title: translate('push.ntfyTestTitle'),
+        message: translate('push.ntfyTestMessage', {
+          name: req.activeMember.name
+        }),
+        priority: 5
+      });
+      res.json({ success: true });
+    }
+  );
+
+  app.delete(
+    '/api/integrations/ntfy',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      deleteIntegration(req.session.familyId, 'ntfy');
       res.json({
         success: true,
         integration: {

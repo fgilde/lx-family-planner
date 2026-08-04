@@ -27,7 +27,10 @@ import OrderedDashboardGrid, {
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { dashboardLayoutForTrash } from '../../utils/dashboardLayout';
 import { formatDate } from '../../utils/formatting';
-import { eventIsForMember } from '../../../shared/calendarAudience.js';
+import {
+  eventIsCurrentOrFuture,
+  eventIsForMember
+} from '../../../shared/calendarAudience.js';
 import {
   birthdayEventCopy,
   nextBirthdayOccurrencesOnly
@@ -182,6 +185,7 @@ export default function PersonalDashboard() {
       nextBirthdayOccurrencesOnly(events, todayKey)
         .filter(
           event =>
+            eventIsCurrentOrFuture(event, todayKey) &&
             eventIsForMember(event, activeMember.id) &&
             belongsToHousehold(event)
         )

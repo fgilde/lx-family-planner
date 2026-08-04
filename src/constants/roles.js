@@ -31,6 +31,12 @@ export const POSITION_OPTIONS = [
   { value: 'pate', label: 'Pate', role: 'adult', emoji: '🤝' },
   { value: 'haustier', label: 'Haustier', role: 'pet', emoji: '🐾' },
   {
+    value: 'wanddisplay',
+    label: 'Wanddisplay',
+    role: 'wall',
+    emoji: '🖥️'
+  },
+  {
     value: 'familienmitglied',
     label: 'Familienmitglied',
     role: 'member',
@@ -44,7 +50,8 @@ export const ROLE_LABELS = {
   teen: 'Teenager',
   senior: 'Großeltern',
   member: 'Familienmitglied',
-  pet: 'Haustier'
+  pet: 'Haustier',
+  wall: 'Wanddisplay'
 };
 
 export const PROFILE_MODULE_OPTIONS = [
@@ -102,6 +109,10 @@ export function isPetProfile(member) {
   return member?.role === 'pet';
 }
 
+export function isWallProfile(member) {
+  return member?.role === 'wall';
+}
+
 export function isYoungProfile(member) {
   return (
     !isManagedProfile(member) &&
@@ -140,7 +151,31 @@ const YOUNG_PROFILE_VIEWS = new Set([
   'board'
 ]);
 const PET_PROFILE_VIEWS = new Set(['dashboard', 'calendar']);
-const MANAGEMENT_VIEWS = new Set(['cloud', 'mail', 'admin', 'kitchen']);
+const WALL_PROFILE_VIEWS = new Set([
+  'dashboard',
+  'kitchen',
+  'calendar',
+  'trash',
+  'shopping',
+  'meals',
+  'tasks',
+  'family-life',
+  'board'
+]);
+
+export function profileModuleOptionsForMember(member) {
+  if (isManagedProfile(member)) return [];
+  if (isPetProfile(member)) {
+    return PROFILE_MODULE_OPTIONS.filter(view => PET_PROFILE_VIEWS.has(view));
+  }
+  if (isYoungProfile(member)) {
+    return PROFILE_MODULE_OPTIONS.filter(view => YOUNG_PROFILE_VIEWS.has(view));
+  }
+  if (isWallProfile(member)) {
+    return PROFILE_MODULE_OPTIONS.filter(view => WALL_PROFILE_VIEWS.has(view));
+  }
+  return [...PROFILE_MODULE_OPTIONS];
+}
 
 export function canAccessAppView(member, view, disabledModules = []) {
   const normalizedView = String(view || 'dashboard');
@@ -163,8 +198,20 @@ export function canAccessAppView(member, view, disabledModules = []) {
   if (isYoungProfile(member)) {
     return YOUNG_PROFILE_VIEWS.has(normalizedView);
   }
-  if (MANAGEMENT_VIEWS.has(normalizedView)) {
+  if (isWallProfile(member)) {
+    return WALL_PROFILE_VIEWS.has(normalizedView);
+  }
+  if (normalizedView === 'admin') {
     return canManageFamily(member);
+  }
+  if (normalizedView === 'kitchen') {
+    return canManageFamily(member);
+  }
+  if (normalizedView === 'cloud' || normalizedView === 'mail') {
+    return canManageFamily(member) || (
+      Array.isArray(member?.allowedModules) &&
+      member.allowedModules.includes(normalizedView)
+    );
   }
   return FAMILY_VIEWS.has(normalizedView);
 }

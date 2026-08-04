@@ -21,8 +21,15 @@ import { useFamily } from '../../context/FamilyContext';
 import { eventAudienceMembers } from '../../../shared/calendarAudience.js';
 import { birthdayEventCopy } from '../../../shared/birthdays.js';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
-import { dashboardLayoutForTrash } from '../../utils/dashboardLayout';
-import { isChildProfile, isManagedProfile } from '../../constants/roles';
+import {
+  dashboardLayoutForTrash,
+  dashboardPreviewItems
+} from '../../utils/dashboardLayout';
+import {
+  isChildProfile,
+  isManagedProfile,
+  isWallProfile
+} from '../../constants/roles';
 import DashboardCustomizer from './DashboardCustomizer';
 import OrderedDashboardGrid, {
   DashboardWidget
@@ -175,6 +182,7 @@ export default function KitchenTabletView() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [taskForCompletion, setTaskForCompletion] = useState(null);
+  const isWall = isWallProfile(activeMember);
   const availableWidgets = useMemo(
     () => TABLET_WIDGETS.filter(
       widget =>
@@ -249,10 +257,23 @@ export default function KitchenTabletView() {
   );
   const pendingTasks = useMemo(
     () =>
-      tasks.filter(
-        task => !task.completed && belongsToHousehold(task)
-      ),
+      tasks
+        .filter(task => !task.completed && belongsToHousehold(task))
+        .sort((left, right) => {
+          const dueDateOrder = String(left.dueDate || '9999-12-31')
+            .localeCompare(String(right.dueDate || '9999-12-31'));
+          if (dueDateOrder) return dueDateOrder;
+          return String(left.title || '').localeCompare(String(right.title || ''));
+        }),
     [activeHousehold, tasks]
+  );
+  const visibleTodayEvents = dashboardPreviewItems(
+    todayEvents,
+    dashboardLayout.layout.preferences?.tabletEventLimit
+  );
+  const visiblePendingTasks = dashboardPreviewItems(
+    pendingTasks,
+    dashboardLayout.layout.preferences?.tabletTaskLimit
   );
   const visibleNotes = useMemo(
     () =>
@@ -351,18 +372,18 @@ export default function KitchenTabletView() {
           <small>{t('kitchen.signedInAs', { name: activeMember?.name })}</small>
         </div>
         <div className="tablet-quick-actions">
-          <button type="button" onClick={() => openQuickAdd('event')}>
+          {!isWall && <button type="button" onClick={() => openQuickAdd('event')}>
             <Plus size={17} /> {t('kitchen.quickActions.event')}
-          </button>
-          <button type="button" onClick={() => openQuickAdd('shopping')}>
+          </button>}
+          {!isWall && <button type="button" onClick={() => openQuickAdd('shopping')}>
             <Plus size={17} /> {t('kitchen.quickActions.shopping')}
-          </button>
-          <button type="button" onClick={() => setActiveTab('dashboard')}>
+          </button>}
+          {!isWall && <button type="button" onClick={() => setActiveTab('dashboard')}>
             {t('kitchen.quickActions.standardView')} <ArrowUpRight size={16} />
-          </button>
-          <button type="button" onClick={() => setIsCustomizerOpen(true)}>
+          </button>}
+          {!isWall && <button type="button" onClick={() => setIsCustomizerOpen(true)}>
             <SlidersHorizontal size={16} /> {t('kitchen.quickActions.tiles')}
-          </button>
+          </button>}
         </div>
       </header>
 
@@ -383,7 +404,7 @@ export default function KitchenTabletView() {
         >
           {todayEvents.length ? (
             <div className="tablet-event-list">
-              {todayEvents.slice(0, 4).map(event => {
+              {visibleTodayEvents.map(event => {
                 const audience = eventAudienceMembers(event, members);
                 const member = audience[0];
                 const displayEvent = birthdayEventCopy(event, t);
@@ -464,7 +485,7 @@ export default function KitchenTabletView() {
         >
           {pendingTasks.length ? (
             <div className="tablet-task-list">
-              {pendingTasks.slice(0, 4).map(task => {
+              {visiblePendingTasks.map(task => {
                 const member = members.find(entry => entry.id === task.memberId);
                 const pendingApproval =
                   task.completionStatus === 'pending_approval';
@@ -679,7 +700,7 @@ export default function KitchenTabletView() {
         </DashboardWidget>
       </OrderedDashboardGrid>
 
-      <DashboardCustomizer
+      {!isWall && <DashboardCustomizer
         isOpen={isCustomizerOpen}
         layout={dashboardLayout.layout}
         mode="tablet"
@@ -691,7 +712,7 @@ export default function KitchenTabletView() {
         setPreference={dashboardLayout.setPreference}
         toggleWidget={dashboardLayout.toggleWidget}
         widgets={availableWidgets}
-      />
+      />}
 
       {taskForCompletion && (
         <div

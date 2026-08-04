@@ -14,7 +14,8 @@
     "patin": "Godmother",
     "pate": "Godfather",
     "haustier": "Pet",
-    "familienmitglied": "Family member"
+    "familienmitglied": "Family member",
+    "wanddisplay": "Wall display"
   },
   "roleLabels": {
     "adult": "Adult",
@@ -22,7 +23,8 @@
     "teen": "Teenager",
     "senior": "Grandparents",
     "member": "Family member",
-    "pet": "Pet"
+    "pet": "Pet",
+    "wall": "Wall display"
   },
   "modal": {
     "eyebrow": {

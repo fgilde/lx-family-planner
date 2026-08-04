@@ -44,5 +44,12 @@
     "ageNote_one": "{{name}} turns {{count}} year old.",
     "ageNote_other": "{{name}} turns {{count}} years old.",
     "sourceName": "Family birthday"
+  },
+  "projectSupport": {
+    "aria": "Support LX Family Planner voluntarily through GitHub Sponsors",
+    "kicker": "One-time or monthly",
+    "title": "Buy LX a coffee",
+    "description": "LX stays free. Even a one-time coffee helps with testing, hosting, and continued development.",
+    "action": "GitHub Sponsors"
   }
 }
