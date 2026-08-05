@@ -1,4 +1,75 @@
 const RELEASE_NOTES = {
+  '1.17.0': {
+    version: '1.17.0',
+    eyebrow: 'Mobile Navigation',
+    title: 'Alle Bereiche auf einen Blick – auch auf dem Handy',
+    intro:
+      'Auf Handys und Tablets im Hochformat ersetzt eine ausklappbare Seitenleiste die bisherige horizontale Scroll-Leiste. Alle Bereiche sind sofort sichtbar, und nach der Auswahl klappt das Menü automatisch wieder zu.',
+    highlights: [
+      {
+        id: 'mobile-nav-drawer',
+        title: 'Menü auf einen Blick statt Scrollen',
+        description:
+          'Das neue ☰-Symbol oben klappt eine seitliche Leiste auf, in der alle Bereiche inklusive Badges sofort sichtbar sind – nichts mehr hinter einer Scrollbahn versteckt.'
+      },
+      {
+        id: 'mobile-nav-autoclose',
+        title: 'Schneller von Bereich zu Bereich',
+        description:
+          'Nach dem Antippen eines Punktes schließt das Menü automatisch, sodass der gewählte Bereich sofort sichtbar wird.'
+      },
+      {
+        id: 'mobile-header-cleanup',
+        title: 'Aufgeräumte Kopfzeile auf dem Handy',
+        description:
+          'Sprache, Theme, Server-Einstellungen und Abmelden sind auf schmalen Bildschirmen ins Menü gewandert. Oben bleiben nur Marke, Menü, Benachrichtigungen und das Profil.'
+      },
+      {
+        id: 'mobile-nav-desktop-unchanged',
+        title: 'Desktop bleibt, wie er ist',
+        description:
+          'Auf größeren Bildschirmen und Tablets im Querformat bleibt die gewohnte horizontale Leiste unverändert – dort funktioniert sie ja gut.'
+      }
+    ],
+    closing:
+      'Bestehende Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'Mobile navigation',
+        title: 'Every area at a glance – even on the phone',
+        intro:
+          'On phones and tablets in portrait, a slide-in drawer replaces the previous horizontal scrolling bar. All areas are visible at once, and the menu closes automatically after a selection.',
+        highlights: [
+          {
+            id: 'mobile-nav-drawer',
+            title: 'The menu at a glance instead of scrolling',
+            description:
+              'The new ☰ symbol at the top opens a side panel where every area including badges is visible immediately – nothing hidden behind a scroll bar anymore.'
+          },
+          {
+            id: 'mobile-nav-autoclose',
+            title: 'Faster from area to area',
+            description:
+              'After tapping an entry, the menu closes automatically so the chosen area is immediately visible.'
+          },
+          {
+            id: 'mobile-header-cleanup',
+            title: 'A tidy header on the phone',
+            description:
+              'Language, theme, server settings and logout have moved into the menu on narrow screens. The header keeps only the brand, menu, notifications and the profile.'
+          },
+          {
+            id: 'mobile-nav-desktop-unchanged',
+            title: 'Desktop stays as it is',
+            description:
+              'On larger screens and tablets in landscape, the familiar horizontal bar remains unchanged – it works well there.'
+          }
+        ],
+        closing:
+          'Existing families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.16.2': {
     version: '1.16.2',
     eyebrow: 'Benachrichtigungen, Wanddisplay und Profilrechte',
