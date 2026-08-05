@@ -22365,3 +22365,236 @@ body:has(.modal-backdrop) .problem-report-launcher {
     width: 100%;
   }
 }
+
+/* --- MOBILE NAVIGATION DRAWER (Issue #14) --- */
+/* Below 900px the horizontal tab bar is replaced by a slide-in drawer.
+   The drawer is portal-rendered and triggered by the hamburger button in
+   the header. Above 900px the hamburger is hidden and the tab bar remains. */
+
+.mobile-menu-btn {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .main-nav {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
+  /* Header actions relocated into the drawer on narrow viewports */
+  .hide-below-tablet {
+    display: none !important;
+  }
+}
+
+.mobile-nav-drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1850;
+  display: grid;
+  justify-items: start;
+  background: rgba(17, 28, 25, 0.3);
+  backdrop-filter: blur(8px) saturate(0.85);
+  animation: mobileNavLayerIn 160ms ease-out both;
+}
+
+.mobile-nav-drawer-panel {
+  width: min(320px, 85vw);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border-color));
+  border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
+  color: var(--text-main);
+  background:
+    radial-gradient(
+      circle at 8% 4%,
+      color-mix(in srgb, var(--theme-glow-one) 70%, transparent),
+      transparent 28%
+    ),
+    var(--bg-elevated);
+  box-shadow:
+    0 34px 90px rgba(15, 27, 23, 0.3),
+    0 5px 18px rgba(15, 27, 23, 0.12);
+  animation: mobileNavPanelIn 210ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.mobile-nav-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 76%, transparent);
+}
+
+.mobile-nav-drawer-header strong {
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.mobile-nav-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-drawer-close:hover {
+  color: var(--primary);
+  background: var(--bg-subtle);
+}
+
+.mobile-nav-drawer-tabs {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  min-height: 48px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item span {
+  flex: 1 1 auto;
+}
+
+.mobile-nav-item:hover {
+  color: var(--primary);
+  background: var(--bg-subtle);
+}
+
+.mobile-nav-item.active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-subtle));
+}
+
+.mobile-nav-item-secondary {
+  margin-top: 6px;
+  color: var(--primary);
+}
+
+.mobile-nav-item-badge {
+  background-color: var(--accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  flex: 0 0 auto;
+}
+
+.mobile-nav-drawer-actions {
+  flex: 0 0 auto;
+  padding: 14px 14px 18px;
+  border-top: 1px solid color-mix(in srgb, var(--border-color) 76%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-nav-section-label {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 6px 4px;
+}
+
+/* Drawer copies of the header actions: make them full-width list rows */
+.mobile-nav-drawer-actions .language-switcher-header {
+  width: 100%;
+}
+
+.mobile-nav-drawer-actions .language-switcher-header .icon-circle-btn {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  min-height: 48px;
+}
+
+.mobile-nav-drawer-actions .language-switcher-menu {
+  position: static;
+  transform: none;
+  width: 100%;
+  margin: 4px 0 0;
+  box-shadow: none;
+  border: 1px solid var(--border-color);
+}
+
+.mobile-nav-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  min-height: 48px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-action-btn:hover {
+  color: var(--primary);
+  background: var(--bg-subtle);
+}
+
+.mobile-nav-action-danger {
+  color: #c0392b;
+}
+
+.mobile-nav-action-danger:hover {
+  color: #c0392b;
+  background: color-mix(in srgb, #c0392b 10%, var(--bg-subtle));
+}
+
+@keyframes mobileNavLayerIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mobileNavPanelIn {
+  from { opacity: 0; transform: translateX(-16px) scale(0.985); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}

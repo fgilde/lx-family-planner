@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
-import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server, Code2, Monitor } from 'lucide-react';
+import { HeartHandshake, Tablet, Star, LogOut, Home, Users, Sparkles, Settings, PawPrint, X, Server, Code2, Monitor, Menu } from 'lucide-react';
 import { isChildProfile, isPetProfile, isWallProfile } from '../constants/roles';
 import {
   ADULT_THEMES,
@@ -16,8 +16,9 @@ import PlanLocationHelp from './PlanLocationHelp';
 import NotificationCenter from './Notifications/NotificationCenter';
 import CustomThemeEditor from './Theme/CustomThemeEditor';
 import LanguageSwitcher from './LanguageSwitcher';
+import MobileNavDrawer from './MobileNavDrawer';
 
-export default function Header({ onLogout, onOpenServerConfig, unreadChatCount = 0 }) {
+export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree, unreadChatCount = 0 }) {
   const { t } = useTranslation('chrome');
   const {
     theme, setTheme,
@@ -32,6 +33,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
   const [isCustomThemeOpen, setIsCustomThemeOpen] = useState(false);
   const [customThemePreviewActive, setCustomThemePreviewActive] = useState(false);
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const isChild = isChildProfile(activeMember);
   const isPet = isPetProfile(activeMember);
   const isWall = isWallProfile(activeMember);
@@ -113,6 +115,16 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
 
   return (
     <header className="app-header">
+      <button
+        type="button"
+        className="icon-circle-btn mobile-menu-btn"
+        onClick={() => setIsMobileNavOpen(true)}
+        aria-label={t('header.menu.open')}
+        aria-expanded={isMobileNavOpen}
+        aria-haspopup="dialog"
+      >
+        <Menu size={20} />
+      </button>
       <a href="#" className="brand-logo" onClick={(e) => { e.preventDefault(); setActiveTab('dashboard'); }}>
         <div className="brand-icon-wrapper">
           <HeartHandshake size={26} />
@@ -152,7 +164,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
 
       <div className="header-right">
         {!isPet && !isWall && <NotificationCenter />}
-        {!isWall && <LanguageSwitcher />}
+        {!isWall && <div className="hide-below-tablet"><LanguageSwitcher /></div>}
         {!isChild && !isPet && !isWall && (
           <button
             className="icon-circle-btn"
@@ -163,7 +175,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
           </button>
         )}
         {/* Role-aware theme worlds */}
-        {!isWall && <div className="theme-picker-wrap">
+        {!isWall && <div className="theme-picker-wrap hide-below-tablet">
           <button
             className="icon-circle-btn"
             onClick={() => {
@@ -335,7 +347,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         {/* Server IP Config Button */}
         {onOpenServerConfig && !isWall && (
           <button
-            className="icon-circle-btn"
+            className="icon-circle-btn hide-below-tablet"
             onClick={onOpenServerConfig}
             title={t('header.serverConfigTitle')}
           >
@@ -345,7 +357,7 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
 
         {/* Logout / Switch Family Button */}
         <button
-          className="icon-circle-btn"
+          className="icon-circle-btn hide-below-tablet"
           onClick={onLogout}
           title={t('header.logoutTitle')}
         >
@@ -356,6 +368,14 @@ export default function Header({ onLogout, onOpenServerConfig, unreadChatCount =
         family={familyAccount}
         isOpen={isFamilySettingsOpen}
         onClose={() => setIsFamilySettingsOpen(false)}
+      />
+      <MobileNavDrawer
+        isOpen={isMobileNavOpen}
+        onClose={() => setIsMobileNavOpen(false)}
+        onOpenFamilyTree={onOpenFamilyTree}
+        onOpenTheme={() => setIsThemePickerOpen(true)}
+        onOpenServerConfig={onOpenServerConfig}
+        onLogout={onLogout}
       />
     </header>
   );

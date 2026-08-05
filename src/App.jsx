@@ -218,6 +218,7 @@ function MainContent() {
             ? () => setIsServerConfigOpen(true)
             : undefined
         }
+        onOpenFamilyTree={() => setIsFamilyTreeOpen(true)}
       />
       <Navigation onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
       <NotificationPermissionBanner />

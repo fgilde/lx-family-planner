@@ -4,6 +4,22 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.17.0] – 2026-08-05
+
+### Mobile Navigation
+
+- auf Handys und Tablets im Hochformat ersetzt eine ausklappbare Seitenleiste
+  (Drawer) die bisherige horizontale Scroll-Leiste; sie lässt sich über das
+  ☰-Symbol in der Kopfzeile öffnen (#14)
+- alle Menüpunkte und Badges sind auf einen Blick sichtbar und nicht mehr
+  hinter einer horizontalen Scrollbahn versteckt
+- nach der Auswahl eines Punktes schließt der Drawer automatisch
+- auf schmalen Bildschirmen sind auch Sprache, Theme, Server-Einstellungen und
+  Abmeldung in den Drawer ausgelagert, die Kopfzeile behält nur Marke,
+  Menübutton, Benachrichtigungen und Profil
+- Desktop und Tablets im Querformat ab 900 px behalten die gewohnte
+  horizontale Tab-Leiste unverändert
+
 ## [1.16.2] – 2026-08-04
 
 ### Benachrichtigungen, Wanddisplay und feinere Profilrechte

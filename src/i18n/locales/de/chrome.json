@@ -42,6 +42,12 @@
     "logoutTitle": "Familie wechseln / Abmelden",
     "wallDisplay": "Wandansicht",
     "wallDisplayHint": "Geschützte Ansicht: anzeigen und abhaken, ohne Einstellungen zu verändern",
+    "menu": {
+      "title": "Menü",
+      "open": "Menü öffnen",
+      "close": "Schließen",
+      "settings": "Einstellungen"
+    },
     "themePicker": {
       "openPet": "Pfotenwelt wählen",
       "openChild": "Meine Themenwelt wählen",

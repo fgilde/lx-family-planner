@@ -42,6 +42,12 @@
     "logoutTitle": "Switch family / Log out",
     "wallDisplay": "Wall view",
     "wallDisplayHint": "Protected view: display and check off items without changing settings",
+    "menu": {
+      "title": "Menu",
+      "open": "Open menu",
+      "close": "Close",
+      "settings": "Settings"
+    },
     "themePicker": {
       "openPet": "Choose paw world",
       "openChild": "Choose my theme world",
