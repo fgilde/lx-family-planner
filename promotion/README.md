@@ -8,7 +8,7 @@ Jede Datei ist für eine andere Entdeckungs-Surface gedacht.
 | Aktion | Datei | Status | Wann möglich |
 |---|---|---|---|
 | **awesome-selfhosted** PR | `awesome-selfhosted.yml` | ⏳ vorbereitet | **ab 2026-12-01** (4-Monate-Regel) |
-| **selfh.st** Einreichung | `selfh-st-submission.md` | ✅ bereit | **jetzt** |
+| **selfh.st** Einreichung | `selfh-st-submission.md` | 🔄 im Review | eingereicht 2026-08-07 |
 | **Reddit r/selfhosted** Show & Tell | `reddit-show-and-tell.md` | ✅ bereit | **jetzt** (nächster Thread) |
 | Unraid Community Applications | — | ✅ live | erledigt |
 | Umbrel App Store | — | ✅ live | erledigt |
