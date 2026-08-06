@@ -1,0 +1,36 @@
+# Awesome-Selfhosted-Eintrag für LX Family Planner
+# ===================================================
+# FRÜHESTENS EINREICHEN: Dezember 2026
+# Grund: awesome-selfhosted verlangt, dass das erste Release >4 Monate alt ist.
+#   Erstes Release: v1.13.0 am 2026-07-30
+#   => 4-Monate-Marke: 2026-11-30 / frühestens 2026-12-01
+#
+# Einreichung: PR gegen awesome-selfhosted/awesome-selfhosted-data
+#   Datei: software/lx-family-planner.yml
+#   Pfad:  https://github.com/awesome-selfhosted/awesome-selfhosted-data/new/master/software
+#
+# Commmit-Nachricht:   add LX Family Planner
+#
+# WICHTIG (sonst automatische Ablehnung):
+#   - Genau eine Datei pro PR
+#   - Kommentare (alles ab #) vor dem Committen entfernen
+#   - Keine Wörter wie "open-source", "free", "self-hosted" in der description
+#     (ergibt sich aus der Listen-Zugehörigkeit)
+#   - description im Satzcase, <250 Zeichen
+#   - In single-page mode erscheint die App nur unter dem ERSTEN Tag -> wählen
+
+name: "LX Family Planner"
+website_url: "https://familie.laxxx-lab.de/"
+source_code_url: "https://github.com/laxxx-lab/lx-family-planner"
+description: "Family organizer combining calendars, tasks, shopping lists, meal planning, family chat, file sharing, and dedicated child and pet profiles."
+licenses:
+  - MIT
+platforms:
+  - Nodejs
+  - Docker
+tags:
+  - Groupware
+  - Task Management & To-do Lists
+  - Recipe Management
+demo_url: "https://familie.laxxx-lab.de/"
+related_software_url: "https://github.com/laxxx-lab/lx-family-planner#integrations"
