@@ -9,7 +9,11 @@ Jede Datei ist für eine andere Entdeckungs-Surface gedacht.
 |---|---|---|---|
 | **awesome-selfhosted** PR | `awesome-selfhosted.yml` | ⏳ vorbereitet | **ab 2026-12-01** (4-Monate-Regel) |
 | **selfh.st** Einreichung | `selfh-st-submission.md` | 🔄 im Review | eingereicht 2026-08-07 |
-| **Reddit r/selfhosted** Show & Tell | `reddit-show-and-tell.md` | ✅ bereit | **jetzt** (nächster Thread) |
+| **Reddit r/selfhosted** Megathread | `reddit-show-and-tell.md` | 🔄 live | gepostet 2026-08-07, erste Reaktion (u/quiet_beer) |
+| **Reddit r/homelab** | — | ⏳ wartet | ab **2026-08-25** (1-Monats-Commit-History, Rule 7) |
+| **Reddit r/docker** | — | ⏳ Mod-Freigabe nötig | Modmail vor Post |
+| **Reddit r/unRAID** | — | ✅ bereit | sofort postbar |
+| **Reddit r/HomeAssistant** | — | ✅ bereit | Fokus auf HA-Integration |
 | Unraid Community Applications | — | ✅ live | erledigt |
 | Umbrel App Store | — | ✅ live | erledigt |
 
