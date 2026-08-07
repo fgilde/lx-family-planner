@@ -28,8 +28,10 @@ import useDashboardLayout from '../../hooks/useDashboardLayout';
 import { dashboardLayoutForTrash } from '../../utils/dashboardLayout';
 import { formatDate } from '../../utils/formatting';
 import {
+  eventAudienceMembers,
   eventIsCurrentOrFuture,
-  eventIsForMember
+  eventIsForMember,
+  eventSpansToday
 } from '../../../shared/calendarAudience.js';
 import {
   birthdayEventCopy,
@@ -118,6 +120,7 @@ export default function PersonalDashboard() {
   const { t: tCalendar } = useTranslation('calendar');
   const {
     activeMember,
+    members,
     events,
     tasks,
     toggleTask,
@@ -195,6 +198,13 @@ export default function PersonalDashboard() {
             new Date(`${right.date}T${right.time || '00:00'}`)
         ),
     [activeHousehold, activeMember.id, events, todayKey]
+  );
+  // Strikt heutige Termine für die „Heute im Blick"-Zusammenfassung und das
+  // Kalender-Badge – analog zum Tabletmodus (KitchenTabletView).
+  const todayEvents = useMemo(
+    () =>
+      myEvents.filter(event => eventSpansToday(event, todayKey)),
+    [myEvents, todayKey]
   );
   const myTasks = useMemo(
     () =>
@@ -292,7 +302,7 @@ export default function PersonalDashboard() {
             </h1>
             <p>
               {t('personal.hero.summary', {
-                events: t('personal.hero.events', { count: myEvents.length }),
+                events: t('personal.hero.events', { count: todayEvents.length }),
                 tasks: t('personal.hero.tasks', { count: myTasks.length }),
                 shopping: t('personal.hero.shopping', {
                   count: openShopping.length
@@ -327,16 +337,17 @@ export default function PersonalDashboard() {
           <DashboardCardHeader
             action={() => setActiveTab('calendar')}
             actionLabel={t('personal.widgets.calendar.action')}
-            count={myEvents.length}
+            count={todayEvents.length}
             icon={Calendar}
             title={t('personal.widgets.calendar.label')}
           />
-          {myEvents.length === 0 ? (
+          {todayEvents.length === 0 ? (
             <EmptyWidget icon="🎉">{t('personal.calendar.empty')}</EmptyWidget>
           ) : (
             <div className="adult-event-list">
-              {myEvents.slice(0, 4).map(event => {
+              {todayEvents.slice(0, 4).map(event => {
                 const displayEvent = birthdayEventCopy(event, t);
+                const audience = eventAudienceMembers(event, members);
                 return <button
                   type="button"
                   key={event.id}
@@ -352,7 +363,11 @@ export default function PersonalDashboard() {
                   </time>
                   <span>
                     <strong>{displayEvent.title}</strong>
-                    <small>{displayEvent.location || t('personal.calendar.defaultLocation')}</small>
+                    <small>
+                      {displayEvent.location ||
+                        audience.map(entry => entry.name).join(', ') ||
+                        t('personal.calendar.defaultLocation')}
+                    </small>
                   </span>
                 </button>;
               })}

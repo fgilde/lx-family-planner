@@ -33,7 +33,8 @@ import EventReminderDialog from './EventReminderDialog';
 import CalendarEventDialog from './CalendarEventDialog';
 import {
   eventAudienceMembers,
-  eventIsForMember
+  eventIsForMember,
+  eventLastDate
 } from '../../../shared/calendarAudience.js';
 import {
   formatReminderLead,
@@ -75,14 +76,6 @@ function previousLocalDate(value) {
   const date = dateFromKey(value);
   date.setDate(date.getDate() - 1);
   return localDateKey(date);
-}
-
-function eventLastDate(event) {
-  if (!event.endDate) return event.date;
-  const endDate = event.allDay
-    ? previousLocalDate(event.endDate)
-    : event.endDate;
-  return endDate < event.date ? event.date : endDate;
 }
 
 export default function CalendarView() {
