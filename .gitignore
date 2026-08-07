@@ -49,6 +49,7 @@ scratch/
 tmp/
 temp/
 scripts/generate_android_icons.py
+scripts/stats.mjs
 
 # Local tools and editor state
 .codex/
