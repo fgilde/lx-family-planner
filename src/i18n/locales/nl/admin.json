@@ -1,0 +1,339 @@
+{
+  "parentAdmin": {
+    "accessDenied": {
+      "title": "Oudersgedeelte",
+      "description": "Dit gedeelte is alleen zichtbaar voor volwassen gezinsprofielen."
+    },
+    "toasts": {
+      "profileUpdatedTitle": "Kindprofiel bijgewerkt",
+      "profileUpdatedBody": "De instellingen van {{name}} zijn opgeslagen."
+    },
+    "hero": {
+      "kicker": "Alleen voor volwassenen",
+      "title": "Oudershuis",
+      "description": "Beheer profielen, taken en dashboards van de kinderen op één rustige plek – zonder heen en weer te schakelen."
+    },
+    "overview": {
+      "childProfiles": "Kindprofielen",
+      "openTasks": "Open taken",
+      "totalStars": "Totaal aantal sterren",
+      "managedProfiles": "Beheerde profielen"
+    },
+    "modules": {
+      "kicker": "Minder drukte",
+      "title": "Gezinsonderdelen",
+      "intro": "Zet onderdelen uit die jouw gezin niet gebruikt. Ze verdwijnen voor elk profiel en kunnen hier altijd weer worden aangezet.",
+      "visible": "Zichtbaar",
+      "hidden": "Verborgen",
+      "profileHint": "Om één persoon aan te passen, bewerk je dat profiel en kies je de zichtbare onderdelen.",
+      "labels": {
+        "chat": "Chat",
+        "calendar": "Agenda",
+        "trash": "Afvalkalender",
+        "shopping": "Boodschappen",
+        "meals": "Maaltijdplan",
+        "tasks": "Taken",
+        "family-life": "Gezinsleven",
+        "board": "Prikbord",
+        "cloud": "Gezinscloud",
+        "mail": "Gezinspost"
+      }
+    },
+    "managed": {
+      "kicker": "Zonder eigen inlog",
+      "title": "Beheerde profielen",
+      "create": "Profiel aanmaken",
+      "intro": "Voor oma, opa of mensen onder jouw hoede: ze verschijnen in afspraken en taken, maar niet bij het inloggen of in de chat.",
+      "positionWithoutLogin": "{{position}} · geen inlog",
+      "plannable": "In te plannen",
+      "emptyTitle": "Nog niemand toegevoegd",
+      "emptyHint": "Kies bij het aanmaken van een profiel voor \"Alleen door ons beheerd\"."
+    },
+    "children": {
+      "kicker": "Kinderen & tieners",
+      "title": "Profielen beheren",
+      "add": "Profiel toevoegen",
+      "selectedProfile": "Geselecteerd profiel",
+      "positionLabel": "Positie",
+      "pinLabel": "Nieuwe profiel-PIN (optioneel)",
+      "pinPlaceholder": "Leeg laten om ongewijzigd te blijven",
+      "saving": "Opslaan …",
+      "save": "Profiel opslaan",
+      "emptyTitle": "Nog geen kindprofiel",
+      "emptyDescription": "Maak eerst een profiel aan als kind of tiener.",
+      "emptyCta": "Kindprofiel aanmaken"
+    },
+    "tasks": {
+      "kicker": "Opruimen",
+      "title": "Takenlijst opschonen",
+      "openCount": "{{count}} open",
+      "doneCount": "{{count}} klaar",
+      "filterLabel": "Alleen taken van",
+      "allMembers": "Alle gezinsleden",
+      "deleteCompleted": "Voltooide verwijderen",
+      "deleteCompletedConfirm": "Voltooide taken echt verwijderen?",
+      "clearAll": "Takenlijst legen",
+      "clearAllConfirm": "Echt alles verwijderen?"
+    },
+    "points": {
+      "kicker": "Sterrenrekeningen",
+      "title": "Beloningspunten",
+      "intro": "Reset de punten van kinderen en volwassenen apart. Huisdieren verzamelen geen beloningspunten.",
+      "resetConfirm": "Echt resetten naar 0?"
+    },
+    "media": {
+      "kicker": "Dashboard voor kinderen",
+      "title": "Medialounge",
+      "intro": "Voeg goedgekeurde YouTube-kanalen en Spotify-afspeellijsten toe als grote, kindvriendelijke tegels. Alleen wat jij hier goedkeurt, is zichtbaar.",
+      "chooseChild": "Kies een kindprofiel",
+      "kindAriaLabel": "Mediasoort",
+      "titlePlaceholder": "bijv. Sesamstraat",
+      "share": "Widget goedkeuren",
+      "linkMeta": "{{kind}} · op het dashboard van {{name}}",
+      "childProfileFallback": "Kindprofiel",
+      "removeLink": "{{title}} verwijderen",
+      "empty": "Nog geen mediawidgets goedgekeurd."
+    },
+    "family": {
+      "kicker": "Gezinsnetwerk",
+      "title": "Gerelateerde gezinsaccounts",
+      "confirmedConnections_one": "{{count}} bevestigde verbinding",
+      "confirmedConnections_other": "{{count}} bevestigde verbindingen",
+      "pendingRequests_one": "{{count}} openstaand verzoek",
+      "pendingRequests_other": "{{count}} openstaande verzoeken",
+      "openTree": "Stamboom openen"
+    }
+  },
+  "homeAssistant": {
+    "kicker": "Slim huis · lokaal & beschermd",
+    "connected": "Verbonden",
+    "notConnected": "Niet verbonden",
+    "intro": "Brengt geselecteerde huisstatussen als echte tegels in de gezinsplanner. De toegangstoken blijft versleuteld op jouw server.",
+    "domains": {
+      "binary_sensor": "Status",
+      "button": "Knop",
+      "climate": "Klimaat",
+      "cover": "Zonwering",
+      "device_tracker": "Aanwezigheid",
+      "fan": "Ventilator",
+      "input_boolean": "Schakelaar",
+      "light": "Lamp",
+      "media_player": "Media",
+      "person": "Persoon",
+      "scene": "Scene",
+      "script": "Script",
+      "sensor": "Sensor",
+      "sun": "Zon",
+      "switch": "Schakelaar",
+      "vacuum": "Stofzuigrobot",
+      "weather": "Weer"
+    },
+    "connect": {
+      "addressLabel": "Home Assistant-adres",
+      "addressHint": "Met Docker is het vaste IP-adres op jouw thuisnetwerk het meest betrouwbaar.",
+      "tokenLabel": "Langlevende toegangstoken",
+      "tokenPlaceholder": "Token uit jouw Home Assistant-profiel",
+      "tokenHint": "De token wordt na het opslaan niet meer getoond.",
+      "submit": "Verbinding controleren"
+    },
+    "summary": {
+      "tilesShared_one": "{{count}} tegel gedeeld op het dashboard",
+      "tilesShared_other": "{{count}} tegels gedeeld op het dashboard",
+      "active": "Actief"
+    },
+    "toolbar": {
+      "loadDevices": "Apparaten laden",
+      "testConnection": "Verbinding testen",
+      "searchPlaceholder": "Zoek naar een apparaat of sensor"
+    },
+    "callout": {
+      "title": "Kies dashboardtegels",
+      "description": "Laad de apparaten en bepaal precies wat zichtbaar en bestuurbaar mag zijn."
+    },
+    "entity": {
+      "allowControl": "Bedienen toestaan",
+      "visibleFor": "Ook zichtbaar voor:"
+    },
+    "noMatches": "Geen overeenkomende apparaten gevonden.",
+    "saveBar": {
+      "selectedCount": "{{count}} geselecteerd",
+      "hint": "Volwassenen zien alles, kinderen alleen wat met hen is gedeeld.",
+      "save": "Selectie opslaan"
+    },
+    "manage": {
+      "summary": "Verbinding beheren",
+      "newTokenPlaceholder": "Nieuwe toegangstoken",
+      "renew": "Verbinding vernieuwen",
+      "disconnectConfirm": "Echt de verbinding verbreken?",
+      "disconnect": "Verbinding verbreken"
+    }
+  },
+  "webPush": {
+    "kickerNative": "Rechtstreeks vanaf Android",
+    "kickerWeb": "Zonder extra app",
+    "titleNative": "Android-appmeldingen",
+    "titleWeb": "Browsermeldingen",
+    "introNative": "De LX-app registreert dit Android-apparaat één keer voor een profiel. Daarna komen meldingen ook binnen als de app gesloten is.",
+    "introWeb": "Elke telefoon of tablet registreert één keer voor een gezinsprofiel. Sleutels en technische details blijven onzichtbaar.",
+    "deviceConnected": "Dit apparaat staat aan",
+    "activationSteps": {
+      "server": "Server controleren …",
+      "android": "Android voorbereiden …",
+      "channels": "Meldingen instellen …",
+      "permission": "Toestemming controleren …",
+      "permission-request": "Bevestig de Android-melding …",
+      "firebase": "Apparaat bij Firebase registreren …",
+      "save": "Apparaat opslaan …"
+    },
+    "serverMissing": {
+      "title": "Firebase-verbinding ontbreekt nog",
+      "description": "De LX-server heeft nog geen privésleutel voor Firebase. Daardoor kan hij Android momenteel niet bereiken.",
+      "hint": "Sla de sleutel alleen op in de datamap van de server en installeer daarna de LX-app die met hetzelfde Firebase-project is gebouwd. De sleutel hoort nooit in de Git-repository."
+    },
+    "checking": {
+      "title": "Android-verbinding controleren",
+      "description": "LX vraagt de actuele Firebase-status op bij de gezinsserver."
+    },
+    "statusError": {
+      "title": "Status kon niet worden gecontroleerd",
+      "fallback": "De app heeft nog geen reactie van de gezinsserver ontvangen.",
+      "retry": "Opnieuw controleren"
+    },
+    "unavailable": {
+      "titleSecureContext": "HTTPS ontbreekt – daarom werkt achtergrond-push niet",
+      "titleGeneric": "Nog één beveiligde stap",
+      "hintNative": "Installeer de nieuwste LX Android-app om native meldingen te gebruiken.",
+      "hintWeb": "Open de planner via een vertrouwd HTTPS-adres, voeg hem toe aan jouw Android-startscherm en activeer daarna dit apparaat."
+    },
+    "denied": {
+      "title": "Uitgezet in de browser",
+      "bodyNative": "Sta meldingen toe onder Android → Apps → LX Family Planner → Meldingen.",
+      "bodyWeb": "Sta meldingen toe in de site-instellingen van jouw browser en open de planner daarna opnieuw."
+    },
+    "ready": {
+      "title": "Registreer dit apparaat voor {{name}}",
+      "hintNative": "Eén tik – de Android-melding verschijnt maar één keer.",
+      "hintWeb": "Eén klik – geen token en geen extra app.",
+      "connecting": "Verbinden …",
+      "enable": "Meldingen aanzetten"
+    },
+    "activationError": "Verbinding niet voltooid",
+    "connectedNote": {
+      "title": "Klaar voor achtergrond-push",
+      "bodyNative": "Android toont gezinsmeldingen in de systeembalk en, als jij wilt, op het vergrendelsering – ook als LX gesloten is.",
+      "bodyWeb": "Voor de meest betrouwbare levering op Android installeer je de planner via \"Toevoegen aan startscherm\" en sta je meldingen toe in de Android-app-instellingen."
+    },
+    "preview": {
+      "title": "Details tonen op het vergrendelscherm",
+      "hint": "Als dit uit staat, blijven chats, taken en afspraken privé."
+    },
+    "actions": {
+      "saving": "Opslaan …",
+      "save": "Selectie opslaan",
+      "sending": "Versturen …",
+      "sendTest": "Test versturen",
+      "disable": "Uitzetten voor dit profiel"
+    },
+    "devices": {
+      "title": "Gezinsapparaten",
+      "registeredCount": "{{count}} geregistreerd",
+      "transportAndroid": "Android-app",
+      "transportBrowser": "Browser",
+      "meta": "{{transport}} · {{member}} · laatst bijgewerkt {{date}}",
+      "removeDevice": "{{name}} verwijderen",
+      "empty": "Nog geen gezinsapparaat geregistreerd."
+    }
+  },
+  "gotify": {
+    "kicker": "Pushberichten",
+    "title": "Gotify-meldingen",
+    "intro": "Belangrijke gezinsmomenten bereiken jou ook als de planner niet open is.",
+    "connected": "Verbonden",
+    "serverFallback": "Gotify-server",
+    "security": {
+      "title": "Veilige installatie",
+      "body": "Het wachtwoord wordt slechts één keer gebruikt om een eigen Gotify-app aan te maken en niet opgeslagen."
+    },
+    "form": {
+      "serverLabel": "Gotify-server",
+      "usernameLabel": "Gebruikersnaam",
+      "passwordLabel": "Wachtwoord",
+      "plannerUrlLabel": "Planner-adres op jouw telefoon",
+      "connecting": "Verbinden …",
+      "connect": "Verbinden & testen"
+    },
+    "status": {
+      "channel": "Berichtenkanaal",
+      "openGotify": "Gotify openen"
+    },
+    "includeText": {
+      "title": "Berichttekst op het vergrendelscherm tonen",
+      "hint": "Standaard uit vanwege privacy."
+    },
+    "phoneUrlLabel": "Dit planner-adres openen bij een tik",
+    "actions": {
+      "saving": "Opslaan …",
+      "saveRules": "Regels opslaan",
+      "sending": "Versturen …",
+      "sendTest": "Test versturen",
+      "disconnectConfirm": "Echt de verbinding verbreken?",
+      "disconnect": "Verbinding verbreken"
+    }
+  },
+  "ntfy": {
+    "kicker": "Open push-kanaal",
+    "title": "ntfy-meldingen",
+    "intro": "Stuurt dezelfde geselecteerde gezinsgebeurtenissen naar een ntfy-onderwerp – zelf gehost of via ntfy.sh.",
+    "connected": "Verbonden",
+    "security": {
+      "title": "Behandel het onderwerp als een wachtwoord",
+      "body": "Gebruik een moeilijk te raden onderwerpnaam. Een optionele toegangstoken wordt versleuteld opgeslagen."
+    },
+    "server": "ntfy-server",
+    "topic": "Onderwerp",
+    "token": "Toegangstoken (optioneel)",
+    "tokenPlaceholder": "tk_... voor beveiligde onderwerpen",
+    "plannerUrl": "Dit planner-adres openen bij een tik",
+    "connect": "Verbinden & testen",
+    "connecting": "Verbinden …",
+    "open": "ntfy openen",
+    "includeText": "Berichttekst in de melding tonen",
+    "includeTextHint": "Standaard uit vanwege privacy.",
+    "save": "Regels opslaan",
+    "test": "Test versturen",
+    "disconnect": "Verbinding verbreken",
+    "disconnectConfirm": "Echt de verbinding verbreken?"
+  },
+  "problemReports": {
+    "kicker": "Feedback uit de app",
+    "title": "Problemmeldingen",
+    "intro": "Meldingen blijven op jouw server. Met \"Kopiëren\" kunnen ze compleet en zonder inloggegevens worden doorgegeven.",
+    "loading": "Meldingen laden …",
+    "categories": {
+      "problem": "Probleem",
+      "content": "Inhoud",
+      "idea": "Idee",
+      "fallback": "Melding"
+    },
+    "copy": {
+      "profileLine": "Profiel: {{value}}",
+      "areaLine": "Onderdeel: {{value}}",
+      "versionLine": "Versie: {{value}}",
+      "deviceLine": "Apparaat: {{value}}",
+      "successTitle": "Melding gekopieerd",
+      "successBody": "Je kunt hem nu direct in GitHub of een bericht plakken.",
+      "errorTitle": "Kopiëren niet mogelijk",
+      "errorBody": "De browser blokkeerde de toegang tot het klembord."
+    },
+    "unknownMember": "Onbekend",
+    "areaFallback": "App",
+    "copyButton": "Kopiëren",
+    "markDone": "Klaar",
+    "reopen": "Heropenen",
+    "empty": {
+      "title": "Geen open meldingen",
+      "hint": "Het is hier momenteel rustig."
+    },
+    "openCount": "{{count}} open"
+  }
+}

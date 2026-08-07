@@ -1,0 +1,185 @@
+{
+  "positions": {
+    "mama": "Mama",
+    "papa": "Tata",
+    "kind": "Dziecko",
+    "teenager": "Nastolatek",
+    "tochter_erwachsen": "Dorosła córka",
+    "sohn_erwachsen": "Dorosły syn",
+    "oma": "Babcia",
+    "opa": "Dziadek",
+    "betreute_person": "Osoba pod opieką",
+    "tante": "Ciotka",
+    "onkel": "Wujek",
+    "patin": "Matka chrzestna",
+    "pate": "Ojciec chrzestny",
+    "haustier": "Zwierzątko",
+    "familienmitglied": "Członek rodziny",
+    "wanddisplay": "Ekran ścienny"
+  },
+  "roleLabels": {
+    "adult": "Dorosły",
+    "child": "Dziecko",
+    "teen": "Nastolatek",
+    "senior": "Dziadkowie",
+    "member": "Członek rodziny",
+    "pet": "Zwierzątko",
+    "wall": "Ekran ścienny"
+  },
+  "modal": {
+    "eyebrow": {
+      "protected": "Profil chroniony",
+      "edit": "Edytuj profil",
+      "new": "Nowy profil",
+      "family": "Twoja rodzina"
+    },
+    "title": {
+      "unlock": "Odblokuj {{name}}",
+      "edit": "Edytuj profil",
+      "create": "Utwórz profil",
+      "whoseTurn": "Kto jest teraz aktywny?"
+    }
+  },
+  "toasts": {
+    "switched": "Przełączono profil",
+    "greeting": "Cześć {{name}}!",
+    "locked": "Profil zablokowany",
+    "pinIncorrect": "Nieprawidłowy PIN",
+    "updated": "Profil zaktualizowany",
+    "savedMessage": "Zapisano {{name}}."
+  },
+  "confirmDelete": "Naprawdę usunąć ten profil rodzinny?",
+  "pin": {
+    "protectedHeading": "Profil {{name}} jest chroniony",
+    "enterPin": "Wpisz osobisty PIN profilu.",
+    "petPasswordNeeded": "Przełączenie z profilu zwierzątka wymaga hasła rodzinnego.",
+    "childPasswordNeeded": "Przełączenie z profilu dziecka wymaga hasła rodzinnego.",
+    "pinPlaceholder": "PIN profilu",
+    "familyPasswordPlaceholder": "Hasło rodzinne",
+    "unlock": "Odblokuj"
+  },
+  "list": {
+    "intro": "Kliknij profil, aby od razu przełączyć się w jego osobisty świat rodzinny.",
+    "selectAria": "Wybierz {{name}}, {{position}}",
+    "activeProfile": "Aktywny profil",
+    "pinProtected": "Chroniony PIN-em",
+    "petBadge": "Profil zwierzątka",
+    "editMember": "Edytuj {{name}}",
+    "managedHeading": "Zarządzane przez Ciebie",
+    "managedSubheading": "Bez loginu · do wydarzeń i zadań",
+    "managedNoAccess": "{{position}} · bez własnego loginu",
+    "eventsTitle": "Wydarzenia",
+    "tasksTitle": "Zadania",
+    "addMember": "Dodaj członka"
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "deviceHint": "Dla {{name}} na tym urządzeniu",
+    "petModeActive": "Tryb zwierzątka aktywny",
+    "petModeHint": "Bez czatu, powiadomień i funkcji konta",
+    "headingFor": "Powiadomienia dla {{name}}",
+    "savedPerDevice": "Ten wybór jest zapisany dla tego profilu i tego urządzenia.",
+    "on": "Włączone",
+    "off": "Wyłączone",
+    "serverNotConfigured": "Natywne powiadomienia Androida nie są jeszcze skonfigurowane na serwerze. Instrukcje znajdziesz w Centrum rodzica.",
+    "deniedNative": "Android blokuje powiadomienia. Zezwól na nie w Aplikacje → LX Family Planner → Powiadomienia.",
+    "deniedBrowser": "Przeglądarka blokuje powiadomienia. Zezwól na nie raz w ustawieniach strony w przeglądarce.",
+    "showPreviews": "Pokazuj treść w powiadomieniach",
+    "sendTest": "Wyślij powiadomienie testowe"
+  },
+  "modules": {
+    "profileTitle": "Widoczne sekcje",
+    "profileHint": "Wybierz, które sekcje ten profil może widzieć i otwierać z nawigacji.",
+    "labels": {
+      "chat": "Czat",
+      "calendar": "Kalendarz",
+      "trash": "Kalendarz śmieci",
+      "shopping": "Zakupy",
+      "meals": "Plan posiłków",
+      "tasks": "Zadania",
+      "family-life": "Życie rodziny",
+      "board": "Tablica",
+      "cloud": "Chmurka rodzinna",
+      "mail": "Poczta rodzinna"
+    }
+  },
+  "avatars": {
+    "av-1": "Odważny lew",
+    "av-2": "Sprytny lis",
+    "av-3": "Pies przygód",
+    "av-4": "Kot ninja",
+    "av-5": "Panda czerwona",
+    "av-6": "Kolega z kosmosu"
+  },
+  "form": {
+    "usage": "Jak profil będzie używany?",
+    "ownLogin": "Z własnym loginem",
+    "ownLoginHint": "Pojawia się w przełączniku profili i może samodzielnie otwierać planer.",
+    "managedOnly": "Tylko zarządzane przez nas",
+    "managedOnlyHint": "Dla babci, dziadka lub osób pod opieką bez własnego dostępu.",
+    "managedNote": "Profil organizacyjny bez loginu",
+    "managedNoteHint": "Profil pojawia się w kalendarzach i zadaniach, ale nie przy logowaniu, w przełączniku profili ani na czacie.",
+    "petNote": "Profil zwierzątka",
+    "petNoteHint": "Pokazuje zadania opieki i wizyty u weterynarza – bez czatu, powiadomień i sklepu gwiazdek.",
+    "petName": "Imię zwierzątka",
+    "petNamePlaceholder": "np. Luna",
+    "namePlaceholder": "np. Przykładowe imię",
+    "birthDate": "Data urodzenia",
+    "birthDateHint": "Automatycznie tworzy wpisy w kalendarzu rodzinnym i przypomnienia.",
+    "position": "Stanowisko w rodzinie",
+    "avatar": "Zdjęcie profilowe",
+    "ownPhoto": "Własne zdjęcie",
+    "color": "Kolor profilu",
+    "newPin": "Nowy PIN profilu (opcjonalnie)",
+    "pin": "PIN profilu (opcjonalnie)",
+    "pinKeepPlaceholder": "Puste = bez zmian",
+    "pinPlaceholder": "Osobista ochrona",
+    "saving": "Zapisywanie …",
+    "save": "Zapisz profil",
+    "delete": "Usuń profil"
+  },
+  "quickAdd": {
+    "title": "Szybkie dodawanie",
+    "types": {
+      "event": "Wydarzenie",
+      "shopping": "Zakupy",
+      "task": "Zadanie",
+      "note": "Notatka"
+    },
+    "titleLabels": {
+      "event": "Tytuł wydarzenia",
+      "shopping": "Nazwa pozycji",
+      "task": "Zadanie",
+      "note": "Tytuł notatki"
+    },
+    "titlePlaceholder": "Wpisz tutaj...",
+    "forWhom": "Dla kogo?",
+    "everyone": "Wszyscy (współdzielone)",
+    "managed": "zarządzane",
+    "allDay": "Wydarzenie całodniowe",
+    "allDayHint": "Bez stałej godziny – może trwać kilka dni.",
+    "startsOn": "Zaczyna się",
+    "startsAt": "Godzina rozpoczęcia",
+    "endsOn": "Kończy się (opcjonalnie)",
+    "endsOnInclusive": "Do (opcjonalnie)",
+    "endsAt": "Godzina zakończenia (opcjonalnie)",
+    "locationOptional": "Miejsce (opcjonalnie)",
+    "locationPlaceholder": "np. dr Nowak, szkoła",
+    "inviteFamilies": "Zaproś połączone rodziny",
+    "inviteFamiliesHint": "Wydarzenie pojawia się dla wszystkich wybranych rodzin; wydarzenia prywatne pozostają osobne.",
+    "categoryLabel": "Kategoria",
+    "shoppingCategories": {
+      "produce": "Owoce i warzywa",
+      "dairy": "Nabiał i chłodnie",
+      "bakery": "Piekarnia",
+      "pantry": "Spiżarnia",
+      "drinks": "Napoje",
+      "household": "Drogeria i dom"
+    },
+    "quantity": "Ilość",
+    "assignedTo": "Przypisane do",
+    "starPoints": "Punkty gwiazdek",
+    "noteText": "Tekst notatki",
+    "notePlaceholder": "Wpisz treść..."
+  }
+}

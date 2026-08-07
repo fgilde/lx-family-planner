@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "attachmentLoad": "La pièce jointe n'a pas pu être chargée."
+  },
+  "imageViewer": {
+    "label": "Image de discussion",
+    "viewLarge": "Voir {{name}} en pleine taille",
+    "closeAria": "Fermer la vue de l'image",
+    "tapToClose": "Appuyez en dehors de l'image pour fermer"
+  },
+  "attachment": {
+    "open": "Ouvrir",
+    "download": "Télécharger",
+    "kinds": {
+      "apk": "Application Android",
+      "archive": "Archive",
+      "pdf": "Document PDF",
+      "video": "Vidéo",
+      "audio": "Audio",
+      "document": "Document"
+    }
+  },
+  "toasts": {
+    "attachmentOpenFailedTitle": "Pièce jointe non ouverte",
+    "downloadFailedTitle": "Échec du téléchargement",
+    "attachmentLimitTitle": "Limite de pièces jointes atteinte",
+    "attachmentLimitBody": "Un message peut contenir au maximum {{max}} fichiers.",
+    "fileTooLargeTitle": "Fichier trop volumineux",
+    "fileTooLargeBody": "{{name}} dépasse 100 Mo.",
+    "selectionTrimmedTitle": "Sélection réduite",
+    "selectionTrimmedBody_one": "Le premier fichier a été joint.",
+    "selectionTrimmedBody_other": "Les {{count}} premiers fichiers ont été joints.",
+    "attachmentSendFailedTitle": "Pièce jointe non envoyée",
+    "attachmentSendFailedBody": "Le fichier n'a pas pu être enregistré dans le Cloud familial."
+  },
+  "preview": {
+    "fileShared": "📎 Fichier partagé",
+    "invitedChat": "Discussion familiale invitée",
+    "openGroup": "Ouvrir le groupe",
+    "noMessages": "Pas encore de messages",
+    "photo": "📷 Photo",
+    "file": "📎 Fichier",
+    "newMessage": "Nouveau message"
+  },
+  "directory": {
+    "kicker": "Paroles de famille",
+    "title": "Discussions",
+    "groupChannel": "Tout le monde ensemble",
+    "directLabel": "Direct",
+    "invitedLabel": "Invité"
+  },
+  "room": {
+    "familyProfiles_one": "{{count}} profil familial",
+    "familyProfiles_other": "{{count}} profils familiaux",
+    "guestInvited": "Vous avez été personnellement invité",
+    "groupTitle": "Discussion familiale",
+    "visibleToAll": "Visible par tout le monde",
+    "guestAccess": "Accès invité une fois accepté",
+    "directMessage": "Message direct"
+  },
+  "empty": {
+    "title": "C'est encore calme par ici",
+    "prompt": "Écrivez le premier message à {{name}}.",
+    "familyName": "votre famille"
+  },
+  "message": {
+    "you": "Vous",
+    "chatPhoto": "Photo de discussion",
+    "sentAttachmentAlt": "Pièce jointe envoyée",
+    "viewLarge": "Voir en pleine taille"
+  },
+  "composer": {
+    "removeAttachment": "Retirer {{name}}",
+    "uploadingFile": "Enregistrement du fichier {{current}} sur {{total}} dans le cloud",
+    "sendingMessage": "Envoi du message",
+    "attachFiles": "Joindre des fichiers",
+    "placeholder": "Message à {{name}}…",
+    "placeholderFamilyName": "la famille",
+    "sending": "Envoi…",
+    "send": "Envoyer",
+    "cloudNote": "Les pièces jointes sont classées automatiquement dans l'archive familiale · jusqu'à 100 Mo"
+  }
+}

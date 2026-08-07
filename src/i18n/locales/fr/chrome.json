@@ -1,0 +1,195 @@
+{
+  "app": {
+    "loading": "Préparation de votre espace familial…"
+  },
+  "navigation": {
+    "myArea": "Mon espace ({{name}})",
+    "myAreaFallback": "Accueil",
+    "chat": "Chat familial & MP",
+    "calendar": "Calendrier",
+    "trash": "Calendrier des déchets",
+    "shopping": "Courses Bring!",
+    "meals": "Plan de repas",
+    "tasks": "Tâches & Étoiles",
+    "familyLife": "Parcours familial",
+    "board": "Tableau d'affichage",
+    "childDashboard": "Mon aventure",
+    "childTasks": "Missions & Étoiles",
+    "childFamilyLife": "Mon parcours",
+    "childCalendar": "Calendrier familial",
+    "childChat": "Radio familiale",
+    "petDashboard": "Pour {{name}}",
+    "petDashboardFallback": "notre animal",
+    "petCalendar": "Vétérinaire & RDV",
+    "cloud": "Cloud familial",
+    "mail": "Courrier familial",
+    "admin": "Espace parents",
+    "familyTree": "Arbre généalogique",
+    "familyTreeTitle": "Arbre généalogique & familles liées"
+  },
+  "header": {
+    "tagline": "Notre foyer familial",
+    "householdSwitched": "🏠 Foyer basculé",
+    "householdViewFamily": "Vue : Notre foyer",
+    "householdViewGrandparents": "Vue : Foyer de Mamie & Papi",
+    "planLocationAria": "Choisir le lieu de planification",
+    "planLocation": "Lieu de planification",
+    "ourHome": "Notre maison",
+    "grandparentsHome": "Maison de Mamie & Papi",
+    "manageFamily": "Gérer la famille",
+    "pet": "Animal",
+    "serverConfigTitle": "Configurer la connexion serveur / IP",
+    "logoutTitle": "Changer de famille / Se déconnecter",
+    "wallDisplay": "Vue murale",
+    "wallDisplayHint": "Vue protégée : afficher et cocher des éléments sans modifier les réglages",
+    "menu": {
+      "title": "Menu",
+      "open": "Ouvrir le menu",
+      "close": "Fermer",
+      "settings": "Réglages"
+    },
+    "themePicker": {
+      "openPet": "Choisir l'univers des pattes",
+      "openChild": "Choisir mon univers",
+      "openAdult": "Choisir l'univers de thème",
+      "kicker": "Univers de design",
+      "titlePet": "L'univers pattes de {{name}}",
+      "petNameFallback": "Votre boule de poils",
+      "titleChild": "Votre univers",
+      "titleAdult": "Votre maison, votre style",
+      "descriptionPet": "Choisissez un univers calme pour le profil animal.",
+      "descriptionChild": "Choisissez votre univers préféré.",
+      "descriptionAdult": "Calme ou animé – votre choix est enregistré dans votre profil.",
+      "groups": {
+        "plain": "Sobre & calme",
+        "expressive": "Avec du caractère"
+      },
+      "close": "Fermer la sélection du thème"
+    },
+    "customTheme": {
+      "createLaunch": "Créer un thème personnalisé",
+      "createLaunchHint": "L'ajouter comme tuile de design distincte",
+      "editLaunch": "Modifier Mon Design",
+      "editLaunchHint": "Continuer à affiner votre tuile de design personnelle",
+      "kicker": "Thème personnalisé",
+      "title": "Créer Mon Design",
+      "description": "Ces valeurs forment un thème distinct. Lin, Graphite et tous les autres designs intégrés restent inchangés.",
+      "safeTitle": "Volontairement restreint",
+      "safeDescription": "Seules les couleurs et rayons d'angle vérifiés sont acceptés. Les sélecteurs, URL externes, imports, surfaces cachées et changements de positionnement sont bloqués.",
+      "codeLabel": "Variables CSS de design",
+      "useExample": "Insérer un exemple",
+      "allowed": "Variables autorisées",
+      "preview": "Aperçu",
+      "save": "Enregistrer comme Mon Design",
+      "reset": "Effacer le thème personnalisé",
+      "saved": "Mon Design a été enregistré en toute sécurité et activé comme thème distinct.",
+      "validation": {
+        "tooLong": "Le code de design est trop long.",
+        "invalidComment": "Un commentaire CSS n'est pas correctement fermé.",
+        "selectorsNotAllowed": "Les sélecteurs personnalisés et règles CSS ne sont pas autorisés pour des raisons de sécurité.",
+        "tooManyDeclarations": "Plus de valeurs de design ont été saisies que ce qui est autorisé.",
+        "invalidDeclaration": "« {{property}} » n'est pas une variable CSS valide.",
+        "propertyNotAllowed": "La variable « {{property}} » ne peut pas être modifiée.",
+        "invalidValue": "La valeur de « {{property}} » n'est pas une couleur ou un rayon valide.",
+        "unsafeValue": "La valeur de « {{property}} » a été bloquée pour des raisons de sécurité."
+      }
+    },
+    "tabletMode": {
+      "exitTitle": "Quitter le mode tablette",
+      "enterTitle": "Ouvrir le mode tablette",
+      "exit": "Quitter la tablette",
+      "enter": "Mode tablette"
+    },
+    "themes": {
+      "adult": {
+        "linen": { "name": "Lin", "description": "chaleureux, calme & sans motif" },
+        "clear": { "name": "Clair", "description": "lumineux, frais & précis" },
+        "graphite": { "name": "Graphite", "description": "neutre, sombre & calme" },
+        "custom": { "name": "Mon Design", "description": "votre style personnel sécurisé" },
+        "light": { "name": "Forêt calme", "description": "chaleureux & naturel" },
+        "ocean": { "name": "Côte calme", "description": "aérien & détendu" },
+        "midnight": { "name": "Lounge nocturne", "description": "calme & sombre" },
+        "rock": { "name": "Backstage", "description": "rock & chaleureux" },
+        "festival": { "name": "Nuit néon", "description": "audacieux & coloré" }
+      },
+      "child": {
+        "space": { "name": "Base de fusées", "description": "fusées & planètes" },
+        "unicorn": { "name": "Pays des licornes", "description": "arcs-en-ciel & magie" },
+        "fairy": { "name": "Magie des fées", "description": "fées & forêt enchantée" },
+        "dino": { "name": "Monde des dinos", "description": "dinos & jungle" },
+        "sunshine": { "name": "Île ensoleillée", "description": "été & bonne humeur" },
+        "adventure": { "name": "Camp des héros", "description": "héros & éclairs" }
+      },
+      "pet": {
+        "light": { "name": "Prairie verte", "description": "calme & naturel" },
+        "ocean": { "name": "Pattes côtières", "description": "frais & détendu" },
+        "rock": { "name": "Truffe sauvage", "description": "audacieux & joueur" },
+        "midnight": { "name": "Patte nocturne", "description": "doux & sombre" }
+      }
+    }
+  },
+  "appUpdate": {
+    "dismiss": "Installer la mise à jour plus tard",
+    "source": "Directement de votre serveur LX",
+    "title": "La version {{version}} est arrivée",
+    "body": "LX peut télécharger la mise à jour maintenant, puis ouvrir directement la boîte d'installation Android.",
+    "downloading": "Téléchargement sécurisé de la mise à jour",
+    "permissionMessage": "Autorisez LX à installer des mises à jour d'application sur la page Android qui vient de s'ouvrir. Revenez ensuite et appuyez à nouveau sur « Mettre à jour maintenant ».",
+    "installerMessage": "Android affiche maintenant la boîte d'installation. Vos données et réglages sont conservés.",
+    "errorMessage": "La mise à jour n'a pas pu être téléchargée. Veuillez réessayer.",
+    "checkPermission": "Vérifier l'autorisation",
+    "updateNow": "Mettre à jour maintenant",
+    "later": "Plus tard"
+  },
+  "releaseNotes": {
+    "close": "Fermer les nouveautés",
+    "version": "Version {{version}}",
+    "confirm": "C'est noté, c'est parti"
+  },
+  "problemReport": {
+    "launcher": "Signaler un problème",
+    "kicker": "Ligne directe",
+    "close": "Fermer le signalement",
+    "categories": {
+      "problem": "Quelque chose ne fonctionne pas",
+      "content": "Le contenu est incorrect",
+      "idea": "J'ai une idée"
+    },
+    "success": {
+      "title": "Merci, c'est noté.",
+      "body": "Le signalement est maintenant dans l'Espace parents avec la version et la section. Aucun identifiant n'est envoyé.",
+      "done": "Terminé"
+    },
+    "titleLabel": "En bref, que s'est-il passé ?",
+    "titlePlaceholder": "ex. L'événement ne peut pas être supprimé",
+    "descriptionLabel": "Comment pouvons-nous le reproduire ?",
+    "descriptionPlaceholder": "Qu'avez-vous fait, que aurait dû se passer, et que s'est-il passé à la place ?",
+    "meta": "Nous enregistrons la section, la taille d'écran, le type et la version du navigateur {{version}}. Aucun mot de passe ni jeton.",
+    "submit": "Enregistrer le signalement"
+  },
+  "planLocationHelp": {
+    "trigger": "Pour quoi faire ?",
+    "title": "Deux foyers, un plan familial",
+    "body": "Pratique quand Mamie et Papi n'ont pas leur propre compte familial : événements, tâches, plan de repas, dates de déchets et tableau d'affichage sont gérés séparément pour leur foyer.",
+    "hint": "Afficher ou masquer : icône d'engrenage → réglages familiaux."
+  },
+  "serverConfig": {
+    "kicker": "Connexion",
+    "title": "Votre serveur familial",
+    "subtitle": "Pour la maison, le NAS ou votre propre domaine.",
+    "close": "Fermer les réglages serveur",
+    "urlLabel": "Adresse du serveur",
+    "urlPlaceholder": "https://famille.exemple.com",
+    "hint": "Sur votre réseau domestique, vous pouvez saisir par exemple <code>192.168.178.50:3001</code>. Hors du réseau domestique, l'adresse doit toujours utiliser HTTPS.",
+    "connected": "Connecté · LX Family Planner {{version}}",
+    "testing": "Test de la connexion…",
+    "test": "Tester la connexion",
+    "errors": {
+      "emptyUrl": "Veuillez saisir une adresse serveur.",
+      "badStatus": "Le serveur a répondu avec le statut {{status}}.",
+      "notLxServer": "Cette adresse n'appartient pas à un serveur LX Family.",
+      "noConnection": "Connexion impossible. Vérifiez l'IP, le domaine et le réseau.",
+      "invalidUrl": "L'adresse du serveur n'est pas valide."
+    }
+  }
+}

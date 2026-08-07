@@ -1,0 +1,225 @@
+{
+  "view": {
+    "hero": {
+      "eyebrow": "Tempo in famiglia",
+      "title": "Il tuo calendario, senza il caos degli impegni.",
+      "todayCount_one": "Oggi c'è <1>{{count}}</1> evento.",
+      "todayCount_other": "Oggi ci sono <1>{{count}}</1> eventi.",
+      "nextUp": "A seguire: {{title}}.",
+      "noNext": "Il prossimo momento libero è tuo."
+    },
+    "actions": {
+      "sources": "Origini calendario",
+      "newEvent": "Nuovo evento"
+    },
+    "filter": {
+      "ariaLabel": "Filtra per persona",
+      "all": "Tutti",
+      "managed": "gestito"
+    },
+    "tools": {
+      "hidePast": "Nascondi passati",
+      "showPast": "Mostra passati",
+      "export": "Esporta",
+      "import": "Importa file"
+    },
+    "agenda": {
+      "kicker": "Agenda",
+      "title": "Cosa c'è in arrivo",
+      "count_one": "{{count}} evento",
+      "count_other": "{{count}} eventi"
+    },
+    "empty": {
+      "title": "C'è ancora spazio per qualcosa di bello",
+      "description": "Aggiungi un evento o collega un calendario esistente.",
+      "cta": "Aggiungi il tuo primo evento"
+    },
+    "day": {
+      "today": "Oggi",
+      "tomorrow": "Domani"
+    },
+    "event": {
+      "allDay": "Tutto il giorno",
+      "until": "fino alle {{time}}",
+      "throughDate": "fino al {{date}}",
+      "untilDateTime": "fino al {{date}}, {{time}}",
+      "fromSubscriptionTitle": "Da una sottoscrizione calendario",
+      "birthdayTitle": "Compleanno famiglia automatico",
+      "familyBirthday": "Compleanno di famiglia",
+      "fromFamily": "Da {{name}}",
+      "subscriptionFallback": "Sottoscrizione calendario",
+      "sharedWithTitle": "Condiviso con le famiglie collegate",
+      "sharedWith": "Con {{names}}",
+      "memberManaged": "{{name}} · gestito",
+      "wholeFamily": "Tutta la famiglia",
+      "openAria": "Apri evento {{title}}",
+      "readOnlyTitle": "Questo evento è gestito dalla sua origine calendario",
+      "editRemindersTitle": "Modifica promemoria",
+      "editRemindersAria": "Modifica promemoria per {{title}}",
+      "deleteTitle": "Elimina evento",
+      "deleteAria": "Elimina {{title}}"
+    }
+  },
+  "editor": {
+    "kicker": "Dettagli evento",
+    "title": "Modifica evento",
+    "description": "Cambia insieme orario, persone, luogo e promemoria.",
+    "readOnlyKicker": "Origine calendario",
+    "readOnlyDescription": "Questo evento è gestito dalla sua origine calendario collegata e qui può solo essere visualizzato.",
+    "birthdayKicker": "Compleanno di famiglia",
+    "birthdayDescription": "Questo compleanno viene creato automaticamente dal profilo. LX ricorda alla famiglia una settimana prima e il giorno del compleanno.",
+    "save": "Salva modifiche",
+    "delete": "Elimina evento",
+    "deleteConfirm": "Eliminare davvero \"{{title}}\"?",
+    "fields": {
+      "title": "Titolo",
+      "allDay": "Evento di una giornata",
+      "allDayHint": "Senza orario fisso, può durare più giorni.",
+      "startDate": "Inizia il",
+      "startTime": "Ora di inizio",
+      "endDate": "Finisce il (facoltativo)",
+      "endDateInclusive": "Fino al (facoltativo)",
+      "endTime": "Ora di fine (facoltativo)",
+      "location": "Luogo (facoltativo)",
+      "locationPlaceholder": "es. scuola o studio medico",
+      "notes": "Note (facoltativo)"
+    },
+    "audience": {
+      "title": "Per chi è questo evento?",
+      "hint": "Scegli tutta la famiglia o seleziona più persone.",
+      "everyone": "Tutta la famiglia"
+    }
+  },
+  "trash": {
+    "types": {
+      "rest": "Rifiuti residui (cassonetto nero)",
+      "paper": "Raccolta carta (cassonetto blu)",
+      "bio": "Rifiuti organici (cassonetto marrone/verde)",
+      "yellow": "Raccolta imballaggi (cassonetto/sacco giallo)"
+    },
+    "header": {
+      "title": "Calendario rifiuti digitale",
+      "description": "Importa il file .ics del tuo gestore rifiuti oppure aggiungi una raccolta tu. LX ti ricorda il giorno prima in modo predefinito.",
+      "connectUrl": "Collega link calendario",
+      "import": "Importa calendario rifiuti",
+      "add": "Aggiungi raccolta"
+    },
+    "feed": {
+      "kicker": "Calendario raccolte automatico",
+      "title": "Calendario rifiuti via link",
+      "description": "Collega l'indirizzo ICS del tuo gestore rifiuti o di Home Assistant. LX sincronizza automaticamente le nuove date di raccolta.",
+      "empty": "Nessun link calendario rifiuti ancora collegato.",
+      "name": "Nome origine",
+      "namePlaceholder": "es. calendario rifiuti del quartiere",
+      "url": "Indirizzo calendario ICS",
+      "security": "Il link viene salvato cifrato sul tuo server e consultato in sola lettura.",
+      "connect": "Collega link",
+      "connecting": "Connessione in corso …",
+      "sync": "Sincronizza ora",
+      "remove": "Rimuovi origine",
+      "confirmRemove": "Rimuovere \"{{name}}\" e tutte le date di raccolta lette da essa?",
+      "pickupCount_one": "{{count}} raccolta",
+      "pickupCount_other": "{{count}} raccolte"
+    },
+    "next": {
+      "kicker": "Prossima raccolta rifiuti",
+      "callout": "Esporre il cassonetto"
+    },
+    "schedule": {
+      "kicker": "Calendario delle raccolte",
+      "title": "Prossime raccolte",
+      "emptyTitle": "Ancora nessuna data di raccolta",
+      "emptyDescription": "Carica il file .ics del tuo gestore rifiuti.",
+      "reminderOff": "Promemoria disattivato",
+      "editReminderTitle": "Cambia promemoria",
+      "editReminderAria": "Cambia promemoria per {{title}}",
+      "removeTitle": "Rimuovi raccolta",
+      "removeAria": "Rimuovi {{title}}"
+    },
+    "dialog": {
+      "eyebrow": "Nuova raccolta",
+      "title": "Aggiungi data di raccolta",
+      "typeLabel": "Tipo di rifiuto",
+      "nameLabel": "Nome",
+      "dateLabel": "Data di raccolta",
+      "save": "Salva raccolta"
+    },
+    "types": {
+      "rest": "Rifiuti indifferenziati (cassonetto nero)",
+      "papier": "Carta (cassonetto blu)",
+      "bio": "Rifiuti organici (cassonetto marrone/verde)",
+      "gelb": "Sacco giallo / raccoglibile"
+    },
+    "toast": {
+      "importFailedTitle": "Importazione non possibile",
+      "importFailedBody": "In questo file non sono state trovate date di raccolta rifiuti.",
+      "importSuccessTitle": "Calendario rifiuti importato",
+      "importSuccessBody_one": "{{count}} data di raccolta è stata importata e ti ricorda un giorno prima in modo predefinito.",
+      "importSuccessBody_other": "{{count}} date di raccolta sono state importate e ti ricordano un giorno prima in modo predefinito.",
+      "addedTitle": "Raccolta salvata",
+      "addedBody": "La raccolta del {{date}} è stata salvata.",
+      "reminderSavedTitle": "Promemoria salvato",
+      "reminderOffTitle": "Promemoria disattivato",
+      "reminderSavedBody": "LX ti ricorderà {{leads}}.",
+      "reminderOffBody": "Nessun promemoria verrà inviato per {{title}}."
+    }
+  },
+  "sources": {
+    "header": {
+      "kicker": "Ponte calendario",
+      "title": "Calendari esterni",
+      "description": "Importa automaticamente eventi da Google, Outlook, Nextcloud e altri calendari ICS.",
+      "closeAria": "Chiudi origini calendario"
+    },
+    "list": {
+      "heading": "Origini collegate",
+      "activeCount": "{{count}} attive",
+      "syncAll": "Sincronizza tutte",
+      "emptyTitle": "Ancora nessun ponte calendario",
+      "emptyDescription": "Incolla a destra un link ICS privato. I nuovi eventi arriveranno poi nel tuo calendario famiglia in modo automatico.",
+      "everyone": "Tutti",
+      "eventCount_one": "{{count}} evento",
+      "eventCount_other": "{{count}} eventi",
+      "syncNever": "Non ancora sincronizzato con successo",
+      "syncToday": "Oggi alle {{time}}",
+      "syncNowTitle": "Sincronizza ora",
+      "syncNowAria": "Sincronizza ora {{name}}",
+      "pauseAria": "Metti in pausa {{name}}",
+      "resumeAria": "Attiva {{name}}",
+      "removeTitle": "Rimuovi origine",
+      "removeAria": "Rimuovi {{name}}",
+      "confirmRemove": "Rimuovere \"{{name}}\" e tutti gli eventi importati da essa?"
+    },
+    "form": {
+      "connect": "Collega calendario",
+      "connectHint": "Il link resta cifrato sul tuo server.",
+      "nameLabel": "Nome origine",
+      "namePlaceholder": "es. calendario scolastico",
+      "urlLabel": "Link ICS privato",
+      "visibilityLabel": "Visibile a",
+      "allMembers": "Tutti i membri famiglia",
+      "householdLabel": "Spazio di pianificazione",
+      "householdFamily": "La nostra casa",
+      "householdGrandparents": "Casa di nonna e nonno",
+      "colorLegend": "Colore del calendario",
+      "pickColorAria": "Scegli colore {{color}}",
+      "privacyNote": "Sola lettura: l'organizzatore famiglia non può modificare o eliminare nulla nel calendario esterno. Ad ogni modo, non condividere mai pubblicamente il link segreto.",
+      "connecting": "Connessione in corso …"
+    }
+  },
+  "reminderDialog": {
+    "trashKicker": "Allarme raccolta",
+    "eventKicker": "Allarme evento",
+    "atTime": "{{time}}",
+    "noneActive": "Nessun promemoria attivo",
+    "note": "Le notifiche devono essere attivate una volta in ciascun profilo. L'avviso appare anche nella casella famiglia.",
+    "save": "Salva promemoria"
+  },
+  "reminderPicker": {
+    "title": "Quando deve ricordartelo LX?",
+    "subtitle": "Scegli uno o più orari",
+    "off": "Disattivato",
+    "activeHint": "LX ti ricorda su tutti i dispositivi abilitati per questo profilo.",
+    "inactiveHint": "Senza una selezione, non verrà inviato nessun promemoria per questa voce."
+  }
+}

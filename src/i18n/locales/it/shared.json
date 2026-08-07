@@ -1,0 +1,62 @@
+{
+  "events": {
+    "groupChat": { "title": "Chat di famiglia", "description": "Nuovi messaggi nel gruppo famiglia" },
+    "directMessages": { "title": "Messaggi diretti", "description": "Messaggi privati per il profilo corrispondente" },
+    "familyMail": { "title": "Casella postale famiglia", "description": "Nuove lettere dalle famiglie collegate" },
+    "familyChatInvites": { "title": "Inviti alla chat", "description": "Inviti alla chat di una famiglia collegata" },
+    "events": { "title": "Calendario e promemoria", "description": "Eventi nuovi, modificati, annullati e in procinto di iniziare" },
+    "taskAssigned": { "title": "Nuove incombenze", "description": "Nuove missioni e doveri" },
+    "taskApproval": { "title": "Rivedi incombenze", "description": "Segnalazioni completate e revisioni rifiutate" },
+    "taskCompleted": { "title": "Incombenze completate", "description": "Incombenze confermate, stelle e traguardi" },
+    "moodUpdates": { "title": "Umore dei bambini", "description": "Nuove voci nella bussola di famiglia" },
+    "moodHelp": { "title": "Bisogno di vicinanza", "description": "Avviso urgente, anche durante le ore di quiete consentite" },
+    "problemReports": { "title": "Segnalazioni problemi", "description": "Nuove segnalazioni e feedback sulle soluzioni" },
+    "encouragements": { "title": "Incoraggiamenti", "description": "Messaggi gentili dalla famiglia" },
+    "familyPolls": { "title": "Sondaggi", "description": "Nuove decisioni di famiglia" },
+    "familyMissions": { "title": "Missioni famiglia", "description": "Nuove missioni condivise" },
+    "schoolItems": { "title": "Scuola", "description": "Compiti, zaino scolastico e verifiche" },
+    "rewards": { "title": "Premi", "description": "Premi nuovi e riscattati" },
+    "pocketMoney": { "title": "Paghetta", "description": "Nuovi versamenti, detrazioni e conversioni" },
+    "familyConnections": { "title": "Rete di famiglia", "description": "Richieste, approvazioni e modifiche delle famiglie collegate" }
+  },
+  "reminderLead": {
+    "atStart": "Quando inizia",
+    "weeks_one": "{{count}} settimana prima",
+    "weeks_other": "{{count}} settimane prima",
+    "days_one": "{{count}} giorno prima",
+    "days_other": "{{count}} giorni prima",
+    "hours_one": "{{count}} ora prima",
+    "hours_other": "{{count}} ore prima",
+    "minutes_one": "{{count}} minuto prima",
+    "minutes_other": "{{count}} minuti prima"
+  },
+  "reminderLeadShort": {
+    "atStart": "All'inizio",
+    "weeks_one": "{{count}} sett",
+    "weeks_other": "{{count}} sett",
+    "days_one": "{{count}} giorno",
+    "days_other": "{{count}} giorni",
+    "hours_one": "{{count}} ora",
+    "hours_other": "{{count}} ore",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min"
+  },
+  "eventReminder": {
+    "fallback": "Un evento inizia a breve.",
+    "startsNow": "inizia ora",
+    "startsInMinutes_one": "inizia tra {{count}} minuto",
+    "startsInMinutes_other": "inizia tra {{count}} minuti",
+    "startsInHours_one": "inizia tra {{count}} ora",
+    "startsInHours_other": "inizia tra {{count}} ore",
+    "startsOnDate": "inizia il {{date}}"
+  },
+  "trashReminder": {
+    "defaultTitle": "Raccolta rifiuti",
+    "tomorrowTitle": "🗑️ Domani: {{title}}",
+    "tomorrowBody": "Domani verrà ritirato: {{title}}. Esponilo in tempo.",
+    "todayTitle": "🗑️ Oggi: {{title}}",
+    "todayBody": "Oggi verrà ritirato: {{title}}.",
+    "reminderTitle": "🗑️ Promemoria: {{title}}",
+    "reminderBody": "Raccolta {{lead}}. Esponilo in tempo."
+  }
+}

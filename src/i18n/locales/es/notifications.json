@@ -1,0 +1,152 @@
+{
+  "center": {
+    "trigger": {
+      "unread_one": "{{count}} notificación sin leer en la bandeja familiar",
+      "unread_other": "{{count}} notificaciones sin leer en la bandeja familiar",
+      "open": "Abrir bandeja familiar",
+      "title": "Bandeja familiar"
+    },
+    "header": {
+      "kicker": "Radio familiar",
+      "title": "Bandeja familiar",
+      "subtitle": "Resumen diario y notificaciones de {{name}} en un solo lugar.",
+      "subtitleFallbackName": "ti",
+      "close": "Cerrar notificaciones"
+    },
+    "tabs": {
+      "label": "Elegir bandeja",
+      "today": "Hoy",
+      "notifications": "Notificaciones"
+    },
+    "markAllRead": "Marcar todo como leído",
+    "time": {
+      "today": "Hoy, {{time}}",
+      "yesterday": "Ayer, {{time}}"
+    },
+    "digest": {
+      "summary_one": "Hoy necesita tu atención {{count}} cosa.",
+      "summary_other": "Hoy necesitan tu atención {{count}} cosas.",
+      "allClear": "Hoy todo está agradablemente tranquilo.",
+      "intro": "Basta un vistazo rápido y luego puede empezar el día.",
+      "events": {
+        "label": "Eventos",
+        "free": "Hoy no hay nada",
+        "count_one": "{{count}} evento hoy",
+        "count_other": "{{count}} eventos hoy",
+        "empty": "No hay entradas en el calendario"
+      },
+      "tasks": {
+        "label": "Tareas",
+        "approvals_one": "{{count}} espera aprobación",
+        "approvals_other": "{{count}} esperan aprobación",
+        "open_one": "{{count}} abierta hoy",
+        "open_other": "{{count}} abiertas hoy",
+        "done": "Todo hecho",
+        "empty": "Ninguna tarea urgente"
+      },
+      "meals": {
+        "label": "Comidas de hoy",
+        "unplanned": "Todavía sin planificar",
+        "empty": "El plan de comidas todavía tiene hueco"
+      },
+      "shopping": {
+        "label": "Compra",
+        "missing_one": "falta {{count}} artículo",
+        "missing_other": "faltan {{count}} artículos",
+        "listEmpty": "La lista está vacía",
+        "nothingToBuy": "Ahora mismo no falta nada por comprar"
+      }
+    },
+    "empty": {
+      "title": "Todo tranquilo por aquí",
+      "text": "Aquí aparecerán nuevos eventos, mensajes y tareas de forma fiable."
+    },
+    "meta": {
+      "groupChat": "Chat familiar",
+      "directMessages": "Mensaje directo",
+      "taskAssigned": "Nueva tarea",
+      "taskApproval": "Aprobación de tarea",
+      "taskCompleted": "Hecho",
+      "events": "Calendario familiar",
+      "moodHelp": "Brújula familiar",
+      "moodUpdates": "Ánimo",
+      "problemReports": "Informe de problema",
+      "encouragements": "Ánimo",
+      "familyPolls": "Encuesta familiar",
+      "familyMissions": "Misión familiar",
+      "schoolItems": "Colegio",
+      "rewards": "Recompensa",
+      "pocketMoney": "Paga semanal",
+      "familyConnections": "Red familiar",
+      "familyMail": "Correo familiar",
+      "familyChatInvites": "Invitación de chat",
+      "default": "Planificador familiar"
+    },
+    "footer": {
+      "today": "El resumen diario se genera en vivo a partir de tu plan familiar.",
+      "notifications": "Las notificaciones se conservan durante 90 días."
+    }
+  },
+  "permissionBanner": {
+    "child": {
+      "eyebrow": "No te pierdas nada importante",
+      "title": "¿Te aviso, {{name}}?",
+      "textNative": "Cuando llegue un mensaje o una nueva misión para ti, la app de LX te lo hará saber.",
+      "textWeb": "Cuando llegue un mensaje o una nueva misión para ti, este dispositivo te avisará.",
+      "action": "Sí, avísame"
+    },
+    "adult": {
+      "eyebrow": "Mantén a la familia al día",
+      "titleNative": "Notificaciones reales de Android",
+      "titleWeb": "Notificaciones en este dispositivo",
+      "textNative": "El chat, los eventos y las tareas aparecen en el área de notificaciones de Android; incluso cuando la app de LX está cerrada.",
+      "textWeb": "El chat, los eventos y las tareas te llegan incluso cuando el planificador está cerrado.",
+      "action": "Activar ahora"
+    },
+    "profileOnly": "Solo para el perfil de {{name}}",
+    "busy": "Un momento …",
+    "later": "Más tarde",
+    "close": "Descartar"
+  },
+  "webPush": {
+    "secureContext": "Las notificaciones requieren una dirección HTTPS segura.",
+    "iosHomeScreen": "En iPhone y iPad, primero elige «Añadir a pantalla de inicio» y abre la app familiar desde allí.",
+    "unsupported": "Este navegador no admite notificaciones web.",
+    "permissionDenied": "Se rechazaron las notificaciones en el navegador.",
+    "permissionNotGranted": "Todavía no se han permitido las notificaciones.",
+    "deviceNames": {
+      "apple": "Dispositivo móvil de Apple",
+      "android": "Dispositivo Android",
+      "windows": "PC con Windows",
+      "mac": "Mac",
+      "chromebook": "Chromebook",
+      "fallback": "Dispositivo familiar"
+    }
+  },
+  "nativePush": {
+    "timeoutDefault": "Android no respondió a tiempo.",
+    "registrationFailed": "La app de Android no pudo registrarse para notificaciones push.",
+    "serviceStartFailed": "Android no pudo iniciar el servicio de notificaciones. Cierra LX completamente y vuelve a abrir la app.",
+    "channels": {
+      "updatesName": "Novedades familiares",
+      "updatesDescription": "Mensajes, eventos, tareas y actividad familiar",
+      "urgentName": "Novedades urgentes de la familia",
+      "urgentDescription": "Solicitudes de ayuda urgentes y recordatorios críticos en el tiempo",
+      "createFailed": "Android no pudo crear los canales de notificación. Comprueba las notificaciones de la app en los ajustes de Android."
+    },
+    "onlyInApp": "Las notificaciones reales de Android están disponibles en la app de LX para Android.",
+    "onlyInAppRegister": "Las notificaciones reales de Android solo están disponibles en la app.",
+    "permissionCheckTimeout": "Android no responde a la comprobación de permisos. Cierra LX completamente y vuelve a abrir la app.",
+    "diagnoseTimeout": "Android no pudo comprobar el estado de los Servicios de Google Play.",
+    "firebaseNotReady": "Firebase no está listo en la app de Android: {{error}}",
+    "firebaseNotConfigured": "Firebase no está configurado en la app de Android.",
+    "playServicesUnavailable": "Los Servicios de Google Play no están listos en este dispositivo: {{status}}. Actualiza los Servicios de Google Play e inténtalo de nuevo.",
+    "playServicesUnknownStatus": "estado desconocido",
+    "tokenTimeout": "Firebase no entregó una clave de dispositivo. Los Servicios de Google Play están disponibles; comprueba la VPN, el firewall y el DNS privado del teléfono.",
+    "tokenEmpty": "Firebase entregó una clave de dispositivo vacía.",
+    "permissionRequestTimeout": "La solicitud de permiso de Android no se completó. Permite las notificaciones en los ajustes de la app e inténtalo de nuevo.",
+    "permissionDenied": "Las notificaciones están desactivadas en los ajustes de la app de Android.",
+    "permissionNotGranted": "Todavía no se han permitido las notificaciones.",
+    "deviceName": "App de LX para Android"
+  }
+}

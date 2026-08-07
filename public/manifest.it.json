@@ -1,0 +1,32 @@
+{
+  "name": "LX Family Planner",
+  "short_name": "LX Family",
+  "description": "Un organizzatore familiare self-hosted per calendari, incombenze, pasti, spesa e altro",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f1e8",
+  "theme_color": "#06513c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "share_target": {
+    "action": "/share-recipe",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  },
+  "shortcuts": [
+    {
+      "name": "Importa una ricetta",
+      "short_name": "Importa ricetta",
+      "description": "Invia un link di ricetta direttamente al ricettario di famiglia",
+      "url": "/share-recipe",
+      "icons": [
+        { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ]
+}

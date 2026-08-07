@@ -1,0 +1,73 @@
+{
+  "header": {
+    "title": "Tableau d'affichage familial",
+    "householdFamily": "Notre foyer",
+    "householdGrandparents": "Foyer de mamie & papi",
+    "addNote": "Épingler une nouvelle note ou photo",
+    "intro": "Notes et photos importantes sur le frigo virtuel. Appuyez sur une photo pour la vue en grand – ouvrez le dos via « Lire la note »."
+  },
+  "note": {
+    "shared": "🤝 Partagé avec mamie & papi",
+    "viewLarge": "Voir en grand",
+    "readNote": "Lire la note",
+    "createdByLabel": "Créé par :",
+    "fallbackAuthor": "La famille",
+    "today": "Aujourd'hui",
+    "editedLabel": "Modifié :",
+    "flipTitle": "Retourner la carte",
+    "editTitle": "Modifier la note",
+    "deleteTitle": "Supprimer la note",
+    "backSideLabel": "Dos de la photo :",
+    "showPhoto": "Afficher la photo"
+  },
+  "lightbox": {
+    "openAria": "Voir l'image « {{title}} » en pleine taille",
+    "dialogAria": "Vue en grand de l'image : {{title}}",
+    "closeAria": "Fermer la vue de l'image"
+  },
+  "photo": {
+    "previewAlt": "Aperçu",
+    "optimizing": "Optimisation de la photo…",
+    "choose": "Choisir / prendre une photo",
+    "upload": "Envoyer la photo",
+    "readError": "La photo n'a pas pu être lue."
+  },
+  "toasts": {
+    "notImage": {
+      "title": "Ce n'est pas un fichier image",
+      "body": "Veuillez choisir une photo au format JPG, PNG ou WebP."
+    },
+    "tooLarge": {
+      "title": "La photo est trop volumineuse",
+      "body": "Veuillez choisir une image de 20 Mo maximum."
+    },
+    "stillTooLarge": "La photo est encore trop volumineuse après optimisation. Veuillez choisir une autre image.",
+    "ready": {
+      "title": "La photo est prête",
+      "body": "L'image a été automatiquement optimisée pour le tableau d'affichage."
+    },
+    "loadFailed": "La photo n'a pas pu être chargée"
+  },
+  "form": {
+    "shared": "🤝 Partagé (afficher aussi chez mamie & papi)"
+  },
+  "addModal": {
+    "title": "Épingler une nouvelle note / photo",
+    "titlePlaceholder": "ex. sortie du dimanche, code Wi-Fi...",
+    "contentLabel": "Contenu (texte de la note)",
+    "contentPlaceholder": "Écrivez ici votre pense-bête ou le texte de la photo...",
+    "photoLabel": "Épingler facultativement une photo (effet Polaroid)",
+    "autoResizeHint": "Les grandes photos de téléphone sont automatiquement réduites avant l'enregistrement.",
+    "colorLabel": "Choisir la couleur de la note",
+    "pinning": "Épinglage…",
+    "submit": "Épingler la note"
+  },
+  "editModal": {
+    "title": "Modifier la note",
+    "contentLabel": "Contenu",
+    "photoLabel": "Modifier / remplacer la photo",
+    "optimizeHint": "La photo est automatiquement optimisée pour un affichage rapide.",
+    "colorLabel": "Choisir la couleur",
+    "submit": "Enregistrer les modifications"
+  }
+}

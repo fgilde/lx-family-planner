@@ -1,0 +1,73 @@
+{
+  "header": {
+    "title": "Gezinsprikbord",
+    "householdFamily": "Ons huishouden",
+    "householdGrandparents": "Huishouden van oma & opa",
+    "addNote": "Nieuwe notitie of foto vastprikken",
+    "intro": "Belangrijke notities & foto's op de virtuele koelkast. Tik op een foto voor de grote weergave – open de achterkant via \"Notitie lezen\"."
+  },
+  "note": {
+    "shared": "🤝 Gedeeld met oma & opa",
+    "viewLarge": "Groot bekijken",
+    "readNote": "Notitie lezen",
+    "createdByLabel": "Aangemaakt door:",
+    "fallbackAuthor": "Gezin",
+    "today": "Vandaag",
+    "editedLabel": "Bewerkt:",
+    "flipTitle": "Kaart omdraaien",
+    "editTitle": "Notitie bewerken",
+    "deleteTitle": "Notitie verwijderen",
+    "backSideLabel": "Achterkant van de foto:",
+    "showPhoto": "Foto tonen"
+  },
+  "lightbox": {
+    "openAria": "Bekijk afbeelding \"{{title}}\" op volledige grootte",
+    "dialogAria": "Grote afbeeldingsweergave: {{title}}",
+    "closeAria": "Afbeeldingsweergave sluiten"
+  },
+  "photo": {
+    "previewAlt": "Voorbeeld",
+    "optimizing": "Foto optimaliseren …",
+    "choose": "Foto kiezen / maken",
+    "upload": "Foto uploaden",
+    "readError": "De foto kon niet worden gelezen."
+  },
+  "toasts": {
+    "notImage": {
+      "title": "Geen afbeeldingsbestand",
+      "body": "Kies een foto in JPG-, PNG- of WebP-formaat."
+    },
+    "tooLarge": {
+      "title": "Foto is te groot",
+      "body": "Kies een afbeelding van maximaal 20 MB."
+    },
+    "stillTooLarge": "De foto is nog steeds te groot na optimalisatie. Kies een andere afbeelding.",
+    "ready": {
+      "title": "Foto is klaar",
+      "body": "De afbeelding is automatisch geoptimaliseerd voor het prikbord."
+    },
+    "loadFailed": "Foto kon niet worden geladen"
+  },
+  "form": {
+    "shared": "🤝 Gedeeld (ook tonen bij oma & opa)"
+  },
+  "addModal": {
+    "title": "Nieuwe notitie / foto vastprikken",
+    "titlePlaceholder": "bijv. zondaguitje, wifi-code...",
+    "contentLabel": "Inhoud (notitietekst)",
+    "contentPlaceholder": "Schrijf hier jouw herinnering of de tekst voor de foto...",
+    "photoLabel": "Optioneel een foto vastprikken (Polaroid-effect)",
+    "autoResizeHint": "Grote telefoonfoto's worden voor het opslaan automatisch verkleind.",
+    "colorLabel": "Notitiekleur kiezen",
+    "pinning": "Vastprikken …",
+    "submit": "Notitie vastprikken"
+  },
+  "editModal": {
+    "title": "Notitie bewerken",
+    "contentLabel": "Inhoud",
+    "photoLabel": "Foto bewerken / vervangen",
+    "optimizeHint": "De foto wordt automatisch geoptimaliseerd voor snelle weergave.",
+    "colorLabel": "Kleur kiezen",
+    "submit": "Wijzigingen opslaan"
+  }
+}

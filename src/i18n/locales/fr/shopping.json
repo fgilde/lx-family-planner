@@ -1,0 +1,63 @@
+{
+  "hero": {
+    "eyebrow": "Marché familial",
+    "title": "Que manque-t-il à la maison ?",
+    "subtitle": "Parcourez tout le catalogue Bring! ou ajoutez votre propre article.",
+    "statusLive": "En direct avec « {{listName}} »",
+    "statusLocal": "Liste familiale locale",
+    "catalogItems": "{{total}} articles standards",
+    "syncing": "Synchronisation",
+    "refreshBring": "Actualiser Bring!",
+    "connection": "Connexion",
+    "connectBring": "Connecter Bring!"
+  },
+  "search": {
+    "placeholder": "Œufs, Nutella, petits pains, poireau…",
+    "searchAria": "Rechercher un article ou en créer un nouveau",
+    "quantityLabel": "Quantité",
+    "quantityAria": "Quantité ou note",
+    "hint": "Introuvable ? Le terme saisi sera ajouté comme votre propre article Bring!."
+  },
+  "list": {
+    "kicker": "Votre liste",
+    "title": "Liste de courses",
+    "emptyTitle": "Le panier de courses vous attend.",
+    "emptyHint": "Appuyez sur un article standard ci-dessous ou recherchez-le directement.",
+    "recentToggle": "Achets récents ({{count}})",
+    "backToList": "De retour sur la liste"
+  },
+  "catalog": {
+    "sourceBring": "Gamme Bring!",
+    "sourceDefault": "Gamme de base",
+    "resultsFor": "Résultats pour « {{query}} »",
+    "quickAdd": "Ajout rapide",
+    "customCategory": "Articles personnels",
+    "shownCount": "{{count}} affichés",
+    "departmentsAria": "Catégories de produits",
+    "popular": "Populaires",
+    "onList": "Sur la liste",
+    "noResultsTitle": "Aucune correspondance dans le catalogue – pas de problème.",
+    "noResultsHint": "Utilisez « Ajouter » pour créer « {{query}} » comme votre propre article."
+  },
+  "accountModal": {
+    "eyebrow": "Intégration facultative",
+    "title": "Connecter les courses Bring!",
+    "connectedEyebrow": "Connecté en direct",
+    "defaultListName": "Liste familiale",
+    "securityNote": "Votre mot de passe est stocké chiffré sur votre propre serveur et n'est jamais enregistré dans le navigateur.",
+    "syncNow": "Synchroniser maintenant",
+    "disconnect": "Déconnecter",
+    "intro": "Reprenez votre liste Bring! existante. Après la connexion, choisissez exactement la liste qui appartient au planificateur familial.",
+    "emailLabel": "E-mail Bring!",
+    "emailPlaceholder": "nom@exemple.com",
+    "passwordLabel": "Mot de passe Bring!",
+    "passwordPlaceholder": "Utilisé uniquement pour une connexion sécurisée",
+    "selectListLabel": "Quelle liste faut-il connecter ?",
+    "connectSelected": "Connecter la liste sélectionnée",
+    "loginButton": "Se connecter en sécurité avec Bring!",
+    "fineprint": "LX Family Planner n'est pas un produit de Bring! Labs AG. Vous pouvez vous déconnecter à tout moment.",
+    "toastConnectedTitle": "Bring! est connecté",
+    "toastConnectedBody": "{{listName}} est maintenant synchronisée.",
+    "toastDefaultList": "La liste de courses"
+  }
+}

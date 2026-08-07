@@ -1,0 +1,274 @@
+{
+  "child": {
+    "fallbackName": "Aventurier",
+    "worlds": {
+      "space": {
+        "label": "Base de lancement",
+        "mission": "Énergie d'étoiles",
+        "greeting": "Prêt pour le décollage ?"
+      },
+      "unicorn": {
+        "label": "Pays des licornes",
+        "mission": "Pouvoir arc-en-ciel",
+        "greeting": "Aujourd'hui sera magique !"
+      },
+      "fairy": {
+        "label": "Magie des fées",
+        "mission": "Pouvoir magique",
+        "greeting": "La forêt enchantée t'appelle !"
+      },
+      "dino": {
+        "label": "Monde des dinos",
+        "mission": "Pouvoir dino",
+        "greeting": "En route pour une grande aventure !"
+      },
+      "sunshine": {
+        "label": "Île ensoleillée",
+        "mission": "Rayons de soleil",
+        "greeting": "Une belle journée commence !"
+      },
+      "adventure": {
+        "label": "Camp des héros",
+        "mission": "Pouvoir de héros",
+        "greeting": "Ta mission t'attend !"
+      }
+    },
+    "moods": {
+      "super": "Génial !",
+      "gut": "Bien",
+      "okay": "Couci-couça",
+      "hilfe": "Besoin d'un câlin"
+    },
+    "hero": {
+      "defaultTitle": "Héros de la famille",
+      "kicker": "Niveau {{level}} · {{title}}",
+      "hey": "Salut {{name}} !",
+      "intro_zero": "Tu n'as aucune mission aujourd'hui. Chaque tâche accomplie fait grandir ton trésor d'étoiles.",
+      "intro_one": "Tu as {{count}} mission aujourd'hui. Chaque tâche accomplie fait grandir ton trésor d'étoiles.",
+      "intro_other": "Tu as {{count}} missions aujourd'hui. Chaque tâche accomplie fait grandir ton trésor d'étoiles.",
+      "starsToNextLevel_one": "{{count}} étoile avant le niveau {{level}}",
+      "starsToNextLevel_other": "{{count}} étoiles avant le niveau {{level}}",
+      "openMissions": "missions en cours",
+      "done": "terminées"
+    },
+    "map": {
+      "kicker": "Ton parcours d'aventure",
+      "progress": "{{done}} sur {{total}} missions terminées",
+      "freeDay": "Aujourd'hui c'est journée libre d'exploration",
+      "progressAria": "Progression des missions",
+      "goalDone": "Terminé !",
+      "goalLabel": "Objectif du jour",
+      "unbeatable": "Tu es imbattable aujourd'hui",
+      "missionsToGoal_one": "{{count}} mission avant l'objectif",
+      "missionsToGoal_other": "{{count}} missions avant l'objectif"
+    },
+    "today": {
+      "routine": {
+        "label": "Ta routine",
+        "allDone": "Tout est fait pour aujourd'hui !",
+        "discover": "Découvrir les routines",
+        "steps": "{{done}}/{{total}} étapes"
+      },
+      "saving": {
+        "label": "Ta tirelire",
+        "noGoal": "Pas encore d'objectif d'épargne",
+        "percentDone": "{{percent}} % du chemin"
+      },
+      "badges": {
+        "label": "Ta collection",
+        "count_one": "{{count}} badge découvert",
+        "count_other": "{{count}} badges découverts",
+        "hint": "De nouveaux succès t'attendent"
+      }
+    },
+    "story": {
+      "encouragementFrom": "Encouragement de {{name}}",
+      "familyFallback": "ta famille",
+      "quote": "« {{message}} »",
+      "togetherStrong": "Plus forts ensemble",
+      "pollKicker": "Ton vote compte"
+    },
+    "mood": {
+      "kicker": "Boussole familiale",
+      "title": "Comment te sens-tu aujourd'hui ?",
+      "checkedIn": "Merci d'avoir donné ton humeur aujourd'hui.",
+      "prompt": "Une touche suffit – ta famille saura comment tu vas."
+    },
+    "quests": {
+      "kicker": "Tes missions",
+      "title": "Collecte des étoiles aujourd'hui",
+      "viewAll": "Toutes",
+      "defaultCategory": "Mission familiale",
+      "emptyTitle": "Tout est fait !",
+      "emptyText": "Tes missions sont terminées. Beau travail."
+    },
+    "rewards": {
+      "kicker": "Station à souhaits",
+      "title": "Ta boutique d'étoiles",
+      "shop": "Boutique",
+      "cost_one": "{{count}} étoile",
+      "cost_other": "{{count}} étoiles",
+      "redeem": "Échanger",
+      "collect": "Continue à collecter",
+      "empty": "Pas encore de souhaits dans la boutique."
+    },
+    "media": {
+      "kicker": "Approuvé par ta famille",
+      "title": "Ton espace multimédia",
+      "safeBadge": "✓ Choisi par tes parents",
+      "spotifyPlaylist": "Liste de lecture Spotify",
+      "youtubeChannel": "Chaîne YouTube",
+      "playMusic": "Lire la musique",
+      "playVideo": "Lancer la vidéo",
+      "pausedLabel": "L'espace multimédia fait une pause",
+      "pausedUntil": "Il sera de retour pour toi à {{time}}."
+    },
+    "homeControlsTitle": "Tes commandes de la maison",
+    "buddy": {
+      "kicker": "Ton monde, ton choix",
+      "title": "Compagnons d'aventure",
+      "text": "Choisis qui t'accompagne dans tes missions. Le choix est enregistré uniquement pour ton profil."
+    },
+    "familyStrip": {
+      "nextLabel": "Ensuite",
+      "nothingPlanned": "Rien de prévu aujourd'hui",
+      "calendar": "Calendrier",
+      "chatLabel": "Radio familiale",
+      "chatPrompt": "Fais un petit coucou à tout le monde !",
+      "open": "Ouvrir"
+    }
+  },
+  "personal": {
+    "widgets": {
+      "calendar": {
+        "label": "Mes événements",
+        "description": "Vos prochains événements et occasions familiales",
+        "action": "Tout afficher"
+      },
+      "tasks": {
+        "label": "Tâches & approbations",
+        "description": "Vos propres tâches et les approbations parentales en attente",
+        "action": "Planificateur de tâches"
+      },
+      "meals": {
+        "label": "À table aujourd'hui",
+        "description": "Le plan de repas actuel pour votre foyer",
+        "action": "Plan de repas"
+      },
+      "shopping": {
+        "label": "Liste de courses",
+        "description": "Les articles ouverts les plus importants en un coup d'œil",
+        "action": "Liste de courses"
+      },
+      "trash": {
+        "label": "Prochaine collecte des déchets",
+        "description": "La prochaine date de collecte pour votre lieu de planification",
+        "action": "Calendrier des déchets"
+      },
+      "board": {
+        "label": "Tableau d'affichage",
+        "description": "Les dernières notes familiales partagées",
+        "action": "Vers le tableau"
+      },
+      "cloud": {
+        "label": "Archive familiale",
+        "description": "Envoyez directement photos, documents et souvenirs"
+      },
+      "home-assistant": {
+        "label": "Notre maison",
+        "description": "Appareils, capteurs et scènes partagés depuis Home Assistant"
+      }
+    },
+    "hero": {
+      "kicker": "Votre aperçu familial",
+      "greeting": {
+        "morning": "Bonjour",
+        "day": "Salut",
+        "evening": "Bonsoir"
+      },
+      "title": "{{greeting}}, {{name}} !",
+      "summary": "Sur votre radar aujourd'hui : {{events}}, {{tasks}} et {{shopping}}.",
+      "events_one": "{{count}} événement",
+      "events_other": "{{count}} événements",
+      "tasks_one": "{{count}} tâche en cours",
+      "tasks_other": "{{count}} tâches en cours",
+      "shopping_one": "{{count}} article de course",
+      "shopping_other": "{{count}} articles de course",
+      "customize": "Disposition",
+      "quickAdd": "Ajouter quelque chose"
+    },
+    "widgetHeader": {
+      "open": "Ouvrir"
+    },
+    "calendar": {
+      "empty": "Aucun événement prévu pour vous.",
+      "allDay": "toute la journée",
+      "defaultLocation": "Événement familial"
+    },
+    "tasks": {
+      "approvals_one": "tâche terminée qui vous attend",
+      "approvals_other": "tâches terminées qui vous attendent",
+      "empty": "Toutes les tâches sont faites.",
+      "due": "Échéance {{date}}",
+      "defaultCategory": "Tâche"
+    },
+    "meals": {
+      "empty": "Rien de prévu pour aujourd'hui.",
+      "types": {
+        "lunch": "Déjeuner",
+        "dinner": "Dîner"
+      }
+    },
+    "shopping": {
+      "empty": "La liste de courses est bouclée."
+    },
+    "trash": {
+      "pickupOn": "Collecte le {{date}}",
+      "empty": "Aucune date de collecte disponible."
+    },
+    "board": {
+      "title": "Nouveau sur le tableau",
+      "empty": "Pas encore de notes."
+    }
+  },
+  "customizer": {
+    "kicker": "Studio de vue",
+    "personalTitle": "Votre aperçu",
+    "tabletTitle": "Tuiles tablette",
+    "scopeNote": "Cette sélection s'applique uniquement à {{name}} sur cet appareil.",
+    "thisProfile": "ce profil",
+    "closeAria": "Fermer le studio de vue",
+    "density": {
+      "title": "Espacement des tuiles",
+      "hint": "Confortable au toucher ou compact pour plus d'aperçu.",
+      "groupAria": "Choisir l'espacement des tuiles",
+      "comfortable": "Confortable",
+      "compact": "Compact"
+    },
+    "tabletPreview": {
+      "title": "Contenu des tuiles tablette",
+      "hint": "D'autres entrées restent défilantes directement dans la tuile.",
+      "events": "Événements",
+      "tasks": "Tâches",
+      "four": "4 entrées",
+      "eight": "8 entrées",
+      "all": "Toutes"
+    },
+    "trash": {
+      "title": "Afficher automatiquement la collecte des déchets",
+      "hint": "Révélez facultativement la tuile seulement peu avant la prochaine collecte.",
+      "visibility": "Afficher la tuile",
+      "always": "Toujours",
+      "upcoming": "Uniquement avant une collecte",
+      "never": "Jamais",
+      "days": "Combien de jours à l'avance ?"
+    },
+    "moveUp": "Monter {{label}}",
+    "moveDown": "Descendre {{label}}",
+    "minVisible": "Au moins une tuile doit rester visible.",
+    "visibilityOn": "Activé",
+    "visibilityOff": "Désactivé",
+    "reset": "Restaurer les valeurs par défaut",
+    "done": "Terminé"
+  }
+}

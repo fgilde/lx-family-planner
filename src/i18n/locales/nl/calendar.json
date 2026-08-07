@@ -1,0 +1,225 @@
+{
+  "view": {
+    "hero": {
+      "eyebrow": "Gezinstijd",
+      "title": "Jouw agenda, zonder de planningschaos.",
+      "todayCount_one": "Er is vandaag <1>{{count}}</1> afspraak.",
+      "todayCount_other": "Er zijn vandaag <1>{{count}}</1> afspraken.",
+      "nextUp": "Straks: {{title}}.",
+      "noNext": "Het volgende vrije moment is voor jou."
+    },
+    "actions": {
+      "sources": "Agendabronnen",
+      "newEvent": "Nieuwe afspraak"
+    },
+    "filter": {
+      "ariaLabel": "Filteren op persoon",
+      "all": "Alles",
+      "managed": "beheerd"
+    },
+    "tools": {
+      "hidePast": "Verleden verbergen",
+      "showPast": "Verleden tonen",
+      "export": "Exporteren",
+      "import": "Bestand importeren"
+    },
+    "agenda": {
+      "kicker": "Agenda",
+      "title": "Wat staat er te gebeuren",
+      "count_one": "{{count}} afspraak",
+      "count_other": "{{count}} afspraken"
+    },
+    "empty": {
+      "title": "Er is nog ruimte voor iets leuks",
+      "description": "Voeg een afspraak toe of koppel een bestaande agenda.",
+      "cta": "Voeg jouw eerste afspraak toe"
+    },
+    "day": {
+      "today": "Vandaag",
+      "tomorrow": "Morgen"
+    },
+    "event": {
+      "allDay": "Hele dag",
+      "until": "tot {{time}}",
+      "throughDate": "t/m {{date}}",
+      "untilDateTime": "tot {{date}}, {{time}}",
+      "fromSubscriptionTitle": "Vanuit een agendabonnement",
+      "birthdayTitle": "Automatische gezinsverjaardag",
+      "familyBirthday": "Gezinsverjaardag",
+      "fromFamily": "Van {{name}}",
+      "subscriptionFallback": "Agendabonnement",
+      "sharedWithTitle": "Gedeeld met verbonden gezinnen",
+      "sharedWith": "Met {{names}}",
+      "memberManaged": "{{name}} · beheerd",
+      "wholeFamily": "Hele gezin",
+      "openAria": "Afspraak {{title}} openen",
+      "readOnlyTitle": "Deze afspraak wordt beheerd door zijn agendabron",
+      "editRemindersTitle": "Herinneringen bewerken",
+      "editRemindersAria": "Herinneringen voor {{title}} bewerken",
+      "deleteTitle": "Afspraak verwijderen",
+      "deleteAria": "{{title}} verwijderen"
+    }
+  },
+  "editor": {
+    "kicker": "Afspraakdetails",
+    "title": "Afspraak bewerken",
+    "description": "Wijzig tijd, personen, locatie en herinneringen samen.",
+    "readOnlyKicker": "Agendabron",
+    "readOnlyDescription": "Deze afspraak wordt beheerd door zijn gekoppelde agendabron en kan hier alleen worden bekeken.",
+    "birthdayKicker": "Gezinsverjaardag",
+    "birthdayDescription": "Deze verjaardag wordt automatisch op basis van het profiel aangemaakt. LX herinnert het gezin een week van tevoren en op de verjaardag zelf.",
+    "save": "Wijzigingen opslaan",
+    "delete": "Afspraak verwijderen",
+    "deleteConfirm": "\"{{title}}\" echt verwijderen?",
+    "fields": {
+      "title": "Titel",
+      "allDay": "Hele dag",
+      "allDayHint": "Geen vaste tijd – kan meerdere dagen duren.",
+      "startDate": "Begint op",
+      "startTime": "Starttijd",
+      "endDate": "Eindigt op (optioneel)",
+      "endDateInclusive": "T/m (optioneel)",
+      "endTime": "Eindtijd (optioneel)",
+      "location": "Locatie (optioneel)",
+      "locationPlaceholder": "bijv. school of huisarts",
+      "notes": "Notities (optioneel)"
+    },
+    "audience": {
+      "title": "Voor wie is deze afspraak?",
+      "hint": "Kies het hele gezin of selecteer meerdere personen.",
+      "everyone": "Hele gezin"
+    }
+  },
+  "trash": {
+    "types": {
+      "rest": "Restafval (grijze container)",
+      "paper": "Papier (blauwe container)",
+      "bio": "GFT (groene container)",
+      "yellow": "PMD-verpakkingen (gele container/-zak)"
+    },
+    "header": {
+      "title": "Digitale afvalkalender",
+      "description": "Importeer het .ics-bestand van jouw afvalinzamelaar of voeg zelf een ophaling toe. LX herinnert je standaard de dag ervoor.",
+      "connectUrl": "Agendakoppeling verbinden",
+      "import": "Afvalkalender importeren",
+      "add": "Ophaling toevoegen"
+    },
+    "feed": {
+      "kicker": "Automatisch ophaalschema",
+      "title": "Afvalkalender via koppeling",
+      "description": "Koppel het ICS-adres van jouw afvalinzamelaar of Home Assistant. LX synchroniseert nieuwe ophaaldata automatisch.",
+      "empty": "Nog geen afvalkalenderkoppeling verbonden.",
+      "name": "Naam van bron",
+      "namePlaceholder": "bijv. afvalkalender wijk",
+      "url": "ICS-agendadres",
+      "security": "De koppeling wordt versleuteld op jouw server opgeslagen en alleen-lezen benaderd.",
+      "connect": "Koppeling verbinden",
+      "connecting": "Verbinden …",
+      "sync": "Nu synchroniseren",
+      "remove": "Bron verwijderen",
+      "confirmRemove": "\"{{name}}\" en alle daaruit gelezen ophaaldata verwijderen?",
+      "pickupCount_one": "{{count}} ophaling",
+      "pickupCount_other": "{{count}} ophalingen"
+    },
+    "next": {
+      "kicker": "Volgende afvalinzameling",
+      "callout": "Zet de container buiten"
+    },
+    "schedule": {
+      "kicker": "Ophaalschema",
+      "title": "Komende ophalingen",
+      "emptyTitle": "Nog geen ophaaldata",
+      "emptyDescription": "Upload het .ics-bestand van jouw afvalinzamelaar.",
+      "reminderOff": "Herinnering uit",
+      "editReminderTitle": "Herinnering wijzigen",
+      "editReminderAria": "Herinnering voor {{title}} wijzigen",
+      "removeTitle": "Ophaling verwijderen",
+      "removeAria": "{{title}} verwijderen"
+    },
+    "dialog": {
+      "eyebrow": "Nieuwe ophaling",
+      "title": "Ophaaldatum toevoegen",
+      "typeLabel": "Afvalsoort",
+      "nameLabel": "Naam",
+      "dateLabel": "Ophaaldatum",
+      "save": "Ophaling opslaan"
+    },
+    "types": {
+      "rest": "Restafval (grijze container)",
+      "papier": "Papier (blauwe container)",
+      "bio": "GFT (groene container)",
+      "gelb": "Gele zak / PMD"
+    },
+    "toast": {
+      "importFailedTitle": "Importeren niet mogelijk",
+      "importFailedBody": "In dit bestand zijn geen afvalinzamelingsdata gevonden.",
+      "importSuccessTitle": "Afvalkalender geïmporteerd",
+      "importSuccessBody_one": "{{count}} ophaaldatum is geïmporteerd en herinnert je standaard één dag vooraf.",
+      "importSuccessBody_other": "{{count}} ophaaldatums zijn geïmporteerd en herinneren je standaard één dag vooraf.",
+      "addedTitle": "Ophaling opgeslagen",
+      "addedBody": "De ophaling op {{date}} is opgeslagen.",
+      "reminderSavedTitle": "Herinnering opgeslagen",
+      "reminderOffTitle": "Herinnering uitgezet",
+      "reminderSavedBody": "LX herinnert je {{leads}}.",
+      "reminderOffBody": "Er wordt geen herinnering meer verstuurd voor {{title}}."
+    }
+  },
+  "sources": {
+    "header": {
+      "kicker": "Agendabrug",
+      "title": "Externe agenda's",
+      "description": "Haal automatisch afspraken binnen uit Google, Outlook, Nextcloud en andere ICS-agenda's.",
+      "closeAria": "Agendabronnen sluiten"
+    },
+    "list": {
+      "heading": "Verbonden bronnen",
+      "activeCount": "{{count}} actief",
+      "syncAll": "Alles synchroniseren",
+      "emptyTitle": "Nog geen agendabrug",
+      "emptyDescription": "Plak rechts een privé-ICS-koppeling. Nieuwe afspraken stromen daarna automatisch jouw gezinsagenda binnen.",
+      "everyone": "Alle",
+      "eventCount_one": "{{count}} afspraak",
+      "eventCount_other": "{{count}} afspraken",
+      "syncNever": "Nog niet succesvol gesynchroniseerd",
+      "syncToday": "Vandaag om {{time}}",
+      "syncNowTitle": "Nu synchroniseren",
+      "syncNowAria": "{{name}} nu synchroniseren",
+      "pauseAria": "{{name}} pauzeren",
+      "resumeAria": "{{name}} activeren",
+      "removeTitle": "Bron verwijderen",
+      "removeAria": "{{name}} verwijderen",
+      "confirmRemove": "\"{{name}}\" en alle daaruit geïmporteerde afspraken verwijderen?"
+    },
+    "form": {
+      "connect": "Agenda verbinden",
+      "connectHint": "De koppeling blijft versleuteld op jouw server.",
+      "nameLabel": "Naam van bron",
+      "namePlaceholder": "bijv. schoolagenda",
+      "urlLabel": "Privé-ICS-koppeling",
+      "visibilityLabel": "Zichtbaar voor",
+      "allMembers": "Alle gezinsleden",
+      "householdLabel": "Planningsgebied",
+      "householdFamily": "Ons huis",
+      "householdGrandparents": "Huis van oma & opa",
+      "colorLegend": "Agendakleur",
+      "pickColorAria": "Kleur {{color}} kiezen",
+      "privacyNote": "Alleen-lezen: de gezinsplanner kan niets wijzigen of verwijderen in de externe agenda. Deel de geheime koppeling toch nooit publiek.",
+      "connecting": "Verbinden …"
+    }
+  },
+  "reminderDialog": {
+    "trashKicker": "Ophaalmelding",
+    "eventKicker": "Afspraakmelding",
+    "atTime": "{{time}}",
+    "noneActive": "Geen herinnering actief",
+    "note": "Meldingen moeten één keer per profiel zijn ingeschakeld. De melding verschijnt ook in de gezinsinbox.",
+    "save": "Herinneringen opslaan"
+  },
+  "reminderPicker": {
+    "title": "Wanneer moet LX je herinneren?",
+    "subtitle": "Kies één of meer momenten",
+    "off": "Uit",
+    "activeHint": "LX herinnert je op alle apparaten die voor dit profiel zijn ingeschakeld.",
+    "inactiveHint": "Zonder een keuze wordt er voor dit item geen herinnering verstuurd."
+  }
+}

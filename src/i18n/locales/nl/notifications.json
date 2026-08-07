@@ -1,0 +1,152 @@
+{
+  "center": {
+    "trigger": {
+      "unread_one": "{{count}} ongelezen melding in de gezinsinbox",
+      "unread_other": "{{count}} ongelezen meldingen in de gezinsinbox",
+      "open": "Gezinsinbox openen",
+      "title": "Gezinsinbox"
+    },
+    "header": {
+      "kicker": "Gezinsradio",
+      "title": "Gezinsinbox",
+      "subtitle": "Dagelijks overzicht en meldingen voor {{name}} op één plek.",
+      "subtitleFallbackName": "jou",
+      "close": "Meldingen sluiten"
+    },
+    "tabs": {
+      "label": "Inbox kiezen",
+      "today": "Vandaag",
+      "notifications": "Meldingen"
+    },
+    "markAllRead": "Alles als gelezen markeren",
+    "time": {
+      "today": "Vandaag, {{time}}",
+      "yesterday": "Gisteren, {{time}}"
+    },
+    "digest": {
+      "summary_one": "{{count}} ding heeft vandaag jouw aandacht nodig.",
+      "summary_other": "{{count}} dingen hebben vandaag jouw aandacht nodig.",
+      "allClear": "Vandaag is alles heerlijk rustig.",
+      "intro": "Eén snelle blik is genoeg – dan kan de dag beginnen.",
+      "events": {
+        "label": "Afspraken",
+        "free": "Vandaag is vrij",
+        "count_one": "vandaag {{count}} afspraak",
+        "count_other": "vandaag {{count}} afspraken",
+        "empty": "Geen items in de agenda"
+      },
+      "tasks": {
+        "label": "Taken",
+        "approvals_one": "{{count}} wacht op goedkeuring",
+        "approvals_other": "{{count}} wachten op goedkeuring",
+        "open_one": "vandaag {{count}} open",
+        "open_other": "vandaag {{count}} open",
+        "done": "Alles klaar",
+        "empty": "Geen dringende taak"
+      },
+      "meals": {
+        "label": "Maaltijden vandaag",
+        "unplanned": "Nog niet gepland",
+        "empty": "Het maaltijdplan heeft nog ruimte"
+      },
+      "shopping": {
+        "label": "Boodschappen",
+        "missing_one": "{{count}} item mist",
+        "missing_other": "{{count}} items missen",
+        "listEmpty": "Lijst is leeg",
+        "nothingToBuy": "Nu niets te kopen"
+      }
+    },
+    "empty": {
+      "title": "Hier is het rustig",
+      "text": "Nieuwe afspraken, berichten en taken verschijnen hier betrouwbaar."
+    },
+    "meta": {
+      "groupChat": "Gezinschat",
+      "directMessages": "Direct bericht",
+      "taskAssigned": "Nieuwe taak",
+      "taskApproval": "Taakgoedkeuring",
+      "taskCompleted": "Klaar",
+      "events": "Gezinsagenda",
+      "moodHelp": "Gezinskompas",
+      "moodUpdates": "Stemming",
+      "problemReports": "Problemmelding",
+      "encouragements": "Aanmoediging",
+      "familyPolls": "Gezinspeiling",
+      "familyMissions": "Gezinsmissie",
+      "schoolItems": "School",
+      "rewards": "Beloning",
+      "pocketMoney": "Zakgeld",
+      "familyConnections": "Gezinsnetwerk",
+      "familyMail": "Gezinspost",
+      "familyChatInvites": "Chatuitnodiging",
+      "default": "Gezinsplanner"
+    },
+    "footer": {
+      "today": "Het dagelijkse overzicht wordt live uit jouw gezinsplan samengesteld.",
+      "notifications": "Meldingen worden 90 dagen bewaard."
+    }
+  },
+  "permissionBanner": {
+    "child": {
+      "eyebrow": "Mis nooit iets belangrijks",
+      "title": "Zal ik je laten weten, {{name}}?",
+      "textNative": "Als er een bericht of nieuwe missie voor jou is, laat de LX-app je het weten.",
+      "textWeb": "Als er een bericht of nieuwe missie voor jou is, laat dit apparaat je het weten.",
+      "action": "Ja, laat me het weten"
+    },
+    "adult": {
+      "eyebrow": "Houd het gezin op de hoogte",
+      "titleNative": "Echte Android-meldingen",
+      "titleWeb": "Meldingen op dit apparaat",
+      "textNative": "Chat, afspraken en taken verschijnen in het Android-meldingengebied – ook als de LX-app gesloten is.",
+      "textWeb": "Chat, afspraken en taken bereiken jou ook als de planner gesloten is.",
+      "action": "Nu aanzetten"
+    },
+    "profileOnly": "Alleen voor het profiel van {{name}}",
+    "busy": "Even geduld …",
+    "later": "Later",
+    "close": "Sluiten"
+  },
+  "webPush": {
+    "secureContext": "Meldingen vereisen een veilig HTTPS-adres.",
+    "iosHomeScreen": "Kies op iPhone en iPad eerst \"Toevoegen aan startscherm\" en open de gezinsapp vanaf daar.",
+    "unsupported": "Deze browser ondersteunt geen webmeldingen.",
+    "permissionDenied": "Meldingen zijn geweigerd in de browser.",
+    "permissionNotGranted": "Meldingen zijn nog niet toegestaan.",
+    "deviceNames": {
+      "apple": "Apple-mobiel apparaat",
+      "android": "Android-apparaat",
+      "windows": "Windows-pc",
+      "mac": "Mac",
+      "chromebook": "Chromebook",
+      "fallback": "Gezinsapparaat"
+    }
+  },
+  "nativePush": {
+    "timeoutDefault": "Android reageerde niet op tijd.",
+    "registrationFailed": "De Android-app kon zich niet registreren voor push.",
+    "serviceStartFailed": "Android kon de meldingsdienst niet starten. Sluit LX volledig en open de app opnieuw.",
+    "channels": {
+      "updatesName": "Gezinsupdates",
+      "updatesDescription": "Berichten, afspraken, taken en gezinsactiviteit",
+      "urgentName": "Dringende gezinsupdates",
+      "urgentDescription": "Dringende hulproepen en tijdskritieke herinneringen",
+      "createFailed": "Android kon de meldingskanalen niet aanmaken. Controleer de app-meldingen in de Android-instellingen."
+    },
+    "onlyInApp": "Echte Android-meldingen zijn beschikbaar in de LX Android-app.",
+    "onlyInAppRegister": "Echte Android-meldingen zijn alleen beschikbaar in de app.",
+    "permissionCheckTimeout": "Android reageert niet op de toestemmingscontrole. Sluit LX volledig en open de app opnieuw.",
+    "diagnoseTimeout": "Android kon de status van Google Play-services niet controleren.",
+    "firebaseNotReady": "Firebase is niet klaar in de Android-app: {{error}}",
+    "firebaseNotConfigured": "Firebase is niet ingesteld in de Android-app.",
+    "playServicesUnavailable": "Google Play-services is niet klaar op dit apparaat: {{status}}. Werk Google Play-services bij en probeer het opnieuw.",
+    "playServicesUnknownStatus": "onbekende status",
+    "tokenTimeout": "Firebase leverde geen apparaatssleutel. Google Play-services is beschikbaar; controleer VPN, firewall en privé-DNS op de telefoon.",
+    "tokenEmpty": "Firebase leverde een lege apparaatssleutel.",
+    "permissionRequestTimeout": "Het Android-toestemmingsverzoek is niet voltooid. Sta meldingen toe in de app-instellingen en probeer het opnieuw.",
+    "permissionDenied": "Meldingen staan uit in de Android-app-instellingen.",
+    "permissionNotGranted": "Meldingen zijn nog niet toegestaan.",
+    "deviceName": "LX Android-app"
+  }
+}

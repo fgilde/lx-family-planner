@@ -1,0 +1,197 @@
+{
+  "kitchen": {
+    "widgets": {
+      "calendar": {
+        "label": "Aujourd'hui",
+        "description": "Tous les événements du jour"
+      },
+      "meals": {
+        "label": "Repas",
+        "description": "Plan de repas du jour"
+      },
+      "tasks": {
+        "label": "Tâches",
+        "description": "Tâches en cours et validations"
+      },
+      "shopping": {
+        "label": "Courses",
+        "description": "Articles encore nécessaires"
+      },
+      "chat": {
+        "label": "Discussion familiale",
+        "description": "Les derniers messages de la famille"
+      },
+      "board": {
+        "label": "Tableau d'affichage",
+        "description": "Notes familiales actuelles"
+      },
+      "trash": {
+        "label": "Collecte des déchets",
+        "description": "La prochaine date de collecte"
+      },
+      "family": {
+        "label": "Famille",
+        "description": "Profils et étoiles en un coup d'œil"
+      },
+      "homeAssistant": {
+        "label": "Contrôle maison",
+        "description": "Appareils, capteurs et scènes en grandes tuiles tablette"
+      }
+    },
+    "household": {
+      "omaOpa": "Mamie & papi",
+      "default": "Notre foyer"
+    },
+    "live": "En direct",
+    "allInView": "Tout en un coup d'œil.",
+    "signedInAs": "Connecté en tant que {{name}}",
+    "quickActions": {
+      "event": "Événement",
+      "shopping": "Courses",
+      "standardView": "Vue standard",
+      "tiles": "Tuiles"
+    },
+    "completeTask": {
+      "kicker": "Cocher la tâche",
+      "title": "Qui l'a terminée ?",
+      "select": "C'était moi",
+      "cancel": "Pas encore"
+    },
+    "cards": {
+      "calendar": {
+        "title": "Aujourd'hui",
+        "count_one": "{{count}} événement",
+        "count_other": "{{count}} événements",
+        "allDay": "toute la journée",
+        "familyFallback": "Famille",
+        "empty": "Rien de prévu pour aujourd'hui."
+      },
+      "meals": {
+        "title": "Repas",
+        "empty": "Aucun repas prévu."
+      },
+      "tasks": {
+        "title": "Tâches",
+        "count_one": "{{count}} en cours",
+        "count_other": "{{count}} en cours",
+        "pendingApproval": "En attente de validation",
+        "shared": "Tâche partagée",
+        "empty": "Toutes les tâches sont faites."
+      },
+      "shopping": {
+        "title": "Courses",
+        "count_one": "{{count}} article",
+        "count_other": "{{count}} articles",
+        "empty": "Tout est acheté."
+      },
+      "chat": {
+        "title": "Discussion familiale",
+        "count_one": "{{count}} message",
+        "count_other": "{{count}} messages",
+        "photo": "📷 Photo",
+        "newMessage": "Nouveau message",
+        "senderFallback": "Famille",
+        "empty": "Pas encore de messages."
+      },
+      "board": {
+        "title": "Tableau d'affichage",
+        "count_one": "{{count}} note",
+        "count_other": "{{count}} notes",
+        "empty": "Le tableau d'affichage est vide."
+      },
+      "trash": {
+        "title": "Prochaine collecte",
+        "noDate": "Pas de date",
+        "empty": "Aucune collecte planifiée."
+      },
+      "family": {
+        "title": "Famille",
+        "count_one": "{{count}} profil",
+        "count_other": "{{count}} profils"
+      }
+    }
+  },
+  "pet": {
+    "noDateAppointment": "Rendez-vous sans date",
+    "appointmentWithTime": "{{day}} · {{time}}",
+    "petFallbackName": "Ami à quatre pattes",
+    "petAlt": "Animal",
+    "kicker": "Profil à pattes · Chouchou de la famille",
+    "heroTitle": "Tout pour {{name}} en un coup d'œil",
+    "heroText": "Rendez-vous, soins et alimentation au même endroit calme – pas de discussion, d'étoiles ni de menus superflus.",
+    "caredFor": "Soigné",
+    "openCareItems": "soins en cours",
+    "overviewAria": "Aperçu à pattes",
+    "nextAppointment": "Prochain rendez-vous",
+    "nothingPlanned": "Rien de prévu",
+    "calendarFree": "Le calendrier est libre.",
+    "care": "Soins",
+    "careOpen_one": "{{count}} élément en cours",
+    "careOpen_other": "{{count}} éléments en cours",
+    "allDone": "Tout est fait",
+    "managedByAdults": "Pris en charge par les adultes.",
+    "petMode": "Mode animal",
+    "calmProtected": "Au calme & protégé",
+    "noChatNoAccount": "Pas de discussion ni de fonctions de compte.",
+    "carePlan": "Plan de soins",
+    "whatsUpFor": "Ce qui arrive pour {{name}}",
+    "familyTakesCare": "La famille s'en occupe",
+    "careCategoryFallback": "Soins & alimentation",
+    "openLabel": "en cours",
+    "allCaredFor": "Tout est bien soigné",
+    "noCareItems": "Il n'y a aucun soin en cours pour {{name}} en ce moment.",
+    "appointmentsHealth": "Rendez-vous & santé",
+    "pawCalendar": "Calendrier à pattes",
+    "calendar": "Calendrier",
+    "noDateShort": "ouvert",
+    "noAppointments": "Aucun rendez-vous planifié",
+    "pawCalendarFree": "Le calendrier à pattes est entièrement libre en ce moment.",
+    "importantNotes": "Notes importantes",
+    "noteFallback": "Note"
+  },
+  "homeAssistant": {
+    "states": {
+      "on": "Allumé",
+      "off": "Éteint",
+      "open": "Ouvert",
+      "closed": "Fermé",
+      "opening": "Ouverture…",
+      "closing": "Fermeture…",
+      "home": "Présent",
+      "notHome": "Absent",
+      "unavailable": "Indisponible",
+      "unknown": "Inconnu",
+      "clear": "Dégagé",
+      "cloudy": "Nuageux",
+      "rainy": "Pluie"
+    },
+    "defaultTitle": "Notre maison",
+    "subtitle": "Home Assistant · en direct",
+    "refreshAria": "Actualiser l'état de la maison",
+    "emptyTitle": "Pas encore de tuiles maison",
+    "emptyHint": "Un profil parent peut partager des appareils et des capteurs dans l'espace parents.",
+    "openCover": "Ouvrir",
+    "closeCover": "Fermer",
+    "adultsOnlyConfirm": "Adultes uniquement, avec confirmation",
+    "control": "Contrôler"
+  },
+  "familyCloud": {
+    "title": "Archive familiale",
+    "openAria": "Ouvrir l'archive familiale",
+    "open": "Ouvrir",
+    "preparing": "L'archive est en préparation",
+    "checkConnection": "Vous pouvez vérifier la connexion dans l'espace parents.",
+    "toParentCenter": "Vers l'espace parents",
+    "sharedStorage": "Stockage partagé",
+    "loading": "Chargement",
+    "ofTotal": "sur {{size}}",
+    "safeForFamily": "en sécurité pour votre famille",
+    "openingArchive": "Ouverture de l'archive…",
+    "noFiles": "Pas encore de fichiers – il y a de la place ici pour vos souvenirs.",
+    "upload": "Envoyer vers le cloud",
+    "toast": {
+      "fileTooBigTitle": "Fichier trop volumineux",
+      "fileTooBigMessage": "{{name}} dépasse 100 Mo."
+    }
+  }
+}

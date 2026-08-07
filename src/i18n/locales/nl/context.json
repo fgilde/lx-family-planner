@@ -1,0 +1,554 @@
+{
+  "defaults": {
+    "you": "jij",
+    "thisProfile": "dit profiel",
+    "aParent": "een ouder",
+    "familyAuthor": "Gezin",
+    "familyName": "Ons gezin",
+    "familyArchive": "Het gezinsarchief",
+    "shoppingQuantity": "1 st",
+    "recipeServings": "4 porties"
+  },
+  "ics": {
+    "defaultFamilyName": "LX-gezin",
+    "calendarName": "{{familyName}}-agenda",
+    "defaultEventTitle": "Gezinsafspraak",
+    "exportFileName": "gezinsagenda_{{date}}.ics"
+  },
+  "shared": {
+    "changeSaved": "De wijziging is opgeslagen."
+  },
+  "errors": {
+    "changeFailed": "Wijziging mislukt",
+    "deviceNotRegistered": "Dit apparaat is nog niet geregistreerd.",
+    "androidPermissionReadFailed": "De Android-toestemming kon niet worden uitgelezen.",
+    "androidPushStatusLoadFailed": "De Android-pushstatus kon niet worden geladen.",
+    "pushCheckTimeout": "De gezinsserver reageert niet op de pushcontrole. Controleer het serveradres en probeer het opnieuw.",
+    "fcmNotConfigured": "De server is nog niet verbonden met Firebase Cloud Messaging.",
+    "deviceKeySaveTimeout": "De apparaatsleutel is beschikbaar, maar de gezinsserver reageert niet tijdens het opslaan.",
+    "androidPushActivationFailed": "Android-meldingen konden niet worden aangezet.",
+    "appNotRegistered": "Deze app is nog niet voor het profiel geregistreerd.",
+    "calendarConnectFailed": "Agenda kon niet worden verbonden",
+    "calendarUpdateFailed": "Agenda kon niet worden gewijzigd",
+    "calendarSyncFailed": "Agenda kon niet worden vernieuwd",
+    "calendarsSyncFailed": "Agenda's konden niet worden vernieuwd",
+    "calendarSourceRemoveFailed": "Agendabron kon niet worden verwijderd",
+    "eventRemindersSaveFailed": "Afspraakherinneringen konden niet worden opgeslagen",
+    "eventSaveFailed": "De afspraak kon niet worden opgeslagen",
+    "shoppingItemAddFailed": "Item kon niet worden toegevoegd",
+    "bringItemUpdateFailed": "Bring!-item kon niet worden bijgewerkt",
+    "bringIngredientsTransferFailed": "Ingrediënten konden niet naar Bring! worden overgebracht",
+    "redeemFailed": "Inwisselen niet mogelijk",
+    "familyDeleteFailed": "Gezin kon niet worden verwijderd",
+    "bringCatalogLoadFailed": "Bring!-catalogus kon niet worden geladen",
+    "bringSyncFailed": "Bring!-synchronisatie mislukt",
+    "gotifyConnectFailed": "Gotify kon niet worden verbonden",
+    "gotifySettingsSaveFailed": "Gotify-instellingen konden niet worden opgeslagen",
+    "gotifyTestFailed": "Gotify-test mislukt",
+    "ntfyConnectFailed": "ntfy kon niet worden verbonden",
+    "ntfySettingsSaveFailed": "ntfy-instellingen konden niet worden opgeslagen",
+    "ntfyTestFailed": "ntfy-test mislukt",
+    "homeAssistantConnectFailed": "Home Assistant kon niet worden verbonden",
+    "deviceListLoadFailed": "Apparatenlijst kon niet worden geladen",
+    "homeAssistantSettingsSaveFailed": "Home Assistant-instellingen konden niet worden opgeslagen",
+    "homeAssistantNoResponse": "Home Assistant reageert niet",
+    "deviceControlFailed": "Apparaat kon niet worden bediend",
+    "nextcloudConnectFailed": "Nextcloud kon niet worden verbonden",
+    "nextcloudBundledSetupFailed": "Gezinscloud kon niet automatisch worden ingesteld",
+    "cloudAccessLoadFailed": "Cloud-toegang kon niet worden geladen",
+    "nextcloudSettingsSaveFailed": "Nextcloud-instellingen konden niet worden opgeslagen",
+    "nextcloudNoResponse": "Nextcloud reageert niet",
+    "nextcloudSyncFailed": "Nextcloud-agenda kon niet worden gesynchroniseerd",
+    "cloudBackupFailed": "Cloud-back-up kon niet worden aangemaakt",
+    "familyRequestFailed": "Gezinsverzoek mislukt",
+    "requestAnswerFailed": "Verzoek kon niet worden beantwoord",
+    "relationshipRemoveFailed": "Verbinding kon niet worden verwijderd",
+    "familyGrantsSaveFailed": "Gezinsdeelinstellingen konden niet worden opgeslagen",
+    "familyMailLoadFailed": "Gezinspost kon niet worden geladen",
+    "letterSendFailed": "Brief kon niet worden verstuurd",
+    "letterUpdateFailed": "Brief kon niet worden bijgewerkt",
+    "chatInvitationsLoadFailed": "Chatuitnodigingen konden niet worden geladen",
+    "chatInvitationSendFailed": "Chatuitnodiging kon niet worden verstuurd",
+    "chatAccessUpdateFailed": "Chattoegang kon niet worden bijgewerkt",
+    "guestChatLoadFailed": "Uitgenodigde gezinschat kon niet worden geladen",
+    "messageSendFailed": "Bericht kon niet worden verstuurd",
+    "taskSendFailed": "Taak kon niet worden verstuurd",
+    "rewardCreateFailed": "Beloning kon niet worden aangemaakt",
+    "pocketMoneyBookFailed": "Zakgeld kon niet worden geboekt",
+    "reportSaveFailed": "Melding kon niet worden opgeslagen",
+    "problemReportsLoadFailed": "Problemmeldingen konden niet worden geladen",
+    "reportStatusChangeFailed": "Meldingsstatus kon niet worden gewijzigd",
+    "mediaWidgetSaveFailed": "Mediawidget kon niet worden opgeslagen",
+    "entrySaveFailed": "Item kon niet worden opgeslagen",
+    "entryUpdateFailed": "Item kon niet worden bijgewerkt",
+    "entryDeleteFailed": "Item kon niet worden verwijderd",
+    "routineUpdateFailed": "Routine kon niet worden bijgewerkt",
+    "schoolItemUpdateFailed": "Schoolitem kon niet worden bijgewerkt",
+    "pollSaveFailed": "Stem kon niet worden opgeslagen",
+    "familyMissionUpdateFailed": "Gezinsmissie kon niet worden bijgewerkt",
+    "kidWorldSaveFailed": "Kinderwereld kon niet worden opgeslagen"
+  },
+  "toasts": {
+    "connectionMissing": {
+      "title": "Verbinding ontbreekt"
+    },
+    "refreshFailed": {
+      "title": "Vernieuwen mislukt"
+    },
+    "homeStatusUnreachable": {
+      "title": "Huisstatus onbereikbaar"
+    },
+    "notificationsUnreachable": {
+      "title": "Meldingen onbereikbaar"
+    },
+    "notificationNotSaved": {
+      "title": "Melding niet opgeslagen"
+    },
+    "notificationsNotSaved": {
+      "title": "Meldingen niet opgeslagen"
+    },
+    "releaseNotesNotSaved": {
+      "title": "Nog niet opgeslagen",
+      "message": "Het nieuws kon niet als gelezen worden gemarkeerd. Probeer het opnieuw."
+    },
+    "themeNotSaved": {
+      "title": "Thema niet opgeslagen"
+    },
+    "customThemeSaved": {
+      "title": "Mijn ontwerp opgeslagen",
+      "message": "Het aangepaste thema is aangemaakt en geactiveerd voor dit profiel.",
+      "resetMessage": "Het aangepaste thema is verwijderd. Het profiel gebruikt nu Linnen."
+    },
+    "webPushUnreachable": {
+      "title": "Pushmeldingen onbereikbaar"
+    },
+    "webPushUnavailable": {
+      "title": "Meldingen nog niet mogelijk"
+    },
+    "webPushEnabled": {
+      "title": "Meldingen staan aan",
+      "message": "Dit apparaat stuurt nu meldingen voor {{name}}."
+    },
+    "activationFailed": {
+      "title": "Activeren niet mogelijk"
+    },
+    "webPushDisabled": {
+      "title": "Meldingen uitgezet",
+      "message": "Dit apparaat ontvangt geen browsermeldingen meer."
+    },
+    "disableFailed": {
+      "title": "Uitzetten niet mogelijk"
+    },
+    "notificationPrefsSaved": {
+      "title": "Meldingen opgeslagen"
+    },
+    "webPushSaved": {
+      "message": "Jouw selectie werkt direct op dit apparaat."
+    },
+    "saveFailed": {
+      "title": "Opslaan niet mogelijk"
+    },
+    "webPushTestSent": {
+      "title": "Test is verstuurd",
+      "message": "De melding verschijnt zo op dit apparaat."
+    },
+    "testFailed": {
+      "title": "Test mislukt"
+    },
+    "androidPushUnreachable": {
+      "title": "Android-meldingen onbereikbaar"
+    },
+    "nativePushEnabled": {
+      "title": "Android-meldingen staan aan",
+      "message": "De LX-app stuurt nu meldingen voor {{name}}."
+    },
+    "nativePushDisabled": {
+      "title": "App-meldingen uitgezet",
+      "message": "Dit apparaat stuurt geen meldingen meer voor {{name}}."
+    },
+    "nativePushSaved": {
+      "title": "App-meldingen opgeslagen",
+      "message": "Jouw selectie werkt direct op dit Android-apparaat."
+    },
+    "nativePushTestSent": {
+      "title": "Android-test is verstuurd",
+      "message": "De melding verschijnt zo in het Android-meldingengebied."
+    },
+    "nativeTestFailed": {
+      "title": "Android-test mislukt"
+    },
+    "deviceRemoved": {
+      "title": "Apparaat verwijderd",
+      "message": "Dit apparaat ontvangt geen gezinsmeldingen meer."
+    },
+    "calendarSourceSaved": {
+      "title": "Agendabron opgeslagen",
+      "warningMessage": "De eerste vernieuwing is nog mislukt: {{warning}}"
+    },
+    "calendarConnected": {
+      "title": "Agenda verbonden",
+      "message": "{{name}} is geïmporteerd met {{count}} afspraken."
+    },
+    "calendarSaved": {
+      "title": "Agenda opgeslagen"
+    },
+    "calendarUpdated": {
+      "title": "Agenda bijgewerkt",
+      "message": "De agendabron is bijgewerkt."
+    },
+    "calendarSynced": {
+      "title": "Agenda is up-to-date",
+      "message": "{{count}} afspraken zijn gesynchroniseerd."
+    },
+    "calendarSyncPartial": {
+      "title": "Synchronisatie gedeeltelijk voltooid",
+      "message": "{{count}} agenda's zijn momenteel niet bereikbaar."
+    },
+    "calendarSyncAll": {
+      "title": "Alle agenda's zijn up-to-date",
+      "message": "{{count}} agendabronnen zijn gesynchroniseerd."
+    },
+    "calendarSourceRemoved": {
+      "title": "Agendabron verwijderd",
+      "message": "De bijbehorende afspraken zijn uit de gezinsplanner verwijderd."
+    },
+    "sharedEventCreated": {
+      "title": "Gezinsafspraak gedeeld",
+      "message": "\"{{title}}\" is zichtbaar voor de uitgenodigde gezinnen."
+    },
+    "eventAdded": {
+      "title": "Afspraak toegevoegd",
+      "message": "\"{{title}}\" staat nu in de agenda."
+    },
+    "eventUpdated": {
+      "title": "Afspraak opgeslagen",
+      "message": "\"{{title}}\" is voor iedereen geselecteerd bijgewerkt."
+    },
+    "eventRemindersSaved": {
+      "title": "Afspraakherinneringen opgeslagen",
+      "enabledMessage": "\"{{title}}\" herinnert je nu op {{count}} momenten.",
+      "disabledMessage": "Herinneringen zijn uitgezet voor \"{{title}}\"."
+    },
+    "sharedEventDeleted": {
+      "title": "Gedeelde afspraak verwijderd",
+      "message": "De afspraak is voor alle uitgenodigde gezinnen verwijderd."
+    },
+    "eventDeleted": {
+      "title": "Afspraak verwijderd",
+      "message": "De afspraak is verwijderd."
+    },
+    "icsImportFailed": {
+      "title": "Importeren niet mogelijk",
+      "message": "Geen geldige afspraken gevonden."
+    },
+    "icsImported": {
+      "title": "Agenda geïmporteerd",
+      "message": "{{count}} afspraken zijn geïmporteerd."
+    },
+    "icsExported": {
+      "title": "Agenda geëxporteerd",
+      "message": "Het agendabestand is aangemaakt."
+    },
+    "bringAdded": {
+      "title": "Toegevoegd aan Bring!",
+      "itemMessage": "{{name}} staat nu op de gedeelde lijst.",
+      "ingredientsMessage": "{{count}} ingrediënten zijn overgebracht."
+    },
+    "shoppingItemAdded": {
+      "title": "Op de boodschappenlijst",
+      "message": "{{name}} is toegevoegd."
+    },
+    "shoppingListNotSaved": {
+      "title": "Boodschappenlijst niet opgeslagen"
+    },
+    "ingredientsAdded": {
+      "title": "Op de boodschappenlijst",
+      "message": "{{count}} ingrediënten zijn toegevoegd."
+    },
+    "recipeSaved": {
+      "title": "Recept opgeslagen",
+      "message": "\"{{name}}\" staat in het receptenboek."
+    },
+    "recipeDeleted": {
+      "title": "Recept verwijderd",
+      "message": "Het recept is verwijderd."
+    },
+    "recipeUpdated": {
+      "title": "Recept bijgewerkt",
+      "message": "\"{{name}}\" is opgeslagen."
+    },
+    "taskSentForReview": {
+      "title": "Verstuurd voor controle",
+      "message": "\"{{title}}\" wacht nu op goedkeuring van {{name}}."
+    },
+    "taskReportWithdrawn": {
+      "title": "Melding ingetrokken",
+      "message": "\"{{title}}\" staat weer open."
+    },
+    "starsEarned": {
+      "title": "Sterren verdiend!",
+      "nextMessage": "+{{stars}} sterren – de volgende herhaling is ingepland op {{date}}.",
+      "message": "+{{stars}} sterren voor \"{{title}}\"."
+    },
+    "taskApproved": {
+      "title": "Taak goedgekeurd",
+      "nextMessage": "\"{{title}}\" is goedgekeurd. De volgende herhaling is ingepland.",
+      "message": "\"{{title}}\" is goedgekeurd – de sterren zijn bijgeschreven."
+    },
+    "taskRejected": {
+      "title": "Nog een keer proberen",
+      "message": "\"{{title}}\" staat weer als open gemarkeerd."
+    },
+    "taskCreated": {
+      "title": "Taak aangemaakt",
+      "message": "\"{{title}}\" is klaar om te gaan."
+    },
+    "taskUpdated": {
+      "title": "Taak bijgewerkt",
+      "message": "\"{{title}}\" is opgeslagen."
+    },
+    "taskDeleted": {
+      "title": "Taak verwijderd",
+      "message": "Het item is permanent verwijderd."
+    },
+    "rewardCreated": {
+      "title": "Beloning aangemaakt",
+      "message": "\"{{title}}\" staat in de sterrenwinkel.",
+      "grandchildMessage": "\"{{title}}\" wacht nu op het kleinkind."
+    },
+    "rewardUpdated": {
+      "title": "Beloning bijgewerkt"
+    },
+    "rewardDeleted": {
+      "title": "Beloning verwijderd",
+      "message": "Het item is verwijderd."
+    },
+    "rewardRedeemed": {
+      "title": "Beloning ingewisseld!",
+      "message": "\"{{title}}\" is verdiend."
+    },
+    "mealPlanUpdated": {
+      "title": "Maaltijdplan bijgewerkt",
+      "message": "{{recipe}} is ingepland."
+    },
+    "mealRemoved": {
+      "title": "Gerecht verwijderd",
+      "message": "Het plekje in het maaltijdplan is weer vrij."
+    },
+    "noteAdded": {
+      "title": "Notitie vastgeprikt",
+      "message": "\"{{title}}\" staat op het prikbord."
+    },
+    "noteUpdated": {
+      "title": "Notitie bijgewerkt"
+    },
+    "noteDeleted": {
+      "title": "Notitie verwijderd",
+      "message": "De notitie is van het prikbord gehaald."
+    },
+    "memberAdded": {
+      "title": "Profiel aangemaakt",
+      "message": "{{name}} maakt nu deel uit van het gezin."
+    },
+    "starsReset": {
+      "title": "Punten gereset",
+      "message": "{{name}} begint weer bij 0 sterren."
+    },
+    "tasksCleared": {
+      "title": "Takenlijst opgeschoond",
+      "message_one": "{{count}} taak is verwijderd.",
+      "message_other": "{{count}} taken zijn verwijderd."
+    },
+    "nothingToClear": {
+      "title": "Niets te verwijderen",
+      "message": "Er zijn geen taken die aan dit filter voldoen."
+    },
+    "memberDeleted": {
+      "title": "Profiel verwijderd",
+      "message": "Het gezinsprofiel is verwijderd."
+    },
+    "familyUpdated": {
+      "title": "Gezin bijgewerkt",
+      "message": "De instellingen zijn opgeslagen."
+    },
+    "familyDeleted": {
+      "title": "Gezin verwijderd",
+      "message": "Het gezinsaccount is verwijderd."
+    },
+    "bringSynced": {
+      "title": "Bring! gesynchroniseerd",
+      "message": "De boodschappenlijst is up-to-date."
+    },
+    "bringDisconnected": {
+      "title": "Bring! losgekoppeld",
+      "message": "De inloggegevens zijn veilig verwijderd."
+    },
+    "gotifyConnected": {
+      "title": "Gotify verbonden",
+      "message": "Het testbericht is succesvol verstuurd."
+    },
+    "gotifySaved": {
+      "message": "De nieuwe Gotify-regels zijn actief."
+    },
+    "gotifyTestSent": {
+      "title": "Testbericht verstuurd",
+      "message": "Controleer nu jouw Gotify-app."
+    },
+    "gotifyDisconnected": {
+      "title": "Gotify losgekoppeld",
+      "message": "De gezinsplanner stuurt geen pushberichten meer."
+    },
+    "ntfyConnected": {
+      "title": "ntfy verbonden",
+      "message": "LX stuurt nu ook gezinsmeldingen naar jouw ntfy-onderwerp."
+    },
+    "ntfySaved": {
+      "message": "De ntfy-gebeurtenisinstellingen zijn opgeslagen."
+    },
+    "ntfyTestSent": {
+      "title": "ntfy-test verstuurd",
+      "message": "De testmelding is naar jouw onderwerp verstuurd."
+    },
+    "ntfyDisconnected": {
+      "title": "ntfy losgekoppeld",
+      "message": "LX stuurt geen meldingen meer naar ntfy."
+    },
+    "homeAssistantConnected": {
+      "title": "Home Assistant verbonden",
+      "message": "{{count}} apparaten en sensoren zijn gevonden."
+    },
+    "homeDashboardSaved": {
+      "title": "Huis-dashboard opgeslagen",
+      "message": "Deelinstellingen en apparaatselectie zijn nu actief."
+    },
+    "connectionOk": {
+      "title": "Verbinding tot stand gebracht"
+    },
+    "homeAssistantDisconnected": {
+      "title": "Home Assistant losgekoppeld",
+      "message": "De toegangssleutel is uit de gezinsplanner verwijderd."
+    },
+    "nextcloudConnected": {
+      "title": "Gezinscloud verbonden",
+      "message": "Agenda, gezinsmap en veilige back-ups zijn klaar."
+    },
+    "nextcloudBundledReady": {
+      "title": "Gezinscloud is klaar",
+      "message": "Jouw gezinsaccount, agenda en cloudmap zijn automatisch ingesteld."
+    },
+    "nextcloudSaved": {
+      "title": "Gezinscloud opgeslagen",
+      "message": "De Nextcloud-regels zijn nu actief."
+    },
+    "nextcloudReachable": {
+      "title": "Gezinscloud bereikbaar"
+    },
+    "nextcloudSynced": {
+      "title": "Agenda gesynchroniseerd",
+      "changedMessage": "{{count}} wijzigingen zijn veilig gesynchroniseerd.",
+      "unchangedMessage": "LX Family en Nextcloud waren al gesynchroniseerd."
+    },
+    "cloudBackupCreated": {
+      "title": "Cloud-back-up aangemaakt",
+      "message": "{{name}} is versleuteld opgeslagen in Nextcloud."
+    },
+    "nextcloudDisconnected": {
+      "title": "Gezinscloud losgekoppeld",
+      "message": "Lokale gezinsitems blijven volledig intact."
+    },
+    "moodShared": {
+      "title": "Bedankt voor het delen",
+      "message": "Jouw stemming staat in de gezinskompas."
+    },
+    "relationshipRequested": {
+      "title": "Verzoek verstuurd",
+      "message": "Het andere gezin kan de verbinding nu bevestigen."
+    },
+    "familiesConnected": {
+      "title": "Gezinnen verbonden",
+      "message": "De verbinding is nu zichtbaar in de stamboom."
+    },
+    "requestDeclined": {
+      "title": "Verzoek afgewezen",
+      "message": "Het verzoek is verwijderd."
+    },
+    "relationshipRemoved": {
+      "title": "Verbinding verwijderd",
+      "message": "De gezinsaccounts zijn niet meer gekoppeld."
+    },
+    "familyGrantsSaved": {
+      "title": "Gezinsdeling opgeslagen",
+      "message": "Het andere gezin ziet direct wat ze mogen helpen plannen."
+    },
+    "letterSent": {
+      "title": "Brief verstuurd",
+      "message": "Het verbonden gezin vindt hem nu in de brievenbus."
+    },
+    "chatInvitationSent": {
+      "title": "Chatuitnodiging verstuurd",
+      "message": "Het geselecteerde profiel beslist zelf over de toegang."
+    },
+    "invitationAccepted": {
+      "title": "Uitnodiging geaccepteerd",
+      "message": "De gezinschat verschijnt nu als eigen kanaal."
+    },
+    "guestAccessEnded": {
+      "title": "Gasttoegang beëindigd"
+    },
+    "invitationDeclined": {
+      "title": "Uitnodiging afgewezen"
+    },
+    "chatAccessUpdated": {
+      "message": "De toegangsinstelling is bijgewerkt."
+    },
+    "taskSentToGrandchild": {
+      "title": "Taak verstuurd",
+      "message": "\"{{title}}\" is nu zichtbaar voor het kleinkind."
+    },
+    "grandchildPocketMoneyBooked": {
+      "message": "De boeking is nu zichtbaar in de gezinsrekening van het kleinkind."
+    },
+    "pocketMoneyBooked": {
+      "title": "Zakgeld geboekt",
+      "message": "De gezinsrekening van {{name}} is up-to-date."
+    },
+    "starsConverted": {
+      "title": "Sterren omgezet"
+    },
+    "problemReportSaved": {
+      "title": "Bedankt voor jouw melding",
+      "message": "De probleemdetails zijn veilig opgeslagen in de gezinsplanner."
+    },
+    "dashboardLinkAdded": {
+      "title": "Dashboard uitgebreid",
+      "message": "\"{{title}}\" is nu zichtbaar op het kindprofiel."
+    },
+    "dashboardLinkRemoved": {
+      "title": "Dashboardkoppeling verwijderd",
+      "message": "De tegel is verwijderd van het kindprofiel."
+    },
+    "familyLifeSaved": {
+      "title": "Opgeslagen",
+      "message": "Gezinsleven is bijgewerkt."
+    },
+    "familyLifeUpdated": {
+      "title": "Bijgewerkt"
+    },
+    "familyLifeRemoved": {
+      "title": "Verwijderd",
+      "message": "Het item is verwijderd."
+    },
+    "routineCompleted": {
+      "title": "Routine klaar!",
+      "message": "Alle stappen lichtten op – goed gedaan."
+    },
+    "voteCounted": {
+      "title": "Stem geteld",
+      "message": "Jouw gezin kan nu jouw keuze zien."
+    },
+    "kidWorldReady": {
+      "title": "Jouw wereld is klaar",
+      "message": "Jouw metgezel reist nu met je mee."
+    }
+  }
+}

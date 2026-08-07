@@ -1,0 +1,140 @@
+{
+  "header": {
+    "title": "Zadania i sklep nagród za gwiazdki",
+    "createReward": "Utwórz własną nagrodę",
+    "assignTask": "Przypisz nowe zadanie",
+    "intro": "Dzieci zgłaszają zadanie jako ukończone. Gwiazdki są przyznawane dopiero, gdy rodzic, który je utworzył, potwierdzi ukończenie.",
+    "approvalsWaiting_one": "{{count}} zadanie czeka na Twój przegląd",
+    "approvalsWaiting_other": "{{count}} zadania(ów) czeka na Twój przegląd"
+  },
+  "repeat": {
+    "none": "Jednorazowe",
+    "daily": "Codziennie",
+    "weekdays": "Od poniedziałku do piątku",
+    "weekly": "Co tydzień",
+    "monthly": "Co miesiąc",
+    "recurring": "Cykliczne"
+  },
+  "memberCard": {
+    "managedOnly": "Tylko organizowane",
+    "noTasks": "Brak zadań przypisanych do {{name}}."
+  },
+  "shared": {
+    "title": "Zabierzmy się za to razem",
+    "description": "Każda wybrana osoba może wziąć te zadania. Gwiazdki trafiają do tego, kto je ukończy.",
+    "open": "Kto skończy pierwszy, odznacza zadanie",
+    "reportedBy": "{{name}} mówi, że gotowe – czeka na potwierdzenie",
+    "completedBy": "Ukończone przez {{name}}",
+    "someone": "ktoś w rodzinie"
+  },
+  "taskItem": {
+    "reviewWaitingFor": "Przegląd czeka na {{name}}.",
+    "fallbackCreator": "twórca",
+    "fallbackParent": "rodzic",
+    "statusConfirmed": "Potwierdzone i zaliczone",
+    "statusPendingWith": "Czeka na przegląd przez {{name}}",
+    "statusCreatedBy": "Utworzone przez {{name}}",
+    "statusTapWhenDone": "Kliknij, gdy skończysz",
+    "rotationTitle": "Zmienia się przy każdym powtórzeniu",
+    "fairRotation": "Uczciwa rotacja ({{count}})",
+    "approve": "Naprawdę gotowe",
+    "reject": "Spróbuj ponownie",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "confirmDelete": "Naprawdę usunąć?"
+  },
+  "shop": {
+    "title": "Sklep nagród za gwiazdki",
+    "titleForChild": "Sklep nagród za gwiazdki dla {{name}}",
+    "editRewardTitle": "Edytuj nagrodę",
+    "deleteRewardTitle": "Usuń nagrodę",
+    "forChild": "🧒 Dla {{name}}",
+    "forAllChildren": "✨ Dla wszystkich dzieci",
+    "requiresStars": "Wymaga {{count}} gwiazdek",
+    "redeemFor": "Wymień dla {{name}}!"
+  },
+  "rewardModal": {
+    "editTitle": "Edytuj nagrodę",
+    "createTitle": "Utwórz nową nagrodę",
+    "titleLabel": "Tytuł nagrody",
+    "titlePlaceholder": "np. 1x wyjazd do zoo, 30 min grania...",
+    "forWhichChild": "Dla którego dziecka jest ta nagroda?",
+    "childOption": "🧒 {{name}}",
+    "starCost": "Cena w gwiazdkach",
+    "imageLabel": "Obrazek nagrody"
+  },
+  "taskModal": {
+    "editTitle": "Edytuj zadanie",
+    "taskLabel": "Zadanie / obowiązek",
+    "taskPlaceholder": "np. posprzątaj pokój, opróżnij zmywarkę...",
+    "descriptionLabel": "Opis (opcjonalnie)",
+    "descriptionPlaceholder": "Szczegóły, wskazówki lub co dokładnie trzeba zrobić …",
+    "assignTo": "Przypisz do",
+    "sharedToggle": "Wspólne zadanie rodzinne",
+    "sharedHint": "Jedno zadanie dla kilku osób – gwiazdki trafiają do osoby, która je ukończy.",
+    "eligibleProfiles": "Kto może je wziąć?",
+    "eligibleHint": "Wybierz co najmniej jeden profil. Dzieci nadal potrzebują potwierdzenia rodzica.",
+    "managedSuffix": ", zarządzane",
+    "scheduleTitle": "Kiedy zadanie ma być gotowe?",
+    "scheduleHint": "Powtórzenia są automatycznie przenoszone w czasie po potwierdzeniu.",
+    "dueDate": "Termin",
+    "dueTime": "Godzina (opcjonalnie)",
+    "repeatLabel": "Powtarzaj",
+    "rotationToggle": "Uczciwa rotacja między profilami",
+    "rotationHint": "Po każdym potwierdzonym powtórzeniu automatycznie nadchodzi kolejna osoba.",
+    "category": "Kategoria",
+    "categories": {
+      "household": "Dom",
+      "kitchen": "Kuchnia",
+      "room": "Pokój",
+      "school": "Szkoła",
+      "pet": "Zwierzątko",
+      "garden": "Ogród"
+    },
+    "managedNoteTitle": "Zadanie organizacyjne",
+    "managedNoteHint": "Profile zarządzane nie dostają gwiazdek i osobnego raportu ukończenia.",
+    "starsLabel": "Nagroda w gwiazdkach (+ gwiazdek)",
+    "submit": "Utwórz zadanie",
+    "save": "Zapisz zmiany"
+  },
+  "rewardIcon": {
+    "defaultLabel": "Nagroda",
+    "customImage": "Własny obraz",
+    "customSymbol": "Własny symbol",
+    "customImageTitle": "{{label}}: własny obraz"
+  },
+  "presets": {
+    "gift": "Prezent",
+    "iceCream": "Lody",
+    "gaming": "Czas gry",
+    "movie": "Wieczór filmowy",
+    "popcorn": "Kino",
+    "pizza": "Pizza",
+    "trip": "Wycieczka",
+    "outdoors": "Na łonie natury",
+    "bike": "Wycieczka rowerowa",
+    "swimming": "Basen",
+    "creative": "Czas kreatywny",
+    "music": "Muzyka",
+    "book": "Książka",
+    "party": "Impreza",
+    "animal": "Przygoda ze zwierzętami",
+    "cake": "Słodka niespodzianka",
+    "rocket": "Przygoda",
+    "trophy": "Wielka nagroda",
+    "crown": "Wybierz życzenie",
+    "surprise": "Niespodzianka"
+  },
+  "iconPicker": {
+    "hint": "Wyraźny obraz, który dzieci od razu rozpoznają.",
+    "uploadAriaLabel": "Wybierz własny obraz nagrody",
+    "presetsAriaLabel": "Ikony nagród",
+    "removeCustomImage": "Usuń własny obraz",
+    "errors": {
+      "invalidType": "Wybierz obraz w formacie PNG, JPG lub WebP.",
+      "tooLarge": "Obraz może mieć maksymalnie 5 MB.",
+      "stillTooLarge": "Obraz jest nadal za duży po zmianie rozmiaru.",
+      "readFailed": "Nie udało się wczytać obrazu."
+    }
+  }
+}

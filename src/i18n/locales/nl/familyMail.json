@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Verbonden gezinnen · bewust privé",
+    "title": "Gezinsbrievenbus",
+    "description": "Plan samen in jullie eigen tempo, of nodig oma en opa direct uit in jullie gezinschat.",
+    "writeLetter": "Brief schrijven"
+  },
+  "filters": {
+    "inbox": "Postvak IN",
+    "sent": "Verstuurd"
+  },
+  "list": {
+    "emptyTitle": "Nog geen brieven",
+    "emptyConnected": "Een rustige start van jullie gezinscorrespondentie.",
+    "emptyUnconnected": "Maak eerst verbinding met een ander gezin in het gezinsnetwerk."
+  },
+  "reader": {
+    "sentTo": "Verstuurd naar {{family}}",
+    "from": "Brief van {{family}}",
+    "reply": "Antwoorden",
+    "archiveLetter": "Brief archiveren",
+    "privacyNote": "Alleen volwassenen van beide verbonden gezinnen kunnen deze brief zien.",
+    "placeholderTitle": "Er wacht een brief tot je hem ophaalt",
+    "placeholderText": "Persoonlijker dan chat, overzichtelijker voor afspraken en gedeelde plannen."
+  },
+  "guests": {
+    "kicker": "Gezinspraat met toestemming",
+    "title": "Gasten in de gezinschat",
+    "description": "Volwassen profielen zoals oma of opa zien nieuwe groepsberichten pas vanaf het moment dat ze accepteren.",
+    "connectedFamily": "Verbonden gezin",
+    "adultProfile": "Volwassenenprofiel",
+    "selectProfile": "Selecteer een profiel",
+    "sendInvitation": "Uitnodiging versturen",
+    "status": {
+      "accepted": "In de chat",
+      "pending": "Wacht op toestemming",
+      "revoked": "Toegang beëindigd",
+      "declined": "Afgewezen"
+    },
+    "accept": "Accepteren",
+    "decline": "Afwijzen",
+    "endAccess": "Toegang beëindigen",
+    "empty": "Nog geen chatgasten uitgenodigd."
+  },
+  "compose": {
+    "kicker": "Nieuwe gezinspost",
+    "title": "Brief schrijven",
+    "recipientFamily": "Ontvankend gezin",
+    "subject": "Onderwerp",
+    "subjectPlaceholder": "Waar gaat het over?",
+    "body": "Jouw brief",
+    "bodyPlaceholder": "Hé allemaal, …",
+    "privacyNote": "Alleen via de bevestigde gezinsverbinding",
+    "submit": "Brief versturen"
+  }
+}

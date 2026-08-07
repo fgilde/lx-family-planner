@@ -1,0 +1,211 @@
+{
+  "sections": {
+    "today": "Vue de la semaine",
+    "routines": "Routines",
+    "money": "Argent de poche",
+    "school": "École",
+    "polls": "Vote",
+    "safety": "En sécurité & au calme"
+  },
+  "hero": {
+    "kicker": "Votre quotidien, une belle équipe",
+    "title": "Parcours familial",
+    "intro": "Routines, école, argent de poche et décisions se retrouvent ici – faciles à comprendre pour les enfants, fiables pour les parents.",
+    "viewFor": "Vue pour",
+    "yourJourney": "Ton parcours",
+    "navAria": "Sections du parcours familial"
+  },
+  "adultsOnly": "Adultes uniquement",
+  "weekly": {
+    "kicker": "Les sept derniers jours",
+    "title": "Voici la semaine de {{name}}",
+    "metrics": {
+      "missions": "Missions",
+      "routineDays": "Jours de routine",
+      "polls": "Sondages",
+      "stars": "Étoiles"
+    },
+    "strongWeek": "C'était une vraiment belle semaine !",
+    "everyStepCounts": "Chaque petit pas compte.",
+    "nextEvent": "Ensuite, « {{title}} » t'attend.",
+    "spontaneousMoment": "Le prochain moment familial peut arriver spontanément."
+  },
+  "achievements": {
+    "kicker": "Vitrine des trophées",
+    "title": "Badges",
+    "firstStep": "Premier pas",
+    "routinePro": "Pro des routines",
+    "starCollector": "Collectionneur d'étoiles",
+    "teamSpirit": "Esprit d'équipe",
+    "collected": "Obtenu",
+    "stillSecret": "Encore secret"
+  },
+  "missions": {
+    "kicker": "Ensemble, pas seul",
+    "title": "Missions familiales",
+    "progress": "{{completed}} sur {{total}} sont faites",
+    "empty": "Pas encore de mission commune.",
+    "creatorTitle": "Nouvelle mission familiale",
+    "titlePlaceholder": "Par exemple : Sauver le jardin ensemble",
+    "descriptionPlaceholder": "Que ferez-vous ensemble ?",
+    "start": "Démarrer la mission"
+  },
+  "encouragement": {
+    "kicker": "Petits mots, grand effet",
+    "title": "Encouragements",
+    "quote": "« {{message}} »",
+    "fromFamily": "Votre famille",
+    "empty": "Un petit encouragement attendra bientôt ici.",
+    "messagePlaceholder": "Que veux-tu dire à {{name}} ?",
+    "send": "Envoyer"
+  },
+  "routines": {
+    "kicker": "Étape par étape",
+    "title": "Les routines de {{name}}",
+    "timeOfDay": {
+      "morning": "Matins",
+      "afternoon": "Après-midi",
+      "evening": "Soirs"
+    },
+    "streak_one": "🔥 {{count}} jour d'affilée",
+    "streak_other": "🔥 {{count}} jours d'affilée",
+    "deleteAria": "Supprimer la routine",
+    "emptyTitle": "Pas encore de routine",
+    "emptyText": "Une bonne routine enlève le stress des matins et des soirs.",
+    "workshop": {
+      "kicker": "Atelier de routines",
+      "title": "Créer une routine",
+      "namePlaceholder": "Nom de la routine",
+      "stepsLabel": "Une étape par ligne",
+      "save": "Enregistrer la routine"
+    },
+    "defaults": {
+      "title": "Démarrage du matin",
+      "steps": "Se lever\nS'habiller\nSe brosser les dents\nVérifier le cartable"
+    }
+  },
+  "money": {
+    "kicker": "Compte familial",
+    "title": "Argent de poche de {{name}}",
+    "balanceLabel": "Solde actuel",
+    "starsAvailable": "{{count}} ⭐ disponibles",
+    "starCost_one": "{{count}} étoile",
+    "starCost_other": "{{count}} étoiles",
+    "emptyLedger": "Le carnet d'argent de poche est encore vide.",
+    "goals": {
+      "kicker": "Les souhaits deviennent visibles",
+      "title": "Objectifs d'épargne",
+      "progress": "{{current}} sur {{target}}",
+      "deleteAria": "Supprimer l'objectif d'épargne",
+      "empty": "Pas encore de souhait à épargner.",
+      "creatorTitle": "Ajouter un objectif d'épargne",
+      "titlePlaceholder": "Pour quoi économisez-vous ?",
+      "amountAria": "Montant cible en euros",
+      "create": "Créer l'objectif"
+    },
+    "booking": {
+      "title": "Enregistrer l'argent de poche",
+      "amountLabel": "Montant en euros – négatif pour une dépense",
+      "noteLabel": "Note de l'écriture",
+      "starsLabel": "Convertir des étoiles pour (facultatif)",
+      "submit": "Enregistrer en sécurité",
+      "defaultNote": "Argent de poche"
+    }
+  },
+  "school": {
+    "kicker": "Tout pour la journée d'école",
+    "title": "Espace scolaire de {{name}}",
+    "settings": {
+      "enabled": "Emploi du temps activé",
+      "disabled": "Emploi du temps désactivé",
+      "disabledTitle": "L'espace scolaire est désactivé pour cet enfant",
+      "disabledHint": "Activez-le uniquement pour les enfants scolarisés. Les parents pourront alors le modifier et l'enfant pourra consulter son propre emploi du temps.",
+      "enable": "Activer l'espace scolaire"
+    },
+    "timetable": {
+      "period": "Heure {{count}}",
+      "free": "Libre",
+      "cancelled": "Annulé cette semaine",
+      "cancellationDate": "Date de l'annulation ponctuelle du cours",
+      "cancelOnce": "Annuler une fois",
+      "restore": "Restaurer le cours"
+    },
+    "kinds": {
+      "lesson": "Emploi du temps",
+      "homework": "Devoirs",
+      "exam": "Contrôle",
+      "bag": "Vérification du cartable"
+    },
+    "deleteAria": "Supprimer l'entrée scolaire",
+    "emptyKind": "Rien de saisi pour le moment.",
+    "form": {
+      "kicker": "Saisir une fois, rester tranquille",
+      "title": "Créer une entrée scolaire",
+      "subjectPlaceholder": "Matière",
+      "titlePlaceholder": "Qu'est-ce qui arrive ?",
+      "weekday": "Jour de la semaine",
+      "period": "Heure",
+      "startsAt": "Commence à",
+      "endsAt": "Termine à",
+      "roomPlaceholder": "Salle (facultatif)",
+      "teacherPlaceholder": "Enseignant (facultatif)",
+      "detailsPlaceholder": "Livre, matériel ou courte note",
+      "submit": "Ajouter l'entrée"
+    }
+  },
+  "polls": {
+    "kicker": "Chaque vote compte",
+    "title": "Sondages familiaux",
+    "votes_one": "{{count}} vote",
+    "votes_other": "{{count}} votes",
+    "deleteAria": "Supprimer le sondage",
+    "emptyTitle": "Pas encore de sondage",
+    "emptyText": "La prochaine question repas ou sortie appartient à toute la famille.",
+    "form": {
+      "kicker": "Décidé rapidement",
+      "title": "Poser une nouvelle question",
+      "questionPlaceholder": "Que souhaitez-vous décider ensemble ?",
+      "optionsLabel": "Une réponse par ligne – les emoji sont autorisés",
+      "closesLabel": "Le sondage se termine facultativement le",
+      "submit": "Lancer le sondage",
+      "defaultOptions": "🍕 Pizza\n🍝 Pâtes\n🥞 Crêpes"
+    }
+  },
+  "safety": {
+    "emergency": {
+      "kicker": "Au cas où",
+      "fallbackTitle": "Carte d'urgence",
+      "defaultTitle": "Aide importante pour notre famille",
+      "empty": "Les parents peuvent stocker ici des contacts d'urgence sécurisés."
+    },
+    "quiet": {
+      "kicker": "Temps familial protégé",
+      "title": "Heures de calme et de médias",
+      "notifications": "Heures de calme des notifications",
+      "range": "{{start}} à {{end}}",
+      "notActive": "Non activé",
+      "mediaLounge": "Espace multimédia",
+      "alwaysVisible": "Toujours visible",
+      "explanation": "Les alertes urgentes « Besoin de proximité » peuvent toujours passer pendant les heures de calme si vous le souhaitez. Les messages normaux restent dans la boîte de réception familiale."
+    },
+    "editor": {
+      "title": "Modifier les règles de protection",
+      "quietSwitch": "Heures de calme pour les notifications",
+      "quietSwitchHint": "Mettre en pause les messages push normaux.",
+      "startLabel": "Début",
+      "endLabel": "Fin",
+      "urgentSwitch": "Laisser passer les appels à l'aide urgents",
+      "urgentSwitchHint": "« Besoin de proximité » reste joignable.",
+      "mediaSwitch": "Utiliser les heures médias",
+      "mediaSwitchHint": "Afficher YouTube et Spotify uniquement dans la plage horaire.",
+      "mediaFromLabel": "Médias à partir de",
+      "mediaToLabel": "Médias jusqu'à",
+      "emergencyTitleLabel": "Titre de la carte d'urgence",
+      "contactsLabel": "Contacts – nom | numéro de téléphone | note",
+      "contactsPlaceholder": "Pédiatre | 0123 456789 | Apporter le carnet de vaccination\nMamie | 0987 654321 | Peut venir chercher",
+      "notesLabel": "Notes importantes",
+      "notesPlaceholder": "Allergies, médicaments ou notes importantes",
+      "save": "Enregistrer les règles de protection"
+    }
+  }
+}

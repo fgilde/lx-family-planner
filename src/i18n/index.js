@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import { plannerApiFetch } from '../utils/apiConfig.js';
 import { resources } from './resources.js';
 
-export const SUPPORTED_LANGUAGES = ['de', 'en'];
+export const SUPPORTED_LANGUAGES = ['de', 'en', 'fr', 'es', 'it', 'nl', 'pl'];
 export const DEFAULT_LANGUAGE = 'de';
 const LANGUAGE_STORAGE_KEY = 'lx_family_language';
 
@@ -72,7 +72,9 @@ export async function initI18n() {
   await i18n.use(initReactI18next).init({
     resources,
     lng: startupLanguage,
-    fallbackLng: DEFAULT_LANGUAGE,
+    // Fallback auf EN: neue Sprachen können schrittweise gepflegt werden,
+    // fehlende Keys zeigen stattdessen den englischen Text.
+    fallbackLng: 'en',
     supportedLngs: SUPPORTED_LANGUAGES,
     defaultNS: 'common',
     interpolation: {

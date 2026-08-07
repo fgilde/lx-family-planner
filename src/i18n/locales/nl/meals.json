@@ -1,0 +1,187 @@
+{
+  "planner": {
+    "tabs": {
+      "weeklyPlan": "Weekmenu ({{household}})",
+      "recipeBook": "Receptenboek ({{count}})"
+    },
+    "households": {
+      "family": "Ons huis",
+      "grandparents": "Oma & opa"
+    },
+    "header": {
+      "title": "Weekmenu",
+      "subtitle": "Plan jullie maaltijden voor de week. Klik op een maaltijd om een recept te kiezen of de ingrediënten met één klik aan de boodschappenlijst toe te voegen!"
+    },
+    "mealTypes": {
+      "lunch": "Lunch",
+      "dinner": "Diner"
+    },
+    "slots": {
+      "editAria": "{{meal}} voor {{day}} bewerken",
+      "addIngredients": "Ingrediënten aan de lijst toevoegen ({{count}})",
+      "empty": "Geen gerecht gepland"
+    },
+    "modal": {
+      "title": "Gerecht toevoegen: {{day}} ({{meal}})",
+      "chooseFromBook": "Kies uit jouw receptenboek",
+      "recipePlaceholderOption": "-- Selecteer een recept uit het receptenboek --",
+      "customLabel": "Of voer zelf een gerecht in",
+      "customPlaceholder": "bijv. pannenkoeken met appelsaus...",
+      "ingredientsLabel": "Ingrediënten (kommagescheiden voor de boodschappenlijst)",
+      "ingredientsPlaceholder": "bijv. 500g bloem, 4 eieren, 1L melk...",
+      "saving": "Opslaan …",
+      "removeEntry": "Item verwijderen"
+    }
+  },
+  "recipeBook": {
+    "image": {
+      "noImageAria": "{{title}} zonder afbeelding",
+      "unavailable": "Receptafbeelding niet beschikbaar"
+    },
+    "errors": {
+      "importFailed": "Het recept kon niet worden geïmporteerd.",
+      "saveFailed": "Het recept kon niet worden opgeslagen in het kookboek.",
+      "shareMissingLink": "De deel-app heeft geen receptkoppeling doorgegeven. Plak de koppeling hieronder."
+      ,"tandoorTooLarge": "De Tandoor-export mag niet groter zijn dan 120 MB.",
+      "tandoorEmpty": "Er zijn geen Tandoor-recepten gevonden in dit bestand.",
+      "tandoorInvalid": "De Tandoor-export kon niet worden uitgelezen.",
+      "rtkTooLarge": "De My Recipe Box-back-up mag niet groter zijn dan 120 MB.",
+      "rtkEmpty": "Er zijn geen My Recipe Box-recepten gevonden in dit bestand.",
+      "rtkInvalid": "De My Recipe Box-back-up kon niet worden uitgelezen."
+    },
+    "toasts": {
+      "importedCheckTitle": "Recept geïmporteerd – even controleren",
+      "importedTitle": "🎉 Recept geïmporteerd!",
+      "importedBody": "\"{{title}}\" is succesvol geïmporteerd!",
+      "draftReadyTitle": "Receptconcept klaar",
+      "draftReadyBody": "Controleer ingrediënten en bereiding. Er wordt niets opgeslagen tot je het bevestigt.",
+      "importErrorTitle": "⚠️ Importfout",
+      "manualCreatedTitle": "✨ Recept aangemaakt",
+      "manualCreatedBody": "\"{{title}}\" is opgeslagen in het receptenboek."
+      ,"tandoorImportedTitle": "Tandoor-recepten geïmporteerd",
+      "tandoorImportedBody": "{{count}} recepten zijn toegevoegd aan jouw LX-kookboek.",
+      "tandoorErrorTitle": "Tandoor-import mislukt",
+      "rtkImportedTitle": "My Recipe Box-recepten geïmporteerd",
+      "rtkImportedBody": "{{imported}} recepten geïmporteerd, {{skipped}} bestaande recepten gevonden en {{imagesRecovered}} ontbrekende afbeeldingen hersteld.",
+      "rtkErrorTitle": "My Recipe Box-import mislukt"
+    },
+    "header": {
+      "title": "Ons kookboek & receptenwereld",
+      "subtitle": "Importeer recepten van Pinterest, Chefkoch en vele andere sites, verzamel ze samen en kook stap voor stap."
+    },
+    "tabs": {
+      "browse": "Alle recepten ({{count}})",
+      "import": "Recept importeren",
+      "manual": "Nieuw recept"
+    },
+    "card": {
+      "editTitle": "Recept bewerken",
+      "deleteTitle": "Recept verwijderen",
+      "defaultPrepTime": "30 min",
+      "defaultServings": "4 porties",
+      "startCooking": "Begin met koken",
+      "addIngredientsTitle": "Ingrediënten aan de boodschappenlijst toevoegen",
+      "addIngredients": "Ingrediënten aan de lijst toevoegen"
+    },
+    "tandoor": {
+      "title": "Importeren uit Tandoor Recipes",
+      "description": "Importeert de officiële Tandoor-export inclusief ingrediënten, stappen en beschikbare afbeeldingen.",
+      "hint": "In Tandoor: open een recept → menu → exporteren → selecteer alle recepten. Kies daarna hier het ZIP-bestand.",
+      "select": "Tandoor-bestand kiezen",
+      "loading": "Tandoor uitlezen …"
+    },
+    "rtk": {
+      "title": "Importeren uit My Recipe Box",
+      "description": "Importeert een volledige .rtk-back-up inclusief ingrediënten, instructies, afbeeldingen en bronlinks.",
+      "hint": "In My Recipe Box: Sync/Backup → Export backup (RTK). Op Android kun je het RTK-bestand daarna direct versturen via Delen → LX Family Planner.",
+      "select": "RTK-back-up kiezen",
+      "loading": "My Recipe Box uitlezen …"
+    },
+    "import": {
+      "shareArrivalTitle": "Rechtstreeks vanaf jouw telefoon gedeeld",
+      "shareArrivalBody": "LX pakt de koppeling op. Socialmedia-recepten worden eerst als controleerbaar concept geopend.",
+      "shareRtkArrivalTitle": "My Recipe Box-back-up ontvangen",
+      "shareRtkArrivalBody": "LX leest het gedeelde RTK-bestand in en importeert de recepten samen met eventueel beschikbare afbeeldingen.",
+      "importRunningAria": "Bezig met importeren",
+      "kicker": "Receptvinder",
+      "title": "Importeer een recept van het web",
+      "description": "Plak een receptkoppeling, Pinterest-pin of openbare Facebook-Reel. Socialmedia-inhoud wordt altijd eerst ter controle geopend vóór opslaan.",
+      "platformsAria": "Voorbeelden van ondersteunde sites",
+      "morePlatforms": "meer receptsites",
+      "howto": "<strong>Geen kopiëren nodig op Android:</strong> Installeer LX één keer als app. Importeer daarna vanaf receptsites, Pinterest of Facebook via <b>Delen → LX Familie</b>.",
+      "urlLabel": "Openbare receptkoppeling",
+      "urlPlaceholder": "https://www.pinterest.nl/pin/... of receptpagina",
+      "socialTextTitle": "Voeg het Facebook-bijschrift toe",
+      "socialTextSummary": "Handig als Facebook alleen de koppeling deelt",
+      "socialTextLabel": "Bijschrift of recepttekst uit de Reel",
+      "socialTextPlaceholder": "Plak de titel, ingrediënten en bereiding uit het Reel-bijschrift …",
+      "socialTextHint": "De tekst blijft op jouw LX-server en opent als bewerkbaar concept.",
+      "submitLoading": "Recept uitlezen …",
+      "submit": "Recept nu importeren",
+      "help": "Privépagina's, inlogschermen en interne thuisnetwerk-adressen worden om veiligheidsredenen niet geopend. Sommige sites kunnen automatisch ophalen technisch blokkeren."
+    },
+    "review": {
+      "kicker": "Geïmporteerd concept",
+      "facebookKicker": "Uitgelezen uit Facebook-Reels",
+      "sharedKicker": "Gedeeld vanuit My Recipe Box",
+      "title": "Eén keer controleren, dan opslaan",
+      "description": "Reel-bijschriften kunnen hoeveelheden, volgorde of afzonderlijke stappen weglaten. Vul hieronder aan wat ontbreekt.",
+      "sharedDescription": "Andere recept-apps delen verschillende hoeveelheden detail, afhankelijk van hun versie. Controleer snel hoeveelheden en volgorde, en voeg zo nodig een afbeelding toe.",
+      "notSaved": "Nog niet opgeslagen",
+      "editorKicker": "Jouw controle",
+      "editorTitle": "Receptconcept controleren",
+      "saveReviewed": "Gecontroleerd recept opslaan"
+    },
+    "manual": {
+      "kicker": "Jouw gezinsrecept",
+      "title": "Maak jouw eigen recept",
+      "editTitle": "Recept bewerken",
+      "dishTitleLabel": "Titel van het gerecht",
+      "dishTitlePlaceholder": "bijv. papa's beroemde bolognese",
+      "prepTimeLabel": "Bereidingstijd",
+      "servingsLabel": "Porties",
+      "imageLabel": "Afbeeldings-URL (optioneel)",
+      "imagePlaceholder": "https://…/receptafbeelding.jpg",
+      "ingredientsLabel": "Ingrediënten",
+      "addIngredient": "Ingrediënt toevoegen",
+      "ingredientPlaceholder": "bijv. 2 courgettes",
+      "removeIngredient": "Ingrediënt verwijderen",
+      "instructionsLabel": "Bereidingsstappen",
+      "addStep": "Stap toevoegen",
+      "stepPlaceholder": "Beschrijf één volledige bereidingsstap …",
+      "removeStep": "Stap verwijderen",
+      "saveChanges": "Wijzigingen opslaan",
+      "submit": "Recept opslaan"
+    }
+  },
+  "cookingMode": {
+    "activeBadge": "Kookmodus actief",
+    "adjustPortions": "Porties aanpassen:",
+    "timer": {
+      "title": "Keukentimer",
+      "minutesUnit": "min",
+      "start": "Start",
+      "stop": "Stop",
+      "resetTitle": "Timer resetten",
+      "startedTitle": "⏱️ Kooktimer gestart",
+      "startedBody_one": "Timer gestart voor {{count}} minuut.",
+      "startedBody_other": "Timer gestart voor {{count}} minuten.",
+      "finishedTitle": "⏰ Koken klaar!",
+      "finishedBody": "De kooktimer voor \"{{title}}\" is afgelopen!"
+    },
+    "ingredients": {
+      "title": "Ingrediënten ({{count}})",
+      "addToList": "🛒 Aan Bring!-lijst toevoegen",
+      "addedTitle": "🛒 Ingrediënten toegevoegd",
+      "addedBody_one": "{{count}} ingrediënt voor \"{{title}}\" staat op de boodschappenlijst!",
+      "addedBody_other": "{{count}} ingrediënten voor \"{{title}}\" staan op de boodschappenlijst!"
+    },
+    "steps": {
+      "title": "Stap-voor-stap instructies",
+      "progress": "{{completed}} / {{total}} klaar",
+      "progressAria": "Bereidingsvoortgang",
+      "parallelHint": "Tegelijkertijd bereiden",
+      "stepTimer": "Timer · {{minutes}} min"
+    }
+  }
+}

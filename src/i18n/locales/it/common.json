@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "LX Family Planner - L'organizzatore della tua famiglia",
+    "description": "Organizzatore familiare chiaro e intuitivo con calendario, lista della spesa Bring!, pianificatore dei pasti, incombenze di casa, sistema di premi e bacheca."
+  },
+  "actions": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "add": "Aggiungi",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "confirm": "Conferma",
+    "search": "Cerca",
+    "reset": "Ripristina",
+    "refresh": "Aggiorna",
+    "retry": "Riprova"
+  },
+  "status": {
+    "loading": "Caricamento …",
+    "saving": "Salvataggio …",
+    "error": "Qualcosa è andato storto.",
+    "empty": "Ancora nessuna voce."
+  },
+  "labels": {
+    "optional": "facoltativo",
+    "date": "Data",
+    "time": "Ora",
+    "title": "Titolo",
+    "description": "Descrizione",
+    "location": "Luogo",
+    "name": "Nome"
+  },
+  "language": {
+    "label": "Lingua",
+    "title": "Scegli lingua",
+    "choose": "Scegli la lingua dell'interfaccia"
+  },
+  "birthdays": {
+    "eventTitle": "🎂 È il compleanno di {{name}}",
+    "location": "Famiglia",
+    "ageNote_one": "{{name}} compie {{count}} anno.",
+    "ageNote_other": "{{name}} compie {{count}} anni.",
+    "sourceName": "Compleanno di famiglia"
+  },
+  "projectSupport": {
+    "aria": "Sostieni volontariamente LX Family Planner tramite GitHub Sponsors",
+    "kicker": "Una tantum o mensile",
+    "title": "Offri un caffè a LX",
+    "description": "LX rimane gratuito. Anche un solo caffè aiuta con test, hosting e sviluppo continuo.",
+    "action": "GitHub Sponsors"
+  }
+}

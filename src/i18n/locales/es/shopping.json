@@ -1,0 +1,63 @@
+{
+  "hero": {
+    "eyebrow": "Mercado familiar",
+    "title": "¿Qué falta en casa?",
+    "subtitle": "Explora el catálogo completo de Bring! o añade tu propio artículo.",
+    "statusLive": "En vivo con «{{listName}}»",
+    "statusLocal": "Lista familiar local",
+    "catalogItems": "{{total}} artículos estándar",
+    "syncing": "Sincronizando",
+    "refreshBring": "Actualizar Bring!",
+    "connection": "Conexión",
+    "connectBring": "Conectar Bring!"
+  },
+  "search": {
+    "placeholder": "Huevos, crema de cacao, panecillos, puerro …",
+    "searchAria": "Buscar un artículo o crear uno nuevo",
+    "quantityLabel": "Cantidad",
+    "quantityAria": "Cantidad o nota",
+    "hint": "¿No aparece? El término que has escrito se añadirá como tu propio artículo de Bring!."
+  },
+  "list": {
+    "kicker": "Tu lista",
+    "title": "Lista de la compra",
+    "emptyTitle": "La cesta de la compra está esperando.",
+    "emptyHint": "Toca un artículo estándar abajo o búscalo directamente.",
+    "recentToggle": "Comprados recientemente ({{count}})",
+    "backToList": "Otra vez en la lista"
+  },
+  "catalog": {
+    "sourceBring": "Catálogo Bring!",
+    "sourceDefault": "Catálogo básico",
+    "resultsFor": "Resultados para «{{query}}»",
+    "quickAdd": "Añadir rápido",
+    "customCategory": "Artículos propios",
+    "shownCount": "{{count}} mostrados",
+    "departmentsAria": "Categorías de productos",
+    "popular": "Populares",
+    "onList": "En la lista",
+    "noResultsTitle": "Sin coincidencias en el catálogo; sin problema.",
+    "noResultsHint": "Usa «Añadir» para crear «{{query}}» como tu propio artículo."
+  },
+  "accountModal": {
+    "eyebrow": "Integración opcional",
+    "title": "Conectar la compra de Bring!",
+    "connectedEyebrow": "Conectado en vivo",
+    "defaultListName": "Lista familiar",
+    "securityNote": "Tu contraseña se guarda cifrada en tu propio servidor y nunca se almacena en el navegador.",
+    "syncNow": "Sincronizar ahora",
+    "disconnect": "Desconectar",
+    "intro": "Retoma tu lista de Bring! existente. Tras iniciar sesión, elige exactamente la lista que pertenece al planificador familiar.",
+    "emailLabel": "Correo de Bring!",
+    "emailPlaceholder": "nombre@ejemplo.com",
+    "passwordLabel": "Contraseña de Bring!",
+    "passwordPlaceholder": "Solo se usa para un inicio de sesión seguro",
+    "selectListLabel": "¿Qué lista quieres conectar?",
+    "connectSelected": "Conectar la lista seleccionada",
+    "loginButton": "Iniciar sesión de forma segura con Bring!",
+    "fineprint": "LX Family Planner no es un producto de Bring! Labs AG. Puedes desconectarte en cualquier momento.",
+    "toastConnectedTitle": "Bring! está conectado",
+    "toastConnectedBody": "Ahora se sincroniza {{listName}}.",
+    "toastDefaultList": "La lista de la compra"
+  }
+}

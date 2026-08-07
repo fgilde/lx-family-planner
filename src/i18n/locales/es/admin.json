@@ -1,0 +1,339 @@
+{
+  "parentAdmin": {
+    "accessDenied": {
+      "title": "Zona de padres",
+      "description": "Esta zona solo es visible para los perfiles adultos de la familia."
+    },
+    "toasts": {
+      "profileUpdatedTitle": "Perfil de niño actualizado",
+      "profileUpdatedBody": "Los ajustes de {{name}} se han guardado."
+    },
+    "hero": {
+      "kicker": "Solo adultos",
+      "title": "Centro de padres",
+      "description": "Gestiona perfiles, tareas y paneles de los niños en un solo lugar tranquilo, sin saltar entre varias zonas."
+    },
+    "overview": {
+      "childProfiles": "Perfiles de niños",
+      "openTasks": "Tareas abiertas",
+      "totalStars": "Estrellas en total",
+      "managedProfiles": "Perfiles gestionados"
+    },
+    "modules": {
+      "kicker": "Menos ruido",
+      "title": "Secciones familiares",
+      "intro": "Desactiva las funciones que tu familia no usa. Desaparecen para todos los perfiles y se pueden volver a activar aquí en cualquier momento.",
+      "visible": "Visible",
+      "hidden": "Oculto",
+      "profileHint": "Para personalizar a una persona, edita ese perfil y elige sus secciones visibles.",
+      "labels": {
+        "chat": "Chat",
+        "calendar": "Calendario",
+        "trash": "Calendario de basura",
+        "shopping": "Compra",
+        "meals": "Plan de comidas",
+        "tasks": "Tareas",
+        "family-life": "Vida familiar",
+        "board": "Tablón",
+        "cloud": "Family Cloud",
+        "mail": "Correo familiar"
+      }
+    },
+    "managed": {
+      "kicker": "Sin inicio de sesión propio",
+      "title": "Perfiles gestionados",
+      "create": "Crear perfil",
+      "intro": "Para la abuela, el abuelo o personas a tu cargo: aparecen en eventos y tareas, pero no en el inicio de sesión ni en el chat.",
+      "positionWithoutLogin": "{{position}} · sin acceso",
+      "plannable": "Planificable",
+      "emptyTitle": "Nadie añadido todavía",
+      "emptyHint": "Elige «Solo gestionado por nosotros» al crear un perfil."
+    },
+    "children": {
+      "kicker": "Niños y adolescentes",
+      "title": "Administrar perfiles",
+      "add": "Añadir perfil",
+      "selectedProfile": "Perfil seleccionado",
+      "positionLabel": "Posición",
+      "pinLabel": "Nuevo PIN del perfil (opcional)",
+      "pinPlaceholder": "Vacío para mantener sin cambios",
+      "saving": "Guardando …",
+      "save": "Guardar perfil",
+      "emptyTitle": "Todavía no hay perfil de niño",
+      "emptyDescription": "Primero crea un perfil como niño o adolescente.",
+      "emptyCta": "Crear perfil de niño"
+    },
+    "tasks": {
+      "kicker": "Ordenar",
+      "title": "Limpiar la lista de tareas",
+      "openCount": "{{count}} abiertas",
+      "doneCount": "{{count}} hechas",
+      "filterLabel": "Solo tareas de",
+      "allMembers": "Todos los miembros de la familia",
+      "deleteCompleted": "Eliminar completadas",
+      "deleteCompletedConfirm": "¿Seguro que quieres eliminar las tareas completadas?",
+      "clearAll": "Vaciar la lista de tareas",
+      "clearAllConfirm": "¿Seguro que quieres eliminarlo todo?"
+    },
+    "points": {
+      "kicker": "Cuentas de estrellas",
+      "title": "Puntos de recompensa",
+      "intro": "Reinicia los puntos de niños y adultos por separado. Las mascotas no acumulan puntos de recompensa.",
+      "resetConfirm": "¿Seguro que quieres reiniciar a 0?"
+    },
+    "media": {
+      "kicker": "Panel del niño",
+      "title": "Sala multimedia",
+      "intro": "Añade canales de YouTube aprobados y listas de Spotify como grandes baldosas aptas para niños. Solo lo que apruebes aquí es visible.",
+      "chooseChild": "Elige un perfil de niño",
+      "kindAriaLabel": "Tipo de medio",
+      "titlePlaceholder": "p. ej. Barrio Sésamo",
+      "share": "Aprobar widget",
+      "linkMeta": "{{kind}} · en el panel de {{name}}",
+      "childProfileFallback": "Perfil de niño",
+      "removeLink": "Eliminar {{title}}",
+      "empty": "Todavía no hay widgets multimedia aprobados."
+    },
+    "family": {
+      "kicker": "Red familiar",
+      "title": "Cuentas familiares vinculadas",
+      "confirmedConnections_one": "{{count}} conexión confirmada",
+      "confirmedConnections_other": "{{count}} conexiones confirmadas",
+      "pendingRequests_one": "{{count}} solicitud pendiente",
+      "pendingRequests_other": "{{count}} solicitudes pendientes",
+      "openTree": "Abrir árbol familiar"
+    }
+  },
+  "homeAssistant": {
+    "kicker": "Hogar inteligente · local y protegido",
+    "connected": "Conectado",
+    "notConnected": "No conectado",
+    "intro": "Lleva estados seleccionados del hogar al planificador familiar como baldosas reales. El token de acceso se queda cifrado en tu servidor.",
+    "domains": {
+      "binary_sensor": "Estado",
+      "button": "Botón",
+      "climate": "Climatización",
+      "cover": "Persianas",
+      "device_tracker": "Presencia",
+      "fan": "Ventilador",
+      "input_boolean": "Interruptor",
+      "light": "Luz",
+      "media_player": "Multimedia",
+      "person": "Persona",
+      "scene": "Escena",
+      "script": "Guion",
+      "sensor": "Sensor",
+      "sun": "Sol",
+      "switch": "Interruptor",
+      "vacuum": "Robot aspirador",
+      "weather": "Tiempo"
+    },
+    "connect": {
+      "addressLabel": "Dirección de Home Assistant",
+      "addressHint": "Con Docker, lo más fiable es usar la IP fija de tu red doméstica.",
+      "tokenLabel": "Token de acceso de larga duración",
+      "tokenPlaceholder": "Token del perfil de Home Assistant",
+      "tokenHint": "El token ya no se muestra después de guardar.",
+      "submit": "Comprobar conexión"
+    },
+    "summary": {
+      "tilesShared_one": "{{count}} baldosa compartida en el panel",
+      "tilesShared_other": "{{count}} baldosas compartidas en el panel",
+      "active": "Activo"
+    },
+    "toolbar": {
+      "loadDevices": "Cargar dispositivos",
+      "testConnection": "Probar conexión",
+      "searchPlaceholder": "Buscar un dispositivo o sensor"
+    },
+    "callout": {
+      "title": "Elegir baldosas del panel",
+      "description": "Carga los dispositivos y decide exactamente qué puede ser visible y controlable."
+    },
+    "entity": {
+      "allowControl": "Permitir control",
+      "visibleFor": "También visible para:"
+    },
+    "noMatches": "No se encontraron dispositivos coincidentes.",
+    "saveBar": {
+      "selectedCount": "{{count}} seleccionadas",
+      "hint": "Los adultos lo ven todo; los niños, solo lo que se comparte con ellos.",
+      "save": "Guardar selección"
+    },
+    "manage": {
+      "summary": "Gestionar conexión",
+      "newTokenPlaceholder": "Nuevo token de acceso",
+      "renew": "Renovar conexión",
+      "disconnectConfirm": "¿Seguro que quieres desconectar?",
+      "disconnect": "Desconectar"
+    }
+  },
+  "webPush": {
+    "kickerNative": "Directamente desde Android",
+    "kickerWeb": "Sin app adicional",
+    "titleNative": "Notificaciones de la app de Android",
+    "titleWeb": "Notificaciones del navegador",
+    "introNative": "La app de LX registra una vez este dispositivo Android para un perfil. Después, los avisos llegan incluso con la app cerrada.",
+    "introWeb": "Cada teléfono o tablet se registra una vez para un perfil familiar. Las claves y los detalles técnicos siguen invisibles.",
+    "deviceConnected": "Este dispositivo está activo",
+    "activationSteps": {
+      "server": "Comprobando el servidor …",
+      "android": "Preparando Android …",
+      "channels": "Configurando notificaciones …",
+      "permission": "Comprobando permiso …",
+      "permission-request": "Confirma el aviso de Android …",
+      "firebase": "Registrando el dispositivo en Firebase …",
+      "save": "Guardando dispositivo …"
+    },
+    "serverMissing": {
+      "title": "Aún falta la conexión con Firebase",
+      "description": "El servidor de LX todavía no tiene una clave privada del servicio de Firebase. Por eso ahora mismo no puede llegar a Android.",
+      "hint": "Guarda la clave del servicio solo en la carpeta de datos del servidor y luego instala la app de LX compilada con el mismo proyecto de Firebase. La clave nunca debe estar en el repositorio Git."
+    },
+    "checking": {
+      "title": "Comprobando la conexión de Android",
+      "description": "LX está solicitando el estado actual de Firebase al servidor familiar."
+    },
+    "statusError": {
+      "title": "No se pudo comprobar el estado",
+      "fallback": "La app todavía no ha recibido respuesta del servidor familiar.",
+      "retry": "Comprobar otra vez"
+    },
+    "unavailable": {
+      "titleSecureContext": "Falta HTTPS; por eso el push en segundo plano no funciona",
+      "titleGeneric": "Un paso seguro más",
+      "hintNative": "Instala la última app de LX para Android para usar notificaciones nativas.",
+      "hintWeb": "Abre el planificador a través de una dirección HTTPS de confianza, añádelo a la pantalla de inicio de Android y luego activa este dispositivo."
+    },
+    "denied": {
+      "title": "Desactivado en el navegador",
+      "bodyNative": "Permite las notificaciones en Android → Aplicaciones → LX Family Planner → Notificaciones.",
+      "bodyWeb": "Permite las notificaciones en los ajustes del sitio del navegador y vuelve a abrir el planificador."
+    },
+    "ready": {
+      "title": "Registrar este dispositivo para {{name}}",
+      "hintNative": "Un toque; el aviso de Android aparece solo una vez.",
+      "hintWeb": "Un clic; sin token y sin app adicional.",
+      "connecting": "Conectando …",
+      "enable": "Activar notificaciones"
+    },
+    "activationError": "Conexión no completada",
+    "connectedNote": {
+      "title": "Listo para push en segundo plano",
+      "bodyNative": "Android muestra los avisos familiares en la bandeja del sistema y, si quieres, en la pantalla de bloqueo, incluso con LX cerrado.",
+      "bodyWeb": "Para la entrega más fiable en Android, instala el planificador con «Añadir a pantalla de inicio» y permite las notificaciones en los ajustes de la app de Android."
+    },
+    "preview": {
+      "title": "Mostrar detalles en la pantalla de bloqueo",
+      "hint": "Cuando está desactivado, los chats, las tareas y los eventos siguen siendo privados."
+    },
+    "actions": {
+      "saving": "Guardando …",
+      "save": "Guardar selección",
+      "sending": "Enviando …",
+      "sendTest": "Enviar prueba",
+      "disable": "Desactivar para este perfil"
+    },
+    "devices": {
+      "title": "Dispositivos familiares",
+      "registeredCount": "{{count}} registrados",
+      "transportAndroid": "App de Android",
+      "transportBrowser": "Navegador",
+      "meta": "{{transport}} · {{member}} · última actualización {{date}}",
+      "removeDevice": "Eliminar {{name}}",
+      "empty": "Todavía no hay ningún dispositivo familiar registrado."
+    }
+  },
+  "gotify": {
+    "kicker": "Mensajes push",
+    "title": "Notificaciones de Gotify",
+    "intro": "Los momentos familiares importantes te llegan incluso cuando el planificador no está abierto.",
+    "connected": "Conectado",
+    "serverFallback": "Servidor Gotify",
+    "security": {
+      "title": "Configuración segura",
+      "body": "La contraseña se usa solo una vez para crear una app de Gotify dedicada y no se almacena."
+    },
+    "form": {
+      "serverLabel": "Servidor Gotify",
+      "usernameLabel": "Nombre de usuario",
+      "passwordLabel": "Contraseña",
+      "plannerUrlLabel": "Dirección del planificador en tu teléfono",
+      "connecting": "Conectando …",
+      "connect": "Conectar y probar"
+    },
+    "status": {
+      "channel": "Canal de mensajes",
+      "openGotify": "Abrir Gotify"
+    },
+    "includeText": {
+      "title": "Mostrar el texto del mensaje en la pantalla de bloqueo",
+      "hint": "Desactivado por defecto por privacidad."
+    },
+    "phoneUrlLabel": "Abrir esta dirección del planificador al tocar",
+    "actions": {
+      "saving": "Guardando …",
+      "saveRules": "Guardar reglas",
+      "sending": "Enviando …",
+      "sendTest": "Enviar prueba",
+      "disconnectConfirm": "¿Seguro que quieres desconectar?",
+      "disconnect": "Desconectar"
+    }
+  },
+  "ntfy": {
+    "kicker": "Canal push abierto",
+    "title": "Notificaciones de ntfy",
+    "intro": "Envía los mismos eventos familiares seleccionados a un tema de ntfy; autoalojado o a través de ntfy.sh.",
+    "connected": "Conectado",
+    "security": {
+      "title": "Trata el tema como una contraseña",
+      "body": "Usa un nombre de tema difícil de adivinar. Un token de acceso opcional se guarda cifrado."
+    },
+    "server": "Servidor ntfy",
+    "topic": "Tema",
+    "token": "Token de acceso (opcional)",
+    "tokenPlaceholder": "tk_... para temas protegidos",
+    "plannerUrl": "Abrir esta dirección del planificador al tocar",
+    "connect": "Conectar y probar",
+    "connecting": "Conectando …",
+    "open": "Abrir ntfy",
+    "includeText": "Mostrar el texto del mensaje en la notificación",
+    "includeTextHint": "Desactivado por defecto por privacidad.",
+    "save": "Guardar reglas",
+    "test": "Enviar prueba",
+    "disconnect": "Desconectar",
+    "disconnectConfirm": "¿Seguro que quieres desconectar?"
+  },
+  "problemReports": {
+    "kicker": "Comentarios desde la app",
+    "title": "Informes de problemas",
+    "intro": "Los informes se quedan en tu servidor. Con «Copiar» se pueden compartir completos y sin credenciales.",
+    "loading": "Cargando informes …",
+    "categories": {
+      "problem": "Problema",
+      "content": "Contenido",
+      "idea": "Idea",
+      "fallback": "Informe"
+    },
+    "copy": {
+      "profileLine": "Perfil: {{value}}",
+      "areaLine": "Zona: {{value}}",
+      "versionLine": "Versión: {{value}}",
+      "deviceLine": "Dispositivo: {{value}}",
+      "successTitle": "Informe copiado",
+      "successBody": "Ahora puedes pegarlo directamente en GitHub o en un mensaje.",
+      "errorTitle": "No se puede copiar",
+      "errorBody": "El navegador bloqueó el acceso al portapapeles."
+    },
+    "unknownMember": "Desconocido",
+    "areaFallback": "App",
+    "copyButton": "Copiar",
+    "markDone": "Hecho",
+    "reopen": "Reabrir",
+    "empty": {
+      "title": "No hay informes abiertos",
+      "hint": "Por aquí todo está tranquilo ahora mismo."
+    },
+    "openCount": "{{count}} abiertos"
+  }
+}

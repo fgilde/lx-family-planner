@@ -1,0 +1,225 @@
+{
+  "view": {
+    "hero": {
+      "eyebrow": "Temps en famille",
+      "title": "Votre calendrier, sans le chaos de l'organisation.",
+      "todayCount_one": "Il y a <1>{{count}}</1> événement aujourd'hui.",
+      "todayCount_other": "Il y a <1>{{count}}</1> événements aujourd'hui.",
+      "nextUp": "Ensuite : {{title}}.",
+      "noNext": "Le prochain moment libre est pour vous."
+    },
+    "actions": {
+      "sources": "Sources de calendrier",
+      "newEvent": "Nouvel événement"
+    },
+    "filter": {
+      "ariaLabel": "Filtrer par personne",
+      "all": "Tous",
+      "managed": "géré"
+    },
+    "tools": {
+      "hidePast": "Masquer le passé",
+      "showPast": "Afficher le passé",
+      "export": "Exporter",
+      "import": "Importer un fichier"
+    },
+    "agenda": {
+      "kicker": "Agenda",
+      "title": "Ce qui arrive ensuite",
+      "count_one": "{{count}} événement",
+      "count_other": "{{count}} événements"
+    },
+    "empty": {
+      "title": "Il reste de la place pour quelque chose d'agréable",
+      "description": "Ajoutez un événement ou connectez un calendrier existant.",
+      "cta": "Ajoutez votre premier événement"
+    },
+    "day": {
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain"
+    },
+    "event": {
+      "allDay": "Toute la journée",
+      "until": "jusqu'à {{time}}",
+      "throughDate": "jusqu'au {{date}}",
+      "untilDateTime": "jusqu'au {{date}}, {{time}}",
+      "fromSubscriptionTitle": "Depuis un abonnement de calendrier",
+      "birthdayTitle": "Anniversaire familial automatique",
+      "familyBirthday": "Anniversaire familial",
+      "fromFamily": "De {{name}}",
+      "subscriptionFallback": "Abonnement de calendrier",
+      "sharedWithTitle": "Partagé avec les familles connectées",
+      "sharedWith": "Avec {{names}}",
+      "memberManaged": "{{name}} · géré",
+      "wholeFamily": "Toute la famille",
+      "openAria": "Ouvrir l'événement {{title}}",
+      "readOnlyTitle": "Cet événement est géré par sa source de calendrier",
+      "editRemindersTitle": "Modifier les rappels",
+      "editRemindersAria": "Modifier les rappels pour {{title}}",
+      "deleteTitle": "Supprimer l'événement",
+      "deleteAria": "Supprimer {{title}}"
+    }
+  },
+  "editor": {
+    "kicker": "Détails de l'événement",
+    "title": "Modifier l'événement",
+    "description": "Modifiez ensemble l'heure, les personnes, le lieu et les rappels.",
+    "readOnlyKicker": "Source de calendrier",
+    "readOnlyDescription": "Cet événement est géré par sa source de calendrier connectée et ne peut être que consulté ici.",
+    "birthdayKicker": "Anniversaire familial",
+    "birthdayDescription": "Cet anniversaire est créé automatiquement depuis le profil. LX rappelle à la famille une semaine avant et le jour de l'anniversaire.",
+    "save": "Enregistrer les modifications",
+    "delete": "Supprimer l'événement",
+    "deleteConfirm": "Vraiment supprimer « {{title}} » ?",
+    "fields": {
+      "title": "Titre",
+      "allDay": "Événement sur la journée",
+      "allDayHint": "Pas d'heure fixe – peut s'étendre sur plusieurs jours.",
+      "startDate": "Commence le",
+      "startTime": "Heure de début",
+      "endDate": "Se termine le (facultatif)",
+      "endDateInclusive": "Jusqu'au (facultatif)",
+      "endTime": "Heure de fin (facultatif)",
+      "location": "Lieu (facultatif)",
+      "locationPlaceholder": "ex. école ou cabinet médical",
+      "notes": "Notes (facultatif)"
+    },
+    "audience": {
+      "title": "À qui est destiné cet événement ?",
+      "hint": "Choisissez toute la famille ou sélectionnez plusieurs personnes.",
+      "everyone": "Toute la famille"
+    }
+  },
+  "trash": {
+    "types": {
+      "rest": "Ordures résiduelles (poubelle noire)",
+      "paper": "Recyclage du papier (poubelle bleue)",
+      "bio": "Déchets organiques (poubelle brune/verte)",
+      "yellow": "Recyclage des emballages (poubelle/sac jaune)"
+    },
+    "header": {
+      "title": "Calendrier des déchets numérique",
+      "description": "Importez le fichier .ics de votre prestataire de collecte ou ajoutez une collecte vous-même. LX vous rappelle la veille par défaut.",
+      "connectUrl": "Connecter un lien de calendrier",
+      "import": "Importer le calendrier des déchets",
+      "add": "Ajouter une collecte"
+    },
+    "feed": {
+      "kicker": "Calendrier de collecte automatique",
+      "title": "Calendrier des déchets par lien",
+      "description": "Connectez l'adresse ICS de votre prestataire de collecte ou de Home Assistant. LX synchronise automatiquement les nouvelles dates de collecte.",
+      "empty": "Aucun lien de calendrier des déchets connecté pour le moment.",
+      "name": "Nom de la source",
+      "namePlaceholder": "ex. calendrier des déchets du quartier",
+      "url": "Adresse du calendrier ICS",
+      "security": "Le lien est stocké chiffré sur votre serveur et consulté en lecture seule.",
+      "connect": "Connecter le lien",
+      "connecting": "Connexion…",
+      "sync": "Synchroniser maintenant",
+      "remove": "Retirer la source",
+      "confirmRemove": "Retirer « {{name}} » et toutes les dates de collecte lues à partir de celle-ci ?",
+      "pickupCount_one": "{{count}} collecte",
+      "pickupCount_other": "{{count}} collectes"
+    },
+    "next": {
+      "kicker": "Prochaine collecte des déchets",
+      "callout": "Sortir la poubelle"
+    },
+    "schedule": {
+      "kicker": "Calendrier des collectes",
+      "title": "Prochaines collectes",
+      "emptyTitle": "Pas encore de date de collecte",
+      "emptyDescription": "Téléversez le fichier .ics de votre prestataire de collecte.",
+      "reminderOff": "Rappel désactivé",
+      "editReminderTitle": "Modifier le rappel",
+      "editReminderAria": "Modifier le rappel pour {{title}}",
+      "removeTitle": "Retirer la collecte",
+      "removeAria": "Retirer {{title}}"
+    },
+    "dialog": {
+      "eyebrow": "Nouvelle collecte",
+      "title": "Ajouter une date de collecte",
+      "typeLabel": "Type de déchet",
+      "nameLabel": "Nom",
+      "dateLabel": "Date de collecte",
+      "save": "Enregistrer la collecte"
+    },
+    "types": {
+      "rest": "Ordures ménagères (poubelle noire)",
+      "papier": "Papier (poubelle bleue)",
+      "bio": "Déchets organiques (poubelle brune/verte)",
+      "gelb": "Sac jaune / recyclables"
+    },
+    "toast": {
+      "importFailedTitle": "Import impossible",
+      "importFailedBody": "Aucune date de collecte n'a été trouvée dans ce fichier.",
+      "importSuccessTitle": "Calendrier des déchets importé",
+      "importSuccessBody_one": "{{count}} date de collecte a été importée et vous rappelle la veille par défaut.",
+      "importSuccessBody_other": "{{count}} dates de collecte ont été importées et vous rappellent la veille par défaut.",
+      "addedTitle": "Collecte enregistrée",
+      "addedBody": "La collecte du {{date}} a été enregistrée.",
+      "reminderSavedTitle": "Rappel enregistré",
+      "reminderOffTitle": "Rappel désactivé",
+      "reminderSavedBody": "LX vous rappellera {{leads}}.",
+      "reminderOffBody": "Aucun rappel ne sera envoyé pour {{title}}."
+    }
+  },
+  "sources": {
+    "header": {
+      "kicker": "Pont de calendrier",
+      "title": "Calendriers externes",
+      "description": "Récupérez automatiquement les événements de Google, Outlook, Nextcloud et d'autres calendriers ICS.",
+      "closeAria": "Fermer les sources de calendrier"
+    },
+    "list": {
+      "heading": "Sources connectées",
+      "activeCount": "{{count}} actif(s)",
+      "syncAll": "Tout synchroniser",
+      "emptyTitle": "Pas encore de pont de calendrier",
+      "emptyDescription": "Collez un lien ICS privé à droite. Les nouveaux événements arriveront alors automatiquement dans votre calendrier familial.",
+      "everyone": "Tous",
+      "eventCount_one": "{{count}} événement",
+      "eventCount_other": "{{count}} événements",
+      "syncNever": "Pas encore synchronisé avec succès",
+      "syncToday": "Aujourd'hui à {{time}}",
+      "syncNowTitle": "Synchroniser maintenant",
+      "syncNowAria": "Synchroniser {{name}} maintenant",
+      "pauseAria": "Mettre {{name}} en pause",
+      "resumeAria": "Activer {{name}}",
+      "removeTitle": "Retirer la source",
+      "removeAria": "Retirer {{name}}",
+      "confirmRemove": "Retirer « {{name}} » et tous les événements importés de celle-ci ?"
+    },
+    "form": {
+      "connect": "Connecter le calendrier",
+      "connectHint": "Le lien reste chiffré sur votre serveur.",
+      "nameLabel": "Nom de la source",
+      "namePlaceholder": "ex. calendrier scolaire",
+      "urlLabel": "Lien ICS privé",
+      "visibilityLabel": "Visible par",
+      "allMembers": "Tous les membres de la famille",
+      "householdLabel": "Espace de planification",
+      "householdFamily": "Notre foyer",
+      "householdGrandparents": "Foyer de mamie & papi",
+      "colorLegend": "Couleur du calendrier",
+      "pickColorAria": "Choisir la couleur {{color}}",
+      "privacyNote": "Lecture seule : le planificateur familial ne peut rien modifier ni supprimer dans le calendrier externe. Toutefois, ne partagez jamais le lien secret publiquement.",
+      "connecting": "Connexion…"
+    }
+  },
+  "reminderDialog": {
+    "trashKicker": "Alarme de collecte",
+    "eventKicker": "Alarme d'événement",
+    "atTime": "{{time}}",
+    "noneActive": "Aucun rappel actif",
+    "note": "Les notifications doivent être activées une fois dans chaque profil. L'avis apparaît aussi dans la boîte de réception familiale.",
+    "save": "Enregistrer les rappels"
+  },
+  "reminderPicker": {
+    "title": "Quand LX doit-il vous rappeler ?",
+    "subtitle": "Choisissez un ou plusieurs moments",
+    "off": "Désactivé",
+    "activeHint": "LX vous rappelle sur tous les appareils activés pour ce profil.",
+    "inactiveHint": "Sans sélection, aucun rappel ne sera envoyé pour cette entrée."
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "app": {
+    "loading": "Jouw gezinsruimte gereedmaken …"
+  },
+  "navigation": {
+    "myArea": "Mijn gebied ({{name}})",
+    "myAreaFallback": "Home",
+    "chat": "Gezinschat & DM's",
+    "calendar": "Agenda",
+    "trash": "Afvalkalender",
+    "shopping": "Bring!-boodschappen",
+    "meals": "Maaltijdplan",
+    "tasks": "Taken & sterren",
+    "familyLife": "Gezinsreis",
+    "board": "Prikbord",
+    "childDashboard": "Mijn avontuur",
+    "childTasks": "Missies & sterren",
+    "childFamilyLife": "Mijn reis",
+    "childCalendar": "Gezinsagenda",
+    "childChat": "Gezinsradio",
+    "petDashboard": "Voor {{name}}",
+    "petDashboardFallback": "ons huisdier",
+    "petCalendar": "Dierenarts & afspraken",
+    "cloud": "Gezinscloud",
+    "mail": "Gezinspost",
+    "admin": "Oudershuis",
+    "familyTree": "Stamboom",
+    "familyTreeTitle": "Stamboom & gezinnen koppelen"
+  },
+  "header": {
+    "tagline": "Ons gezinshuis",
+    "householdSwitched": "🏠 Huishouden gewisseld",
+    "householdViewFamily": "Weergave: Ons gezinshuis",
+    "householdViewGrandparents": "Weergave: Huis van oma & opa",
+    "planLocationAria": "Planningslocatie kiezen",
+    "planLocation": "Planningslocatie",
+    "ourHome": "Ons huis",
+    "grandparentsHome": "Huis van oma & opa",
+    "manageFamily": "Gezin beheren",
+    "pet": "Huisdier",
+    "serverConfigTitle": "Serververbinding / IP instellen",
+    "logoutTitle": "Gezin wisselen / Uitloggen",
+    "wallDisplay": "Muurweergave",
+    "wallDisplayHint": "Beveiligde weergave: weergeven en afvinken zonder instellingen te wijzigen",
+    "menu": {
+      "title": "Menu",
+      "open": "Menu openen",
+      "close": "Sluiten",
+      "settings": "Instellingen"
+    },
+    "themePicker": {
+      "openPet": "Pootjeswereld kiezen",
+      "openChild": "Mijn themawereld kiezen",
+      "openAdult": "Themawereld kiezen",
+      "kicker": "Ontwerpwereld",
+      "titlePet": "Pootjeswereld van {{name}}",
+      "petNameFallback": "Jouw harige vriend",
+      "titleChild": "Jouw themawereld",
+      "titleAdult": "Jouw huis, jouw stijl",
+      "descriptionPet": "Kies een rustige wereld voor het huisdierprofiel.",
+      "descriptionChild": "Kies jouw lievelingswereld.",
+      "descriptionAdult": "Rustig of kleurrijk – jouw keuze wordt in jouw profiel opgeslagen.",
+      "groups": {
+        "plain": "Eenvoudig & rustig",
+        "expressive": "Met karakter"
+      },
+      "close": "Themaselectie sluiten"
+    },
+    "customTheme": {
+      "createLaunch": "Aangepast thema aanmaken",
+      "createLaunchHint": "Voeg het toe als aparte ontwerptegel",
+      "editLaunch": "Mijn ontwerp bewerken",
+      "editLaunchHint": "Verfijn verder jouw persoonlijke ontwerptegel",
+      "kicker": "Aangepast thema",
+      "title": "Mijn ontwerp aanmaken",
+      "description": "Deze waarden vormen een apart thema. Linnen, Grafiet en elk ander ingebouwd ontwerp blijven ongewijzigd.",
+      "safeTitle": "Bewust beperkt",
+      "safeDescription": "Alleen geverifieerde kleuren en hoekstralen worden geaccepteerd. Selectors, externe URL's, imports, verborgen oppervlakken en positioneringswijzigingen worden geblokkeerd.",
+      "codeLabel": "CSS-ontwerpvariabelen",
+      "useExample": "Voorbeeld invoegen",
+      "allowed": "Toegestane variabelen",
+      "preview": "Voorbeeld",
+      "save": "Opslaan als Mijn ontwerp",
+      "reset": "Aangepast thema wissen",
+      "saved": "Mijn ontwerp is veilig opgeslagen en als apart thema geactiveerd.",
+      "validation": {
+        "tooLong": "De ontwerpcode is te lang.",
+        "invalidComment": "Een CSS-commentaar is niet correct gesloten.",
+        "selectorsNotAllowed": "Eigen selectors en CSS-regels zijn om veiligheidsredenen niet toegestaan.",
+        "tooManyDeclarations": "Er zijn meer ontwerpwaarden ingevoerd dan toegestaan.",
+        "invalidDeclaration": "\"{{property}}\" is geen geldige CSS-variabele.",
+        "propertyNotAllowed": "De variabele \"{{property}}\" mag niet worden gewijzigd.",
+        "invalidValue": "De waarde voor \"{{property}}\" is geen geldige kleur of straal.",
+        "unsafeValue": "De waarde voor \"{{property}}\" is om veiligheidsredenen geblokkeerd."
+      }
+    },
+    "tabletMode": {
+      "exitTitle": "Tabletmodus verlaten",
+      "enterTitle": "Tabletmodus openen",
+      "exit": "Tablet verlaten",
+      "enter": "Tabletmodus"
+    },
+    "themes": {
+      "adult": {
+        "linen": { "name": "Linnen", "description": "warm, rustig & zonder motief" },
+        "clear": { "name": "Helder", "description": "licht, koel & precies" },
+        "graphite": { "name": "Grafiet", "description": "neutraal, donker & kalm" },
+        "custom": { "name": "Mijn ontwerp", "description": "jouw eigen veilige stijl" },
+        "light": { "name": "Bosrust", "description": "warm & natuurlijk" },
+        "ocean": { "name": "Kustrust", "description": "luchtig & ontspannen" },
+        "midnight": { "name": "Nachtclub", "description": "kalm & donker" },
+        "rock": { "name": "Backstage", "description": "ruitig & warm" },
+        "festival": { "name": "Neonnacht", "description": "stevig & kleurrijk" }
+      },
+      "child": {
+        "space": { "name": "Raketbasis", "description": "raketten & planeten" },
+        "unicorn": { "name": "Eenhoornland", "description": "regenbogen & magie" },
+        "fairy": { "name": "Feeënmagie", "description": "feeën & betoverd woud" },
+        "dino": { "name": "Dinowereld", "description": "dino's & oerwoud" },
+        "sunshine": { "name": "Zonnig Eiland", "description": "zomer & goede sfeer" },
+        "adventure": { "name": "Heldenkamp", "description": "helden & bliksem" }
+      },
+      "pet": {
+        "light": { "name": "Groene Weide", "description": "kalm & natuurlijk" },
+        "ocean": { "name": "Kustpootjes", "description": "fris & ontspannen" },
+        "rock": { "name": "Wilde Snuit", "description": "stevig & speels" },
+        "midnight": { "name": "Nachtpootje", "description": "zacht & donker" }
+      }
+    }
+  },
+  "appUpdate": {
+    "dismiss": "Update later installeren",
+    "source": "Rechtstreeks vanaf jouw LX-server",
+    "title": "Versie {{version}} is er",
+    "body": "LX kan de update nu downloaden en daarna direct het Android-installatievenster openen.",
+    "downloading": "Update veilig downloaden",
+    "permissionMessage": "Sta LX toe om één keer app-updates te installeren op de Android-pagina die zojuist is geopend. Kom daarna terug en tik nogmaals op \"Nu bijwerken\".",
+    "installerMessage": "Android toont nu het installatievenster. Jouw gegevens en instellingen blijven behouden.",
+    "errorMessage": "De update kon niet worden gedownload. Probeer het opnieuw.",
+    "checkPermission": "Toestemming controleren",
+    "updateNow": "Nu bijwerken",
+    "later": "Later"
+  },
+  "releaseNotes": {
+    "close": "Wat is er nieuw sluiten",
+    "version": "Versie {{version}}",
+    "confirm": "Begrepen, we gaan"
+  },
+  "problemReport": {
+    "launcher": "Probleem melden",
+    "kicker": "Directe lijn",
+    "close": "Melding sluiten",
+    "categories": {
+      "problem": "Iets werkt niet",
+      "content": "Inhoud is onjuist",
+      "idea": "Ik heb een idee"
+    },
+    "success": {
+      "title": "Bedankt, we hebben het ontvangen.",
+      "body": "De melding staat nu in het Oudershuis, inclusief versie en onderdeel. Er worden geen inloggegevens verstuurd.",
+      "done": "Klaar"
+    },
+    "titleLabel": "Kortom, wat is er gebeurd?",
+    "titlePlaceholder": "bijv. Afspraak kan niet worden verwijderd",
+    "descriptionLabel": "Hoe kunnen we het nabouwen?",
+    "descriptionPlaceholder": "Wat deed je, wat had er moeten gebeuren en wat gebeurde er in plaats daarvan?",
+    "meta": "We slaan het onderdeel, schermgrootte, browsertype en versie {{version}} op. Geen wachtwoorden of tokens.",
+    "submit": "Melding opslaan"
+  },
+  "planLocationHelp": {
+    "trigger": "Waarvoor?",
+    "title": "Twee huizen, één gezinsplan",
+    "body": "Handig als oma en opa geen eigen gezinsaccount hebben: afspraken, taken, maaltijdplan, afvaldata en prikbord worden apart voor hun huis bijgehouden.",
+    "hint": "Tonen of verbergen: tandwielicoon → gezinsinstellingen."
+  },
+  "serverConfig": {
+    "kicker": "Verbinding",
+    "title": "Jouw gezinsserver",
+    "subtitle": "Voor thuis, een NAS of jouw eigen domein.",
+    "close": "Serverinstellingen sluiten",
+    "urlLabel": "Serveradres",
+    "urlPlaceholder": "https://gezin.voorbeeld.nl",
+    "hint": "Op jouw thuisnetwerk kun je bijvoorbeeld <code>192.168.178.50:3001</code> invoeren. Buiten jouw thuisnetwerk moet het adres altijd HTTPS gebruiken.",
+    "connected": "Verbonden · LX Family Planner {{version}}",
+    "testing": "Verbinding testen …",
+    "test": "Verbinding testen",
+    "errors": {
+      "emptyUrl": "Voer een serveradres in.",
+      "badStatus": "De server reageerde met status {{status}}.",
+      "notLxServer": "Dit adres behoort niet tot een LX Family-server.",
+      "noConnection": "Geen verbinding mogelijk. Controleer IP, domein en netwerk.",
+      "invalidUrl": "Het serveradres is niet geldig."
+    }
+  }
+}

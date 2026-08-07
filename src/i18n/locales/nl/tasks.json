@@ -1,0 +1,140 @@
+{
+  "header": {
+    "title": "Taken & sterrenbeloningswinkel",
+    "createReward": "Eigen beloning aanmaken",
+    "assignTask": "Nieuwe taak toewijzen",
+    "intro": "Kinderen melden een taak als klaar. Sterren worden pas toegekend als de ouder die de taak heeft aangemaakt de voltooiing bevestigt.",
+    "approvalsWaiting_one": "{{count}} taak wacht op jouw controle",
+    "approvalsWaiting_other": "{{count}} taken wachten op jouw controle"
+  },
+  "repeat": {
+    "none": "Eenmalig",
+    "daily": "Elke dag",
+    "weekdays": "Maandag tot en met vrijdag",
+    "weekly": "Elke week",
+    "monthly": "Elke maand",
+    "recurring": "Terugkerend"
+  },
+  "memberCard": {
+    "managedOnly": "Alleen georganiseerd",
+    "noTasks": "Geen taken toegewezen aan {{name}}."
+  },
+  "shared": {
+    "title": "Samen oppakken",
+    "description": "Elke geselecteerde persoon kan deze taken oppakken. Sterren gaan naar wie ze voltooit.",
+    "open": "Wie het eerst klaar is, vinkt de taak af",
+    "reportedBy": "{{name}} zegt dat het klaar is – wacht op bevestiging",
+    "completedBy": "Voltooid door {{name}}",
+    "someone": "iemand in het gezin"
+  },
+  "taskItem": {
+    "reviewWaitingFor": "De controle wacht op {{name}}.",
+    "fallbackCreator": "de maker",
+    "fallbackParent": "een ouder",
+    "statusConfirmed": "Bevestigd en bijgeschreven",
+    "statusPendingWith": "Wacht op controle door {{name}}",
+    "statusCreatedBy": "Aangemaakt door {{name}}",
+    "statusTapWhenDone": "Tik als je klaar bent",
+    "rotationTitle": "Rouleert bij elke herhaling",
+    "fairRotation": "Eerlijke roulatie ({{count}})",
+    "approve": "Echt klaar",
+    "reject": "Nog een keer proberen",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "confirmDelete": "Echt verwijderen?"
+  },
+  "shop": {
+    "title": "Sterrenbeloningswinkel",
+    "titleForChild": "Sterrenbeloningswinkel voor {{name}}",
+    "editRewardTitle": "Beloning bewerken",
+    "deleteRewardTitle": "Beloning verwijderen",
+    "forChild": "🧒 Voor {{name}}",
+    "forAllChildren": "✨ Voor alle kinderen",
+    "requiresStars": "Vereist {{count}} sterren",
+    "redeemFor": "Inwisselen voor {{name}}!"
+  },
+  "rewardModal": {
+    "editTitle": "Beloning bewerken",
+    "createTitle": "Nieuwe beloning aanmaken",
+    "titleLabel": "Titel van beloning",
+    "titlePlaceholder": "bijv. 1x dierentuin, 30 min gamen...",
+    "forWhichChild": "Voor welk kind is deze beloning?",
+    "childOption": "🧒 {{name}}",
+    "starCost": "Sterrenkosten",
+    "imageLabel": "Beloningsafbeelding"
+  },
+  "taskModal": {
+    "editTitle": "Taak bewerken",
+    "taskLabel": "Taak / klusje",
+    "taskPlaceholder": "bijv. kamer opruimen, de vaatwasser legen...",
+    "descriptionLabel": "Omschrijving (optioneel)",
+    "descriptionPlaceholder": "Details, tips of wat er precies gedaan moet worden …",
+    "assignTo": "Toewijzen aan",
+    "sharedToggle": "Gezamenlijke gezinstaak",
+    "sharedHint": "Eén taak voor meerdere personen – sterren gaan naar degene die hem voltooit.",
+    "eligibleProfiles": "Wie kan hem oppakken?",
+    "eligibleHint": "Selecteer minimaal één profiel. Kinderen hebben nog steeds ouderlijke goedkeuring nodig.",
+    "managedSuffix": ", beheerd",
+    "scheduleTitle": "Wanneer moet de taak klaar?",
+    "scheduleHint": "Herhalingen worden na bevestiging automatisch opnieuw ingepland.",
+    "dueDate": "Klaar op",
+    "dueTime": "Tijd (optioneel)",
+    "repeatLabel": "Herhalen",
+    "rotationToggle": "Eerlijk rouleren tussen profielen",
+    "rotationHint": "Na elke bevestigde herhaling is automatisch de volgende persoon aan de beurt.",
+    "category": "Categorie",
+    "categories": {
+      "household": "Huishouden",
+      "kitchen": "Keuken",
+      "room": "Kamer",
+      "school": "School",
+      "pet": "Huisdier",
+      "garden": "Tuin"
+    },
+    "managedNoteTitle": "Organisatietaak",
+    "managedNoteHint": "Beheerde profielen krijgen geen sterren en geen aparte klaar-melding.",
+    "starsLabel": "Sterrenbeloning (+ sterren)",
+    "submit": "Taak aanmaken",
+    "save": "Wijzigingen opslaan"
+  },
+  "rewardIcon": {
+    "defaultLabel": "Beloning",
+    "customImage": "Eigen afbeelding",
+    "customSymbol": "Eigen symbool",
+    "customImageTitle": "{{label}}: eigen afbeelding"
+  },
+  "presets": {
+    "gift": "Cadeau",
+    "iceCream": "IJsje",
+    "gaming": "Gametijd",
+    "movie": "Filmavond",
+    "popcorn": "Bioscoop",
+    "pizza": "Pizza",
+    "trip": "Uitje",
+    "outdoors": "Buiten",
+    "bike": "Fietstocht",
+    "swimming": "Zwemmen",
+    "creative": "Creatieve tijd",
+    "music": "Muziek",
+    "book": "Boek",
+    "party": "Feestje",
+    "animal": "Dierenavontuur",
+    "cake": "Lekkernij",
+    "rocket": "Avontuur",
+    "trophy": "Grote prijs",
+    "crown": "Wens kiezen",
+    "surprise": "Verrassing"
+  },
+  "iconPicker": {
+    "hint": "Een duidelijke afbeelding die kinderen direct herkennen.",
+    "uploadAriaLabel": "Kies een eigen beloningsafbeelding",
+    "presetsAriaLabel": "Beloningsiconen",
+    "removeCustomImage": "Eigen afbeelding verwijderen",
+    "errors": {
+      "invalidType": "Kies een PNG-, JPG- of WebP-afbeelding.",
+      "tooLarge": "De afbeelding mag niet groter zijn dan 5 MB.",
+      "stillTooLarge": "De afbeelding is nog steeds te groot na schalen.",
+      "readFailed": "De afbeelding kon niet worden uitgelezen."
+    }
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "header": {
+    "title": "Tareas y tienda de recompensas por estrellas",
+    "createReward": "Crear una recompensa personalizada",
+    "assignTask": "Asignar una nueva tarea",
+    "intro": "Los niños informan de que han terminado una tarea. Las estrellas solo se otorgan cuando el padre que la creó confirma que está hecha.",
+    "approvalsWaiting_one": "{{count}} tarea está esperando tu revisión",
+    "approvalsWaiting_other": "{{count}} tareas están esperando tu revisión"
+  },
+  "repeat": {
+    "none": "Una vez",
+    "daily": "Cada día",
+    "weekdays": "De lunes a viernes",
+    "weekly": "Cada semana",
+    "monthly": "Cada mes",
+    "recurring": "Recurrente"
+  },
+  "memberCard": {
+    "managedOnly": "Solo organización",
+    "noTasks": "No hay tareas asignadas a {{name}}."
+  },
+  "shared": {
+    "title": "Afrontadlo juntos",
+    "description": "Cualquier persona seleccionada puede coger estas tareas. Las estrellas van para quien las complete.",
+    "open": "Quien termine primero marca la tarea como hecha",
+    "reportedBy": "{{name}} dice que está hecho – a la espera de confirmación",
+    "completedBy": "Completado por {{name}}",
+    "someone": "alguien de la familia"
+  },
+  "taskItem": {
+    "reviewWaitingFor": "La revisión está esperando a {{name}}.",
+    "fallbackCreator": "el creador",
+    "fallbackParent": "un padre",
+    "statusConfirmed": "Confirmado y adjudicado",
+    "statusPendingWith": "A la espera de la revisión de {{name}}",
+    "statusCreatedBy": "Creado por {{name}}",
+    "statusTapWhenDone": "Toca cuando hayas terminado",
+    "rotationTitle": "Rota con cada repetición",
+    "fairRotation": "Rotación equitativa ({{count}})",
+    "approve": "Realmente hecho",
+    "reject": "Inténtalo otra vez",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Seguro que quieres eliminar?"
+  },
+  "shop": {
+    "title": "Tienda de recompensas por estrellas",
+    "titleForChild": "Tienda de recompensas por estrellas para {{name}}",
+    "editRewardTitle": "Editar recompensa",
+    "deleteRewardTitle": "Eliminar recompensa",
+    "forChild": "🧒 Para {{name}}",
+    "forAllChildren": "✨ Para todos los niños",
+    "requiresStars": "Requiere {{count}} estrellas",
+    "redeemFor": "¡Canjear para {{name}}!"
+  },
+  "rewardModal": {
+    "editTitle": "Editar recompensa",
+    "createTitle": "Crear nueva recompensa",
+    "titleLabel": "Título de la recompensa",
+    "titlePlaceholder": "p. ej. 1 visita al zoo, 30 min de juego…",
+    "forWhichChild": "¿Para qué niño es esta recompensa?",
+    "childOption": "🧒 {{name}}",
+    "starCost": "Coste en estrellas",
+    "imageLabel": "Imagen de la recompensa"
+  },
+  "taskModal": {
+    "editTitle": "Editar tarea",
+    "taskLabel": "Tarea / deber",
+    "taskPlaceholder": "p. ej. recoger la habitación, vaciar el lavavajillas…",
+    "descriptionLabel": "Descripción (opcional)",
+    "descriptionPlaceholder": "Detalles, consejos o qué hay que hacer exactamente …",
+    "assignTo": "Asignar a",
+    "sharedToggle": "Tarea familiar compartida",
+    "sharedHint": "Una tarea para varias personas; las estrellas van para quien la complete.",
+    "eligibleProfiles": "¿Quién puede cogerla?",
+    "eligibleHint": "Selecciona al menos un perfil. Los niños siguen necesitando la confirmación de un padre.",
+    "managedSuffix": ", gestionado",
+    "scheduleTitle": "¿Cuándo vence la tarea?",
+    "scheduleHint": "Las repeticiones se reprograman automáticamente tras la confirmación.",
+    "dueDate": "Vence el",
+    "dueTime": "Hora (opcional)",
+    "repeatLabel": "Repetir",
+    "rotationToggle": "Rotar de forma equitativa entre perfiles",
+    "rotationHint": "Tras cada repetición confirmada, la siguiente persona es la siguiente automáticamente.",
+    "category": "Categoría",
+    "categories": {
+      "household": "Hogar",
+      "kitchen": "Cocina",
+      "room": "Habitación",
+      "school": "Colegio",
+      "pet": "Mascota",
+      "garden": "Jardín"
+    },
+    "managedNoteTitle": "Tarea de organización",
+    "managedNoteHint": "Los perfiles gestionados no reciben estrellas ni ningún informe de tarea completada.",
+    "starsLabel": "Recompensa en estrellas (+ estrellas)",
+    "submit": "Crear tarea",
+    "save": "Guardar cambios"
+  },
+  "rewardIcon": {
+    "defaultLabel": "Recompensa",
+    "customImage": "Imagen personalizada",
+    "customSymbol": "Símbolo personalizado",
+    "customImageTitle": "{{label}}: imagen personalizada"
+  },
+  "presets": {
+    "gift": "Regalo",
+    "iceCream": "Helado",
+    "gaming": "Rato de juego",
+    "movie": "Noche de cine",
+    "popcorn": "Cine",
+    "pizza": "Pizza",
+    "trip": "Excursión",
+    "outdoors": "Aire libre",
+    "bike": "Paseo en bici",
+    "swimming": "Piscina",
+    "creative": "Rato creativo",
+    "music": "Música",
+    "book": "Libro",
+    "party": "Fiesta",
+    "animal": "Aventura animal",
+    "cake": "Capricho dulce",
+    "rocket": "Aventura",
+    "trophy": "Gran premio",
+    "crown": "Pide un deseo",
+    "surprise": "Sorpresa"
+  },
+  "iconPicker": {
+    "hint": "Una imagen clara que los niños reconocerán al instante.",
+    "uploadAriaLabel": "Elegir una imagen de recompensa personalizada",
+    "presetsAriaLabel": "Iconos de recompensa",
+    "removeCustomImage": "Eliminar imagen personalizada",
+    "errors": {
+      "invalidType": "Elige una imagen PNG, JPG o WebP.",
+      "tooLarge": "La imagen no debe superar los 5 MB.",
+      "stillTooLarge": "La imagen sigue siendo demasiado grande tras reducirla.",
+      "readFailed": "No se pudo leer la imagen."
+    }
+  }
+}

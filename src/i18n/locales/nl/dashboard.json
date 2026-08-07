@@ -1,0 +1,274 @@
+{
+  "child": {
+    "fallbackName": "Avonturier",
+    "worlds": {
+      "space": {
+        "label": "Raketbasis",
+        "mission": "Sterrenenergie",
+        "greeting": "Klaar voor de lancering?"
+      },
+      "unicorn": {
+        "label": "Eenhoornland",
+        "mission": "Regenboogkracht",
+        "greeting": "Vandaag wordt het magisch!"
+      },
+      "fairy": {
+        "label": "Feeënmagie",
+        "mission": "Tovendust",
+        "greeting": "Het betoverde woud roept!"
+      },
+      "dino": {
+        "label": "Dinowereld",
+        "mission": "Dinokracht",
+        "greeting": "Op weg naar een groot avontuur!"
+      },
+      "sunshine": {
+        "label": "Zonnig Eiland",
+        "mission": "Zonnestralen",
+        "greeting": "Er begint een goede dag!"
+      },
+      "adventure": {
+        "label": "Heldenkamp",
+        "mission": "Heldenkracht",
+        "greeting": "Jouw missie wacht!"
+      }
+    },
+    "moods": {
+      "super": "Geweldig!",
+      "gut": "Goed",
+      "okay": "Gaat wel",
+      "hilfe": "Knof een knuffel"
+    },
+    "hero": {
+      "defaultTitle": "Gezinsheld",
+      "kicker": "Niveau {{level}} · {{title}}",
+      "hey": "Hé {{name}}!",
+      "intro_zero": "Er zijn vandaag geen missies voor jou. Elke taak die je voltooit, laat jouw sterrenschat groeien.",
+      "intro_one": "Er is vandaag {{count}} missie voor jou. Elke taak die je voltooit, laat jouw sterrenschat groeien.",
+      "intro_other": "Er zijn vandaag {{count}} missies voor jou. Elke taak die je voltooit, laat jouw sterrenschat groeien.",
+      "starsToNextLevel_one": "Nog {{count}} ster naar niveau {{level}}",
+      "starsToNextLevel_other": "Nog {{count}} sterren naar niveau {{level}}",
+      "openMissions": "missies open",
+      "done": "voltooid"
+    },
+    "map": {
+      "kicker": "Jouw avonturenroute",
+      "progress": "{{done}} van {{total}} missies voltooid",
+      "freeDay": "Vandaag is een vrije ontdekkersdag",
+      "progressAria": "Missievoortgang",
+      "goalDone": "Klaar!",
+      "goalLabel": "Dagelijks doel",
+      "unbeatable": "Vandaag ben je niet te stoppen",
+      "missionsToGoal_one": "Nog {{count}} missie naar het doel",
+      "missionsToGoal_other": "Nog {{count}} missies naar het doel"
+    },
+    "today": {
+      "routine": {
+        "label": "Jouw routine",
+        "allDone": "Vandaag is alles klaar!",
+        "discover": "Ontdek routines",
+        "steps": "{{done}}/{{total}} stappen"
+      },
+      "saving": {
+        "label": "Jouw spaarpot",
+        "noGoal": "Nog geen spaardoel",
+        "percentDone": "{{percent}}% ervan"
+      },
+      "badges": {
+        "label": "Jouw collectie",
+        "count_one": "{{count}} badge ontdekt",
+        "count_other": "{{count}} badges ontdekt",
+        "hint": "Er wachten nieuwe prestaties op je"
+      }
+    },
+    "story": {
+      "encouragementFrom": "Aanmoediging van {{name}}",
+      "familyFallback": "jouw gezin",
+      "quote": "“{{message}}”",
+      "togetherStrong": "Samen sterker",
+      "pollKicker": "Jouw stem telt"
+    },
+    "mood": {
+      "kicker": "Gezinskompas",
+      "title": "Hoe voel je je vandaag?",
+      "checkedIn": "Bedankt dat je vandaag hebt ingecheckt.",
+      "prompt": "Eén tik is genoeg – jouw gezin weet hoe het met je gaat."
+    },
+    "quests": {
+      "kicker": "Jouw missies",
+      "title": "Verzamel vandaag sterren",
+      "viewAll": "Alles",
+      "defaultCategory": "Gezinsmissie",
+      "emptyTitle": "Alles klaar!",
+      "emptyText": "Jouw missies zijn voltooid. Goed gedaan."
+    },
+    "rewards": {
+      "kicker": "Wensstation",
+      "title": "Jouw sterrenwinkel",
+      "shop": "Winkel",
+      "cost_one": "{{count}} ster",
+      "cost_other": "{{count}} sterren",
+      "redeem": "Inwisselen",
+      "collect": "Blijf sparen",
+      "empty": "Nog geen wensen in de winkel."
+    },
+    "media": {
+      "kicker": "Goedgekeurd door jouw gezin",
+      "title": "Jouw medialounge",
+      "safeBadge": "✓ Gekozen door jouw ouders",
+      "spotifyPlaylist": "Spotify-afspeellijst",
+      "youtubeChannel": "YouTube-kanaal",
+      "playMusic": "Muziek afspelen",
+      "playVideo": "Video starten",
+      "pausedLabel": "De medialounge houdt even pauze",
+      "pausedUntil": "Hij is om {{time}} weer voor je terug."
+    },
+    "homeControlsTitle": "Jouw huisbediening",
+    "buddy": {
+      "kicker": "Jouw wereld, jouw keuze",
+      "title": "Avontuurlijke metgezellen",
+      "text": "Kies wie je op jouw missies vergezelt. De keuze wordt alleen voor jouw profiel opgeslagen."
+    },
+    "familyStrip": {
+      "nextLabel": "Straks",
+      "nothingPlanned": "Vandaag niets gepland",
+      "calendar": "Agenda",
+      "chatLabel": "Gezinsradio",
+      "chatPrompt": "Zeg even gedag tegen iedereen!",
+      "open": "Openen"
+    }
+  },
+  "personal": {
+    "widgets": {
+      "calendar": {
+        "label": "Mijn afspraken",
+        "description": "Jouw aankomende afspraken en gezinsgelegenheden",
+        "action": "Alles tonen"
+      },
+      "tasks": {
+        "label": "Taken & goedkeuringen",
+        "description": "Jouw eigen taken en openstaande oudergoedkeuringen",
+        "action": "Takenplanner"
+      },
+      "meals": {
+        "label": "Wat er vandaag op tafel staat",
+        "description": "Het huidige maaltijdplan voor jouw huishouden",
+        "action": "Maaltijdplan"
+      },
+      "shopping": {
+        "label": "Boodschappenlijst",
+        "description": "De belangrijkste open items in één oogopslag",
+        "action": "Boodschappenlijst"
+      },
+      "trash": {
+        "label": "Volgende afvalinzameling",
+        "description": "De volgende ophaaldatum voor jouw planningslocatie",
+        "action": "Afvalkalender"
+      },
+      "board": {
+        "label": "Prikbord",
+        "description": "De nieuwste gedeelde gezinsnotities",
+        "action": "Naar het prikbord"
+      },
+      "cloud": {
+        "label": "Gezinsarchief",
+        "description": "Upload foto's, documenten en herinneringen direct"
+      },
+      "home-assistant": {
+        "label": "Ons huis",
+        "description": "Gedeelde apparaten, sensoren en scènes uit Home Assistant"
+      }
+    },
+    "hero": {
+      "kicker": "Jouw gezinsoverzicht",
+      "greeting": {
+        "morning": "Goedemorgen",
+        "day": "Hallo",
+        "evening": "Goedenavond"
+      },
+      "title": "{{greeting}}, {{name}}!",
+      "summary": "Vandaag op jouw radar: {{events}}, {{tasks}} en {{shopping}}.",
+      "events_one": "{{count}} afspraak",
+      "events_other": "{{count}} afspraken",
+      "tasks_one": "{{count}} open taak",
+      "tasks_other": "{{count}} open taken",
+      "shopping_one": "{{count}} boodschap",
+      "shopping_other": "{{count}} boodschappen",
+      "customize": "Indeling",
+      "quickAdd": "Iets toevoegen"
+    },
+    "widgetHeader": {
+      "open": "Openen"
+    },
+    "calendar": {
+      "empty": "Geen afspraken voor jou ingepland.",
+      "allDay": "hele dag",
+      "defaultLocation": "Gezinsafspraak"
+    },
+    "tasks": {
+      "approvals_one": "voltooide taak wacht op jou",
+      "approvals_other": "voltooide taken wachten op jou",
+      "empty": "Alle taken zijn klaar.",
+      "due": "Voor {{date}}",
+      "defaultCategory": "Taak"
+    },
+    "meals": {
+      "empty": "Voor vandaag nog niets gepland.",
+      "types": {
+        "lunch": "Lunch",
+        "dinner": "Diner"
+      }
+    },
+    "shopping": {
+      "empty": "De boodschappenlijst is rond."
+    },
+    "trash": {
+      "pickupOn": "Ophaling op {{date}}",
+      "empty": "Geen afvalinzamelingsdata beschikbaar."
+    },
+    "board": {
+      "title": "Nieuw op het prikbord",
+      "empty": "Nog geen notities."
+    }
+  },
+  "customizer": {
+    "kicker": "Weergavestudio",
+    "personalTitle": "Jouw overzicht",
+    "tabletTitle": "Tablettegels",
+    "scopeNote": "Deze selectie geldt alleen voor {{name}} op dit apparaat.",
+    "thisProfile": "dit profiel",
+    "closeAria": "Weergavestudio sluiten",
+    "density": {
+      "title": "Tegelafstand",
+      "hint": "Comfortabel voor aanraken of compact voor meer overzicht.",
+      "groupAria": "Tegelafstand kiezen",
+      "comfortable": "Comfortabel",
+      "compact": "Compact"
+    },
+    "tabletPreview": {
+      "title": "Inhoud tablettegel",
+      "hint": "Meer items blijven direct binnen de tegel scrollbaar.",
+      "events": "Afspraken",
+      "tasks": "Taken",
+      "four": "4 items",
+      "eight": "8 items",
+      "all": "Alles"
+    },
+    "trash": {
+      "title": "Afvalinzameling automatisch tonen",
+      "hint": "Onthul de tegel optioneel pas kort voor de volgende ophaling.",
+      "visibility": "Tegel tonen",
+      "always": "Altijd",
+      "upcoming": "Alleen vóór een ophaling",
+      "never": "Nooit",
+      "days": "Hoeveel dagen vooraf?"
+    },
+    "moveUp": "{{label}} omhoog",
+    "moveDown": "{{label}} omlaag",
+    "minVisible": "Er moet minimaal één tegel zichtbaar blijven.",
+    "visibilityOn": "Aan",
+    "visibilityOff": "Uit",
+    "reset": "Standaard herstellen",
+    "done": "Klaar"
+  }
+}

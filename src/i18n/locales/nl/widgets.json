@@ -1,0 +1,197 @@
+{
+  "kitchen": {
+    "widgets": {
+      "calendar": {
+        "label": "Vandaag",
+        "description": "Alle afspraken van vandaag"
+      },
+      "meals": {
+        "label": "Maaltijden",
+        "description": "Maaltijdplan van vandaag"
+      },
+      "tasks": {
+        "label": "Taken",
+        "description": "Open taken en goedkeuringen"
+      },
+      "shopping": {
+        "label": "Boodschappen",
+        "description": "Nog benodigde items"
+      },
+      "chat": {
+        "label": "Gezinschat",
+        "description": "De nieuwste gezinsberichten"
+      },
+      "board": {
+        "label": "Prikbord",
+        "description": "Actuele gezinsnotities"
+      },
+      "trash": {
+        "label": "Afvalinzameling",
+        "description": "De volgende ophaaldatum"
+      },
+      "family": {
+        "label": "Gezin",
+        "description": "Profielen en sterren in één oogopslag"
+      },
+      "homeAssistant": {
+        "label": "Huisbediening",
+        "description": "Apparaten, sensoren en scènes als grote tablettegels"
+      }
+    },
+    "household": {
+      "omaOpa": "Oma & opa",
+      "default": "Ons huis"
+    },
+    "live": "Live",
+    "allInView": "Alles in één oogopslag.",
+    "signedInAs": "Ingelogd als {{name}}",
+    "quickActions": {
+      "event": "Afspraak",
+      "shopping": "Boodschap",
+      "standardView": "Standaardweergave",
+      "tiles": "Tegels"
+    },
+    "completeTask": {
+      "kicker": "Taak afvinken",
+      "title": "Wie heeft dit voltooid?",
+      "select": "Ik was het",
+      "cancel": "Nog niet"
+    },
+    "cards": {
+      "calendar": {
+        "title": "Vandaag",
+        "count_one": "{{count}} afspraak",
+        "count_other": "{{count}} afspraken",
+        "allDay": "hele dag",
+        "familyFallback": "Gezin",
+        "empty": "Vandaag nog niets gepland."
+      },
+      "meals": {
+        "title": "Maaltijden",
+        "empty": "Nog geen maaltijden gepland."
+      },
+      "tasks": {
+        "title": "Taken",
+        "count_one": "{{count}} open",
+        "count_other": "{{count}} open",
+        "pendingApproval": "Wacht op controle",
+        "shared": "Gezamenlijke taak",
+        "empty": "Alle taken zijn klaar."
+      },
+      "shopping": {
+        "title": "Boodschappen",
+        "count_one": "{{count}} item",
+        "count_other": "{{count}} items",
+        "empty": "Alles gekocht."
+      },
+      "chat": {
+        "title": "Gezinschat",
+        "count_one": "{{count}} bericht",
+        "count_other": "{{count}} berichten",
+        "photo": "📷 Foto",
+        "newMessage": "Nieuw bericht",
+        "senderFallback": "Gezin",
+        "empty": "Nog geen berichten."
+      },
+      "board": {
+        "title": "Prikbord",
+        "count_one": "{{count}} notitie",
+        "count_other": "{{count}} notities",
+        "empty": "Het prikbord is leeg."
+      },
+      "trash": {
+        "title": "Volgende ophaling",
+        "noDate": "Geen datum",
+        "empty": "Nog geen afvalophaling ingepland."
+      },
+      "family": {
+        "title": "Gezin",
+        "count_one": "{{count}} profiel",
+        "count_other": "{{count}} profielen"
+      }
+    }
+  },
+  "pet": {
+    "noDateAppointment": "Afspraak zonder datum",
+    "appointmentWithTime": "{{day}} · {{time}}",
+    "petFallbackName": "Harige vriend",
+    "petAlt": "Huisdier",
+    "kicker": "Pootjesprofiel · Gezinslieveling",
+    "heroTitle": "Alles voor {{name}} in één oogopslag",
+    "heroText": "Afspraken, verzorging en voeding op één rustige plek – geen chat, sterren of onnodige menu's.",
+    "caredFor": "Verzorgd",
+    "openCareItems": "open verzorgingsitems",
+    "overviewAria": "Pootjesoverzicht",
+    "nextAppointment": "Volgende afspraak",
+    "nothingPlanned": "Niets gepland",
+    "calendarFree": "De agenda is vrij.",
+    "care": "Verzorging",
+    "careOpen_one": "{{count}} item open",
+    "careOpen_other": "{{count}} items open",
+    "allDone": "Alles klaar",
+    "managedByAdults": "Wordt door de volwassenen geregeld.",
+    "petMode": "Huisdiermodus",
+    "calmProtected": "Rustig & beschermd",
+    "noChatNoAccount": "Geen chat en geen accountfuncties.",
+    "carePlan": "Verzorgingsplan",
+    "whatsUpFor": "Wat staat er te gebeuren voor {{name}}",
+    "familyTakesCare": "Het gezin regelt het",
+    "careCategoryFallback": "Verzorging & voeding",
+    "openLabel": "open",
+    "allCaredFor": "Alles goed verzorgd",
+    "noCareItems": "Er zijn momenteel geen open verzorgingsitems voor {{name}}.",
+    "appointmentsHealth": "Afspraken & gezondheid",
+    "pawCalendar": "Pootjesagenda",
+    "calendar": "Agenda",
+    "noDateShort": "open",
+    "noAppointments": "Geen afspraken gepland",
+    "pawCalendarFree": "De pootjesagenda is nu helemaal vrij.",
+    "importantNotes": "Belangrijke notities",
+    "noteFallback": "Notitie"
+  },
+  "homeAssistant": {
+    "states": {
+      "on": "Aan",
+      "off": "Uit",
+      "open": "Open",
+      "closed": "Gesloten",
+      "opening": "Openen …",
+      "closing": "Sluiten …",
+      "home": "Thuis",
+      "notHome": "Afwezig",
+      "unavailable": "Niet beschikbaar",
+      "unknown": "Onbekend",
+      "clear": "Helder",
+      "cloudy": "Bewolkt",
+      "rainy": "Regen"
+    },
+    "defaultTitle": "Ons huis",
+    "subtitle": "Home Assistant · live",
+    "refreshAria": "Huisstatus vernieuwen",
+    "emptyTitle": "Nog geen huistegels",
+    "emptyHint": "Een ouderprofiel kan apparaten en sensoren delen in het ouderencentrum.",
+    "openCover": "Openen",
+    "closeCover": "Sluiten",
+    "adultsOnlyConfirm": "Alleen voor volwassenen, met bevestiging",
+    "control": "Bedienen"
+  },
+  "familyCloud": {
+    "title": "Gezinsarchief",
+    "openAria": "Gezinsarchief openen",
+    "open": "Openen",
+    "preparing": "Het archief wordt voorbereid",
+    "checkConnection": "Je kunt de verbinding controleren in het ouderencentrum.",
+    "toParentCenter": "Naar het ouderencentrum",
+    "sharedStorage": "Gedeelde opslag",
+    "loading": "Laden",
+    "ofTotal": "van {{size}}",
+    "safeForFamily": "veilig voor jouw gezin",
+    "openingArchive": "Archief openen …",
+    "noFiles": "Nog geen bestanden – hier is ruimte voor jouw herinneringen.",
+    "upload": "Naar de cloud uploaden",
+    "toast": {
+      "fileTooBigTitle": "Bestand te groot",
+      "fileTooBigMessage": "{{name}} is groter dan 100 MB."
+    }
+  }
+}

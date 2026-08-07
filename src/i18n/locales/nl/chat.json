@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "attachmentLoad": "De bijlage kon niet worden geladen."
+  },
+  "imageViewer": {
+    "label": "Chatafbeelding",
+    "viewLarge": "Bekijk {{name}} op volledige grootte",
+    "closeAria": "Afbeeldingsweergave sluiten",
+    "tapToClose": "Tik buiten de afbeelding om te sluiten"
+  },
+  "attachment": {
+    "open": "Openen",
+    "download": "Downloaden",
+    "kinds": {
+      "apk": "Android-app",
+      "archive": "Archief",
+      "pdf": "PDF-document",
+      "video": "Video",
+      "audio": "Audio",
+      "document": "Document"
+    }
+  },
+  "toasts": {
+    "attachmentOpenFailedTitle": "Bijlage niet geopend",
+    "downloadFailedTitle": "Download mislukt",
+    "attachmentLimitTitle": "Bijlagelimiet bereikt",
+    "attachmentLimitBody": "Een bericht kan maximaal {{max}} bestanden bevatten.",
+    "fileTooLargeTitle": "Bestand te groot",
+    "fileTooLargeBody": "{{name}} is groter dan 100 MB.",
+    "selectionTrimmedTitle": "Selectie ingekort",
+    "selectionTrimmedBody_one": "Het eerste bestand is bijgevoegd.",
+    "selectionTrimmedBody_other": "De eerste {{count}} bestanden zijn bijgevoegd.",
+    "attachmentSendFailedTitle": "Bijlage niet verzonden",
+    "attachmentSendFailedBody": "Het bestand kon niet worden opgeslagen in de Gezinscloud."
+  },
+  "preview": {
+    "fileShared": "📎 Bestand gedeeld",
+    "invitedChat": "Uitgenodigde gezinschat",
+    "openGroup": "Groep openen",
+    "noMessages": "Nog geen berichten",
+    "photo": "📷 Foto",
+    "file": "📎 Bestand",
+    "newMessage": "Nieuw bericht"
+  },
+  "directory": {
+    "kicker": "Gezinspraat",
+    "title": "Chats",
+    "groupChannel": "Allen samen",
+    "directLabel": "Direct",
+    "invitedLabel": "Uitgenodigd"
+  },
+  "room": {
+    "familyProfiles_one": "{{count}} gezinsprofiel",
+    "familyProfiles_other": "{{count}} gezinsprofielen",
+    "guestInvited": "Je bent persoonlijk uitgenodigd",
+    "groupTitle": "Gezinschat",
+    "visibleToAll": "Zichtbaar voor iedereen",
+    "guestAccess": "Gasttoegang eenmaal geaccepteerd",
+    "directMessage": "Direct bericht"
+  },
+  "empty": {
+    "title": "Hier is het nog rustig",
+    "prompt": "Schrijf het eerste bericht aan {{name}}.",
+    "familyName": "jouw gezin"
+  },
+  "message": {
+    "you": "Jij",
+    "chatPhoto": "Chatfoto",
+    "sentAttachmentAlt": "Verzonden bijlage",
+    "viewLarge": "Op volledige grootte bekijken"
+  },
+  "composer": {
+    "removeAttachment": "{{name}} verwijderen",
+    "uploadingFile": "Bestand {{current}} van {{total}} opslaan in de cloud",
+    "sendingMessage": "Bericht versturen",
+    "attachFiles": "Bestanden bijvoegen",
+    "placeholder": "Bericht aan {{name}} …",
+    "placeholderFamilyName": "het gezin",
+    "sending": "Versturen …",
+    "send": "Versturen",
+    "cloudNote": "Bijlagen worden automatisch in het gezinsarchief geplaatst · tot 100 MB"
+  }
+}

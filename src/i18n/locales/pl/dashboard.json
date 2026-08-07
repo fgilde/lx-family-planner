@@ -1,0 +1,274 @@
+{
+  "child": {
+    "fallbackName": "Poszukiwacz przygód",
+    "worlds": {
+      "space": {
+        "label": "Baza rakietowa",
+        "mission": "Energia gwiazd",
+        "greeting": "Gotowy na start?"
+      },
+      "unicorn": {
+        "label": "Kraina jednorożców",
+        "mission": "Moc tęczy",
+        "greeting": "Dziś będzie magicznie!"
+      },
+      "fairy": {
+        "label": "Magia wróżek",
+        "mission": "Magiczny pył",
+        "greeting": "Zaczarowany las wzywa!"
+      },
+      "dino": {
+        "label": "Świat dinozaurów",
+        "mission": "Moc dinozaurów",
+        "greeting": "Wyrusz w wielką przygodę!"
+      },
+      "sunshine": {
+        "label": "Wyspa słońca",
+        "mission": "Promyki słońca",
+        "greeting": "Zaczyna się dobry dzień!"
+      },
+      "adventure": {
+        "label": "Obóz bohaterów",
+        "mission": "Moc bohatera",
+        "greeting": "Twoja misja czeka!"
+      }
+    },
+    "moods": {
+      "super": "Super!",
+      "gut": "Dobrze",
+      "okay": "Tak sobie",
+      "hilfe": "Potrzebuję przytulenia"
+    },
+    "hero": {
+      "defaultTitle": "Bohater rodziny",
+      "kicker": "Poziom {{level}} · {{title}}",
+      "hey": "Hej {{name}}!",
+      "intro_zero": "Nie masz dziś żadnych misji. Każde ukończone zadanie powiększa Twój skarb gwiazdek.",
+      "intro_one": "Masz dziś {{count}} misję. Każde ukończone zadanie powiększa Twój skarb gwiazdek.",
+      "intro_other": "Masz dziś {{count}} misje. Każde ukończone zadanie powiększa Twój skarb gwiazdek.",
+      "starsToNextLevel_one": "{{count}} gwiazdka do poziomu {{level}}",
+      "starsToNextLevel_other": "{{count}} gwiazdek do poziomu {{level}}",
+      "openMissions": "otwartych misji",
+      "done": "ukończono"
+    },
+    "map": {
+      "kicker": "Twoja ścieżka przygód",
+      "progress": "Ukończono {{done}} z {{total}} misji",
+      "freeDay": "Dziś jest wolny dzień odkrywcy",
+      "progressAria": "Postęp misji",
+      "goalDone": "Gotowe!",
+      "goalLabel": "Dzienny cel",
+      "unbeatable": "Dziś jesteś nie do zatrzymania",
+      "missionsToGoal_one": "{{count}} misja do celu",
+      "missionsToGoal_other": "{{count}} misje(ów) do celu"
+    },
+    "today": {
+      "routine": {
+        "label": "Twoja rutyna",
+        "allDone": "Wszystko zrobione na dziś!",
+        "discover": "Odkryj rutyny",
+        "steps": "{{done}}/{{total}} kroków"
+      },
+      "saving": {
+        "label": "Twoja świnka skarbonka",
+        "noGoal": "Brak celu oszczędzania",
+        "percentDone": "{{percent}}% do celu"
+      },
+      "badges": {
+        "label": "Twoja kolekcja",
+        "count_one": "odkryto {{count}} odznakę",
+        "count_other": "odkryto {{count}} odznak(i)",
+        "hint": "Czekają na Ciebie nowe osiągnięcia"
+      }
+    },
+    "story": {
+      "encouragementFrom": "Wsparcie od {{name}}",
+      "familyFallback": "Twoja rodzina",
+      "quote": "„{{message}}”",
+      "togetherStrong": "Razem raźniej",
+      "pollKicker": "Twój głos się liczy"
+    },
+    "mood": {
+      "kicker": "Kompas rodzinny",
+      "title": "Jak się dziś czujesz?",
+      "checkedIn": "Dzięki za dzisiejsze sprawdzenie.",
+      "prompt": "Wystarczy jedno kliknięcie – Twoja rodzina będzie wiedzieć, jak się czujesz."
+    },
+    "quests": {
+      "kicker": "Twoje misje",
+      "title": "Zbieraj dzisiaj gwiazdki",
+      "viewAll": "Wszystkie",
+      "defaultCategory": "Misja rodzinna",
+      "emptyTitle": "Wszystko zrobione!",
+      "emptyText": "Twoje misje są ukończone. Świetna robota."
+    },
+    "rewards": {
+      "kicker": "Stacja życzeń",
+      "title": "Twój sklep gwiazdek",
+      "shop": "Sklep",
+      "cost_one": "{{count}} gwiazdka",
+      "cost_other": "{{count}} gwiazdek",
+      "redeem": "Wymień",
+      "collect": "Zbieraj dalej",
+      "empty": "Brak życzeń w sklepie."
+    },
+    "media": {
+      "kicker": "Zatwierdzone przez Twoją rodzinę",
+      "title": "Twoja strefa multimedialna",
+      "safeBadge": "✓ Wybrane przez Twoich rodziców",
+      "spotifyPlaylist": "Playlista Spotify",
+      "youtubeChannel": "Kanał YouTube",
+      "playMusic": "Odtwórz muzykę",
+      "playVideo": "Odtwórz wideo",
+      "pausedLabel": "Strefa multimedialna ma chwilę przerwy",
+      "pausedUntil": "Wróci dla Ciebie o {{time}}."
+    },
+    "homeControlsTitle": "Sterowanie Twoim domem",
+    "buddy": {
+      "kicker": "Twój świat, Twój wybór",
+      "title": "Towarzysze przygód",
+      "text": "Wybierz, kto towarzyszy Ci w misjach. Wybór jest zapisany tylko dla Twojego profilu."
+    },
+    "familyStrip": {
+      "nextLabel": "Następnie",
+      "nothingPlanned": "Dziś nic niezaplanowane",
+      "calendar": "Kalendarz",
+      "chatLabel": "Rodzinne radio",
+      "chatPrompt": "Wyślij wszystkim szybkie cześć!",
+      "open": "Otwórz"
+    }
+  },
+  "personal": {
+    "widgets": {
+      "calendar": {
+        "label": "Moje wydarzenia",
+        "description": "Twoje nadchodzące wydarzenia i okazje rodzinne",
+        "action": "Pokaż wszystko"
+      },
+      "tasks": {
+        "label": "Zadania i zatwierdzenia",
+        "description": "Twoje własne zadania i oczekujące zatwierdzenia rodziców",
+        "action": "Planer zadań"
+      },
+      "meals": {
+        "label": "Dziś na stole",
+        "description": "Aktualny plan posiłków dla Twojego gospodarstwa domowego",
+        "action": "Plan posiłków"
+      },
+      "shopping": {
+        "label": "Lista zakupów",
+        "description": "Najważniejsze otwarte pozycje w skrócie",
+        "action": "Lista zakupów"
+      },
+      "trash": {
+        "label": "Następny odbiór śmieci",
+        "description": "Najbliższy termin odbioru dla Twojego miejsca planowania",
+        "action": "Kalendarz śmieci"
+      },
+      "board": {
+        "label": "Tablica",
+        "description": "Najnowsze wspólne notatki rodzinne",
+        "action": "Do tablicy"
+      },
+      "cloud": {
+        "label": "Archiwum rodzinne",
+        "description": "Wyślij zdjęcia, dokumenty i wspomnienia bezpośrednio"
+      },
+      "home-assistant": {
+        "label": "Nasz dom",
+        "description": "Współdzielone urządzenia, czujniki i sceny z Home Assistant"
+      }
+    },
+    "hero": {
+      "kicker": "Twój przegląd rodzinny",
+      "greeting": {
+        "morning": "Dzień dobry",
+        "day": "Cześć",
+        "evening": "Dobry wieczór"
+      },
+      "title": "{{greeting}}, {{name}}!",
+      "summary": "Dziś na Twoim radarzie: {{events}}, {{tasks}} i {{shopping}}.",
+      "events_one": "{{count}} wydarzenie",
+      "events_other": "{{count}} wydarzenia(ów)",
+      "tasks_one": "{{count}} otwarte zadanie",
+      "tasks_other": "{{count}} otwartych zadań",
+      "shopping_one": "{{count}} pozycja zakupowa",
+      "shopping_other": "{{count}} pozycji zakupowych",
+      "customize": "Układ",
+      "quickAdd": "Dodaj coś"
+    },
+    "widgetHeader": {
+      "open": "Otwórz"
+    },
+    "calendar": {
+      "empty": "Brak wydarzeń zaplanowanych dla Ciebie.",
+      "allDay": "cały dzień",
+      "defaultLocation": "Wydarzenie rodzinne"
+    },
+    "tasks": {
+      "approvals_one": "ukończone zadanie czeka na Ciebie",
+      "approvals_other": "ukończonych zadań czeka na Ciebie",
+      "empty": "Wszystkie zadania są wykonane.",
+      "due": "Termin {{date}}",
+      "defaultCategory": "Zadanie"
+    },
+    "meals": {
+      "empty": "Na dziś jeszcze nic niezaplanowane.",
+      "types": {
+        "lunch": "Obiad",
+        "dinner": "Kolacja"
+      }
+    },
+    "shopping": {
+      "empty": "Lista zakupów jest gotowa."
+    },
+    "trash": {
+      "pickupOn": "Odbiór {{date}}",
+      "empty": "Brak dostępnych terminów odbioru śmieci."
+    },
+    "board": {
+      "title": "Nowe na tablicy",
+      "empty": "Brak notatek."
+    }
+  },
+  "customizer": {
+    "kicker": "Studio widoku",
+    "personalTitle": "Twój przegląd",
+    "tabletTitle": "Kafelki na tablecie",
+    "scopeNote": "Ten wybór dotyczy tylko {{name}} na tym urządzeniu.",
+    "thisProfile": "ten profil",
+    "closeAria": "Zamknij studio widoku",
+    "density": {
+      "title": "Odstępy kafelków",
+      "hint": "Wygodne dla dotyku lub zwarte dla lepszego przeglądu.",
+      "groupAria": "Wybierz odstępy kafelków",
+      "comfortable": "Wygodne",
+      "compact": "Zwarte"
+    },
+    "tabletPreview": {
+      "title": "Zawartość kafelków na tablecie",
+      "hint": "Pozostałe wpisy pozostają przewijalne bezpośrednio wewnątrz kafelka.",
+      "events": "Wydarzenia",
+      "tasks": "Zadania",
+      "four": "4 wpisy",
+      "eight": "8 wpisów",
+      "all": "Wszystkie"
+    },
+    "trash": {
+      "title": "Pokaż automatycznie odbiór śmieci",
+      "hint": "Opcjonalnie ujawnij kafelek tylko krótko przed następnym odbiorem.",
+      "visibility": "Pokazuj kafelek",
+      "always": "Zawsze",
+      "upcoming": "Tylko przed odbiorem",
+      "never": "Nigdy",
+      "days": "Ile dni wcześniej?"
+    },
+    "moveUp": "Przesuń {{label}} w górę",
+    "moveDown": "Przesuń {{label}} w dół",
+    "minVisible": "Co najmniej jeden kafelek musi pozostać widoczny.",
+    "visibilityOn": "Włączone",
+    "visibilityOff": "Wyłączone",
+    "reset": "Przywróć domyślne",
+    "done": "Gotowe"
+  }
+}

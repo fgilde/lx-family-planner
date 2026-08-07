@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Familias conectadas · deliberadamente privadas",
+    "title": "Buzón familiar",
+    "description": "Planificad juntos a vuestro ritmo o invitad a la abuela y al abuelo directamente a vuestro chat familiar.",
+    "writeLetter": "Escribir una carta"
+  },
+  "filters": {
+    "inbox": "Bandeja de entrada",
+    "sent": "Enviados"
+  },
+  "list": {
+    "emptyTitle": "Todavía no hay cartas",
+    "emptyConnected": "Un comienzo tranquilo para vuestra correspondencia familiar.",
+    "emptyUnconnected": "Primero conéctate con otra familia en la red familiar."
+  },
+  "reader": {
+    "sentTo": "Enviada a {{family}}",
+    "from": "Carta de {{family}}",
+    "reply": "Responder",
+    "archiveLetter": "Archivar carta",
+    "privacyNote": "Solo los adultos de ambas familias conectadas pueden ver esta carta.",
+    "placeholderTitle": "Una carta te espera para recogerla",
+    "placeholderText": "Más personal que el chat, más claro para acuerdos y planes compartidos."
+  },
+  "guests": {
+    "kicker": "Charla familiar con consentimiento",
+    "title": "Invitados en el chat familiar",
+    "description": "Los perfiles adultos, como la abuela o el abuelo, solo ven los mensajes nuevos del grupo desde el momento en que aceptan.",
+    "connectedFamily": "Familia conectada",
+    "adultProfile": "Perfil adulto",
+    "selectProfile": "Selecciona un perfil",
+    "sendInvitation": "Enviar invitación",
+    "status": {
+      "accepted": "En el chat",
+      "pending": "Esperando consentimiento",
+      "revoked": "Acceso finalizado",
+      "declined": "Rechazado"
+    },
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "endAccess": "Terminar acceso",
+    "empty": "Todavía no hay invitados de chat."
+  },
+  "compose": {
+    "kicker": "Nuevo correo familiar",
+    "title": "Escribir una carta",
+    "recipientFamily": "Familia destinataria",
+    "subject": "Asunto",
+    "subjectPlaceholder": "¿De qué se trata?",
+    "body": "Tu carta",
+    "bodyPlaceholder": "Hola a todos, …",
+    "privacyNote": "Solo a través de la conexión familiar confirmada",
+    "submit": "Enviar carta"
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "parentAdmin": {
+    "accessDenied": {
+      "title": "Espace parents",
+      "description": "Cet espace est uniquement visible par les profils adultes de la famille."
+    },
+    "toasts": {
+      "profileUpdatedTitle": "Profil enfant mis à jour",
+      "profileUpdatedBody": "Les réglages de {{name}} ont été enregistrés."
+    },
+    "hero": {
+      "kicker": "Adultes uniquement",
+      "title": "Espace parents",
+      "description": "Gérez les profils, les tâches et les tableaux de bord des enfants au même endroit, en toute tranquillité, sans passer d'un espace à l'autre."
+    },
+    "overview": {
+      "childProfiles": "Profils enfants",
+      "openTasks": "Tâches en cours",
+      "totalStars": "Étoiles au total",
+      "managedProfiles": "Profils gérés"
+    },
+    "modules": {
+      "kicker": "Moins de clutter",
+      "title": "Rubriques familiales",
+      "intro": "Désactivez les fonctions que votre famille n'utilise pas. Elles disparaissent pour tous les profils et peuvent être réactivées ici à tout moment.",
+      "visible": "Visible",
+      "hidden": "Masqué",
+      "profileHint": "Pour personnaliser une personne en particulier, modifiez son profil et choisissez ses rubriques visibles.",
+      "labels": {
+        "chat": "Discussion",
+        "calendar": "Calendrier",
+        "trash": "Calendrier des déchets",
+        "shopping": "Courses",
+        "meals": "Plan de repas",
+        "tasks": "Tâches",
+        "family-life": "Vie de famille",
+        "board": "Tableau d'affichage",
+        "cloud": "Cloud familial",
+        "mail": "Courrier familial"
+      }
+    },
+    "managed": {
+      "kicker": "Sans identifiant propre",
+      "title": "Profils gérés",
+      "create": "Créer un profil",
+      "intro": "Pour mamie, papi ou les personnes dont vous vous occupez : ils apparaissent dans les événements et les tâches, mais pas à la connexion ni dans la discussion.",
+      "positionWithoutLogin": "{{position}} · sans identifiant",
+      "plannable": "Planifiable",
+      "emptyTitle": "Personne n'a encore été ajouté",
+      "emptyHint": "Choisissez « Géré par nous uniquement » lors de la création d'un profil."
+    },
+    "children": {
+      "kicker": "Enfants & ados",
+      "title": "Administrer les profils",
+      "add": "Ajouter un profil",
+      "selectedProfile": "Profil sélectionné",
+      "positionLabel": "Rôle",
+      "pinLabel": "Nouveau code PIN du profil (facultatif)",
+      "pinPlaceholder": "Laisser vide pour ne pas modifier",
+      "saving": "Enregistrement…",
+      "save": "Enregistrer le profil",
+      "emptyTitle": "Pas encore de profil enfant",
+      "emptyDescription": "Créez d'abord un profil en tant qu'enfant ou adolescent.",
+      "emptyCta": "Créer un profil enfant"
+    },
+    "tasks": {
+      "kicker": "Faire le tri",
+      "title": "Nettoyer la liste de tâches",
+      "openCount": "{{count}} en cours",
+      "doneCount": "{{count}} terminée(s)",
+      "filterLabel": "Uniquement les tâches de",
+      "allMembers": "Tous les membres de la famille",
+      "deleteCompleted": "Supprimer les terminées",
+      "deleteCompletedConfirm": "Vraiment supprimer les tâches terminées ?",
+      "clearAll": "Vider la liste de tâches",
+      "clearAllConfirm": "Vraiment tout supprimer ?"
+    },
+    "points": {
+      "kicker": "Comptes d'étoiles",
+      "title": "Points de récompense",
+      "intro": "Réinitialisez séparément les points des enfants et des adultes. Les animaux de compagnie ne collectent pas de points de récompense.",
+      "resetConfirm": "Vraiment remettre à 0 ?"
+    },
+    "media": {
+      "kicker": "Tableau de bord enfants",
+      "title": "Espace multimédia",
+      "intro": "Ajoutez des chaînes YouTube approuvées et des listes de lecture Spotify sous forme de grandes tuiles adaptées aux enfants. Seul ce que vous approuvez ici est visible.",
+      "chooseChild": "Choisir un profil enfant",
+      "kindAriaLabel": "Type de média",
+      "titlePlaceholder": "ex. 1, rue des Sésames",
+      "share": "Approuver le widget",
+      "linkMeta": "{{kind}} · sur le tableau de bord de {{name}}",
+      "childProfileFallback": "Profil enfant",
+      "removeLink": "Retirer {{title}}",
+      "empty": "Aucun widget multimédia approuvé pour le moment."
+    },
+    "family": {
+      "kicker": "Réseau familial",
+      "title": "Comptes familiaux liés",
+      "confirmedConnections_one": "{{count}} connexion confirmée",
+      "confirmedConnections_other": "{{count}} connexions confirmées",
+      "pendingRequests_one": "{{count}} demande en attente",
+      "pendingRequests_other": "{{count}} demandes en attente",
+      "openTree": "Ouvrir l'arbre généalogique"
+    }
+  },
+  "homeAssistant": {
+    "kicker": "Maison connectée · local & protégé",
+    "connected": "Connecté",
+    "notConnected": "Non connecté",
+    "intro": "Intègre des états sélectionnés de la maison dans le planificateur familial sous forme de vraies tuiles. Le jeton d'accès reste chiffré sur votre serveur.",
+    "domains": {
+      "binary_sensor": "État",
+      "button": "Bouton",
+      "climate": "Climat",
+      "cover": "Volets",
+      "device_tracker": "Présence",
+      "fan": "Ventilateur",
+      "input_boolean": "Interrupteur",
+      "light": "Lumière",
+      "media_player": "Média",
+      "person": "Personne",
+      "scene": "Scène",
+      "script": "Script",
+      "sensor": "Capteur",
+      "sun": "Soleil",
+      "switch": "Interrupteur",
+      "vacuum": "Aspirateur robot",
+      "weather": "Météo"
+    },
+    "connect": {
+      "addressLabel": "Adresse Home Assistant",
+      "addressHint": "Avec Docker, l'IP fixe de votre réseau domestique est la plus fiable.",
+      "tokenLabel": "Jeton d'accès longue durée",
+      "tokenPlaceholder": "Jeton depuis votre profil Home Assistant",
+      "tokenHint": "Le jeton n'est plus affiché après l'enregistrement.",
+      "submit": "Vérifier la connexion"
+    },
+    "summary": {
+      "tilesShared_one": "{{count}} tuile partagée sur le tableau de bord",
+      "tilesShared_other": "{{count}} tuiles partagées sur le tableau de bord",
+      "active": "Actif"
+    },
+    "toolbar": {
+      "loadDevices": "Charger les appareils",
+      "testConnection": "Tester la connexion",
+      "searchPlaceholder": "Rechercher un appareil ou un capteur"
+    },
+    "callout": {
+      "title": "Choisir les tuiles du tableau de bord",
+      "description": "Chargez les appareils et décidez exactement de ce qui peut être visible et contrôlable."
+    },
+    "entity": {
+      "allowControl": "Autoriser le contrôle",
+      "visibleFor": "Également visible par :"
+    },
+    "noMatches": "Aucun appareil correspondant trouvé.",
+    "saveBar": {
+      "selectedCount": "{{count}} sélectionné(s)",
+      "hint": "Les adultes voient tout, les enfants uniquement ce qui est partagé avec eux.",
+      "save": "Enregistrer la sélection"
+    },
+    "manage": {
+      "summary": "Gérer la connexion",
+      "newTokenPlaceholder": "Nouveau jeton d'accès",
+      "renew": "Renouveler la connexion",
+      "disconnectConfirm": "Vraiment déconnecter ?",
+      "disconnect": "Déconnecter"
+    }
+  },
+  "webPush": {
+    "kickerNative": "Directement depuis Android",
+    "kickerWeb": "Sans application supplémentaire",
+    "titleNative": "Notifications de l'application Android",
+    "titleWeb": "Notifications du navigateur",
+    "introNative": "L'application LX enregistre cet appareil Android une seule fois pour un profil. Ensuite, les alertes arrivent même quand l'application est fermée.",
+    "introWeb": "Chaque téléphone ou tablette s'enregistre une fois pour un profil familial. Les clés et les détails techniques restent invisibles.",
+    "deviceConnected": "Cet appareil est activé",
+    "activationSteps": {
+      "server": "Vérification du serveur…",
+      "android": "Préparation d'Android…",
+      "channels": "Configuration des notifications…",
+      "permission": "Vérification de l'autorisation…",
+      "permission-request": "Veuillez confirmer l'invite Android…",
+      "firebase": "Enregistrement de l'appareil auprès de Firebase…",
+      "save": "Enregistrement de l'appareil…"
+    },
+    "serverMissing": {
+      "title": "Connexion Firebase encore manquante",
+      "description": "Le serveur LX n'a pas encore de clé de service Firebase privée. C'est pourquoi il ne peut pas joindre Android pour le moment.",
+      "hint": "Placez la clé de service uniquement dans le dossier de données du serveur, puis installez l'application LX compilée avec le même projet Firebase. La clé ne doit jamais se trouver dans le dépôt Git."
+    },
+    "checking": {
+      "title": "Vérification de la connexion Android",
+      "description": "LX demande l'état Firebase actuel au serveur familial."
+    },
+    "statusError": {
+      "title": "L'état n'a pas pu être vérifié",
+      "fallback": "L'application n'a pas encore reçu de réponse du serveur familial.",
+      "retry": "Revérifier"
+    },
+    "unavailable": {
+      "titleSecureContext": "HTTPS manquant – c'est pourquoi les notifications en arrière-plan ne fonctionnent pas",
+      "titleGeneric": "Une étape de sécurité supplémentaire",
+      "hintNative": "Installez la dernière application Android LX pour utiliser les notifications natives.",
+      "hintWeb": "Ouvrez le planificateur via une adresse HTTPS de confiance, ajoutez-le à l'écran d'accueil Android, puis activez cet appareil."
+    },
+    "denied": {
+      "title": "Désactivé dans le navigateur",
+      "bodyNative": "Autorisez les notifications sous Android → Applications → LX Family Planner → Notifications.",
+      "bodyWeb": "Autorisez les notifications dans les paramètres du site de votre navigateur, puis rouvrez le planificateur."
+    },
+    "ready": {
+      "title": "Enregistrer cet appareil pour {{name}}",
+      "hintNative": "Une touche – l'invite Android n'apparaît qu'une seule fois.",
+      "hintWeb": "Un clic – pas de jeton ni d'application supplémentaire.",
+      "connecting": "Connexion…",
+      "enable": "Activer les notifications"
+    },
+    "activationError": "Connexion non terminée",
+    "connectedNote": {
+      "title": "Prêt pour les notifications en arrière-plan",
+      "bodyNative": "Android affiche les alertes familiales dans la barre système et, si vous le souhaitez, sur l'écran de verrouillage – même quand LX est fermé.",
+      "bodyWeb": "Pour une diffusion plus fiable sur Android, installez le planificateur via « Ajouter à l'écran d'accueil » et autorisez les notifications dans les paramètres de l'application Android."
+    },
+    "preview": {
+      "title": "Afficher les détails sur l'écran de verrouillage",
+      "hint": "Si désactivé, les discussions, tâches et événements restent privés."
+    },
+    "actions": {
+      "saving": "Enregistrement…",
+      "save": "Enregistrer la sélection",
+      "sending": "Envoi…",
+      "sendTest": "Envoyer un test",
+      "disable": "Désactiver pour ce profil"
+    },
+    "devices": {
+      "title": "Appareils familiaux",
+      "registeredCount": "{{count}} enregistré(s)",
+      "transportAndroid": "Application Android",
+      "transportBrowser": "Navigateur",
+      "meta": "{{transport}} · {{member}} · dernière mise à jour {{date}}",
+      "removeDevice": "Retirer {{name}}",
+      "empty": "Aucun appareil familial enregistré pour le moment."
+    }
+  },
+  "gotify": {
+    "kicker": "Messages push",
+    "title": "Notifications Gotify",
+    "intro": "Les moments familiaux importants vous atteignent même quand le planificateur n'est pas ouvert.",
+    "connected": "Connecté",
+    "serverFallback": "Serveur Gotify",
+    "security": {
+      "title": "Configuration sécurisée",
+      "body": "Le mot de passe n'est utilisé qu'une seule fois pour créer une application Gotify dédiée et n'est pas stocké."
+    },
+    "form": {
+      "serverLabel": "Serveur Gotify",
+      "usernameLabel": "Nom d'utilisateur",
+      "passwordLabel": "Mot de passe",
+      "plannerUrlLabel": "Adresse du planificateur sur votre téléphone",
+      "connecting": "Connexion…",
+      "connect": "Connecter & tester"
+    },
+    "status": {
+      "channel": "Canal de messages",
+      "openGotify": "Ouvrir Gotify"
+    },
+    "includeText": {
+      "title": "Afficher le texte du message sur l'écran de verrouillage",
+      "hint": "Désactivé par défaut pour des raisons de confidentialité."
+    },
+    "phoneUrlLabel": "Ouvrir cette adresse du planificateur quand on appuie",
+    "actions": {
+      "saving": "Enregistrement…",
+      "saveRules": "Enregistrer les règles",
+      "sending": "Envoi…",
+      "sendTest": "Envoyer un test",
+      "disconnectConfirm": "Vraiment déconnecter ?",
+      "disconnect": "Déconnecter"
+    }
+  },
+  "ntfy": {
+    "kicker": "Canal push ouvert",
+    "title": "Notifications ntfy",
+    "intro": "Envoie les mêmes événements familiaux sélectionnés vers un sujet ntfy – auto-hébergé ou via ntfy.sh.",
+    "connected": "Connecté",
+    "security": {
+      "title": "Traitez le sujet comme un mot de passe",
+      "body": "Utilisez un nom de sujet difficile à deviner. Un jeton d'accès facultatif est stocké chiffré."
+    },
+    "server": "Serveur ntfy",
+    "topic": "Sujet",
+    "token": "Jeton d'accès (facultatif)",
+    "tokenPlaceholder": "tk_... pour les sujets protégés",
+    "plannerUrl": "Ouvrir cette adresse du planificateur quand on appuie",
+    "connect": "Connecter & tester",
+    "connecting": "Connexion…",
+    "open": "Ouvrir ntfy",
+    "includeText": "Afficher le texte du message dans la notification",
+    "includeTextHint": "Désactivé par défaut pour des raisons de confidentialité.",
+    "save": "Enregistrer les règles",
+    "test": "Envoyer un test",
+    "disconnect": "Déconnecter",
+    "disconnectConfirm": "Vraiment déconnecter ?"
+  },
+  "problemReports": {
+    "kicker": "Commentaires depuis l'application",
+    "title": "Signalements de problèmes",
+    "intro": "Les signalements restent sur votre serveur. Avec « Copier », ils peuvent être transmis intégralement et sans identifiants.",
+    "loading": "Chargement des signalements…",
+    "categories": {
+      "problem": "Problème",
+      "content": "Contenu",
+      "idea": "Idée",
+      "fallback": "Signaler"
+    },
+    "copy": {
+      "profileLine": "Profil : {{value}}",
+      "areaLine": "Zone : {{value}}",
+      "versionLine": "Version : {{value}}",
+      "deviceLine": "Appareil : {{value}}",
+      "successTitle": "Signalement copié",
+      "successBody": "Vous pouvez maintenant le coller directement dans GitHub ou un message.",
+      "errorTitle": "Copie impossible",
+      "errorBody": "Le navigateur a bloqué l'accès au presse-papiers."
+    },
+    "unknownMember": "Inconnu",
+    "areaFallback": "Application",
+    "copyButton": "Copier",
+    "markDone": "Terminé",
+    "reopen": "Rouvrir",
+    "empty": {
+      "title": "Aucun signalement ouvert",
+      "hint": "Tout est calme par ici en ce moment."
+    },
+    "openCount": "{{count}} ouvert(s)"
+  }
+}

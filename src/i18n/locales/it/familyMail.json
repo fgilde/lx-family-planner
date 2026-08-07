@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Famiglie collegate · volutamente private",
+    "title": "Casella postale famiglia",
+    "description": "Pianificate insieme al vostro ritmo oppure invitate nonna e nonno direttamente nella vostra chat di famiglia.",
+    "writeLetter": "Scrivi una lettera"
+  },
+  "filters": {
+    "inbox": "In arrivo",
+    "sent": "Inviata"
+  },
+  "list": {
+    "emptyTitle": "Ancora nessuna lettera",
+    "emptyConnected": "Un inizio tranquillo della vostra corrispondenza famiglia.",
+    "emptyUnconnected": "Collegati prima con un'altra famiglia nella rete di famiglia."
+  },
+  "reader": {
+    "sentTo": "Inviata a {{family}}",
+    "from": "Lettera da {{family}}",
+    "reply": "Rispondi",
+    "archiveLetter": "Archivia lettera",
+    "privacyNote": "Solo gli adulti di entrambe le famiglie collegate possono vedere questa lettera.",
+    "placeholderTitle": "Una lettera ti aspetta di essere ritirata",
+    "placeholderText": "Più personale della chat, più chiara per accordi e piani condivisi."
+  },
+  "guests": {
+    "kicker": "Chiacchiere di famiglia con consenso",
+    "title": "Ospiti nella chat di famiglia",
+    "description": "I profili adulti come nonna o nonno vedono i nuovi messaggi di gruppo solo dal momento in cui accettano.",
+    "connectedFamily": "Famiglia collegata",
+    "adultProfile": "Profilo adulto",
+    "selectProfile": "Seleziona un profilo",
+    "sendInvitation": "Invia invito",
+    "status": {
+      "accepted": "Nella chat",
+      "pending": "In attesa di consenso",
+      "revoked": "Accesso terminato",
+      "declined": "Rifiutato"
+    },
+    "accept": "Accetta",
+    "decline": "Rifiuta",
+    "endAccess": "Termina accesso",
+    "empty": "Ancora nessun ospite chat invitato."
+  },
+  "compose": {
+    "kicker": "Nuova posta famiglia",
+    "title": "Scrivi una lettera",
+    "recipientFamily": "Famiglia destinataria",
+    "subject": "Oggetto",
+    "subjectPlaceholder": "Di cosa si tratta?",
+    "body": "La tua lettera",
+    "bodyPlaceholder": "Ciao a tutti, …",
+    "privacyNote": "Solo tramite il collegamento famiglia confermato",
+    "submit": "Spedisci lettera"
+  }
+}

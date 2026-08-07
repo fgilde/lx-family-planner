@@ -1,0 +1,187 @@
+{
+  "planner": {
+    "tabs": {
+      "weeklyPlan": "Tygodniowy plan posiłków ({{household}})",
+      "recipeBook": "Książka przepisów ({{count}})"
+    },
+    "households": {
+      "family": "Nasz dom",
+      "grandparents": "Babcia i dziadek"
+    },
+    "header": {
+      "title": "Tygodniowy plan posiłków",
+      "subtitle": "Zaplanujcie posiłki na tydzień. Kliknij posiłek, aby wybrać przepis lub jednym kliknięciem dodać jego składniki do listy zakupów!"
+    },
+    "mealTypes": {
+      "lunch": "Obiad",
+      "dinner": "Kolacja"
+    },
+    "slots": {
+      "editAria": "Edytuj {{meal}} dla {{day}}",
+      "addIngredients": "Dodaj składniki do listy ({{count}})",
+      "empty": "Brak zaplanowanego dania"
+    },
+    "modal": {
+      "title": "Dodaj danie: {{day}} ({{meal}})",
+      "chooseFromBook": "Wybierz z książki przepisów",
+      "recipePlaceholderOption": "-- Wybierz przepis z książki przepisów --",
+      "customLabel": "Lub wpisz danie samodzielnie",
+      "customPlaceholder": "np. naleśniki z sosem jabłkowym...",
+      "ingredientsLabel": "Składniki (oddzielone przecinkiem dla listy zakupów)",
+      "ingredientsPlaceholder": "np. 500g mąki, 4 jajka, 1L mleka...",
+      "saving": "Zapisywanie …",
+      "removeEntry": "Usuń wpis"
+    }
+  },
+  "recipeBook": {
+    "image": {
+      "noImageAria": "{{title}} bez zdjęcia",
+      "unavailable": "Zdjęcie przepisu jest niedostępne"
+    },
+    "errors": {
+      "importFailed": "Nie udało się zaimportować przepisu.",
+      "saveFailed": "Nie udało się zapisać przepisu w książce kucharskiej.",
+      "shareMissingLink": "Aplikacja udostępniania nie przekazała linku do przepisu. Wklej link poniżej."
+      ,"tandoorTooLarge": "Eksport Tandoor może mieć maksymalnie 120 MB.",
+      "tandoorEmpty": "W tym pliku nie znaleziono żadnych przepisów Tandoor.",
+      "tandoorInvalid": "Nie udało się odczytać eksportu Tandoor.",
+      "rtkTooLarge": "Kopia zapasowa My Recipe Box może mieć maksymalnie 120 MB.",
+      "rtkEmpty": "W tym pliku nie znaleziono żadnych przepisów My Recipe Box.",
+      "rtkInvalid": "Nie udało się odczytać kopii zapasowej My Recipe Box."
+    },
+    "toasts": {
+      "importedCheckTitle": "Przepis zaimportowany – sprawdź proszę",
+      "importedTitle": "🎉 Przepis zaimportowany!",
+      "importedBody": "„{{title}}” został pomyślnie zaimportowany!",
+      "draftReadyTitle": "Szkic przepisu gotowy",
+      "draftReadyBody": "Sprawdź składniki i sposób przygotowania. Nic nie zostanie zapisane, dopóki tego nie potwierdzisz.",
+      "importErrorTitle": "⚠️ Błąd importu",
+      "manualCreatedTitle": "✨ Przepis utworzony",
+      "manualCreatedBody": "„{{title}}” został zapisany w książce przepisów."
+      ,"tandoorImportedTitle": "Przepisy Tandoor zaimportowane",
+      "tandoorImportedBody": "Dodano {{count}} przepisów do Twojej książki kucharskiej LX.",
+      "tandoorErrorTitle": "Import Tandoor nie powiódł się",
+      "rtkImportedTitle": "Przepisy My Recipe Box zaimportowane",
+      "rtkImportedBody": "Zaimportowano {{imported}} przepisów, znaleziono {{skipped}} istniejących przepisów i odzyskano {{imagesRecovered}} brakujących obrazów.",
+      "rtkErrorTitle": "Import My Recipe Box nie powiódł się"
+    },
+    "header": {
+      "title": "Nasza książka kucharska i świat przepisów",
+      "subtitle": "Importuj przepisy z Pinterest, Chefkoch i wielu innych stron, zbieraj je razem i gotuj krok po kroku."
+    },
+    "tabs": {
+      "browse": "Wszystkie przepisy ({{count}})",
+      "import": "Importuj przepis",
+      "manual": "Nowy przepis"
+    },
+    "card": {
+      "editTitle": "Edytuj przepis",
+      "deleteTitle": "Usuń przepis",
+      "defaultPrepTime": "30 min",
+      "defaultServings": "4 porcje",
+      "startCooking": "Zacznij gotować",
+      "addIngredientsTitle": "Dodaj składniki do listy zakupów",
+      "addIngredients": "Dodaj składniki do listy"
+    },
+    "tandoor": {
+      "title": "Import z Tandoor Recipes",
+      "description": "Importuje oficjalny eksport Tandoor, w tym składniki, kroki i dostępne obrazy.",
+      "hint": "W Tandoor: otwórz przepis → menu → eksport → zaznacz wszystkie przepisy. Następnie wybierz tu plik ZIP.",
+      "select": "Wybierz plik Tandoor",
+      "loading": "Odczytywanie Tandoor …"
+    },
+    "rtk": {
+      "title": "Import z My Recipe Box",
+      "description": "Importuje pełną kopię zapasową .rtk, w tym składniki, instrukcje, obrazy i linki źródłowe.",
+      "hint": "W My Recipe Box: Sync/Backup → Export backup (RTK). Na Androidzie możesz następnie wysłać plik RTK bezpośrednio przez Udostępnij → LX Family Planner.",
+      "select": "Wybierz kopię zapasową RTK",
+      "loading": "Odczytywanie My Recipe Box …"
+    },
+    "import": {
+      "shareArrivalTitle": "Udostępnione prosto z telefonu",
+      "shareArrivalBody": "LX pobiera link. Przepisy z mediów społecznościowych otwierają się najpierw jako możliwy do sprawdzenia szkic.",
+      "shareRtkArrivalTitle": "Otrzymano kopię zapasową My Recipe Box",
+      "shareRtkArrivalBody": "LX odczytuje udostępniony plik RTK i importuje jego przepisy wraz z ewentualnymi dostępnymi obrazami.",
+      "importRunningAria": "Trwa import",
+      "kicker": "Wyszukiwarka przepisów",
+      "title": "Zaimportuj przepis z sieci",
+      "description": "Wklej link do przepisu, pinezkę Pinterest lub publiczny Facebook Reel. Treści z mediów społecznościowych są zawsze otwierane do sprawdzenia przed zapisaniem.",
+      "platformsAria": "Przykłady obsługiwanych stron",
+      "morePlatforms": "więcej stron z przepisami",
+      "howto": "<strong>Bez kopiowania na Androidzie:</strong> Zainstaluj raz LX jako aplikację. Następnie importuj ze stron z przepisami, Pinterest lub Facebooka przez <b>Udostępnij → LX Familie</b>.",
+      "urlLabel": "Publiczny link do przepisu",
+      "urlPlaceholder": "https://www.pinterest.de/pin/... lub strona przepisu",
+      "socialTextTitle": "Dodaj podpis z Facebooka",
+      "socialTextSummary": "Przydatne, gdy Facebook udostępnia tylko link",
+      "socialTextLabel": "Podpis lub tekst przepisu z Rolki",
+      "socialTextPlaceholder": "Wklej tytuł, składniki i sposób przygotowania z podpisu Rolki …",
+      "socialTextHint": "Tekst zostaje na Twoim serwerze LX i otwiera się jako edytowalny szkic.",
+      "submitLoading": "Odczytywanie przepisu …",
+      "submit": "Zaimportuj przepis teraz",
+      "help": "Z powodów bezpieczeństwa strony prywatne, logowania i wewnętrzne adresy sieci domowej nie są otwierane. Niektóre strony mogą technicznie blokować automatyczne pobieranie."
+    },
+    "review": {
+      "kicker": "Zaimportowany szkic",
+      "facebookKicker": "Odczytane z Facebook Reels",
+      "sharedKicker": "Udostępnione z My Recipe Box",
+      "title": "Sprawdź raz, a potem zapisz",
+      "description": "Podpisy Rolek mogą pomijać ilości, kolejność lub pojedyncze kroki. Dodaj poniżej wszystko, czego brakuje.",
+      "sharedDescription": "Inne aplikacje z przepisami udostępniają różne ilości szczegółów w zależności od wersji. Szybko sprawdź ilości i kolejność, a w razie potrzeby dodaj obraz.",
+      "notSaved": "Jeszcze nie zapisano",
+      "editorKicker": "Twój przegląd",
+      "editorTitle": "Sprawdź szkic przepisu",
+      "saveReviewed": "Zapisz sprawdzony przepis"
+    },
+    "manual": {
+      "kicker": "Twój przepis rodzinny",
+      "title": "Utwórz własny przepis",
+      "editTitle": "Edytuj przepis",
+      "dishTitleLabel": "Tytuł dania",
+      "dishTitlePlaceholder": "np. słynne bolońskie taty",
+      "prepTimeLabel": "Czas przygotowania",
+      "servingsLabel": "Porcje",
+      "imageLabel": "Adres URL obrazu (opcjonalnie)",
+      "imagePlaceholder": "https://…/obraz-przepisu.jpg",
+      "ingredientsLabel": "Składniki",
+      "addIngredient": "Dodaj składnik",
+      "ingredientPlaceholder": "np. 2 cukinie",
+      "removeIngredient": "Usuń składnik",
+      "instructionsLabel": "Kroki przygotowania",
+      "addStep": "Dodaj krok",
+      "stepPlaceholder": "Opisz jeden pełny krok przygotowania …",
+      "removeStep": "Usuń krok",
+      "saveChanges": "Zapisz zmiany",
+      "submit": "Zapisz przepis"
+    }
+  },
+  "cookingMode": {
+    "activeBadge": "Tryb gotowania aktywny",
+    "adjustPortions": "Dostosuj porcje:",
+    "timer": {
+      "title": "Minutnik kuchenny",
+      "minutesUnit": "min",
+      "start": "Start",
+      "stop": "Stop",
+      "resetTitle": "Resetuj minutnik",
+      "startedTitle": "⏱️ Uruchomiono minutnik gotowania",
+      "startedBody_one": "Minutnik uruchomiony na {{count}} minutę.",
+      "startedBody_other": "Minutnik uruchomiony na {{count}} minut(y).",
+      "finishedTitle": "⏰ Gotowanie ukończone!",
+      "finishedBody": "Minutnik gotowania dla „{{title}}” zadziałał!"
+    },
+    "ingredients": {
+      "title": "Składniki ({{count}})",
+      "addToList": "🛒 Dodaj do listy Bring!",
+      "addedTitle": "🛒 Składniki dodane",
+      "addedBody_one": "{{count}} składnik dla „{{title}}” jest na liście zakupów!",
+      "addedBody_other": "{{count}} składniki(ów) dla „{{title}}” jest na liście zakupów!"
+    },
+    "steps": {
+      "title": "Instrukcje krok po kroku",
+      "progress": "{{completed}} / {{total}} ukończono",
+      "progressAria": "Postęp przygotowania",
+      "parallelHint": "Przygotuj równolegle",
+      "stepTimer": "Minutnik · {{minutes}} min"
+    }
+  }
+}

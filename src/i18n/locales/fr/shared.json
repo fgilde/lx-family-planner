@@ -1,0 +1,62 @@
+{
+  "events": {
+    "groupChat": { "title": "Discussion familiale", "description": "Nouveaux messages dans le groupe familial" },
+    "directMessages": { "title": "Messages directs", "description": "Messages privés pour le profil correspondant" },
+    "familyMail": { "title": "Boîte aux lettres familiale", "description": "Nouvelles lettres des familles connectées" },
+    "familyChatInvites": { "title": "Invitations à la discussion", "description": "Invitations à la discussion d'une famille connectée" },
+    "events": { "title": "Calendrier & rappels", "description": "Événements nouveaux, modifiés, annulés et à venir" },
+    "taskAssigned": { "title": "Nouvelles tâches", "description": "Nouvelles missions et corvées" },
+    "taskApproval": { "title": "Valider des tâches", "description": "Signalements terminés et validations rejetées" },
+    "taskCompleted": { "title": "Tâches terminées", "description": "Tâches confirmées, étoiles et succès" },
+    "moodUpdates": { "title": "Humeurs des enfants", "description": "Nouvelles entrées dans la boussole familiale" },
+    "moodHelp": { "title": "Besoin de proximité", "description": "Alerte urgente – même pendant les heures de calme autorisées" },
+    "problemReports": { "title": "Signalements de problèmes", "description": "Nouveaux signalements et retours sur les solutions" },
+    "encouragements": { "title": "Encouragements", "description": "Petits mots gentils de la famille" },
+    "familyPolls": { "title": "Sondages", "description": "Nouvelles décisions familiales" },
+    "familyMissions": { "title": "Missions familiales", "description": "Nouvelles missions communes" },
+    "schoolItems": { "title": "École", "description": "Devoirs, cartable et contrôles" },
+    "rewards": { "title": "Récompenses", "description": "Récompenses nouvelles et échangées" },
+    "pocketMoney": { "title": "Argent de poche", "description": "Nouveaux dépôts, déductions et conversions" },
+    "familyConnections": { "title": "Réseau familial", "description": "Demandes, approbations et changements des familles connectées" }
+  },
+  "reminderLead": {
+    "atStart": "Au début",
+    "weeks_one": "{{count}} semaine avant",
+    "weeks_other": "{{count}} semaines avant",
+    "days_one": "{{count}} jour avant",
+    "days_other": "{{count}} jours avant",
+    "hours_one": "{{count}} heure avant",
+    "hours_other": "{{count}} heures avant",
+    "minutes_one": "{{count}} minute avant",
+    "minutes_other": "{{count}} minutes avant"
+  },
+  "reminderLeadShort": {
+    "atStart": "Au début",
+    "weeks_one": "{{count}} semaine",
+    "weeks_other": "{{count}} sem.",
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "hours_one": "{{count}} h",
+    "hours_other": "{{count}} h",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min"
+  },
+  "eventReminder": {
+    "fallback": "Un événement commence bientôt.",
+    "startsNow": "commence maintenant",
+    "startsInMinutes_one": "commence dans {{count}} minute",
+    "startsInMinutes_other": "commence dans {{count}} minutes",
+    "startsInHours_one": "commence dans {{count}} heure",
+    "startsInHours_other": "commence dans {{count}} heures",
+    "startsOnDate": "commence le {{date}}"
+  },
+  "trashReminder": {
+    "defaultTitle": "Collecte des déchets",
+    "tomorrowTitle": "🗑️ Demain : {{title}}",
+    "tomorrowBody": "{{title}} sera collecté demain. Veuillez le sortir à temps.",
+    "todayTitle": "🗑️ Aujourd'hui : {{title}}",
+    "todayBody": "{{title}} sera collecté aujourd'hui.",
+    "reminderTitle": "🗑️ Rappel : {{title}}",
+    "reminderBody": "Collecte {{lead}}. Veuillez le sortir à temps."
+  }
+}

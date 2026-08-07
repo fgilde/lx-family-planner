@@ -1,0 +1,32 @@
+{
+  "name": "LX Family Planner",
+  "short_name": "LX Family",
+  "description": "Un planificateur familial auto-hébergé pour calendriers, tâches ménagères, repas, courses et plus",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f1e8",
+  "theme_color": "#06513c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "share_target": {
+    "action": "/share-recipe",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  },
+  "shortcuts": [
+    {
+      "name": "Importer une recette",
+      "short_name": "Import de recette",
+      "description": "Envoyer un lien de recette directement au livre de cuisine familial",
+      "url": "/share-recipe",
+      "icons": [
+        { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ]
+}

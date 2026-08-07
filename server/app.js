@@ -207,7 +207,7 @@ const APP_SECRET =
   'lx-family-development-secret-change-me';
 const ENCRYPTION_KEY = createHash('sha256').update(APP_SECRET).digest();
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const SUPPORTED_APP_LANGUAGES = ['de', 'en'];
+const SUPPORTED_APP_LANGUAGES = ['de', 'en', 'fr', 'es', 'it', 'nl', 'pl'];
 const APP_LANGUAGE = (() => {
   const configured = String(process.env.APP_LANGUAGE || '')
     .trim()
@@ -231,7 +231,15 @@ const translate = (key, vars = {}) => {
     requestLanguageContext.getStore()?.language || APP_LANGUAGE;
   return (appTranslators[language] || appTranslators[APP_LANGUAGE])(key, vars);
 };
-const APP_LOCALE = APP_LANGUAGE === 'en' ? 'en-GB' : 'de-DE';
+const APP_LOCALE = {
+  de: 'de-DE',
+  en: 'en-GB',
+  fr: 'fr-FR',
+  es: 'es-ES',
+  it: 'it-IT',
+  nl: 'nl-NL',
+  pl: 'pl-PL'
+}[APP_LANGUAGE] || 'de-DE';
 const REGISTRATION_MODE = (() => {
   const configured = String(
     process.env.REGISTRATION_MODE || 'first-family'

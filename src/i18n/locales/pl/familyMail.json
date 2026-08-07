@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Połączone rodziny · celowo prywatne",
+    "title": "Skrzynka rodzinna",
+    "description": "Planujcie wspólnie we własnym tempie lub zaproś babcię i dziadka bezpośrednio na czat rodzinny.",
+    "writeLetter": "Napisz list"
+  },
+  "filters": {
+    "inbox": "Odebrane",
+    "sent": "Wysłane"
+  },
+  "list": {
+    "emptyTitle": "Brak listów",
+    "emptyConnected": "Spokojny początek Waszej korespondencji rodzinnej.",
+    "emptyUnconnected": "Najpierw połącz się z inną rodziną w sieci rodzinnej."
+  },
+  "reader": {
+    "sentTo": "Wysłano do {{family}}",
+    "from": "List od {{family}}",
+    "reply": "Odpowiedz",
+    "archiveLetter": "Zarchiwizuj list",
+    "privacyNote": "Tylko dorośli z obu połączonych rodzin mogą zobaczyć ten list.",
+    "placeholderTitle": "List czeka, aż go odbierzesz",
+    "placeholderText": "Bardziej osobiste niż czat, wyraźniejsze dla ustaleń i wspólnych planów."
+  },
+  "guests": {
+    "kicker": "Rozmowy rodzinne za zgodą",
+    "title": "Goście na czacie rodzinnym",
+    "description": "Profile dorosłych, jak babcia czy dziadek, widzą nowe wiadomości grupowe dopiero od momentu ich akceptacji.",
+    "connectedFamily": "Połączona rodzina",
+    "adultProfile": "Profil dorosłego",
+    "selectProfile": "Wybierz profil",
+    "sendInvitation": "Wyślij zaproszenie",
+    "status": {
+      "accepted": "Na czacie",
+      "pending": "Czeka na zgodę",
+      "revoked": "Dostęp zakończony",
+      "declined": "Odrzucono"
+    },
+    "accept": "Akceptuj",
+    "decline": "Odrzuć",
+    "endAccess": "Zakończ dostęp",
+    "empty": "Nie zaproszono jeszcze gości czatu."
+  },
+  "compose": {
+    "kicker": "Nowa poczta rodzinna",
+    "title": "Napisz list",
+    "recipientFamily": "Rodzina odbiorcy",
+    "subject": "Temat",
+    "subjectPlaceholder": "O czym chodzi?",
+    "body": "Twój list",
+    "bodyPlaceholder": "Cześć wszystkim, …",
+    "privacyNote": "Tylko przez potwierdzone połączenie rodzinne",
+    "submit": "Wyślij list"
+  }
+}

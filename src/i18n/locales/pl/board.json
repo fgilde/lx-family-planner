@@ -1,0 +1,73 @@
+{
+  "header": {
+    "title": "Tablica rodzinna",
+    "householdFamily": "Nasz dom",
+    "householdGrandparents": "Dom babci i dziadka",
+    "addNote": "Przypnij nową notatkę lub zdjęcie",
+    "intro": "Ważne notatki i zdjęcia na wirtualnej lodówce. Kliknij zdjęcie, aby zobaczyć je w pełnym rozmiarze – tył otwórz przez „Czytaj notatkę”."
+  },
+  "note": {
+    "shared": "🤝 Współdzielone z babcią i dziadkiem",
+    "viewLarge": "Zobacz w pełnym rozmiarze",
+    "readNote": "Czytaj notatkę",
+    "createdByLabel": "Utworzył(a):",
+    "fallbackAuthor": "Rodzina",
+    "today": "Dzisiaj",
+    "editedLabel": "Edytowano:",
+    "flipTitle": "Odwróć kartę",
+    "editTitle": "Edytuj notatkę",
+    "deleteTitle": "Usuń notatkę",
+    "backSideLabel": "Tył zdjęcia:",
+    "showPhoto": "Pokaż zdjęcie"
+  },
+  "lightbox": {
+    "openAria": "Zobacz zdjęcie „{{title}}” w pełnym rozmiarze",
+    "dialogAria": "Duży podgląd zdjęcia: {{title}}",
+    "closeAria": "Zamknij podgląd zdjęcia"
+  },
+  "photo": {
+    "previewAlt": "Podgląd",
+    "optimizing": "Optymalizowanie zdjęcia …",
+    "choose": "Wybierz / zrób zdjęcie",
+    "upload": "Wyślij zdjęcie",
+    "readError": "Nie udało się wczytać zdjęcia."
+  },
+  "toasts": {
+    "notImage": {
+      "title": "To nie jest plik obrazu",
+      "body": "Wybierz zdjęcie w formacie JPG, PNG lub WebP."
+    },
+    "tooLarge": {
+      "title": "Zdjęcie jest za duże",
+      "body": "Wybierz obraz o rozmiarze maksymalnie 20 MB."
+    },
+    "stillTooLarge": "Zdjęcie jest nadal za duże po optymalizacji. Wybierz inny obraz.",
+    "ready": {
+      "title": "Zdjęcie jest gotowe",
+      "body": "Obraz został automatycznie zoptymalizowany pod kątem tablicy."
+    },
+    "loadFailed": "Nie udało się wczytać zdjęcia"
+  },
+  "form": {
+    "shared": "🤝 Współdzielone (pokaż też u babci i dziadka)"
+  },
+  "addModal": {
+    "title": "Przypnij nową notatkę / zdjęcie",
+    "titlePlaceholder": "np. niedzielny spacer, hasło Wi-Fi...",
+    "contentLabel": "Treść (tekst notatki)",
+    "contentPlaceholder": "Wpisz tutaj swoją przypominajkę lub tekst do zdjęcia...",
+    "photoLabel": "Opcjonalnie przypnij zdjęcie (efekt Polaroid)",
+    "autoResizeHint": "Duże zdjęcia z telefonu są automatycznie pomniejszane przed zapisaniem.",
+    "colorLabel": "Wybierz kolor notatki",
+    "pinning": "Przypinanie …",
+    "submit": "Przypnij notatkę"
+  },
+  "editModal": {
+    "title": "Edytuj notatkę",
+    "contentLabel": "Treść",
+    "photoLabel": "Edytuj / zastąp zdjęcie",
+    "optimizeHint": "Zdjęcie jest automatycznie optymalizowane do szybkiego wyświetlania.",
+    "colorLabel": "Wybierz kolor",
+    "submit": "Zapisz zmiany"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "hero": {
+    "kicker": "Familles connectées · délibérément privées",
+    "title": "Boîte aux lettres familiale",
+    "description": "Planifiez ensemble à votre rythme, ou invitez mamie et papi directement dans votre discussion familiale.",
+    "writeLetter": "Écrire une lettre"
+  },
+  "filters": {
+    "inbox": "Boîte de réception",
+    "sent": "Envoyées"
+  },
+  "list": {
+    "emptyTitle": "Pas encore de lettres",
+    "emptyConnected": "Un début tranquille pour votre correspondance familiale.",
+    "emptyUnconnected": "Connectez-vous d'abord avec une autre famille dans le réseau familial."
+  },
+  "reader": {
+    "sentTo": "Envoyée à {{family}}",
+    "from": "Lettre de {{family}}",
+    "reply": "Répondre",
+    "archiveLetter": "Archiver la lettre",
+    "privacyNote": "Seuls les adultes des deux familles connectées peuvent voir cette lettre.",
+    "placeholderTitle": "Une lettre vous attend pour être relevée",
+    "placeholderText": "Plus personnel que la discussion, plus clair pour les arrangements et les plans communs."
+  },
+  "guests": {
+    "kicker": "Paroles de famille avec consentement",
+    "title": "Invités dans la discussion familiale",
+    "description": "Les profils adultes comme mamie ou papi ne voient les nouveaux messages de groupe qu'à partir du moment où ils acceptent.",
+    "connectedFamily": "Famille connectée",
+    "adultProfile": "Profil adulte",
+    "selectProfile": "Sélectionner un profil",
+    "sendInvitation": "Envoyer l'invitation",
+    "status": {
+      "accepted": "Dans la discussion",
+      "pending": "En attente de consentement",
+      "revoked": "Accès terminé",
+      "declined": "Refusé"
+    },
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "endAccess": "Terminer l'accès",
+    "empty": "Aucun invité de discussion pour le moment."
+  },
+  "compose": {
+    "kicker": "Nouveau courrier familial",
+    "title": "Écrire une lettre",
+    "recipientFamily": "Famille destinataire",
+    "subject": "Sujet",
+    "subjectPlaceholder": "De quoi s'agit-il ?",
+    "body": "Votre lettre",
+    "bodyPlaceholder": "Bonjour à tous,…",
+    "privacyNote": "Uniquement via la connexion familiale confirmée",
+    "submit": "Poster la lettre"
+  }
+}

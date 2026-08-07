@@ -1,0 +1,211 @@
+{
+  "sections": {
+    "today": "Widok tygodnia",
+    "routines": "Rutyny",
+    "money": "Kieszonkowe",
+    "school": "Szkoła",
+    "polls": "Głosowanie",
+    "safety": "Bezpiecznie i spokojnie"
+  },
+  "hero": {
+    "kicker": "Twoja codzienność, jeden świetny zespół",
+    "title": "Rodzinna podróż",
+    "intro": "Rutyny, szkoła, kieszonkowe i decyzje spotykają się tutaj – proste do zrozumienia dla dzieci, niezawodne dla rodziców.",
+    "viewFor": "Podgląd dla",
+    "yourJourney": "Twoja podróż",
+    "navAria": "Sekcje rodzinnej podróży"
+  },
+  "adultsOnly": "Tylko dla dorosłych",
+  "weekly": {
+    "kicker": "Ostatnie siedem dni",
+    "title": "Tak wyglądał tydzień {{name}}",
+    "metrics": {
+      "missions": "Misje",
+      "routineDays": "Dni rutyny",
+      "polls": "Głosowania",
+      "stars": "Gwiazdki"
+    },
+    "strongWeek": "To był naprawdę mocny tydzień!",
+    "everyStepCounts": "Każdy mały krok się liczy.",
+    "nextEvent": "Następnie „{{title}}” na Ciebie czeka.",
+    "spontaneousMoment": "Następna rodzinna chwila może zdarzyć się spontanicznie."
+  },
+  "achievements": {
+    "kicker": "Szuflada z trofeami",
+    "title": "Odznaki",
+    "firstStep": "Pierwszy krok",
+    "routinePro": "Mistrz rutyny",
+    "starCollector": "Kolekcjoner gwiazdek",
+    "teamSpirit": "Duch zespołu",
+    "collected": "Zebrane",
+    "stillSecret": "Wciąż tajemnica"
+  },
+  "missions": {
+    "kicker": "Razem, nie samemu",
+    "title": "Misje rodzinne",
+    "progress": "{{completed}} z {{total}} ukończonych",
+    "empty": "Brak wspólnej misji.",
+    "creatorTitle": "Nowa misja rodzinna",
+    "titlePlaceholder": "Na przykład: Wspólnie uratujcie ogród",
+    "descriptionPlaceholder": "Co zrobicie razem?",
+    "start": "Rozpocznij misję"
+  },
+  "encouragement": {
+    "kicker": "Małe słowa, wielki wpływ",
+    "title": "Słowa wsparcia",
+    "quote": "„{{message}}”",
+    "fromFamily": "Twoja rodzina",
+    "empty": "Wkrótce poczeka tu miłe wsparcie.",
+    "messagePlaceholder": "Co chciałbyś przekazać {{name}}?",
+    "send": "Wyślij"
+  },
+  "routines": {
+    "kicker": "Krok po kroku",
+    "title": "Rutyny {{name}}",
+    "timeOfDay": {
+      "morning": "Poranki",
+      "afternoon": "Popołudnia",
+      "evening": "Wieczory"
+    },
+    "streak_one": "🔥 {{count}} dzień z rzędu",
+    "streak_other": "🔥 {{count}} dni z rzędu",
+    "deleteAria": "Usuń rutynę",
+    "emptyTitle": "Brak rutyny",
+    "emptyText": "Dobra rutyna zdejmuję stres z poranków i wieczorów.",
+    "workshop": {
+      "kicker": "Warsztat rutyn",
+      "title": "Utwórz rutynę",
+      "namePlaceholder": "Nazwa rutyny",
+      "stepsLabel": "Jeden krok w linii",
+      "save": "Zapisz rutynę"
+    },
+    "defaults": {
+      "title": "Poranny start",
+      "steps": "Wstać\nUbrać się\nUmyć zęby\nSprawdzić plecak"
+    }
+  },
+  "money": {
+    "kicker": "Konto rodzinne",
+    "title": "Kieszonkowe {{name}}",
+    "balanceLabel": "Aktualne saldo",
+    "starsAvailable": "Dostępne {{count}} ⭐",
+    "starCost_one": "{{count}} gwiazdka",
+    "starCost_other": "{{count}} gwiazdek",
+    "emptyLedger": "Książka kieszonkowego jest jeszcze pusta.",
+    "goals": {
+      "kicker": "Życzenia stają się widoczne",
+      "title": "Cele oszczędzania",
+      "progress": "{{current}} z {{target}}",
+      "deleteAria": "Usuń cel oszczędzania",
+      "empty": "Brak życzeń, na które warto oszczędzać.",
+      "creatorTitle": "Dodaj cel oszczędzania",
+      "titlePlaceholder": "Na co oszczędzasz?",
+      "amountAria": "Kwota docelowa w euro",
+      "create": "Utwórz cel"
+    },
+    "booking": {
+      "title": "Zaksięguj kieszonkowe",
+      "amountLabel": "Kwota w euro – ujemna dla wydatku",
+      "noteLabel": "Notatka księgowania",
+      "starsLabel": "Wymień za to gwiazdki (opcjonalnie)",
+      "submit": "Zaksięguj bezpiecznie",
+      "defaultNote": "Kieszonkowe"
+    }
+  },
+  "school": {
+    "kicker": "Wszystko na dzień szkolny",
+    "title": "Sekcja szkolna {{name}}",
+    "settings": {
+      "enabled": "Plan lekcji włączony",
+      "disabled": "Plan lekcji wyłączony",
+      "disabledTitle": "Sekcja szkolna jest wyłączona dla tego dziecka",
+      "disabledHint": "Włącz ją tylko dla dzieci w wieku szkolnym. Rodzice będą mogli ją edytować, a dziecko zobaczy własny plan lekcji.",
+      "enable": "Włącz sekcję szkolną"
+    },
+    "timetable": {
+      "period": "Lekcja {{count}}",
+      "free": "Wolne",
+      "cancelled": "Odwołane w tym tygodniu",
+      "cancellationDate": "Data jednorazowego odwołania lekcji",
+      "cancelOnce": "Odwołaj raz",
+      "restore": "Przywróć lekcję"
+    },
+    "kinds": {
+      "lesson": "Plan lekcji",
+      "homework": "Praca domowa",
+      "exam": "Sprawdzian",
+      "bag": "Sprawdzenie plecaka"
+    },
+    "deleteAria": "Usuń wpis szkolny",
+    "emptyKind": "Nic jeszcze nie wpisano.",
+    "form": {
+      "kicker": "Wpisz raz, zachowaj spokój",
+      "title": "Utwórz wpis szkolny",
+      "subjectPlaceholder": "Przedmiot",
+      "titlePlaceholder": "Co nadchodzi?",
+      "weekday": "Dzień tygodnia",
+      "period": "Lekcja",
+      "startsAt": "Zaczyna się o",
+      "endsAt": "Kończy się o",
+      "roomPlaceholder": "Sala (opcjonalnie)",
+      "teacherPlaceholder": "Nauczyciel (opcjonalnie)",
+      "detailsPlaceholder": "Książka, materiały lub krótka notatka",
+      "submit": "Dodaj wpis"
+    }
+  },
+  "polls": {
+    "kicker": "Każdy głos się liczy",
+    "title": "Głosowania rodzinne",
+    "votes_one": "{{count}} głos",
+    "votes_other": "{{count}} głosy(ów)",
+    "deleteAria": "Usuń głosowanie",
+    "emptyTitle": "Brak głosowania",
+    "emptyText": "Następne pytanie o jedzenie lub wycieczkę należy do całej rodziny.",
+    "form": {
+      "kicker": "Szybka decyzja",
+      "title": "Zadaj nowe pytanie",
+      "questionPlaceholder": "Co chciałbyś wspólnie zdecydować?",
+      "optionsLabel": "Jedna odpowiedź w linii – emoji są dozwolone",
+      "closesLabel": "Głosowanie opcjonalnie kończy się",
+      "submit": "Rozpocznij głosowanie",
+      "defaultOptions": "🍕 Pizza\n🍝 Makaron\n🥞 Naleśniki"
+    }
+  },
+  "safety": {
+    "emergency": {
+      "kicker": "Na wszelki wypadek",
+      "fallbackTitle": "Karta ratunkowa",
+      "defaultTitle": "Ważna pomoc dla naszej rodziny",
+      "empty": "Rodzice mogą tu zapisać bezpieczne kontakty ratunkowe."
+    },
+    "quiet": {
+      "kicker": "Chroniony czas dla rodziny",
+      "title": "Cisza i czas multimediów",
+      "notifications": "Cisza powiadomień",
+      "range": "{{start}} do {{end}}",
+      "notActive": "Nie włączone",
+      "mediaLounge": "Strefa multimedialna",
+      "alwaysVisible": "Zawsze widoczne",
+      "explanation": "Pilne alerty „Potrzebuję przytulenia” mogą wciąż docierać w czasie ciszy, jeśli tego chcesz. Zwykłe wiadomości pozostają w skrzynce rodzinnej."
+    },
+    "editor": {
+      "title": "Edytuj reguły ochrony",
+      "quietSwitch": "Cisza powiadomień",
+      "quietSwitchHint": "Wstrzymaj zwykłe powiadomienia push.",
+      "startLabel": "Początek",
+      "endLabel": "Koniec",
+      "urgentSwitch": "Przepuść pilne wezwania o pomoc",
+      "urgentSwitchHint": "„Potrzebuję przytulenia” pozostaje osiągalne.",
+      "mediaSwitch": "Używaj godzin multimediów",
+      "mediaSwitchHint": "Pokazuj YouTube i Spotify tylko w oknie czasowym.",
+      "mediaFromLabel": "Multimedia od",
+      "mediaToLabel": "Multimedia do",
+      "emergencyTitleLabel": "Tytuł karty ratunkowej",
+      "contactsLabel": "Kontakty – imię i nazwisko | numer telefonu | notatka",
+      "contactsPlaceholder": "Pediatra | 0123 456789 | Przynieść książeczkę szczepień\nBabcia | 0987 654321 | Może odebrać",
+      "notesLabel": "Ważne notatki",
+      "notesPlaceholder": "Alergie, leki lub ważne uwagi",
+      "save": "Zapisz reguły ochrony"
+    }
+  }
+}

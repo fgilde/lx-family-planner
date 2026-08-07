@@ -1,0 +1,197 @@
+{
+  "kitchen": {
+    "widgets": {
+      "calendar": {
+        "label": "Dzisiaj",
+        "description": "Wszystkie dzisiejsze wydarzenia"
+      },
+      "meals": {
+        "label": "Posiłki",
+        "description": "Dzisiejszy plan posiłków"
+      },
+      "tasks": {
+        "label": "Zadania",
+        "description": "Otwarte zadania i zatwierdzenia"
+      },
+      "shopping": {
+        "label": "Zakupy",
+        "description": "Pozycje wciąż potrzebne"
+      },
+      "chat": {
+        "label": "Czat rodzinny",
+        "description": "Najnowsze wiadomości rodzinne"
+      },
+      "board": {
+        "label": "Tablica",
+        "description": "Bieżące notatki rodzinne"
+      },
+      "trash": {
+        "label": "Odbiór śmieci",
+        "description": "Najbliższy termin odbioru"
+      },
+      "family": {
+        "label": "Rodzina",
+        "description": "Profile i gwiazdki w skrócie"
+      },
+      "homeAssistant": {
+        "label": "Sterowanie domem",
+        "description": "Urządzenia, czujniki i sceny jako duże kafelki na tablecie"
+      }
+    },
+    "household": {
+      "omaOpa": "Babcia i dziadek",
+      "default": "Nasz dom"
+    },
+    "live": "Na żywo",
+    "allInView": "Wszystko w jednym rzucie oka.",
+    "signedInAs": "Zalogowano jako {{name}}",
+    "quickActions": {
+      "event": "Wydarzenie",
+      "shopping": "Zakupy",
+      "standardView": "Widok standardowy",
+      "tiles": "Kafelki"
+    },
+    "completeTask": {
+      "kicker": "Odznacz zadanie",
+      "title": "Kto ukończył to zadanie?",
+      "select": "To byłem ja",
+      "cancel": "Jeszcze nie"
+    },
+    "cards": {
+      "calendar": {
+        "title": "Dzisiaj",
+        "count_one": "{{count}} wydarzenie",
+        "count_other": "{{count}} wydarzenia(ów)",
+        "allDay": "cały dzień",
+        "familyFallback": "Rodzina",
+        "empty": "Na dziś jeszcze nic niezaplanowane."
+      },
+      "meals": {
+        "title": "Posiłki",
+        "empty": "Brak zaplanowanych posiłków."
+      },
+      "tasks": {
+        "title": "Zadania",
+        "count_one": "{{count}} otwarte",
+        "count_other": "{{count}} otwartych",
+        "pendingApproval": "Czeka na przegląd",
+        "shared": "Zadanie współdzielone",
+        "empty": "Wszystkie zadania są wykonane."
+      },
+      "shopping": {
+        "title": "Zakupy",
+        "count_one": "{{count}} pozycja",
+        "count_other": "{{count}} pozycji",
+        "empty": "Wszystko kupione."
+      },
+      "chat": {
+        "title": "Czat rodzinny",
+        "count_one": "{{count}} wiadomość",
+        "count_other": "{{count}} wiadomości",
+        "photo": "📷 Zdjęcie",
+        "newMessage": "Nowa wiadomość",
+        "senderFallback": "Rodzina",
+        "empty": "Brak wiadomości."
+      },
+      "board": {
+        "title": "Tablica",
+        "count_one": "{{count}} notatka",
+        "count_other": "{{count}} notatek",
+        "empty": "Tablica jest pusta."
+      },
+      "trash": {
+        "title": "Następny odbiór",
+        "noDate": "Brak daty",
+        "empty": "Brak zaplanowanych odbiorów śmieci."
+      },
+      "family": {
+        "title": "Rodzina",
+        "count_one": "{{count}} profil",
+        "count_other": "{{count}} profile(ów)"
+      }
+    }
+  },
+  "pet": {
+    "noDateAppointment": "Wizyta bez daty",
+    "appointmentWithTime": "{{day}} · {{time}}",
+    "petFallbackName": "Futrzasty przyjaciel",
+    "petAlt": "Zwierzątko",
+    "kicker": "Profil zwierzątka · Rodzinny pupil",
+    "heroTitle": "Wszystko dla {{name}} w jednym rzucie oka",
+    "heroText": "Wizyty, opieka i karmienie w jednym spokojnym miejscu – bez czatu, gwiazdek ani zbędnych menu.",
+    "caredFor": "Pod opieką",
+    "openCareItems": "otwartych pozycji opieki",
+    "overviewAria": "Przegląd łap",
+    "nextAppointment": "Następna wizyta",
+    "nothingPlanned": "Nic niezaplanowane",
+    "calendarFree": "Kalendarz jest wolny.",
+    "care": "Opieka",
+    "careOpen_one": "{{count}} otwarta pozycja",
+    "careOpen_other": "{{count}} otwartych pozycji",
+    "allDone": "Wszystko zrobione",
+    "managedByAdults": "Zajmują się tym dorośli.",
+    "petMode": "Tryb zwierzątka",
+    "calmProtected": "Spokój i ochrona",
+    "noChatNoAccount": "Bez czatu i funkcji konta.",
+    "carePlan": "Plan opieki",
+    "whatsUpFor": "Co nadchodzi dla {{name}}",
+    "familyTakesCare": "Rodzina się tym zajmuje",
+    "careCategoryFallback": "Opieka i karmienie",
+    "openLabel": "otwarte",
+    "allCaredFor": "Wszystko zaopiekowane",
+    "noCareItems": "Dla {{name}} nie ma teraz otwartych pozycji opieki.",
+    "appointmentsHealth": "Wizyty i zdrowie",
+    "pawCalendar": "Kalendarz łap",
+    "calendar": "Kalendarz",
+    "noDateShort": "otwarte",
+    "noAppointments": "Brak zaplanowanych wizyt",
+    "pawCalendarFree": "Kalendarz łap jest teraz zupełnie wolny.",
+    "importantNotes": "Ważne notatki",
+    "noteFallback": "Notatka"
+  },
+  "homeAssistant": {
+    "states": {
+      "on": "Włączone",
+      "off": "Wyłączone",
+      "open": "Otwarte",
+      "closed": "Zamknięte",
+      "opening": "Otwieranie …",
+      "closing": "Zamykanie …",
+      "home": "W domu",
+      "notHome": "Poza domem",
+      "unavailable": "Niedostępne",
+      "unknown": "Nieznany",
+      "clear": "Pogodnie",
+      "cloudy": "Pochmurnie",
+      "rainy": "Deszcz"
+    },
+    "defaultTitle": "Nasz dom",
+    "subtitle": "Home Assistant · na żywo",
+    "refreshAria": "Odśwież status domu",
+    "emptyTitle": "Brak kafelków domu",
+    "emptyHint": "Profil rodzica może udostępnić urządzenia i czujniki w centrum rodzica.",
+    "openCover": "Otwórz",
+    "closeCover": "Zamknij",
+    "adultsOnlyConfirm": "Tylko dla dorosłych, z potwierdzeniem",
+    "control": "Sterowanie"
+  },
+  "familyCloud": {
+    "title": "Archiwum rodzinne",
+    "openAria": "Otwórz archiwum rodzinne",
+    "open": "Otwórz",
+    "preparing": "Archiwum jest przygotowywane",
+    "checkConnection": "Możesz sprawdzić połączenie w centrum rodzica.",
+    "toParentCenter": "Do centrum rodzica",
+    "sharedStorage": "Wspólna pamięć",
+    "loading": "Wczytywanie",
+    "ofTotal": "z {{size}}",
+    "safeForFamily": "bezpieczne dla Twojej rodziny",
+    "openingArchive": "Otwieranie archiwum …",
+    "noFiles": "Brak plików – jest tu miejsce na Twoje wspomnienia.",
+    "upload": "Wyślij do chmury",
+    "toast": {
+      "fileTooBigTitle": "Plik jest za duży",
+      "fileTooBigMessage": "{{name}} jest większy niż 100 MB."
+    }
+  }
+}

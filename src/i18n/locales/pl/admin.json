@@ -1,0 +1,339 @@
+{
+  "parentAdmin": {
+    "accessDenied": {
+      "title": "Strefa rodziców",
+      "description": "Ta strefa jest widoczna tylko dla dorosłych członków rodziny."
+    },
+    "toasts": {
+      "profileUpdatedTitle": "Profil dziecka zaktualizowany",
+      "profileUpdatedBody": "Ustawienia profilu {{name}} zostały zapisane."
+    },
+    "hero": {
+      "kicker": "Tylko dla dorosłych",
+      "title": "Centrum rodzica",
+      "description": "Zarządzaj profilami, zadaniami i panelami dzieci w jednym spokojnym miejscu – bez przełączania się między wieloma sekcjami."
+    },
+    "overview": {
+      "childProfiles": "Profile dzieci",
+      "openTasks": "Otwarte zadania",
+      "totalStars": "Wszystkie gwiazdki",
+      "managedProfiles": "Zarządzane profile"
+    },
+    "modules": {
+      "kicker": "Mniej chaosu",
+      "title": "Sekcje rodziny",
+      "intro": "Wyłącz funkcje, których Twoja rodzina nie używa. Znikną one dla każdego profilu i w każdej chwili można je tu ponownie włączyć.",
+      "visible": "Widoczne",
+      "hidden": "Ukryte",
+      "profileHint": "Aby dostosować jedną osobę, edytuj ten profil i wybierz widoczne sekcje.",
+      "labels": {
+        "chat": "Czat",
+        "calendar": "Kalendarz",
+        "trash": "Kalendarz śmieci",
+        "shopping": "Zakupy",
+        "meals": "Plan posiłków",
+        "tasks": "Zadania",
+        "family-life": "Życie rodziny",
+        "board": "Tablica",
+        "cloud": "Chmurka rodzinna",
+        "mail": "Poczta rodzinna"
+      }
+    },
+    "managed": {
+      "kicker": "Bez własnego loginu",
+      "title": "Zarządzane profile",
+      "create": "Utwórz profil",
+      "intro": "Dla babci, dziadka lub osób pod Twoją opieką: pojawiają się w wydarzeniach i zadaniach, ale nie przy logowaniu ani na czacie.",
+      "positionWithoutLogin": "{{position}} · bez loginu",
+      "plannable": "Do planowania",
+      "emptyTitle": "Nikt jeszcze nie dodany",
+      "emptyHint": "Wybierz „Tylko zarządzane przez nas” podczas tworzenia profilu."
+    },
+    "children": {
+      "kicker": "Dzieci i nastolatki",
+      "title": "Zarządzaj profilami",
+      "add": "Dodaj profil",
+      "selectedProfile": "Wybrany profil",
+      "positionLabel": "Stanowisko",
+      "pinLabel": "Nowy PIN profilu (opcjonalnie)",
+      "pinPlaceholder": "Zostaw puste, aby nie zmieniać",
+      "saving": "Zapisywanie …",
+      "save": "Zapisz profil",
+      "emptyTitle": "Brak profilu dziecka",
+      "emptyDescription": "Najpierw utwórz profil jako dziecko lub nastolatka.",
+      "emptyCta": "Utwórz profil dziecka"
+    },
+    "tasks": {
+      "kicker": "Sprzątanie",
+      "title": "Uporządkuj listę zadań",
+      "openCount": "{{count}} otwartych",
+      "doneCount": "{{count}} ukończonych",
+      "filterLabel": "Tylko zadania od",
+      "allMembers": "Wszyscy członkowie rodziny",
+      "deleteCompleted": "Usuń ukończone",
+      "deleteCompletedConfirm": "Naprawdę usunąć ukończone zadania?",
+      "clearAll": "Opróżnij listę zadań",
+      "clearAllConfirm": "Naprawdę usunąć wszystko?"
+    },
+    "points": {
+      "kicker": "Konta gwiazdek",
+      "title": "Punkty nagród",
+      "intro": "Resetuj punkty dzieci i dorosłych osobno. Zwierzęta nie zbierają punktów nagród.",
+      "resetConfirm": "Naprawdę wyzerować?"
+    },
+    "media": {
+      "kicker": "Panel dziecka",
+      "title": "Strefa multimedialna",
+      "intro": "Dodawaj zatwierdzone kanały YouTube i playlisty Spotify jako duże, przyjazne dzieciom kafelki. Widoczne jest tylko to, co tu zatwierdzisz.",
+      "chooseChild": "Wybierz profil dziecka",
+      "kindAriaLabel": "Typ mediów",
+      "titlePlaceholder": "np. Ulica Sezamkowa",
+      "share": "Zatwierdź kafelek",
+      "linkMeta": "{{kind}} · na pulpicie {{name}}",
+      "childProfileFallback": "Profil dziecka",
+      "removeLink": "Usuń {{title}}",
+      "empty": "Brak zatwierdzonych kafelków multimedialnych."
+    },
+    "family": {
+      "kicker": "Sieć rodzinna",
+      "title": "Powiązane konta rodzinne",
+      "confirmedConnections_one": "{{count}} potwierdzone połączenie",
+      "confirmedConnections_other": "{{count}} potwierdzonych połączeń",
+      "pendingRequests_one": "{{count}} oczekująca prośba",
+      "pendingRequests_other": "{{count}} oczekujących próśb",
+      "openTree": "Otwórz drzewo genealogiczne"
+    }
+  },
+  "homeAssistant": {
+    "kicker": "Inteligentny dom · lokalnie i chronione",
+    "connected": "Połączono",
+    "notConnected": "Nie połączono",
+    "intro": "Wprowadza wybrane stany domu do planera rodzinnego jako prawdziwe kafelki. Token dostępu pozostaje zaszyfrowany na Twoim serwerze.",
+    "domains": {
+      "binary_sensor": "Stan",
+      "button": "Przycisk",
+      "climate": "Klimat",
+      "cover": "Rolety",
+      "device_tracker": "Obecność",
+      "fan": "Wentylator",
+      "input_boolean": "Przełącznik",
+      "light": "Światło",
+      "media_player": "Multimedia",
+      "person": "Osoba",
+      "scene": "Scena",
+      "script": "Skrypt",
+      "sensor": "Czujnik",
+      "sun": "Słońce",
+      "switch": "Przełącznik",
+      "vacuum": "Odkurzacz",
+      "weather": "Pogoda"
+    },
+    "connect": {
+      "addressLabel": "Adres Home Assistant",
+      "addressHint": "W przypadku Dockera najbardziej niezawodne jest użycie stałego adresu IP w sieci domowej.",
+      "tokenLabel": "Długoterminowy token dostępu",
+      "tokenPlaceholder": "Token z Twojego profilu Home Assistant",
+      "tokenHint": "Token nie jest już widoczny po zapisaniu.",
+      "submit": "Sprawdź połączenie"
+    },
+    "summary": {
+      "tilesShared_one": "{{count}} kafelek udostępniony na pulpicie",
+      "tilesShared_other": "{{count}} kafelków udostępnionych na pulpicie",
+      "active": "Aktywne"
+    },
+    "toolbar": {
+      "loadDevices": "Wczytaj urządzenia",
+      "testConnection": "Testuj połączenie",
+      "searchPlaceholder": "Szukaj urządzenia lub czujnika"
+    },
+    "callout": {
+      "title": "Wybierz kafelki pulpitu",
+      "description": "Wczytaj urządzenia i zdecyduj dokładnie, co może być widoczne i sterowane."
+    },
+    "entity": {
+      "allowControl": "Zezwól na sterowanie",
+      "visibleFor": "Również widoczne dla:"
+    },
+    "noMatches": "Brak pasujących urządzeń.",
+    "saveBar": {
+      "selectedCount": "Wybrano {{count}}",
+      "hint": "Dorośli widzą wszystko, dzieci tylko to, co zostało im udostępnione.",
+      "save": "Zapisz wybór"
+    },
+    "manage": {
+      "summary": "Zarządzaj połączeniem",
+      "newTokenPlaceholder": "Nowy token dostępu",
+      "renew": "Odnów połączenie",
+      "disconnectConfirm": "Naprawdę rozłączyć?",
+      "disconnect": "Rozłącz"
+    }
+  },
+  "webPush": {
+    "kickerNative": "Bezpośrednio z Androida",
+    "kickerWeb": "Bez dodatkowej aplikacji",
+    "titleNative": "Powiadomienia z aplikacji na Androida",
+    "titleWeb": "Powiadomienia w przeglądarce",
+    "introNative": "Aplikacja LX rejestruje to urządzenie z Androidem raz dla danego profilu. Potem powiadomienia docierają nawet, gdy aplikacja jest zamknięta.",
+    "introWeb": "Każdy telefon lub tablet rejestruje się raz dla profilu rodzinnego. Klucze i szczegóły techniczne pozostają niewidoczne.",
+    "deviceConnected": "To urządzenie jest aktywne",
+    "activationSteps": {
+      "server": "Sprawdzanie serwera …",
+      "android": "Przygotowywanie Androida …",
+      "channels": "Konfigurowanie powiadomień …",
+      "permission": "Sprawdzanie uprawnień …",
+      "permission-request": "Potwierdź pytanie Androida …",
+      "firebase": "Rejestrowanie urządzenia w Firebase …",
+      "save": "Zapisywanie urządzenia …"
+    },
+    "serverMissing": {
+      "title": "Połączenie Firebase wciąż brakuje",
+      "description": "Serwer LX nie ma jeszcze prywatnego klucza usługi Firebase. Dlatego obecnie nie może docierać do Androida.",
+      "hint": "Umieść klucz usługi tylko w folderze danych serwera, a następnie zainstaluj aplikację LX zbudowaną z tym samym projektem Firebase. Klucz nigdy nie powinien trafić do repozytorium Git."
+    },
+    "checking": {
+      "title": "Sprawdzanie połączenia z Androidem",
+      "description": "LX pobiera aktualny status Firebase z serwera rodzinnego."
+    },
+    "statusError": {
+      "title": "Nie udało się sprawdzić statusu",
+      "fallback": "Aplikacja nie otrzymała jeszcze odpowiedzi od serwera rodzinnego.",
+      "retry": "Sprawdź ponownie"
+    },
+    "unavailable": {
+      "titleSecureContext": "Brak HTTPS – dlatego powiadomienia w tle nie działają",
+      "titleGeneric": "Jeszcze jeden krok bezpieczeństwa",
+      "hintNative": "Zainstaluj najnowszą aplikację LX na Androida, aby korzystać z natywnych powiadomień.",
+      "hintWeb": "Otwórz planer przez zaufany adres HTTPS, dodaj go do ekranu głównego Androida, a następnie aktywuj to urządzenie."
+    },
+    "denied": {
+      "title": "Wyłączone w przeglądarce",
+      "bodyNative": "Zezwól na powiadomienia w Android → Aplikacje → LX Family Planner → Powiadomienia.",
+      "bodyWeb": "Zezwól na powiadomienia w ustawieniach strony w przeglądarce, a następnie otwórz ponownie planer."
+    },
+    "ready": {
+      "title": "Zarejestruj to urządzenie dla {{name}}",
+      "hintNative": "Jedno dotknięcie – pytanie Androida pojawi się tylko raz.",
+      "hintWeb": "Jedno kliknięcie – bez tokenu i bez dodatkowej aplikacji.",
+      "connecting": "Łączenie …",
+      "enable": "Włącz powiadomienia"
+    },
+    "activationError": "Połączenie nie zostało ukończone",
+    "connectedNote": {
+      "title": "Gotowe na powiadomienia w tle",
+      "bodyNative": "Android pokazuje powiadomienia rodzinne w zasobniku systemowym, a jeśli chcesz, także na ekranie blokady – nawet gdy LX jest zamknięte.",
+      "bodyWeb": "Aby zapewnić najbardziej niezawodne doręczanie na Androidzie, zainstaluj planer przez „Dodaj do ekranu głównego” i zezwól na powiadomienia w ustawieniach aplikacji Android."
+    },
+    "preview": {
+      "title": "Pokazuj szczegóły na ekranie blokady",
+      "hint": "Gdy wyłączone, czaty, zadania i wydarzenia pozostają prywatne."
+    },
+    "actions": {
+      "saving": "Zapisywanie …",
+      "save": "Zapisz wybór",
+      "sending": "Wysyłanie …",
+      "sendTest": "Wyślij test",
+      "disable": "Wyłącz dla tego profilu"
+    },
+    "devices": {
+      "title": "Urządzenia rodzinne",
+      "registeredCount": "Zarejestrowano {{count}}",
+      "transportAndroid": "Aplikacja na Androida",
+      "transportBrowser": "Przeglądarka",
+      "meta": "{{transport}} · {{member}} · ostatnia aktualizacja {{date}}",
+      "removeDevice": "Usuń {{name}}",
+      "empty": "Brak zarejestrowanych urządzeń rodzinnych."
+    }
+  },
+  "gotify": {
+    "kicker": "Powiadomienia push",
+    "title": "Powiadomienia Gotify",
+    "intro": "Ważne chwile rodzinne docierają do Ciebie nawet wtedy, gdy planer nie jest otwarty.",
+    "connected": "Połączono",
+    "serverFallback": "Serwer Gotify",
+    "security": {
+      "title": "Bezpieczna konfiguracja",
+      "body": "Hasło jest używane tylko raz, aby utworzyć dedykowaną aplikację Gotify, i nie jest przechowywane."
+    },
+    "form": {
+      "serverLabel": "Serwer Gotify",
+      "usernameLabel": "Nazwa użytkownika",
+      "passwordLabel": "Hasło",
+      "plannerUrlLabel": "Adres planera w Twoim telefonie",
+      "connecting": "Łączenie …",
+      "connect": "Połącz i przetestuj"
+    },
+    "status": {
+      "channel": "Kanał wiadomości",
+      "openGotify": "Otwórz Gotify"
+    },
+    "includeText": {
+      "title": "Pokazuj tekst wiadomości na ekranie blokady",
+      "hint": "Domyślnie wyłączone ze względów prywatności."
+    },
+    "phoneUrlLabel": "Otwórz ten adres planera po kliknięciu",
+    "actions": {
+      "saving": "Zapisywanie …",
+      "saveRules": "Zapisz reguły",
+      "sending": "Wysyłanie …",
+      "sendTest": "Wyślij test",
+      "disconnectConfirm": "Naprawdę rozłączyć?",
+      "disconnect": "Rozłącz"
+    }
+  },
+  "ntfy": {
+    "kicker": "Otwarty kanał push",
+    "title": "Powiadomienia ntfy",
+    "intro": "Wysyła te same wybrane wydarzenia rodzinne do tematu ntfy – na własnym serwerze lub przez ntfy.sh.",
+    "connected": "Połączono",
+    "security": {
+      "title": "Traktuj temat jak hasło",
+      "body": "Użyj nazwy tematu trudnej do odgadnięcia. Opcjonalny token dostępu jest przechowywany w zaszyfrowanej formie."
+    },
+    "server": "Serwer ntfy",
+    "topic": "Temat",
+    "token": "Token dostępu (opcjonalnie)",
+    "tokenPlaceholder": "tk_... dla chronionych tematów",
+    "plannerUrl": "Otwórz ten adres planera po kliknięciu",
+    "connect": "Połącz i przetestuj",
+    "connecting": "Łączenie …",
+    "open": "Otwórz ntfy",
+    "includeText": "Pokazuj tekst wiadomości w powiadomieniu",
+    "includeTextHint": "Domyślnie wyłączone ze względów prywatności.",
+    "save": "Zapisz reguły",
+    "test": "Wyślij test",
+    "disconnect": "Rozłącz",
+    "disconnectConfirm": "Naprawdę rozłączyć?"
+  },
+  "problemReports": {
+    "kicker": "Opinie z aplikacji",
+    "title": "Zgłoszenia problemów",
+    "intro": "Zgłoszenia pozostają na Twoim serwerze. Przyciskiem „Kopiuj” można je przekazać w pełni i bez danych logowania.",
+    "loading": "Wczytywanie zgłoszeń …",
+    "categories": {
+      "problem": "Problem",
+      "content": "Treść",
+      "idea": "Pomysł",
+      "fallback": "Zgłoszenie"
+    },
+    "copy": {
+      "profileLine": "Profil: {{value}}",
+      "areaLine": "Sekcja: {{value}}",
+      "versionLine": "Wersja: {{value}}",
+      "deviceLine": "Urządzenie: {{value}}",
+      "successTitle": "Zgłoszenie skopiowane",
+      "successBody": "Możesz teraz wkleić je bezpośrednio do GitHub lub w wiadomości.",
+      "errorTitle": "Kopiowanie nie jest możliwe",
+      "errorBody": "Przeglądarka zablokowała dostęp do schowka."
+    },
+    "unknownMember": "Nieznany",
+    "areaFallback": "Aplikacja",
+    "copyButton": "Kopiuj",
+    "markDone": "Gotowe",
+    "reopen": "Otwórz ponownie",
+    "empty": {
+      "title": "Brak otwartych zgłoszeń",
+      "hint": "Tutaj jest teraz wszystko spokojne."
+    },
+    "openCount": "{{count}} otwartych"
+  }
+}

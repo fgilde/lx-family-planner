@@ -1,0 +1,179 @@
+{
+  "toggle": {
+    "on": "Aan",
+    "off": "Uit"
+  },
+  "access": {
+    "grants": {
+      "sharedCalendar": {
+        "label": "Gedeelde afspraken",
+        "help": "Dit gezin mag jou uitnodigen voor afspraken die voor beide gezinnen zichtbaar zijn."
+      },
+      "tasks": {
+        "label": "Taken",
+        "help": "Volwassenen in dit gezin mogen jouw kinderen taken geven."
+      },
+      "rewards": {
+        "label": "Sterren & beloningen",
+        "help": "Staat sterrenpunten op taken en eigen beloningen toe."
+      },
+      "pocketMoney": {
+        "label": "Zakgeld",
+        "help": "Staat traceerbare zakgeldboekingen toe voor jouw kinderen."
+      }
+    },
+    "childPosition": {
+      "teenager": "Tieners",
+      "grandchild": "Kleinkind"
+    },
+    "header": {
+      "kicker": "Veilig samen organiseren",
+      "title": "Rechten in het gezinsnetwerk",
+      "description": "Jij beslist per verbinding. Het andere gezin kan geen privéagenda's, chats of prikbordinhoud zien."
+    },
+    "card": {
+      "subtitle": "Wat dit gezin voor jouw kinderen mag doen",
+      "grantedFromOther": "Van daaruit met jou gedeeld:",
+      "nothingYet": "nog niets"
+    },
+    "planner": {
+      "kicker": "Voor kleinkinderen",
+      "title": "Van gezin naar gezin",
+      "description": "Taken, beloningen of zakgeld belanden direct en traceerbaar in de gezinsrekening van het kind.",
+      "familyBranch": "Gezinstak",
+      "tools": {
+        "task": "Taak",
+        "reward": "Beloning",
+        "money": "Zakgeld"
+      },
+      "task": {
+        "label": "Taak",
+        "placeholder": "bijv. oma helpen in de tuin",
+        "dueDate": "Voor wanneer?",
+        "stars": "Sterren"
+      },
+      "reward": {
+        "label": "Beloning",
+        "placeholder": "bijv. een middagje naar de dierentuin",
+        "costStars": "Sterrenprijs",
+        "image": "Beloningsafbeelding"
+      },
+      "money": {
+        "amount": "Bedrag in euro's",
+        "note": "Waarvoor?",
+        "defaultNote": "Van oma & opa"
+      },
+      "submit": "Naar kindprofiel sturen"
+    }
+  },
+  "tree": {
+    "relations": {
+      "parent": {
+        "label": "Ouderlijk gezin",
+        "help": "Het geselecteerde gezin staat boven jouw gezin."
+      },
+      "child": {
+        "label": "Kindgezin",
+        "help": "Het geselecteerde gezin is een gezinstak onder jou."
+      },
+      "sibling": {
+        "label": "Broer/zus-gezin",
+        "help": "Beide gezinnen staan op hetzelfde niveau."
+      },
+      "relative": {
+        "label": "Andere familie",
+        "help": "Bijvoorbeeld tantes, ooms, neven/nichten of zelfgekozen naaste familie."
+      },
+      "fallback": "Verwant gezin"
+    },
+    "node": {
+      "ourFamily": "Ons gezin",
+      "profiles_one": "{{count}} profiel",
+      "profiles_other": "{{count}} profielen"
+    },
+    "branch": {
+      "membersAria": "Leden van {{familyName}}",
+      "thisFamily": "dit gezin",
+      "noProfiles": "Nog geen profielen"
+    },
+    "header": {
+      "kicker": "Alleen verbindingen met bevestiging",
+      "title": "Jouw gezinsnetwerk",
+      "description": "Koppel echte gezinsaccounts. Een verbinding wordt pas zichtbaar als het andere gezin instemt.",
+      "closeAria": "Stamboom sluiten"
+    },
+    "generations": {
+      "parents": "Ouderlijke gezinnen",
+      "parentsEmpty": "Nog niet gekoppeld",
+      "children": "Kindgezinnen",
+      "childrenEmpty": "Nog geen gezinstak",
+      "ourAccount": "Jouw account"
+    },
+    "inbox": {
+      "kicker": "Heeft jouw beslissing nodig",
+      "title": "Gezinsverzoeken",
+      "request": "{{familyName}} wil jou toevoegen als {{relation}}.",
+      "accept": "Accepteren",
+      "decline": "Afwijzen"
+    },
+    "request": {
+      "kicker": "Gezinsaccount koppelen",
+      "title": "Nieuwe verbinding",
+      "registeredFamily": "Geregistreerd gezin",
+      "selectFamily": "Selecteer een gezin …",
+      "relationLabel": "Dit gezin is jouw …",
+      "send": "Verzoek versturen",
+      "allConnected": "Alle momenteel geregistreerde gezinnen zijn al verbonden of aangevraagd.",
+      "adultsOnly": "Alleen volwassenen kunnen gezinsaccounts koppelen."
+    },
+    "manage": {
+      "kicker": "Beheer",
+      "title": "Verbindingen & verzoeken",
+      "pending": "Wacht op bevestiging",
+      "removeTitle": "Verbinding verwijderen",
+      "empty": "Nog geen verbindingen."
+    }
+  },
+  "settings": {
+    "header": {
+      "eyebrow": "Gezinsbeheer",
+      "title": "Ons thuis"
+    },
+    "form": {
+      "newImage": "Nieuwe gezinsfoto",
+      "familyName": "Gezinsnaam",
+      "badge": "Korte slagzin",
+      "badgeDefault": "Ons gezin",
+      "badgePlaceholder": "bijv. Ons thuis",
+      "newPassword": "Nieuw gezinswachtwoord (optioneel)",
+      "passwordPlaceholder": "Leeg laten = ongewijzigd"
+    },
+    "household": {
+      "title": "Een tweede planningsplek tonen",
+      "description": "Toont \"Huis van oma & opa\" als eigen planningsgebied in de app-kop.",
+      "why": "Waarom bestaat dit?",
+      "explainer": "Ideaal wanneer oma en opa geen eigen gezinsaccount gebruiken: afspraken, taken, maaltijdplan, afvalophaldatums en het prikbord kunnen apart voor hun huis worden gepland."
+    },
+    "about": {
+      "version": "Versie {{version}}"
+    },
+    "github": {
+      "aria": "Bekijk LX Family Planner op GitHub",
+      "kicker": "Open Source",
+      "title": "Bevalt LX?",
+      "description": "Bekijk het project of laat een ster achter."
+    },
+    "actions": {
+      "saving": "Opslaan …",
+      "save": "Wijzigingen opslaan",
+      "deleteAccount": "Gezinsaccount verwijderen"
+    },
+    "delete": {
+      "title": "Dit gezinsaccount permanent verwijderen?",
+      "description": "Dit verwijdert profielen, afspraken, taken en alle andere gezinsinhoud. Deze actie kan niet ongedaan worden gemaakt.",
+      "passwordLabel": "Voer het gezinswachtwoord in om te bevestigen",
+      "deleting": "Verwijderen …",
+      "confirm": "Gezin permanent verwijderen"
+    }
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "toggle": {
+    "on": "Activado",
+    "off": "Desactivado"
+  },
+  "access": {
+    "grants": {
+      "sharedCalendar": {
+        "label": "Eventos compartidos",
+        "help": "Esta familia puede invitarte a eventos visibles para ambas familias."
+      },
+      "tasks": {
+        "label": "Tareas",
+        "help": "Los adultos de esta familia pueden dar tareas a tus niños."
+      },
+      "rewards": {
+        "label": "Estrellas y recompensas",
+        "help": "Permite puntos de estrellas en tareas y recompensas personalizadas."
+      },
+      "pocketMoney": {
+        "label": "Paga semanal",
+        "help": "Permite entradas de paga semanal rastreables para tus niños."
+      }
+    },
+    "childPosition": {
+      "teenager": "Adolescente",
+      "grandchild": "Nieto o nieta"
+    },
+    "header": {
+      "kicker": "Organizar juntos de forma segura",
+      "title": "Permisos en la red familiar",
+      "description": "Tú decides por cada conexión. La otra familia no puede ver calendarios privados, chats ni el contenido del tablón."
+    },
+    "card": {
+      "subtitle": "Lo que esta familia puede hacer por tus niños",
+      "grantedFromOther": "Compartido contigo desde allí:",
+      "nothingYet": "todavía nada"
+    },
+    "planner": {
+      "kicker": "Para nietos",
+      "title": "De familia a familia",
+      "description": "Las tareas, recompensas o pagas semanales llegan de forma directa y rastreable a la cuenta familiar del niño.",
+      "familyBranch": "Rama familiar",
+      "tools": {
+        "task": "Tarea",
+        "reward": "Recompensa",
+        "money": "Paga semanal"
+      },
+      "task": {
+        "label": "Tarea",
+        "placeholder": "p. ej. ayudar a la abuela en el jardín",
+        "dueDate": "¿Para cuándo?",
+        "stars": "Estrellas"
+      },
+      "reward": {
+        "label": "Recompensa",
+        "placeholder": "p. ej. una tarde en el zoo",
+        "costStars": "Precio en estrellas",
+        "image": "Imagen de la recompensa"
+      },
+      "money": {
+        "amount": "Importe en euros",
+        "note": "¿Para qué?",
+        "defaultNote": "De abuela y abuelo"
+      },
+      "submit": "Enviar al perfil del niño"
+    }
+  },
+  "tree": {
+    "relations": {
+      "parent": {
+        "label": "Familia ascendiente",
+        "help": "La familia seleccionada está por encima de tu familia."
+      },
+      "child": {
+        "label": "Familia descendiente",
+        "help": "La familia seleccionada es una rama familiar por debajo de ti."
+      },
+      "sibling": {
+        "label": "Familia hermana",
+        "help": "Ambas familias están en el mismo nivel."
+      },
+      "relative": {
+        "label": "Otros parientes",
+        "help": "Por ejemplo, tías, tíos, primos o familia elegida cercana."
+      },
+      "fallback": "Familia emparentada"
+    },
+    "node": {
+      "ourFamily": "Nuestra familia",
+      "profiles_one": "{{count}} perfil",
+      "profiles_other": "{{count}} perfiles"
+    },
+    "branch": {
+      "membersAria": "Miembros de {{familyName}}",
+      "thisFamily": "esta familia",
+      "noProfiles": "Todavía no hay perfiles"
+    },
+    "header": {
+      "kicker": "Conexiones solo con confirmación",
+      "title": "Tu red familiar",
+      "description": "Vincula cuentas familiares reales. Una conexión solo se hace visible cuando la otra familia lo acepta.",
+      "closeAria": "Cerrar árbol familiar"
+    },
+    "generations": {
+      "parents": "Familias ascendientes",
+      "parentsEmpty": "Todavía no vinculadas",
+      "children": "Familias descendientes",
+      "childrenEmpty": "Todavía no hay ninguna rama familiar",
+      "ourAccount": "Tu cuenta"
+    },
+    "inbox": {
+      "kicker": "Necesita tu decisión",
+      "title": "Solicitudes familiares",
+      "request": "{{familyName}} quiere añadirte como su {{relation}}.",
+      "accept": "Aceptar",
+      "decline": "Rechazar"
+    },
+    "request": {
+      "kicker": "Conectar una cuenta familiar",
+      "title": "Nueva conexión",
+      "registeredFamily": "Familia registrada",
+      "selectFamily": "Selecciona una familia …",
+      "relationLabel": "Esta familia es tu …",
+      "send": "Enviar solicitud",
+      "allConnected": "Todas las familias registradas actualmente ya están conectadas o solicitadas.",
+      "adultsOnly": "Solo los adultos pueden vincular cuentas familiares."
+    },
+    "manage": {
+      "kicker": "Gestión",
+      "title": "Conexiones y solicitudes",
+      "pending": "Esperando confirmación",
+      "removeTitle": "Eliminar conexión",
+      "empty": "Todavía no hay conexiones."
+    }
+  },
+  "settings": {
+    "header": {
+      "eyebrow": "Administración familiar",
+      "title": "Nuestro hogar"
+    },
+    "form": {
+      "newImage": "Nueva foto familiar",
+      "familyName": "Nombre de la familia",
+      "badge": "Breve lema",
+      "badgeDefault": "Nuestra familia",
+      "badgePlaceholder": "p. ej. Nuestro hogar",
+      "newPassword": "Nueva contraseña familiar (opcional)",
+      "passwordPlaceholder": "Vacío = sin cambios"
+    },
+    "household": {
+      "title": "Mostrar un segundo lugar de planificación",
+      "description": "Muestra «Hogar de abuela y abuelo» como área de planificación propia en la cabecera de la app.",
+      "why": "¿Para qué sirve?",
+      "explainer": "Ideal cuando la abuela y el abuelo no usan su propia cuenta familiar: eventos, tareas, plan de comidas, fechas de recogida de basura y tablón se pueden planificar por separado para su hogar."
+    },
+    "about": {
+      "version": "Versión {{version}}"
+    },
+    "github": {
+      "aria": "Ver LX Family Planner en GitHub",
+      "kicker": "Código abierto",
+      "title": "¿Te gusta LX?",
+      "description": "Visita el proyecto o déjale una estrella."
+    },
+    "actions": {
+      "saving": "Guardando …",
+      "save": "Guardar cambios",
+      "deleteAccount": "Eliminar cuenta familiar"
+    },
+    "delete": {
+      "title": "¿Eliminar permanentemente esta cuenta familiar?",
+      "description": "Esto elimina perfiles, eventos, tareas y todo el demás contenido familiar. Esta acción no se puede deshacer.",
+      "passwordLabel": "Introduce la contraseña familiar para confirmar",
+      "deleting": "Eliminando …",
+      "confirm": "Eliminar familia permanentemente"
+    }
+  }
+}

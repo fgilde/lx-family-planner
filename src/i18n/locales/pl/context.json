@@ -1,0 +1,554 @@
+{
+  "defaults": {
+    "you": "ty",
+    "thisProfile": "ten profil",
+    "aParent": "rodzic",
+    "familyAuthor": "Rodzina",
+    "familyName": "Nasza rodzina",
+    "familyArchive": "Archiwum rodzinne",
+    "shoppingQuantity": "1 szt",
+    "recipeServings": "4 porcje"
+  },
+  "ics": {
+    "defaultFamilyName": "LX Family",
+    "calendarName": "Kalendarz {{familyName}}",
+    "defaultEventTitle": "Wydarzenie rodzinne",
+    "exportFileName": "kalendarz_rodzinny_{{date}}.ics"
+  },
+  "shared": {
+    "changeSaved": "Zmiana została zapisana."
+  },
+  "errors": {
+    "changeFailed": "Zmiana nie powiodła się",
+    "deviceNotRegistered": "To urządzenie nie jest jeszcze zarejestrowane.",
+    "androidPermissionReadFailed": "Nie udało się odczytać uprawnień Androida.",
+    "androidPushStatusLoadFailed": "Nie udało się wczytać statusu powiadomień Androida.",
+    "pushCheckTimeout": "Serwer rodzinny nie odpowiada na sprawdzenie powiadomień. Sprawdź adres serwera i spróbuj ponownie.",
+    "fcmNotConfigured": "Serwer nie jest jeszcze połączony z Firebase Cloud Messaging.",
+    "deviceKeySaveTimeout": "Klucz urządzenia jest dostępny, ale serwer rodzinny nie odpowiada podczas zapisywania.",
+    "androidPushActivationFailed": "Nie udało się włączyć powiadomień Androida.",
+    "appNotRegistered": "Ta aplikacja nie jest jeszcze zarejestrowana dla profilu.",
+    "calendarConnectFailed": "Nie udało się podłączyć kalendarza",
+    "calendarUpdateFailed": "Nie udało się zmienić kalendarza",
+    "calendarSyncFailed": "Nie udało się odświeżyć kalendarza",
+    "calendarsSyncFailed": "Nie udało się odświeżyć kalendarzy",
+    "calendarSourceRemoveFailed": "Nie udało się usunąć źródła kalendarza",
+    "eventRemindersSaveFailed": "Nie udało się zapisać przypomnień wydarzenia",
+    "eventSaveFailed": "Nie udało się zapisać wydarzenia",
+    "shoppingItemAddFailed": "Nie udało się dodać pozycji",
+    "bringItemUpdateFailed": "Nie udało się zaktualizować pozycji Bring!",
+    "bringIngredientsTransferFailed": "Nie udało się przenieść składników do Bring!",
+    "redeemFailed": "Wymiana nie jest możliwa",
+    "familyDeleteFailed": "Nie udało się usunąć rodziny",
+    "bringCatalogLoadFailed": "Nie udało się wczytać katalogu Bring!",
+    "bringSyncFailed": "Synchronizacja Bring! nie powiodła się",
+    "gotifyConnectFailed": "Nie udało się połączyć z Gotify",
+    "gotifySettingsSaveFailed": "Nie udało się zapisać ustawień Gotify",
+    "gotifyTestFailed": "Test Gotify nie powiódł się",
+    "ntfyConnectFailed": "Nie udało się połączyć z ntfy",
+    "ntfySettingsSaveFailed": "Nie udało się zapisać ustawień ntfy",
+    "ntfyTestFailed": "Test ntfy nie powiódł się",
+    "homeAssistantConnectFailed": "Nie udało się połączyć z Home Assistant",
+    "deviceListLoadFailed": "Nie udało się wczytać listy urządzeń",
+    "homeAssistantSettingsSaveFailed": "Nie udało się zapisać ustawień Home Assistant",
+    "homeAssistantNoResponse": "Home Assistant nie odpowiada",
+    "deviceControlFailed": "Nie udało się sterować urządzeniem",
+    "nextcloudConnectFailed": "Nie udało się połączyć z Nextcloud",
+    "nextcloudBundledSetupFailed": "Nie udało się automatycznie skonfigurować Chmurki rodzinnej",
+    "cloudAccessLoadFailed": "Nie udało się wczytać dostępu do chmury",
+    "nextcloudSettingsSaveFailed": "Nie udało się zapisać ustawień Nextcloud",
+    "nextcloudNoResponse": "Nextcloud nie odpowiada",
+    "nextcloudSyncFailed": "Nie udało się zsynchronizować kalendarza Nextcloud",
+    "cloudBackupFailed": "Nie udało się utworzyć kopii zapasowej w chmurze",
+    "familyRequestFailed": "Żądanie rodzinne nie powiodło się",
+    "requestAnswerFailed": "Nie udało się odpowiedzieć na żądanie",
+    "relationshipRemoveFailed": "Nie udało się usunąć połączenia",
+    "familyGrantsSaveFailed": "Nie udało się zapisać ustawień współdzielenia rodziny",
+    "familyMailLoadFailed": "Nie udało się wczytać poczty rodzinnej",
+    "letterSendFailed": "Nie udało się wysłać listu",
+    "letterUpdateFailed": "Nie udało się zaktualizować listu",
+    "chatInvitationsLoadFailed": "Nie udało się wczytać zaproszeń na czat",
+    "chatInvitationSendFailed": "Nie udało się wysłać zaproszenia na czat",
+    "chatAccessUpdateFailed": "Nie udało się zaktualizować dostępu do czatu",
+    "guestChatLoadFailed": "Nie udało się wczytać czatu rodzinnego z gościem",
+    "messageSendFailed": "Nie udało się wysłać wiadomości",
+    "taskSendFailed": "Nie udało się wysłać zadania",
+    "rewardCreateFailed": "Nie udało się utworzyć nagrody",
+    "pocketMoneyBookFailed": "Nie udało się zaksięgować kieszonkowego",
+    "reportSaveFailed": "Nie udało się zapisać zgłoszenia",
+    "problemReportsLoadFailed": "Nie udało się wczytać zgłoszeń problemów",
+    "reportStatusChangeFailed": "Nie udało się zmienić statusu zgłoszenia",
+    "mediaWidgetSaveFailed": "Nie udało się zapisać kafelka multimediów",
+    "entrySaveFailed": "Nie udało się zapisać wpisu",
+    "entryUpdateFailed": "Nie udało się zaktualizować wpisu",
+    "entryDeleteFailed": "Nie udało się usunąć wpisu",
+    "routineUpdateFailed": "Nie udało się zaktualizować rutyny",
+    "schoolItemUpdateFailed": "Nie udało się zaktualizować wpisu szkolnego",
+    "pollSaveFailed": "Nie udało się zapisać głosu",
+    "familyMissionUpdateFailed": "Nie udało się zaktualizować misji rodzinnej",
+    "kidWorldSaveFailed": "Nie udało się zapisać świata dzieci"
+  },
+  "toasts": {
+    "connectionMissing": {
+      "title": "Brak połączenia"
+    },
+    "refreshFailed": {
+      "title": "Odświeżanie nie powiodło się"
+    },
+    "homeStatusUnreachable": {
+      "title": "Status domu jest nieosiągalny"
+    },
+    "notificationsUnreachable": {
+      "title": "Powiadomienia są nieosiągalne"
+    },
+    "notificationNotSaved": {
+      "title": "Powiadomienie nie zostało zapisane"
+    },
+    "notificationsNotSaved": {
+      "title": "Powiadomienia nie zostały zapisane"
+    },
+    "releaseNotesNotSaved": {
+      "title": "Jeszcze nie zapisano",
+      "message": "Nie udało się oznaczyć nowości jako przeczytane. Spróbuj ponownie."
+    },
+    "themeNotSaved": {
+      "title": "Motyw nie został zapisany"
+    },
+    "customThemeSaved": {
+      "title": "Zapisano Mój Design",
+      "message": "Motyw własny został utworzony i aktywowany dla tego profilu.",
+      "resetMessage": "Motyw własny został usunięty. Profil korzysta teraz z motywu Lniany."
+    },
+    "webPushUnreachable": {
+      "title": "Powiadomienia push są nieosiągalne"
+    },
+    "webPushUnavailable": {
+      "title": "Powiadomienia nie są jeszcze możliwe"
+    },
+    "webPushEnabled": {
+      "title": "Powiadomienia są włączone",
+      "message": "To urządzenie wysyła teraz alerty dla {{name}}."
+    },
+    "activationFailed": {
+      "title": "Aktywacja nie jest możliwa"
+    },
+    "webPushDisabled": {
+      "title": "Powiadomienia wyłączone",
+      "message": "To urządzenie nie będzie już otrzymywać powiadomień z przeglądarki."
+    },
+    "disableFailed": {
+      "title": "Wyłączanie nie jest możliwe"
+    },
+    "notificationPrefsSaved": {
+      "title": "Powiadomienia zapisane"
+    },
+    "webPushSaved": {
+      "message": "Twój wybór działa od razu na tym urządzeniu."
+    },
+    "saveFailed": {
+      "title": "Zapisywanie nie jest możliwe"
+    },
+    "webPushTestSent": {
+      "title": "Wysłano test",
+      "message": "Powiadomienie powinno wkrótce pojawić się na tym urządzeniu."
+    },
+    "testFailed": {
+      "title": "Test nie powiódł się"
+    },
+    "androidPushUnreachable": {
+      "title": "Powiadomienia Androida są nieosiągalne"
+    },
+    "nativePushEnabled": {
+      "title": "Powiadomienia Androida są włączone",
+      "message": "Aplikacja LX wysyła teraz alerty dla {{name}}."
+    },
+    "nativePushDisabled": {
+      "title": "Powiadomienia aplikacji wyłączone",
+      "message": "To urządzenie nie wysyła już alertów dla {{name}}."
+    },
+    "nativePushSaved": {
+      "title": "Powiadomienia aplikacji zapisane",
+      "message": "Twój wybór działa od razu na tym urządzeniu z Androidem."
+    },
+    "nativePushTestSent": {
+      "title": "Wysłano test Androida",
+      "message": "Powiadomienie powinno wkrótce pojawić się w obszarze powiadomień Androida."
+    },
+    "nativeTestFailed": {
+      "title": "Test Androida nie powiódł się"
+    },
+    "deviceRemoved": {
+      "title": "Urządzenie usunięte",
+      "message": "To urządzenie nie będzie już otrzymywać powiadomień rodzinnych."
+    },
+    "calendarSourceSaved": {
+      "title": "Źródło kalendarza zapisane",
+      "warningMessage": "Pierwsze odświeżenie nadal się nie powiodło: {{warning}}"
+    },
+    "calendarConnected": {
+      "title": "Kalendarz połączony",
+      "message": "{{name}} został zaimportowany z {{count}} wydarzeniami."
+    },
+    "calendarSaved": {
+      "title": "Kalendarz zapisany"
+    },
+    "calendarUpdated": {
+      "title": "Kalendarz zaktualizowany",
+      "message": "Źródło kalendarza zostało zaktualizowane."
+    },
+    "calendarSynced": {
+      "title": "Kalendarz jest aktualny",
+      "message": "Zsynchronizowano {{count}} wydarzeń."
+    },
+    "calendarSyncPartial": {
+      "title": "Synchronizacja częściowa",
+      "message": "Nie udało się teraz dotrzeć do {{count}} kalendarzy."
+    },
+    "calendarSyncAll": {
+      "title": "Wszystkie kalendarze są aktualne",
+      "message": "Zsynchronizowano {{count}} źródeł kalendarza."
+    },
+    "calendarSourceRemoved": {
+      "title": "Źródło kalendarza usunięte",
+      "message": "Powiązane wydarzenia zostały usunięte z planera rodzinnego."
+    },
+    "sharedEventCreated": {
+      "title": "Wydarzenie rodzinne udostępnione",
+      "message": "„{{title}}” jest widoczne dla zaproszonych rodzin."
+    },
+    "eventAdded": {
+      "title": "Wydarzenie dodane",
+      "message": "„{{title}}” jest teraz w kalendarzu."
+    },
+    "eventUpdated": {
+      "title": "Wydarzenie zapisane",
+      "message": "„{{title}}” zostało zaktualizowane dla wszystkich wybranych."
+    },
+    "eventRemindersSaved": {
+      "title": "Przypomnienia wydarzenia zapisane",
+      "enabledMessage": "„{{title}}” będzie teraz przypominać o {{count}} porach.",
+      "disabledMessage": "Przypomnienia dla „{{title}}” są wyłączone."
+    },
+    "sharedEventDeleted": {
+      "title": "Współdzielone wydarzenie usunięte",
+      "message": "Wydarzenie zostało usunięte dla wszystkich zaproszonych rodzin."
+    },
+    "eventDeleted": {
+      "title": "Wydarzenie usunięte",
+      "message": "Wydarzenie zostało usunięte."
+    },
+    "icsImportFailed": {
+      "title": "Import nie jest możliwy",
+      "message": "Nie znaleziono prawidłowych wydarzeń."
+    },
+    "icsImported": {
+      "title": "Kalendarz zaimportowany",
+      "message": "Zaimportowano {{count}} wydarzeń."
+    },
+    "icsExported": {
+      "title": "Kalendarz wyeksportowany",
+      "message": "Plik kalendarza został utworzony."
+    },
+    "bringAdded": {
+      "title": "Dodano do Bring!",
+      "itemMessage": "{{name}} jest teraz na wspólnej liście.",
+      "ingredientsMessage": "Przeniesiono {{count}} składników."
+    },
+    "shoppingItemAdded": {
+      "title": "Na liście zakupów",
+      "message": "Dodano {{name}}."
+    },
+    "shoppingListNotSaved": {
+      "title": "Lista zakupów nie została zapisana"
+    },
+    "ingredientsAdded": {
+      "title": "Na liście zakupów",
+      "message": "Dodano {{count}} składników."
+    },
+    "recipeSaved": {
+      "title": "Przepis zapisany",
+      "message": "„{{name}}” znajduje się w książce przepisów."
+    },
+    "recipeDeleted": {
+      "title": "Przepis usunięty",
+      "message": "Przepis został usunięty."
+    },
+    "recipeUpdated": {
+      "title": "Przepis zaktualizowany",
+      "message": "Zapisano „{{name}}”."
+    },
+    "taskSentForReview": {
+      "title": "Wysłane do sprawdzenia",
+      "message": "„{{title}}” czeka teraz na zatwierdzenie przez {{name}}."
+    },
+    "taskReportWithdrawn": {
+      "title": "Raport wycofany",
+      "message": "„{{title}}” jest znów otwarte."
+    },
+    "starsEarned": {
+      "title": "Zdobyte gwiazdki!",
+      "nextMessage": "+{{stars}} gwiazdek – następne powtórzenie zaplanowano na {{date}}.",
+      "message": "+{{stars}} gwiazdek za „{{title}}”."
+    },
+    "taskApproved": {
+      "title": "Zadanie zatwierdzone",
+      "nextMessage": "„{{title}}” jest zatwierdzone. Następne powtórzenie zostało zaplanowane.",
+      "message": "„{{title}}” jest zatwierdzone – gwiazdki zostały zaliczone."
+    },
+    "taskRejected": {
+      "title": "Spróbuj ponownie",
+      "message": "„{{title}}” jest ponownie oznaczone jako otwarte."
+    },
+    "taskCreated": {
+      "title": "Zadanie utworzone",
+      "message": "„{{title}}” jest gotowe."
+    },
+    "taskUpdated": {
+      "title": "Zadanie zaktualizowane",
+      "message": "Zapisano „{{title}}”."
+    },
+    "taskDeleted": {
+      "title": "Zadanie usunięte",
+      "message": "Wpis został trwale usunięty."
+    },
+    "rewardCreated": {
+      "title": "Nagroda utworzona",
+      "message": "„{{title}}” jest w sklepie gwiazdek.",
+      "grandchildMessage": "„{{title}}” czeka teraz na wnuczka."
+    },
+    "rewardUpdated": {
+      "title": "Nagroda zaktualizowana"
+    },
+    "rewardDeleted": {
+      "title": "Nagroda usunięta",
+      "message": "Wpis został usunięty."
+    },
+    "rewardRedeemed": {
+      "title": "Nagroda wymieniona!",
+      "message": "„{{title}}” to zasłużona nagroda."
+    },
+    "mealPlanUpdated": {
+      "title": "Plan posiłków zaktualizowany",
+      "message": "Zaplanowano {{recipe}}."
+    },
+    "mealRemoved": {
+      "title": "Danie usunięte",
+      "message": "Miejsce w planie posiłków jest znów wolne."
+    },
+    "noteAdded": {
+      "title": "Notatka przypięta",
+      "message": "„{{title}}” jest na tablicy."
+    },
+    "noteUpdated": {
+      "title": "Notatka zaktualizowana"
+    },
+    "noteDeleted": {
+      "title": "Notatka usunięta",
+      "message": "Notatka została zdjęta z tablicy."
+    },
+    "memberAdded": {
+      "title": "Profil utworzony",
+      "message": "{{name}} jest teraz częścią rodziny."
+    },
+    "starsReset": {
+      "title": "Punkty wyzerowane",
+      "message": "{{name}} zaczyna znów od 0 gwiazdek."
+    },
+    "tasksCleared": {
+      "title": "Lista zadań uporządkowana",
+      "message_one": "Usunięto {{count}} zadanie.",
+      "message_other": "Usunięto {{count}} zadania(ów)."
+    },
+    "nothingToClear": {
+      "title": "Nic do usunięcia",
+      "message": "Brak pasujących zadań dla tego filtru."
+    },
+    "memberDeleted": {
+      "title": "Profil usunięty",
+      "message": "Profil rodzinny został usunięty."
+    },
+    "familyUpdated": {
+      "title": "Rodzina zaktualizowana",
+      "message": "Ustawienia zostały zapisane."
+    },
+    "familyDeleted": {
+      "title": "Rodzina usunięta",
+      "message": "Konto rodzinne zostało usunięte."
+    },
+    "bringSynced": {
+      "title": "Bring! zsynchronizowane",
+      "message": "Lista zakupów jest aktualna."
+    },
+    "bringDisconnected": {
+      "title": "Bring! rozłączone",
+      "message": "Dane logowania zostały bezpiecznie usunięte."
+    },
+    "gotifyConnected": {
+      "title": "Gotify połączone",
+      "message": "Wiadomość testowa została wysłana pomyślnie."
+    },
+    "gotifySaved": {
+      "message": "Nowe reguły Gotify są aktywne."
+    },
+    "gotifyTestSent": {
+      "title": "Wiadomość testowa wysłana",
+      "message": "Sprawdź teraz swoją aplikację Gotify."
+    },
+    "gotifyDisconnected": {
+      "title": "Gotify rozłączone",
+      "message": "Planer rodzinny nie będzie już wysyłał powiadomień push."
+    },
+    "ntfyConnected": {
+      "title": "ntfy połączone",
+      "message": "LX wysyła teraz także powiadomienia rodzinne do Twojego tematu ntfy."
+    },
+    "ntfySaved": {
+      "message": "Zapisano ustawienia zdarzeń ntfy."
+    },
+    "ntfyTestSent": {
+      "title": "Wysłano test ntfy",
+      "message": "Powiadomienie testowe zostało wysłane do Twojego tematu."
+    },
+    "ntfyDisconnected": {
+      "title": "ntfy rozłączone",
+      "message": "LX nie wysyła już powiadomień do ntfy."
+    },
+    "homeAssistantConnected": {
+      "title": "Home Assistant połączony",
+      "message": "Znaleziono {{count}} urządzeń i czujników."
+    },
+    "homeDashboardSaved": {
+      "title": "Pulpit domu zapisany",
+      "message": "Ustawienia udostępniania i wybór urządzeń są teraz aktywne."
+    },
+    "connectionOk": {
+      "title": "Połączenie nawiązane"
+    },
+    "homeAssistantDisconnected": {
+      "title": "Home Assistant rozłączony",
+      "message": "Klucz dostępu został usunięty z planera rodzinnego."
+    },
+    "nextcloudConnected": {
+      "title": "Chmurka rodzinna połączona",
+      "message": "Kalendarz, folder rodzinny i bezpieczne kopie zapasowe są gotowe."
+    },
+    "nextcloudBundledReady": {
+      "title": "Chmurka rodzinna jest gotowa",
+      "message": "Twoje konto rodzinne, kalendarz i folder chmurowy zostały skonfigurowane automatycznie."
+    },
+    "nextcloudSaved": {
+      "title": "Chmurka rodzinna zapisana",
+      "message": "Reguły Nextcloud są teraz aktywne."
+    },
+    "nextcloudReachable": {
+      "title": "Chmurka rodzinna osiągalna"
+    },
+    "nextcloudSynced": {
+      "title": "Kalendarz zsynchronizowany",
+      "changedMessage": "Bezpiecznie zsynchronizowano {{count}} zmian.",
+      "unchangedMessage": "LX Family i Nextcloud były już zsynchronizowane."
+    },
+    "cloudBackupCreated": {
+      "title": "Utworzono kopię zapasową w chmurze",
+      "message": "{{name}} jest przechowywane w zaszyfrowanej formie w Nextcloud."
+    },
+    "nextcloudDisconnected": {
+      "title": "Chmurka rodzinna rozłączona",
+      "message": "Lokalne wpisy rodzinne pozostają nienaruszone."
+    },
+    "moodShared": {
+      "title": "Dzięki za podzielenie się",
+      "message": "Twój nastrój jest w kompasie rodzinnym."
+    },
+    "relationshipRequested": {
+      "title": "Prośba wysłana",
+      "message": "Druga rodzina może teraz potwierdzić połączenie."
+    },
+    "familiesConnected": {
+      "title": "Rodziny połączone",
+      "message": "Połączenie jest teraz widoczne w drzewie genealogicznym."
+    },
+    "requestDeclined": {
+      "title": "Prośba odrzucona",
+      "message": "Prośba została usunięta."
+    },
+    "relationshipRemoved": {
+      "title": "Połączenie usunięte",
+      "message": "Konta rodzinne nie są już powiązane."
+    },
+    "familyGrantsSaved": {
+      "title": "Współdzielenie rodziny zapisane",
+      "message": "Druga rodzina od razu widzi, w czym może pomóc planować."
+    },
+    "letterSent": {
+      "title": "List wysłany",
+      "message": "Połączona rodzina znajdzie go teraz w swojej skrzynce."
+    },
+    "chatInvitationSent": {
+      "title": "Zaproszenie na czat wysłane",
+      "message": "Wybrany profil sam decyduje o dostępie."
+    },
+    "invitationAccepted": {
+      "title": "Zaproszenie zaakceptowane",
+      "message": "Czat rodzinny pojawia się teraz jako osobny kanał."
+    },
+    "guestAccessEnded": {
+      "title": "Dostęp gościa zakończony"
+    },
+    "invitationDeclined": {
+      "title": "Zaproszenie odrzucone"
+    },
+    "chatAccessUpdated": {
+      "message": "Ustawienie dostępu zostało zaktualizowane."
+    },
+    "taskSentToGrandchild": {
+      "title": "Zadanie wysłane",
+      "message": "„{{title}}” jest teraz widoczne dla wnuczka."
+    },
+    "grandchildPocketMoneyBooked": {
+      "message": "Zaksięgowanie jest teraz widoczne na koncie rodzinnym wnuczka."
+    },
+    "pocketMoneyBooked": {
+      "title": "Kieszonkowe zaksięgowane",
+      "message": "Konto rodzinne {{name}} jest aktualne."
+    },
+    "starsConverted": {
+      "title": "Gwiazdki wymienione"
+    },
+    "problemReportSaved": {
+      "title": "Dzięki za zgłoszenie",
+      "message": "Szczegóły problemu zostały bezpiecznie zapisane w planerze rodzinnym."
+    },
+    "dashboardLinkAdded": {
+      "title": "Pulpit rozbudowany",
+      "message": "„{{title}}” jest teraz widoczne na profilu dziecka."
+    },
+    "dashboardLinkRemoved": {
+      "title": "Link pulpitu usunięty",
+      "message": "Kafelek został usunięty z profilu dziecka."
+    },
+    "familyLifeSaved": {
+      "title": "Zapisano",
+      "message": "Życie rodziny zostało zaktualizowane."
+    },
+    "familyLifeUpdated": {
+      "title": "Zaktualizowano"
+    },
+    "familyLifeRemoved": {
+      "title": "Usunięto",
+      "message": "Wpis został usunięty."
+    },
+    "routineCompleted": {
+      "title": "Rutyna ukończona!",
+      "message": "Wszystkie kroki świecą – świetna robota."
+    },
+    "voteCounted": {
+      "title": "Głos zliczony",
+      "message": "Twoja rodzina widzi teraz Twój wybór."
+    },
+    "kidWorldReady": {
+      "title": "Twój świat jest gotowy",
+      "message": "Twój towarzysz podróżuje teraz z Tobą."
+    }
+  }
+}

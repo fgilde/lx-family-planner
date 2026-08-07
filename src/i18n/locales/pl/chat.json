@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "attachmentLoad": "Nie udało się wczytać załącznika."
+  },
+  "imageViewer": {
+    "label": "Obraz z czatu",
+    "viewLarge": "Zobacz {{name}} w pełnym rozmiarze",
+    "closeAria": "Zamknij podgląd obrazu",
+    "tapToClose": "Kliknij poza obrazem, aby zamknąć"
+  },
+  "attachment": {
+    "open": "Otwórz",
+    "download": "Pobierz",
+    "kinds": {
+      "apk": "Aplikacja na Androida",
+      "archive": "Archiwum",
+      "pdf": "Dokument PDF",
+      "video": "Wideo",
+      "audio": "Audio",
+      "document": "Dokument"
+    }
+  },
+  "toasts": {
+    "attachmentOpenFailedTitle": "Załącznik nie został otwarty",
+    "downloadFailedTitle": "Pobieranie nie powiodło się",
+    "attachmentLimitTitle": "Osiągnięto limit załączników",
+    "attachmentLimitBody": "Wiadomość może zawierać maksymalnie {{max}} pliki(ów).",
+    "fileTooLargeTitle": "Plik jest za duży",
+    "fileTooLargeBody": "{{name}} jest większy niż 100 MB.",
+    "selectionTrimmedTitle": "Wybór skrócony",
+    "selectionTrimmedBody_one": "Pierwszy plik został załączony.",
+    "selectionTrimmedBody_other": "Pierwsze {{count}} pliki(ów) zostało załączone.",
+    "attachmentSendFailedTitle": "Załącznik nie został wysłany",
+    "attachmentSendFailedBody": "Nie udało się zapisać pliku w Chmurce rodzinnej."
+  },
+  "preview": {
+    "fileShared": "📎 Plik udostępniony",
+    "invitedChat": "Czat rodzinny z gościem",
+    "openGroup": "Otwórz grupę",
+    "noMessages": "Brak wiadomości",
+    "photo": "📷 Zdjęcie",
+    "file": "📎 Plik",
+    "newMessage": "Nowa wiadomość"
+  },
+  "directory": {
+    "kicker": "Rozmowy rodzinne",
+    "title": "Czaty",
+    "groupChannel": "Wszyscy razem",
+    "directLabel": "Bezpośrednie",
+    "invitedLabel": "Zaproszeni"
+  },
+  "room": {
+    "familyProfiles_one": "{{count}} profil rodzinny",
+    "familyProfiles_other": "{{count}} profile(ów) rodzinne",
+    "guestInvited": "Zostałeś osobiście zaproszony(a)",
+    "groupTitle": "Czat rodzinny",
+    "visibleToAll": "Widoczne dla wszystkich",
+    "guestAccess": "Dostęp gościa po akceptacji",
+    "directMessage": "Wiadomość bezpośrednia"
+  },
+  "empty": {
+    "title": "Jeszcze tu cicho",
+    "prompt": "Napisz pierwszą wiadomość do {{name}}.",
+    "familyName": "Twoja rodzina"
+  },
+  "message": {
+    "you": "Ty",
+    "chatPhoto": "Zdjęcie z czatu",
+    "sentAttachmentAlt": "Wysłany załącznik",
+    "viewLarge": "Zobacz w pełnym rozmiarze"
+  },
+  "composer": {
+    "removeAttachment": "Usuń {{name}}",
+    "uploadingFile": "Zapisywanie pliku {{current}} z {{total}} w chmurze",
+    "sendingMessage": "Wysyłanie wiadomości",
+    "attachFiles": "Załącz pliki",
+    "placeholder": "Wiadomość do {{name}} …",
+    "placeholderFamilyName": "rodzina",
+    "sending": "Wysyłanie …",
+    "send": "Wyślij",
+    "cloudNote": "Załączniki są automatycznie umieszczane w archiwum rodzinnym · do 100 MB"
+  }
+}

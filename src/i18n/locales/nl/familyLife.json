@@ -1,0 +1,211 @@
+{
+  "sections": {
+    "today": "Weekweergave",
+    "routines": "Routines",
+    "money": "Zakgeld",
+    "school": "School",
+    "polls": "Stemmen",
+    "safety": "Veilig & rustig"
+  },
+  "hero": {
+    "kicker": "Jouw dagelijks leven, één geweldig team",
+    "title": "Gezinsreis",
+    "intro": "Routines, school, zakgeld en beslissingen komen hier samen – begrijpelijk voor kinderen, betrouwbaar voor ouders.",
+    "viewFor": "Weergave voor",
+    "yourJourney": "Jouw reis",
+    "navAria": "Gezinsreisonderdelen"
+  },
+  "adultsOnly": "Alleen voor volwassenen",
+  "weekly": {
+    "kicker": "De afgelopen zeven dagen",
+    "title": "Dat was de week van {{name}}",
+    "metrics": {
+      "missions": "Missies",
+      "routineDays": "Routinedagen",
+      "polls": "Peilingen",
+      "stars": "Sterren"
+    },
+    "strongWeek": "Dat was een heel sterke week!",
+    "everyStepCounts": "Elke kleine stap telt.",
+    "nextEvent": "Straks wacht \"{{title}}\" op je.",
+    "spontaneousMoment": "Het volgende gezinsmoment kan zomaar spontaan gebeuren."
+  },
+  "achievements": {
+    "kicker": "Prijskast",
+    "title": "Badges",
+    "firstStep": "Eerste stap",
+    "routinePro": "Routineprof",
+    "starCollector": "Sterrenverzamelaar",
+    "teamSpirit": "Teamgeest",
+    "collected": "Verzameld",
+    "stillSecret": "Nog een geheim"
+  },
+  "missions": {
+    "kicker": "Samen, niet alleen",
+    "title": "Gezinsmissies",
+    "progress": "{{completed}} van {{total}} staat genoteerd",
+    "empty": "Nog geen gezamenlijke missie.",
+    "creatorTitle": "Nieuwe gezinsmissie",
+    "titlePlaceholder": "Bijvoorbeeld: red samen de tuin",
+    "descriptionPlaceholder": "Wat doen jullie samen?",
+    "start": "Missie starten"
+  },
+  "encouragement": {
+    "kicker": "Kleine woorden, grote impact",
+    "title": "Aanmoedigingen",
+    "quote": "“{{message}}”",
+    "fromFamily": "Jouw gezin",
+    "empty": "Hier staat binnenkort een lieve aanmoediging te wachten.",
+    "messagePlaceholder": "Wat wil je {{name}} vertellen?",
+    "send": "Versturen"
+  },
+  "routines": {
+    "kicker": "Stap voor stap",
+    "title": "Routines van {{name}}",
+    "timeOfDay": {
+      "morning": "'s Ochtends",
+      "afternoon": "'s Middags",
+      "evening": "'s Avonds"
+    },
+    "streak_one": "🔥 {{count}} dag op rij",
+    "streak_other": "🔥 {{count}} dagen op rij",
+    "deleteAria": "Routine verwijderen",
+    "emptyTitle": "Nog geen routine",
+    "emptyText": "Een goede routine haalt de stress uit ochtenden en avonden.",
+    "workshop": {
+      "kicker": "Routinewerkplaats",
+      "title": "Routine aanmaken",
+      "namePlaceholder": "Routinenaam",
+      "stepsLabel": "Eén stap per regel",
+      "save": "Routine opslaan"
+    },
+    "defaults": {
+      "title": "Ochtendstart",
+      "steps": "Opstaan\nAankleden\nTanden poetsen\nSchooltas controleren"
+    }
+  },
+  "money": {
+    "kicker": "Gezinsrekening",
+    "title": "Zakgeld van {{name}}",
+    "balanceLabel": "Huidig saldo",
+    "starsAvailable": "{{count}} ⭐ beschikbaar",
+    "starCost_one": "{{count}} ster",
+    "starCost_other": "{{count}} sterren",
+    "emptyLedger": "Het zakgeldboekje is nog leeg.",
+    "goals": {
+      "kicker": "Wensen worden zichtbaar",
+      "title": "Spaardoelen",
+      "progress": "{{current}} van {{target}}",
+      "deleteAria": "Spaardoel verwijderen",
+      "empty": "Nog geen wens om voor te sparen.",
+      "creatorTitle": "Spaardoel toevoegen",
+      "titlePlaceholder": "Waar spaar je voor?",
+      "amountAria": "Doelbedrag in euro's",
+      "create": "Doel aanmaken"
+    },
+    "booking": {
+      "title": "Zakgeld boeken",
+      "amountLabel": "Bedrag in euro's – negatief voor een uitgave",
+      "noteLabel": "Boekingsnotitie",
+      "starsLabel": "Sterren ervoor omzetten (optioneel)",
+      "submit": "Veilig boeken",
+      "defaultNote": "Zakgeld"
+    }
+  },
+  "school": {
+    "kicker": "Alles voor de schooldag",
+    "title": "Schoolgebied van {{name}}",
+    "settings": {
+      "enabled": "Rooster aan",
+      "disabled": "Rooster uit",
+      "disabledTitle": "Het schoolgebied is uitgezet voor dit kind",
+      "disabledHint": "Schakel het alleen in voor schoolkinderen. Ouders kunnen het daarna bewerken en het kind kan het eigen rooster bekijken.",
+      "enable": "Schoolgebied inschakelen"
+    },
+    "timetable": {
+      "period": "Uur {{count}}",
+      "free": "Vrij",
+      "cancelled": "Deze week uitgevallen",
+      "cancellationDate": "Datum van de eenmalige lesuitval",
+      "cancelOnce": "Eén keer annuleren",
+      "restore": "Les herstellen"
+    },
+    "kinds": {
+      "lesson": "Rooster",
+      "homework": "Huiswerk",
+      "exam": "Proefwerk",
+      "bag": "Tascontrole"
+    },
+    "deleteAria": "Schoolitem verwijderen",
+    "emptyKind": "Nog niets ingevuld.",
+    "form": {
+      "kicker": "Eén keer invoeren, rust behouden",
+      "title": "Schoolitem aanmaken",
+      "subjectPlaceholder": "Vak",
+      "titlePlaceholder": "Wat staat er te gebeuren?",
+      "weekday": "Weekdag",
+      "period": "Uur",
+      "startsAt": "Begint om",
+      "endsAt": "Eindigt om",
+      "roomPlaceholder": "Lokaal (optioneel)",
+      "teacherPlaceholder": "Leraar (optioneel)",
+      "detailsPlaceholder": "Boek, materialen of een korte notitie",
+      "submit": "Item toevoegen"
+    }
+  },
+  "polls": {
+    "kicker": "Elke stem telt",
+    "title": "Gezinspeilingen",
+    "votes_one": "{{count}} stem",
+    "votes_other": "{{count}} stemmen",
+    "deleteAria": "Peiling verwijderen",
+    "emptyTitle": "Nog geen peiling",
+    "emptyText": "De volgende eten- of uitjevraag hoort bij het hele gezin.",
+    "form": {
+      "kicker": "Snel beslist",
+      "title": "Stel een nieuwe vraag",
+      "questionPlaceholder": "Wat wil je samen beslissen?",
+      "optionsLabel": "Eén antwoord per regel – emoji zijn toegestaan",
+      "closesLabel": "Peiling eindigt optioneel op",
+      "submit": "Peiling starten",
+      "defaultOptions": "🍕 Pizza\n🍝 Pasta\n🥞 Pannenkoeken"
+    }
+  },
+  "safety": {
+    "emergency": {
+      "kicker": "Voor het geval dat",
+      "fallbackTitle": "Noodkaart",
+      "defaultTitle": "Belangrijke hulp voor ons gezin",
+      "empty": "Ouders kunnen hier veilige noodcontacten opslaan."
+    },
+    "quiet": {
+      "kicker": "Beschermde gezinstijd",
+      "title": "Stilte- en mediatijden",
+      "notifications": "Stilte-uren voor meldingen",
+      "range": "{{start}} tot {{end}}",
+      "notActive": "Niet ingeschakeld",
+      "mediaLounge": "Medialounge",
+      "alwaysVisible": "Altijd zichtbaar",
+      "explanation": "Dringende \"Heb ik knuffel nodig\"-meldingen kunnen tijdens de stilte-uren, als jij wilt, nog steeds doorkomen. Gewone berichten blijven in de gezinsinbox."
+    },
+    "editor": {
+      "title": "Beschermingsregels bewerken",
+      "quietSwitch": "Stilte-uren voor meldingen",
+      "quietSwitchHint": "Pauzeer gewone pushberichten.",
+      "startLabel": "Start",
+      "endLabel": "Einde",
+      "urgentSwitch": "Dringende roep om hulp doorlaten",
+      "urgentSwitchHint": "\"Heb ik knuffel nodig\" blijft bereikbaar.",
+      "mediaSwitch": "Mediatijden gebruiken",
+      "mediaSwitchHint": "Toon YouTube en Spotify alleen binnen het tijdsvak.",
+      "mediaFromLabel": "Media vanaf",
+      "mediaToLabel": "Media tot",
+      "emergencyTitleLabel": "Titel van de noodkaart",
+      "contactsLabel": "Contacten – naam | telefoonnummer | notitie",
+      "contactsPlaceholder": "Jeugdarts | 0123 456789 | Breng vaccinatieboekje mee\nOma | 0987 654321 | Mag ophalen",
+      "notesLabel": "Belangrijke notities",
+      "notesPlaceholder": "Allergieën, medicatie of belangrijke notities",
+      "save": "Beschermingsregels opslaan"
+    }
+  }
+}

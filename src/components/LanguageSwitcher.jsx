@@ -10,7 +10,12 @@ import {
 
 const LANGUAGE_OPTIONS = [
   { code: 'de', short: 'DE', label: 'Deutsch' },
-  { code: 'en', short: 'EN', label: 'English' }
+  { code: 'en', short: 'EN', label: 'English' },
+  { code: 'fr', short: 'FR', label: 'Français' },
+  { code: 'es', short: 'ES', label: 'Español' },
+  { code: 'it', short: 'IT', label: 'Italiano' },
+  { code: 'nl', short: 'NL', label: 'Nederlands' },
+  { code: 'pl', short: 'PL', label: 'Polski' }
 ];
 
 export default function LanguageSwitcher({ variant = 'header' }) {

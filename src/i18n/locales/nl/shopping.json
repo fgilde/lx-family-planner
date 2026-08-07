@@ -1,0 +1,63 @@
+{
+  "hero": {
+    "eyebrow": "Gezinsmarkt",
+    "title": "Wat ontbreekt er thuis?",
+    "subtitle": "Blader door de volledige Bring!-catalogus of voeg een eigen item toe.",
+    "statusLive": "Live met \"{{listName}}\"",
+    "statusLocal": "Lokale gezinslijst",
+    "catalogItems": "{{total}} standaarditems",
+    "syncing": "Synchroniseren",
+    "refreshBring": "Bring! vernieuwen",
+    "connection": "Verbinding",
+    "connectBring": "Bring! verbinden"
+  },
+  "search": {
+    "placeholder": "Eieren, chocoladepasta, broodjes, prei …",
+    "searchAria": "Zoek naar een item of maak een nieuw item aan",
+    "quantityLabel": "Hoeveelheid",
+    "quantityAria": "Hoeveelheid of notitie",
+    "hint": "Niet gevonden? De ingevoerde term wordt als eigen Bring!-item toegevoegd."
+  },
+  "list": {
+    "kicker": "Jouw lijst",
+    "title": "Boodschappenlijst",
+    "emptyTitle": "De boodschappenmand staat te wachten.",
+    "emptyHint": "Tik hieronder op een standaarditem of zoek het direct op.",
+    "recentToggle": "Recent gekocht ({{count}})",
+    "backToList": "Terug op de lijst"
+  },
+  "catalog": {
+    "sourceBring": "Bring!-assortiment",
+    "sourceDefault": "Basisassortiment",
+    "resultsFor": "Resultaten voor \"{{query}}\"",
+    "quickAdd": "Snel toevoegen",
+    "customCategory": "Eigen items",
+    "shownCount": "{{count}} getoond",
+    "departmentsAria": "Productcategorieën",
+    "popular": "Populair",
+    "onList": "Op de lijst",
+    "noResultsTitle": "Geen catalogustreffer – geen probleem.",
+    "noResultsHint": "Gebruik \"Toevoegen\" om \"{{query}}\" als eigen item aan te maken."
+  },
+  "accountModal": {
+    "eyebrow": "Optionele integratie",
+    "title": "Bring!-boodschappen verbinden",
+    "connectedEyebrow": "Live verbonden",
+    "defaultListName": "Gezinslijst",
+    "securityNote": "Jouw wachtwoord wordt versleuteld op jouw eigen server opgeslagen en nooit in de browser bewaard.",
+    "syncNow": "Nu synchroniseren",
+    "disconnect": "Loskoppelen",
+    "intro": "Neem jouw bestaande Bring!-lijst over. Kies na het inloggen precies de lijst die bij de gezinsplanner hoort.",
+    "emailLabel": "Bring!-e-mailadres",
+    "emailPlaceholder": "naam@voorbeeld.nl",
+    "passwordLabel": "Bring!-wachtwoord",
+    "passwordPlaceholder": "Alleen gebruikt voor veilig inloggen",
+    "selectListLabel": "Welke lijst moet worden verbonden?",
+    "connectSelected": "Geselecteerde lijst verbinden",
+    "loginButton": "Veilig inloggen met Bring!",
+    "fineprint": "LX Family Planner is geen product van Bring! Labs AG. Je kunt op elk moment loskoppelen.",
+    "toastConnectedTitle": "Bring! is verbonden",
+    "toastConnectedBody": "{{listName}} wordt nu gesynchroniseerd.",
+    "toastDefaultList": "De boodschappenlijst"
+  }
+}

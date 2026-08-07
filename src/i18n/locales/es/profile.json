@@ -1,0 +1,185 @@
+{
+  "positions": {
+    "mama": "Mamá",
+    "papa": "Papá",
+    "kind": "Niño",
+    "teenager": "Adolescente",
+    "tochter_erwachsen": "Hija adulta",
+    "sohn_erwachsen": "Hijo adulto",
+    "oma": "Abuela",
+    "opa": "Abuelo",
+    "betreute_person": "Persona cuidada",
+    "tante": "Tía",
+    "onkel": "Tío",
+    "patin": "Madrina",
+    "pate": "Padrino",
+    "haustier": "Mascota",
+    "familienmitglied": "Miembro de la familia",
+    "wanddisplay": "Pantalla de pared"
+  },
+  "roleLabels": {
+    "adult": "Adulto",
+    "child": "Niño",
+    "teen": "Adolescente",
+    "senior": "Abuelos",
+    "member": "Miembro de la familia",
+    "pet": "Mascota",
+    "wall": "Pantalla de pared"
+  },
+  "modal": {
+    "eyebrow": {
+      "protected": "Perfil protegido",
+      "edit": "Editar perfil",
+      "new": "Nuevo perfil",
+      "family": "Tu familia"
+    },
+    "title": {
+      "unlock": "Desbloquear a {{name}}",
+      "edit": "Editar perfil",
+      "create": "Crear perfil",
+      "whoseTurn": "¿Quién es ahora?"
+    }
+  },
+  "toasts": {
+    "switched": "Perfil cambiado",
+    "greeting": "¡Hola, {{name}}!",
+    "locked": "Perfil bloqueado",
+    "pinIncorrect": "PIN incorrecto",
+    "updated": "Perfil actualizado",
+    "savedMessage": "{{name}} se ha guardado."
+  },
+  "confirmDelete": "¿Seguro que quieres eliminar este perfil familiar?",
+  "pin": {
+    "protectedHeading": "El perfil de {{name}} está protegido",
+    "enterPin": "Introduce el PIN personal del perfil.",
+    "petPasswordNeeded": "Salir de un perfil de mascota requiere la contraseña familiar.",
+    "childPasswordNeeded": "Salir de un perfil de niño requiere la contraseña familiar.",
+    "pinPlaceholder": "PIN del perfil",
+    "familyPasswordPlaceholder": "Contraseña familiar",
+    "unlock": "Desbloquear"
+  },
+  "list": {
+    "intro": "Toca un perfil para entrar directamente en su mundo familiar personal.",
+    "selectAria": "Seleccionar a {{name}}, {{position}}",
+    "activeProfile": "Perfil activo",
+    "pinProtected": "Protegido con PIN",
+    "petBadge": "Perfil de patitas",
+    "editMember": "Editar a {{name}}",
+    "managedHeading": "Gestionado por ti",
+    "managedSubheading": "Sin inicio de sesión · para eventos y tareas",
+    "managedNoAccess": "{{position}} · sin acceso propio",
+    "eventsTitle": "Eventos",
+    "tasksTitle": "Tareas",
+    "addMember": "Añadir miembro"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "deviceHint": "Para {{name}} en este dispositivo",
+    "petModeActive": "Modo mascota activo",
+    "petModeHint": "Sin chat, notificaciones ni funciones de cuenta",
+    "headingFor": "Notificaciones para {{name}}",
+    "savedPerDevice": "Esta selección se guarda para este perfil y este dispositivo.",
+    "on": "Activado",
+    "off": "Desactivado",
+    "serverNotConfigured": "Las notificaciones nativas de Android todavía no están configuradas en el servidor. Encontrarás las instrucciones en el Centro de padres.",
+    "deniedNative": "Android está bloqueando las notificaciones. Permítelas en Aplicaciones → LX Family Planner → Notificaciones.",
+    "deniedBrowser": "El navegador está bloqueando las notificaciones. Permítelas una vez en los ajustes del sitio del navegador.",
+    "showPreviews": "Mostrar el contenido en las notificaciones",
+    "sendTest": "Enviar notificación de prueba"
+  },
+  "modules": {
+    "profileTitle": "Secciones visibles",
+    "profileHint": "Elige qué secciones puede ver y abrir desde la navegación este perfil.",
+    "labels": {
+      "chat": "Chat",
+      "calendar": "Calendario",
+      "trash": "Calendario de basura",
+      "shopping": "Compra",
+      "meals": "Plan de comidas",
+      "tasks": "Tareas",
+      "family-life": "Vida familiar",
+      "board": "Tablón",
+      "cloud": "Family Cloud",
+      "mail": "Correo familiar"
+    }
+  },
+  "avatars": {
+    "av-1": "León valiente",
+    "av-2": "Zorro astuto",
+    "av-3": "Perro aventurero",
+    "av-4": "Gata ninja",
+    "av-5": "Panda rojo",
+    "av-6": "Compañero espacial"
+  },
+  "form": {
+    "usage": "¿Cómo se usará el perfil?",
+    "ownLogin": "Con su propio inicio de sesión",
+    "ownLoginHint": "Aparece en el selector de perfiles y puede abrir el planificador de forma independiente.",
+    "managedOnly": "Solo gestionado por nosotros",
+    "managedOnlyHint": "Para la abuela, el abuelo o personas cuidadas sin acceso propio.",
+    "managedNote": "Perfil de organización sin inicio de sesión",
+    "managedNoteHint": "El perfil aparece en calendarios y tareas, pero no en el inicio de sesión, en el selector de perfiles ni en el chat.",
+    "petNote": "Perfil de mascota",
+    "petNoteHint": "Muestra tareas de cuidado y citas de la mascota; sin chat, notificaciones ni tienda de estrellas.",
+    "petName": "Nombre de la mascota",
+    "petNamePlaceholder": "p. ej. Luna",
+    "namePlaceholder": "p. ej. Nombre de ejemplo",
+    "birthDate": "Fecha de nacimiento",
+    "birthDateHint": "Crea automáticamente entradas y recordatorios en el calendario familiar.",
+    "position": "Posición en la familia",
+    "avatar": "Foto de perfil",
+    "ownPhoto": "Foto propia",
+    "color": "Color del perfil",
+    "newPin": "Nuevo PIN del perfil (opcional)",
+    "pin": "PIN del perfil (opcional)",
+    "pinKeepPlaceholder": "Vacío = sin cambios",
+    "pinPlaceholder": "Protección personal",
+    "saving": "Guardando …",
+    "save": "Guardar perfil",
+    "delete": "Eliminar perfil"
+  },
+  "quickAdd": {
+    "title": "Añadir rápido",
+    "types": {
+      "event": "Evento",
+      "shopping": "Compra",
+      "task": "Tarea",
+      "note": "Nota"
+    },
+    "titleLabels": {
+      "event": "Título del evento",
+      "shopping": "Nombre del artículo",
+      "task": "Tarea",
+      "note": "Título de la nota"
+    },
+    "titlePlaceholder": "Escribe aquí…",
+    "forWhom": "¿Para quién?",
+    "everyone": "Todos (compartido)",
+    "managed": "gestionado",
+    "allDay": "Evento de todo el día",
+    "allDayHint": "Sin hora fija; puede durar varios días.",
+    "startsOn": "Empieza el",
+    "startsAt": "Hora de inicio",
+    "endsOn": "Termina el (opcional)",
+    "endsOnInclusive": "Hasta (opcional)",
+    "endsAt": "Hora de fin (opcional)",
+    "locationOptional": "Lugar (opcional)",
+    "locationPlaceholder": "p. ej. Dr. García, colegio",
+    "inviteFamilies": "Invitar a familias conectadas",
+    "inviteFamiliesHint": "El evento aparece para todas las familias seleccionadas; los eventos privados siguen por separado.",
+    "categoryLabel": "Categoría",
+    "shoppingCategories": {
+      "produce": "Fruta y verdura",
+      "dairy": "Lácteos y refrigerados",
+      "bakery": "Panadería",
+      "pantry": "Despensa",
+      "drinks": "Bebidas",
+      "household": "Droguería y hogar"
+    },
+    "quantity": "Cantidad",
+    "assignedTo": "Asignada a",
+    "starPoints": "Puntos de estrellas",
+    "noteText": "Texto de la nota",
+    "notePlaceholder": "Introduce el contenido…"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "errors": {
+    "attachmentLoad": "Non è stato possibile caricare l'allegato."
+  },
+  "imageViewer": {
+    "label": "Immagine della chat",
+    "viewLarge": "Vedi {{name}} a schermo intero",
+    "closeAria": "Chiudi vista immagine",
+    "tapToClose": "Tocca fuori dall'immagine per chiudere"
+  },
+  "attachment": {
+    "open": "Apri",
+    "download": "Scarica",
+    "kinds": {
+      "apk": "App Android",
+      "archive": "Archivio",
+      "pdf": "Documento PDF",
+      "video": "Video",
+      "audio": "Audio",
+      "document": "Documento"
+    }
+  },
+  "toasts": {
+    "attachmentOpenFailedTitle": "Allegato non aperto",
+    "downloadFailedTitle": "Scaricamento non riuscito",
+    "attachmentLimitTitle": "Limite allegati raggiunto",
+    "attachmentLimitBody": "Un messaggio può includere al massimo {{max}} file.",
+    "fileTooLargeTitle": "File troppo grande",
+    "fileTooLargeBody": "{{name}} è più grande di 100 MB.",
+    "selectionTrimmedTitle": "Selezione ridotta",
+    "selectionTrimmedBody_one": "È stato allegato il primo file.",
+    "selectionTrimmedBody_other": "Sono stati allegati i primi {{count}} file.",
+    "attachmentSendFailedTitle": "Allegato non inviato",
+    "attachmentSendFailedBody": "Non è stato possibile salvare il file nel Cloud di famiglia."
+  },
+  "preview": {
+    "fileShared": "📎 File condiviso",
+    "invitedChat": "Chat della famiglia invitata",
+    "openGroup": "Apri gruppo",
+    "noMessages": "Ancora nessun messaggio",
+    "photo": "📷 Foto",
+    "file": "📎 File",
+    "newMessage": "Nuovo messaggio"
+  },
+  "directory": {
+    "kicker": "Chiacchiere di famiglia",
+    "title": "Chat",
+    "groupChannel": "Tutti insieme",
+    "directLabel": "Diretta",
+    "invitedLabel": "Invitata"
+  },
+  "room": {
+    "familyProfiles_one": "{{count}} profilo famiglia",
+    "familyProfiles_other": "{{count}} profili famiglia",
+    "guestInvited": "Sei stato invitato personalmente",
+    "groupTitle": "Chat di famiglia",
+    "visibleToAll": "Visibile a tutti",
+    "guestAccess": "Accesso ospite una volta accettato",
+    "directMessage": "Messaggio diretto"
+  },
+  "empty": {
+    "title": "Qui è ancora tranquillo",
+    "prompt": "Scrivi il primo messaggio a {{name}}.",
+    "familyName": "la famiglia"
+  },
+  "message": {
+    "you": "Tu",
+    "chatPhoto": "Foto della chat",
+    "sentAttachmentAlt": "Allegato inviato",
+    "viewLarge": "Vedi a schermo intero"
+  },
+  "composer": {
+    "removeAttachment": "Rimuovi {{name}}",
+    "uploadingFile": "Salvataggio del file {{current}} di {{total}} nel cloud",
+    "sendingMessage": "Invio del messaggio",
+    "attachFiles": "Allega file",
+    "placeholder": "Messaggio a {{name}} …",
+    "placeholderFamilyName": "la famiglia",
+    "sending": "Invio …",
+    "send": "Invia",
+    "cloudNote": "Gli allegati vengono archiviati automaticamente nell'archivio famiglia · fino a 100 MB"
+  }
+}

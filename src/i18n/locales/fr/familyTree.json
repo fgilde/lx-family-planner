@@ -1,0 +1,179 @@
+{
+  "toggle": {
+    "on": "Activé",
+    "off": "Désactivé"
+  },
+  "access": {
+    "grants": {
+      "sharedCalendar": {
+        "label": "Événements partagés",
+        "help": "Cette famille peut vous inviter à des événements visibles par les deux familles."
+      },
+      "tasks": {
+        "label": "Tâches",
+        "help": "Les adultes de cette famille peuvent donner des tâches à vos enfants."
+      },
+      "rewards": {
+        "label": "Étoiles & récompenses",
+        "help": "Autorise les points d'étoiles sur les tâches et les récompenses personnalisées."
+      },
+      "pocketMoney": {
+        "label": "Argent de poche",
+        "help": "Autorise des écritures traçables d'argent de poche pour vos enfants."
+      }
+    },
+    "childPosition": {
+      "teenager": "Adolescent",
+      "grandchild": "Petit-enfant"
+    },
+    "header": {
+      "kicker": "S'organiser ensemble en sécurité",
+      "title": "Permissions dans le réseau familial",
+      "description": "Vous décidez par connexion. L'autre famille ne peut pas voir les calendriers privés, les discussions ni le contenu du tableau d'affichage."
+    },
+    "card": {
+      "subtitle": "Ce que cette famille peut faire pour vos enfants",
+      "grantedFromOther": "Partagé avec vous depuis là-bas :",
+      "nothingYet": "rien pour le moment"
+    },
+    "planner": {
+      "kicker": "Pour les petits-enfants",
+      "title": "De famille à famille",
+      "description": "Tâches, récompenses ou argent de poche atterrissent directement et de façon traçable dans le compte familial de l'enfant.",
+      "familyBranch": "Branche familiale",
+      "tools": {
+        "task": "Tâche",
+        "reward": "Récompense",
+        "money": "Argent de poche"
+      },
+      "task": {
+        "label": "Tâche",
+        "placeholder": "ex. Aider mamie au jardin",
+        "dueDate": "Pour quand ?",
+        "stars": "Étoiles"
+      },
+      "reward": {
+        "label": "Récompense",
+        "placeholder": "ex. Un après-midi au zoo",
+        "costStars": "Prix en étoiles",
+        "image": "Image de la récompense"
+      },
+      "money": {
+        "amount": "Montant en euros",
+        "note": "Pour quoi ?",
+        "defaultNote": "De la part de mamie & papi"
+      },
+      "submit": "Envoyer au profil de l'enfant"
+    }
+  },
+  "tree": {
+    "relations": {
+      "parent": {
+        "label": "Famille parente",
+        "help": "La famille sélectionnée se situe au-dessus de votre famille."
+      },
+      "child": {
+        "label": "Famille enfant",
+        "help": "La famille sélectionnée est une branche familiale en dessous de vous."
+      },
+      "sibling": {
+        "label": "Famille sœur",
+        "help": "Les deux familles sont au même niveau."
+      },
+      "relative": {
+        "label": "Autres parents",
+        "help": "Par exemple tantes, oncles, cousins ou famille de cœur."
+      },
+      "fallback": "Famille apparentée"
+    },
+    "node": {
+      "ourFamily": "Notre famille",
+      "profiles_one": "{{count}} profil",
+      "profiles_other": "{{count}} profils"
+    },
+    "branch": {
+      "membersAria": "Membres de {{familyName}}",
+      "thisFamily": "cette famille",
+      "noProfiles": "Pas encore de profils"
+    },
+    "header": {
+      "kicker": "Connexions uniquement avec confirmation",
+      "title": "Votre réseau familial",
+      "description": "Reliez de vrais comptes familiaux. Une connexion ne devient visible que lorsque l'autre famille accepte.",
+      "closeAria": "Fermer l'arbre généalogique"
+    },
+    "generations": {
+      "parents": "Familles parentes",
+      "parentsEmpty": "Pas encore liées",
+      "children": "Familles enfants",
+      "childrenEmpty": "Pas encore de branche familiale",
+      "ourAccount": "Votre compte"
+    },
+    "inbox": {
+      "kicker": "Nécessite votre décision",
+      "title": "Demandes familiales",
+      "request": "{{familyName}} souhaite vous ajouter comme {{relation}}.",
+      "accept": "Accepter",
+      "decline": "Refuser"
+    },
+    "request": {
+      "kicker": "Connecter un compte familial",
+      "title": "Nouvelle connexion",
+      "registeredFamily": "Famille enregistrée",
+      "selectFamily": "Sélectionner une famille…",
+      "relationLabel": "Cette famille est votre…",
+      "send": "Envoyer la demande",
+      "allConnected": "Toutes les familles actuellement enregistrées sont déjà connectées ou en demande.",
+      "adultsOnly": "Seuls les adultes peuvent lier des comptes familiaux."
+    },
+    "manage": {
+      "kicker": "Gestion",
+      "title": "Connexions & demandes",
+      "pending": "En attente de confirmation",
+      "removeTitle": "Retirer la connexion",
+      "empty": "Pas encore de connexions."
+    }
+  },
+  "settings": {
+    "header": {
+      "eyebrow": "Administration familiale",
+      "title": "Notre foyer"
+    },
+    "form": {
+      "newImage": "Nouvelle photo de famille",
+      "familyName": "Nom de famille",
+      "badge": "Petite phrase",
+      "badgeDefault": "Notre famille",
+      "badgePlaceholder": "ex. Notre chez-nous",
+      "newPassword": "Nouveau mot de passe familial (facultatif)",
+      "passwordPlaceholder": "Laisser vide = inchangé"
+    },
+    "household": {
+      "title": "Afficher un second lieu de planification",
+      "description": "Affiche « Chez mamie & papi » comme zone de planification propre dans l'en-tête de l'application.",
+      "why": "Pourquoi cela existe-t-il ?",
+      "explainer": "Idéal quand mamie et papi n'utilisent pas leur propre compte familial : événements, tâches, plan de repas, dates de collecte des déchets et tableau d'affichage peuvent être planifiés séparément pour leur foyer."
+    },
+    "about": {
+      "version": "Version {{version}}"
+    },
+    "github": {
+      "aria": "Voir LX Family Planner sur GitHub",
+      "kicker": "Open Source",
+      "title": "Vous aimez LX ?",
+      "description": "Visitez le projet ou laissez une étoile."
+    },
+    "actions": {
+      "saving": "Enregistrement…",
+      "save": "Enregistrer les modifications",
+      "deleteAccount": "Supprimer le compte familial"
+    },
+    "delete": {
+      "title": "Supprimer définitivement ce compte familial ?",
+      "description": "Cela retire les profils, événements, tâches et tout autre contenu familial. Cette action est irréversible.",
+      "passwordLabel": "Saisissez le mot de passe familial pour confirmer",
+      "deleting": "Suppression…",
+      "confirm": "Supprimer définitivement la famille"
+    }
+  }
+}

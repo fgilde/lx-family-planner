@@ -1,0 +1,197 @@
+{
+  "kitchen": {
+    "widgets": {
+      "calendar": {
+        "label": "Oggi",
+        "description": "Tutti gli eventi di oggi"
+      },
+      "meals": {
+        "label": "Pasti",
+        "description": "Piano pasti di oggi"
+      },
+      "tasks": {
+        "label": "Incombenze",
+        "description": "Incombenze aperte e approvazioni"
+      },
+      "shopping": {
+        "label": "Spesa",
+        "description": "Articoli ancora necessari"
+      },
+      "chat": {
+        "label": "Chat di famiglia",
+        "description": "Gli ultimi messaggi famiglia"
+      },
+      "board": {
+        "label": "Bacheca",
+        "description": "Note famiglia attuali"
+      },
+      "trash": {
+        "label": "Raccolta rifiuti",
+        "description": "La prossima data di raccolta"
+      },
+      "family": {
+        "label": "Famiglia",
+        "description": "Profili e stelle a colpo d'occhio"
+      },
+      "homeAssistant": {
+        "label": "Controllo casa",
+        "description": "Dispositivi, sensori e scene come grandi riquadri tablet"
+      }
+    },
+    "household": {
+      "omaOpa": "Nonna e nonno",
+      "default": "La nostra casa"
+    },
+    "live": "In diretta",
+    "allInView": "Tutto a colpo d'occhio.",
+    "signedInAs": "Accesso come {{name}}",
+    "quickActions": {
+      "event": "Evento",
+      "shopping": "Spesa",
+      "standardView": "Vista standard",
+      "tiles": "Riquadri"
+    },
+    "completeTask": {
+      "kicker": "Spunta incombenza",
+      "title": "Chi l'ha completata?",
+      "select": "Sono stato io",
+      "cancel": "Non ancora"
+    },
+    "cards": {
+      "calendar": {
+        "title": "Oggi",
+        "count_one": "{{count}} evento",
+        "count_other": "{{count}} eventi",
+        "allDay": "tutto il giorno",
+        "familyFallback": "Famiglia",
+        "empty": "Ancora niente in programma per oggi."
+      },
+      "meals": {
+        "title": "Pasti",
+        "empty": "Ancora nessun pasto pianificato."
+      },
+      "tasks": {
+        "title": "Incombenze",
+        "count_one": "{{count}} aperta",
+        "count_other": "{{count}} aperte",
+        "pendingApproval": "In attesa di revisione",
+        "shared": "Incombenza condivisa",
+        "empty": "Tutte le incombenze sono fatte."
+      },
+      "shopping": {
+        "title": "Spesa",
+        "count_one": "{{count}} articolo",
+        "count_other": "{{count}} articoli",
+        "empty": "Tutto comprato."
+      },
+      "chat": {
+        "title": "Chat di famiglia",
+        "count_one": "{{count}} messaggio",
+        "count_other": "{{count}} messaggi",
+        "photo": "📷 Foto",
+        "newMessage": "Nuovo messaggio",
+        "senderFallback": "Famiglia",
+        "empty": "Ancora nessun messaggio."
+      },
+      "board": {
+        "title": "Bacheca",
+        "count_one": "{{count}} nota",
+        "count_other": "{{count}} note",
+        "empty": "La bacheca è vuota."
+      },
+      "trash": {
+        "title": "Prossima raccolta",
+        "noDate": "Nessuna data",
+        "empty": "Ancora nessuna raccolta programmata."
+      },
+      "family": {
+        "title": "Famiglia",
+        "count_one": "{{count}} profilo",
+        "count_other": "{{count}} profili"
+      }
+    }
+  },
+  "pet": {
+    "noDateAppointment": "Appuntamento senza data",
+    "appointmentWithTime": "{{day}} · {{time}}",
+    "petFallbackName": "Amico peloso",
+    "petAlt": "Animale",
+    "kicker": "Profilo zampa · Coccole di famiglia",
+    "heroTitle": "Tutto per {{name}} a colpo d'occhio",
+    "heroText": "Appuntamenti, cure e pasti in un unico posto tranquillo: niente chat, stelle o menu superflui.",
+    "caredFor": "Curato",
+    "openCareItems": "voci di cura aperte",
+    "overviewAria": "Panoramica zampa",
+    "nextAppointment": "Prossimo appuntamento",
+    "nothingPlanned": "Niente in programma",
+    "calendarFree": "Il calendario è libero.",
+    "care": "Cure",
+    "careOpen_one": "{{count}} voce aperta",
+    "careOpen_other": "{{count}} voci aperte",
+    "allDone": "Tutto fatto",
+    "managedByAdults": "Seguito dagli adulti.",
+    "petMode": "Modalità animale",
+    "calmProtected": "Tranquillo e protetto",
+    "noChatNoAccount": "Niente chat e nessuna funzione conto.",
+    "carePlan": "Piano di cure",
+    "whatsUpFor": "Cosa c'è in arrivo per {{name}}",
+    "familyTakesCare": "La famiglia se ne occupa",
+    "careCategoryFallback": "Cure e alimentazione",
+    "openLabel": "aperte",
+    "allCaredFor": "Tutto ben curato",
+    "noCareItems": "Al momento non ci sono voci di cura aperte per {{name}}.",
+    "appointmentsHealth": "Appuntamenti e salute",
+    "pawCalendar": "Calendario zampa",
+    "calendar": "Calendario",
+    "noDateShort": "aperto",
+    "noAppointments": "Nessun appuntamento in programma",
+    "pawCalendarFree": "Il calendario zampa è completamente libero in questo momento.",
+    "importantNotes": "Note importanti",
+    "noteFallback": "Nota"
+  },
+  "homeAssistant": {
+    "states": {
+      "on": "Acceso",
+      "off": "Spento",
+      "open": "Aperto",
+      "closed": "Chiuso",
+      "opening": "In apertura …",
+      "closing": "In chiusura …",
+      "home": "In casa",
+      "notHome": "Fuori casa",
+      "unavailable": "Non disponibile",
+      "unknown": "Sconosciuto",
+      "clear": "Sereno",
+      "cloudy": "Nuvoloso",
+      "rainy": "Pioggia"
+    },
+    "defaultTitle": "La nostra casa",
+    "subtitle": "Home Assistant · in diretta",
+    "refreshAria": "Aggiorna lo stato casa",
+    "emptyTitle": "Ancora nessun riquadro casa",
+    "emptyHint": "Un profilo genitore può condividere dispositivi e sensori nel centro genitori.",
+    "openCover": "Apri",
+    "closeCover": "Chiudi",
+    "adultsOnlyConfirm": "Solo adulti, con conferma",
+    "control": "Controlla"
+  },
+  "familyCloud": {
+    "title": "Archivio di famiglia",
+    "openAria": "Apri archivio famiglia",
+    "open": "Apri",
+    "preparing": "Preparazione dell'archivio",
+    "checkConnection": "Puoi controllare la connessione nel centro genitori.",
+    "toParentCenter": "Al centro genitori",
+    "sharedStorage": "Spazio condiviso",
+    "loading": "Caricamento",
+    "ofTotal": "di {{size}}",
+    "safeForFamily": "sicuro per la tua famiglia",
+    "openingArchive": "Apertura archivio …",
+    "noFiles": "Ancora nessun file: qui c'è spazio per i tuoi ricordi.",
+    "upload": "Carica sul cloud",
+    "toast": {
+      "fileTooBigTitle": "File troppo grande",
+      "fileTooBigMessage": "{{name}} è più grande di 100 MB."
+    }
+  }
+}

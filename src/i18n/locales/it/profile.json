@@ -1,0 +1,185 @@
+{
+  "positions": {
+    "mama": "Mamma",
+    "papa": "Papà",
+    "kind": "Bambino",
+    "teenager": "Ragazzo",
+    "tochter_erwachsen": "Figlia adulta",
+    "sohn_erwachsen": "Figlio adulto",
+    "oma": "Nonna",
+    "opa": "Nonno",
+    "betreute_person": "Persona assistita",
+    "tante": "Zia",
+    "onkel": "Zio",
+    "patin": "Madrina",
+    "pate": "Padrino",
+    "haustier": "Animale",
+    "familienmitglied": "Membro della famiglia",
+    "wanddisplay": "Vista bacheca"
+  },
+  "roleLabels": {
+    "adult": "Adulto",
+    "child": "Bambino",
+    "teen": "Ragazzo",
+    "senior": "Nonni",
+    "member": "Membro famiglia",
+    "pet": "Animale",
+    "wall": "Vista bacheca"
+  },
+  "modal": {
+    "eyebrow": {
+      "protected": "Profilo protetto",
+      "edit": "Modifica profilo",
+      "new": "Nuovo profilo",
+      "family": "La tua famiglia"
+    },
+    "title": {
+      "unlock": "Sblocca {{name}}",
+      "edit": "Modifica profilo",
+      "create": "Crea profilo",
+      "whoseTurn": "A chi tocca ora?"
+    }
+  },
+  "toasts": {
+    "switched": "Profilo cambiato",
+    "greeting": "Ciao {{name}}!",
+    "locked": "Profilo bloccato",
+    "pinIncorrect": "PIN non corretto",
+    "updated": "Profilo aggiornato",
+    "savedMessage": "{{name}} è stato salvato."
+  },
+  "confirmDelete": "Eliminare davvero questo profilo famiglia?",
+  "pin": {
+    "protectedHeading": "Il profilo di {{name}} è protetto",
+    "enterPin": "Inserisci il PIN personale del profilo.",
+    "petPasswordNeeded": "Uscire da un profilo animale richiede la password famiglia.",
+    "childPasswordNeeded": "Uscire da un profilo bambino richiede la password famiglia.",
+    "pinPlaceholder": "PIN del profilo",
+    "familyPasswordPlaceholder": "Password famiglia",
+    "unlock": "Sblocca"
+  },
+  "list": {
+    "intro": "Tocca un profilo per passare direttamente al suo mondo famiglia personale.",
+    "selectAria": "Seleziona {{name}}, {{position}}",
+    "activeProfile": "Profilo attivo",
+    "pinProtected": "Protetto con PIN",
+    "petBadge": "Profilo zampa",
+    "editMember": "Modifica {{name}}",
+    "managedHeading": "Gestito da te",
+    "managedSubheading": "Senza accesso · per eventi e incombenze",
+    "managedNoAccess": "{{position}} · senza accesso proprio",
+    "eventsTitle": "Eventi",
+    "tasksTitle": "Incombenze",
+    "addMember": "Aggiungi membro"
+  },
+  "notifications": {
+    "title": "Notifiche",
+    "deviceHint": "Per {{name}} su questo dispositivo",
+    "petModeActive": "Modalità animale attiva",
+    "petModeHint": "Senza chat, notifiche e funzioni conto",
+    "headingFor": "Notifiche per {{name}}",
+    "savedPerDevice": "Questa selezione viene salvata per questo profilo e questo dispositivo.",
+    "on": "Attiva",
+    "off": "Disattiva",
+    "serverNotConfigured": "Le notifiche Android native non sono ancora configurate sul server. Trovi le istruzioni nel Centro genitori.",
+    "deniedNative": "Android sta bloccando le notifiche. Consentile sotto App → LX Family Planner → Notifiche.",
+    "deniedBrowser": "Il browser sta bloccando le notifiche. Consentile una volta nelle impostazioni del sito del browser.",
+    "showPreviews": "Mostra il contenuto nelle notifiche",
+    "sendTest": "Invia notifica di test"
+  },
+  "modules": {
+    "profileTitle": "Sezioni visibili",
+    "profileHint": "Scegli quali sezioni questo profilo può vedere e aprire dalla navigazione.",
+    "labels": {
+      "chat": "Chat",
+      "calendar": "Calendario",
+      "trash": "Calendario rifiuti",
+      "shopping": "Spesa",
+      "meals": "Piano pasti",
+      "tasks": "Incombenze",
+      "family-life": "Vita di famiglia",
+      "board": "Bacheca",
+      "cloud": "Cloud di famiglia",
+      "mail": "Posta famiglia"
+    }
+  },
+  "avatars": {
+    "av-1": "Leone coraggioso",
+    "av-2": "Volpe furba",
+    "av-3": "Cane avventuroso",
+    "av-4": "Gatto ninja",
+    "av-5": "Panda rosso",
+    "av-6": "Compare spaziale"
+  },
+  "form": {
+    "usage": "Come verrà usato il profilo?",
+    "ownLogin": "Con accesso proprio",
+    "ownLoginHint": "Appare nel selettore profili e può aprire l'organizzatore in modo indipendente.",
+    "managedOnly": "Solo gestito da noi",
+    "managedOnlyHint": "Per nonna, nonno o persone assistite senza accesso proprio.",
+    "managedNote": "Profilo di organizzazione senza accesso",
+    "managedNoteHint": "Il profilo appare in calendari e incombenze, ma non all'accesso, nel selettore profili o in chat.",
+    "petNote": "Profilo animale",
+    "petNoteHint": "Mostra incombenze di cura e appuntamenti dell'animale, senza chat, notifiche o negozio delle stelle.",
+    "petName": "Nome dell'animale",
+    "petNamePlaceholder": "es. Luna",
+    "namePlaceholder": "es. Nome esempio",
+    "birthDate": "Data di nascita",
+    "birthDateHint": "Crea automaticamente voci calendario famiglia e promemoria.",
+    "position": "Posizione nella famiglia",
+    "avatar": "Foto profilo",
+    "ownPhoto": "Foto propria",
+    "color": "Colore del profilo",
+    "newPin": "Nuovo PIN profilo (facoltativo)",
+    "pin": "PIN del profilo (facoltativo)",
+    "pinKeepPlaceholder": "Lascia vuoto = invariato",
+    "pinPlaceholder": "Protezione personale",
+    "saving": "Salvataggio …",
+    "save": "Salva profilo",
+    "delete": "Elimina profilo"
+  },
+  "quickAdd": {
+    "title": "Aggiunta rapida",
+    "types": {
+      "event": "Evento",
+      "shopping": "Spesa",
+      "task": "Incombenza",
+      "note": "Nota"
+    },
+    "titleLabels": {
+      "event": "Titolo evento",
+      "shopping": "Nome articolo",
+      "task": "Incombenza",
+      "note": "Titolo nota"
+    },
+    "titlePlaceholder": "Scrivi qui…",
+    "forWhom": "Per chi?",
+    "everyone": "Tutti (condiviso)",
+    "managed": "gestito",
+    "allDay": "Evento di una giornata",
+    "allDayHint": "Senza orario fisso, può durare più giorni.",
+    "startsOn": "Inizia il",
+    "startsAt": "Ora di inizio",
+    "endsOn": "Finisce il (facoltativo)",
+    "endsOnInclusive": "Fino al (facoltativo)",
+    "endsAt": "Ora di fine (facoltativo)",
+    "locationOptional": "Luogo (facoltativo)",
+    "locationPlaceholder": "es. Dott. Rossi, scuola",
+    "inviteFamilies": "Invita famiglie collegate",
+    "inviteFamiliesHint": "L'evento appare per tutte le famiglie selezionate; gli eventi privati restano separati.",
+    "categoryLabel": "Categoria",
+    "shoppingCategories": {
+      "produce": "Frutta e verdura",
+      "dairy": "Latticini e refrigerati",
+      "bakery": "Panetteria",
+      "pantry": "Dispensa",
+      "drinks": "Bevande",
+      "household": "Drogheria e casa"
+    },
+    "quantity": "Quantità",
+    "assignedTo": "Assegnata a",
+    "starPoints": "Punti stella",
+    "noteText": "Testo della nota",
+    "notePlaceholder": "Inserisci il contenuto…"
+  }
+}

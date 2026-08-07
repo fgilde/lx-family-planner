@@ -1,0 +1,140 @@
+{
+  "header": {
+    "title": "Incombenze e negozio premi a stelle",
+    "createReward": "Crea un premio personalizzato",
+    "assignTask": "Assegna una nuova incombenza",
+    "intro": "I bambini segnalano un'incombenza come fatta. Le stelle vengono assegnate solo quando il genitore che l'ha creata ne conferma il completamento.",
+    "approvalsWaiting_one": "{{count}} incombenza aspetta la tua revisione",
+    "approvalsWaiting_other": "{{count}} incombenze aspettano la tua revisione"
+  },
+  "repeat": {
+    "none": "Una tantum",
+    "daily": "Ogni giorno",
+    "weekdays": "Da lunedì a venerdì",
+    "weekly": "Ogni settimana",
+    "monthly": "Ogni mese",
+    "recurring": "Ricorrente"
+  },
+  "memberCard": {
+    "managedOnly": "Solo organizzata",
+    "noTasks": "Nessuna incombenza assegnata a {{name}}."
+  },
+  "shared": {
+    "title": "Affrontatela insieme",
+    "description": "Qualsiasi persona selezionata può prendere queste incombenze. Le stelle vanno a chi le completa.",
+    "open": "Chi finisce per primo spunta l'incombenza",
+    "reportedBy": "{{name}} dice che è fatta, in attesa di conferma",
+    "completedBy": "Completata da {{name}}",
+    "someone": "qualcuno nella famiglia"
+  },
+  "taskItem": {
+    "reviewWaitingFor": "La revisione aspetta {{name}}.",
+    "fallbackCreator": "il creatore",
+    "fallbackParent": "un genitore",
+    "statusConfirmed": "Confermata e accreditata",
+    "statusPendingWith": "In attesa di revisione da {{name}}",
+    "statusCreatedBy": "Creata da {{name}}",
+    "statusTapWhenDone": "Tocca quando hai finito",
+    "rotationTitle": "Ruota a ogni ripetizione",
+    "fairRotation": "Rotazione equa ({{count}})",
+    "approve": "Davvero fatta",
+    "reject": "Riprova",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "confirmDelete": "Eliminare davvero?"
+  },
+  "shop": {
+    "title": "Negozio premi a stelle",
+    "titleForChild": "Negozio premi a stelle per {{name}}",
+    "editRewardTitle": "Modifica premio",
+    "deleteRewardTitle": "Elimina premio",
+    "forChild": "🧒 Per {{name}}",
+    "forAllChildren": "✨ Per tutti i bambini",
+    "requiresStars": "Richiede {{count}} stelle",
+    "redeemFor": "Riscatta per {{name}}!"
+  },
+  "rewardModal": {
+    "editTitle": "Modifica premio",
+    "createTitle": "Crea nuovo premio",
+    "titleLabel": "Titolo del premio",
+    "titlePlaceholder": "es. 1 gita allo zoo, 30 min di videogiochi…",
+    "forWhichChild": "Per quale bambino è questo premio?",
+    "childOption": "🧒 {{name}}",
+    "starCost": "Costo in stelle",
+    "imageLabel": "Immagine del premio"
+  },
+  "taskModal": {
+    "editTitle": "Modifica incombenza",
+    "taskLabel": "Incombenza / mestiere",
+    "taskPlaceholder": "es. riordinare la stanza, svuotare la lavastoviglie…",
+    "descriptionLabel": "Descrizione (facoltativo)",
+    "descriptionPlaceholder": "Dettagli, suggerimenti o cosa bisogna fare di preciso …",
+    "assignTo": "Assegna a",
+    "sharedToggle": "Incombenza famiglia condivisa",
+    "sharedHint": "Un'incombenza per più persone: le stelle vanno a chi la completa.",
+    "eligibleProfiles": "Chi può prenderla?",
+    "eligibleHint": "Seleziona almeno un profilo. I bambini hanno comunque bisogno della conferma di un genitore.",
+    "managedSuffix": ", gestito",
+    "scheduleTitle": "Quando scade l'incombenza?",
+    "scheduleHint": "Le ripetizioni vengono riprogrammate automaticamente dopo la conferma.",
+    "dueDate": "Scade il",
+    "dueTime": "Ora (facoltativo)",
+    "repeatLabel": "Ripeti",
+    "rotationToggle": "Ruota in modo equo tra i profili",
+    "rotationHint": "Dopo ogni ripetizione confermata, la prossima persona è automaticamente di turno.",
+    "category": "Categoria",
+    "categories": {
+      "household": "Casa",
+      "kitchen": "Cucina",
+      "room": "Stanza",
+      "school": "Scuola",
+      "pet": "Animale",
+      "garden": "Giardino"
+    },
+    "managedNoteTitle": "Incombenza di organizzazione",
+    "managedNoteHint": "I profili gestiti non ricevono stelle né una segnalazione di completamento separata.",
+    "starsLabel": "Ricompensa in stelle (+ stelle)",
+    "submit": "Crea incombenza",
+    "save": "Salva modifiche"
+  },
+  "rewardIcon": {
+    "defaultLabel": "Premio",
+    "customImage": "Immagine personalizzata",
+    "customSymbol": "Simbolo personalizzato",
+    "customImageTitle": "{{label}}: immagine personalizzata"
+  },
+  "presets": {
+    "gift": "Regalo",
+    "iceCream": "Gelato",
+    "gaming": "Tempo per i giochi",
+    "movie": "Sera film",
+    "popcorn": "Cinema",
+    "pizza": "Pizza",
+    "trip": "Gita",
+    "outdoors": "All'aperto",
+    "bike": "Giro in bici",
+    "swimming": "Nuoto",
+    "creative": "Tempo creativo",
+    "music": "Musica",
+    "book": "Libro",
+    "party": "Festa",
+    "animal": "Avventura con animali",
+    "cake": "Dolcetto",
+    "rocket": "Avventura",
+    "trophy": "Gran premio",
+    "crown": "Esprimi un desiderio",
+    "surprise": "Sorpresa"
+  },
+  "iconPicker": {
+    "hint": "Un'immagine chiara che i bambini riconoscono subito.",
+    "uploadAriaLabel": "Scegli un'immagine personalizzata per il premio",
+    "presetsAriaLabel": "Icone dei premi",
+    "removeCustomImage": "Rimuovi immagine personalizzata",
+    "errors": {
+      "invalidType": "Scegli un'immagine PNG, JPG o WebP.",
+      "tooLarge": "L'immagine non deve superare i 5 MB.",
+      "stillTooLarge": "L'immagine è ancora troppo grande dopo il ridimensionamento.",
+      "readFailed": "Non è stato possibile leggere l'immagine."
+    }
+  }
+}

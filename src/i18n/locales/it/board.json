@@ -1,0 +1,73 @@
+{
+  "header": {
+    "title": "Bacheca di famiglia",
+    "householdFamily": "Il nostro nucleo",
+    "householdGrandparents": "Nucleo di nonna e nonno",
+    "addNote": "Appunta una nuova nota o foto",
+    "intro": "Note e foto importanti sul frigorifero virtuale. Tocca una foto per la vista grande: apri il retro tramite \"Leggi nota\"."
+  },
+  "note": {
+    "shared": "🤝 Condiviso con nonna e nonno",
+    "viewLarge": "Vedi grande",
+    "readNote": "Leggi nota",
+    "createdByLabel": "Creata da:",
+    "fallbackAuthor": "Famiglia",
+    "today": "Oggi",
+    "editedLabel": "Modificata:",
+    "flipTitle": "Gira la carta",
+    "editTitle": "Modifica nota",
+    "deleteTitle": "Elimina nota",
+    "backSideLabel": "Retro della foto:",
+    "showPhoto": "Mostra foto"
+  },
+  "lightbox": {
+    "openAria": "Vedi l'immagine “{{title}}” a schermo intero",
+    "dialogAria": "Vista immagine grande: {{title}}",
+    "closeAria": "Chiudi vista immagine"
+  },
+  "photo": {
+    "previewAlt": "Anteprima",
+    "optimizing": "Ottimizzazione foto …",
+    "choose": "Scegli / scatta foto",
+    "upload": "Carica foto",
+    "readError": "Non è stato possibile leggere la foto."
+  },
+  "toasts": {
+    "notImage": {
+      "title": "Non è un file immagine",
+      "body": "Scegli una foto in formato JPG, PNG o WebP."
+    },
+    "tooLarge": {
+      "title": "La foto è troppo grande",
+      "body": "Scegli un'immagine di al massimo 20 MB."
+    },
+    "stillTooLarge": "La foto è ancora troppo grande dopo l'ottimizzazione. Scegli un'altra immagine.",
+    "ready": {
+      "title": "La foto è pronta",
+      "body": "L'immagine è stata ottimizzata automaticamente per la bacheca."
+    },
+    "loadFailed": "Non è stato possibile caricare la foto"
+  },
+  "form": {
+    "shared": "🤝 Condiviso (mostra anche da nonna e nonno)"
+  },
+  "addModal": {
+    "title": "Appunta una nuova nota / foto",
+    "titlePlaceholder": "es. gita domenicale, codice Wi-Fi…",
+    "contentLabel": "Contenuto (testo della nota)",
+    "contentPlaceholder": "Scrivi qui il tuo promemoria o il testo per la foto…",
+    "photoLabel": "Appunta facoltativamente una foto (effetto Polaroid)",
+    "autoResizeHint": "Le foto grandi del telefono vengono rimpicciolite automaticamente prima del salvataggio.",
+    "colorLabel": "Scegli il colore della nota",
+    "pinning": "Appuntatura …",
+    "submit": "Appunta nota"
+  },
+  "editModal": {
+    "title": "Modifica nota",
+    "contentLabel": "Contenuto",
+    "photoLabel": "Modifica / sostituisci foto",
+    "optimizeHint": "La foto viene ottimizzata automaticamente per una visualizzazione veloce.",
+    "colorLabel": "Scegli colore",
+    "submit": "Salva modifiche"
+  }
+}

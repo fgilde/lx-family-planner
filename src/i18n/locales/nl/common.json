@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "LX Family Planner - Onze gezinsorganizer",
+    "description": "Heldere, intuïtieve gezinsplanner met agenda, Bring!-boodschappenlijst, maaltijdplanner, huishoudelijke klusjes, beloningssysteem en prikbord."
+  },
+  "actions": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "add": "Toevoegen",
+    "close": "Sluiten",
+    "back": "Terug",
+    "next": "Volgende",
+    "confirm": "Bevestigen",
+    "search": "Zoeken",
+    "reset": "Resetten",
+    "refresh": "Vernieuwen",
+    "retry": "Opnieuw proberen"
+  },
+  "status": {
+    "loading": "Laden …",
+    "saving": "Opslaan …",
+    "error": "Er ging iets mis.",
+    "empty": "Nog geen items."
+  },
+  "labels": {
+    "optional": "optioneel",
+    "date": "Datum",
+    "time": "Tijd",
+    "title": "Titel",
+    "description": "Omschrijving",
+    "location": "Locatie",
+    "name": "Naam"
+  },
+  "language": {
+    "label": "Taal",
+    "title": "Taal kiezen",
+    "choose": "Kies de interfacetaal"
+  },
+  "birthdays": {
+    "eventTitle": "🎂 Het is de verjaardag van {{name}}",
+    "location": "Gezin",
+    "ageNote_one": "{{name}} wordt {{count}} jaar oud.",
+    "ageNote_other": "{{name}} wordt {{count}} jaar oud.",
+    "sourceName": "Gezinsverjaardag"
+  },
+  "projectSupport": {
+    "aria": "Steun LX Family Planner vrijwillig via GitHub Sponsors",
+    "kicker": "Eenmalig of maandelijks",
+    "title": "Trakteer LX op koffie",
+    "description": "LX blijft gratis. Zelfs een eenmalige koffie helpt bij testen, hosting en verdere ontwikkeling.",
+    "action": "GitHub Sponsors"
+  }
+}

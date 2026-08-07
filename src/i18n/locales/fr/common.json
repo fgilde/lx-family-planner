@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "LX Family Planner - L'organisateur familial",
+    "description": "Planificateur familial clair et intuitif avec calendrier, liste de courses Bring!, planificateur de repas, tâches ménagères, système de récompenses et tableau d'affichage."
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "confirm": "Confirmer",
+    "search": "Rechercher",
+    "reset": "Réinitialiser",
+    "refresh": "Actualiser",
+    "retry": "Réessayer"
+  },
+  "status": {
+    "loading": "Chargement…",
+    "saving": "Enregistrement…",
+    "error": "Une erreur est survenue.",
+    "empty": "Aucune entrée pour le moment."
+  },
+  "labels": {
+    "optional": "facultatif",
+    "date": "Date",
+    "time": "Heure",
+    "title": "Titre",
+    "description": "Description",
+    "location": "Lieu",
+    "name": "Nom"
+  },
+  "language": {
+    "label": "Langue",
+    "title": "Choisir la langue",
+    "choose": "Choisir la langue de l'interface"
+  },
+  "birthdays": {
+    "eventTitle": "🎂 C'est l'anniversaire de {{name}}",
+    "location": "Famille",
+    "ageNote_one": "{{name}} fête ses {{count}} an.",
+    "ageNote_other": "{{name}} fête ses {{count}} ans.",
+    "sourceName": "Anniversaire familial"
+  },
+  "projectSupport": {
+    "aria": "Soutenir LX Family Planner via GitHub Sponsors",
+    "kicker": "Unique ou mensuel",
+    "title": "Offrir un café à LX",
+    "description": "LX reste gratuit. Même un café unique aide pour les tests, l'hébergement et le développement continu.",
+    "action": "GitHub Sponsors"
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "sections": {
+    "today": "Vista semanal",
+    "routines": "Rutinas",
+    "money": "Paga semanal",
+    "school": "Colegio",
+    "polls": "Votar",
+    "safety": "Seguro y tranquilo"
+  },
+  "hero": {
+    "kicker": "Tu día a día, un gran equipo",
+    "title": "Trayectoria familiar",
+    "intro": "Aquí se reúnen rutinas, colegio, paga semanal y decisiones; fácil de entender para los niños, fiable para los padres.",
+    "viewFor": "Viendo para",
+    "yourJourney": "Tu trayectoria",
+    "navAria": "Secciones de la trayectoria familiar"
+  },
+  "adultsOnly": "Solo adultos",
+  "weekly": {
+    "kicker": "Los últimos siete días",
+    "title": "Así fue la semana de {{name}}",
+    "metrics": {
+      "missions": "Misiones",
+      "routineDays": "Días de rutina",
+      "polls": "Encuestas",
+      "stars": "Estrellas"
+    },
+    "strongWeek": "¡Ha sido una semana muy fuerte!",
+    "everyStepCounts": "Cada pequeño paso cuenta.",
+    "nextEvent": "Lo siguiente, «{{title}}», te está esperando.",
+    "spontaneousMoment": "El próximo momento familiar puede surgir espontáneamente."
+  },
+  "achievements": {
+    "kicker": "Vitrina de trofeos",
+    "title": "Insignias",
+    "firstStep": "Primer paso",
+    "routinePro": "Experto en rutinas",
+    "starCollector": "Coleccionista de estrellas",
+    "teamSpirit": "Espíritu de equipo",
+    "collected": "Conseguidas",
+    "stillSecret": "Todavía en secreto"
+  },
+  "missions": {
+    "kicker": "Juntos, no solos",
+    "title": "Misiones familiares",
+    "progress": "{{completed}} de {{total}} conseguidas",
+    "empty": "Todavía no hay ninguna misión compartida.",
+    "creatorTitle": "Nueva misión familiar",
+    "titlePlaceholder": "Por ejemplo: salvar el jardín juntos",
+    "descriptionPlaceholder": "¿Qué haréis juntos?",
+    "start": "Empezar misión"
+  },
+  "encouragement": {
+    "kicker": "Pequeñas palabras, gran efecto",
+    "title": "Ánimos",
+    "quote": "«{{message}}»",
+    "fromFamily": "Tu familia",
+    "empty": "Pronto habrá un ánimo cariñoso esperándote aquí.",
+    "messagePlaceholder": "¿Qué te gustaría decir a {{name}}?",
+    "send": "Enviar"
+  },
+  "routines": {
+    "kicker": "Paso a paso",
+    "title": "Rutinas de {{name}}",
+    "timeOfDay": {
+      "morning": "Mañanas",
+      "afternoon": "Tardes",
+      "evening": "Noches"
+    },
+    "streak_one": "🔥 {{count}} día seguido",
+    "streak_other": "🔥 {{count}} días seguidos",
+    "deleteAria": "Eliminar rutina",
+    "emptyTitle": "Todavía no hay rutina",
+    "emptyText": "Una buena rutina quita estrés por la mañana y por la noche.",
+    "workshop": {
+      "kicker": "Taller de rutinas",
+      "title": "Crear una rutina",
+      "namePlaceholder": "Nombre de la rutina",
+      "stepsLabel": "Un paso por línea",
+      "save": "Guardar rutina"
+    },
+    "defaults": {
+      "title": "Empezar la mañana",
+      "steps": "Levantarse\nVestirse\nCepillarse los dientes\nRevisar la mochila del cole"
+    }
+  },
+  "money": {
+    "kicker": "Cuenta familiar",
+    "title": "Paga semanal de {{name}}",
+    "balanceLabel": "Saldo actual",
+    "starsAvailable": "{{count}} ⭐ disponibles",
+    "starCost_one": "{{count}} estrella",
+    "starCost_other": "{{count}} estrellas",
+    "emptyLedger": "La libreta de la paga semanal todavía está vacía.",
+    "goals": {
+      "kicker": "Los deseos se hacen visibles",
+      "title": "Metas de ahorro",
+      "progress": "{{current}} de {{target}}",
+      "deleteAria": "Eliminar meta de ahorro",
+      "empty": "Todavía no hay ningún deseo por el que ahorrar.",
+      "creatorTitle": "Añadir meta de ahorro",
+      "titlePlaceholder": "¿Para qué estás ahorrando?",
+      "amountAria": "Importe objetivo en euros",
+      "create": "Crear meta"
+    },
+    "booking": {
+      "title": "Anotar paga semanal",
+      "amountLabel": "Importe en euros; negativo para un gasto",
+      "noteLabel": "Nota del movimiento",
+      "starsLabel": "Convertir estrellas para ello (opcional)",
+      "submit": "Anotar de forma segura",
+      "defaultNote": "Paga semanal"
+    }
+  },
+  "school": {
+    "kicker": "Todo para el día de colegio",
+    "title": "Área de colegio de {{name}}",
+    "settings": {
+      "enabled": "Horario activado",
+      "disabled": "Horario desactivado",
+      "disabledTitle": "El área de colegio está desactivada para este niño",
+      "disabledHint": "Actívala solo para niños en edad escolar. Los padres podrán editarla y el niño podrá ver su propio horario.",
+      "enable": "Activar área de colegio"
+    },
+    "timetable": {
+      "period": "Clase {{count}}",
+      "free": "Libre",
+      "cancelled": "Cancelada esta semana",
+      "cancellationDate": "Fecha de la cancelación puntual de la clase",
+      "cancelOnce": "Cancelar una vez",
+      "restore": "Restaurar clase"
+    },
+    "kinds": {
+      "lesson": "Horario",
+      "homework": "Deberes",
+      "exam": "Examen",
+      "bag": "Revisión de la mochila"
+    },
+    "deleteAria": "Eliminar entrada del colegio",
+    "emptyKind": "Todavía no hay nada introducido.",
+    "form": {
+      "kicker": "Anótalo una vez y quédate tranquilo",
+      "title": "Crear entrada del colegio",
+      "subjectPlaceholder": "Asignatura",
+      "titlePlaceholder": "¿Qué viene ahora?",
+      "weekday": "Día de la semana",
+      "period": "Clase",
+      "startsAt": "Empieza a las",
+      "endsAt": "Termina a las",
+      "roomPlaceholder": "Aula (opcional)",
+      "teacherPlaceholder": "Profesor/a (opcional)",
+      "detailsPlaceholder": "Libro, materiales o una nota breve",
+      "submit": "Añadir entrada"
+    }
+  },
+  "polls": {
+    "kicker": "Cada voto cuenta",
+    "title": "Encuestas familiares",
+    "votes_one": "{{count}} voto",
+    "votes_other": "{{count}} votos",
+    "deleteAria": "Eliminar encuesta",
+    "emptyTitle": "Todavía no hay encuesta",
+    "emptyText": "La próxima pregunta sobre comida o excursión es para toda la familia.",
+    "form": {
+      "kicker": "Decidido rápido",
+      "title": "Plantear una nueva pregunta",
+      "questionPlaceholder": "¿Qué os gustaría decidir juntos?",
+      "optionsLabel": "Una respuesta por línea; se permiten emojis",
+      "closesLabel": "La encuesta termina opcionalmente el",
+      "submit": "Iniciar encuesta",
+      "defaultOptions": "🍕 Pizza\n🍝 Pasta\n🥞 Tortitas"
+    }
+  },
+  "safety": {
+    "emergency": {
+      "kicker": "Por si acaso",
+      "fallbackTitle": "Tarjeta de emergencia",
+      "defaultTitle": "Ayuda importante para nuestra familia",
+      "empty": "Los padres pueden guardar aquí contactos de emergencia seguros."
+    },
+    "quiet": {
+      "kicker": "Tiempo familiar protegido",
+      "title": "Horas de descanso y multimedia",
+      "notifications": "Horas sin notificaciones",
+      "range": "{{start}} a {{end}}",
+      "notActive": "No activado",
+      "mediaLounge": "Sala multimedia",
+      "alwaysVisible": "Siempre visible",
+      "explanation": "Si lo deseas, las alertas urgentes de «Necesita cercanía» pueden seguir llegando durante las horas de descanso. Los mensajes normales se quedan en la bandeja familiar."
+    },
+    "editor": {
+      "title": "Editar reglas de protección",
+      "quietSwitch": "Horas sin notificaciones",
+      "quietSwitchHint": "Pausar los mensajes push normales.",
+      "startLabel": "Inicio",
+      "endLabel": "Fin",
+      "urgentSwitch": "Dejar pasar las llamadas de ayuda urgentes",
+      "urgentSwitchHint": "«Necesita cercanía» sigue siendo localizable.",
+      "mediaSwitch": "Usar horario multimedia",
+      "mediaSwitchHint": "Mostrar YouTube y Spotify solo dentro de la franja horaria.",
+      "mediaFromLabel": "Multimedia desde",
+      "mediaToLabel": "Multimedia hasta",
+      "emergencyTitleLabel": "Título de la tarjeta de emergencia",
+      "contactsLabel": "Contactos; nombre | número de teléfono | nota",
+      "contactsPlaceholder": "Pediatra | 0123 456789 | Traer cartilla de vacunación\nAbuela | 0987 654321 | Puede recoger",
+      "notesLabel": "Notas importantes",
+      "notesPlaceholder": "Alergias, medicación o notas importantes",
+      "save": "Guardar reglas de protección"
+    }
+  }
+}

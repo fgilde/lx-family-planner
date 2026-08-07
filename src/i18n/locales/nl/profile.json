@@ -1,0 +1,185 @@
+{
+  "positions": {
+    "mama": "Mama",
+    "papa": "Papa",
+    "kind": "Kind",
+    "teenager": "Tieners",
+    "tochter_erwachsen": "Volwassen dochter",
+    "sohn_erwachsen": "Volwassen zoon",
+    "oma": "Oma",
+    "opa": "Opa",
+    "betreute_person": "Onder hoede",
+    "tante": "Tante",
+    "onkel": "Oom",
+    "patin": "Peettante",
+    "pate": "Peetoom",
+    "haustier": "Huisdier",
+    "familienmitglied": "Gezinslid",
+    "wanddisplay": "Scherm aan de muur"
+  },
+  "roleLabels": {
+    "adult": "Volwassene",
+    "child": "Kind",
+    "teen": "Tieners",
+    "senior": "Grootouders",
+    "member": "Gezinslid",
+    "pet": "Huisdier",
+    "wall": "Scherm aan de muur"
+  },
+  "modal": {
+    "eyebrow": {
+      "protected": "Beveiligd profiel",
+      "edit": "Profiel bewerken",
+      "new": "Nieuw profiel",
+      "family": "Jouw gezin"
+    },
+    "title": {
+      "unlock": "{{name}} ontgrendelen",
+      "edit": "Profiel bewerken",
+      "create": "Profiel aanmaken",
+      "whoseTurn": "Wie is nu aan de beurt?"
+    }
+  },
+  "toasts": {
+    "switched": "Profiel gewisseld",
+    "greeting": "Hallo {{name}}!",
+    "locked": "Profiel vergrendeld",
+    "pinIncorrect": "Onjuiste PIN",
+    "updated": "Profiel bijgewerkt",
+    "savedMessage": "{{name}} is opgeslagen."
+  },
+  "confirmDelete": "Dit gezinsprofiel echt verwijderen?",
+  "pin": {
+    "protectedHeading": "Het profiel van {{name}} is beveiligd",
+    "enterPin": "Voer de persoonlijke profiel-PIN in.",
+    "petPasswordNeeded": "Om een huisdierprofiel te verlaten is het gezinswachtwoord nodig.",
+    "childPasswordNeeded": "Om een kindprofiel te verlaten is het gezinswachtwoord nodig.",
+    "pinPlaceholder": "Profiel-PIN",
+    "familyPasswordPlaceholder": "Gezinswachtwoord",
+    "unlock": "Ontgrendelen"
+  },
+  "list": {
+    "intro": "Tik op een profiel om direct de persoonlijke gezinswereld in te stappen.",
+    "selectAria": "Selecteer {{name}}, {{position}}",
+    "activeProfile": "Actieve profiel",
+    "pinProtected": "Beveiligd met een PIN",
+    "petBadge": "Pootjesprofiel",
+    "editMember": "{{name}} bewerken",
+    "managedHeading": "Door jou beheerd",
+    "managedSubheading": "Geen inlog · voor afspraken en taken",
+    "managedNoAccess": "{{position}} · geen eigen inlog",
+    "eventsTitle": "Afspraken",
+    "tasksTitle": "Taken",
+    "addMember": "Lid toevoegen"
+  },
+  "notifications": {
+    "title": "Meldingen",
+    "deviceHint": "Voor {{name}} op dit apparaat",
+    "petModeActive": "Huisdiermodus actief",
+    "petModeHint": "Zonder chat, meldingen en accountfuncties",
+    "headingFor": "Meldingen voor {{name}}",
+    "savedPerDevice": "Deze selectie wordt voor dit profiel en dit apparaat opgeslagen.",
+    "on": "Aan",
+    "off": "Uit",
+    "serverNotConfigured": "Native Android-meldingen zijn op de server nog niet ingesteld. De instructies vind je in het Oudercentrum.",
+    "deniedNative": "Android blokkeert meldingen. Sta ze toe onder Apps → LX Family Planner → Meldingen.",
+    "deniedBrowser": "De browser blokkeert meldingen. Sta ze één keer toe in de site-instellingen van de browser.",
+    "showPreviews": "Inhoud in meldingen tonen",
+    "sendTest": "Testmelding versturen"
+  },
+  "modules": {
+    "profileTitle": "Zichtbare onderdelen",
+    "profileHint": "Kies welke onderdelen dit profiel vanuit de navigatie mag zien en openen.",
+    "labels": {
+      "chat": "Chat",
+      "calendar": "Agenda",
+      "trash": "Afvalkalender",
+      "shopping": "Boodschappen",
+      "meals": "Maaltijdplan",
+      "tasks": "Taken",
+      "family-life": "Gezinsleven",
+      "board": "Prikbord",
+      "cloud": "Gezinscloud",
+      "mail": "Gezinspost"
+    }
+  },
+  "avatars": {
+    "av-1": "Moedige leeuw",
+    "av-2": "Slimme vos",
+    "av-3": "Avonturenhound",
+    "av-4": "Ninja-kat",
+    "av-5": "Rode panda",
+    "av-6": "Ruimtemakkker"
+  },
+  "form": {
+    "usage": "Hoe wordt het profiel gebruikt?",
+    "ownLogin": "Met eigen inlog",
+    "ownLoginHint": "Verschijnt in de profielkiezer en kan de planner zelfstandig openen.",
+    "managedOnly": "Alleen door ons beheerd",
+    "managedOnlyHint": "Voor oma, opa of mensen onder hoede zonder eigen toegang.",
+    "managedNote": "Organisatieprofiel zonder inlog",
+    "managedNoteHint": "Het profiel verschijnt in agenda's en taken, maar niet bij inloggen, in de profielkiezer of in chat.",
+    "petNote": "Huisdierprofiel",
+    "petNoteHint": "Toont verzorgingstaken en dierenafspraken – zonder chat, meldingen of de sterrenwinkel.",
+    "petName": "Naam van huisdier",
+    "petNamePlaceholder": "bijv. Luna",
+    "namePlaceholder": "bijv. Voorbeeldnaam",
+    "birthDate": "Geboortedatum",
+    "birthDateHint": "Maakt automatisch agenda-items en herinneringen aan.",
+    "position": "Positie in het gezin",
+    "avatar": "Profielfoto",
+    "ownPhoto": "Eigen foto",
+    "color": "Profielkleur",
+    "newPin": "Nieuwe profiel-PIN (optioneel)",
+    "pin": "Profiel-PIN (optioneel)",
+    "pinKeepPlaceholder": "Leeg laten = ongewijzigd",
+    "pinPlaceholder": "Persoonlijke beveiliging",
+    "saving": "Opslaan …",
+    "save": "Profiel opslaan",
+    "delete": "Profiel verwijderen"
+  },
+  "quickAdd": {
+    "title": "Snel toevoegen",
+    "types": {
+      "event": "Afspraak",
+      "shopping": "Boodschap",
+      "task": "Taak",
+      "note": "Notitie"
+    },
+    "titleLabels": {
+      "event": "Titel van afspraak",
+      "shopping": "Naam van item",
+      "task": "Taak",
+      "note": "Notitietitel"
+    },
+    "titlePlaceholder": "Typ hier...",
+    "forWhom": "Voor wie?",
+    "everyone": "Iedereen (gedeeld)",
+    "managed": "beheerd",
+    "allDay": "Hele dag",
+    "allDayHint": "Geen vaste tijd – kan meerdere dagen duren.",
+    "startsOn": "Begint op",
+    "startsAt": "Starttijd",
+    "endsOn": "Eindigt op (optioneel)",
+    "endsOnInclusive": "T/m (optioneel)",
+    "endsAt": "Eindtijd (optioneel)",
+    "locationOptional": "Locatie (optioneel)",
+    "locationPlaceholder": "bijv. huisarts, school",
+    "inviteFamilies": "Verbonden gezinnen uitnodigen",
+    "inviteFamiliesHint": "De afspraak verschijnt voor alle geselecteerde gezinnen; privé-afspraken blijven gescheiden.",
+    "categoryLabel": "Categorie",
+    "shoppingCategories": {
+      "produce": "Fruit & groente",
+      "dairy": "Zuivel & koelkast",
+      "bakery": "Bakkerij",
+      "pantry": "Voorraadkast",
+      "drinks": "Dranken",
+      "household": "Drogisterij & huishouden"
+    },
+    "quantity": "Hoeveelheid",
+    "assignedTo": "Toegewezen aan",
+    "starPoints": "Sterrenpunten",
+    "noteText": "Notitietekst",
+    "notePlaceholder": "Inhoud invoeren..."
+  }
+}

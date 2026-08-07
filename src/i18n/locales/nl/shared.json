@@ -1,0 +1,62 @@
+{
+  "events": {
+    "groupChat": { "title": "Gezinschat", "description": "Nieuwe berichten in de gezinsgroep" },
+    "directMessages": { "title": "Directe berichten", "description": "Privéberichten voor het bijbehorende profiel" },
+    "familyMail": { "title": "Gezinsbrievenbus", "description": "Nieuwe brieven van verbonden gezinnen" },
+    "familyChatInvites": { "title": "Chatuitnodigingen", "description": "Uitnodigingen voor de chat van een verbonden gezin" },
+    "events": { "title": "Agenda & herinneringen", "description": "Nieuwe, gewijzigde, geannuleerde en binnenkort startende afspraken" },
+    "taskAssigned": { "title": "Nieuwe taken", "description": "Nieuwe missies en plichten" },
+    "taskApproval": { "title": "Taken controleren", "description": "Klaar-meldingen en afgewezen controles" },
+    "taskCompleted": { "title": "Voltooide taken", "description": "Bevestigde taken, sterren en prestaties" },
+    "moodUpdates": { "title": "Stemmingen van kinderen", "description": "Nieuwe items in de gezinskompas" },
+    "moodHelp": { "title": "Heb ik knuffel nodig", "description": "Dringende melding – ook tijdens toegestane stilte-uren" },
+    "problemReports": { "title": "Problemmeldingen", "description": "Nieuwe meldingen en feedback over oplossingen" },
+    "encouragements": { "title": "Aanmoedigingen", "description": "Lieve berichten van het gezin" },
+    "familyPolls": { "title": "Peilingen", "description": "Nieuwe gezinsbeslissingen" },
+    "familyMissions": { "title": "Gezinsmissies", "description": "Nieuwe gezamenlijke missies" },
+    "schoolItems": { "title": "School", "description": "Huiswerk, schooltas en proefwerken" },
+    "rewards": { "title": "Beloningen", "description": "Nieuwe en ingewisselde beloningen" },
+    "pocketMoney": { "title": "Zakgeld", "description": "Nieuwe stortingen, afschrijvingen en omzettingen" },
+    "familyConnections": { "title": "Gezinsnetwerk", "description": "Verzoeken, goedkeuringen en wijzigingen van verbonden gezinnen" }
+  },
+  "reminderLead": {
+    "atStart": "Bij de start",
+    "weeks_one": "{{count}} week vooraf",
+    "weeks_other": "{{count}} weken vooraf",
+    "days_one": "{{count}} dag vooraf",
+    "days_other": "{{count}} dagen vooraf",
+    "hours_one": "{{count}} uur vooraf",
+    "hours_other": "{{count}} uur vooraf",
+    "minutes_one": "{{count}} minuut vooraf",
+    "minutes_other": "{{count}} minuten vooraf"
+  },
+  "reminderLeadShort": {
+    "atStart": "Bij start",
+    "weeks_one": "{{count}} wk",
+    "weeks_other": "{{count}} wk",
+    "days_one": "{{count}} dag",
+    "days_other": "{{count}} dagen",
+    "hours_one": "{{count}} u",
+    "hours_other": "{{count}} u",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min"
+  },
+  "eventReminder": {
+    "fallback": "Een afspraak begint zo.",
+    "startsNow": "begint nu",
+    "startsInMinutes_one": "begint over {{count}} minuut",
+    "startsInMinutes_other": "begint over {{count}} minuten",
+    "startsInHours_one": "begint over {{count}} uur",
+    "startsInHours_other": "begint over {{count}} uur",
+    "startsOnDate": "begint op {{date}}"
+  },
+  "trashReminder": {
+    "defaultTitle": "Afvalinzameling",
+    "tomorrowTitle": "🗑️ Morgen: {{title}}",
+    "tomorrowBody": "{{title}} wordt morgen opgehaald. Zet het op tijd buiten.",
+    "todayTitle": "🗑️ Vandaag: {{title}}",
+    "todayBody": "{{title}} wordt vandaag opgehaald.",
+    "reminderTitle": "🗑️ Herinnering: {{title}}",
+    "reminderBody": "Ophaling {{lead}}. Zet het op tijd buiten."
+  }
+}

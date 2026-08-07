@@ -1,0 +1,179 @@
+{
+  "toggle": {
+    "on": "Włączone",
+    "off": "Wyłączone"
+  },
+  "access": {
+    "grants": {
+      "sharedCalendar": {
+        "label": "Współdzielone wydarzenia",
+        "help": "Ta rodzina może zapraszać Cię do wydarzeń widocznych dla obu rodzin."
+      },
+      "tasks": {
+        "label": "Zadania",
+        "help": "Dorośli z tej rodziny mogą dawać Twoim dzieciom zadania."
+      },
+      "rewards": {
+        "label": "Gwiazdki i nagrody",
+        "help": "Zezwala na punkty gwiazdek za zadania i własne nagrody."
+      },
+      "pocketMoney": {
+        "label": "Kieszonkowe",
+        "help": "Zezwala na śledzone wpisy kieszonkowego dla Twoich dzieci."
+      }
+    },
+    "childPosition": {
+      "teenager": "Nastolatek",
+      "grandchild": "Wnuk"
+    },
+    "header": {
+      "kicker": "Organizujcie razem, bezpiecznie",
+      "title": "Uprawnienia w sieci rodzinnej",
+      "description": "Decydujesz dla każdego połączenia. Druga rodzina nie widzi prywatnych kalendarzy, czatów ani treści tablicy."
+    },
+    "card": {
+      "subtitle": "Co ta rodzina może zrobić dla Twoich dzieci",
+      "grantedFromOther": "Udostępnione Ci stamtąd:",
+      "nothingYet": "jeszcze nic"
+    },
+    "planner": {
+      "kicker": "Dla wnuczków",
+      "title": "Od rodziny do rodziny",
+      "description": "Zadania, nagrody lub kieszonkowe trafiają bezpośrednio i w sposób śledzony na konto rodzinne dziecka.",
+      "familyBranch": "Gałąź rodzinna",
+      "tools": {
+        "task": "Zadanie",
+        "reward": "Nagroda",
+        "money": "Kieszonkowe"
+      },
+      "task": {
+        "label": "Zadanie",
+        "placeholder": "np. Pomóż babci w ogrodzie",
+        "dueDate": "Do kiedy?",
+        "stars": "Gwiazdki"
+      },
+      "reward": {
+        "label": "Nagroda",
+        "placeholder": "np. Popołudnie w zoo",
+        "costStars": "Cena w gwiazdkach",
+        "image": "Obrazek nagrody"
+      },
+      "money": {
+        "amount": "Kwota w euro",
+        "note": "Za co?",
+        "defaultNote": "Od babci i dziadka"
+      },
+      "submit": "Wyślij do profilu dziecka"
+    }
+  },
+  "tree": {
+    "relations": {
+      "parent": {
+        "label": "Rodzina nadrzędna",
+        "help": "Wybrana rodzina znajduje się nad Twoją rodziną."
+      },
+      "child": {
+        "label": "Rodzina podrzędna",
+        "help": "Wybrana rodzina jest gałęzią rodzinną poniżej Ciebie."
+      },
+      "sibling": {
+        "label": "Rodzina równoległa",
+        "help": "Obie rodziny są na tym samym poziomie."
+      },
+      "relative": {
+        "label": "Inni krewni",
+        "help": "Na przykład ciotki, wujkowie, kuzyni lub bliska wybrana rodzina."
+      },
+      "fallback": "Spokrewniona rodzina"
+    },
+    "node": {
+      "ourFamily": "Nasza rodzina",
+      "profiles_one": "{{count}} profil",
+      "profiles_other": "{{count}} profile(ów)"
+    },
+    "branch": {
+      "membersAria": "Członkowie {{familyName}}",
+      "thisFamily": "ta rodzina",
+      "noProfiles": "Brak profili"
+    },
+    "header": {
+      "kicker": "Połączenia tylko za zgodą",
+      "title": "Twoja sieć rodzinna",
+      "description": "Połącz prawdziwe konta rodzinne. Połączenie staje się widoczne dopiero, gdy druga rodzina się zgodzi.",
+      "closeAria": "Zamknij drzewo genealogiczne"
+    },
+    "generations": {
+      "parents": "Rodziny nadrzędne",
+      "parentsEmpty": "Jeszcze niepowiązane",
+      "children": "Rodziny podrzędne",
+      "childrenEmpty": "Brak gałęzi rodzinnej",
+      "ourAccount": "Twoje konto"
+    },
+    "inbox": {
+      "kicker": "Wymaga Twojej decyzji",
+      "title": "Prośby rodzinne",
+      "request": "{{familyName}} chciał(a)by dodać Cię jako swoje {{relation}}.",
+      "accept": "Akceptuj",
+      "decline": "Odrzuć"
+    },
+    "request": {
+      "kicker": "Połącz konto rodzinne",
+      "title": "Nowe połączenie",
+      "registeredFamily": "Zarejestrowana rodzina",
+      "selectFamily": "Wybierz rodzinę …",
+      "relationLabel": "Ta rodzina jest Twoim …",
+      "send": "Wyślij prośbę",
+      "allConnected": "Wszystkie aktualnie zarejestrowane rodziny są już połączone lub zawnioskowane.",
+      "adultsOnly": "Tylko dorośli mogą łączyć konta rodzinne."
+    },
+    "manage": {
+      "kicker": "Zarządzanie",
+      "title": "Połączenia i prośby",
+      "pending": "Czeka na potwierdzenie",
+      "removeTitle": "Usuń połączenie",
+      "empty": "Brak połączeń."
+    }
+  },
+  "settings": {
+    "header": {
+      "eyebrow": "Administracja rodzinna",
+      "title": "Nasz dom"
+    },
+    "form": {
+      "newImage": "Nowe zdjęcie rodzinne",
+      "familyName": "Nazwa rodziny",
+      "badge": "Krótkie hasło",
+      "badgeDefault": "Nasza rodzina",
+      "badgePlaceholder": "np. Nasz dom",
+      "newPassword": "Nowe hasło rodzinne (opcjonalnie)",
+      "passwordPlaceholder": "Puste = bez zmian"
+    },
+    "household": {
+      "title": "Pokaż drugie miejsce planowania",
+      "description": "Pokazuje „Dom babci i dziadka” jako osobne miejsce planowania w nagłówku aplikacji.",
+      "why": "Po co to istnieje?",
+      "explainer": "Idealne, gdy babcia i dziadek nie używają własnego konta rodzinnego: wydarzenia, zadania, plan posiłków, terminy odbioru śmieci i tablica mogą być planowane osobno dla ich domu."
+    },
+    "about": {
+      "version": "Wersja {{version}}"
+    },
+    "github": {
+      "aria": "Zobacz LX Family Planner na GitHubie",
+      "kicker": "Open Source",
+      "title": "Podoba Ci się LX?",
+      "description": "Odwiedź projekt lub zostaw gwiazdkę."
+    },
+    "actions": {
+      "saving": "Zapisywanie …",
+      "save": "Zapisz zmiany",
+      "deleteAccount": "Usuń konto rodzinne"
+    },
+    "delete": {
+      "title": "Trwale usunąć to konto rodzinne?",
+      "description": "Spowoduje to usunięcie profili, wydarzeń, zadań i całej pozostałej treści rodzinnej. Tej operacji nie można cofnąć.",
+      "passwordLabel": "Wpisz hasło rodzinne, aby potwierdzić",
+      "deleting": "Usuwanie …",
+      "confirm": "Trwale usuń rodzinę"
+    }
+  }
+}
