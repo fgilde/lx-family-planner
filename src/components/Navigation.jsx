@@ -12,11 +12,18 @@ export default function Navigation({ onOpenFamilyTree }) {
   const { visibleTabs } = useNavigationTabs();
 
   useEffect(() => {
-    const activeButton = navigationRef.current?.querySelector(
-      '[aria-current="page"]'
-    );
-    activeButton?.scrollIntoView({
-      behavior: 'smooth',
+    const nav = navigationRef.current;
+    const activeButton = nav?.querySelector('[aria-current="page"]');
+    if (!nav || !activeButton) return;
+    const navRect = nav.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+    // Nur scrollen, wenn der aktive Tab wirklich außerhalb des sichtbaren
+    // Bereichs liegt – verhindert das lästige Springen der ganzen Leiste.
+    const isHiddenLeft = buttonRect.left < navRect.left - 1;
+    const isHiddenRight = buttonRect.right > navRect.right + 1;
+    if (!isHiddenLeft && !isHiddenRight) return;
+    activeButton.scrollIntoView({
+      behavior: 'auto',
       block: 'nearest',
       inline: 'nearest'
     });

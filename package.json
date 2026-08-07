@@ -38,6 +38,7 @@
     "check": "node --check server.js && node --check server/app.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && npm run check:i18n && npm run test && vite build"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.4.2",
     "@capacitor/push-notifications": "^8.1.2",
     "bring-shopping": "^2.0.1",

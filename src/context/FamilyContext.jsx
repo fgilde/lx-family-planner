@@ -211,7 +211,58 @@ function makeId(prefix) {
 
 export function FamilyProvider({ children }) {
   const [authStatus, setAuthStatus] = useState('loading');
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTabState] = useState('dashboard');
+  // Verlauf der besuchten Tabs, damit Android Hardware-Back in der App
+  // zurücknavigieren kann, statt sie sofort zu verlassen.
+  const tabHistoryRef = useRef([]);
+  const activeTabRef = useRef('dashboard');
+
+  const setActiveTab = useCallback((nextTab, { recordHistory = true } = {}) => {
+    setActiveTabState(prevTab => {
+      const resolved = typeof nextTab === 'function' ? nextTab(prevTab) : nextTab;
+      if (resolved === activeTabRef.current) return prevTab;
+      if (recordHistory) {
+        tabHistoryRef.current.push(activeTabRef.current);
+        if (tabHistoryRef.current.length > 64) {
+          tabHistoryRef.current.shift();
+        }
+      }
+      activeTabRef.current = resolved;
+      return resolved;
+    });
+  }, []);
+
+  const popTabHistory = useCallback(() => {
+    const previous = tabHistoryRef.current.pop();
+    if (!previous) return false;
+    setActiveTabState(prevTab => {
+      activeTabRef.current = previous;
+      return previous;
+    });
+    return true;
+  }, []);
+
+  // Android: Hardware-Back / Wischgeste navigiert im Tab-Verlauf zurück, statt
+  // die App sofort zu schließen. Nur am Verlaufsanfang wird die App verlassen.
+  useEffect(() => {
+    let listener;
+    (async () => {
+      try {
+        const capacitor = await import('@capacitor/app');
+        const App = capacitor.App;
+        if (!App?.addListener) return;
+        listener = await App.addListener('backButton', () => {
+          if (popTabHistory()) return;
+          App.exitApp();
+        });
+      } catch {
+        // Kein Capacitor-Kontext (Browser/Desktop) – nichts zu tun.
+      }
+    })();
+    return () => {
+      if (listener?.remove) listener.remove();
+    };
+  }, [popTabHistory]);
   const [activeHouseholdState, setActiveHouseholdState] = useState(
     () => localStorage.getItem('lx_active_household') || 'familie'
   );
@@ -756,7 +807,9 @@ export function FamilyProvider({ children }) {
       method: 'POST',
       body: JSON.stringify({ memberId, pin, familyPassword })
     });
-    setActiveTab(isWallProfile(data.member) ? 'kitchen' : 'dashboard');
+    setActiveTab(isWallProfile(data.member) ? 'kitchen' : 'dashboard', {
+      recordHistory: false
+    });
     setActiveMemberIdState(memberId);
     setMembers(previous =>
       previous.map(member => (member.id === memberId ? data.member : member))
@@ -810,7 +863,9 @@ export function FamilyProvider({ children }) {
     setHomeAssistantEntities([]);
     setWebPush(initialWebPushState());
     setNativePush(initialNativePushState());
-    setActiveTab('dashboard');
+    setActiveTab('dashboard', { recordHistory: false });
+    tabHistoryRef.current = [];
+    activeTabRef.current = 'dashboard';
     setStoredSessionToken('');
     localStorage.removeItem('lx_active_member');
   }, []);
