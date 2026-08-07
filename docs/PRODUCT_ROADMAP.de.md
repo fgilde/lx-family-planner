@@ -47,6 +47,56 @@
    Kalender, Einkauf und Aufgaben bleiben ohne Verbindung lesbar. Änderungen
    werden später mit sichtbarer Konfliktauflösung synchronisiert.
 
+### Aus Feedback eingesammelt (GitHub-Issues und Reddit)
+
+Die Hauptanliegen der Issues #3 und #11 sind vollständig umgesetzt (Profilwechsel,
+Home Assistant, Cloud-Fehler, ntfy, Module ausblenden, schlichte Themes, Custom
+CSS, Erwachsenen-Profile, gemeinsame Aufgaben, Rezeptbearbeitung mit
+Tandoor-Import, dynamische Müll-Kachel und schreibgeschütztes Wanddisplay-Profil).
+Diese Sammlung führt nur noch die **offenen Nachträge** aus den Kommentarthreads
+sowie das neue Issue #15 und das Reddit-Feedback auf.
+
+**Zuerst anzugehende Bugs (hoher Effekt, geringer Aufwand):**
+
+- „Heute im Blick" zeigt nicht die Anzahl heutiger Termine, sondern alle
+  Termine im Kalender (mobil 17, Web 19) – #15.
+- Android: Zurück- bzw. Wischgeste beendet die App, statt in der App
+  zurückzunavigieren; Capacitor Hardware-Back-Historie – #15.
+- „Meine Termine" in „Mein Bereich" startet Mitte Juni statt heute, während
+  der Tabletmodus korrekt zeigt – #11 (Kommentar).
+- Mir zugewiesene Termine werden als „Familientermin" ausgezeichnet – #15.
+- Darstellungsfehler im Ansichtsatelier – #15.
+- Tab-Leiste verschiebt sich beim Wechsel um einige Pixel, der letzte Tab
+  (z. B. Pinwand) wird in Browsern wie Firefox abgeschnitten – #3 (Kommentar).
+- Dialog „Familie erstellen" bleibt nach Name und Passwort hängen
+  (Next → nichts passiert) – Reddit.
+
+**Mobile und Kalender (überwiegend aus #15):**
+
+- Begrüßungsfeld kompakter, einheitliches Layout in allen Untermenüs – #15.
+- Müllabfuhrtermine desselben Tages bündeln (mehrere Tonnen unter einem
+  Eintrag) – #15.
+- Farbcodierung nicht nur in der Kalenderansicht, sondern auch in Listen und
+  Übersichten – #15.
+- Echte Wochen- und Monatsansicht, damit freie Zeitfenster sichtbar werden – #15.
+- Konsistente Navigation: Karten öffnen sich auf Web und Mobil per Klick,
+  nicht nur auf Mobil – #15.
+
+**Tablet (Nachtrag zu #11):**
+
+- Flexible Tablet-Aufgabenliste (4 / 8 / alle) mit Scrollbar und
+  Priorisierung/Sortierung statt festem Limit von 4 – #11 (Kommentar).
+
+**Integrationen und Import:**
+
+- Import aus Google Calendar und iCloud-Konten – Reddit.
+- Müllkalender per URL abonnieren statt nur ICS-Datei hochladen – #11
+  (Kommentar).
+- Optionale Anbindungen an Mealie (Essen/Einkauf), Immich (Medien) und
+  Paperless-ngx (Dokumente) – Reddit.
+- Benutzerdefinierte Wiederholungen (jährlich, vierteljährlich) für
+  Wartungsaufgaben – Reddit.
+
 ### Priorität 2 – hoher Familiennutzen
 
 1. **Morgen- und Abendroutinen für Kinder**  
@@ -79,6 +129,9 @@
 - direkte Google-/Outlook-Kontokopplung zusätzlich zum vorhandenen
   CalDAV-/Nextcloud-Schreibzugriff
 - barrierearme Großelternansicht mit besonders großen Bedienelementen
+- native iOS-App neben der bestehenden Android- und Web-Version
+- weitere Sprachen (z. B. Französisch, Spanisch, Italienisch) über ein
+  geprüftes, betreutes Übersetzungs-Catalogue
 
 ## Produktprinzipien
 

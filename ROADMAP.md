@@ -12,13 +12,52 @@ possible household feature in the core app.
 - keep installation and safe updates predictable across Docker, Proxmox,
   Unraid and Umbrel.
 
+### In-flight fixes and improvements (from GitHub issues and Reddit feedback)
+
+The main bodies of issues #3 and #11 are complete (profile switching, Home
+Assistant, cloud error codes, ntfy, hideable modules, plain themes, custom CSS,
+adult profiles, shared tasks, recipe editing with Tandoor import, dynamic waste
+tile, and the read-only wall-display profile). This list captures only the
+**open follow-ups** from the comment threads, the new issue #15, and Reddit.
+
+Usability bugs to resolve first, with the highest-impact items listed:
+
+- "Today at a glance" counter showing every calendar event instead of just
+  today's events (#15).
+- Android back/gesture navigation closing the app instead of navigating back;
+  Capacitor hardware-back handling to respect in-app history (#15).
+- "My events" in "My area" starting mid-June instead of today, while the
+  tablet view already shows the correct day (#11 comment).
+- Events assigned to me labelled as "family event" instead of reflecting the
+  assignee (#15).
+- Rendering issues in the view/theme studio ("Ansichtsatelier") (#15).
+- Tab bar shifting horizontally between tabs and the last tab (e.g. Pinboard)
+  being clipped in browsers such as Firefox (#3 comment).
+- "Create family" dialog stalling after entering name and password (Reddit).
+
+Mobile, calendar and tablet improvements:
+
+- compact greeting widget and consistent layout across sub-views (#15);
+- bundle waste-collection pickups that fall on the same day into one entry,
+  and move the waste-calendar configuration into settings (#15);
+- colour-coded events in lists and overviews, not only in the calendar grid;
+- real week and month calendar views so free time slots become visible (#15);
+- consistent navigation: clicking a card opens it directly on web and mobile,
+  not only on mobile (#15);
+- flexible wall-tablet task list (4 / 8 / all) with scrollbar and
+  prioritisation/sort, replacing the fixed 4-item limit (#11 comment).
+
 ## Next
 
 - generic two-way CalDAV support beyond the bundled Nextcloud integration;
+- calendar import from Google Calendar and iCloud accounts;
+- optional waste-collection subscriptions via URL (not only ICS upload);
+- optional Mealie, Immich and Paperless-ngx connections;
+- custom recurrence (yearly, quarterly) for maintenance tasks;
 - short-lived invitation links for adding a trusted device or relative;
 - optional modules for pantry, household budget and other advanced areas;
 - accessible large-control mode for grandparents and managed profiles;
-- community translation workflow with catalogue checks and review ownership.
+- additional interface languages with a reviewed, owner-backed catalogue.
 
 ## Later / under evaluation
 
