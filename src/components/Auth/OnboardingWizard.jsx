@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -190,20 +191,36 @@ export default function OnboardingWizard({ onComplete, onBack }) {
                   onChange={event => setPassword(event.target.value)}
                   placeholder={t('onboarding.step1.passwordPlaceholder')}
                   maxLength={100}
+                  aria-invalid={password.length > 0 && password.length < 10}
                 />
               </label>
+              {password.length > 0 && password.length < 10 && (
+                <p className="onboarding-field-hint" role="alert">
+                  <AlertCircle size={16} aria-hidden="true" />
+                  <span>{t('onboarding.step1.passwordTooShort')}</span>
+                </p>
+              )}
               {publicAccess?.registration?.requiresInvite && (
-                <label className="auth-field">
-                  <span>{t('onboarding.step1.inviteCodeLabel')}</span>
-                  <input
-                    type="password"
-                    autoComplete="one-time-code"
-                    value={inviteCode}
-                    onChange={event => setInviteCode(event.target.value)}
-                    placeholder={t('onboarding.step1.inviteCodePlaceholder')}
-                    maxLength={200}
-                  />
-                </label>
+                <>
+                  <label className="auth-field">
+                    <span>{t('onboarding.step1.inviteCodeLabel')}</span>
+                    <input
+                      type="password"
+                      autoComplete="one-time-code"
+                      value={inviteCode}
+                      onChange={event => setInviteCode(event.target.value)}
+                      placeholder={t('onboarding.step1.inviteCodePlaceholder')}
+                      maxLength={200}
+                      aria-invalid={inviteCode.length === 0}
+                    />
+                  </label>
+                  {inviteCode.length === 0 && (
+                    <p className="onboarding-field-hint" role="alert">
+                      <AlertCircle size={16} aria-hidden="true" />
+                      <span>{t('onboarding.step1.inviteRequired')}</span>
+                    </p>
+                  )}
+                </>
               )}
               <div className="privacy-note">
                 <ShieldCheck size={18} />
