@@ -4,6 +4,27 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.18.0] – 2026-08-08
+
+### Sprachen und Fehlerkorrekturen
+
+- fünf neue Benutzeroberflächen-Sprachen: Französisch, Spanisch,
+  Italienisch, Niederländisch und Polnisch; fehlende Übersetzungen fallen
+  sauber auf Englisch zurück;
+- „Heute im Blick" und das Kalender-Badge zählen nur noch die Termine des
+  aktuellen Tages statt aller anstehenden Termine (#15);
+- „Meine Termine" startet korrekt am heutigen Tag (#11);
+- zugewiesene Termine zeigen die Profilnamen statt pauschal
+  „Familientermin" (#15);
+- die Tab-Leiste verschiebt sich beim Wechsel nicht mehr, und der letzte Tab
+  bleibt in Firefox erreichbar (#3);
+- die Hardware-Zurück-Taste und Wischgeste navigiert auf Android innerhalb
+  der App zurück statt sie zu verlassen (#15);
+- das Ansichtsatelier schneidet die Fußzeile nicht mehr ab, wenn die
+  bedingten Auswahlfelder eingeblendet werden (#15);
+- der Onboarding-Dialog „Familie erstellen" zeigt, warum „Weiter" inaktiv ist
+  (Passwort zu kurz oder Einladungscode erforderlich).
+
 ## [1.17.0] – 2026-08-05
 
 ### Mobile Navigation

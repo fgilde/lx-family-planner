@@ -6,6 +6,26 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.18.0] — 2026-08-08
+
+### Languages and bug fixes
+
+- five new interface languages: French, Spanish, Italian, Dutch and Polish;
+  missing translations fall back to English cleanly;
+- "Today at a glance" and the calendar badge count only the current day's
+  events instead of every upcoming event (#15);
+- "My events" starts at the current day (#11);
+- assigned events show the profile names instead of always "family event"
+  (#15);
+- the tab bar no longer shifts when switching, and the last tab stays
+  reachable in Firefox (#3);
+- the hardware back button and gesture navigates back inside the app on
+  Android instead of exiting (#15);
+- the dashboard studio no longer clips its footer when the conditional
+  picker blocks are shown (#15);
+- the "create family" onboarding dialog shows why "Next" is inactive
+  (password too short or invite code required).
+
 ## [1.16.2] — 2026-08-04
 
 ### Notifications, wall display and finer profile permissions

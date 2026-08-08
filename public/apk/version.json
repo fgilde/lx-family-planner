@@ -1,7 +1,7 @@
 {
-    "versionName":  "1.17.0",
-    "versionCode":  40,
+    "versionName":  "1.18.0",
+    "versionCode":  41,
     "buildKind":  "release",
-    "builtAt":  "2026-08-05T20:27:30.6639457Z",
-    "sha256":  "511971a1860c1015ec58d9e1c78a55a494af3fa63dc4a74a92ac866124132bc3"
+    "builtAt":  "2026-08-08T13:54:03.0161072Z",
+    "sha256":  "cf9d796c2d31e1c49c687826ec053837029cd33a028d9d077cbd9392fba770cc"
 }

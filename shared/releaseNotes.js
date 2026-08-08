@@ -1,4 +1,75 @@
 const RELEASE_NOTES = {
+  '1.18.0': {
+    version: '1.18.0',
+    eyebrow: 'Mehr Sprachen & Fehlerkorrekturen',
+    title: 'Fünf neue Sprachen und ein ruhigeres Dashboard',
+    intro:
+      'Die Oberfläche spricht jetzt zusätzlich Französisch, Spanisch, Italienisch, Niederländisch und Polnisch. Außerdem werden auf dem Dashboard nur noch die heutigen Termine gezählt, die Tab-Leiste springt nicht mehr und das Ansichtsatelier bleibt vollständig bedienbar.',
+    highlights: [
+      {
+        id: 'i18n-five-languages',
+        title: 'Französisch, Spanisch, Italienisch, Niederländisch, Polnisch',
+        description:
+          'Die Sprache kann in der Kopfzeile oder vor dem Login gewählt werden. Fehlende Übersetzungen fallen sauber auf Englisch zurück.'
+      },
+      {
+        id: 'dashboard-today-count',
+        title: '„Heute im Blick" zeigt nur heute',
+        description:
+          'Die Zusammenfassung und das Kalender-Badge zählen ab sofort ausschließlich die Termine des aktuellen Tages statt aller anstehenden Termine.'
+      },
+      {
+        id: 'nav-and-studio-fixes',
+        title: 'Ruhigere Tab-Leiste und fertiges Ansichtsatelier',
+        description:
+          'Tabs verschieben sich beim Wechsel nicht mehr, in Firefox bleibt der letzte Tab erreichbar, und das Ansichtsatelier schneidet die Fußzeile nicht mehr ab.'
+      },
+      {
+        id: 'android-back-nav',
+        title: 'Android: Zurück bleibt in der App',
+        description:
+          'Die Hardware-Zurück-Taste und Wischgeste navigiert innerhalb der App zurück, statt sie sofort zu verlassen.'
+      }
+    ],
+    closing:
+      'Bestehende Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'More languages & bug fixes',
+        title: 'Five new languages and a calmer dashboard',
+        intro:
+          'The interface now also speaks French, Spanish, Italian, Dutch and Polish. In addition, the dashboard counts only today’s events, the tab bar no longer jumps, and the dashboard studio stays fully usable.',
+        highlights: [
+          {
+            id: 'i18n-five-languages',
+            title: 'French, Spanish, Italian, Dutch, Polish',
+            description:
+              'Pick the language from the header or before login. Missing translations fall back to English cleanly.'
+          },
+          {
+            id: 'dashboard-today-count',
+            title: '“Today at a glance” shows only today',
+            description:
+              'The summary and calendar badge now count only the current day’s events instead of every upcoming event.'
+          },
+          {
+            id: 'nav-and-studio-fixes',
+            title: 'Calmer tab bar and a finished dashboard studio',
+            description:
+              'Tabs no longer shift when switching, the last tab stays reachable in Firefox, and the studio no longer clips its footer.'
+          },
+          {
+            id: 'android-back-nav',
+            title: 'Android: back stays in the app',
+            description:
+              'The hardware back button and gesture navigate back inside the app instead of exiting it immediately.'
+          }
+        ],
+        closing:
+          'Existing families, profiles, events, tasks, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.17.0': {
     version: '1.17.0',
     eyebrow: 'Mobile Navigation',
