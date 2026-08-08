@@ -23,6 +23,17 @@
       "export": "Exporteren",
       "import": "Bestand importeren"
     },
+    "layouts": {
+      "ariaLabel": "Agendaweergave",
+      "agenda": "Agenda",
+      "week": "Week",
+      "month": "Maand",
+      "previous": "Vorige periode",
+      "next": "Volgende periode",
+      "today": "Vandaag",
+      "more": "+{{count}} meer",
+      "free": "vrij"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "Wat staat er te gebeuren",

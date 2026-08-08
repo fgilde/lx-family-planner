@@ -5,11 +5,15 @@ import {
   CalendarPlus,
   CakeSlice,
   BellRing,
+  CalendarDays,
+  ChevronLeft,
   ChevronRight,
   Cloud,
   Download,
+  Grid2X2,
   History,
   HeartHandshake,
+  List,
   LockKeyhole,
   MapPin,
   Plus,
@@ -44,6 +48,11 @@ import {
   birthdayEventCopy,
   nextBirthdayOccurrencesOnly
 } from '../../../shared/birthdays.js';
+import {
+  calendarDaysForView,
+  calendarEventsForDay,
+  shiftCalendarAnchor
+} from '../../../shared/calendarGrid.js';
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -78,6 +87,126 @@ function previousLocalDate(value) {
   return localDateKey(date);
 }
 
+function calendarRangeLabel(anchorDate, view, language) {
+  const anchor = dateFromKey(anchorDate);
+  if (view === 'month') {
+    return new Intl.DateTimeFormat(language, {
+      month: 'long',
+      year: 'numeric'
+    }).format(anchor);
+  }
+  const week = calendarDaysForView(anchorDate, 'week');
+  const first = dateFromKey(week[0]);
+  const last = dateFromKey(week.at(-1));
+  const formatter = new Intl.DateTimeFormat(language, {
+    day: 'numeric',
+    month: 'short'
+  });
+  return `${formatter.format(first)} – ${formatter.format(last)}`;
+}
+
+function CalendarDateGrid({
+  anchorDate,
+  events,
+  members,
+  onSelectEvent,
+  t,
+  todayKey,
+  view
+}) {
+  const { i18n } = useTranslation();
+  const days = useMemo(
+    () => calendarDaysForView(anchorDate, view),
+    [anchorDate, view]
+  );
+  const anchorMonth = dateFromKey(anchorDate).getMonth();
+  const weekdays = useMemo(() => {
+    const start = dateFromKey('2026-08-03');
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(start.getTime());
+      date.setDate(date.getDate() + index);
+      return new Intl.DateTimeFormat(i18n.language, {
+        weekday: 'short'
+      }).format(date);
+    });
+  }, [i18n.language]);
+
+  return (
+    <section className={`calendar-date-grid is-${view}`}>
+      <header className="calendar-date-grid-heading">
+        <div>
+          <span>{t(`view.layouts.${view}`)}</span>
+          <h2>{calendarRangeLabel(anchorDate, view, i18n.language)}</h2>
+        </div>
+        <strong>{events.length}</strong>
+      </header>
+      <div className="calendar-grid-weekdays" aria-hidden="true">
+        {weekdays.map(day => <span key={day}>{day}</span>)}
+      </div>
+      <div className="calendar-grid-days">
+        {days.map(dateKey => {
+          const dayEvents = calendarEventsForDay(events, dateKey);
+          const date = dateFromKey(dateKey);
+          const outsideMonth = view === 'month' && date.getMonth() !== anchorMonth;
+          return (
+            <section
+              key={dateKey}
+              className={`calendar-grid-day ${
+                dateKey === todayKey ? 'is-today' : ''
+              } ${outsideMonth ? 'is-outside-month' : ''}`}
+            >
+              <header>
+                <time dateTime={dateKey}>
+                  <strong>{date.getDate()}</strong>
+                  <span>{new Intl.DateTimeFormat(i18n.language, {
+                    weekday: 'short'
+                  }).format(date)}</span>
+                </time>
+                {dateKey === todayKey && <em>{t('view.layouts.today')}</em>}
+              </header>
+              <div className="calendar-grid-events">
+                {dayEvents.slice(0, view === 'month' ? 3 : 6).map(event => {
+                  const audience = eventAudienceMembers(event, members);
+                  const accent = event.sourceColor || audience[0]?.color ||
+                    event.color || 'var(--primary)';
+                  const displayEvent = birthdayEventCopy(event, t);
+                  return (
+                    <button
+                      key={`${dateKey}-${event.id}`}
+                      type="button"
+                      style={{ '--event-color': accent }}
+                      onClick={() => onSelectEvent(event)}
+                      title={displayEvent.title}
+                      aria-label={t('view.event.openAria', {
+                        title: displayEvent.title
+                      })}
+                    >
+                      <span>{event.allDay || !event.time
+                        ? t('view.event.allDay')
+                        : event.time}</span>
+                      <strong>{displayEvent.title}</strong>
+                    </button>
+                  );
+                })}
+                {dayEvents.length > (view === 'month' ? 3 : 6) && (
+                  <span className="calendar-grid-more">
+                    {t('view.layouts.more', {
+                      count: dayEvents.length - (view === 'month' ? 3 : 6)
+                    })}
+                  </span>
+                )}
+                {!dayEvents.length && <span className="calendar-grid-free">
+                  {t('view.layouts.free')}
+                </span>}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function CalendarView() {
   const { t } = useTranslation('calendar');
   const { t: tShared } = useTranslation('shared');
@@ -96,6 +225,10 @@ export default function CalendarView() {
   } = useFamily();
   const [selectedMemberFilter, setSelectedMemberFilter] = useState('all');
   const [showPast, setShowPast] = useState(false);
+  const [calendarView, setCalendarView] = useState('agenda');
+  const [calendarAnchorDate, setCalendarAnchorDate] = useState(() =>
+    localDateKey()
+  );
   const [isSourcesOpen, setIsSourcesOpen] = useState(false);
   const [selectedReminderEvent, setSelectedReminderEvent] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -127,6 +260,20 @@ export default function CalendarView() {
         .sort((left, right) => eventDateValue(left) - eventDateValue(right));
     },
     [householdEvents, selectedMemberFilter, showPast, todayKey]
+  );
+
+  const gridEvents = useMemo(
+    () =>
+      nextBirthdayOccurrencesOnly(householdEvents, todayKey, {
+        includePast: true
+      })
+        .filter(
+          event =>
+            selectedMemberFilter === 'all' ||
+            eventIsForMember(event, selectedMemberFilter)
+        )
+        .sort((left, right) => eventDateValue(left) - eventDateValue(right)),
+    [householdEvents, selectedMemberFilter, todayKey]
   );
 
   const groupedEvents = useMemo(() => {
@@ -254,6 +401,39 @@ export default function CalendarView() {
         </div>
 
         <div className="calendar-tools">
+          <div
+            className="calendar-view-switcher"
+            role="group"
+            aria-label={t('view.layouts.ariaLabel')}
+          >
+            <button
+              type="button"
+              className={calendarView === 'agenda' ? 'is-active' : ''}
+              aria-pressed={calendarView === 'agenda'}
+              onClick={() => setCalendarView('agenda')}
+              title={t('view.layouts.agenda')}
+            >
+              <List size={16} /> <span>{t('view.layouts.agenda')}</span>
+            </button>
+            <button
+              type="button"
+              className={calendarView === 'week' ? 'is-active' : ''}
+              aria-pressed={calendarView === 'week'}
+              onClick={() => setCalendarView('week')}
+              title={t('view.layouts.week')}
+            >
+              <CalendarDays size={16} /> <span>{t('view.layouts.week')}</span>
+            </button>
+            <button
+              type="button"
+              className={calendarView === 'month' ? 'is-active' : ''}
+              aria-pressed={calendarView === 'month'}
+              onClick={() => setCalendarView('month')}
+              title={t('view.layouts.month')}
+            >
+              <Grid2X2 size={15} /> <span>{t('view.layouts.month')}</span>
+            </button>
+          </div>
           <button type="button" onClick={() => setShowPast(value => !value)}>
             <History size={15} />
             {showPast ? t('view.tools.hidePast') : t('view.tools.showPast')}
@@ -272,7 +452,43 @@ export default function CalendarView() {
         </div>
       </section>
 
-      <section className="calendar-agenda">
+      {calendarView !== 'agenda' && (
+        <section className="calendar-period-navigation">
+          <button
+            type="button"
+            onClick={() => setCalendarAnchorDate(previous =>
+              shiftCalendarAnchor(previous, calendarView, -1)
+            )}
+            aria-label={t('view.layouts.previous')}
+            title={t('view.layouts.previous')}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            type="button"
+            className="calendar-period-today"
+            onClick={() => setCalendarAnchorDate(todayKey)}
+          >
+            {t('view.layouts.today')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setCalendarAnchorDate(previous =>
+              shiftCalendarAnchor(previous, calendarView, 1)
+            )}
+            aria-label={t('view.layouts.next')}
+            title={t('view.layouts.next')}
+          >
+            <ChevronRight size={18} />
+          </button>
+        </section>
+      )}
+
+      <section
+        className={`calendar-agenda ${
+          calendarView !== 'agenda' ? 'is-hidden' : ''
+        }`}
+      >
         <header className="calendar-agenda-heading">
           <div>
             <span>{t('view.agenda.kicker')}</span>
@@ -500,6 +716,18 @@ export default function CalendarView() {
           </div>
         )}
       </section>
+
+      {calendarView !== 'agenda' && (
+        <CalendarDateGrid
+          anchorDate={calendarAnchorDate}
+          events={gridEvents}
+          members={members}
+          onSelectEvent={setSelectedEvent}
+          t={t}
+          todayKey={todayKey}
+          view={calendarView}
+        />
+      )}
 
       <CalendarSubscriptionManager
         isOpen={isSourcesOpen}

@@ -23,6 +23,17 @@
       "export": "Export",
       "import": "Datei importieren"
     },
+    "layouts": {
+      "ariaLabel": "Kalenderansicht",
+      "agenda": "Agenda",
+      "week": "Woche",
+      "month": "Monat",
+      "previous": "Vorheriger Zeitraum",
+      "next": "Nächster Zeitraum",
+      "today": "Heute",
+      "more": "+{{count}} weitere",
+      "free": "frei"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "Was als Nächstes ansteht",

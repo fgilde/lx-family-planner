@@ -18,8 +18,12 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
-import { eventAudienceMembers } from '../../../shared/calendarAudience.js';
+import {
+  eventAudienceMembers,
+  eventSpansToday
+} from '../../../shared/calendarAudience.js';
 import { birthdayEventCopy } from '../../../shared/birthdays.js';
+import { groupTrashEventsByDate, trashGroupTitle } from '../../../shared/trashSchedule.js';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import {
   dashboardLayoutForTrash,
@@ -230,7 +234,7 @@ export default function KitchenTabletView() {
   const todayEvents = useMemo(
     () =>
       events
-        .filter(event => event.date === todayKey && belongsToHousehold(event))
+        .filter(event => eventSpansToday(event, todayKey) && belongsToHousehold(event))
         .sort((left, right) =>
           String(left.time || '').localeCompare(String(right.time || ''))
         ),
@@ -294,11 +298,14 @@ export default function KitchenTabletView() {
   );
   const nextTrash = useMemo(
     () =>
-      trashEvents
-        .filter(item => item.date >= todayKey)
-        .sort((left, right) => left.date.localeCompare(right.date))[0],
-    [todayKey, trashEvents]
+      groupTrashEventsByDate(
+        trashEvents.filter(
+          item => item.date >= todayKey && belongsToHousehold(item)
+        )
+      )[0],
+    [activeHousehold, todayKey, trashEvents]
   );
+  const nextTrashTitle = trashGroupTitle(nextTrash);
   const effectiveDashboardLayout = dashboardLayoutForTrash(
     dashboardLayout.layout,
     nextTrash?.date,
@@ -645,7 +652,7 @@ export default function KitchenTabletView() {
               onClick={() => setActiveTab('trash')}
             >
               <span>🗑️</span>
-              <strong>{nextTrash.title}</strong>
+              <strong>{nextTrashTitle}</strong>
               <small>{shortDate(nextTrash.date)}</small>
             </button>
           ) : (

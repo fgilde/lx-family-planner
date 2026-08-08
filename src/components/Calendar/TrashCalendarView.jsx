@@ -21,6 +21,7 @@ import { useFamily } from '../../context/FamilyContext';
 import { formatDate } from '../../utils/formatting';
 import { parseICSContent } from '../../utils/icsUtils';
 import { canManageFamily } from '../../constants/roles';
+import { groupTrashEventsByDate, trashGroupTitle } from '../../../shared/trashSchedule.js';
 import EventReminderDialog from './EventReminderDialog';
 import EventReminderPicker from './EventReminderPicker';
 
@@ -130,6 +131,10 @@ export default function TrashCalendarView() {
       )
       .sort((left, right) => left.date.localeCompare(right.date));
   }, [activeHousehold, trashEvents]);
+  const upcomingTrashGroups = useMemo(
+    () => groupTrashEventsByDate(upcomingTrash),
+    [upcomingTrash]
+  );
 
   const closeAddDialog = () => {
     setIsAddOpen(false);
@@ -240,10 +245,11 @@ export default function TrashCalendarView() {
     return result;
   };
 
-  const nextPickup = upcomingTrash[0];
-  const nextType = nextPickup
-    ? TRASH_TYPES.find(type => type.id === nextPickup.type) || TRASH_TYPES[0]
-    : null;
+  const nextPickup = upcomingTrashGroups[0];
+  const typeForItem = item =>
+    TRASH_TYPES.find(type => type.id === item.type) || TRASH_TYPES[0];
+  const titleForItem = item => item.titleKey ? t(item.titleKey) : item.title;
+  const nextPickupTitle = trashGroupTitle(nextPickup, titleForItem);
 
   return (
     <div className="trash-calendar">
@@ -289,14 +295,14 @@ export default function TrashCalendarView() {
       {nextPickup ? (
         <section className="trash-next-pickup">
           <div className="trash-next-pickup-main">
-            <span className="trash-next-pickup-icon">{nextType.icon}</span>
+            <span className="trash-next-pickup-icon trash-next-pickup-icons">
+              {nextPickup.items.map(item => (
+                <i key={item.id}>{typeForItem(item).icon}</i>
+              ))}
+            </span>
             <div>
               <span>{t('trash.next.kicker')}</span>
-              <h3>
-                {nextPickup.titleKey
-                  ? t(nextPickup.titleKey)
-                  : nextPickup.title}
-              </h3>
+              <h3>{nextPickupTitle}</h3>
               <p>
                 {formatDate(localTrashDate(nextPickup.date), {
                   weekday: 'long',
@@ -318,10 +324,10 @@ export default function TrashCalendarView() {
             <span>{t('trash.schedule.kicker')}</span>
             <h3>{t('trash.schedule.title')}</h3>
           </div>
-          <b>{upcomingTrash.length}</b>
+          <b>{upcomingTrashGroups.length}</b>
         </header>
 
-        {!upcomingTrash.length ? (
+        {!upcomingTrashGroups.length ? (
           <div className="trash-schedule-empty">
             <span>🗓️</span>
             <strong>{t('trash.schedule.emptyTitle')}</strong>
@@ -329,25 +335,26 @@ export default function TrashCalendarView() {
           </div>
         ) : (
           <div className="trash-schedule-list">
-            {upcomingTrash.map(item => {
-              const type =
-                TRASH_TYPES.find(entry => entry.id === item.type) ||
-                TRASH_TYPES[0];
+            {upcomingTrashGroups.map(group => {
+              const item = group.items[0];
+              const type = typeForItem(item);
               const reminders = normalizeTrashReminders(item.reminders);
-              const itemTitle = item.titleKey
-                ? t(item.titleKey)
-                : item.title;
+              const itemTitle = trashGroupTitle(group, titleForItem);
               return (
                 <article
-                  key={item.id}
-                  className="trash-schedule-row"
+                  key={group.date}
+                  className="trash-schedule-row is-group"
                   style={{ '--trash-color': type.color }}
                 >
-                  <span className="trash-schedule-icon">{type.icon}</span>
+                  <span className="trash-schedule-icon trash-schedule-icons">
+                    {group.items.map(entry => (
+                      <i key={entry.id}>{typeForItem(entry).icon}</i>
+                    ))}
+                  </span>
                   <div className="trash-schedule-copy">
                     <strong>{itemTitle}</strong>
                     <span>
-                      {formatDate(localTrashDate(item.date), {
+                      {formatDate(localTrashDate(group.date), {
                         weekday: 'short',
                         day: 'numeric',
                         month: 'short',
@@ -383,6 +390,39 @@ export default function TrashCalendarView() {
                             .join(' · ')
                         : t('trash.schedule.reminderOff')}
                     </button>
+                    {group.items.slice(1).map(entry => {
+                      const entryReminders = normalizeTrashReminders(entry.reminders);
+                      const entryTitle = titleForItem(entry);
+                      return (
+                        <button
+                          key={entry.id}
+                          type="button"
+                          className={
+                            entryReminders.length
+                              ? 'trash-reminder-summary is-active'
+                              : 'trash-reminder-summary'
+                          }
+                          onClick={() =>
+                            setReminderEvent({
+                              ...entry,
+                              allDay: true,
+                              reminderKind: 'trash',
+                              reminders: entryReminders
+                            })
+                          }
+                        >
+                          {entryReminders.length ? <Bell size={13} /> : <BellOff size={13} />}
+                          <strong>{entryTitle}</strong>
+                          {entryReminders.length
+                            ? entryReminders
+                                .map(minutes =>
+                                  formatReminderLead(minutes, true, tShared)
+                                )
+                                .join(' Â· ')
+                            : t('trash.schedule.reminderOff')}
+                        </button>
+                      );
+                    })}
                   </div>
                   <div className="trash-schedule-row-actions">
                     <button
@@ -414,6 +454,43 @@ export default function TrashCalendarView() {
                     >
                       <Trash2 size={16} />
                     </button>
+                    {group.items.slice(1).map(entry => {
+                      const entryReminders = normalizeTrashReminders(entry.reminders);
+                      const entryTitle = titleForItem(entry);
+                      return (
+                        <span className="trash-group-action-pair" key={entry.id}>
+                          <button
+                            type="button"
+                            className="icon-circle-btn"
+                            onClick={() =>
+                              setReminderEvent({
+                                ...entry,
+                                allDay: true,
+                                reminderKind: 'trash',
+                                reminders: entryReminders
+                              })
+                            }
+                            title={t('trash.schedule.editReminderTitle')}
+                            aria-label={t('trash.schedule.editReminderAria', {
+                              title: entryTitle
+                            })}
+                          >
+                            <Bell size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            className="icon-circle-btn trash-delete-button"
+                            onClick={() => deleteTrashEvent(entry.id)}
+                            title={t('trash.schedule.removeTitle')}
+                            aria-label={t('trash.schedule.removeAria', {
+                              title: entryTitle
+                            })}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </span>
+                      );
+                    })}
                   </div>
                 </article>
               );
