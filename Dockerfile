@@ -34,7 +34,7 @@ COPY --chown=node:node server.js ./
 COPY --chown=node:node server ./server
 COPY --chown=node:node shared ./shared
 COPY --chown=node:node --from=build /app/dist ./dist
-COPY --chown=node:node scripts/docker-entrypoint.sh /usr/local/bin/lx-family-entrypoint
+COPY --chown=node:node --chmod=755 scripts/docker-entrypoint.sh /usr/local/bin/lx-family-entrypoint
 
 ENV PUID=1000 \
     PGID=1000
