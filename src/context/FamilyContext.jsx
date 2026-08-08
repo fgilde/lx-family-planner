@@ -220,9 +220,13 @@ export function FamilyProvider({ children }) {
   const setActiveTab = useCallback((nextTab, { recordHistory = true } = {}) => {
     setActiveTabState(prevTab => {
       const resolved = typeof nextTab === 'function' ? nextTab(prevTab) : nextTab;
-      if (resolved === activeTabRef.current) return prevTab;
+      // Der React-State ist die maßgebliche Quelle. Der Ref ist nur für den
+      // nativen Zurück-Stack da und kann während Bootstrapping/Deep-Links kurz
+      // hinterherhinken. Ein Vergleich mit dem Ref ließ dann sichtbare
+      // Navigationselemente ohne Wirkung zurück.
+      if (resolved === prevTab) return prevTab;
       if (recordHistory) {
-        tabHistoryRef.current.push(activeTabRef.current);
+        tabHistoryRef.current.push(prevTab);
         if (tabHistoryRef.current.length > 64) {
           tabHistoryRef.current.shift();
         }

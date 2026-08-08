@@ -38,6 +38,7 @@ import {
   nextBirthdayOccurrencesOnly
 } from '../../../shared/birthdays.js';
 import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
+import { groupTrashEventsByDate, trashGroupTitle } from '../../../shared/trashSchedule.js';
 import { isChildProfile, isPetProfile } from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
@@ -113,6 +114,11 @@ function EmptyWidget({ icon, children }) {
       <p>{children}</p>
     </div>
   );
+}
+
+function openWidgetFromBackground(event, onOpen) {
+  if (event.target.closest('button, a, input, select, textarea, label')) return;
+  onOpen();
 }
 
 export default function PersonalDashboard() {
@@ -267,9 +273,12 @@ export default function PersonalDashboard() {
     : activeHousehold === 'familie'
       ? initialTrashEvents(tCalendar)
       : [];
-  const nextTrash = trashEvents
-    .filter(item => item.date >= todayKey)
-    .sort((left, right) => left.date.localeCompare(right.date))[0];
+  const nextTrash = groupTrashEventsByDate(
+    trashEvents.filter(item => item.date >= todayKey)
+  )[0];
+  const nextTrashTitle = trashGroupTitle(nextTrash, item =>
+    item.titleKey ? tCalendar(item.titleKey) : item.title
+  );
   const effectiveDashboardLayout = dashboardLayoutForTrash(
     dashboardLayout.layout,
     nextTrash?.date,
@@ -333,7 +342,11 @@ export default function PersonalDashboard() {
         className="adult-widget-grid"
         layout={effectiveDashboardLayout}
       >
-        <DashboardWidget widgetId="calendar" className="card adult-dashboard-widget">
+        <DashboardWidget
+          widgetId="calendar"
+          className="card adult-dashboard-widget is-clickable"
+          onClick={event => openWidgetFromBackground(event, () => setActiveTab('calendar'))}
+        >
           <DashboardCardHeader
             action={() => setActiveTab('calendar')}
             actionLabel={t('personal.widgets.calendar.action')}
@@ -375,7 +388,11 @@ export default function PersonalDashboard() {
           )}
         </DashboardWidget>
 
-        <DashboardWidget widgetId="tasks" className="card adult-dashboard-widget">
+        <DashboardWidget
+          widgetId="tasks"
+          className="card adult-dashboard-widget is-clickable"
+          onClick={event => openWidgetFromBackground(event, () => setActiveTab('tasks'))}
+        >
           <DashboardCardHeader
             action={() => setActiveTab('tasks')}
             actionLabel={t('personal.widgets.tasks.action')}
@@ -424,7 +441,11 @@ export default function PersonalDashboard() {
           )}
         </DashboardWidget>
 
-        <DashboardWidget widgetId="meals" className="card adult-dashboard-widget meals">
+        <DashboardWidget
+          widgetId="meals"
+          className="card adult-dashboard-widget meals is-clickable"
+          onClick={event => openWidgetFromBackground(event, () => setActiveTab('meals'))}
+        >
           <DashboardCardHeader
             action={() => setActiveTab('meals')}
             actionLabel={t('personal.widgets.meals.action')}
@@ -456,7 +477,11 @@ export default function PersonalDashboard() {
           )}
         </DashboardWidget>
 
-        <DashboardWidget widgetId="shopping" className="card adult-dashboard-widget shopping">
+        <DashboardWidget
+          widgetId="shopping"
+          className="card adult-dashboard-widget shopping is-clickable"
+          onClick={event => openWidgetFromBackground(event, () => setActiveTab('shopping'))}
+        >
           <DashboardCardHeader
             action={() => setActiveTab('shopping')}
             actionLabel={t('personal.widgets.shopping.action')}
@@ -484,7 +509,11 @@ export default function PersonalDashboard() {
           )}
         </DashboardWidget>
 
-        <DashboardWidget widgetId="trash" className="card adult-dashboard-widget trash">
+        <DashboardWidget
+          widgetId="trash"
+          className="card adult-dashboard-widget trash is-clickable"
+          onClick={event => openWidgetFromBackground(event, () => setActiveTab('trash'))}
+        >
           <DashboardCardHeader
             action={() => setActiveTab('trash')}
             actionLabel={t('personal.widgets.trash.action')}
@@ -500,11 +529,7 @@ export default function PersonalDashboard() {
             >
               <span>🗑️</span>
               <span>
-                <strong>
-                  {nextTrash.titleKey
-                    ? t(`calendar:${nextTrash.titleKey}`)
-                    : nextTrash.title}
-                </strong>
+                <strong>{nextTrashTitle}</strong>
                 <small>
                   {t('personal.trash.pickupOn', {
                     date: formatDate(`${nextTrash.date}T12:00:00`, {
@@ -520,7 +545,11 @@ export default function PersonalDashboard() {
           )}
         </DashboardWidget>
 
-        <DashboardWidget widgetId="board" className="card adult-dashboard-widget board">
+        <DashboardWidget
+          widgetId="board"
+          className="card adult-dashboard-widget board is-clickable"
+          onClick={event => openWidgetFromBackground(event, () => setActiveTab('board'))}
+        >
           <DashboardCardHeader
             action={() => setActiveTab('board')}
             actionLabel={t('personal.widgets.board.action')}
