@@ -8,7 +8,7 @@ services:
       PROXY_AUTH_ADD: "false"
 
   server:
-    image: ghcr.io/laxxx-lab/lx-family-planner:1.18.0@sha256:accd423fe413573efbd82572613de1ec449fc1374db0e6887d58bc4c26d44ea1
+    image: ghcr.io/laxxx-lab/lx-family-planner:1.18.0@sha256:db5de0e3f005581098a9fbb3ba7758784a8ee6fd8e17a3c775357fbf2d24f406
     user: "1000:1000"
     restart: on-failure
     stop_grace_period: 15s
