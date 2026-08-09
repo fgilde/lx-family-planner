@@ -7,22 +7,24 @@ Jede Datei ist für eine andere Entdeckungs-Surface gedacht.
 
 | Aktion | Datei | Status | Wann möglich |
 |---|---|---|---|
+| **GitHub discovery** | Repository metadata | ✅ live | description, demo and 17 relevant topics set on 2026-08-09 |
 | **awesome-selfhosted** PR | `awesome-selfhosted.yml` | ⏳ vorbereitet | **ab 2026-12-01** (4-Monate-Regel) |
 | **selfh.st** Einreichung | `selfh-st-submission.md` | 🔄 im Review | eingereicht 2026-08-07 |
-| **Reddit r/selfhosted** Megathread | `reddit-show-and-tell.md` | 🔄 live | gepostet 2026-08-07, erste Reaktion (u/quiet_beer) |
+| **Reddit r/selfhosted** Megathread | `reddit-show-and-tell.md` | 🔄 live | gepostet 2026-08-07; do not repost until a later meaningful release |
 | **Reddit r/homelab** | — | ⏳ wartet | ab **2026-08-25** (1-Monats-Commit-History, Rule 7) |
-| **Reddit r/docker** | — | ⏳ Mod-Freigabe nötig | Modmail vor Post |
-| **Reddit r/unRAID** | — | ✅ bereit | sofort postbar |
-| **Reddit r/HomeAssistant** | — | ✅ bereit | Fokus auf HA-Integration |
-| Unraid Community Applications | — | ✅ live | erledigt |
-| Umbrel App Store | — | ✅ live | erledigt |
+| **Reddit r/unRAID** | `launch-v1.18.1.md` | ✅ bereit | focus on Community Applications and simple updates |
+| **Home Assistant Community** | `launch-v1.18.1.md` | ✅ bereit | focus on tablet mode and HA dashboard widgets |
+| **Mastodon / Fediverse** | `launch-v1.18.1.md` | ✅ bereit | short release announcement |
+| Unraid Community Applications | — | ✅ live | automatic approval received; wait for catalogue refresh |
+| Umbrel App Store | [PR #5939](https://github.com/getumbrel/umbrel-apps/pull/5939) | 🔄 awaiting review | package and official lint are green; not live until Umbrel merges it |
 
 ## Reihenfolge (empfohlen)
 
 1. **Diese Woche**
-   - [ ] `selfh-st-submission.md` bei https://selfh.st/submit/ einreichen
-   - [ ] `reddit-show-and-tell.md` im nächsten r/selfhosted Show-&-Tell-Thread posten
-   - [ ] Kurzen Mastodon/Forgejo-Post mit Demo-Link setzen
+   - [ ] Den Home-Assistant-Community-Post aus `launch-v1.18.1.md` im Bereich
+         *Share your Projects!* veröffentlichen
+   - [ ] Den Unraid-Beitrag aus `launch-v1.18.1.md` posten
+   - [ ] Einen kurzen Mastodon-/Fediverse-Post mit Demo-Link setzen
 
 2. **Laufend**
    - [ ] Bei größeren Releases einen Post in die gleichen Kanäle (nicht jede Woche)
@@ -42,7 +44,8 @@ verschwendete Mühe und könnte als Spam markiert werden.
 
 ## Was du tun kannst, bis Dezember die Aufnahme beschleunigt
 
-- Regelmäßig releasen (alle 1–2 Wochen) → Maintainer sehen Aktivität
+- Regelmäßig und nachvollziehbar releasen (nicht künstlich jede Woche) →
+  Maintainer sehen Aktivität
 - Saubere Changelogs → wirkt professionell bei der Review
 - Sterne sammeln (über selfh.st + Reddit) → soziale Signale helfen der Review
 - 2–3 gelöste Issues → zeigt lebendige Community
