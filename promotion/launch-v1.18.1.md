@@ -33,7 +33,8 @@ Android APK. The Umbrel submission is in review. LX Family is MIT-licensed and
 has no hosted service or telemetry – each household runs its own instance.
 
 - GitHub and installation: https://github.com/laxxx-lab/lx-family-planner
-- Read-only demo: https://familie.laxxx-lab.de/
+- Read-only demo: https://familie.laxxx-lab.de/ – family **Demo**, password
+  **demo**. It is a shared showroom; please do not enter personal data.
 - Screenshots: dashboard, child profile and tablet mode are at the top of the
   README.
 
@@ -66,7 +67,8 @@ Existing data survives updates; the project includes a documented backup and
 rollback path.
 
 - GitHub / docs: https://github.com/laxxx-lab/lx-family-planner
-- Read-only demo: https://familie.laxxx-lab.de/
+- Read-only demo: https://familie.laxxx-lab.de/ – family **Demo**, password
+  **demo**. It is a shared showroom; please do not enter personal data.
 - Android APK and Docker/Proxmox installation are in the README.
 
 I would love feedback from Unraid families: is there a dashboard tile,
@@ -85,7 +87,7 @@ chores, shopping, meals, chat, files and kid-friendly profiles.
 Runs on Docker, Proxmox and Unraid; Android APK included. No hosted account,
 no telemetry – each family runs its own instance.
 
-Demo: https://familie.laxxx-lab.de/
+Demo: https://familie.laxxx-lab.de/ – family **Demo**, password **demo**
 Code: https://github.com/laxxx-lab/lx-family-planner
 
 Transparency: both the app and this post use AI as a tool; product direction,
