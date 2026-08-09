@@ -18,6 +18,12 @@ const LEGACY_DATABASE_FILE = process.env.LEGACY_DATABASE_FILE
   ? path.resolve(process.env.LEGACY_DATABASE_FILE)
   : path.join(process.cwd(), 'family_db.json');
 
+// Fresh self-hosted installations and isolated browser tests may point SQLite
+// at a data directory that does not exist yet. Creating only that parent
+// directory is idempotent and avoids a startup failure without touching any
+// existing database or user data.
+fs.mkdirSync(path.dirname(DATABASE_FILE), { recursive: true, mode: 0o700 });
+
 const RECORD_TYPES = new Set([
   'events',
   'shoppingItems',
