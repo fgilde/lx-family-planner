@@ -56,6 +56,12 @@ Files:
 The package must be tested on umbrelOS before opening the pull request against
 `getumbrel/umbrel-apps`.
 
+For every update, publish the GitHub release first. Then take the exact
+multi-architecture GHCR digest for that version, pin it in the Umbrel compose
+file as `:<version>@sha256:<digest>`, bump `umbrel-app.yml`, add concise
+user-facing release notes and run the Umbrel update test. Never pin Umbrel to
+a guessed digest or the moving `latest` tag.
+
 ## Release safety
 
 Every store test must cover:

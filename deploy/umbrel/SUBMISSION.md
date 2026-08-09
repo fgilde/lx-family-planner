@@ -4,8 +4,9 @@ Copy the `lx-family-planner` directory into a branch of
 `getumbrel/umbrel-apps`, test it on an umbrelOS Linux VM and open an App
 Submission pull request.
 
-The initial submission intentionally keeps `gallery: []` and
-`releaseNotes: ""`, as requested by the Umbrel submission guide.
+The Umbrel package intentionally keeps `gallery: []`. Each later update must
+use the exact published GHCR version and multi-architecture digest and add
+short, user-facing release notes.
 
 Use these existing 1440×900 product views in the submission:
 
@@ -46,4 +47,5 @@ Before opening the pull request:
 3. update the app and confirm `/app/data` and `/app/backups` remain intact,
 4. test the dashboard, login, calendar and Android download link.
 
-The package is pinned to the published `1.18.0` multi-architecture digest.
+The package is pinned to the published `1.18.1` multi-architecture digest:
+`sha256:bb0c8b880610d8b6e7116b51fdb7894603d9ca3fbd54ca9d8ff31ff303512030`.

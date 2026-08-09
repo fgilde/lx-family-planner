@@ -2,7 +2,7 @@ manifestVersion: 1.1
 id: lx-family-planner
 category: files
 name: LX Family
-version: "1.18.0"
+version: "1.18.1"
 tagline: Private Family OS for every generation
 description: >-
   LX Family brings calendars, tasks, shopping, meals, family chat,
@@ -14,7 +14,9 @@ description: >-
   while parents keep control over task approval, notifications, integrations
   and child-safe media widgets. Optional integrations include Nextcloud,
   Home Assistant, Bring!, Gotify and the native LX Android app.
-releaseNotes: ""
+releaseNotes: >-
+  LX Family Planner is now LX Family · Private Family OS. Existing families,
+  profiles, events, chores, files and settings stay intact.
 developer: LX Family contributors
 website: https://github.com/laxxx-lab/lx-family-planner
 dependencies: []
