@@ -210,6 +210,5 @@ test('Umbrel package uses one internally consistent pinned release without root 
   );
   assert.match(compose, /user: "1000:1000"/);
   assert.doesNotMatch(compose, /cap_add:/);
-  assert.match(manifest, /releaseNotes: >-/);
-  assert.match(manifest, /LX Family Planner is now LX Family/);
+  assert.match(manifest, /releaseNotes: ""/);
 });

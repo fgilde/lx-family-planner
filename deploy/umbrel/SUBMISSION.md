@@ -4,9 +4,9 @@ Copy the `lx-family-planner` directory into a branch of
 `getumbrel/umbrel-apps`, test it on an umbrelOS Linux VM and open an App
 Submission pull request.
 
-The Umbrel package intentionally keeps `gallery: []`. Each later update must
-use the exact published GHCR version and multi-architecture digest and add
-short, user-facing release notes.
+The initial submission intentionally keeps `gallery: []` and
+`releaseNotes: ""`, as required by the Umbrel submission guide. Each later
+update must use the exact published GHCR version and multi-architecture digest.
 
 Use these existing 1440×900 product views in the submission:
 
