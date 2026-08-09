@@ -41,9 +41,9 @@ I would especially value feedback from people using a tablet or wall panel with
 Home Assistant: which small, family-safe HA widget would make this useful every
 day?
 
-**AI transparency:** The project is developed with AI coding assistance. The
-product decisions, integration choices, release tests and maintenance remain
-under human review.
+**Transparency:** Both LX Family and this post were created with AI as a tool.
+Product direction, testing, release decisions and ongoing maintenance remain
+the maintainer's responsibility.
 
 ## 2. Reddit r/unRAID
 
@@ -73,8 +73,9 @@ I would love feedback from Unraid families: is there a dashboard tile,
 integration or backup workflow that you would want before trusting it for daily
 use?
 
-**AI transparency:** AI coding assistants are part of the development process;
-releases and product decisions are reviewed by the maintainer.
+**Transparency:** Both LX Family and this post were created with AI as a tool.
+Product direction, testing, release decisions and ongoing maintenance remain
+the maintainer's responsibility.
 
 ## 3. Mastodon / Fediverse
 
@@ -86,6 +87,9 @@ no telemetry – each family runs its own instance.
 
 Demo: https://familie.laxxx-lab.de/
 Code: https://github.com/laxxx-lab/lx-family-planner
+
+Transparency: both the app and this post use AI as a tool; product direction,
+testing, releases and maintenance remain the maintainer's responsibility.
 
 #SelfHosted #HomeLab #OpenSource #HomeAssistant #FamilyTech #Docker
 
