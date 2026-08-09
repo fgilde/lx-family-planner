@@ -31,6 +31,8 @@ should sit next to each other instead of in separate apps.
 **Available now:** Docker, Proxmox, Unraid Community Applications and a native
 Android APK. The Umbrel submission is in review. LX Family is MIT-licensed and
 has no hosted service or telemetry – each household runs its own instance.
+The interface is available in seven languages: German, English, French,
+Spanish, Italian, Dutch and Polish.
 
 - GitHub and installation: https://github.com/laxxx-lab/lx-family-planner
 - Read-only demo: https://familie.laxxx-lab.de/ – family **Demo**, password
@@ -66,6 +68,9 @@ It runs as a normal, unprivileged container with persistent data and backups.
 Existing data survives updates; the project includes a documented backup and
 rollback path.
 
+The interface is available in seven languages: German, English, French,
+Spanish, Italian, Dutch and Polish.
+
 - GitHub / docs: https://github.com/laxxx-lab/lx-family-planner
 - Read-only demo: https://familie.laxxx-lab.de/ – family **Demo**, password
   **demo**. It is a shared showroom; please do not enter personal data.
@@ -85,7 +90,8 @@ LX Family 1.18.1 is out: a private, self-hosted Family OS for shared calendars,
 chores, shopping, meals, chat, files and kid-friendly profiles.
 
 Runs on Docker, Proxmox and Unraid; Android APK included. No hosted account,
-no telemetry – each family runs its own instance.
+no telemetry – each family runs its own instance. Interface languages: German,
+English, French, Spanish, Italian, Dutch and Polish.
 
 Demo: https://familie.laxxx-lab.de/ – family **Demo**, password **demo**
 Code: https://github.com/laxxx-lab/lx-family-planner
