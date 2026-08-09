@@ -1,5 +1,5 @@
 [Unit]
-Description=LX Family Planner regelmäßig auf stabile Updates prüfen
+Description=LX Family regelmäßig auf stabile Updates prüfen
 
 [Timer]
 OnCalendar=*-*-* 04:15:00 Europe/Berlin
@@ -9,4 +9,3 @@ Unit=lx-family-planner-auto-update.service
 
 [Install]
 WantedBy=timers.target
-

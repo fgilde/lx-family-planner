@@ -196,7 +196,7 @@ Das Update wurde sicherheitshalber abgebrochen. Bitte diese Änderungen zuerst s
     -Command 'docker' `
     -Arguments @(
       'compose', 'run', '--rm', '--no-deps',
-      'family-planner', 'node', 'server/backup.js'
+      'family-planner', 'node', 'server/backup.js', '--keep', '4'
     ) `
     -FailureMessage 'Die Sicherung vor dem Update ist fehlgeschlagen.'
 
@@ -250,6 +250,16 @@ Das Update wurde sicherheitshalber abgebrochen. Bitte diese Änderungen zuerst s
       '--compare', $containerManifest
     ) `
     -FailureMessage 'Die Datenprüfung nach dem Update hat Abweichungen gefunden.'
+
+  # Die neue Sicherung bleibt bis nach dem Gesundheits- und Datencheck bestehen.
+  # Erst danach werden wirklich nur die drei neuesten Sicherungen behalten.
+  Invoke-Checked `
+    -Command 'docker' `
+    -Arguments @(
+      'compose', 'exec', '-T', 'family-planner',
+      'node', 'server/backup.js', '--prune', '3'
+    ) `
+    -FailureMessage 'Die Sicherungsbereinigung nach dem Update ist fehlgeschlagen.'
 
   Write-Host ''
   Write-Host 'Update erfolgreich.'

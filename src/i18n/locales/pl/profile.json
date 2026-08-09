@@ -82,7 +82,7 @@
     "on": "Włączone",
     "off": "Wyłączone",
     "serverNotConfigured": "Natywne powiadomienia Androida nie są jeszcze skonfigurowane na serwerze. Instrukcje znajdziesz w Centrum rodzica.",
-    "deniedNative": "Android blokuje powiadomienia. Zezwól na nie w Aplikacje → LX Family Planner → Powiadomienia.",
+    "deniedNative": "Android blokuje powiadomienia. Zezwól na nie w Aplikacje → LX Family → Powiadomienia.",
     "deniedBrowser": "Przeglądarka blokuje powiadomienia. Zezwól na nie raz w ustawieniach strony w przeglądarce.",
     "showPreviews": "Pokazuj treść w powiadomieniach",
     "sendTest": "Wyślij powiadomienie testowe"

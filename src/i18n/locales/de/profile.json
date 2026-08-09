@@ -82,7 +82,7 @@
     "on": "An",
     "off": "Aus",
     "serverNotConfigured": "Native Android-Meldungen sind auf dem Server noch nicht eingerichtet. Die Anleitung findest du in der Elternzentrale.",
-    "deniedNative": "Android blockiert Meldungen. Bitte erlaube sie unter Apps → LX Family Planner → Benachrichtigungen.",
+    "deniedNative": "Android blockiert Meldungen. Bitte erlaube sie unter Apps → LX Family → Benachrichtigungen.",
     "deniedBrowser": "Der Browser blockiert Meldungen. Bitte erlaube sie einmal in den Website-Einstellungen des Browsers.",
     "showPreviews": "Inhalt in Meldungen zeigen",
     "sendTest": "Testmeldung senden"

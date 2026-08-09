@@ -82,7 +82,7 @@
     "on": "Aan",
     "off": "Uit",
     "serverNotConfigured": "Native Android-meldingen zijn op de server nog niet ingesteld. De instructies vind je in het Oudercentrum.",
-    "deniedNative": "Android blokkeert meldingen. Sta ze toe onder Apps → LX Family Planner → Meldingen.",
+    "deniedNative": "Android blokkeert meldingen. Sta ze toe onder Apps → LX Family → Meldingen.",
     "deniedBrowser": "De browser blokkeert meldingen. Sta ze één keer toe in de site-instellingen van de browser.",
     "showPreviews": "Inhoud in meldingen tonen",
     "sendTest": "Testmelding versturen"

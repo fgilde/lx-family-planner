@@ -6,6 +6,17 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.18.1] — 2026-08-09
+
+### LX Family branding
+
+- LX Family Planner is now presented everywhere as **LX Family · Private
+  Family OS**;
+- the Android app, Docker image, repository slug and application id deliberately
+  stay compatible, so existing installations update without a reinstall;
+- the release image no longer advertises a developer-specific public domain,
+  which keeps self-hosted installations neutral.
+
 ## [1.18.0] — 2026-08-08
 
 ### Languages and bug fixes

@@ -181,7 +181,7 @@
     "urlLabel": "Server address",
     "urlPlaceholder": "https://family.example.com",
     "hint": "On your home network you can enter, for example, <code>192.168.178.50:3001</code>. Outside your home network the address should always use HTTPS.",
-    "connected": "Connected · LX Family Planner {{version}}",
+    "connected": "Connected · LX Family {{version}}",
     "testing": "Testing connection …",
     "test": "Test connection",
     "errors": {

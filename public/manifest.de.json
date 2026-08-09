@@ -1,7 +1,7 @@
 {
-  "name": "LX Family Planner",
+  "name": "LX Family",
   "short_name": "LX Familie",
-  "description": "Selbst gehosteter Familienplaner für Kalender, Aufgaben, Essen, Einkauf und mehr",
+  "description": "LX Family · Euer privates Family OS für Kalender, Aufgaben, Essen, Einkauf und mehr",
   "id": "/",
   "start_url": "/",
   "scope": "/",

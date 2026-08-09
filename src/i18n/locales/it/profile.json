@@ -82,7 +82,7 @@
     "on": "Attiva",
     "off": "Disattiva",
     "serverNotConfigured": "Le notifiche Android native non sono ancora configurate sul server. Trovi le istruzioni nel Centro genitori.",
-    "deniedNative": "Android sta bloccando le notifiche. Consentile sotto App → LX Family Planner → Notifiche.",
+    "deniedNative": "Android sta bloccando le notifiche. Consentile sotto App → LX Family → Notifiche.",
     "deniedBrowser": "Il browser sta bloccando le notifiche. Consentile una volta nelle impostazioni del sito del browser.",
     "showPreviews": "Mostra il contenuto nelle notifiche",
     "sendTest": "Invia notifica di test"

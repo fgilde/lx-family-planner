@@ -14,9 +14,10 @@ export function ntfyPriority(value) {
 export function ntfyMessageBody(config, payload) {
   return {
     topic: normalizeNtfyTopic(config?.topic),
-    title: String(payload?.title || 'LX Family Planner').slice(0, 140),
+    title: String(payload?.title || PRODUCT_NAME).slice(0, 140),
     message: String(payload?.message || 'Neue Familiennachricht').slice(0, 3000),
     priority: ntfyPriority(payload?.priority),
     ...(config?.plannerUrl ? { click: String(config.plannerUrl) } : {})
   };
 }
+import { PRODUCT_NAME } from '../shared/brand.js';

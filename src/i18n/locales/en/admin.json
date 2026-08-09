@@ -207,7 +207,7 @@
     },
     "denied": {
       "title": "Turned off in the browser",
-      "bodyNative": "Allow notifications under Android → Apps → LX Family Planner → Notifications.",
+      "bodyNative": "Allow notifications under Android → Apps → LX Family → Notifications.",
       "bodyWeb": "Allow notifications in your browser's site settings and then reopen the planner."
     },
     "ready": {

@@ -27,6 +27,7 @@ import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import AndroidAppDownload from './AndroidAppDownload';
 import LanguageSwitcher from '../LanguageSwitcher';
 import ProjectSupportCard from '../ProjectSupportCard';
+import { PRODUCT_NAME } from '../../../shared/brand.js';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
   const { t } = useTranslation('auth');
@@ -114,7 +115,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
         <section className="auth-story-panel">
           <div className="auth-brand">
             <span className="auth-brand-mark">LX</span>
-            <span>Family Planner</span>
+            <span>{PRODUCT_NAME}</span>
           </div>
           <div className="auth-story-copy">
             <span className="eyebrow">{t('login.profileStep.eyebrow')}</span>
@@ -240,7 +241,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
       <section className="auth-story-panel">
         <div className="auth-brand">
           <span className="auth-brand-mark">LX</span>
-          <span>Family Planner</span>
+          <span>{PRODUCT_NAME}</span>
         </div>
         <div className="auth-community-links">
           <a

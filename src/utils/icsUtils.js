@@ -20,7 +20,7 @@ export function exportEventsToICS(
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//LX Family Planner//DE',
+    'PRODID:-//LX Family//Private Family OS//DE',
     `X-WR-CALNAME:${escapeIcsText(
       i18n.t('context:ics.calendarName', { familyName })
     )}`,

@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LX Family Planner - L'organisateur familial",
+    "title": "LX Family · Private Family OS",
     "description": "Planificateur familial clair et intuitif avec calendrier, liste de courses Bring!, planificateur de repas, tâches ménagères, système de récompenses et tableau d'affichage."
   },
   "actions": {
@@ -46,7 +46,7 @@
     "sourceName": "Anniversaire familial"
   },
   "projectSupport": {
-    "aria": "Soutenir LX Family Planner via GitHub Sponsors",
+    "aria": "Soutenir LX Family via GitHub Sponsors",
     "kicker": "Unique ou mensuel",
     "title": "Offrir un café à LX",
     "description": "LX reste gratuit. Même un café unique aide pour les tests, l'hébergement et le développement continu.",

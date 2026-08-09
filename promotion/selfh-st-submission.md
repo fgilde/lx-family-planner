@@ -8,16 +8,16 @@
 # manuell ausfüllen. Hier ist der komplette Inhalt zum Kopieren/Einfügen.
 
 ## App-Name
-LX Family Planner
+LX Family
 
 ## Kategorie
 Productivity / Family (oder "Home Automation" je nach Dropdown-Auswahl)
 
 ## Kurzbeschreibung (Tagline)
-Private family planner for calendars, tasks, shopping, meals, chat and child profiles — self-hosted.
+Private Family OS for calendars, tasks, shopping, meals, chat and child profiles — self-hosted.
 
 ## Beschreibung (Description)
-LX Family Planner is a self-hosted family operating system that brings together
+LX Family is a self-hosted private family operating system that brings together
 shared calendars, task management, shopping lists, meal planning, a family chat,
 file sharing, and dedicated profiles for children and pets. Data stays entirely
 on your own server. Adults get a calm planning workspace, children get playful
@@ -59,4 +59,4 @@ MIT
 - Android APK
 
 ## Tags / Keywords
-family planner, calendar, household, children, meal planning, shopping list, self-hosted, groupware
+private family OS, family organizer, calendar, household, children, meal planning, shopping list, self-hosted, groupware

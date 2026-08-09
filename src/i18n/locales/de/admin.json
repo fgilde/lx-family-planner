@@ -207,7 +207,7 @@
     },
     "denied": {
       "title": "Im Browser ausgeschaltet",
-      "bodyNative": "Erlaube Benachrichtigungen unter Android → Apps → LX Family Planner → Benachrichtigungen.",
+      "bodyNative": "Erlaube Benachrichtigungen unter Android → Apps → LX Family → Benachrichtigungen.",
       "bodyWeb": "Erlaube Benachrichtigungen in den Website-Einstellungen deines Browsers und öffne den Planer danach erneut."
     },
     "ready": {

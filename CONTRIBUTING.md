@@ -1,4 +1,4 @@
-# Contributing to LX Family Planner
+# Contributing to LX Family
 
 The best contribution is not the longest feature list. It is a change that
 makes everyday family life easier without weakening privacy, reliability or the

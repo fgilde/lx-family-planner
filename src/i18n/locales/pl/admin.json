@@ -207,7 +207,7 @@
     },
     "denied": {
       "title": "Wyłączone w przeglądarce",
-      "bodyNative": "Zezwól na powiadomienia w Android → Aplikacje → LX Family Planner → Powiadomienia.",
+      "bodyNative": "Zezwól na powiadomienia w Android → Aplikacje → LX Family → Powiadomienia.",
       "bodyWeb": "Zezwól na powiadomienia w ustawieniach strony w przeglądarce, a następnie otwórz ponownie planer."
     },
     "ready": {

@@ -41,6 +41,7 @@ import {
   DEFAULT_WEB_PUSH_PREFERENCES
 } from '../shared/notificationEvents.js';
 import { releaseNotesForVersion } from '../shared/releaseNotes.js';
+import { PRODUCT_NAME } from '../shared/brand.js';
 import { loadBringCatalog } from './bringCatalog.js';
 import {
   extractSharedRecipeDraft,
@@ -176,6 +177,10 @@ import {
   uploadNextcloudUserFile
 } from './nextcloud.js';
 import { createTranslator } from './i18n.js';
+import { configuredCorsOrigins, configuredTrustProxy } from './serverSecurity.js';
+import { registerRuntimeRoutes } from './routes/runtimeRoutes.js';
+import { registerPublicAccessRoutes } from './routes/publicAccessRoutes.js';
+import { registerAuthRoutes } from './routes/authRoutes.js';
 
 const SESSION_COOKIE = 'lx_session';
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30;
@@ -283,16 +288,9 @@ const PUBLIC_APP_URL = (() => {
     return '';
   }
 })();
-const CORS_ALLOWED_ORIGINS = new Set([
-  'capacitor://localhost',
-  'http://localhost',
-  'https://localhost',
-  'https://familie.laxxx-lab.de',
-  ...String(process.env.CORS_ALLOWED_ORIGINS || '')
-    .split(',')
-    .map(origin => origin.trim().replace(/\/+$/, ''))
-    .filter(Boolean)
-]);
+const CORS_ALLOWED_ORIGINS = configuredCorsOrigins(
+  process.env.CORS_ALLOWED_ORIGINS
+);
 const pendingBringLogins = new Map();
 const authAttempts = new Map();
 const nextcloudSyncLocks = new Map();
@@ -2907,7 +2905,7 @@ function integrationStatus(familyId, member = null) {
           connected: true,
           baseUrl: gotify.config?.baseUrl || '',
           applicationName:
-            gotify.config?.applicationName || 'LX Family Planner',
+            gotify.config?.applicationName || PRODUCT_NAME,
           plannerUrl: gotify.config?.plannerUrl || '',
           rules: {
             ...DEFAULT_GOTIFY_RULES,
@@ -3456,7 +3454,7 @@ async function postGotifyMessage(baseUrl, token, payload, plannerUrl = '') {
       'X-Gotify-Key': token
     },
     body: JSON.stringify({
-      title: cleanText(payload.title, 'LX Family Planner', 140),
+      title: cleanText(payload.title, PRODUCT_NAME, 140),
       message: cleanText(payload.message, translate('push.gotifyDefaultMessage'), 3000),
       priority: Math.max(-2, Math.min(10, Number(payload.priority || 4))),
       extras
@@ -5144,7 +5142,7 @@ export function createApp() {
     nextcloudSyncDebounces.clear();
   };
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', configuredTrustProxy(process.env.TRUST_PROXY));
   app.use((req, _res, next) => {
     const language =
       normalizeRequestLanguage(req.headers['x-lx-language']) ||
@@ -5191,366 +5189,70 @@ export function createApp() {
   app.use(protectReadOnlyDemo);
   app.use(protectWallDisplay);
 
-  app.get('/api/config', (_req, res) => {
-    res.json({
-      success: true,
-      language: APP_LANGUAGE,
-      supportedLanguages: SUPPORTED_APP_LANGUAGES
-    });
+  const { availableApkRelease } = registerRuntimeRoutes(app, {
+    appVersion: APP_VERSION,
+    appLanguage: APP_LANGUAGE,
+    supportedLanguages: SUPPORTED_APP_LANGUAGES,
+    normalizeRequestLanguage,
+    publicAppUrl: PUBLIC_APP_URL,
+    isProduction: IS_PRODUCTION,
+    cleanText
   });
 
-  app.get('/manifest.json', (req, res) => {
-    const language =
-      normalizeRequestLanguage(req.headers['x-lx-language']) ||
-      normalizeRequestLanguage(req.headers['accept-language']) ||
-      APP_LANGUAGE;
-    const fileName = `manifest.${language}.json`;
-    const manifestPath = [
-      path.join(process.cwd(), 'dist', fileName),
-      path.join(process.cwd(), 'public', fileName)
-    ].find(candidate => fs.existsSync(candidate));
-    res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
-    res.append('Vary', 'Accept-Language');
-    if (!manifestPath) return res.sendStatus(404);
-    return res.sendFile(manifestPath);
+  registerPublicAccessRoutes(app, {
+    demoFamilyId: process.env.DEMO_FAMILY_ID,
+    getFamily,
+    listPublicFamilies,
+    publicFamilyDirectory: PUBLIC_FAMILY_DIRECTORY,
+    publicRegistrationStatus,
+    authRateLimit,
+    ensureObject,
+    constantTimeTextMatch,
+    registrationInviteCode: REGISTRATION_INVITE_CODE,
+    requireText,
+    translate,
+    cleanText,
+    normalizeMemberInput,
+    isManagedMember,
+    isAdultMember,
+    createFamily,
+    createSession,
+    getSession,
+    clearAuthAttempts,
+    sessionCookie,
+    secureCookieForRequest,
+    publicSessionPayload,
+    nativeSessionTokenPayload,
+    sessionMaxAgeMs: SESSION_MAX_AGE_MS
   });
 
-  app.get('/api/health', (_req, res) => {
-    res.json({
-      success: true,
-      status: 'ok',
-      version: APP_VERSION,
-      database: 'sqlite',
-      timestamp: new Date().toISOString()
-    });
-  });
-
-  function findApkCandidates() {
-    const candidates = [
-      path.join(process.cwd(), 'data/apk/latest.apk'),
-      path.join(process.cwd(), 'data/apk/LX-Family-Planner.apk'),
-      path.join(process.cwd(), 'public/apk/LX-Family-Planner.apk'),
-      path.join(process.cwd(), 'public/apk/latest.apk'),
-      path.join(process.cwd(), 'dist/apk/LX-Family-Planner.apk'),
-      path.join(process.cwd(), 'dist/apk/latest.apk'),
-      path.join(process.cwd(), 'LX-Family-Planner.apk'),
-      path.join(process.cwd(), 'dist/LX-Family-Planner.apk')
-    ];
-    return [...new Set(candidates)].filter(file => fs.existsSync(file));
-  }
-
-  function readApkMetadata(apkFile) {
-    const candidates = apkFile
-      ? [path.join(path.dirname(apkFile), 'version.json')]
-      : [];
-    for (const file of [...new Set(candidates)]) {
-      try {
-        const metadata = JSON.parse(
-          fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '')
-        );
-        return {
-          versionName: cleanText(
-            metadata.versionName,
-            APP_VERSION,
-            40
-          ),
-          versionCode: Math.max(0, Number(metadata.versionCode) || 0),
-          buildKind:
-            metadata.buildKind === 'release' ? 'release' : 'debug',
-          builtAt: cleanText(metadata.builtAt, '', 80),
-          sha256: /^[a-f0-9]{64}$/i.test(metadata.sha256 || '')
-            ? metadata.sha256.toLowerCase()
-            : ''
-        };
-      } catch {
-        // Try the next local metadata file.
-      }
-    }
-    return {
-      versionName: APP_VERSION,
-      versionCode: 0,
-      buildKind: 'debug',
-      builtAt: '',
-      sha256: ''
-    };
-  }
-
-  function availableApkRelease() {
-    const releases = findApkCandidates()
-      .map(file => ({
-        file,
-        metadata: readApkMetadata(file),
-        stats: fs.statSync(file)
-      }))
-      .filter(
-        release =>
-          !IS_PRODUCTION || release.metadata.buildKind === 'release'
-      )
-      .sort((left, right) => {
-        const byVersion =
-          right.metadata.versionCode - left.metadata.versionCode;
-        if (byVersion !== 0) return byVersion;
-        return right.stats.mtimeMs - left.stats.mtimeMs;
-      });
-    return releases[0] || null;
-  }
-
-  app.get('/api/app/version', (req, res) => {
-    const release = availableApkRelease();
-    const metadata = release?.metadata || {
-      versionName: APP_VERSION,
-      versionCode: 0,
-      buildKind: '',
-      builtAt: '',
-      sha256: ''
-    };
-    const requestOrigin = `${req.protocol}://${req.get('host')}`;
-    const publicAppOrigin = PUBLIC_APP_URL || requestOrigin;
-    let publicApkUrl = null;
-    if (release) {
-      try {
-        publicApkUrl = new URL(
-          '/apk/latest.apk',
-          publicAppOrigin
-        ).href;
-      } catch {
-        publicApkUrl = null;
-      }
-    }
-
-    res.json({
-      success: true,
-      versionName: metadata.versionName,
-      versionCode: metadata.versionCode,
-      apkUrl: release ? '/apk/latest.apk' : null,
-      publicApkUrl,
-      buildKind: release ? metadata.buildKind : null,
-      fileSizeBytes: release ? release.stats.size : null,
-      releasedAt:
-        metadata.builtAt ||
-        (release
-          ? release.stats.mtime.toISOString()
-          : null),
-      sha256: metadata.sha256 || null
-    });
-  });
-
-  app.get('/api/public/families', (_req, res) => {
-    const demoFamily = process.env.DEMO_FAMILY_ID
-      ? getFamily(process.env.DEMO_FAMILY_ID)
-      : null;
-    res.setHeader('Cache-Control', 'no-store');
-    res.json({
-      success: true,
-      directoryEnabled: PUBLIC_FAMILY_DIRECTORY,
-      families: PUBLIC_FAMILY_DIRECTORY ? listPublicFamilies() : [],
-      demo: demoFamily
-        ? {
-            familyName: demoFamily.familyName,
-            familyAvatar: demoFamily.familyAvatar,
-            badge: demoFamily.badge
-          }
-        : null,
-      registration: publicRegistrationStatus()
-    });
-  });
-
-  app.post('/api/public/register', authRateLimit, (req, res) => {
-    const input = ensureObject(req.body);
-    const registration = publicRegistrationStatus();
-    if (!registration.allowed) {
-      return res.status(403).json({
-        success: false,
-        error: translate('errors.registrationClosed')
-      });
-    }
-    if (
-      registration.requiresInvite &&
-      !constantTimeTextMatch(input.inviteCode, REGISTRATION_INVITE_CODE)
-    ) {
-      return res.status(403).json({
-        success: false,
-        error: translate('errors.inviteCodeInvalid')
-      });
-    }
-    const familyName = requireText(input.familyName, translate('fields.familyName'), 100);
-    const password = requireText(input.password, translate('fields.password'), 100);
-    if (password.length < 10) {
-      return res.status(400).json({
-        success: false,
-        error: translate('errors.familyPasswordTooShort')
-      });
-    }
-    const members = Array.isArray(input.members) ? input.members : [];
-    if (members.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: translate('errors.membersRequired')
-      });
-    }
-    const normalizedMembers = members.slice(0, 20).map(normalizeMemberInput);
-    if (!normalizedMembers.some(member => !member.isManaged)) {
-      return res.status(400).json({
-        success: false,
-        error: translate('errors.loginProfileRequired')
-      });
-    }
-    if (!normalizedMembers.some(isAdultMember)) {
-      return res.status(400).json({
-        success: false,
-        error: translate('errors.adminProfileRequired')
-      });
-    }
-    const result = createFamily({
-      familyName,
-      familyAvatar: cleanText(input.familyAvatar, '', 1_200_000),
-      badge: cleanText(input.badge, 'Unsere Familie', 60),
-      password,
-      members: normalizedMembers
-    });
-    const initialMember =
-      result.members.find(isAdultMember) ||
-      result.members.find(member => !member.isManaged);
-    const sessionToken = createSession(result.family.id, {
-      memberId: initialMember?.id || null,
-      maxAgeMs: SESSION_MAX_AGE_MS
-    });
-    const session = getSession(sessionToken);
-    clearAuthAttempts(req);
-    res.setHeader(
-      'Set-Cookie',
-      sessionCookie(sessionToken, secureCookieForRequest(req))
-    );
-    res.status(201).json({
-      success: true,
-      family: result.family,
-      members: result.members,
-      activeMemberId: initialMember?.id || null,
-      session: publicSessionPayload(session),
-      ...nativeSessionTokenPayload(req, sessionToken)
-    });
-    const cloudProvisioning = setTimeout(() => {
-      void app.locals.provisionBundledCloudFamily(result.family.id)
-        .catch(error => {
-          console.warn(
-            `Family Cloud für neue Familie ${result.family.id} konnte nicht eingerichtet werden:`,
-            error.message
-          );
-        });
-    }, 250);
-    cloudProvisioning.unref();
-  });
-
-  app.post('/api/auth/family', authRateLimit, (req, res) => {
-    const input = ensureObject(req.body);
-    const familyReference = requireText(
-      input.familyId || input.familyName,
-      translate('fields.family'),
-      100
-    );
-    const password = requireText(input.password, translate('fields.password'), 100);
-    const familyRow = findFamilyAuthCandidates(familyReference).find(
-      candidate => verifySecret(password, candidate.password_hash)
-    );
-    if (!familyRow) {
-      return res.status(401).json({
-        success: false,
-        error: translate('errors.familyOrPasswordIncorrect')
-      });
-    }
-    const familyId = familyRow.id;
-    const sessionToken = createSession(familyId, {
-      maxAgeMs: SESSION_MAX_AGE_MS
-    });
-    const session = getSession(sessionToken);
-    clearAuthAttempts(req);
-    res.setHeader(
-      'Set-Cookie',
-      sessionCookie(sessionToken, secureCookieForRequest(req))
-    );
-    res.json({
-      success: true,
-      family: getFamily(familyId),
-      members: getBootstrap(familyId).members,
-      session: publicSessionPayload(session),
-      ...nativeSessionTokenPayload(req, sessionToken)
-    });
-  });
-
-  app.post('/api/auth/member', requireAuth, (req, res) => {
-    const input = ensureObject(req.body);
-    const memberId = requireText(input.memberId, translate('fields.profile'), 100);
-    const memberRow = getMemberAuthRow(req.session.familyId, memberId);
-    if (!memberRow) {
-      return res.status(404).json({
-        success: false,
-        error: translate('errors.profileNotFound')
-      });
-    }
-    if (isManagedMember(memberRow)) {
-      return res.status(403).json({
-        success: false,
-        error:
-          translate('errors.managedProfileNoLogin')
-      });
-    }
-    const currentMember = req.session.memberId
-      ? getMember(req.session.familyId, req.session.memberId)
-      : null;
-    const targetIsAdult = isAdultMember(memberRow);
-    const currentIsAdult = isAdultMember(currentMember);
-    if (targetIsAdult && currentMember && !currentIsAdult && !memberRow.pin_hash) {
-      const familyRow = getFamilyAuthRow(req.session.familyId);
-      if (
-        !verifySecret(
-          cleanText(input.familyPassword, '', 100),
-          familyRow.password_hash
-        )
-      ) {
-        return res.status(401).json({
-          success: false,
-          error: translate('errors.familyPasswordRequiredForAdult'),
-          requiresFamilyPassword: true
-        });
-      }
-    }
-    if (memberRow.pin_hash && !verifySecret(cleanText(input.pin, '', 12), memberRow.pin_hash)) {
-      return res.status(401).json({
-        success: false,
-        error: translate('errors.pinIncorrect')
-      });
-    }
-    setSessionMember(req.sessionToken, req.session.familyId, memberId);
-    req.session = getSession(req.sessionToken);
-    res.json({
-      success: true,
-      member: getMember(req.session.familyId, memberId),
-      session: publicSessionPayload(req.session)
-    });
-  });
-
-  app.get('/api/auth/session', (req, res) => {
-    if (!req.session) {
-      return res.status(401).json({ success: false, authenticated: false });
-    }
-    res.json({
-      success: true,
-      authenticated: true,
-      session: publicSessionPayload(req.session),
-      family: getFamily(req.session.familyId),
-      member: req.session.memberId
-        ? getMember(req.session.familyId, req.session.memberId)
-        : null
-    });
-  });
-
-  app.post('/api/auth/logout', (req, res) => {
-    if (req.sessionToken) deleteSession(req.sessionToken);
-    res.setHeader(
-      'Set-Cookie',
-      clearSessionCookie(secureCookieForRequest(req))
-    );
-    res.json({ success: true });
+  registerAuthRoutes(app, {
+    authRateLimit,
+    ensureObject,
+    requireText,
+    translate,
+    findFamilyAuthCandidates,
+    verifySecret,
+    createSession,
+    sessionMaxAgeMs: SESSION_MAX_AGE_MS,
+    getSession,
+    clearAuthAttempts,
+    sessionCookie,
+    secureCookieForRequest,
+    publicSessionPayload,
+    nativeSessionTokenPayload,
+    getFamily,
+    getBootstrap,
+    requireAuth,
+    getMemberAuthRow,
+    isManagedMember,
+    isAdultMember,
+    getMember,
+    getFamilyAuthRow,
+    cleanText,
+    setSessionMember,
+    deleteSession,
+    clearSessionCookie
   });
 
   app.get('/api/bootstrap', requireAuth, (req, res) => {
@@ -9034,7 +8736,7 @@ export function createApp() {
       recipientMemberIds: [req.session.memberId],
       title: translate('push.testGreeting', { name: member?.name || '' }),
       body: translate('push.webTestBody'),
-      privateTitle: 'LX Family Planner',
+      privateTitle: PRODUCT_NAME,
       privateBody: translate('push.testPrivateBody'),
       url: '/?view=dashboard',
       tag: `push-test-${req.session.memberId}`,
@@ -9767,7 +9469,7 @@ export function createApp() {
       }
 
       const family = getFamily(req.session.familyId);
-      const applicationName = `LX Family Planner · ${family.familyName}`;
+      const applicationName = `${PRODUCT_NAME} · ${family.familyName}`;
       const form = new FormData();
       form.set('name', applicationName);
       form.set(
@@ -10654,7 +10356,7 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
         'Hinweis: Für Produktion APP_SECRET als sichere Umgebungsvariable setzen.'
       );
     }
-    console.log(`LX Family Planner läuft auf http://localhost:${port}`);
+    console.log(`${PRODUCT_NAME} läuft auf http://localhost:${port}`);
   });
   const calendarSyncTimer = setInterval(() => {
     void syncAllCalendarSubscriptions();

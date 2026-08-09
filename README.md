@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/readme-hero-en.svg" alt="LX Family Planner — a self-hosted family operating system" width="100%">
+  <img src="docs/readme-hero-en.svg" alt="LX Family — Private Family OS" width="100%">
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.16.1" src="https://img.shields.io/badge/version-1.16.1-17483F">
+  <img alt="Version 1.18.1" src="https://img.shields.io/badge/version-1.18.1-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -26,7 +26,7 @@
   Your routines, your server, your family data.
 </p>
 
-LX Family Planner brings the everyday life of a household into one calm,
+LX Family is a private Family OS that brings the everyday life of a household into one calm,
 role-aware app:
 
 - organize calendars, chores, meals, shopping, school, chat and family files;
@@ -34,6 +34,11 @@ role-aware app:
   parental approval instead of a scaled-down admin screen;
 - keep everything on your own server, with optional Nextcloud, Home Assistant
   and native Android notifications.
+
+> **New name, same safe update path:** LX Family was previously called **LX
+> Family Planner**. The repository, Docker image and Android package identifier
+> deliberately stay stable, so existing installations update normally. Read the
+> short [renaming note](docs/RENAMING.md).
 
 ## Try it first
 
@@ -43,7 +48,7 @@ role-aware app:
 > Choose **Doris** for the adult experience or **Jeremy Pascal** for the child
 > experience. The demo is a shared showroom—please do not enter personal data.
 
-![LX Family Planner adult dashboard](docs/screenshots/demo-dashboard.png)
+![LX Family adult dashboard](docs/screenshots/demo-dashboard.png)
 
 | One-tap profile selection | A real child experience |
 | --- | --- |
@@ -70,7 +75,7 @@ role-aware app:
 
 ## What makes it different?
 
-| | LX Family Planner | A traditional family calendar |
+| | LX Family | A traditional family calendar |
 | --- | --- | --- |
 | Children | visual routines, missions, stars and parent-approved chores | mostly the adult UI with fewer controls |
 | Profiles | adults, children, teens, grandparents, managed people and pets | usually one generic account type |
@@ -117,6 +122,10 @@ Open `http://SERVER-IP:3001`, create the first family and complete the guided
 setup. The secure defaults allow the first family registration and then close
 public registration automatically. Family names are not listed publicly.
 
+> **Your server, your address:** LX Family does not operate a hosted service
+> for other families. Each installation uses its own IP address or domain.
+> See [self-hosting](docs/SELF_HOSTING.md) for LAN, HTTPS, Android and CORS.
+
 > [!IMPORTANT]
 > Keep `.env`, `APP_SECRET`, `data/` and `backups/` private. Never commit a
 > Firebase service account, Nextcloud password or real family content.
@@ -130,8 +139,10 @@ click. Existing installations can use the guarded updater:
 - Store packaging: see [store submissions](docs/STORE_SUBMISSIONS.md)
 
 Every guarded update creates a consistent backup, runs migrations on a copy,
-checks the result and rolls back if validation fails. The `data/` and
-`backups/` directories are independent from the application image.
+checks the result and rolls back if validation fails. LX retains the three
+newest local backup-and-manifest pairs; a fourth is held only until a guarded
+update has passed all checks. The `data/` and `backups/` directories are
+independent from the application image.
 
 ### Without Docker
 
@@ -150,15 +161,14 @@ For development, run `npm run server` and `npm run dev` in separate terminals.
 
 ## Languages
 
-The interface is fully maintained in **English and German**. A visible language
-switch is available before login and in the main header; the choice is stored
-on the device. Set `APP_LANGUAGE=en` to make English the default for a new
-installation and for server-generated notifications.
+The visible language switch offers **German, English, French, Spanish, Italian,
+Dutch and Polish** before login and in the main header. The choice stays on the
+device. Set `APP_LANGUAGE=en` (or another supported language code) to choose
+the default for a new installation and server-generated notifications.
 
-Translation catalogues are key-checked during CI so one language cannot silently
-lose UI strings. Additional languages are welcome once a maintainer or community
-translator can keep the complete catalogue healthy—partial language buttons
-are deliberately not advertised as finished translations.
+Translation catalogues are key-checked during CI so a language cannot silently
+lose UI strings. Native speakers are warmly invited to improve wording through
+small, focused pull requests.
 
 ## Optional Family Cloud
 

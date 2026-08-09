@@ -4,6 +4,18 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.18.1] – 2026-08-09
+
+### Marke LX Family
+
+- LX Family Planner erscheint nun überall als **LX Family · Private Family
+  OS**;
+- Android-App, Docker-Image, Repository-Adresse und App-Kennung bleiben
+  absichtlich kompatibel, damit bestehende Installationen ohne Neuinstallation
+  aktualisiert werden;
+- das Release-Image wirbt nicht mehr mit einer entwicklereigenen öffentlichen
+  Domain und bleibt für jede selbst gehostete Installation neutral.
+
 ## [1.18.0] – 2026-08-08
 
 ### Sprachen und Fehlerkorrekturen

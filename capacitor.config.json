@@ -1,6 +1,6 @@
 {
   "appId": "com.lxfamily.planner",
-  "appName": "LX Family Planner",
+  "appName": "LX Family",
   "webDir": "dist",
   "server": {
     "androidScheme": "http",

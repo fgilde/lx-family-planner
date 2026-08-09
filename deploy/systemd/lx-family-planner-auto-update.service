@@ -1,5 +1,5 @@
 [Unit]
-Description=LX Family Planner – geprüftes stabiles Update
+Description=LX Family – geprüftes stabiles Update
 After=docker.service network-online.target
 Requires=docker.service
 Wants=network-online.target
@@ -14,4 +14,3 @@ IOSchedulingClass=best-effort
 IOSchedulingPriority=7
 NoNewPrivileges=true
 UMask=0077
-

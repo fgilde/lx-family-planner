@@ -11,13 +11,13 @@
 
 ---
 
-**Title:** LX Family Planner — a self-hosted family OS for calendars, tasks, meals, chat and kid profiles
+**Title:** LX Family — a private self-hosted Family OS for calendars, tasks, meals, chat and kid profiles
 
 **Body:**
 
 Hi everyone 👋
 
-I've been working on **LX Family Planner** — a self-hosted family organizer that bundles the stuff families actually need into one app, instead of spreading it across five. It runs on Docker / Unraid / Umbrel / Proxmox / plain Node.js, MIT-licensed.
+I've been working on **LX Family** — a private self-hosted Family OS that bundles the stuff families actually need into one app, instead of spreading it across five. It runs on Docker / Unraid / Umbrel / Proxmox / plain Node.js, MIT-licensed.
 
 **What it does:**
 

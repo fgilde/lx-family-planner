@@ -1,6 +1,6 @@
 # Promotion & Verbreitung
 
-Vorbereitete Einreichungen und Posts, um LX Family Planner bekannter zu machen.
+Vorbereitete Einreichungen und Posts, um LX Family als Private Family OS bekannter zu machen.
 Jede Datei ist für eine andere Entdeckungs-Surface gedacht.
 
 ## Statusübersicht

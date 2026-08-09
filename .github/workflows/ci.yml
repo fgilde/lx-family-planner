@@ -34,3 +34,27 @@ jobs:
 
       - name: Server, Tests und Web-Build prüfen
         run: npm run check
+
+  browser:
+    name: Browser-Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v6
+
+      - name: Node.js vorbereiten
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Chromium für Browser-Checks bereitstellen
+        run: npx playwright install --with-deps chromium
+
+      - name: Anmeldung und Hauptnavigation prüfen
+        run: npm run test:e2e

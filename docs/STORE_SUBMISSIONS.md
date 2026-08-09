@@ -1,6 +1,6 @@
 # Store-Veröffentlichungen
 
-LX Family Planner is prepared for distribution through GitHub Container
+LX Family is prepared for distribution through GitHub Container
 Registry, Unraid Community Applications and the Umbrel App Store.
 
 ## Shared release image
@@ -8,14 +8,11 @@ Registry, Unraid Community Applications and the Umbrel App Store.
 All stores use the same signed release source:
 
 ```text
-ghcr.io/laxxx-lab/lx-family-planner:1.17.0
+ghcr.io/laxxx-lab/lx-family-planner:<published-release-version>
 ```
 
-Immutable release digest:
-
-```text
-sha256:422d14bc3f85cc13308f05ecd81d5d509568e3f7862e18cbbcb19b70cd21e44b
-```
+For every store submission, take the matching immutable digest from the
+published GitHub release. Do not copy a digest from an older release.
 
 Supported platforms:
 
@@ -29,6 +26,9 @@ Persistent paths:
 
 The `APP_SECRET` must stay unchanged during updates. Umbrel supplies its
 deterministic `APP_SEED`; Unraid asks for a masked random value during setup.
+The visible product name is **LX Family · Private Family OS**. Repository,
+image and package identifiers deliberately keep `lx-family-planner` so existing
+store installs update in place; see [the renaming note](RENAMING.md).
 
 ## Unraid
 

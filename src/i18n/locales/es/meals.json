@@ -93,7 +93,7 @@
     "rtk": {
       "title": "Importar desde My Recipe Box",
       "description": "Importa una copia de seguridad .rtk completa, incluidos ingredientes, instrucciones, imágenes y enlaces de origen.",
-      "hint": "En My Recipe Box: Sincronizar/Copia de seguridad → Exportar copia (RTK). En Android, puedes enviar luego el archivo RTK directamente con Compartir → LX Family Planner.",
+      "hint": "En My Recipe Box: Sincronizar/Copia de seguridad → Exportar copia (RTK). En Android, puedes enviar luego el archivo RTK directamente con Compartir → LX Family.",
       "select": "Elegir copia RTK",
       "loading": "Leyendo My Recipe Box …"
     },

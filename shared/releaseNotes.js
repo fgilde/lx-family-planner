@@ -1,11 +1,64 @@
 const RELEASE_NOTES = {
+  '1.18.1': {
+    version: '1.18.1',
+    eyebrow: 'Willkommen bei LX Family',
+    title: 'Aus LX Family Planner wird LX Family',
+    intro:
+      'LX Family heißt jetzt LX Family · Private Family OS. Der neue Name passt besser zu allem, was euren Alltag gemeinsam organisiert – Kalender, Aufgaben, Rezepte, Cloud, Kinderwelten und mehr.',
+    highlights: [
+      {
+        id: 'lx-family-name',
+        title: 'Neuer Name, gleiche vertraute App',
+        description:
+          'Eure Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert. Auch die Android-App wird wie gewohnt einfach über die vorhandene Installation aktualisiert.'
+      },
+      {
+        id: 'compatible-update',
+        title: 'Einfach weiter aktualisieren',
+        description:
+          'Die vorhandene Android-App kann direkt aktualisiert werden – ohne Neuinstallation und ohne dass eure Familieninhalte verloren gehen.'
+      }
+    ],
+    closing:
+      'Danke, dass ihr LX Family in euren Familienalltag holt. Viel Freude mit eurem privaten Family OS!',
+    localizations: {
+      en: {
+        eyebrow: 'Welcome to LX Family',
+        title: 'LX Family Planner becomes LX Family',
+        intro:
+          'LX Family is now called LX Family · Private Family OS. The new name better fits everything that organizes your everyday family life together – calendars, chores, recipes, cloud, child spaces and more.',
+        highlights: [
+          {
+            id: 'lx-family-name',
+            title: 'New name, the same familiar app',
+            description:
+              'Your families, profiles, events, chores, recipes, files and settings stay unchanged. Android updates install over the existing app as usual.'
+          },
+          {
+            id: 'compatible-update',
+            title: 'Keep updating with ease',
+            description:
+              'The existing Android app installs this update directly – with no reinstall and without losing your family content.'
+          }
+        ],
+        closing:
+          'Thank you for bringing LX Family into your family life. Enjoy your private Family OS!'
+      }
+    }
+  },
   '1.18.0': {
     version: '1.18.0',
-    eyebrow: 'Mehr Sprachen & Fehlerkorrekturen',
-    title: 'Fünf neue Sprachen und ein ruhigeres Dashboard',
+    eyebrow: 'LX Family, mehr Sprachen & Fehlerkorrekturen',
+    title: 'Aus LX Family Planner wird LX Family',
     intro:
-      'Die Oberfläche spricht jetzt zusätzlich Französisch, Spanisch, Italienisch, Niederländisch und Polnisch. Außerdem werden auf dem Dashboard nur noch die heutigen Termine gezählt, die Tab-Leiste springt nicht mehr und das Ansichtsatelier bleibt vollständig bedienbar.',
+      'LX Family heißt ab jetzt Private Family OS. Der neue Name passt besser zu Kalender, Aufgaben, Cloud, Kinderwelten und allem, was euren Alltag gemeinsam organisiert. Die Oberfläche spricht außerdem zusätzlich Französisch, Spanisch, Italienisch, Niederländisch und Polnisch.',
     highlights: [
+      {
+        id: 'lx-family-name',
+        title: 'Neuer Name, gleiche sichere App',
+        description:
+          'Aus LX Family Planner wird LX Family · Private Family OS. Eure Familien, Daten und Einstellungen bleiben unverändert. Auch Repository, Docker-Image und Android-App-Kennung bleiben absichtlich gleich, damit Updates ohne Neuinstallation funktionieren.'
+      },
       {
         id: 'i18n-five-languages',
         title: 'Französisch, Spanisch, Italienisch, Niederländisch, Polnisch',
@@ -35,11 +88,17 @@ const RELEASE_NOTES = {
       'Bestehende Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
     localizations: {
       en: {
-        eyebrow: 'More languages & bug fixes',
-        title: 'Five new languages and a calmer dashboard',
+        eyebrow: 'LX Family, more languages & bug fixes',
+        title: 'LX Family Planner becomes LX Family',
         intro:
-          'The interface now also speaks French, Spanish, Italian, Dutch and Polish. In addition, the dashboard counts only today’s events, the tab bar no longer jumps, and the dashboard studio stays fully usable.',
+          'LX Family is now called Private Family OS. The new name better fits calendars, chores, cloud, child spaces and everything that organizes your family life together. The interface now also speaks French, Spanish, Italian, Dutch and Polish.',
         highlights: [
+          {
+            id: 'lx-family-name',
+            title: 'New name, same safe app',
+            description:
+              'LX Family Planner becomes LX Family · Private Family OS. Your families, data and settings remain unchanged. The repository, Docker image and Android application id deliberately stay the same so updates work without reinstalling.'
+          },
           {
             id: 'i18n-five-languages',
             title: 'French, Spanish, Italian, Dutch, Polish',

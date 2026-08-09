@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">LX Family Planner</string>
-    <string name="title_activity_main">LX Family Planner</string>
+    <string name="app_name">LX Family</string>
+    <string name="title_activity_main">LX Family</string>
     <string name="package_name">com.lxfamily.planner</string>
     <string name="custom_url_scheme">com.lxfamily.planner</string>
     <string name="default_notification_channel_id">lx_family_updates</string>

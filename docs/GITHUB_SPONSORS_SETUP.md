@@ -19,7 +19,7 @@ unsichtbar. Lokal kann er mit `?support-preview=1` geprüft werden.
 
 ## Vorschlag für das Profil
 
-> LX Family Planner is a private, self-hosted family OS for calendars, chores,
+> LX Family is a private, self-hosted family OS for calendars, chores,
 > meals, shopping, rewards, family cloud, and the small things that keep a home
 > running. Sponsorships help fund testing, hosting, documentation, and careful
 > long-term maintenance. LX stays open, free, and without feature paywalls.

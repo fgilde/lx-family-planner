@@ -972,7 +972,7 @@ function serializeEvent(event, uid, timeZone) {
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'CALSCALE:GREGORIAN',
-    'PRODID:-//LX Family Planner//Family Cloud//DE',
+    'PRODID:-//LX Family//Family Cloud//DE',
     'BEGIN:VEVENT',
     `UID:${escapeIcs(uid)}`,
     `DTSTAMP:${icsStamp()}`,

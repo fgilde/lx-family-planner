@@ -1,7 +1,9 @@
 const SERVER_URL_KEY = 'lx_family_server_url';
 const SESSION_TOKEN_KEY = 'lx_family_session_token';
 
-export const DEFAULT_SERVER_URL = 'https://familie.laxxx-lab.de';
+// A distributable APK must never silently connect to the developer's server.
+// Each native installation chooses and stores its own family server address.
+export const DEFAULT_SERVER_URL = '';
 
 export function normalizeServerUrl(
   value,
@@ -27,14 +29,9 @@ export function normalizeServerUrl(
 
 export function getStoredServerUrl() {
   try {
-    const saved = localStorage.getItem(SERVER_URL_KEY);
-    if (saved !== null) return saved;
-    if (isCapacitorNative() || window.location.origin === 'http://localhost' || window.location.origin === 'capacitor://localhost' || window.location.protocol === 'file:') {
-      return DEFAULT_SERVER_URL;
-    }
-    return '';
+    return localStorage.getItem(SERVER_URL_KEY) || '';
   } catch {
-    return isCapacitorNative() ? DEFAULT_SERVER_URL : '';
+    return '';
   }
 }
 

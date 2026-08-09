@@ -17,6 +17,7 @@ import NotificationCenter from './Notifications/NotificationCenter';
 import CustomThemeEditor from './Theme/CustomThemeEditor';
 import LanguageSwitcher from './LanguageSwitcher';
 import MobileNavDrawer from './MobileNavDrawer';
+import { PRODUCT_NAME, PRODUCT_TAGLINE } from '../../shared/brand.js';
 
 export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree, unreadChatCount = 0 }) {
   const { t } = useTranslation('chrome');
@@ -130,8 +131,8 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
           <HeartHandshake size={26} />
         </div>
         <div className="brand-text">
-          <h1>LX Family Planner</h1>
-          <p>{t('header.tagline')}</p>
+          <h1>{PRODUCT_NAME}</h1>
+          <p>{PRODUCT_TAGLINE}</p>
         </div>
       </a>
 

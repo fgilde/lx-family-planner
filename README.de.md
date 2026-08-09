@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/readme-hero.svg" alt="LX Family Planner – der selbst gehostete Familienplaner" width="100%">
+  <img src="docs/readme-hero.svg" alt="LX Family – Private Family OS" width="100%">
 </p>
 
 <p align="center">
@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.16.1" src="https://img.shields.io/badge/version-1.16.1-17483F">
+  <img alt="Version 1.18.1" src="https://img.shields.io/badge/version-1.18.1-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -22,9 +22,15 @@
 </p>
 
 <p align="center">
-  <strong>Ein privates Family OS für Kalender, Aufgaben, Essen, Einkauf, Chat, Cloud und Kinderabenteuer.</strong><br>
+  <strong>LX Family · Private Family OS für Kalender, Aufgaben, Essen, Einkauf, Chat, Cloud und Kinderabenteuer.</strong><br>
   Läuft auf eurem Server. Gehört eurer Familie.
 </p>
+
+> **Neuer Name, sichere Updates:** Aus **LX Family Planner** wird **LX Family**
+> mit dem Untertitel **Private Family OS**. Repository, Docker-Image und
+> Android-Paketkennung bleiben absichtlich unverändert, damit bestehende
+> Installationen ganz normal aktualisieren. Mehr dazu unter
+> [Namensänderung](docs/RENAMING.md).
 
 ## Ausprobieren – ohne Installation
 
@@ -95,6 +101,11 @@ docker compose up -d --build
 Danach `http://SERVER-IP:3001` öffnen, Familie anlegen und losplanen. Unter
 Windows erledigt `Start-Familienplaner.cmd` dieselben Schritte bequem per
 Doppelklick. Für Proxmox gibt es weiter unten einen eigenen LXC-Helper.
+
+> **Eigener Server, eigene Adresse:** LX Family betreibt keinen Dienst für
+> Familien. Jede Installation bleibt auf eurer IP oder eigenen Domain. Die
+> vollständige Anleitung für Heimnetz, HTTPS-Domain, Android-App und CORS steht
+> unter [Selbst hosten](docs/SELF_HOSTING.md).
 
 ### Private Anmeldung und neue Familien
 
@@ -579,7 +590,7 @@ anschließend bewusst in die neue Instanz übernehmen.
 
 ## Installation aus einem App-Store
 
-LX Family Planner ist für **Unraid Community Applications** und den
+LX Family ist für **Unraid Community Applications** und den
 **Umbrel App Store** vorbereitet. Nach der Prüfung durch die jeweiligen
 Store-Teams erscheint LX dort als normale App: Installieren anklicken,
 Speicherort und Zugang festlegen, fertig.
@@ -815,10 +826,12 @@ Docker verwendet standardmäßig `Europe/Berlin`. Eine andere Zeitzone kann übe
 ## Sprache der Oberfläche
 
 Die App startet standardmäßig auf Deutsch. Über die Umgebungsvariable
-`APP_LANGUAGE` in der `.env` kann eine englische Oberfläche gewählt werden
-(`APP_LANGUAGE=en`). Die Einstellung gilt für die Web-App, die Android-App und
-serverseitige Benachrichtigungen. Details und Übersetzungs-Konventionen stehen
-in [docs/i18n.de.md](docs/i18n.de.md).
+`APP_LANGUAGE` in der `.env` kann die Standardsprache gewählt werden: `de`,
+`en`, `fr`, `es`, `it`, `nl` oder `pl`. Zusätzlich gibt es vor der Anmeldung
+und im Kopfbereich eine sichtbare Sprachwahl, die pro Gerät gespeichert wird.
+Die Einstellung gilt für die Web-App, die Android-App und serverseitige
+Benachrichtigungen. Details und Übersetzungs-Konventionen stehen in
+[docs/i18n.de.md](docs/i18n.de.md).
 
 ## Rezepte aus dem Web importieren
 
@@ -861,7 +874,7 @@ geöffnet und erst nach der Prüfung gespeichert.
 
 Für eine vollständige Sammlung in My Recipe Box unter **Synchronisieren /
 Backup → Backup exportieren (RTK)** eine `.rtk`-Datei erstellen. In Android
-anschließend **Teilen → LX Family Planner** wählen; LX öffnet den Rezeptbereich
+anschließend **Teilen → LX Family** wählen; LX öffnet den Rezeptbereich
 und startet den Import automatisch. Alternativ lässt sich die Datei weiterhin
 im Rezept-Finder unter **Aus My Recipe Box übernehmen** auswählen. LX liest das
 offene RTK-Format mit Rezepten, Bildern, Quellen, Kategorien und Stichwörtern.
@@ -874,12 +887,12 @@ Sowohl die installierte LX-PWA als auch die Android-App registrieren sich auf
 unterstützten Android-Geräten als Teilen-Ziel. Danach funktioniert der Ablauf
 ohne Kopieren:
 
-1. LX Family Planner über die HTTPS-Adresse öffnen.
+1. LX Family über die HTTPS-Adresse öffnen.
 2. Im Browser **Zum Startbildschirm hinzufügen** beziehungsweise **App
    installieren** wählen.
 3. In Chefkoch, Pinterest, einem öffentlichen Facebook-Reel oder einer anderen
    Rezept-App **Teilen** öffnen.
-4. **LX Family Planner** auswählen.
+4. **LX Family** auswählen.
 
 LX öffnet das Kochbuch, liest den geteilten Link und startet den sicheren
 Rezeptimport. Die Funktion ist von der Web-Share-Target-Unterstützung des
@@ -1078,6 +1091,11 @@ Integritätsergebnisse. Damit kann nach einem Update erkannt werden, ob ein
 bestehender Eintrag oder ein gespeichertes Einstellungsfeld fehlt oder verändert
 wurde.
 
+LX behält automatisch genau die **drei neuesten** vollständigen lokalen
+Sicherungen samt Prüfmanifest. Während eines geschützten Updates bleibt bis zum
+erfolgreichen Gesundheits- und Datencheck kurzzeitig eine vierte Sicherung als
+Rückfallnetz erhalten.
+
 Sicherungen sollten regelmäßig zusätzlich auf ein anderes Gerät oder Medium
 kopiert werden. Ein Backup ist erst dann ein gutes Backup, wenn die
 Wiederherstellung einmal getestet wurde.
@@ -1113,7 +1131,8 @@ Die Vorlage liegt in `.env.example`.
 | `NEXTCLOUD_FAMILY_QUOTA` | Speicherkontingent pro Familie; Standard `10GB` |
 | `NEXTCLOUD_*_PASSWORD` | vom Aktivierungsskript zufällig erzeugte Cloud-, Datenbank- und Redis-Schlüssel |
 | `NEXTCLOUD_TRUSTED_DOMAINS` | erlaubte Browsernamen und Heimnetz-Adressen für Nextcloud |
-| `CORS_ALLOWED_ORIGINS` | zusätzliche, vertrauenswürdige Ursprünge für eine getrennt gehostete oder native Oberfläche |
+| `CORS_ALLOWED_ORIGINS` | zusätzliche, vertrauenswürdige Ursprünge nur für eine getrennt gehostete Weboberfläche; normale Browser- und Android-Installationen benötigen keinen Eintrag |
+| `TRUST_PROXY` | nur hinter einem vertrauenswürdigen Reverse Proxy auf `1` setzen; bei direkt freigegebenem Docker-Port leer bzw. `false` lassen |
 | `AGENT_API_KEY` | aktiviert optional die geschützte Agent-API |
 | `VAPID_*` | optionale feste Web-Push-Schlüssel |
 

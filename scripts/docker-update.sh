@@ -107,7 +107,7 @@ docker compose build --pull family-planner
 echo "4/6 App kurz anhalten und konsistente Sicherung erstellen ..."
 docker compose stop family-planner
 service_stopped="true"
-docker compose run --rm --no-deps family-planner node server/backup.js
+docker compose run --rm --no-deps family-planner node server/backup.js --keep 4
 for candidate in "$backup_directory"/*.sqlite; do
   [[ -e "$candidate" ]] || continue
   if [[ -z "$backup_file" || "$candidate" -nt "$backup_file" ]]; then
@@ -134,6 +134,10 @@ echo "6/6 Familieninhalte und Einstellungen vergleichen ..."
 container_manifest="/app/backups/$(basename "$backup_file").manifest.json"
 docker compose exec -T family-planner \
   node server/dataIntegrity.js --compare "$container_manifest"
+
+# The fresh update backup stays available until the new version has passed all
+# checks. Only then is retention safely reduced to the agreed three backups.
+docker compose exec -T family-planner node server/backup.js --prune 3
 
 trap - ERR
 echo

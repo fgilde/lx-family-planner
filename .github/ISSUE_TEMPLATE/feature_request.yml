@@ -43,5 +43,5 @@ body:
     attributes:
       label: Fit
       options:
-        - label: This idea fits a private, self-hosted family planner.
+        - label: This idea fits a private, self-hosted family hub.
           required: true

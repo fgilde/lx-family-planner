@@ -207,7 +207,7 @@
     },
     "denied": {
       "title": "Disattivato nel browser",
-      "bodyNative": "Consenti le notifiche sotto Android → App → LX Family Planner → Notifiche.",
+      "bodyNative": "Consenti le notifiche sotto Android → App → LX Family → Notifiche.",
       "bodyWeb": "Consenti le notifiche nelle impostazioni del sito del browser e riapri l'organizzatore."
     },
     "ready": {

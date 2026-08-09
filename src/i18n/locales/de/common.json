@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LX Family Planner - Unser Familienplaner",
+    "title": "LX Family · Private Family OS",
     "description": "Übersichtlicher, intuitiver Familienplaner mit Kalender, Bring!-Einkaufsliste, Essensplaner, Haushaltsaufgaben, Belohnungssystem und Pinnwand."
   },
   "actions": {
@@ -46,7 +46,7 @@
     "sourceName": "Familiengeburtstag"
   },
   "projectSupport": {
-    "aria": "LX Family Planner freiwillig über GitHub Sponsors unterstützen",
+    "aria": "LX Family freiwillig über GitHub Sponsors unterstützen",
     "kicker": "Einmalig oder monatlich",
     "title": "LX einen Kaffee spendieren",
     "description": "LX bleibt kostenlos. Schon ein einmaliger Kaffee hilft bei Tests, Hosting und der Weiterentwicklung.",

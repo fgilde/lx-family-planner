@@ -207,7 +207,7 @@
     },
     "denied": {
       "title": "Désactivé dans le navigateur",
-      "bodyNative": "Autorisez les notifications sous Android → Applications → LX Family Planner → Notifications.",
+      "bodyNative": "Autorisez les notifications sous Android → Applications → LX Family → Notifications.",
       "bodyWeb": "Autorisez les notifications dans les paramètres du site de votre navigateur, puis rouvrez le planificateur."
     },
     "ready": {

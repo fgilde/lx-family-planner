@@ -7,6 +7,7 @@ import {
   Check,
   Heart,
   Plus,
+  Server,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -20,6 +21,8 @@ import {
   getPositionOptionLabel,
   roleForPosition
 } from '../../constants/roles';
+import { PRODUCT_NAME } from '../../../shared/brand.js';
+import { getStoredServerUrl, isCapacitorNative } from '../../utils/apiConfig';
 
 const MEMBER_COLORS = [
   '#246B58',
@@ -46,7 +49,11 @@ function emptyMember(index = 0) {
   };
 }
 
-export default function OnboardingWizard({ onComplete, onBack }) {
+export default function OnboardingWizard({
+  onComplete,
+  onBack,
+  onOpenServerConfig
+}) {
   const { t } = useTranslation('auth');
   const { registerFamily, publicAccess } = useFamily();
   const [step, setStep] = useState(1);
@@ -57,6 +64,10 @@ export default function OnboardingWizard({ onComplete, onBack }) {
   const [members, setMembers] = useState([emptyMember(0)]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const nativeApp = isCapacitorNative();
+  const serverAddress = nativeApp
+    ? getStoredServerUrl() || t('chrome:serverConfig.urlPlaceholder')
+    : window.location.origin;
   const managingMembers = useMemo(
     () => members.filter(canManageFamily),
     [members]
@@ -142,7 +153,7 @@ export default function OnboardingWizard({ onComplete, onBack }) {
         </button>
         <div className="auth-brand">
           <span className="auth-brand-mark">LX</span>
-          <span>Family Planner</span>
+          <span>{PRODUCT_NAME}</span>
         </div>
         <span className="onboarding-step">
           {t('onboarding.stepIndicator', { step, total: 3 })}
@@ -162,6 +173,19 @@ export default function OnboardingWizard({ onComplete, onBack }) {
             <span className="eyebrow">{t('onboarding.step1.eyebrow')}</span>
             <h1>{t('onboarding.step1.title')}</h1>
             <p>{t('onboarding.step1.description')}</p>
+            <aside className="onboarding-server-summary">
+              <span className="onboarding-server-icon"><Server size={19} /></span>
+              <span>
+                <strong>{t('chrome:serverConfig.title')}</strong>
+                <small>{t('chrome:serverConfig.subtitle')}</small>
+                <code>{serverAddress}</code>
+              </span>
+              {nativeApp && onOpenServerConfig && (
+                <button type="button" onClick={onOpenServerConfig}>
+                  {t('chrome:serverConfig.urlLabel')}
+                </button>
+              )}
+            </aside>
             <div className="onboarding-fields">
               <label className="auth-field">
                 <span>{t('onboarding.step1.familyNameLabel')}</span>

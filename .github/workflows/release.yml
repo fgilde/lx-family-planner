@@ -79,10 +79,10 @@ jobs:
             type=semver,pattern={{major}}
             type=raw,value=latest
           labels: |
-            org.opencontainers.image.title=LX Family Planner
-            org.opencontainers.image.description=Private self-hosted family planner for calendars, tasks, meals, shopping, chat and child profiles.
+            org.opencontainers.image.title=LX Family
+            org.opencontainers.image.description=LX Family · Private Family OS for calendars, tasks, meals, shopping, chat and child profiles.
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.url=https://familie.laxxx-lab.de
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}
             org.opencontainers.image.licenses=MIT
 
       - name: Image bauen und veröffentlichen
@@ -150,7 +150,7 @@ jobs:
           gh release create "${GITHUB_REF_NAME}" \
             --verify-tag \
             --latest \
-            --title "LX Family Planner ${version}" \
+            --title "LX Family ${version}" \
             "${notes[@]}" \
             "release/LX-Family-Planner-${version}.apk" \
             "release/compose.yaml" \

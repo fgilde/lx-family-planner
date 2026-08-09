@@ -55,7 +55,7 @@
     "selectListLabel": "Welche Liste soll verbunden werden?",
     "connectSelected": "Ausgewählte Liste verbinden",
     "loginButton": "Sicher bei Bring! anmelden",
-    "fineprint": "LX Family Planner ist kein Produkt von Bring! Labs AG. Die Verbindung kann jederzeit getrennt werden.",
+    "fineprint": "LX Family ist kein Produkt von Bring! Labs AG. Die Verbindung kann jederzeit getrennt werden.",
     "toastConnectedTitle": "Bring! ist verbunden",
     "toastConnectedBody": "{{listName}} wird jetzt synchronisiert.",
     "toastDefaultList": "Die Einkaufsliste"

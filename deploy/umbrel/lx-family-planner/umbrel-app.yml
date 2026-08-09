@@ -1,11 +1,11 @@
 manifestVersion: 1.1
 id: lx-family-planner
 category: files
-name: LX Family Planner
+name: LX Family
 version: "1.18.0"
-tagline: Private family planning for every generation
+tagline: Private Family OS for every generation
 description: >-
-  LX Family Planner brings calendars, tasks, shopping, meals, family chat,
+  LX Family brings calendars, tasks, shopping, meals, family chat,
   files and reminders together on your own server. Adults get a calm planning
   workspace, children get playful missions and rewards, and pet profiles only
   show care and health-related information.
@@ -15,8 +15,8 @@ description: >-
   and child-safe media widgets. Optional integrations include Nextcloud,
   Home Assistant, Bring!, Gotify and the native LX Android app.
 releaseNotes: ""
-developer: LX Family Planner contributors
-website: https://familie.laxxx-lab.de
+developer: LX Family contributors
+website: https://github.com/laxxx-lab/lx-family-planner
 dependencies: []
 repo: https://github.com/laxxx-lab/lx-family-planner
 support: https://github.com/laxxx-lab/lx-family-planner/issues

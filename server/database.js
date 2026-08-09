@@ -2780,7 +2780,7 @@ export function createInboxNotifications(
   memberIds,
   {
     eventKey = 'update',
-    title = 'Neu im Familienplaner',
+    title = 'Neu in LX Family',
     body = '',
     url = '/',
     priority = 'normal',
@@ -2809,7 +2809,7 @@ export function createInboxNotifications(
         familyId,
         memberId,
         String(eventKey || 'update'),
-        String(title || 'Neu im Familienplaner'),
+        String(title || 'Neu in LX Family'),
         String(body || ''),
         String(url || '/'),
         String(priority || 'normal'),

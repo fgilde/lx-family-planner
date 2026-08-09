@@ -394,8 +394,8 @@
     "internalNextcloudAddress": "Internal Nextcloud address"
   },
   "labels": {
-    "htmlTitle": "LX Family Planner - Our Family Planner",
-    "htmlDescription": "Clear, intuitive family planner with calendar, Bring! shopping list, meal planner, household chores, rewards system and pinboard.",
+    "htmlTitle": "LX Family · Private Family OS",
+    "htmlDescription": "LX Family is your private Family OS for calendar, chores, shopping, meals, chat and more.",
     "someone": "Someone",
     "theCreator": "the creator",
     "parent": "Parent",
@@ -581,17 +581,17 @@
     "nativeTestBody": "The Android app can now notify you reliably.",
     "webTestBody": "Browser notifications are working on this device.",
     "testPrivateBody": "Your notifications are ready to go.",
-    "gotifyConnectedTitle": "LX Family Planner is connected",
+    "gotifyConnectedTitle": "LX Family is connected",
     "gotifyConnectedMessage": "Push notifications for your family are now active.",
-    "gotifyTestTitle": "Test from LX Family Planner",
+    "gotifyTestTitle": "Test from LX Family",
     "gotifyTestMessage": "Hello {{name}}, the connection is working."
-    ,"ntfyConnectedTitle": "LX Family Planner is connected to ntfy",
+    ,"ntfyConnectedTitle": "LX Family is connected to ntfy",
     "ntfyConnectedMessage": "Notifications for your family are now active through this topic.",
-    "ntfyTestTitle": "Test from LX Family Planner",
+    "ntfyTestTitle": "Test from LX Family",
     "ntfyTestMessage": "Hello {{name}}, ntfy can reach you."
   },
   "messages": {
-    "gotifyAppDescription": "Notifications from the private LX Family Planner",
+    "gotifyAppDescription": "Notifications from the private LX Family",
     "nextcloudTest_one": "Nextcloud {{version}} is responding. {{count}} calendar found.",
     "nextcloudTest_other": "Nextcloud {{version}} is responding. {{count}} calendars found.",
     "homeAssistantTest_one": "{{count}} device or sensor reachable.",

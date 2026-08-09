@@ -82,7 +82,7 @@
     "on": "On",
     "off": "Off",
     "serverNotConfigured": "Native Android notifications are not set up on the server yet. You can find the instructions in the Parent Center.",
-    "deniedNative": "Android is blocking notifications. Please allow them under Apps → LX Family Planner → Notifications.",
+    "deniedNative": "Android is blocking notifications. Please allow them under Apps → LX Family → Notifications.",
     "deniedBrowser": "The browser is blocking notifications. Please allow them once in the browser's site settings.",
     "showPreviews": "Show content in notifications",
     "sendTest": "Send test notification"

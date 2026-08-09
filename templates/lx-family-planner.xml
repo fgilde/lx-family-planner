@@ -1,5 +1,5 @@
 <Container version="2">
-  <Name>LX Family Planner</Name>
+  <Name>LX Family</Name>
   <Repository>ghcr.io/laxxx-lab/lx-family-planner:latest</Repository>
   <Registry>https://github.com/laxxx-lab/lx-family-planner/pkgs/container/lx-family-planner</Registry>
   <Network>bridge</Network>
@@ -7,13 +7,13 @@
   <Privileged>false</Privileged>
   <Icon>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/public/icon-512.png</Icon>
   <WebUI>http://[IP]:[PORT:3001]</WebUI>
-  <Overview>Private self-hosted family planner with calendars, tasks, shopping, meals, chat, Android notifications, Family Cloud and dedicated child and pet profiles.</Overview>
+  <Overview>LX Family · Private Family OS with calendars, tasks, shopping, meals, chat, Android notifications, Family Cloud and dedicated child and pet profiles.</Overview>
   <Support>https://github.com/laxxx-lab/lx-family-planner/issues</Support>
-  <Project>https://familie.laxxx-lab.de</Project>
+  <Project>https://github.com/laxxx-lab/lx-family-planner</Project>
   <TemplateURL>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/templates/lx-family-planner.xml</TemplateURL>
   <ReadMe>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/README.md</ReadMe>
   <Category>Tools:Utilities</Category>
-  <ExtraSearchTerms>family planner calendar household children meal shopping self hosted</ExtraSearchTerms>
+  <ExtraSearchTerms>LX Family private family OS family organizer calendar household children meal shopping self hosted</ExtraSearchTerms>
   <Requires>A 32-character or longer random APP_SECRET. Keep the same value for every update.</Requires>
   <Changes>v1.17.0: Mobile navigation drawer, ntfy notifications, wall display, profile permissions, dynamic trash card, birthdays, shared chores, themes, full i18n and child timetables. Initial Community Applications release.</Changes>
   <Date>2026-08-05</Date>
@@ -21,9 +21,9 @@
   <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-dashboard.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-kinderprofil.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-haustierprofil.png</Screenshot>
-  <Config Name="WebUI" Target="3001" Default="3001" Mode="tcp" Description="Port used to open LX Family Planner." Type="Port" Display="always" Required="true" Mask="false"/>
+  <Config Name="WebUI" Target="3001" Default="3001" Mode="tcp" Description="Port used to open LX Family." Type="Port" Display="always" Required="true" Mask="false"/>
   <Config Name="Family data" Target="/app/data" Default="/mnt/user/appdata/lx-family-planner/data" Mode="rw" Description="Persistent database, integration secrets and Firebase configuration." Type="Path" Display="always" Required="true" Mask="false"/>
-  <Config Name="Backups" Target="/app/backups" Default="/mnt/user/appdata/lx-family-planner/backups" Mode="rw" Description="Persistent LX Family Planner backups." Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="Backups" Target="/app/backups" Default="/mnt/user/appdata/lx-family-planner/backups" Mode="rw" Description="Persistent LX Family backups." Type="Path" Display="always" Required="true" Mask="false"/>
   <Config Name="Unraid user ID" Target="PUID" Default="99" Description="Linux user ID used for files in the appdata folders. Unraid normally uses 99 (nobody)." Type="Variable" Display="advanced" Required="true" Mask="false"/>
   <Config Name="Unraid group ID" Target="PGID" Default="100" Description="Linux group ID used for files in the appdata folders. Unraid normally uses 100 (users)." Type="Variable" Display="advanced" Required="true" Mask="false"/>
   <Config Name="App secret" Target="APP_SECRET" Default="" Description="Random secret with at least 32 characters. Never change it after the first start." Type="Variable" Display="always" Required="true" Mask="true"/>

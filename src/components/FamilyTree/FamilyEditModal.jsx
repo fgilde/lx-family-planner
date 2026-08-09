@@ -19,6 +19,7 @@ import { compressImageDataUrl } from '../../utils/imageCompressor';
 import { DEFAULT_FAMILY_AVATAR } from '../../utils/imageFallback';
 import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import ProjectSupportCard from '../ProjectSupportCard';
+import { PRODUCT_NAME } from '../../../shared/brand.js';
 
 export default function FamilyEditModal({ family, isOpen, onClose }) {
   const { t } = useTranslation('familyTree');
@@ -190,7 +191,7 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
             </label>
 
             <div className="family-version-strip">
-              <span>LX Family Planner</span>
+              <span>{PRODUCT_NAME}</span>
               <strong>{t('settings.about.version', { version: appVersion })}</strong>
             </div>
 

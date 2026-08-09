@@ -67,7 +67,7 @@ self.addEventListener('push', event => {
     payload = { body: event.data?.text() || 'Im Familienplaner gibt es etwas Neues.' };
   }
 
-  const title = payload.title || 'LX Family Planner';
+  const title = payload.title || 'LX Family';
   const options = {
     body: payload.body || 'Im Familienplaner gibt es etwas Neues.',
     icon: payload.icon || '/icon.png',

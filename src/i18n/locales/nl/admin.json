@@ -207,7 +207,7 @@
     },
     "denied": {
       "title": "Uitgezet in de browser",
-      "bodyNative": "Sta meldingen toe onder Android → Apps → LX Family Planner → Meldingen.",
+      "bodyNative": "Sta meldingen toe onder Android → Apps → LX Family → Meldingen.",
       "bodyWeb": "Sta meldingen toe in de site-instellingen van jouw browser en open de planner daarna opnieuw."
     },
     "ready": {

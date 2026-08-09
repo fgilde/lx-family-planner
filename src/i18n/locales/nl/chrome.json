@@ -181,7 +181,7 @@
     "urlLabel": "Serveradres",
     "urlPlaceholder": "https://gezin.voorbeeld.nl",
     "hint": "Op jouw thuisnetwerk kun je bijvoorbeeld <code>192.168.178.50:3001</code> invoeren. Buiten jouw thuisnetwerk moet het adres altijd HTTPS gebruiken.",
-    "connected": "Verbonden · LX Family Planner {{version}}",
+    "connected": "Verbonden · LX Family {{version}}",
     "testing": "Verbinding testen …",
     "test": "Verbinding testen",
     "errors": {

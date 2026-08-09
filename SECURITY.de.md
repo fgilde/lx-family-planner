@@ -29,6 +29,9 @@ eine konsistente Sicherung erzeugt werden.
 
 - Öffentlichen Zugriff nur über HTTPS und einen bewusst konfigurierten Reverse
   Proxy erlauben.
+- Nur hinter genau einem vertrauenswürdigen Reverse Proxy `TRUST_PROXY=1`
+  setzen; bei einem direkt veröffentlichten Docker-Port muss der Wert leer
+  bleiben bzw. `false` sein.
 - `.env`, `APP_SECRET`, Firebase-Dienstschlüssel und Datenordner niemals in Git
   aufnehmen.
 - Updates mit dem mitgelieferten Update-Skript einspielen; es sichert und

@@ -1,7 +1,7 @@
 {
-  "name": "LX Family Planner",
+  "name": "LX Family",
   "short_name": "LX Family",
-  "description": "A self-hosted family planner for calendars, chores, meals, shopping and more",
+  "description": "LX Family · Private Family OS for calendars, chores, meals, shopping and more",
   "id": "/",
   "start_url": "/",
   "scope": "/",

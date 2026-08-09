@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { GoogleAuth } from 'google-auth-library';
+import { PRODUCT_NAME } from '../shared/brand.js';
 
 const FCM_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 const DEFAULT_SERVICE_ACCOUNT_FILE = path.join(
@@ -170,7 +171,7 @@ export async function sendFirebaseNotification({
         message: {
           token,
           notification: {
-            title: String(title || 'LX Family Planner').slice(0, 100),
+            title: String(title || PRODUCT_NAME).slice(0, 100),
             body: String(body || '').slice(0, 500)
           },
           data: stringData,

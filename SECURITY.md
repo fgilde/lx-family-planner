@@ -22,6 +22,8 @@ consistent backup with the bundled backup function before updating.
 
 - Expose LX publicly only through HTTPS and a deliberately configured reverse
   proxy.
+- Set `TRUST_PROXY=1` only behind one trusted reverse proxy. Leave it unset or
+  `false` when exposing a Docker port directly.
 - Never commit `.env`, `APP_SECRET`, Firebase keys or the data directory.
 - Keep the same `APP_SECRET` across updates and restores. It protects stored
   integration secrets and private links.

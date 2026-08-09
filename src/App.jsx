@@ -1,38 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { FamilyProvider, useFamily } from './context/FamilyContext';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
-import PersonalDashboard from './components/Dashboard/PersonalDashboard';
-import KitchenTabletView from './components/Dashboard/KitchenTabletView';
-import CalendarView from './components/Calendar/CalendarView';
-import TrashCalendarView from './components/Calendar/TrashCalendarView';
-import BringShoppingList from './components/Shopping/BringShoppingList';
-import MealPlanner from './components/Meals/MealPlanner';
-import ChoreRewardsPlanner from './components/Tasks/ChoreRewardsPlanner';
-import FamilyPinboard from './components/Board/FamilyPinboard';
-import FamilyChatView from './components/Chat/FamilyChatView';
 import FamilyTreeModal from './components/FamilyTree/FamilyTreeModal';
 import ProfileModal from './components/ProfileModal';
 import QuickAddModal from './components/QuickAddModal';
 import ToastNotification from './components/ToastNotification';
-import FamilyLoginScreen from './components/Auth/FamilyLoginScreen';
-import OnboardingWizard from './components/Auth/OnboardingWizard';
 import BringAccountModal from './components/Shopping/BringAccountModal';
-import ParentAdmin from './components/Admin/ParentAdmin';
-import CloudFileBrowser from './components/Admin/CloudFileBrowser';
-import FamilyLifeHub from './components/FamilyLife/FamilyLifeHub';
-import FamilyMailbox from './components/FamilyMail/FamilyMailbox';
 import NotificationPermissionBanner from './components/Notifications/NotificationPermissionBanner';
 import ProblemReportButton from './components/ProblemReportButton';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
 import ServerConfigModal from './components/ServerConfigModal';
 import AppUpdateBanner from './components/AppUpdateBanner';
 import { canAccessAppView, isWallProfile } from './constants/roles';
-import { isCapacitorNative } from './utils/apiConfig';
+import { getStoredServerUrl, isCapacitorNative } from './utils/apiConfig';
 
 const EMPTY_DISABLED_MODULES = [];
+
+const PersonalDashboard = lazy(() => import('./components/Dashboard/PersonalDashboard'));
+const KitchenTabletView = lazy(() => import('./components/Dashboard/KitchenTabletView'));
+const CalendarView = lazy(() => import('./components/Calendar/CalendarView'));
+const TrashCalendarView = lazy(() => import('./components/Calendar/TrashCalendarView'));
+const BringShoppingList = lazy(() => import('./components/Shopping/BringShoppingList'));
+const MealPlanner = lazy(() => import('./components/Meals/MealPlanner'));
+const ChoreRewardsPlanner = lazy(() => import('./components/Tasks/ChoreRewardsPlanner'));
+const FamilyPinboard = lazy(() => import('./components/Board/FamilyPinboard'));
+const FamilyChatView = lazy(() => import('./components/Chat/FamilyChatView'));
+const FamilyLoginScreen = lazy(() => import('./components/Auth/FamilyLoginScreen'));
+const OnboardingWizard = lazy(() => import('./components/Auth/OnboardingWizard'));
+const ParentAdmin = lazy(() => import('./components/Admin/ParentAdmin'));
+const CloudFileBrowser = lazy(() => import('./components/Admin/CloudFileBrowser'));
+const FamilyLifeHub = lazy(() => import('./components/FamilyLife/FamilyLifeHub'));
+const FamilyMailbox = lazy(() => import('./components/FamilyMail/FamilyMailbox'));
 
 const DEEP_LINK_VIEWS = new Set([
   'dashboard',
@@ -48,6 +49,16 @@ const DEEP_LINK_VIEWS = new Set([
   'mail',
   'admin'
 ]);
+
+function ViewLoading() {
+  const { t } = useTranslation('chrome');
+  return (
+    <div className="app-loading" role="status" aria-live="polite">
+      <LoaderCircle className="spin" size={28} />
+      <strong>{t('app.loading')}</strong>
+    </div>
+  );
+}
 
 function MainContent() {
   const { t } = useTranslation('chrome');
@@ -157,6 +168,16 @@ function MainContent() {
 
   useEffect(() => {
     if (
+      authStatus !== 'authenticated' &&
+      canConfigureServer &&
+      !getStoredServerUrl()
+    ) {
+      setIsServerConfigOpen(true);
+    }
+  }, [authStatus, canConfigureServer]);
+
+  useEffect(() => {
+    if (
       authStatus === 'authenticated' &&
       isWallProfile(activeMember) &&
       activeTab === 'dashboard'
@@ -177,24 +198,40 @@ function MainContent() {
 
   if (isCreatingNewFamily && authStatus !== 'authenticated') {
     return (
-      <OnboardingWizard
-        onComplete={() => setIsCreatingNewFamily(false)}
-        onBack={() => setIsCreatingNewFamily(false)}
-      />
+      <>
+        <Suspense fallback={<ViewLoading />}>
+          <OnboardingWizard
+            onComplete={() => setIsCreatingNewFamily(false)}
+            onBack={() => setIsCreatingNewFamily(false)}
+            onOpenServerConfig={
+              canConfigureServer
+                ? () => setIsServerConfigOpen(true)
+                : undefined
+            }
+          />
+        </Suspense>
+        <ServerConfigModal
+          isOpen={isServerConfigOpen}
+          onClose={() => setIsServerConfigOpen(false)}
+          onSave={() => window.location.reload()}
+        />
+      </>
     );
   }
 
   if (authStatus !== 'authenticated') {
     return (
       <>
-        <FamilyLoginScreen
-          onStartOnboarding={() => setIsCreatingNewFamily(true)}
-          onOpenServerConfig={
-            canConfigureServer
-              ? () => setIsServerConfigOpen(true)
-              : undefined
-          }
-        />
+        <Suspense fallback={<ViewLoading />}>
+          <FamilyLoginScreen
+            onStartOnboarding={() => setIsCreatingNewFamily(true)}
+            onOpenServerConfig={
+              canConfigureServer
+                ? () => setIsServerConfigOpen(true)
+                : undefined
+            }
+          />
+        </Suspense>
         <ServerConfigModal
           isOpen={isServerConfigOpen}
           onClose={() => setIsServerConfigOpen(false)}
@@ -224,25 +261,27 @@ function MainContent() {
       <NotificationPermissionBanner />
 
       <main className="content-wrapper">
-        {activeTab === 'dashboard' && <PersonalDashboard />}
-        {activeTab === 'chat' && <FamilyChatView />}
-        {activeTab === 'kitchen' && <KitchenTabletView />}
-        {activeTab === 'calendar' && <CalendarView />}
-        {activeTab === 'trash' && <TrashCalendarView />}
-        {activeTab === 'shopping' && <BringShoppingList />}
-        {activeTab === 'meals' && <MealPlanner />}
-        {activeTab === 'tasks' && <ChoreRewardsPlanner />}
-        {activeTab === 'board' && <FamilyPinboard />}
-        {activeTab === 'family-life' && <FamilyLifeHub />}
-        {activeTab === 'cloud' && !readOnlyDemo && (
-          <div className="family-cloud-page">
-            <CloudFileBrowser />
-          </div>
-        )}
-        {activeTab === 'mail' && <FamilyMailbox />}
-        {activeTab === 'admin' && (
-          <ParentAdmin onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
-        )}
+        <Suspense fallback={<ViewLoading />}>
+          {activeTab === 'dashboard' && <PersonalDashboard />}
+          {activeTab === 'chat' && <FamilyChatView />}
+          {activeTab === 'kitchen' && <KitchenTabletView />}
+          {activeTab === 'calendar' && <CalendarView />}
+          {activeTab === 'trash' && <TrashCalendarView />}
+          {activeTab === 'shopping' && <BringShoppingList />}
+          {activeTab === 'meals' && <MealPlanner />}
+          {activeTab === 'tasks' && <ChoreRewardsPlanner />}
+          {activeTab === 'board' && <FamilyPinboard />}
+          {activeTab === 'family-life' && <FamilyLifeHub />}
+          {activeTab === 'cloud' && !readOnlyDemo && (
+            <div className="family-cloud-page">
+              <CloudFileBrowser />
+            </div>
+          )}
+          {activeTab === 'mail' && <FamilyMailbox />}
+          {activeTab === 'admin' && (
+            <ParentAdmin onOpenFamilyTree={() => setIsFamilyTreeOpen(true)} />
+          )}
+        </Suspense>
       </main>
 
       <FamilyTreeModal

@@ -394,7 +394,7 @@
     "internalNextcloudAddress": "Intern Nextcloud-adres"
   },
   "labels": {
-    "htmlTitle": "LX Family Planner - Onze gezinsplanner",
+    "htmlTitle": "LX Family · Private Family OS",
     "htmlDescription": "Heldere, intuïtieve gezinsplanner met agenda, Bring!-boodschappenlijst, maaltijdplanner, huishoudelijke klusjes, beloningssysteem en prikbord.",
     "someone": "Iemand",
     "theCreator": "de maker",
@@ -581,17 +581,17 @@
     "nativeTestBody": "De Android-app kan je nu betrouwbaar melden.",
     "webTestBody": "Browsermeldingen werken op dit apparaat.",
     "testPrivateBody": "Jouw meldingen zijn klaar voor gebruik.",
-    "gotifyConnectedTitle": "LX Family Planner is verbonden",
+    "gotifyConnectedTitle": "LX Family is verbonden",
     "gotifyConnectedMessage": "Pushmeldingen voor jouw gezin zijn nu actief.",
-    "gotifyTestTitle": "Test van LX Family Planner",
+    "gotifyTestTitle": "Test van LX Family",
     "gotifyTestMessage": "Hallo {{name}}, de verbinding werkt."
-    ,"ntfyConnectedTitle": "LX Family Planner is verbonden met ntfy",
+    ,"ntfyConnectedTitle": "LX Family is verbonden met ntfy",
     "ntfyConnectedMessage": "Meldingen voor jouw gezin zijn nu actief via dit onderwerp.",
-    "ntfyTestTitle": "Test van LX Family Planner",
+    "ntfyTestTitle": "Test van LX Family",
     "ntfyTestMessage": "Hallo {{name}}, ntfy kan je bereiken."
   },
   "messages": {
-    "gotifyAppDescription": "Meldingen van de privé LX Family Planner",
+    "gotifyAppDescription": "Meldingen van de privé LX Family",
     "nextcloudTest_one": "Nextcloud {{version}} reageert. {{count}} agenda gevonden.",
     "nextcloudTest_other": "Nextcloud {{version}} reageert. {{count}} agenda's gevonden.",
     "homeAssistantTest_one": "{{count}} apparaat of sensor bereikbaar.",

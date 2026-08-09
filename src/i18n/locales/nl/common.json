@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "LX Family Planner - Onze gezinsorganizer",
+    "title": "LX Family · Private Family OS",
     "description": "Heldere, intuïtieve gezinsplanner met agenda, Bring!-boodschappenlijst, maaltijdplanner, huishoudelijke klusjes, beloningssysteem en prikbord."
   },
   "actions": {
@@ -46,7 +46,7 @@
     "sourceName": "Gezinsverjaardag"
   },
   "projectSupport": {
-    "aria": "Steun LX Family Planner vrijwillig via GitHub Sponsors",
+    "aria": "Steun LX Family vrijwillig via GitHub Sponsors",
     "kicker": "Eenmalig of maandelijks",
     "title": "Trakteer LX op koffie",
     "description": "LX blijft gratis. Zelfs een eenmalige koffie helpt bij testen, hosting en verdere ontwikkeling.",

@@ -37,129 +37,20 @@ import {
   isCapacitorNative,
   plannerApiRequest
 } from '../utils/apiConfig';
-import { DEFAULT_GOTIFY_RULES } from '../../shared/notificationEvents';
 import i18n from '../i18n';
 import { formatDateTime } from '../utils/formatting';
-import {
-  CUSTOM_THEME_PROPERTIES,
-  parseCustomThemeCss
-} from '../../shared/customThemeCss.js';
-import { CUSTOM_THEME_ID, isPlainTheme } from '../constants/themes';
 import { birthdayEventsForMembers } from '../../shared/birthdays.js';
+import {
+  DEFAULT_PUBLIC_ACCESS,
+  EMPTY_INTEGRATIONS,
+  EMPTY_RESOURCES,
+  initialNativePushState,
+  initialWebPushState,
+  resourceWithDefaults
+} from './familyContextState';
+import { applyThemePresentation } from './familyThemePresentation';
 
 const FamilyContext = createContext(null);
-
-function applyCustomThemeCss(css) {
-  const result = parseCustomThemeCss(css);
-  if (!result.valid) return result;
-  for (const property of CUSTOM_THEME_PROPERTIES) {
-    document.documentElement.style.removeProperty(property);
-  }
-  for (const [property, value] of Object.entries(result.variables)) {
-    document.documentElement.style.setProperty(property, value);
-  }
-  return result;
-}
-
-function applyThemePresentation(themeId, customThemeCss = '') {
-  const nextTheme = themeId || 'light';
-  document.documentElement.setAttribute('data-theme', nextTheme);
-  document.documentElement.setAttribute(
-    'data-theme-style',
-    isPlainTheme(nextTheme) ? 'plain' : 'illustrated'
-  );
-  return applyCustomThemeCss(
-    nextTheme === CUSTOM_THEME_ID ? customThemeCss : ''
-  );
-}
-
-const EMPTY_RESOURCES = {
-  events: [],
-  shoppingItems: [],
-  tasks: [],
-  notes: [],
-  meals: [],
-  savedRecipes: [],
-  rewards: [],
-  chatMessages: [],
-  familyTree: [],
-  dashboardLinks: [],
-  trashEvents: [],
-  moodCheckins: [],
-  dailyRoutines: [],
-  savingsGoals: [],
-  pocketMoneyTransactions: [],
-  schoolItems: [],
-  familyPolls: [],
-  encouragements: [],
-  familyMissions: [],
-  familySettings: [],
-  kidProfiles: []
-};
-const EMPTY_INTEGRATIONS = {
-  bring: { connected: false },
-  gotify: {
-    connected: false,
-    rules: { ...DEFAULT_GOTIFY_RULES }
-  },
-  ntfy: {
-    connected: false,
-    rules: { ...DEFAULT_GOTIFY_RULES }
-  },
-  homeAssistant: {
-    connected: false,
-    enabled: false,
-    selectedEntities: []
-  },
-  nextcloud: {
-    connected: false,
-    enabled: false,
-    eventSyncEnabled: false,
-    backupEnabled: false
-  }
-};
-const DEFAULT_PUBLIC_ACCESS = {
-  directoryEnabled: false,
-  demo: null,
-  registration: {
-    mode: 'closed',
-    allowed: false,
-    requiresInvite: false
-  }
-};
-
-function initialWebPushState() {
-  const capability = webPushCapability();
-  return {
-    ...capability,
-    permission: notificationPermission(),
-    loading: true,
-    busy: '',
-    publicKey: '',
-    defaults: {},
-    currentDeviceId: '',
-    devices: []
-  };
-}
-
-function initialNativePushState() {
-  const capability = nativePushCapability();
-  return {
-    ...capability,
-    permission: capability.supported ? 'prompt' : 'unsupported',
-    loading: capability.supported,
-    busy: '',
-    serverConfigured: null,
-    serverReason: '',
-    statusError: '',
-    permissionError: '',
-    activationError: '',
-    activationStep: '',
-    defaults: {},
-    currentDeviceId: '',
-    devices: []
-  };
-}
 
 export const FUNNY_COMIC_AVATARS = [
   {
@@ -195,15 +86,6 @@ export const FUNNY_COMIC_AVATARS = [
 ];
 
 const apiRequest = plannerApiRequest;
-
-function resourceWithDefaults(resources) {
-  return Object.fromEntries(
-    Object.keys(EMPTY_RESOURCES).map(key => [
-      key,
-      Array.isArray(resources?.[key]) ? resources[key] : []
-    ])
-  );
-}
 
 function makeId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

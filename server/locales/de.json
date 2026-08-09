@@ -394,8 +394,8 @@
     "internalNextcloudAddress": "Interne Nextcloud-Adresse"
   },
   "labels": {
-    "htmlTitle": "LX Family Planner - Unser Familienplaner",
-    "htmlDescription": "Übersichtlicher, intuitiver Familienplaner mit Kalender, Bring!-Einkaufsliste, Essensplaner, Haushaltsaufgaben, Belohnungssystem und Pinnwand.",
+    "htmlTitle": "LX Family · Private Family OS",
+    "htmlDescription": "LX Family ist euer privates Family OS für Kalender, Aufgaben, Einkauf, Essen, Chat und mehr.",
     "someone": "Jemand",
     "theCreator": "dem Ersteller",
     "parent": "Elternteil",
@@ -581,17 +581,17 @@
     "nativeTestBody": "Die Android-App kann dir jetzt zuverlässig Bescheid sagen.",
     "webTestBody": "Browser-Benachrichtigungen funktionieren auf diesem Gerät.",
     "testPrivateBody": "Deine Benachrichtigungen sind startklar.",
-    "gotifyConnectedTitle": "LX Family Planner ist verbunden",
+    "gotifyConnectedTitle": "LX Family ist verbunden",
     "gotifyConnectedMessage": "Push-Benachrichtigungen für eure Familie sind jetzt aktiv.",
-    "gotifyTestTitle": "Test vom LX Family Planner",
+    "gotifyTestTitle": "Test von LX Family",
     "gotifyTestMessage": "Hallo {{name}}, die Verbindung funktioniert."
-    ,"ntfyConnectedTitle": "LX Family Planner ist mit ntfy verbunden",
+    ,"ntfyConnectedTitle": "LX Family ist mit ntfy verbunden",
     "ntfyConnectedMessage": "Benachrichtigungen für eure Familie sind jetzt über dieses Topic aktiv.",
-    "ntfyTestTitle": "Test vom LX Family Planner",
+    "ntfyTestTitle": "Test von LX Family",
     "ntfyTestMessage": "Hallo {{name}}, ntfy kann dich erreichen."
   },
   "messages": {
-    "gotifyAppDescription": "Benachrichtigungen aus dem privaten LX Family Planner",
+    "gotifyAppDescription": "Benachrichtigungen aus dem privaten LX Family",
     "nextcloudTest_one": "Nextcloud {{version}} antwortet. {{count}} Kalender gefunden.",
     "nextcloudTest_other": "Nextcloud {{version}} antwortet. {{count}} Kalender gefunden.",
     "homeAssistantTest_one": "{{count}} Gerät oder Sensor erreichbar.",
