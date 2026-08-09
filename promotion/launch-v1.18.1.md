@@ -33,6 +33,9 @@ Android APK. The Umbrel submission is in review. LX Family is MIT-licensed and
 has no hosted service or telemetry – each household runs its own instance.
 The interface is available in seven languages: German, English, French,
 Spanish, Italian, Dutch and Polish.
+The Android app checks for new releases automatically and guides a
+checksum-verified update directly from the app; Android keeps the final install
+confirmation in the user's hands.
 
 - GitHub and installation: https://github.com/laxxx-lab/lx-family-planner
 - Read-only demo: https://familie.laxxx-lab.de/ – family **Demo**, password
@@ -71,6 +74,9 @@ rollback path.
 The interface is available in seven languages: German, English, French,
 Spanish, Italian, Dutch and Polish.
 
+The native Android app automatically detects a new LX release and guides the
+secure in-app update. Android shows its normal final install confirmation.
+
 - GitHub / docs: https://github.com/laxxx-lab/lx-family-planner
 - Read-only demo: https://familie.laxxx-lab.de/ – family **Demo**, password
   **demo**. It is a shared showroom; please do not enter personal data.
@@ -92,6 +98,8 @@ chores, shopping, meals, chat, files and kid-friendly profiles.
 Runs on Docker, Proxmox and Unraid; Android APK included. No hosted account,
 no telemetry – each family runs its own instance. Interface languages: German,
 English, French, Spanish, Italian, Dutch and Polish.
+The Android app checks for updates automatically and starts a verified in-app
+update flow.
 
 Demo: https://familie.laxxx-lab.de/ – family **Demo**, password **demo**
 Code: https://github.com/laxxx-lab/lx-family-planner
