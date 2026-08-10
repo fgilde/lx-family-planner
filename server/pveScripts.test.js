@@ -9,6 +9,7 @@ const scriptPaths = [
   path.join(projectRoot, 'scripts', 'pve-helper.sh'),
   path.join(projectRoot, 'scripts', 'pve-guest-install.sh'),
   path.join(projectRoot, 'scripts', 'pve-manage.sh'),
+  path.join(projectRoot, 'scripts', 'proxmox-lxc.sh'),
   path.join(projectRoot, 'scripts', 'nextcloud-public-url.sh'),
   path.join(projectRoot, 'scripts', 'docker-update.sh'),
   path.join(projectRoot, 'scripts', 'docker-auto-update.sh'),
@@ -59,6 +60,14 @@ test('PVE helper exposes a non-destructive help command', t => {
   assert.match(help.stdout, /--non-interactive/);
   assert.match(help.stdout, /PUBLIC_APP_URL/);
   assert.doesNotMatch(help.stdout, /Container jetzt erstellen/);
+});
+
+test('Proxmox LXC entry point resolves the LX helper files from this repository', () => {
+  const launcher = scripts['proxmox-lxc.sh'];
+  assert.match(launcher, /COMMUNITY_SCRIPTS_URL/);
+  assert.match(launcher, /deploy\/proxmox-helper-scripts/);
+  assert.match(launcher, /ct\/lx-family\.sh/);
+  assert.doesNotMatch(launcher, /docker\s+(compose|run|pull|build)/i);
 });
 
 test('PVE host helper creates a guarded unprivileged LXC', () => {

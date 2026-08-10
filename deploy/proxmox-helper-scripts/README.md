@@ -4,6 +4,18 @@ This is the LX Family candidate for the community-scripts ProxmoxVE workflow.
 It deliberately uses a native Node.js service in an unprivileged Debian LXC,
 because the upstream contribution standard does not accept Docker installers.
 
+## Install from this repository
+
+Until the upstream catalogue eligibility requirements are met, the tested
+installer can be started directly on a Proxmox VE host as `root`:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/proxmox-lxc.sh)"
+```
+
+It creates a new unprivileged Debian 13 LXC with the Helper-Scripts defaults.
+Use the advanced network settings when the Proxmox host does not provide DHCP.
+
 ## Files for ProxmoxVED
 
 - `ct/lx-family.sh`
