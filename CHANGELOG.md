@@ -6,6 +6,16 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.18.3] — 2026-08-10
+
+### Reliable update cleanup
+
+- after a successful data and health check, backup cleanup now runs in a fresh
+  LX container so legacy bind-mount ownership can be repaired before pruning;
+- if legacy file permissions still prevent cleanup, the verified update stays
+  active and every existing backup is retained untouched instead of triggering
+  an unnecessary rollback.
+
 ## [1.18.2] — 2026-08-10
 
 ### Android server persistence and home-server stores

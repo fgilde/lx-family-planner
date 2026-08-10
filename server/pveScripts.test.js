@@ -184,6 +184,30 @@ test('default Docker Compose grants only the capabilities needed for bind-mount 
   assert.match(compose, /cap_add:\s*\n\s*- CHOWN\s*\n\s*- SETGID\s*\n\s*- SETUID/);
 });
 
+test('backup cleanup repairs legacy permissions without rolling back a healthy update', () => {
+  const linuxUpdate = scripts['docker-update.sh'];
+  const windowsUpdate = fs.readFileSync(
+    path.join(projectRoot, 'scripts', 'docker-update.ps1'),
+    'utf8'
+  );
+  assert.match(
+    linuxUpdate,
+    /docker compose run --rm --no-deps family-planner node server\/backup\.js --prune 3/
+  );
+  assert.match(
+    linuxUpdate,
+    /Sicherungsbereinigung konnte wegen alter Dateirechte nicht abgeschlossen werden/
+  );
+  assert.match(
+    windowsUpdate,
+    /'compose', 'run', '--rm', '--no-deps'/
+  );
+  assert.match(
+    windowsUpdate,
+    /Das Update bleibt aktiv; alle vorhandenen Sicherungen wurden unverändert behalten/
+  );
+});
+
 test('Umbrel package uses one internally consistent pinned release without root capabilities', () => {
   const compose = fs.readFileSync(
     path.join(

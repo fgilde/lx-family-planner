@@ -136,8 +136,15 @@ docker compose exec -T family-planner \
   node server/dataIntegrity.js --compare "$container_manifest"
 
 # The fresh update backup stays available until the new version has passed all
-# checks. Only then is retention safely reduced to the agreed three backups.
-docker compose exec -T family-planner node server/backup.js --prune 3
+# checks. Run cleanup in a fresh container so its root entrypoint can repair
+# ownership from older LX installations before it drops privileges. Retention
+# is housekeeping: an unreadable old backup must never roll back a healthy,
+# integrity-checked application update. In that rare case every backup stays
+# untouched and the next successful cleanup tries again.
+if ! docker compose run --rm --no-deps family-planner node server/backup.js --prune 3; then
+  echo "Die Sicherungsbereinigung konnte wegen alter Dateirechte nicht abgeschlossen werden." >&2
+  echo "Das Update bleibt aktiv; alle vorhandenen Sicherungen wurden unverändert behalten." >&2
+fi
 
 trap - ERR
 echo

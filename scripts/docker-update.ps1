@@ -252,14 +252,22 @@ Das Update wurde sicherheitshalber abgebrochen. Bitte diese Änderungen zuerst s
     -FailureMessage 'Die Datenprüfung nach dem Update hat Abweichungen gefunden.'
 
   # Die neue Sicherung bleibt bis nach dem Gesundheits- und Datencheck bestehen.
-  # Erst danach werden wirklich nur die drei neuesten Sicherungen behalten.
-  Invoke-Checked `
-    -Command 'docker' `
-    -Arguments @(
-      'compose', 'exec', '-T', 'family-planner',
-      'node', 'server/backup.js', '--prune', '3'
-    ) `
-    -FailureMessage 'Die Sicherungsbereinigung nach dem Update ist fehlgeschlagen.'
+  # Die Bereinigung startet absichtlich in einem frischen Container: dessen
+  # Einstiegspunkt kann Besitzrechte aus alten LX-Installationen reparieren,
+  # bevor er als Anwendungsbenutzer arbeitet. Misslingt nur dieses Aufräumen,
+  # bleiben alle Sicherungen erhalten; ein erfolgreich geprüftes Update wird
+  # niemals allein deswegen zurückgerollt.
+  try {
+    Invoke-Checked `
+      -Command 'docker' `
+      -Arguments @(
+        'compose', 'run', '--rm', '--no-deps',
+        'family-planner', 'node', 'server/backup.js', '--prune', '3'
+      ) `
+      -FailureMessage 'Die Sicherungsbereinigung nach dem Update ist fehlgeschlagen.'
+  } catch {
+    Write-Warning 'Die Sicherungsbereinigung konnte wegen alter Dateirechte nicht abgeschlossen werden. Das Update bleibt aktiv; alle vorhandenen Sicherungen wurden unverändert behalten.'
+  }
 
   Write-Host ''
   Write-Host 'Update erfolgreich.'

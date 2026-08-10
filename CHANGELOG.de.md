@@ -4,6 +4,17 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.18.3] – 2026-08-10
+
+### Verlässliche Update-Bereinigung
+
+- nach bestandenem Daten- und Gesundheitscheck startet die Sicherungsbereinigung
+  in einem frischen LX-Container, damit Besitzrechte aus älteren Installationen
+  vor dem Aufräumen repariert werden können;
+- verhindern alte Dateirechte das Aufräumen weiterhin, bleibt das geprüfte
+  Update aktiv und alle vorhandenen Sicherungen bleiben unverändert erhalten,
+  statt dass die Anwendung unnötig zurückgesetzt wird.
+
 ## [1.18.2] – 2026-08-10
 
 ### Dauerhafte Android-Verbindung und neue Heimserver-Stores

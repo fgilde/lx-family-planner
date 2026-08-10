@@ -1,4 +1,51 @@
 const RELEASE_NOTES = {
+  '1.18.3': {
+    version: '1.18.3',
+    eyebrow: 'Verlässlichere Server-Updates',
+    title: 'Ein Update bleibt auch bei alten Sicherungen stabil',
+    intro:
+      'LX Family behandelt alte Dateirechte bei Sicherungen jetzt vorsichtiger. Eure Datenprüfung und das gestartete Update bleiben geschützt.',
+    highlights: [
+      {
+        id: 'backup-permission-repair',
+        title: 'Alte Sicherungen werden sicher behandelt',
+        description:
+          'Vor dem Aufräumen startet LX einen frischen Helfer, der Besitzrechte aus älteren Installationen reparieren kann.'
+      },
+      {
+        id: 'healthy-update-kept',
+        title: 'Erfolgreiche Updates bleiben aktiv',
+        description:
+          'Kann eine alte Sicherung nicht entfernt werden, behält LX vorsichtshalber alle Sicherungen. Das geprüfte Update wird nicht mehr deshalb zurückgesetzt.'
+      }
+    ],
+    closing:
+      'Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'More reliable server updates',
+        title: 'Updates stay stable with legacy backups',
+        intro:
+          'LX Family now handles legacy backup permissions more carefully while keeping your data check and successful update protected.',
+        highlights: [
+          {
+            id: 'backup-permission-repair',
+            title: 'Legacy backups are handled safely',
+            description:
+              'Before cleanup, LX starts a fresh helper that can repair ownership inherited from older installations.'
+          },
+          {
+            id: 'healthy-update-kept',
+            title: 'Successful updates stay active',
+            description:
+              'If an old backup cannot be removed, LX keeps every backup as a precaution. A verified update is no longer rolled back for that reason.'
+          }
+        ],
+        closing:
+          'Families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.18.2': {
     version: '1.18.2',
     eyebrow: 'Android-Verbindung & Heimserver-Stores',
