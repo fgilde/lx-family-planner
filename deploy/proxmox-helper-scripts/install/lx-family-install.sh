@@ -13,10 +13,12 @@ setting_up_container
 network_check
 update_os
 
-# NodeSource keys are ASCII-armored and therefore need GnuPG before the
-# Helper-Scripts Node.js repository helper imports them. Fresh Debian 13
-# containers do not include it by default.
-ensure_dependencies curl ca-certificates gnupg
+# NodeSource keys are ASCII-armored and therefore need the `gpg` executable
+# before the Helper-Scripts Node.js repository helper imports them. Checking
+# the executable (rather than the `gnupg` meta package) also handles fresh
+# Debian containers where that package name may only be a removed-package
+# residue.
+ensure_dependencies curl ca-certificates gpg
 
 NODE_VERSION="22" setup_nodejs
 
