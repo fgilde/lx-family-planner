@@ -308,3 +308,45 @@ test('CasaOS and Cosmos packages use a pinned multi-architecture release with pe
   assert.equal(cosmosCompose.volumes['{ServiceName}-backups'] !== undefined, true);
   assert.deepEqual(cosmosDescription.supported_architectures, ['amd64', 'arm64']);
 });
+
+test('Proxmox Helper-Scripts candidate follows the native LXC contribution model', t => {
+  const candidateRoot = path.join(
+    projectRoot,
+    'deploy',
+    'proxmox-helper-scripts'
+  );
+  const ctScript = path.join(candidateRoot, 'ct', 'lx-family.sh');
+  const installScript = path.join(
+    candidateRoot,
+    'install',
+    'lx-family-install.sh'
+  );
+  const metadata = JSON.parse(
+    fs.readFileSync(path.join(candidateRoot, 'json', 'lx-family.json'), 'utf8')
+  );
+  const ctSource = fs.readFileSync(ctScript, 'utf8');
+  const installSource = fs.readFileSync(installScript, 'utf8');
+
+  assert.match(ctSource, /source <\(curl -fsSL .*build\.func/);
+  assert.match(ctSource, /check_for_gh_release "lx-family" "laxxx-lab\/lx-family-planner"/);
+  assert.match(ctSource, /create_backup \/opt\/lx-family\/\.env \/opt\/lx-family\/data \/opt\/lx-family\/backups/);
+  assert.match(installSource, /NODE_VERSION="22" setup_nodejs/);
+  assert.match(installSource, /fetch_and_deploy_gh_release "lx-family" "laxxx-lab\/lx-family-planner" "tarball"/);
+  assert.match(installSource, /ExecStart=\/usr\/bin\/node --env-file-if-exists=\.env server\.js/);
+  assert.doesNotMatch(`${ctSource}\n${installSource}`, /docker\s+(compose|run|pull|build)/i);
+  assert.equal(metadata.slug, 'lx-family');
+  assert.equal(metadata.type, 'ct');
+  assert.equal(metadata.updateable, true);
+  assert.equal(metadata.privileged, false);
+  assert.equal(metadata.interface_port, 3001);
+  assert.deepEqual(metadata.architectures, ['amd64']);
+
+  const check = spawnSync(bashExecutable, ['-n', ctScript, installScript], {
+    encoding: 'utf8'
+  });
+  if (check.error?.code === 'ENOENT') {
+    t.skip('Bash ist in dieser Umgebung nicht installiert.');
+    return;
+  }
+  assert.equal(check.status, 0, check.stderr || check.stdout);
+});
