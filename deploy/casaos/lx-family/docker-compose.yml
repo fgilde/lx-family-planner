@@ -49,6 +49,21 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
+    x-casaos:
+      ports:
+        - container: "3001"
+          description:
+            en_US: LX Family web interface
+            de_DE: LX Family Weboberfläche
+      volumes:
+        - container: /app/data
+          description:
+            en_US: Family data, database and private installation secret
+            de_DE: Familiendaten, Datenbank und privates Installationsgeheimnis
+        - container: /app/backups
+          description:
+            en_US: Automatic LX Family backups
+            de_DE: Automatische LX-Family-Sicherungen
 
 x-casaos:
   id: io.github.laxxx-lab.lx-family
@@ -56,7 +71,7 @@ x-casaos:
   index: /
   port_map: "3001"
   scheme: http
-  icon: icon.png
+  icon: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/LXFamily/icon.png
   title:
     en_US: LX Family
     de_DE: LX Family
@@ -76,12 +91,12 @@ x-casaos:
     before_install:
       en_US: The app creates a private encryption secret in its persistent data folder on first start. Keep the data folder when moving or restoring LX Family.
       de_DE: Die App erzeugt beim ersten Start ein privates Verschlüsselungsgeheimnis im dauerhaften Datenordner. Diesen Ordner beim Umzug oder Wiederherstellen von LX Family mit sichern.
-  thumbnail: screenshot-dashboard.png
+  thumbnail: https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/LXFamily/screenshot-dashboard.png
   screenshot_link:
-    - screenshot-dashboard.png
-    - screenshot-profiles.png
-    - screenshot-child-profile.png
-    - screenshot-family-cloud.png
+    - https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/LXFamily/screenshot-dashboard.png
+    - https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/LXFamily/screenshot-profiles.png
+    - https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/LXFamily/screenshot-child-profile.png
+    - https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/LXFamily/screenshot-family-cloud.png
   category: Home
   author: LaxXx Lab
   developer: LX Family contributors
