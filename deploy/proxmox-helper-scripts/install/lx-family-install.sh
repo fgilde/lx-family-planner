@@ -6,6 +6,11 @@
 # Source: https://github.com/laxxx-lab/lx-family-planner
 
 source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+# The Helper-Scripts completion hook uses the lower-case application slug to
+# create `/usr/bin/update`. It is not always exported into the LXC context.
+app="${app:-lx-family}"
+export app
+
 color
 verb_ip6
 catch_errors

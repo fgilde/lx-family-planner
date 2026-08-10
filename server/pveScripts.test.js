@@ -332,6 +332,7 @@ test('Proxmox Helper-Scripts candidate follows the native LXC contribution model
   assert.match(ctSource, /create_backup \/opt\/lx-family\/\.env \/opt\/lx-family\/data \/opt\/lx-family\/backups/);
   assert.match(installSource, /NODE_VERSION="22" setup_nodejs/);
   assert.match(installSource, /ensure_dependencies curl ca-certificates gpg/);
+  assert.match(installSource, /app="\$\{app:-lx-family\}"/);
   assert.match(installSource, /fetch_and_deploy_gh_release "lx-family" "laxxx-lab\/lx-family-planner" "tarball"/);
   assert.match(installSource, /ExecStart=\/usr\/bin\/node --env-file-if-exists=\.env server\.js/);
   assert.doesNotMatch(`${ctSource}\n${installSource}`, /docker\s+(compose|run|pull|build)/i);
