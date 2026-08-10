@@ -1,5 +1,8 @@
+import { registerPlugin } from '@capacitor/core';
+
 const SERVER_URL_KEY = 'lx_family_server_url';
 const SESSION_TOKEN_KEY = 'lx_family_session_token';
+const LXServerPreferences = registerPlugin('LXServerPreferences');
 
 // A distributable APK must never silently connect to the developer's server.
 // Each native installation chooses and stores its own family server address.
@@ -35,27 +38,66 @@ export function getStoredServerUrl() {
   }
 }
 
-export function setStoredServerUrl(
+async function persistServerUrlForNativeApp(url) {
+  if (!isCapacitorNative()) return;
+  try {
+    await LXServerPreferences.setServerUrl({ url });
+  } catch {
+    // Older APKs do not know the plugin yet. The web storage copy still works.
+  }
+}
+
+function writeServerUrlToWebStorage(clean, previous = getStoredServerUrl()) {
+  if (clean) {
+    localStorage.setItem(SERVER_URL_KEY, clean);
+  } else {
+    localStorage.setItem(SERVER_URL_KEY, '');
+  }
+  if (previous !== clean) {
+    localStorage.removeItem(SESSION_TOKEN_KEY);
+  }
+  return clean;
+}
+
+export async function setStoredServerUrl(
   url,
   invalidMessage = 'The server address is not valid.'
 ) {
   try {
     const clean = normalizeServerUrl(url, invalidMessage);
     const previous = getStoredServerUrl();
-    if (clean) {
-      localStorage.setItem(SERVER_URL_KEY, clean);
-    } else {
-      localStorage.setItem(SERVER_URL_KEY, '');
-    }
-    if (previous !== clean) {
-      localStorage.removeItem(SESSION_TOKEN_KEY);
-    }
+    writeServerUrlToWebStorage(clean, previous);
+    await persistServerUrlForNativeApp(clean);
     return clean;
   } catch (error) {
     throw new Error(
       error?.message || invalidMessage
     );
   }
+}
+
+/**
+ * Restores an Android server choice before the FamilyProvider starts its API
+ * requests. This also migrates existing installations from WebView storage to
+ * durable native storage during their first update after this change.
+ */
+export async function hydrateStoredServerUrl(
+  invalidMessage = 'The server address is not valid.'
+) {
+  const webUrl = getStoredServerUrl();
+  if (!isCapacitorNative()) return webUrl;
+  try {
+    const result = await LXServerPreferences.getServerUrl();
+    const nativeUrl = normalizeServerUrl(result?.url || '', invalidMessage);
+    if (nativeUrl) {
+      writeServerUrlToWebStorage(nativeUrl, webUrl);
+      return nativeUrl;
+    }
+    if (webUrl) await persistServerUrlForNativeApp(webUrl);
+  } catch {
+    // The first run on an older APK falls back to the already stored web value.
+  }
+  return webUrl;
 }
 
 export function getStoredSessionToken() {
@@ -79,7 +121,9 @@ export function setStoredSessionToken(token) {
 }
 
 export function isCapacitorNative() {
-  return Boolean(window.Capacitor?.isNativePlatform());
+  return Boolean(
+    typeof window !== 'undefined' && window.Capacitor?.isNativePlatform()
+  );
 }
 
 export function buildApiUrl(path) {

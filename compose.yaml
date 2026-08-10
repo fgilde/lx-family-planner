@@ -5,7 +5,6 @@ services:
       target: runtime
     image: lx-family-planner:local
     restart: unless-stopped
-    init: true
     env_file:
       - .env
     environment:

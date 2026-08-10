@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.18.1" src="https://img.shields.io/badge/version-1.18.1-17483F">
+  <img alt="Version 1.18.2" src="https://img.shields.io/badge/version-1.18.2-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -101,6 +101,14 @@ docker compose up -d --build
 Danach `http://SERVER-IP:3001` öffnen, Familie anlegen und losplanen. Unter
 Windows erledigt `Start-Familienplaner.cmd` dieselben Schritte bequem per
 Doppelklick. Für Proxmox gibt es weiter unten einen eigenen LXC-Helper.
+
+### App-Stores für Heimserver
+
+Neben Docker und dem Proxmox-Helper liegen im Repository prüfbare Pakete für
+Unraid, Umbrel, CasaOS und Cosmos. CasaOS und Cosmos verwenden nur den
+schlanken LX-Family-Container; Nextcloud und weitere Dienste verbindet ihr bei
+Bedarf später innerhalb der Elternzentrale. Details für Tests und
+Store-Einreichungen stehen unter [Store-Veröffentlichungen](docs/STORE_SUBMISSIONS.md).
 
 > **Eigener Server, eigene Adresse:** LX Family betreibt keinen Dienst für
 > Familien. Jede Installation bleibt auf eurer IP oder eigenen Domain. Die

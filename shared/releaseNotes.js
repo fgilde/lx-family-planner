@@ -1,4 +1,63 @@
 const RELEASE_NOTES = {
+  '1.18.2': {
+    version: '1.18.2',
+    eyebrow: 'Android-Verbindung & Heimserver-Stores',
+    title: 'Dein Familienserver bleibt verbunden',
+    intro:
+      'Die Android-App merkt sich den ausgewählten LX-Family-Server jetzt dauerhaft. Außerdem lässt sich LX Family leichter und sicherer auf weiteren Heimserver-Plattformen installieren.',
+    highlights: [
+      {
+        id: 'native-server-persistence',
+        title: 'Serveradresse bleibt nach App-Updates erhalten',
+        description:
+          'Die App speichert die Adresse zusätzlich direkt in Android und lädt sie schon vor dem App-Start. Eine bereits vorhandene Einstellung wird automatisch übernommen.'
+      },
+      {
+        id: 'secure-docker-bootstrap',
+        title: 'Sicherer Docker-Erststart',
+        description:
+          'Fehlt bei einer neuen Installation der Sicherheitsschlüssel, erzeugt und speichert LX Family ihn automatisch im geschützten Datenordner.'
+      },
+      {
+        id: 'casaos-cosmos',
+        title: 'Bereit für CasaOS, ZimaOS und Cosmos',
+        description:
+          'Neue Installationspakete mit App-Texten, Icons und Screenshots bereiten LX Family für weitere Heimserver-Stores vor.'
+      }
+    ],
+    closing:
+      'Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'Android connection & home-server stores',
+        title: 'Your family server stays connected',
+        intro:
+          'The Android app now remembers the selected LX Family server persistently. LX Family is also easier and safer to install on more home-server platforms.',
+        highlights: [
+          {
+            id: 'native-server-persistence',
+            title: 'The server address survives app updates',
+            description:
+              'The app stores the address directly in Android and restores it before startup. An existing setting migrates automatically.'
+          },
+          {
+            id: 'secure-docker-bootstrap',
+            title: 'Secure first Docker start',
+            description:
+              'If a new installation has no application secret, LX Family creates one and stores it safely in the persistent data folder.'
+          },
+          {
+            id: 'casaos-cosmos',
+            title: 'Ready for CasaOS, ZimaOS and Cosmos',
+            description:
+              'New installation packages with store copy, icons and screenshots prepare LX Family for more home-server stores.'
+          }
+        ],
+        closing:
+          'Families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.18.1': {
     version: '1.18.1',
     eyebrow: 'Willkommen bei LX Family',

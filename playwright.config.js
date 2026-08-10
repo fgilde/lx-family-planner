@@ -38,7 +38,8 @@ export default defineConfig({
       }
     },
     {
-      command: 'npm run dev -- --host 127.0.0.1 --port 4170',
+      command:
+        'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4170',
       url: 'http://127.0.0.1:4170',
       timeout: 30_000,
       reuseExistingServer: !process.env.CI,

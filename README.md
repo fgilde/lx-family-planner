@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.18.1" src="https://img.shields.io/badge/version-1.18.1-17483F">
+  <img alt="Version 1.18.2" src="https://img.shields.io/badge/version-1.18.2-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -81,7 +81,7 @@ role-aware app:
 | Profiles | adults, children, teens, grandparents, managed people and pets | usually one generic account type |
 | Family network | invite grandparents or another household and share only what you approve | usually one isolated household |
 | Data ownership | self-hosted SQLite, safe updates, optional Nextcloud | provider account and cloud required |
-| Home setup | Docker, Proxmox, Unraid, Umbrel or plain Node.js | vendor-specific |
+| Home setup | Docker, Proxmox, Unraid, Umbrel, CasaOS, Cosmos or plain Node.js | vendor-specific |
 | Integrations | Android push, browser push, Home Assistant, Bring!, ICS and Gotify | varies by vendor |
 
 ## Highlights

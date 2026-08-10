@@ -4,6 +4,27 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.18.2] – 2026-08-10
+
+### Dauerhafte Android-Verbindung und neue Heimserver-Stores
+
+- die Android-App speichert den ausgewählten LX-Family-Server jetzt zusätzlich
+  im nativen Android-Speicher und stellt ihn vor dem App-Start wieder her;
+- vorhandene Serveradressen aus dem bisherigen App-Speicher werden automatisch
+  übernommen;
+- Docker-Installationen erzeugen bei Bedarf selbstständig einen starken,
+  dauerhaft im Datenordner gespeicherten Sicherheitsschlüssel;
+- der gehärtete Containerstart verursacht keinen Konflikt mehr mit dem
+  Init-Prozess;
+- APK-Metadaten werden nur noch verwendet, wenn ihre Prüfsumme zur tatsächlich
+  ausgelieferten APK passt; dadurch kann keine alte Datei im Datenordner ein
+  Android-Update blockieren;
+- das Dockerfile baut nun auch mit älteren Docker-Engines ohne BuildKit;
+- Installationspakete, Metadaten und Screenshots für CasaOS/ZimaOS und Cosmos
+  sind enthalten;
+- erste Aufgaben des FamilyContext wurden ohne Änderung der Familiendaten in
+  eigene Start-, Benachrichtigungs-, Toast- und Hilfsmodule aufgeteilt.
+
 ## [1.18.1] – 2026-08-09
 
 ### Marke LX Family

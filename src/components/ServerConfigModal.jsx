@@ -14,6 +14,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
     () => getStoredServerUrl() || DEFAULT_SERVER_URL
   );
   const [testing, setTesting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
 
   useEffect(() => {
@@ -64,14 +65,15 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
     try {
       let target = normalizeServerUrl(
         url,
         t('serverConfig.errors.invalidUrl')
       );
       if (target === window.location.origin) target = '';
-      const saved = setStoredServerUrl(
+      const saved = await setStoredServerUrl(
         target,
         t('serverConfig.errors.invalidUrl')
       );
@@ -83,6 +85,8 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
         success: false,
         message: error?.message || t('serverConfig.errors.invalidUrl')
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -157,11 +161,11 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
         </div>
 
         <footer>
-          <button
-            type="button"
-            className="server-config-test"
-            onClick={handleTestConnection}
-            disabled={testing}
+            <button
+              type="button"
+              className="server-config-test"
+              onClick={handleTestConnection}
+              disabled={testing || saving}
           >
             {testing ? t('serverConfig.testing') : t('serverConfig.test')}
           </button>
@@ -170,6 +174,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
               type="button"
               className="server-config-cancel"
               onClick={onClose}
+              disabled={saving}
             >
               {t('common:actions.cancel')}
             </button>
@@ -177,7 +182,7 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
               type="button"
               className="server-config-save"
               onClick={handleSave}
-              disabled={testing}
+              disabled={testing || saving}
             >
               {t('common:actions.save')}
             </button>

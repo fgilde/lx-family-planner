@@ -1,7 +1,7 @@
 # Store-Veröffentlichungen
 
-LX Family is prepared for distribution through GitHub Container
-Registry, Unraid Community Applications and the Umbrel App Store.
+LX Family is prepared for distribution through GitHub Container Registry,
+Unraid Community Applications, Umbrel, CasaOS and Cosmos.
 
 ## Shared release image
 
@@ -26,6 +26,8 @@ Persistent paths:
 
 The `APP_SECRET` must stay unchanged during updates. Umbrel supplies its
 deterministic `APP_SEED`; Unraid asks for a masked random value during setup.
+The CasaOS package creates and persists a per-installation secret in its data
+folder on first start, while Cosmos supplies a generated persistent secret.
 The visible product name is **LX Family · Private Family OS**. Repository,
 image and package identifiers deliberately keep `lx-family-planner` so existing
 store installs update in place; see [the renaming note](RENAMING.md).
@@ -62,6 +64,41 @@ file as `:<version>@sha256:<digest>`, bump `umbrel-app.yml` and run the Umbrel
 update test. Keep `releaseNotes` empty while the Umbrel pull request is a new
 app submission. Never pin Umbrel to a guessed digest or the moving `latest`
 tag.
+
+## CasaOS
+
+Files:
+
+- `/deploy/casaos/lx-family/docker-compose.yml`
+- `/deploy/casaos/SUBMISSION.md`
+
+CasaOS v2 packages use one Compose file with a top-level `x-casaos` metadata
+block. The LX package has two persistent bind mounts below CasaOS AppData: one
+for `/app/data`, one for `/app/backups`. It exposes only port 3001 and starts
+with first-family registration protection.
+
+For every release, update the image tag, `x-casaos.version`, date and release
+notes together. Copy the whole `lx-family/` folder into the AppStore PR so the
+reviewed icon and screenshots travel with the manifest.
+
+## Cosmos
+
+Files:
+
+- `/deploy/cosmos/LXFamily/cosmos-compose.json`
+- `/deploy/cosmos/LXFamily/description.json`
+- `/deploy/cosmos/SUBMISSION.md`
+
+Cosmos uses a JSON Compose superset with a generated `APP_SECRET`, two named
+volumes and a routed web entry point. LX Family intentionally keeps its own
+login: the Cosmos route has `AuthEnabled: false`, avoiding a second account
+wall that would break the Android app and family-specific permissions. Since
+the route is the only web entry point, `TRUST_PROXY=1` lets LX recognize the
+HTTPS connection forwarded by Cosmos safely.
+
+`cosmos-auto-update` remains disabled. LX updates must follow a published
+release and preserve the database and backup volumes; platform-wide automatic
+container updates would bypass LX's own pre-update backup checks.
 
 ## Release safety
 

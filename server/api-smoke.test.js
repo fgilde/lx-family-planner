@@ -5,6 +5,14 @@ import path from 'node:path';
 import test, { after } from 'node:test';
 import { createServer } from 'node:http';
 
+const packageMetadata = JSON.parse(
+  fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+);
+const apkMetadata = JSON.parse(
+  fs.readFileSync(new URL('../public/apk/version.json', import.meta.url), 'utf8')
+);
+const currentAppVersion = packageMetadata.version;
+
 const testDirectory = fs.mkdtempSync(
   path.join(os.tmpdir(), 'lx-family-api-')
 );
@@ -431,10 +439,10 @@ test('web app manifest follows the browser language', async () => {
 test('family flow stays isolated, authorized and internally consistent', async () => {
   const health = await request('/api/health');
   assert.equal(health.body.database, 'sqlite');
-  assert.equal(health.body.version, '1.18.1');
+  assert.equal(health.body.version, currentAppVersion);
   const appRelease = await request('/api/app/version');
-  assert.equal(appRelease.body.versionName, '1.18.1');
-  assert.equal(appRelease.body.versionCode, 42);
+  assert.equal(appRelease.body.versionName, apkMetadata.versionName);
+  assert.equal(appRelease.body.versionCode, apkMetadata.versionCode);
   assert.equal(appRelease.body.apkUrl, '/apk/latest.apk');
   assert.equal(
     appRelease.body.publicApkUrl,
@@ -510,8 +518,8 @@ test('family flow stays isolated, authorized and internally consistent', async (
     headers: authenticatedHeaders
   });
   assert.equal(bootstrap.body.family.id, registration.body.family.id);
-  assert.equal(bootstrap.body.appVersion, '1.18.1');
-  assert.equal(bootstrap.body.releaseNotes.version, '1.18.1');
+  assert.equal(bootstrap.body.appVersion, currentAppVersion);
+  assert.equal(bootstrap.body.releaseNotes.version, currentAppVersion);
   assert.equal(bootstrap.body.nativePushServer.configured, false);
   assert.equal(
     bootstrap.body.nativePushServer.reason,
@@ -551,7 +559,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     installationId: 'lx-android-1234567890abcdef',
     token: 'fcm-test-token-1234567890abcdef',
     deviceName: 'Test Android-App',
-    appVersion: '1.18.1',
+    appVersion: currentAppVersion,
     preferences: { groupChat: true, showPreviews: false }
   });
   assert.equal(storedNativeDevice.platform, 'android');
@@ -577,10 +585,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     }
   );
-  assert.equal(acknowledgedReleaseNotes.body.version, '1.18.1');
+  assert.equal(acknowledgedReleaseNotes.body.version, currentAppVersion);
   assert.equal(
     acknowledgedReleaseNotes.body.member.lastSeenReleaseVersion,
-    '1.18.1'
+    currentAppVersion
   );
   const bootstrapAfterReleaseNotes = await request('/api/bootstrap', {
     headers: authenticatedHeaders
@@ -594,7 +602,10 @@ test('family flow stays isolated, authorized and internally consistent', async (
   const secondAdultBootstrap = await request('/api/bootstrap', {
     headers: authenticatedHeaders
   });
-  assert.equal(secondAdultBootstrap.body.releaseNotes.version, '1.18.1');
+  assert.equal(
+    secondAdultBootstrap.body.releaseNotes.version,
+    currentAppVersion
+  );
   await request('/api/auth/member', {
     method: 'POST',
     headers: authenticatedHeaders,
@@ -1615,7 +1626,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
-  assert.equal(problemReport.body.report.appVersion, '1.18.1');
+  assert.equal(problemReport.body.report.appVersion, currentAppVersion);
   await request(
     '/api/problem-reports',
     { headers: authenticatedHeaders },

@@ -6,6 +6,26 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.18.2] — 2026-08-10
+
+### Android server persistence and home-server stores
+
+- the Android app now stores the selected LX Family server in native Android
+  preferences and restores it before the web app starts, so an app update no
+  longer loses the configured server;
+- existing WebView server settings migrate automatically to native storage;
+- Docker installations generate and persist a strong application secret when
+  none was configured explicitly;
+- the hardened container startup no longer conflicts with the init process;
+- APK metadata is accepted only when its checksum matches the APK actually
+  served by the server, preventing a stale persistent APK from blocking an
+  Android update;
+- the Dockerfile now also builds on older Docker engines without BuildKit;
+- install packages, metadata and screenshots for CasaOS/ZimaOS and Cosmos are
+  included;
+- the first FamilyContext responsibilities were split into focused bootstrap,
+  notification, toast and helper modules without changing family data.
+
 ## [1.18.1] — 2026-08-09
 
 ### LX Family branding

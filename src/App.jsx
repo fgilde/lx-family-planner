@@ -15,7 +15,11 @@ import ReleaseNotesModal from './components/ReleaseNotesModal';
 import ServerConfigModal from './components/ServerConfigModal';
 import AppUpdateBanner from './components/AppUpdateBanner';
 import { canAccessAppView, isWallProfile } from './constants/roles';
-import { getStoredServerUrl, isCapacitorNative } from './utils/apiConfig';
+import {
+  getStoredServerUrl,
+  hydrateStoredServerUrl,
+  isCapacitorNative
+} from './utils/apiConfig';
 
 const EMPTY_DISABLED_MODULES = [];
 
@@ -304,6 +308,29 @@ function MainContent() {
 }
 
 export default function App() {
+  const nativeApp = isCapacitorNative();
+  const [serverStorageReady, setServerStorageReady] = useState(!nativeApp);
+
+  useEffect(() => {
+    if (!nativeApp) return undefined;
+    let active = true;
+    hydrateStoredServerUrl().finally(() => {
+      if (active) setServerStorageReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [nativeApp]);
+
+  if (!serverStorageReady) {
+    return (
+      <div className="app-loading" role="status" aria-live="polite">
+        <div className="app-loading-mark">LX</div>
+        <LoaderCircle className="spin" size={28} />
+      </div>
+    );
+  }
+
   return (
     <FamilyProvider>
       <AppUpdateBanner />

@@ -162,6 +162,11 @@ test('Docker startup repairs Unraid bind-mount permissions before dropping privi
   assert.match(entrypoint, /chown -R "\$data_uid:\$data_gid" \/app\/data \/app\/backups/);
   assert.match(entrypoint, /gosu "\$data_uid:\$data_gid" test -w \/app\/data/);
   assert.match(entrypoint, /exec gosu "\$data_uid:\$data_gid" "\$@"/);
+  assert.match(entrypoint, /secret_file="\/app\/data\/\.lx-family-app-secret"/);
+  assert.match(entrypoint, /randomBytes\(48\)/);
+  assert.match(entrypoint, /gosu "\$data_uid:\$data_gid" test -r "\$secret_file"/);
+  assert.match(entrypoint, /gosu "\$data_uid:\$data_gid" cat "\$secret_file"/);
+  assert.match(entrypoint, /export APP_SECRET/);
   assert.match(dockerfile, /apt-get install -y --no-install-recommends gosu/);
   assert.match(dockerfile, /ENTRYPOINT \["\/usr\/local\/bin\/lx-family-entrypoint"\]/);
   assert.match(unraidTemplate, /Target="PUID" Default="99"/);
@@ -211,4 +216,71 @@ test('Umbrel package uses one internally consistent pinned release without root 
   assert.match(compose, /user: "1000:1000"/);
   assert.doesNotMatch(compose, /cap_add:/);
   assert.match(manifest, /releaseNotes: ""/);
+});
+
+test('CasaOS and Cosmos packages use a pinned multi-architecture release with persistent storage', () => {
+  const version = JSON.parse(
+    fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
+  ).version;
+  const casaCompose = fs.readFileSync(
+    path.join(
+      projectRoot,
+      'deploy',
+      'casaos',
+      'lx-family',
+      'docker-compose.yml'
+    ),
+    'utf8'
+  );
+  const cosmosCompose = JSON.parse(
+    fs.readFileSync(
+      path.join(
+        projectRoot,
+        'deploy',
+        'cosmos',
+        'LXFamily',
+        'cosmos-compose.json'
+      ),
+      'utf8'
+    )
+  );
+  const cosmosDescription = JSON.parse(
+    fs.readFileSync(
+      path.join(
+        projectRoot,
+        'deploy',
+        'cosmos',
+        'LXFamily',
+        'description.json'
+      ),
+      'utf8'
+    )
+  );
+
+  assert.match(
+    casaCompose,
+    new RegExp(
+      `image: ghcr\\.io/laxxx-lab/lx-family-planner:${version.replaceAll('.', '\\.')}\\b`
+    )
+  );
+  assert.match(casaCompose, /id: io\.github\.laxxx-lab\.lx-family/);
+  assert.match(casaCompose, /source: \/DATA\/AppData\/\$AppID\/data/);
+  assert.match(casaCompose, /source: \/DATA\/AppData\/\$AppID\/backups/);
+  assert.match(casaCompose, /architectures:\s*\n\s*- amd64\s*\n\s*- arm64/);
+  assert.doesNotMatch(casaCompose, /:latest\b/);
+  assert.doesNotMatch(casaCompose, /\n\s*init:\s*true/);
+
+  const cosmosService = cosmosCompose.services['{ServiceName}'];
+  assert.equal(
+    cosmosService.image,
+    `ghcr.io/laxxx-lab/lx-family-planner:${version}`
+  );
+  assert.equal(cosmosService.labels['cosmos-auto-update'], 'false');
+  assert.equal(cosmosService.labels['cosmos-persistent-env'], 'APP_SECRET');
+  assert.equal(cosmosService.environment.includes('TRUST_PROXY=1'), true);
+  assert.equal(cosmosService.init, undefined);
+  assert.equal(cosmosService.routes[0].AuthEnabled, false);
+  assert.equal(cosmosCompose.volumes['{ServiceName}-data'] !== undefined, true);
+  assert.equal(cosmosCompose.volumes['{ServiceName}-backups'] !== undefined, true);
+  assert.deepEqual(cosmosDescription.supported_architectures, ['amd64', 'arm64']);
 });

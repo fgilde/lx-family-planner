@@ -12,6 +12,8 @@ family_planner.sqlite-shm
 family_planner.sqlite-wal
 node_modules
 scratch
+.lx-stage-*
+.lx-family-*.tar.gz
 *.log
 android
 *.apk

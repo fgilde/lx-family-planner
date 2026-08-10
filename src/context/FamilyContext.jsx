@@ -49,6 +49,10 @@ import {
   resourceWithDefaults
 } from './familyContextState';
 import { applyThemePresentation } from './familyThemePresentation';
+import { makeClientId } from './familyContextHelpers';
+import { applyFamilyBootstrap } from './familyBootstrap';
+import { useFamilyToast } from './useFamilyToast';
+import { useFamilyNotifications } from './useFamilyNotifications';
 
 const FamilyContext = createContext(null);
 
@@ -86,10 +90,7 @@ export const FUNNY_COMIC_AVATARS = [
 ];
 
 const apiRequest = plannerApiRequest;
-
-function makeId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
+const makeId = makeClientId;
 
 export function FamilyProvider({ children }) {
   const [authStatus, setAuthStatus] = useState('loading');
@@ -162,8 +163,6 @@ export function FamilyProvider({ children }) {
   const [familyRelationships, setFamilyRelationships] = useState([]);
   const [familyLetters, setFamilyLetters] = useState([]);
   const [familyChatGuests, setFamilyChatGuests] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [integrations, setIntegrations] = useState(EMPTY_INTEGRATIONS);
   const [readOnlyDemo, setReadOnlyDemo] = useState(false);
   const [appVersion, setAppVersion] = useState(APP_VERSION);
@@ -180,20 +179,29 @@ export function FamilyProvider({ children }) {
   const [theme, setThemeState] = useState(
     () => localStorage.getItem('lx_theme') || 'light'
   );
-  const [toast, setToast] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [quickAddDefaultType, setQuickAddDefaultType] = useState('event');
   const [isBringModalOpen, setIsBringModalOpen] = useState(false);
   const versionRef = useRef(0);
-  const toastTimerRef = useRef(null);
   const liveRefreshRef = useRef(false);
 
-  const showToast = useCallback((title, message, type = 'info') => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToast({ title, message, type });
-    toastTimerRef.current = setTimeout(() => setToast(null), 4200);
-  }, []);
+  const { toast, setToast, showToast } = useFamilyToast();
+  const {
+    markAllNotificationsRead,
+    markNotificationRead,
+    notifications,
+    refreshNotifications,
+    setNotifications,
+    setUnreadNotificationCount,
+    unreadNotificationCount
+  } = useFamilyNotifications({
+    activeMemberId: activeMemberIdState,
+    authStatus,
+    request: apiRequest,
+    showToast,
+    versionRef
+  });
 
   const refreshPublicFamilies = useCallback(async () => {
     try {
@@ -219,41 +227,27 @@ export function FamilyProvider({ children }) {
   }, [showToast]);
 
   const applyBootstrap = useCallback(data => {
-    setFamilyAccount(data.family || null);
-    setMembers(data.members || []);
-    setResources(resourceWithDefaults(data.resources));
-    setCalendarSubscriptions(
-      Array.isArray(data.calendarSubscriptions)
-        ? data.calendarSubscriptions
-        : []
-    );
-    setFamilyRelationships(data.familyRelationships || []);
-    setFamilyLetters(
-      Array.isArray(data.familyLetters) ? data.familyLetters : []
-    );
-    setFamilyChatGuests(
-      Array.isArray(data.familyChatGuests) ? data.familyChatGuests : []
-    );
-    setNotifications(
-      Array.isArray(data.notifications) ? data.notifications : []
-    );
-    setUnreadNotificationCount(
-      Number(data.unreadNotificationCount || 0)
-    );
-    setIntegrations(data.integrations || EMPTY_INTEGRATIONS);
-    setReadOnlyDemo(Boolean(data.readOnlyDemo));
-    setAppVersion(data.appVersion || APP_VERSION);
-    setReleaseNotes(data.releaseNotes || null);
-    if (data.nativePushServer) {
-      setNativePush(previous => ({
-        ...previous,
-        serverConfigured: Boolean(data.nativePushServer.configured),
-        serverReason: data.nativePushServer.reason || '',
-        statusError: ''
-      }));
-    }
-    setActiveMemberIdState(data.activeMemberId || '');
-    versionRef.current = Number(data.version || 0);
+    applyFamilyBootstrap(data, {
+      appVersion: APP_VERSION,
+      emptyIntegrations: EMPTY_INTEGRATIONS,
+      setActiveMemberId: setActiveMemberIdState,
+      setAppVersion,
+      setCalendarSubscriptions,
+      setFamilyAccount,
+      setFamilyChatGuests,
+      setFamilyLetters,
+      setFamilyRelationships,
+      setIntegrations,
+      setMembers,
+      setNativePush,
+      setNotifications,
+      setReadOnlyDemo,
+      setReleaseNotes,
+      setResources,
+      setUnreadNotificationCount,
+      resourceWithDefaults,
+      versionRef
+    });
   }, []);
 
   const refreshBootstrap = useCallback(async ({ silent = false } = {}) => {
@@ -326,113 +320,6 @@ export function FamilyProvider({ children }) {
     integrations.homeAssistant?.connected,
     integrations.homeAssistant?.enabled,
     showToast
-  ]);
-
-  const refreshNotifications = useCallback(async ({ silent = false } = {}) => {
-    if (authStatus !== 'authenticated' || !activeMemberIdState) {
-      setNotifications([]);
-      setUnreadNotificationCount(0);
-      return [];
-    }
-    try {
-      const data = await apiRequest('/api/notifications');
-      setNotifications(data.notifications || []);
-      setUnreadNotificationCount(Number(data.unreadCount || 0));
-      return data.notifications || [];
-    } catch (error) {
-      if (!silent) {
-        showToast(
-          i18n.t('context:toasts.notificationsUnreachable.title'),
-          error.message,
-          'warning'
-        );
-      }
-      return [];
-    }
-  }, [activeMemberIdState, authStatus, showToast]);
-
-  const markNotificationRead = useCallback(async (
-    notificationId,
-    read = true
-  ) => {
-    const existing = notifications.find(
-      notification => notification.id === notificationId
-    );
-    if (!existing || existing.read === read) return existing || null;
-    const optimisticReadAt = read ? Date.now() : null;
-    setNotifications(previous =>
-      previous.map(notification =>
-        notification.id === notificationId
-          ? {
-              ...notification,
-              read,
-              readAt: optimisticReadAt
-            }
-          : notification
-      )
-    );
-    setUnreadNotificationCount(previous =>
-      Math.max(0, previous + (read ? -1 : 1))
-    );
-    try {
-      const data = await apiRequest(
-        `/api/notifications/${notificationId}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify({ read })
-        }
-      );
-      setNotifications(previous =>
-        previous.map(notification =>
-          notification.id === notificationId
-            ? data.notification
-            : notification
-        )
-      );
-      setUnreadNotificationCount(Number(data.unreadCount || 0));
-      versionRef.current = Number(data.version || versionRef.current);
-      return data.notification;
-    } catch (error) {
-      await refreshNotifications({ silent: true });
-      showToast(
-        i18n.t('context:toasts.notificationNotSaved.title'),
-        error.message,
-        'warning'
-      );
-      return null;
-    }
-  }, [notifications, refreshNotifications, showToast]);
-
-  const markAllNotificationsRead = useCallback(async () => {
-    if (!unreadNotificationCount) return true;
-    const readAt = Date.now();
-    setNotifications(previous =>
-      previous.map(notification => ({
-        ...notification,
-        read: true,
-        readAt: notification.readAt || readAt
-      }))
-    );
-    setUnreadNotificationCount(0);
-    try {
-      const data = await apiRequest('/api/notifications/read-all', {
-        method: 'POST'
-      });
-      versionRef.current = Number(data.version || versionRef.current);
-      return true;
-    } catch (error) {
-      await refreshNotifications({ silent: true });
-      showToast(
-        i18n.t('context:toasts.notificationsNotSaved.title'),
-        error.message,
-        'warning'
-      );
-      return false;
-    }
-  }, [
-    refreshNotifications,
-    showToast,
-    unreadNotificationCount
   ]);
 
   useEffect(() => {

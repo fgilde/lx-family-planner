@@ -3,7 +3,6 @@ services:
     image: "ghcr.io/laxxx-lab/lx-family-planner:${LX_FAMILY_VERSION:-latest}"
     pull_policy: always
     restart: unless-stopped
-    init: true
     env_file:
       - .env
     environment:

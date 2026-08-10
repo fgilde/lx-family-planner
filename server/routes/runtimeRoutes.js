@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 function findApkCandidates(projectRoot) {
   const candidates = [
@@ -47,6 +48,12 @@ function readApkMetadata(apkFile, { appVersion, cleanText }) {
   };
 }
 
+function sha256ForFile(file) {
+  return createHash('sha256')
+    .update(fs.readFileSync(file))
+    .digest('hex');
+}
+
 /**
  * Public runtime endpoints are intentionally separate from family data routes.
  * They are used before login by web browsers, Android and installation tools.
@@ -63,13 +70,24 @@ export function registerRuntimeRoutes(app, {
 }) {
   const availableApkRelease = () => {
     const releases = findApkCandidates(projectRoot)
-      .map(file => ({
-        file,
-        metadata: readApkMetadata(file, { appVersion, cleanText }),
-        stats: fs.statSync(file)
-      }))
+      .map(file => {
+        const metadata = readApkMetadata(file, { appVersion, cleanText });
+        const actualSha256 = sha256ForFile(file);
+        return {
+          file,
+          metadata: {
+            ...metadata,
+            sha256: actualSha256
+          },
+          metadataMatchesFile:
+            !metadata.sha256 || metadata.sha256 === actualSha256,
+          stats: fs.statSync(file)
+        };
+      })
       .filter(
-        release => !isProduction || release.metadata.buildKind === 'release'
+        release =>
+          release.metadataMatchesFile &&
+          (!isProduction || release.metadata.buildKind === 'release')
       )
       .sort((left, right) => {
         const byVersion =
