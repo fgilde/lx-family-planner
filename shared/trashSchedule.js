@@ -1,3 +1,10 @@
+const TRASH_ICONS = {
+  rest: '🗑️',
+  papier: '📦',
+  bio: '🍎',
+  gelb: '🟡'
+};
+
 export function groupTrashEventsByDate(events) {
   const groups = new Map();
   for (const item of Array.isArray(events) ? events : []) {
@@ -15,6 +22,13 @@ export function groupTrashEventsByDate(events) {
         String(left?.title || '').localeCompare(String(right?.title || ''))
       )
     }));
+}
+
+export function trashGroupIcons(group) {
+  const icons = (group?.items || []).map(item =>
+    TRASH_ICONS[item?.type] || TRASH_ICONS.rest
+  );
+  return [...new Set(icons)];
 }
 
 export function trashGroupTitle(group, titleForItem = item => item?.title || '') {

@@ -38,7 +38,11 @@ import {
   nextBirthdayOccurrencesOnly
 } from '../../../shared/birthdays.js';
 import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
-import { groupTrashEventsByDate, trashGroupTitle } from '../../../shared/trashSchedule.js';
+import {
+  groupTrashEventsByDate,
+  trashGroupIcons,
+  trashGroupTitle
+} from '../../../shared/trashSchedule.js';
 import { isChildProfile, isPetProfile } from '../../constants/roles';
 import {
   DEFAULT_FAMILY_AVATAR,
@@ -279,6 +283,7 @@ export default function PersonalDashboard() {
   const nextTrashTitle = trashGroupTitle(nextTrash, item =>
     item.titleKey ? tCalendar(item.titleKey) : item.title
   );
+  const nextTrashIcons = trashGroupIcons(nextTrash);
   const effectiveDashboardLayout = dashboardLayoutForTrash(
     dashboardLayout.layout,
     nextTrash?.date,
@@ -527,7 +532,9 @@ export default function PersonalDashboard() {
               className="adult-trash-next"
               onClick={() => setActiveTab('trash')}
             >
-              <span>🗑️</span>
+              <span className="adult-trash-next-icons" aria-hidden="true">
+                {nextTrashIcons.map(icon => <i key={icon}>{icon}</i>)}
+              </span>
               <span>
                 <strong>{nextTrashTitle}</strong>
                 <small>

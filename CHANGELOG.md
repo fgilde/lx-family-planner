@@ -6,6 +6,17 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.18.4] — 2026-08-11
+
+### Calendar and mobile overview
+
+- the selected calendar layout (agenda, week or month) now stays saved per
+  profile and device, even after navigating to another area;
+- calendar and personal overview use a significantly denser header on phones,
+  so the actual content becomes visible sooner;
+- the dashboard waste card now shows the correct bin, or all matching bins for
+  a grouped pickup, instead of a generic icon.
+
 ## [1.18.3] — 2026-08-10
 
 ### Reliable update cleanup

@@ -61,6 +61,23 @@ function localDateKey(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
+const CALENDAR_LAYOUTS = new Set(['agenda', 'week', 'month']);
+
+function calendarViewStorageKey(activeHousehold, activeMemberId) {
+  return `lx_calendar_view:${activeHousehold || 'familie'}:${activeMemberId || 'default'}`;
+}
+
+function storedCalendarView(activeHousehold, activeMemberId) {
+  try {
+    const value = localStorage.getItem(
+      calendarViewStorageKey(activeHousehold, activeMemberId)
+    );
+    return CALENDAR_LAYOUTS.has(value) ? value : 'agenda';
+  } catch {
+    return 'agenda';
+  }
+}
+
 function dateFromKey(value) {
   return new Date(`${value}T12:00:00`);
 }
@@ -225,7 +242,9 @@ export default function CalendarView() {
   } = useFamily();
   const [selectedMemberFilter, setSelectedMemberFilter] = useState('all');
   const [showPast, setShowPast] = useState(false);
-  const [calendarView, setCalendarView] = useState('agenda');
+  const [calendarView, setCalendarView] = useState(() =>
+    storedCalendarView(activeHousehold, activeMember?.id)
+  );
   const [calendarAnchorDate, setCalendarAnchorDate] = useState(() =>
     localDateKey()
   );
@@ -234,6 +253,20 @@ export default function CalendarView() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const todayKey = localDateKey();
   const canManage = canManageFamily(activeMember);
+
+  const chooseCalendarView = nextView => {
+    if (!CALENDAR_LAYOUTS.has(nextView)) return;
+    setCalendarView(nextView);
+    try {
+      localStorage.setItem(
+        calendarViewStorageKey(activeHousehold, activeMember?.id),
+        nextView
+      );
+    } catch {
+      // Die Ansicht bleibt für die geöffnete Sitzung nutzbar, auch wenn der
+      // Browser keinen lokalen Speicher bereitstellt.
+    }
+  };
 
   const householdEvents = useMemo(
     () =>
@@ -410,7 +443,7 @@ export default function CalendarView() {
               type="button"
               className={calendarView === 'agenda' ? 'is-active' : ''}
               aria-pressed={calendarView === 'agenda'}
-              onClick={() => setCalendarView('agenda')}
+              onClick={() => chooseCalendarView('agenda')}
               title={t('view.layouts.agenda')}
             >
               <List size={16} /> <span>{t('view.layouts.agenda')}</span>
@@ -419,7 +452,7 @@ export default function CalendarView() {
               type="button"
               className={calendarView === 'week' ? 'is-active' : ''}
               aria-pressed={calendarView === 'week'}
-              onClick={() => setCalendarView('week')}
+              onClick={() => chooseCalendarView('week')}
               title={t('view.layouts.week')}
             >
               <CalendarDays size={16} /> <span>{t('view.layouts.week')}</span>
@@ -428,7 +461,7 @@ export default function CalendarView() {
               type="button"
               className={calendarView === 'month' ? 'is-active' : ''}
               aria-pressed={calendarView === 'month'}
-              onClick={() => setCalendarView('month')}
+              onClick={() => chooseCalendarView('month')}
               title={t('view.layouts.month')}
             >
               <Grid2X2 size={15} /> <span>{t('view.layouts.month')}</span>

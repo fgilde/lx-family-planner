@@ -6241,6 +6241,18 @@ textarea {
   font-size: 2rem;
 }
 
+.adult-trash-next-icons {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.adult-trash-next-icons i {
+  font-style: normal;
+}
+
 .adult-trash-next > span:nth-child(2) {
   display: grid;
   gap: 4px;
@@ -14355,14 +14367,57 @@ textarea {
 }
 
 @media (max-width: 700px) {
+  .adult-dashboard {
+    gap: 14px;
+  }
+
+  .adult-hero {
+    min-height: 0;
+    padding: 15px 16px;
+    gap: 13px;
+    border-radius: 18px;
+  }
+
+  .adult-hero-identity {
+    gap: 12px;
+    align-items: center;
+  }
+
+  .adult-hero-avatar {
+    width: 44px;
+    height: 44px;
+    border-width: 2px;
+    border-radius: 15px 15px 6px 15px;
+  }
+
+  .adult-hero-kicker {
+    display: none;
+  }
+
+  .adult-hero h1 {
+    margin: 0 0 2px;
+    font-size: clamp(1.18rem, 5.8vw, 1.45rem);
+    line-height: 1.12;
+  }
+
+  .adult-hero p {
+    margin: 0;
+    font-size: 0.76rem;
+    line-height: 1.3;
+  }
+
   .adult-hero-actions {
     width: 100%;
+    gap: 7px;
   }
 
   .adult-layout-button,
   .adult-quick-add {
     flex: 1;
     justify-content: center;
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
   }
 
   .adult-widget-grid,
@@ -15754,13 +15809,26 @@ textarea {
 
 @media (max-width: 650px) {
   .calendar-hero {
-    min-height: 190px;
-    padding: 22px 20px;
-    border-radius: 25px;
+    min-height: 0;
+    gap: 13px;
+    padding: 15px 16px;
+    border-radius: 18px;
+  }
+
+  .calendar-eyebrow {
+    display: none;
   }
 
   .calendar-hero h1 {
-    font-size: 2.2rem;
+    margin: 0;
+    font-size: clamp(1.35rem, 6.5vw, 1.65rem);
+    line-height: 1.12;
+  }
+
+  .calendar-hero p {
+    margin: 4px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
   }
 
   .calendar-hero-actions {
@@ -15770,7 +15838,15 @@ textarea {
   }
 
   .calendar-hero-actions button {
+    min-height: 38px;
     padding-inline: 10px;
+    font-size: 0.72rem;
+  }
+
+  .calendar-control-deck {
+    gap: 8px;
+    padding: 8px;
+    border-radius: 16px;
   }
 
   .calendar-tools button,

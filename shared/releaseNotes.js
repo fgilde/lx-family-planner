@@ -1,4 +1,63 @@
 const RELEASE_NOTES = {
+  '1.18.4': {
+    version: '1.18.4',
+    eyebrow: 'Kalender, der bei dir bleibt',
+    title: 'Deine Ansicht bleibt, dein Handy gewinnt Platz',
+    intro:
+      'Die gewählte Kalenderansicht bleibt nun erhalten. Gleichzeitig ist LX Family auf dem Smartphone dichter und die Müll-Kachel zeigt die richtigen Tonnen.',
+    highlights: [
+      {
+        id: 'calendar-view-preference',
+        title: 'Monatsansicht bleibt ausgewählt',
+        description:
+          'Wählst du Woche oder Monat, merkt sich LX Family diese Ansicht pro Profil und Gerät – auch nach einem Bereichswechsel.'
+      },
+      {
+        id: 'compact-phone-headers',
+        title: 'Mehr Kalender, weniger Kopfbereich',
+        description:
+          'Die persönliche Übersicht und der Kalender brauchen auf kleinen Bildschirmen deutlich weniger Höhe, ohne dass wichtige Aktionen verloren gehen.'
+      },
+      {
+        id: 'correct-trash-icons',
+        title: 'Die richtigen Tonnen im Dashboard',
+        description:
+          'Die Müll-Kachel übernimmt jetzt die passende Tonne oder alle Tonnen einer gemeinsamen Abholung.'
+      }
+    ],
+    closing:
+      'Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'A calendar that stays yours',
+        title: 'Your view stays put, your phone gains space',
+        intro:
+          'Your chosen calendar layout now stays saved. LX Family is also denser on phones, and the waste card shows the right bins.',
+        highlights: [
+          {
+            id: 'calendar-view-preference',
+            title: 'Month view stays selected',
+            description:
+              'When you choose week or month, LX Family remembers that layout per profile and device, even after you navigate elsewhere.'
+          },
+          {
+            id: 'compact-phone-headers',
+            title: 'More calendar, less header',
+            description:
+              'The personal overview and calendar now use substantially less height on small screens without losing important actions.'
+          },
+          {
+            id: 'correct-trash-icons',
+            title: 'Correct bins on the dashboard',
+            description:
+              'The waste card now reflects the correct bin, or every bin in a shared pickup.'
+          }
+        ],
+        closing:
+          'Families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.18.3': {
     version: '1.18.3',
     eyebrow: 'Verlässlichere Server-Updates',

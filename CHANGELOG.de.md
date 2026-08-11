@@ -4,6 +4,18 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.18.4] – 2026-08-11
+
+### Kalender und mobile Übersicht
+
+- die gewählte Kalenderansicht (Liste, Woche oder Monat) bleibt nun pro Profil
+  und Gerät erhalten, auch nach dem Wechsel in einen anderen Bereich;
+- Kalender- und persönliche Übersicht nutzen auf Smartphones einen deutlich
+  kompakteren Kopfbereich, damit die eigentlichen Inhalte schneller sichtbar
+  sind;
+- die Müll-Kachel im Dashboard zeigt jetzt die passende Tonne bzw. bei einer
+  gebündelten Abholung alle passenden Tonnen statt eines allgemeinen Symbols.
+
 ## [1.18.3] – 2026-08-10
 
 ### Verlässliche Update-Bereinigung
