@@ -7,8 +7,9 @@
 </p>
 
 <p align="center">
-  <a href="https://familie.laxxx-lab.de/"><img alt="Live-Demo öffnen" src="https://img.shields.io/badge/LIVE--DEMO-ÖFFNEN-E75D4A?style=for-the-badge"></a>
-  <a href="https://familie.laxxx-lab.de/apk/latest.apk"><img alt="Android-App herunterladen" src="https://img.shields.io/badge/ANDROID--APP-LADEN-176653?style=for-the-badge"></a>
+  <a href="https://lxfamily.de/"><img alt="lxfamily.de besuchen" src="https://img.shields.io/badge/WEBSITE-LXFAMILY.DE-19332F?style=for-the-badge"></a>
+  <a href="https://demo.lxfamily.de/"><img alt="Live-Demo öffnen" src="https://img.shields.io/badge/LIVE--DEMO-ÖFFNEN-E75D4A?style=for-the-badge"></a>
+  <a href="https://demo.lxfamily.de/apk/latest.apk"><img alt="Android-App herunterladen" src="https://img.shields.io/badge/ANDROID--APP-LADEN-176653?style=for-the-badge"></a>
   <a href="#in-5-minuten-startklar"><img alt="Installation starten" src="https://img.shields.io/badge/IN%205%20MINUTEN-STARTKLAR-E4B76B?style=for-the-badge&labelColor=19332F"></a>
 </p>
 
@@ -35,7 +36,7 @@
 ## Ausprobieren – ohne Installation
 
 > [!TIP]
-> **[Live-Demo öffnen](https://familie.laxxx-lab.de/)**<br>
+> **[Live-Demo öffnen](https://demo.lxfamily.de/)**<br>
 > Familie: `Demo` · Passwort: `demo`<br>
 > Wähle danach Doris für die Erwachsenenansicht oder Jeremy Pascal für die
 > Kinderwelt. Die öffentliche Demo ist ein gemeinsamer, schreibgeschützter

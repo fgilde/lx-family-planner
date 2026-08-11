@@ -7,8 +7,9 @@
 </p>
 
 <p align="center">
-  <a href="https://familie.laxxx-lab.de/"><img alt="Open the live demo" src="https://img.shields.io/badge/LIVE_DEMO-OPEN-E75D4A?style=for-the-badge"></a>
-  <a href="https://familie.laxxx-lab.de/apk/latest.apk"><img alt="Download the Android app" src="https://img.shields.io/badge/ANDROID-DOWNLOAD-176653?style=for-the-badge"></a>
+  <a href="https://lxfamily.de/"><img alt="Visit lxfamily.de" src="https://img.shields.io/badge/WEBSITE-LXFAMILY.DE-19332F?style=for-the-badge"></a>
+  <a href="https://demo.lxfamily.de/"><img alt="Open the live demo" src="https://img.shields.io/badge/LIVE_DEMO-OPEN-E75D4A?style=for-the-badge"></a>
+  <a href="https://demo.lxfamily.de/apk/latest.apk"><img alt="Download the Android app" src="https://img.shields.io/badge/ANDROID-DOWNLOAD-176653?style=for-the-badge"></a>
   <a href="#quick-start"><img alt="Start in five minutes" src="https://img.shields.io/badge/5_MINUTES-QUICK_START-E4B76B?style=for-the-badge&labelColor=19332F"></a>
 </p>
 
@@ -43,7 +44,7 @@ role-aware app:
 ## Try it first
 
 > [!TIP]
-> **[Open the read-only live demo](https://familie.laxxx-lab.de/)**<br>
+> **[Open the read-only live demo](https://demo.lxfamily.de/)**<br>
 > Family: `Demo` · password: `demo`<br>
 > Choose **Doris** for the adult experience or **Jeremy Pascal** for the child
 > experience. The demo is a shared showroom—please do not enter personal data.
