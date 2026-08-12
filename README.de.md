@@ -10,12 +10,12 @@
   <a href="https://lxfamily.de/"><img alt="lxfamily.de besuchen" src="https://img.shields.io/badge/WEBSITE-LXFAMILY.DE-19332F?style=for-the-badge"></a>
   <a href="https://demo.lxfamily.de/"><img alt="Live-Demo öffnen" src="https://img.shields.io/badge/LIVE--DEMO-ÖFFNEN-E75D4A?style=for-the-badge"></a>
   <a href="https://demo.lxfamily.de/apk/latest.apk"><img alt="Android-App herunterladen" src="https://img.shields.io/badge/ANDROID--APP-LADEN-176653?style=for-the-badge"></a>
-  <a href="#in-5-minuten-startklar"><img alt="Installation starten" src="https://img.shields.io/badge/IN%205%20MINUTEN-STARTKLAR-E4B76B?style=for-the-badge&labelColor=19332F"></a>
+  <a href="#lx-family-installieren"><img alt="Installation starten" src="https://img.shields.io/badge/IN%205%20MINUTEN-STARTKLAR-E4B76B?style=for-the-badge&labelColor=19332F"></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.18.2" src="https://img.shields.io/badge/version-1.18.2-17483F">
+  <img alt="Version 1.18.4" src="https://img.shields.io/badge/version-1.18.4-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -41,6 +41,14 @@
 > Wähle danach Doris für die Erwachsenenansicht oder Jeremy Pascal für die
 > Kinderwelt. Die öffentliche Demo ist ein gemeinsamer, schreibgeschützter
 > Schauraum – bitte keine persönlichen Daten eingeben.
+
+### In 15 Sekunden sehen, wie LX funktioniert
+
+Echte Ansichten aus der öffentlichen Demo: Profil auswählen, in die
+Kinderwelt gehen, den Familienüberblick sehen, einen Termin planen und das
+Familienarchiv öffnen.
+
+![LX Family Demo-Rundgang](docs/screenshots/demo-walkthrough.gif)
 
 ## Warum LX Family?
 
@@ -88,6 +96,18 @@
 | ![Erwachsenen-Dashboard im Theme Waldruhe](docs/screenshots/dashboard-waldruhe.jpg) | ![Erwachsenen-Dashboard im Theme Backstage](docs/screenshots/dashboard-backstage.jpg) |
 
 </details>
+
+## LX Family installieren
+
+**[Plattform auswählen und in wenigen Minuten starten →](docs/INSTALL.de.md)**
+
+| Eure Umgebung | Startpunkt |
+| --- | --- |
+| Docker, NAS, Mini-PC oder VM | [Docker Compose](docs/INSTALL.de.md#docker-compose) |
+| Proxmox VE | [Nativer LX-Family-LXC](docs/INSTALL.de.md#proxmox-ve-nativer-lxc) |
+| Windows-Heimserver | [Windows + Docker Desktop](docs/INSTALL.de.md#windows-mit-docker-desktop) |
+| Vorhandener Node-Server | [Node.js ohne Docker](docs/INSTALL.de.md#ohne-docker-mit-nodejs) |
+| Unraid, Umbrel, CasaOS oder Cosmos | [Pakete für App-Stores](docs/INSTALL.de.md#pakete-für-app-stores) |
 
 ## In 5 Minuten startklar
 
@@ -542,60 +562,36 @@ docker compose up -d
 Die Daten bleiben in `data/`, Sicherungen in `backups/`. Eine bestimmte
 Programmversion lässt sich mit `LX_FAMILY_VERSION=1.16.1` fest anheften.
 
-## Proxmox VE Helper-Script
+## Proxmox VE: nativer LXC
 
-Für Proxmox VE gibt es einen eigenen One-Liner. Er wird in der
+Für Proxmox VE gibt es einen kompakten, nativen Installer. Er wird in der
 **Proxmox-Host-Shell als root** ausgeführt und erstellt einen neuen,
-unprivilegierten Debian-LXC:
+unprivilegierten Debian-13-LXC mit LX Family und Node.js 22 – ohne Docker im
+Container:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-helper.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/proxmox-lxc.sh)"
 ```
 
-Vor dem Ausführen kann das Skript vollständig angesehen werden:
+Der Installer fragt vor dem Anlegen nach Container-ID, Ressourcen, Storage und
+Netzwerk. Seine Standardwerte sind 2 CPU-Kerne, 2 GB RAM, 10 GB Speicher und
+DHCP an `vmbr0`. Falls euer Netzwerk kein DHCP bereitstellt, im erweiterten
+Modus eine freie statische Adresse wählen.
+
+Danach die im Abschluss angezeigte Adresse im Browser öffnen, zum Beispiel
+`http://192.168.x.x:3001`, und das Onboarding abschließen. Innerhalb des LXC
+helfen diese Befehle bei Betrieb und Diagnose:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-helper.sh | less
+systemctl status lx-family
+systemctl restart lx-family
+journalctl -u lx-family -n 100 --no-pager
 ```
 
-Ein Trockenlauf prüft PVE, Speicher, Netzwerk und alle gewählten Werte, erstellt
-aber noch keinen Container:
-
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-helper.sh)" -- --dry-run
-```
-
-Die Standardinstallation verwendet:
-
-- Proxmox VE 8.4 oder neuer
-- Debian 13, mit automatischem Rückfall auf Debian 12
-- unprivilegierten LXC mit `nesting` und `keyctl`
-- 2 CPU-Kerne, 2 GB RAM, 512 MB Swap und 8 GB Speicher
-- DHCP an `vmbr0` und Port `3001`
-- Docker Engine aus dem offiziellen Docker-Repository
-- zufällig erzeugtes App-Geheimnis und persistente Daten im LXC
-
-Im erweiterten Modus lassen sich Container-ID, Speicher, Netzwerk, Ressourcen,
-Port und öffentliche LX-Adresse anpassen. Eine bereits vergebene Container-ID
-wird niemals überschrieben. Bei einem Installationsfehler bleibt der neue
-Container zur Diagnose erhalten.
-
-Nach der Installation:
-
-```bash
-pct enter CONTAINER_ID
-lx-family status
-lx-family update
-lx-family backup
-lx-family logs
-lx-family restart
-lx-family domain https://familie.example.de
-lx-family doctor
-```
-
-Der Helper ist für eine **neue Installation** gedacht. Für den Umzug einer
-bestehenden Familie zuerst ein Datenbank-Backup erstellen und dieses
-anschließend bewusst in die neue Instanz übernehmen.
+Der Installer ist für **neue Installationen** vorgesehen. Für einen Umzug erst
+ein LX-Backup exportieren und bewusst in die neue Instanz importieren. Die
+vollständige, aktuelle Anleitung steht zusätzlich unter
+[LX Family installieren](docs/INSTALL.de.md#proxmox-ve-nativer-lxc).
 
 ## Installation aus einem App-Store
 

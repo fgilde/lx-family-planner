@@ -10,12 +10,12 @@
   <a href="https://lxfamily.de/"><img alt="Visit lxfamily.de" src="https://img.shields.io/badge/WEBSITE-LXFAMILY.DE-19332F?style=for-the-badge"></a>
   <a href="https://demo.lxfamily.de/"><img alt="Open the live demo" src="https://img.shields.io/badge/LIVE_DEMO-OPEN-E75D4A?style=for-the-badge"></a>
   <a href="https://demo.lxfamily.de/apk/latest.apk"><img alt="Download the Android app" src="https://img.shields.io/badge/ANDROID-DOWNLOAD-176653?style=for-the-badge"></a>
-  <a href="#quick-start"><img alt="Start in five minutes" src="https://img.shields.io/badge/5_MINUTES-QUICK_START-E4B76B?style=for-the-badge&labelColor=19332F"></a>
+  <a href="#install-lx-family"><img alt="Start in five minutes" src="https://img.shields.io/badge/5_MINUTES-QUICK_START-E4B76B?style=for-the-badge&labelColor=19332F"></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.18.2" src="https://img.shields.io/badge/version-1.18.2-17483F">
+  <img alt="Version 1.18.4" src="https://img.shields.io/badge/version-1.18.4-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -48,6 +48,13 @@ role-aware app:
 > Family: `Demo` · password: `demo`<br>
 > Choose **Doris** for the adult experience or **Jeremy Pascal** for the child
 > experience. The demo is a shared showroom—please do not enter personal data.
+
+### See the flow in 15 seconds
+
+Real screens from the public demo: choose a profile, enter a child space, see
+the shared overview, plan a date and open the family archive.
+
+![LX Family demo walkthrough](docs/screenshots/demo-walkthrough.gif)
 
 ![LX Family adult dashboard](docs/screenshots/demo-dashboard.png)
 
@@ -107,6 +114,18 @@ The complete feature and operations guide is available in the
 **[German documentation](README.de.md)** while the English guide is being
 expanded.
 
+## Install LX Family
+
+**[Choose your platform and start in a few minutes →](docs/INSTALL.md)**
+
+| Your setup | Start here |
+| --- | --- |
+| Docker, NAS, mini PC or VM | [Docker Compose](docs/INSTALL.md#docker-compose) |
+| Proxmox VE | [Native LX Family LXC](docs/INSTALL.md#proxmox-ve-native-lxc) |
+| Windows home server | [Windows + Docker Desktop](docs/INSTALL.md#windows-with-docker-desktop) |
+| Existing Node server | [Plain Node.js](docs/INSTALL.md#plain-nodejs) |
+| Unraid, Umbrel, CasaOS or Cosmos | [App-store packages](docs/INSTALL.md#app-store-packages) |
+
 ## Quick start
 
 ### Docker Compose (recommended)
@@ -136,7 +155,7 @@ click. Existing installations can use the guarded updater:
 
 - Windows: `Update-Familienplaner.cmd`
 - Linux/Docker: `bash scripts/docker-update.sh`
-- Proxmox helper installation: see [the complete German guide](README.de.md#proxmox-ve-helper-script)
+- Proxmox native LXC: see [the platform guide](docs/INSTALL.md#proxmox-ve-native-lxc)
 - Store packaging: see [store submissions](docs/STORE_SUBMISSIONS.md)
 
 Every guarded update creates a consistent backup, runs migrations on a copy,
