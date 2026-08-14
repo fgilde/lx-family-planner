@@ -6,6 +6,17 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.18.5] — 2026-08-14
+
+### iOS PWA installation
+
+- iPhone users now receive a concise Safari-specific install guide: **Share →
+  Add to Home Screen**;
+- the installed web app has an Apple home-screen icon, standalone launch mode
+  and safe-area support for modern iOS displays;
+- the prompt is only shown on eligible iOS Safari devices and can be dismissed
+  for seven days, so other browsers remain undisturbed.
+
 ## [1.18.4] — 2026-08-11
 
 ### Calendar and mobile overview

@@ -4,6 +4,17 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.18.5] – 2026-08-14
+
+### iOS-PWA installieren
+
+- auf iOS-Geräten erklärt LX Family direkt in Safari den kurzen Weg über
+  **Teilen → Zum Home-Bildschirm**;
+- die installierte Web-App besitzt ein Apple-Home-Bildschirm-Icon, startet
+  eigenständig und berücksichtigt sichere Bildschirmränder;
+- der Hinweis erscheint nur auf passenden iOS-Safari-Geräten und kann für
+  sieben Tage ausgeblendet werden. Andere Browser bleiben unbehelligt.
+
 ## [1.18.4] – 2026-08-11
 
 ### Kalender und mobile Übersicht

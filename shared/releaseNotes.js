@@ -1,10 +1,10 @@
 const RELEASE_NOTES = {
   '1.18.5': {
     version: '1.18.5',
-    eyebrow: 'iOS-PWA Vorschau',
+    eyebrow: 'LX Family auf iOS',
     title: 'LX Family lässt sich auf iOS wie eine App installieren',
     intro:
-      'Diese Vorschau zeigt den neuen Installationsweg für iOS-Geräte. Bitte kurz in Safari ausprobieren und Rückmeldung geben.',
+      'LX Family lässt sich auf iOS-Geräten jetzt direkt aus Safari heraus zum Home-Bildschirm hinzufügen.',
     highlights: [
       {
         id: 'ios-home-screen-install',
@@ -20,7 +20,31 @@ const RELEASE_NOTES = {
       }
     ],
     closing:
-      'Dies ist eine Testversion. Familien, Profile und eure bestehenden Daten bleiben unverändert erhalten.'
+      'Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'LX Family on iOS',
+        title: 'Install LX Family on iOS like an app',
+        intro:
+          'LX Family can now be added to the home screen directly from Safari on iOS devices.',
+        highlights: [
+          {
+            id: 'ios-home-screen-install',
+            title: 'Add to Home Screen',
+            description:
+              'On iOS, LX Family explains the few Safari steps needed to install it from the browser.'
+          },
+          {
+            id: 'ios-standalone-layout',
+            title: 'A dedicated app experience',
+            description:
+              'After installation, LX Family launches from its icon and uses the screen without the Safari bar.'
+          }
+        ],
+        closing:
+          'Families, profiles, events, chores, recipes, files and settings remain unchanged.'
+      }
+    }
   },
   '1.18.4': {
     version: '1.18.4',
