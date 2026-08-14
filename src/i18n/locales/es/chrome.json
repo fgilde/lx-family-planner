@@ -173,6 +173,17 @@
     "body": "Útil cuando la abuela y el abuelo no tienen su propia cuenta familiar: eventos, tareas, plan de comidas, fechas de basura y tablón se guardan por separado para su hogar.",
     "hint": "Mostrar u ocultar: icono del engranaje → ajustes familiares."
   },
+  "iosInstall": {
+    "kicker": "Para iPhone y iPad",
+    "title": "Usa LX como una app",
+    "body": "Añade LX a la pantalla de inicio. Se abrirá sin controles del navegador y podrá recibir notificaciones del navegador.",
+    "stepShare": "Toca Compartir en la parte inferior",
+    "stepHome": "Elige «Añadir a pantalla de inicio»",
+    "stepAdd": "Toca «Añadir» arriba a la derecha",
+    "secureHint": "Las notificaciones necesitan una dirección LX con HTTPS.",
+    "later": "Más tarde",
+    "close": "Cerrar aviso de instalación"
+  },
   "serverConfig": {
     "kicker": "Conexión",
     "title": "Tu servidor familiar",

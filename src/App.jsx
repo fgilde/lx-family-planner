@@ -14,6 +14,7 @@ import ProblemReportButton from './components/ProblemReportButton';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
 import ServerConfigModal from './components/ServerConfigModal';
 import AppUpdateBanner from './components/AppUpdateBanner';
+import IOSInstallPrompt from './components/IOSInstallPrompt';
 import { canAccessAppView, isWallProfile } from './constants/roles';
 import {
   getStoredServerUrl,
@@ -333,6 +334,7 @@ export default function App() {
 
   return (
     <FamilyProvider>
+      <IOSInstallPrompt />
       <AppUpdateBanner />
       <MainContent />
     </FamilyProvider>

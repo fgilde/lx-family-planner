@@ -173,6 +173,17 @@
     "body": "Praktisch, wenn Oma und Opa kein eigenes Familienkonto haben: Termine, Aufgaben, Speiseplan, Mülltermine und Pinnwand werden für ihr Zuhause getrennt geführt.",
     "hint": "Ein- oder ausblenden: Zahnrad → Familieneinstellungen."
   },
+  "iosInstall": {
+    "kicker": "Für iPhone & iPad",
+    "title": "LX wie eine App verwenden",
+    "body": "Lege LX auf den Home-Bildschirm. Es öffnet sich dann ohne Browser-Leiste und kann Browser-Benachrichtigungen erhalten.",
+    "stepShare": "Unten auf Teilen tippen",
+    "stepHome": "„Zum Home-Bildschirm“ wählen",
+    "stepAdd": "Oben rechts „Hinzufügen“ tippen",
+    "secureHint": "Für Benachrichtigungen braucht eure LX-Adresse HTTPS.",
+    "later": "Später",
+    "close": "Installationshinweis schließen"
+  },
   "serverConfig": {
     "kicker": "Verbindung",
     "title": "Dein Familien-Server",

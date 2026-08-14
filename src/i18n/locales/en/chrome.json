@@ -173,6 +173,17 @@
     "body": "Handy when Grandma and Grandpa don't have their own family account: events, tasks, meal plan, trash dates and pinboard are kept separately for their home.",
     "hint": "Show or hide: gear icon → family settings."
   },
+  "iosInstall": {
+    "kicker": "For iPhone & iPad",
+    "title": "Use LX like an app",
+    "body": "Put LX on the Home Screen. It opens without browser controls and can receive browser notifications.",
+    "stepShare": "Tap Share at the bottom",
+    "stepHome": "Choose “Add to Home Screen”",
+    "stepAdd": "Tap “Add” in the top-right corner",
+    "secureHint": "Notifications need your LX address to use HTTPS.",
+    "later": "Later",
+    "close": "Close install hint"
+  },
   "serverConfig": {
     "kicker": "Connection",
     "title": "Your Family Server",

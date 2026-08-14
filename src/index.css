@@ -2128,6 +2128,154 @@ body {
   transition: background-color 0.35s ease, color 0.25s ease;
 }
 
+/* iPhone/iPad: Safari installs LX as a standalone web app. The prompt is
+   deliberately compact and respects the dynamic island/home indicator. */
+.ios-install-prompt {
+  position: fixed;
+  z-index: 110500;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 13px;
+  width: min(100% - 32px, 460px);
+  margin-left: auto;
+  padding: 17px 46px 15px 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border-color));
+  border-radius: 24px 24px 9px 24px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--accent) 22%, transparent), transparent 40%),
+    var(--bg-card);
+  box-shadow: 0 24px 58px rgba(12, 30, 24, 0.28);
+  backdrop-filter: blur(18px);
+  animation: ios-install-arrive 300ms ease-out both;
+}
+
+@keyframes ios-install-arrive {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ios-install-prompt-orbit {
+  position: absolute;
+  top: -19px;
+  right: 46px;
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border-radius: 50%;
+  color: var(--accent);
+  opacity: 0.48;
+}
+
+.ios-install-prompt-mark {
+  width: 45px;
+  height: 45px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px 16px 6px 16px;
+  color: #fff;
+  background: linear-gradient(145deg, var(--primary), color-mix(in srgb, var(--primary) 66%, #071e18));
+  box-shadow: 0 10px 23px color-mix(in srgb, var(--primary) 32%, transparent);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+.ios-install-prompt-copy { display: grid; gap: 3px; min-width: 0; }
+.ios-install-prompt-copy > small {
+  color: var(--primary);
+  font-size: 0.63rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.ios-install-prompt-copy > strong {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  line-height: 1.1;
+}
+.ios-install-prompt-copy > p {
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+.ios-install-prompt-copy > ol {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+  list-style: none;
+}
+.ios-install-prompt-copy > ol > li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-main);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+.ios-install-prompt-copy > ol > li svg { color: var(--primary); }
+.ios-install-prompt-copy > ol > li span {
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-subtle));
+  font-size: 0.56rem;
+}
+.ios-install-prompt-copy > em {
+  margin-top: 4px;
+  color: var(--warning);
+  font-size: 0.66rem;
+  font-style: normal;
+  line-height: 1.35;
+}
+.ios-install-prompt-actions { grid-column: 2; }
+.ios-install-prompt-actions > button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-subtle));
+  font: inherit;
+  font-size: 0.67rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.ios-install-prompt-close {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  cursor: pointer;
+}
+
+@media (max-width: 560px) {
+  .ios-install-prompt {
+    width: auto;
+    padding: 15px 42px 14px 14px;
+    border-radius: 21px 21px 7px 21px;
+  }
+  .ios-install-prompt-mark { width: 40px; height: 40px; border-radius: 14px 14px 5px 14px; }
+  .ios-install-prompt-copy > strong { font-size: 1.1rem; }
+  .ios-install-prompt-orbit { right: 41px; }
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,

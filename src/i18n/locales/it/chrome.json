@@ -173,6 +173,17 @@
     "body": "Utile quando nonna e nonno non hanno un account famiglia proprio: eventi, incombenze, piano pasti, date dei rifiuti e bacheca vengono tenuti separati per la loro casa.",
     "hint": "Mostra o nascondi: icona ingranaggio → impostazioni famiglia."
   },
+  "iosInstall": {
+    "kicker": "Per iPhone e iPad",
+    "title": "Usa LX come un’app",
+    "body": "Aggiungi LX alla schermata Home. Si aprirà senza i comandi del browser e potrà ricevere notifiche del browser.",
+    "stepShare": "Tocca Condividi in basso",
+    "stepHome": "Scegli «Aggiungi a Home»",
+    "stepAdd": "Tocca «Aggiungi» in alto a destra",
+    "secureHint": "Le notifiche richiedono un indirizzo LX in HTTPS.",
+    "later": "Più tardi",
+    "close": "Chiudi il suggerimento di installazione"
+  },
   "serverConfig": {
     "kicker": "Connessione",
     "title": "Il tuo server di famiglia",

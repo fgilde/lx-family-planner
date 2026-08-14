@@ -190,6 +190,14 @@ Translation catalogues are key-checked during CI so a language cannot silently
 lose UI strings. Native speakers are warmly invited to improve wording through
 small, focused pull requests.
 
+## iPhone and iPad
+
+LX Family is an installable PWA on iPhone and iPad. Open your own LX address in
+Safari, use **Share → Add to Home Screen**, then open LX from the new icon. It
+runs in a standalone window without Safari controls; LX also shows the three
+steps directly on compatible Apple devices. Browser push on iOS additionally
+needs the Home-Screen app, HTTPS and a configured Web Push server.
+
 ## Optional Family Cloud
 
 LX can provision a separate Nextcloud account for each family, expose shared and

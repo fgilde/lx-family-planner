@@ -1047,7 +1047,16 @@ Dieser Browserweg bleibt verfügbar, ist aber von Browser und
 Energiespareinstellungen abhängiger als der native App-Kanal.
 
 Auf iPhone und iPad muss die App zuerst zum Home-Bildschirm hinzugefügt und von
-dort geöffnet werden.
+dort geöffnet werden. LX blendet dafür auf kompatiblen Apple-Geräten einen
+kurzen Hinweis ein:
+
+1. in Safari unten auf **Teilen** tippen,
+2. **Zum Home-Bildschirm** wählen,
+3. oben rechts **Hinzufügen** tippen und LX anschließend über das neue Icon
+   öffnen.
+
+Die PWA läuft dann ohne Safari-Leiste. Für Browser-Benachrichtigungen braucht
+sie zusätzlich HTTPS und eine eingerichtete Web-Push-Verbindung.
 
 ### Gotify, Telegram und WhatsApp
 

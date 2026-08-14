@@ -173,6 +173,17 @@
     "body": "Przydatne, gdy babcia i dziadek nie mają własnego konta rodzinnego: wydarzenia, zadania, plan posiłków, terminy odbioru śmieci i tablica są prowadzone osobno dla ich domu.",
     "hint": "Pokaż lub ukryj: ikona zębatki → ustawienia rodziny."
   },
+  "iosInstall": {
+    "kicker": "Dla iPhone’a i iPada",
+    "title": "Używaj LX jak aplikacji",
+    "body": "Dodaj LX do ekranu początkowego. Otworzy się bez paska przeglądarki i może otrzymywać powiadomienia przeglądarki.",
+    "stepShare": "Stuknij Udostępnij na dole",
+    "stepHome": "Wybierz „Dodaj do ekranu początkowego”",
+    "stepAdd": "Stuknij „Dodaj” w prawym górnym rogu",
+    "secureHint": "Powiadomienia wymagają adresu LX z HTTPS.",
+    "later": "Później",
+    "close": "Zamknij wskazówkę instalacji"
+  },
   "serverConfig": {
     "kicker": "Połączenie",
     "title": "Twój serwer rodzinny",

@@ -173,6 +173,17 @@
     "body": "Pratique quand Mamie et Papi n'ont pas leur propre compte familial : événements, tâches, plan de repas, dates de déchets et tableau d'affichage sont gérés séparément pour leur foyer.",
     "hint": "Afficher ou masquer : icône d'engrenage → réglages familiaux."
   },
+  "iosInstall": {
+    "kicker": "Pour iPhone et iPad",
+    "title": "Utiliser LX comme une app",
+    "body": "Ajoutez LX à l’écran d’accueil. Il s’ouvrira sans barre de navigateur et pourra recevoir les notifications du navigateur.",
+    "stepShare": "Touchez Partager en bas",
+    "stepHome": "Choisissez « Sur l’écran d’accueil »",
+    "stepAdd": "Touchez « Ajouter » en haut à droite",
+    "secureHint": "Les notifications nécessitent une adresse LX en HTTPS.",
+    "later": "Plus tard",
+    "close": "Fermer le conseil d’installation"
+  },
   "serverConfig": {
     "kicker": "Connexion",
     "title": "Votre serveur familial",

@@ -23,6 +23,9 @@ test('public brand uses LX Family while update identifiers stay stable', () => {
     fs.readFileSync(path.join(projectRoot, 'capacitor.config.json'), 'utf8')
   );
   assert.equal(manifest.name, PRODUCT_NAME);
+  const indexHtml = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
+  assert.match(indexHtml, /apple-mobile-web-app-capable/);
+  assert.match(indexHtml, /apple-touch-icon/);
   assert.equal(capacitor.appName, PRODUCT_NAME);
   assert.equal(capacitor.appId, 'com.lxfamily.planner');
 

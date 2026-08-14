@@ -173,6 +173,17 @@
     "body": "Handig als oma en opa geen eigen gezinsaccount hebben: afspraken, taken, maaltijdplan, afvaldata en prikbord worden apart voor hun huis bijgehouden.",
     "hint": "Tonen of verbergen: tandwielicoon → gezinsinstellingen."
   },
+  "iosInstall": {
+    "kicker": "Voor iPhone en iPad",
+    "title": "Gebruik LX als app",
+    "body": "Zet LX op het beginscherm. Het opent zonder browserbalk en kan browsermeldingen ontvangen.",
+    "stepShare": "Tik onderaan op Deel",
+    "stepHome": "Kies ‘Zet op beginscherm’",
+    "stepAdd": "Tik rechtsboven op ‘Voeg toe’",
+    "secureHint": "Meldingen hebben een LX-adres met HTTPS nodig.",
+    "later": "Later",
+    "close": "Installatietip sluiten"
+  },
   "serverConfig": {
     "kicker": "Verbinding",
     "title": "Jouw gezinsserver",
