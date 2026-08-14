@@ -12,4 +12,11 @@ This repository is the isolated test build for the next LX Family release.
 
 Deploy this `main` branch to a test environment only. It reports version `1.18.5` so the preview is clearly distinguishable from the current stable release.
 
-Do not use the automatic stable-update service for this preview. Build and start the test deployment explicitly, then verify `/api/health` returns `"version":"1.18.5"`.
+Do not use the automatic stable-update service for this preview. The preview includes a local Docker override so it never tries to pull an unpublished stable image:
+
+```bash
+cp .env.example .env
+docker compose -f compose.production.yaml -f compose.preview.yaml up -d --build
+```
+
+Verify `/api/health` returns `"version":"1.18.5"`. Existing test data stays in the usual `data/` and `backups/` folders.
