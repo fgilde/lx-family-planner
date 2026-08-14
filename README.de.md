@@ -15,12 +15,14 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.18.4" src="https://img.shields.io/badge/version-1.18.4-17483F">
+  <img alt="Vorschauversion 1.18.5" src="https://img.shields.io/badge/Vorschau-1.18.5-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
   <a href="LICENSE"><img alt="MIT-Lizenz" src="https://img.shields.io/badge/Lizenz-MIT-E4B76B"></a>
 </p>
+
+> **Vorschau:** Dieses Repository enthält die iOS-PWA-Vorschau für LX Family 1.18.5. Sie ist zum Testen vor dem nächsten stabilen Release gedacht.
 
 <p align="center">
   <strong>LX Family · Private Family OS für Kalender, Aufgaben, Essen, Einkauf, Chat, Cloud und Kinderabenteuer.</strong><br>

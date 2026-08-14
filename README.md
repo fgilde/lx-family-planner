@@ -15,12 +15,14 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Version 1.18.4" src="https://img.shields.io/badge/version-1.18.4-17483F">
+  <img alt="Preview version 1.18.5" src="https://img.shields.io/badge/preview-1.18.5-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-E4B76B"></a>
 </p>
+
+> **Preview branch:** This repository contains the 1.18.5 iOS PWA preview. It is intended for testing before the next stable LX Family release.
 
 <p align="center">
   <strong>A self-hosted Family OS with separate spaces for parents, children, grandparents and pets.</strong><br>
