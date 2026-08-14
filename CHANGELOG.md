@@ -16,6 +16,8 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
   and safe-area support for modern iOS displays;
 - the prompt is only shown on eligible iOS Safari devices and can be dismissed
   for seven days, so other browsers remain undisturbed.
+- the sign-in screen now also gives everyone a compact, readable overview of
+  the current release, even before selecting a family profile.
 
 ## [1.18.4] — 2026-08-11
 

@@ -17,6 +17,12 @@ const RELEASE_NOTES = {
         title: 'Eigenes App-Erlebnis',
         description:
           'Nach der Installation startet LX Family über sein Icon und nutzt den Bildschirm ohne Safari-Leiste.'
+      },
+      {
+        id: 'release-preview-before-login',
+        title: 'Neuigkeiten schon vor der Anmeldung',
+        description:
+          'Der Startbildschirm zeigt ab jetzt kompakt, was sich in der installierten Version geändert hat.'
       }
     ],
     closing:
@@ -39,6 +45,12 @@ const RELEASE_NOTES = {
             title: 'A dedicated app experience',
             description:
               'After installation, LX Family launches from its icon and uses the screen without the Safari bar.'
+          },
+          {
+            id: 'release-preview-before-login',
+            title: 'What is new before you sign in',
+            description:
+              'The welcome screen now gives a compact overview of what changed in the installed version.'
           }
         ],
         closing:

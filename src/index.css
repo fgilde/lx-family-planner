@@ -3690,6 +3690,108 @@ textarea {
   width: 100%;
 }
 
+.auth-release-preview {
+  width: 100%;
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  overflow: hidden;
+  color: var(--text-main);
+  border: 1px solid color-mix(in srgb, var(--primary) 27%, var(--border-color));
+  border-radius: 27px;
+  background:
+    linear-gradient(118deg, color-mix(in srgb, var(--accent) 13%, transparent), transparent 45%),
+    radial-gradient(circle at 94% 8%, color-mix(in srgb, var(--primary) 13%, transparent), transparent 32%),
+    var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-release-preview-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary);
+}
+
+.auth-release-preview-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 8px 16px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.auth-release-preview-head > div {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.auth-release-preview-head span:not(.auth-release-preview-icon) {
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-release-preview-head strong {
+  color: var(--primary);
+  font-size: 0.84rem;
+}
+
+.auth-release-preview-copy h3 {
+  margin: 0 0 4px;
+  color: var(--text-main);
+  font-size: 1.04rem;
+  letter-spacing: -0.018em;
+}
+
+.auth-release-preview-copy p,
+.auth-release-preview-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+
+.auth-release-preview-highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.auth-release-preview-highlights > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  padding: 10px 11px;
+  border-left: 3px solid color-mix(in srgb, var(--accent) 70%, var(--primary));
+  border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-subtle));
+}
+
+.auth-release-preview-highlights strong {
+  color: var(--text-main);
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.auth-release-preview-highlights span {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.auth-release-preview-note {
+  padding-top: 2px;
+  font-size: 0.62rem;
+}
+
 .android-download-card {
   width: 100%;
   min-height: 176px;

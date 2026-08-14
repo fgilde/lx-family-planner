@@ -14,6 +14,8 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
   eigenständig und berücksichtigt sichere Bildschirmränder;
 - der Hinweis erscheint nur auf passenden iOS-Safari-Geräten und kann für
   sieben Tage ausgeblendet werden. Andere Browser bleiben unbehelligt.
+- der Anmeldebildschirm zeigt allen Personen jetzt bereits vor der
+  Profilauswahl kompakt, was sich in der aktuellen Version geändert hat.
 
 ## [1.18.4] – 2026-08-11
 
