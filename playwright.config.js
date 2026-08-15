@@ -38,8 +38,10 @@ export default defineConfig({
       }
     },
     {
-      command:
-        'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 4170',
+      // npm resolves Vite from this checkout or a parent workspace. A direct
+      // node_modules path breaks preview clones that intentionally reuse the
+      // root dependency cache.
+      command: 'npm run dev -- --host 127.0.0.1 --port 4170',
       url: 'http://127.0.0.1:4170',
       timeout: 30_000,
       reuseExistingServer: !process.env.CI,

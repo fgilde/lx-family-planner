@@ -29,4 +29,22 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   await expect(
     page.getByRole('button', { name: 'Kalender', exact: true })
   ).toHaveAttribute('aria-current', 'page');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('.app-header')).toHaveCSS('position', 'sticky');
+  await expect(page.locator('.calendar-history-toggle')).toHaveCSS(
+    'justify-content',
+    'center'
+  );
+  await expect(page.locator('.calendar-import-action')).toHaveCSS(
+    'justify-content',
+    'center'
+  );
+  await page.getByRole('button', { name: 'Menü öffnen' }).click();
+  await expect(
+    page.getByRole('dialog', { name: 'Menü' })
+  ).toBeVisible();
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed');
+  await page.getByRole('button', { name: 'Schließen' }).click();
+  await expect(page.locator('body')).not.toHaveCSS('position', 'fixed');
 });

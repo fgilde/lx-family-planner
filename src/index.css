@@ -2115,6 +2115,13 @@ html, body {
   scrollbar-gutter: stable;
 }
 
+/* Fixed-body lock used by full-screen overlays. This avoids the iOS Safari
+   behaviour where swiping inside a drawer scrolls the blurred page behind it. */
+html.lx-viewport-scroll-locked,
+body.lx-viewport-scroll-locked {
+  overscroll-behavior: none;
+}
+
 body {
   font-family: var(--font-body);
   background:
@@ -2333,6 +2340,8 @@ textarea {
 }
 
 .app-container > .app-header {
+  position: sticky;
+  top: 0;
   z-index: 100;
 }
 
@@ -2427,6 +2436,16 @@ textarea {
   box-shadow: var(--shadow-sm);
   flex-wrap: wrap;
   gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .app-header {
+    /* Own compositing layer keeps the menu trigger stable in iOS Safari. */
+    position: sticky;
+    top: 0;
+    z-index: 140;
+    transform: translateZ(0);
+  }
 }
 
 .brand-logo {
@@ -3095,6 +3114,7 @@ textarea {
   justify-content: center;
   padding: 16px;
   z-index: 2200;
+  overscroll-behavior: contain;
 }
 
 .modal-card {
@@ -3106,6 +3126,8 @@ textarea {
   box-shadow: var(--shadow-lg);
   max-height: 90vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Floating Action Button (FAB) */
@@ -13619,6 +13641,7 @@ textarea {
   padding: 12px;
   background: rgba(17, 28, 25, 0.3);
   backdrop-filter: blur(8px) saturate(0.85);
+  overscroll-behavior: contain;
   animation: notificationLayerIn 160ms ease-out both;
 }
 
@@ -13628,6 +13651,7 @@ textarea {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   overflow: hidden;
+  overscroll-behavior: contain;
   border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border-color));
   border-radius: 28px;
   color: var(--text-main);
@@ -16058,6 +16082,26 @@ textarea {
 }
 
 @media (max-width: 650px) {
+  .calendar-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calendar-tools .calendar-view-switcher {
+    grid-column: 1 / -1;
+  }
+
+  .calendar-tools .calendar-history-toggle,
+  .calendar-tools .calendar-import-action {
+    grid-column: 1 / -1;
+  }
+
+  .calendar-tools > button,
+  .calendar-tools > label {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
   .calendar-hero {
     min-height: 0;
     gap: 13px;
@@ -23207,6 +23251,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
   justify-items: start;
   background: rgba(17, 28, 25, 0.3);
   backdrop-filter: blur(8px) saturate(0.85);
+  overscroll-behavior: contain;
   animation: mobileNavLayerIn 160ms ease-out both;
 }
 
@@ -23216,6 +23261,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: contain;
   border-right: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border-color));
   border-radius: 0 var(--radius-xl) var(--radius-xl) 0;
   color: var(--text-main);
@@ -23269,6 +23315,8 @@ body:has(.modal-backdrop) .problem-report-launcher {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 10px;
   display: flex;
   flex-direction: column;

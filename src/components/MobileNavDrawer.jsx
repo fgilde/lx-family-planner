@@ -11,6 +11,7 @@ import {
 import { useFamily } from '../context/FamilyContext';
 import { canManageFamily } from '../constants/roles';
 import { useNavigationTabs } from '../hooks/useNavigationTabs';
+import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 import LanguageSwitcher from './LanguageSwitcher';
 
 /**
@@ -47,15 +48,8 @@ export default function MobileNavDrawer({
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [isOpen, onClose]);
 
-  // Lock body scroll while the drawer is open (mirrors ProfileModal behavior).
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  // overflow:hidden alone leaks scroll events through to the page in iOS Safari.
+  useViewportScrollLock(isOpen);
 
   if (!isOpen) return null;
 

@@ -61,6 +61,10 @@ Mobile, calendar and tablet improvements:
 
 ## Later / under evaluation
 
+- opt-in Android family location sharing: visible on-device tracking status,
+  per-profile pause controls, no required third-party cloud and no location
+  history in the first release; optional arrival alerts and short retention
+  only after the consent and battery model have been proven;
 - optional at-rest database encryption with a documented recovery model;
 - Telegram profile linking through a bot and expiring QR/start links;
 - voice-assisted kitchen capture;

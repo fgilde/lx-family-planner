@@ -20,6 +20,7 @@ import { DEFAULT_FAMILY_AVATAR } from '../../utils/imageFallback';
 import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import ProjectSupportCard from '../ProjectSupportCard';
 import { PRODUCT_NAME } from '../../../shared/brand.js';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 
 export default function FamilyEditModal({ family, isOpen, onClose }) {
   const { t } = useTranslation('familyTree');
@@ -35,6 +36,7 @@ export default function FamilyEditModal({ family, isOpen, onClose }) {
   const [deletePassword, setDeletePassword] = useState('');
   const [showDelete, setShowDelete] = useState(false);
   const [busy, setBusy] = useState(false);
+  useViewportScrollLock(isOpen && Boolean(family));
 
   useEffect(() => {
     if (!family) return;

@@ -17,6 +17,7 @@ import NotificationCenter from './Notifications/NotificationCenter';
 import CustomThemeEditor from './Theme/CustomThemeEditor';
 import LanguageSwitcher from './LanguageSwitcher';
 import MobileNavDrawer from './MobileNavDrawer';
+import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 import { PRODUCT_NAME, PRODUCT_TAGLINE } from '../../shared/brand.js';
 
 export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree, unreadChatCount = 0 }) {
@@ -35,6 +36,7 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
   const [customThemePreviewActive, setCustomThemePreviewActive] = useState(false);
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  useViewportScrollLock(isThemePickerOpen);
   const isChild = isChildProfile(activeMember);
   const isPet = isPetProfile(activeMember);
   const isWall = isWallProfile(activeMember);

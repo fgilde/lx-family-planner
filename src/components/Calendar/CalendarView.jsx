@@ -467,14 +467,18 @@ export default function CalendarView() {
               <Grid2X2 size={15} /> <span>{t('view.layouts.month')}</span>
             </button>
           </div>
-          <button type="button" onClick={() => setShowPast(value => !value)}>
+          <button
+            type="button"
+            className="calendar-history-toggle"
+            onClick={() => setShowPast(value => !value)}
+          >
             <History size={15} />
             {showPast ? t('view.tools.hidePast') : t('view.tools.showPast')}
           </button>
           <button type="button" onClick={exportICS}>
             <Download size={15} /> {t('view.tools.export')}
           </button>
-          <label>
+          <label className="calendar-import-action">
             <Upload size={15} /> {t('view.tools.import')}
             <input
               type="file"

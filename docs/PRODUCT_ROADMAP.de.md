@@ -120,6 +120,10 @@ sowie das neue Issue #15 und das Reddit-Feedback auf.
 
 ### Optional
 
+- freiwillige Android-Standortfreigabe innerhalb der Familie: sichtbarer
+  Tracking-Status, Pause pro Profil, keine Drittanbieter-Cloud und in der
+  ersten Version keine Standort-Historie; Ankunftshinweise und kurze
+  Aufbewahrung erst nach einem geprüften Einwilligungs- und Akkukonzept
 - WhatsApp nur über die offizielle WhatsApp Business Platform
 - Sprach-Schnelleingabe in der Küche
 - Geburtstags- und Geschenkideenliste

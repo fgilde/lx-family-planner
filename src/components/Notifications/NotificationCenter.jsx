@@ -32,6 +32,7 @@ import { useFamily } from '../../context/FamilyContext';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
 import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
 import { canManageFamily } from '../../constants/roles';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 import {
   formatDate,
   formatDateTime,
@@ -194,6 +195,7 @@ export default function NotificationCenter() {
   } = useFamily();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('today');
+  useViewportScrollLock(isOpen);
 
   const orderedNotifications = useMemo(
     () => [...notifications].sort(
