@@ -5,6 +5,10 @@ import {
   Network,
   Sparkles,
   Server,
+  Settings,
+  Tablet,
+  Home,
+  Users,
   LogOut,
   X
 } from 'lucide-react';
@@ -32,7 +36,14 @@ export default function MobileNavDrawer({
   onOpenFamilyTree,
   onOpenTheme,
   onOpenServerConfig,
-  onLogout
+  onLogout,
+  onOpenFamilySettings,
+  showPlanningLocations = false,
+  activeHousehold,
+  onSelectHousehold,
+  showTabletMode = false,
+  isTabletModeActive = false,
+  onToggleTabletMode
 }) {
   const { t } = useTranslation('chrome');
   const { activeTab, setActiveTab, activeMember } = useFamily();
@@ -67,6 +78,11 @@ export default function MobileNavDrawer({
   const runAction = handler => () => {
     onClose();
     handler?.();
+  };
+
+  const selectHousehold = household => {
+    onSelectHousehold?.(household);
+    onClose();
   };
 
   return createPortal(
@@ -127,9 +143,55 @@ export default function MobileNavDrawer({
         </nav>
 
         <div className="mobile-nav-drawer-actions">
+          {showPlanningLocations && (
+            <section className="mobile-nav-planning-location" aria-label={t('header.planLocationAria')}>
+              <span className="mobile-nav-section-label">{t('header.planLocation')}</span>
+              <div className="mobile-nav-household-options">
+                <button
+                  type="button"
+                  className={activeHousehold === 'familie' ? 'active' : ''}
+                  onClick={() => selectHousehold('familie')}
+                  aria-pressed={activeHousehold === 'familie'}
+                >
+                  <Home size={18} />
+                  <span>{t('header.ourHome')}</span>
+                </button>
+                <button
+                  type="button"
+                  className={activeHousehold === 'oma_opa' ? 'active grandparents' : ''}
+                  onClick={() => selectHousehold('oma_opa')}
+                  aria-pressed={activeHousehold === 'oma_opa'}
+                >
+                  <Users size={18} />
+                  <span>{t('header.grandparentsHome')}</span>
+                </button>
+              </div>
+            </section>
+          )}
+
           <span className="mobile-nav-section-label">
             {t('header.menu.settings')}
           </span>
+          {onOpenFamilySettings && (
+            <button
+              type="button"
+              className="mobile-nav-action-btn"
+              onClick={runAction(onOpenFamilySettings)}
+            >
+              <Settings size={18} />
+              <span>{t('header.manageFamily')}</span>
+            </button>
+          )}
+          {showTabletMode && (
+            <button
+              type="button"
+              className={`mobile-nav-action-btn ${isTabletModeActive ? 'is-active' : ''}`}
+              onClick={runAction(onToggleTabletMode)}
+            >
+              <Tablet size={18} />
+              <span>{isTabletModeActive ? t('header.tabletMode.exit') : t('header.tabletMode.enter')}</span>
+            </button>
+          )}
           <LanguageSwitcher />
           <button
             type="button"

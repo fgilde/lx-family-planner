@@ -19,6 +19,16 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 - the sign-in screen now also gives everyone a compact, readable overview of
   the current release, even before selecting a family profile.
 
+### Mobile navigation refinement
+
+- the iPhone header is now a compact, fully opaque single row that remains
+  visible while scrolling;
+- the profile switcher sits directly beside the navigation button; planning
+  location, family settings, tablet mode, language, theme and logout are
+  grouped in the mobile menu instead of competing for header space;
+- the fixed header reserves its exact height in the document, so calendar
+  controls never slide underneath it.
+
 ## [1.18.4] — 2026-08-11
 
 ### Calendar and mobile overview

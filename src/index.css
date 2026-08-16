@@ -2451,13 +2451,105 @@ textarea {
     box-sizing: border-box;
     z-index: 140;
     padding-top: max(10px, env(safe-area-inset-top));
+    /* The mobile bar must be a real visual surface. A translucent sticky
+       header makes scrolled controls look as if they belong to the header. */
+    background: var(--bg-card);
     transform: translate3d(0, 0, 0);
+  }
+
+  .app-container > .app-header {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    min-height: 66px;
+  }
+
+  /* The two most frequent actions belong together: open navigation and
+     switch profile. Keeping the logo between them and the bell makes the
+     header readable at a glance without a second control row. */
+  .app-header .mobile-menu-btn {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .app-header .header-right {
+    display: contents;
+  }
+
+  .app-header .profile-pill-btn,
+  .app-header .wall-display-badge {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .app-header .notification-center-trigger {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .app-header .mobile-header-context,
+  .app-header .mobile-header-secondary-action {
+    display: none;
+  }
+
+  .app-header .brand-logo {
+    grid-column: 3;
+    grid-row: 1;
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 8px;
+  }
+
+  .app-header .brand-icon-wrapper {
+    width: 39px;
+    height: 39px;
+    border-radius: 13px 13px 5px 13px;
+  }
+
+  .app-header .brand-icon-wrapper svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .app-header .brand-text {
+    min-width: 0;
+  }
+
+  .app-header .brand-text h1 {
+    overflow: hidden;
+    font-size: clamp(1rem, 5vw, 1.28rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-header .brand-text p {
+    display: none;
+  }
+
+  .app-header .header-right {
+    flex: 0 0 auto;
+    gap: 6px;
   }
 
   .mobile-header-spacer {
     display: block;
     flex: 0 0 var(--mobile-header-height, 0px);
     height: var(--mobile-header-height, 0px);
+  }
+}
+
+@media (max-width: 560px) {
+  .app-header .profile-pill-btn {
+    width: 44px;
+    min-width: 44px;
+    padding: 3px;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .app-header .profile-pill-btn > div:not(.avatar-fallback-sm) {
+    display: none !important;
   }
 }
 
@@ -23406,6 +23498,49 @@ body:has(.modal-backdrop) .problem-report-launcher {
   padding: 0 6px 4px;
 }
 
+.mobile-nav-planning-location {
+  display: grid;
+  gap: 8px;
+  padding: 0 0 4px;
+}
+
+.mobile-nav-household-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.mobile-nav-household-options button {
+  min-width: 0;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 850;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+}
+
+.mobile-nav-household-options button.active {
+  border-color: var(--primary);
+  color: var(--on-primary);
+  background: var(--primary);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+.mobile-nav-household-options button.active.grandparents {
+  border-color: #b86618;
+  background: #b86618;
+}
+
 /* Drawer copies of the header actions: make them full-width list rows */
 .mobile-nav-drawer-actions .language-switcher-header {
   width: 100%;
@@ -23452,6 +23587,11 @@ body:has(.modal-backdrop) .problem-report-launcher {
 .mobile-nav-action-btn:hover {
   color: var(--primary);
   background: var(--bg-subtle);
+}
+
+.mobile-nav-action-btn.is-active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-subtle));
 }
 
 .mobile-nav-action-danger {

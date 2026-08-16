@@ -23,6 +23,12 @@ const RELEASE_NOTES = {
         title: 'Neuigkeiten schon vor der Anmeldung',
         description:
           'Der Startbildschirm zeigt ab jetzt kompakt, was sich in der installierten Version geändert hat.'
+      },
+      {
+        id: 'ios-mobile-navigation',
+        title: 'Auf dem iPhone klarer unterwegs',
+        description:
+          'Die Kopfzeile bleibt beim Scrollen sichtbar und kompakt. Menü und Profil liegen direkt nebeneinander; Planungsort, Design und weitere Einstellungen sind ordentlich im Menü gebündelt.'
       }
     ],
     closing:
@@ -51,6 +57,12 @@ const RELEASE_NOTES = {
             title: 'What is new before you sign in',
             description:
               'The welcome screen now gives a compact overview of what changed in the installed version.'
+          },
+          {
+            id: 'ios-mobile-navigation',
+            title: 'Clearer navigation on iPhone',
+            description:
+              'The header stays visible and compact while scrolling. Menu and profile sit next to each other, while planning location, design and further settings live neatly in the menu.'
           }
         ],
         closing:

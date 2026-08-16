@@ -169,7 +169,7 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
 
       {/* Household planning context */}
       {!isChild && !isPet && grandparentsHouseholdEnabled && <div
-        className="household-switcher"
+        className="household-switcher mobile-header-context"
         role="group"
         aria-label={t('header.planLocationAria')}
       >
@@ -199,7 +199,7 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
         {!isWall && <div className="hide-below-tablet"><LanguageSwitcher /></div>}
         {!isChild && !isPet && !isWall && (
           <button
-            className="icon-circle-btn"
+            className="icon-circle-btn mobile-header-secondary-action"
             onClick={() => setIsFamilySettingsOpen(true)}
             title={t('header.manageFamily')}
           >
@@ -323,7 +323,7 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
 
         {/* Tablet Dashboard Toggle */}
         {!isChild && !isPet && !isWall && <button
-          className={`tablet-mode-btn ${activeTab === 'kitchen' ? 'active' : ''}`}
+          className={`tablet-mode-btn mobile-header-secondary-action ${activeTab === 'kitchen' ? 'active' : ''}`}
           onClick={() => setActiveTab(activeTab === 'kitchen' ? 'dashboard' : 'kitchen')}
           title={activeTab === 'kitchen' ? t('header.tabletMode.exitTitle') : t('header.tabletMode.enterTitle')}
         >
@@ -408,6 +408,13 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
         onOpenTheme={() => setIsThemePickerOpen(true)}
         onOpenServerConfig={onOpenServerConfig}
         onLogout={onLogout}
+        onOpenFamilySettings={() => setIsFamilySettingsOpen(true)}
+        showPlanningLocations={!isChild && !isPet && grandparentsHouseholdEnabled}
+        activeHousehold={activeHousehold}
+        onSelectHousehold={toggleHousehold}
+        showTabletMode={!isChild && !isPet && !isWall}
+        isTabletModeActive={activeTab === 'kitchen'}
+        onToggleTabletMode={() => setActiveTab(activeTab === 'kitchen' ? 'dashboard' : 'kitchen')}
       />
     </header>
     <div
