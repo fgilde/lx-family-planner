@@ -2422,6 +2422,10 @@ textarea {
 }
 
 /* --- HEADER --- */
+.mobile-header-spacer {
+  display: none;
+}
+
 .app-header {
   background: var(--header-bg);
   backdrop-filter: blur(18px) saturate(1.15);
@@ -2439,12 +2443,21 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .app-header {
-    /* Own compositing layer keeps the menu trigger stable in iOS Safari. */
-    position: sticky;
-    top: 0;
+  .app-container > .app-header {
+    /* iOS Safari can lose sticky flex items after the browser viewport moves. */
+    position: fixed;
+    inset: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;
     z-index: 140;
-    transform: translateZ(0);
+    padding-top: max(10px, env(safe-area-inset-top));
+    transform: translate3d(0, 0, 0);
+  }
+
+  .mobile-header-spacer {
+    display: block;
+    flex: 0 0 var(--mobile-header-height, 0px);
+    height: var(--mobile-header-height, 0px);
   }
 }
 
@@ -16090,9 +16103,13 @@ textarea {
     grid-column: 1 / -1;
   }
 
-  .calendar-tools .calendar-history-toggle,
-  .calendar-tools .calendar-import-action {
+  .calendar-tools .calendar-history-toggle {
     grid-column: 1 / -1;
+  }
+
+  .calendar-tools .calendar-import-action {
+    /* Export and import share one balanced row below the history action. */
+    grid-column: auto;
   }
 
   .calendar-tools > button,

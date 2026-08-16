@@ -31,7 +31,7 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   ).toHaveAttribute('aria-current', 'page');
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.locator('.app-header')).toHaveCSS('position', 'sticky');
+  await expect(page.locator('.app-header')).toHaveCSS('position', 'fixed');
   await expect(page.locator('.calendar-history-toggle')).toHaveCSS(
     'justify-content',
     'center'
@@ -40,6 +40,10 @@ test('a new family can complete onboarding and open the calendar', async ({ page
     'justify-content',
     'center'
   );
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await expect.poll(() => page.locator('.app-header').evaluate(
+    element => Math.round(element.getBoundingClientRect().top)
+  )).toBe(0);
   await page.getByRole('button', { name: 'Menü öffnen' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Menü' })

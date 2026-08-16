@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
@@ -36,6 +36,8 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
   const [customThemePreviewActive, setCustomThemePreviewActive] = useState(false);
   const [isFamilySettingsOpen, setIsFamilySettingsOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const headerRef = useRef(null);
+  const [mobileHeaderHeight, setMobileHeaderHeight] = useState(0);
   useViewportScrollLock(isThemePickerOpen);
   const isChild = isChildProfile(activeMember);
   const isPet = isPetProfile(activeMember);
@@ -98,6 +100,32 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
     setIsThemePickerOpen(false);
   };
 
+  // On iOS Safari a sticky flex item can disappear once the browser's visual
+  // viewport changes. The phone header is therefore fixed and this measured
+  // spacer keeps the page content exactly where it belongs below it.
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return undefined;
+
+    const updateHeight = () => {
+      const nextHeight = Math.ceil(header.getBoundingClientRect().height);
+      setMobileHeaderHeight(previous =>
+        previous === nextHeight ? previous : nextHeight
+      );
+    };
+
+    updateHeight();
+    const observer = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(updateHeight);
+    observer?.observe(header);
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, []);
+
   useEffect(() => {
     if (!isThemePickerOpen) return undefined;
     const closeOnEscape = event => {
@@ -117,7 +145,8 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
   };
 
   return (
-    <header className="app-header">
+    <>
+    <header className="app-header" ref={headerRef}>
       <button
         type="button"
         className="icon-circle-btn mobile-menu-btn"
@@ -381,5 +410,11 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
         onLogout={onLogout}
       />
     </header>
+    <div
+      className="mobile-header-spacer"
+      aria-hidden="true"
+      style={{ '--mobile-header-height': `${mobileHeaderHeight}px` }}
+    />
+    </>
   );
 }
