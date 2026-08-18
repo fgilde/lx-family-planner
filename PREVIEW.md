@@ -6,6 +6,9 @@ This repository is the isolated test build for the next LX Family release.
 
 - iOS PWA installation flow for Safari: **Share → Add to Home Screen**
 - iOS safe-area and standalone display support
+- a compact iPhone navigation row, stable overlays and centered calendar actions
+- an iPhone-safe calendar editor whose action bar remains reachable
+- recipe images from the photo library or camera, saved only in the local LX data directory
 - all 1.18.4 stable functionality
 
 ## Deployment
