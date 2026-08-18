@@ -51,4 +51,62 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   await expect(page.locator('body')).toHaveCSS('position', 'fixed');
   await page.getByRole('button', { name: 'Schließen' }).click();
   await expect(page.locator('body')).not.toHaveCSS('position', 'fixed');
+
+  const created = await page.evaluate(async () => {
+    const date = new Date();
+    const dateKey = [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, '0'),
+      String(date.getDate()).padStart(2, '0')
+    ].join('-');
+    const response = await fetch('/api/resources/events', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        id: `mobile-dialog-${Date.now()}`,
+        title: 'Mobiler Dialog-Test',
+        date: dateKey,
+        time: '09:00',
+        allDay: false,
+        memberId: 'all',
+        reminders: [10]
+      })
+    });
+    return { ok: response.ok, body: await response.json() };
+  });
+  expect(created.ok).toBe(true);
+  await page.goto('/?view=calendar');
+  await page.getByRole('button', {
+    name: 'Termin Mobiler Dialog-Test öffnen'
+  }).click();
+  const dialog = page.getByRole('dialog', {
+    name: 'Termin bearbeiten'
+  });
+  await expect(dialog).toBeVisible();
+  await expect(page.locator('.calendar-editor-dialog > footer')).toBeVisible();
+  const viewportSafe = await dialog.evaluate(element => {
+    const dialogBounds = element.getBoundingClientRect();
+    const footerBounds = element.querySelector('footer').getBoundingClientRect();
+    return {
+      dialogBottom: Math.ceil(dialogBounds.bottom),
+      footerBottom: Math.ceil(footerBounds.bottom),
+      viewportHeight: window.innerHeight
+    };
+  });
+  expect(viewportSafe.dialogBottom).toBeLessThanOrEqual(viewportSafe.viewportHeight);
+  expect(viewportSafe.footerBottom).toBeLessThanOrEqual(viewportSafe.viewportHeight);
+
+  await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+  await page.goto('/?view=meals');
+  await page.getByRole('button', { name: 'Rezeptbuch (0)', exact: true }).click();
+  await page.getByRole('button', { name: 'Neues Rezept', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Bild auswählen', exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Foto aufnehmen', exact: true })
+  ).toBeVisible();
+  await expect(
+    page.locator('input[capture="environment"]')
+  ).toHaveAttribute('accept', 'image/*');
 });

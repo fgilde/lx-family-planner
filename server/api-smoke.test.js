@@ -531,6 +531,42 @@ test('family flow stays isolated, authorized and internally consistent', async (
     bootstrap.body.family.grandparentsHouseholdEnabled,
     true
   );
+
+  const recipeImageBytes = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLQ9wAAAABJRU5ErkJggg==',
+    'base64'
+  );
+  const uploadedRecipeImage = await request(
+    '/api/recipes/images',
+    {
+      method: 'PUT',
+      headers: {
+        ...authenticatedHeaders,
+        'content-type': 'application/octet-stream',
+        'x-lx-file-name': encodeURIComponent('mein rezeptbild.png')
+      },
+      body: recipeImageBytes
+    },
+    201
+  );
+  assert.match(
+    uploadedRecipeImage.body.image,
+    /^\/api\/recipes\/images\/[a-f0-9-]{36}\?family=.+&claim=.+$/i
+  );
+  const recipeImageResponse = await fetch(
+    `${baseUrl}${uploadedRecipeImage.body.image}`
+  );
+  assert.equal(recipeImageResponse.status, 200);
+  assert.equal(recipeImageResponse.headers.get('content-type'), 'image/png');
+  assert.deepEqual(
+    Buffer.from(await recipeImageResponse.arrayBuffer()),
+    recipeImageBytes
+  );
+  const deniedRecipeImage = await fetch(
+    `${baseUrl}${uploadedRecipeImage.body.image.replace(/claim=[^&]+/, 'claim=invalid')}`
+  );
+  assert.equal(deniedRecipeImage.status, 404);
+
   const nativePushStatus = await request('/api/native-push/status', {
     headers: authenticatedHeaders
   });

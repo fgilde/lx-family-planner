@@ -20,12 +20,15 @@ import {
   Pencil,
   ShieldCheck,
   Sparkles,
+  Camera,
+  ImagePlus,
+  LoaderCircle,
   X
 } from 'lucide-react';
 import { recipeShareTargetFromUrl } from '../../../shared/recipeShareTarget.js';
 import { parseRtkExport } from '../../../shared/rtkImport.js';
 import { parseTandoorExport } from '../../../shared/tandoorImport.js';
-import { plannerApiRequest } from '../../utils/apiConfig.js';
+import { buildApiUrl, plannerApiRequest } from '../../utils/apiConfig.js';
 import {
   clearNativeRecipeShareRequest,
   clearPendingNativeRecipeShare,
@@ -46,7 +49,7 @@ function RecipeImage({ src, alt }) {
   }
   return (
     <img
-      src={src}
+      src={buildApiUrl(src)}
       alt={alt}
       onError={() => setFailed(true)}
       referrerPolicy="no-referrer"
@@ -103,8 +106,11 @@ export default function RecipeBook() {
   const [importDraft, setImportDraft] = useState(null);
   const [tandoorLoading, setTandoorLoading] = useState(false);
   const [rtkLoading, setRtkLoading] = useState(false);
+  const [manualImageUploading, setManualImageUploading] = useState(false);
   const tandoorFileInput = useRef(null);
   const rtkFileInput = useRef(null);
+  const manualImageInput = useRef(null);
+  const manualCameraInput = useRef(null);
 
   const openImportedRecipeDraft = data => {
     const recipe = data.recipe || {};
@@ -259,6 +265,41 @@ export default function RecipeBook() {
   const openCreateRecipe = () => {
     resetRecipeEditor();
     setActiveTab('manual');
+  };
+
+  const uploadManualRecipeImage = async file => {
+    if (!file || manualImageUploading) return;
+    setManualImageUploading(true);
+    try {
+      const result = await plannerApiRequest('/api/recipes/images', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'X-LX-File-Name': encodeURIComponent(file.name || 'rezeptbild')
+        },
+        body: await file.arrayBuffer()
+      });
+      setManualImage(result.image || '');
+      showToast(
+        t('recipeBook.manual.imageSavedTitle'),
+        t('recipeBook.manual.imageSavedBody'),
+        'success'
+      );
+    } catch (uploadError) {
+      showToast(
+        t('recipeBook.manual.imageUploadFailedTitle'),
+        uploadError?.message || t('recipeBook.manual.imageUploadFailedBody'),
+        'error'
+      );
+    } finally {
+      setManualImageUploading(false);
+    }
+  };
+
+  const handleManualImageSelection = event => {
+    const [file] = Array.from(event.target.files || []);
+    event.target.value = '';
+    void uploadManualRecipeImage(file);
   };
 
   const openEditRecipe = recipe => {
@@ -860,7 +901,7 @@ export default function RecipeBook() {
               </div>
             </div>
 
-            <div className="form-group">
+            <div className="form-group recipe-image-source">
               <label className="form-label">{t('recipeBook.manual.imageLabel')}</label>
               <input
                 type="url"
@@ -869,6 +910,63 @@ export default function RecipeBook() {
                 value={manualImage}
                 onChange={event => setManualImage(event.target.value)}
               />
+              <p>{t('recipeBook.manual.imageHint')}</p>
+              <div className="recipe-image-source-actions">
+                <input
+                  ref={manualImageInput}
+                  className="visually-hidden"
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,image/avif"
+                  onChange={handleManualImageSelection}
+                />
+                <input
+                  ref={manualCameraInput}
+                  className="visually-hidden"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleManualImageSelection}
+                />
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={manualImageUploading}
+                  onClick={() => manualImageInput.current?.click()}
+                >
+                  <ImagePlus size={16} /> {t('recipeBook.manual.chooseImage')}
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary recipe-camera-button"
+                  disabled={manualImageUploading}
+                  onClick={() => manualCameraInput.current?.click()}
+                >
+                  {manualImageUploading
+                    ? <LoaderCircle className="spin" size={16} />
+                    : <Camera size={16} />}
+                  {manualImageUploading
+                    ? t('recipeBook.manual.imageUploading')
+                    : t('recipeBook.manual.takePhoto')}
+                </button>
+              </div>
+              {manualImage && (
+                <div className="recipe-image-source-preview">
+                  <RecipeImage
+                    src={manualImage}
+                    alt={t('recipeBook.manual.imagePreviewAlt', {
+                      title: manualTitle || t('recipeBook.manual.dishTitleLabel')
+                    })}
+                  />
+                  <button
+                    type="button"
+                    className="icon-circle-btn"
+                    onClick={() => setManualImage('')}
+                    aria-label={t('recipeBook.manual.removeImage')}
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="recipe-editor-section">

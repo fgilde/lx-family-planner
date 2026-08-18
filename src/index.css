@@ -8327,6 +8327,66 @@ textarea {
   color: var(--text-main);
 }
 
+.recipe-image-source {
+  display: grid;
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary) 7%, transparent),
+      transparent 62%
+    ),
+    var(--bg-subtle);
+}
+
+.recipe-image-source > p {
+  margin: -2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.recipe-image-source-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recipe-image-source-actions .btn-secondary {
+  min-height: 40px;
+  border-radius: 12px;
+}
+
+.recipe-camera-button {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border-color)) !important;
+  color: var(--primary) !important;
+}
+
+.recipe-image-source-preview {
+  position: relative;
+  width: min(220px, 100%);
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  background: var(--bg-card);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--text-main) 8%, transparent);
+}
+
+.recipe-image-source-preview > button {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 31px;
+  height: 31px;
+  border-color: color-mix(in srgb, var(--danger) 32%, var(--border-color));
+  color: var(--danger);
+  background: color-mix(in srgb, var(--bg-elevated) 90%, transparent);
+}
+
 .recipe-editor-section {
   margin-top: 20px;
   padding: 16px;
@@ -21587,13 +21647,18 @@ body:has(.modal-backdrop) .problem-report-launcher {
   z-index: 61000;
   display: grid;
   place-items: center;
-  padding: 18px;
+  padding:
+    max(18px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
   background: rgba(10, 22, 18, 0.58);
   backdrop-filter: blur(12px) saturate(0.9);
 }
 
 .calendar-editor-dialog {
   width: min(760px, calc(100vw - 36px));
+  height: min(900px, calc(100dvh - 36px));
   max-height: min(900px, calc(100dvh - 36px));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -22085,7 +22150,8 @@ body:has(.modal-backdrop) .problem-report-launcher {
 
   .calendar-editor-dialog {
     width: 100%;
-    max-height: 96dvh;
+    height: calc(100dvh - env(safe-area-inset-top));
+    max-height: calc(100dvh - env(safe-area-inset-top));
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
@@ -22122,7 +22188,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
 
   .calendar-editor-dialog > footer {
     grid-template-columns: 1fr 1fr;
-    padding: 11px 12px calc(11px + env(safe-area-inset-bottom));
+    padding: 11px 12px max(11px, env(safe-area-inset-bottom));
   }
 
   .calendar-editor-dialog > footer > span {

@@ -198,6 +198,7 @@ const JSON_LIMIT = process.env.JSON_LIMIT || '5mb';
 const REWARD_ICON_IMAGE_MAX_LENGTH = 350_000;
 const CHAT_ATTACHMENT_MAX_BYTES = 100 * 1024 * 1024;
 const CHAT_ATTACHMENT_MAX_COUNT = 8;
+const RECIPE_IMAGE_MAX_BYTES = 15 * 1024 * 1024;
 const CHAT_ATTACHMENT_FOLDER = 'Familie/Chat';
 const PRIVATE_CHAT_ATTACHMENT_FOLDER = '.LX-Privat/Chat';
 const CLOUD_SHARED_FOLDER = 'Familie';
@@ -2246,6 +2247,73 @@ function safeCompare(left, right) {
     leftBuffer.length === rightBuffer.length &&
     timingSafeEqual(leftBuffer, rightBuffer)
   );
+}
+
+function recipeImageDataDirectory(familyId) {
+  const databaseFile = process.env.DATABASE_FILE
+    ? path.resolve(process.env.DATABASE_FILE)
+    : path.join(process.cwd(), 'family_planner.sqlite');
+  // A hash keeps internal family IDs out of filenames while still giving every
+  // household its own local, permission-restricted directory.
+  const familyDirectory = createHash('sha256')
+    .update(String(familyId || ''))
+    .digest('hex');
+  return path.join(path.dirname(databaseFile), 'recipe-images', familyDirectory);
+}
+
+function recipeImageMimeType(content) {
+  const bytes = Buffer.isBuffer(content) ? content : Buffer.from(content || '');
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8 &&
+    bytes[2] === 0xff
+  ) return 'image/jpeg';
+  if (
+    bytes.length >= 8 &&
+    bytes.subarray(0, 8).equals(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+    )
+  ) return 'image/png';
+  if (bytes.length >= 6 && bytes.subarray(0, 6).toString('ascii').match(/^GIF8[79]a$/)) {
+    return 'image/gif';
+  }
+  if (
+    bytes.length >= 12 &&
+    bytes.subarray(0, 4).toString('ascii') === 'RIFF' &&
+    bytes.subarray(8, 12).toString('ascii') === 'WEBP'
+  ) return 'image/webp';
+  if (bytes.length >= 20 && bytes.subarray(4, 8).toString('ascii') === 'ftyp') {
+    const brand = bytes.subarray(8, 12).toString('ascii').toLowerCase();
+    if (['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1'].includes(brand)) {
+      return 'image/heic';
+    }
+    if (['avif', 'avis'].includes(brand)) return 'image/avif';
+  }
+  return '';
+}
+
+function recipeImageExtension(mimeType) {
+  return {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
+    'image/webp': 'webp',
+    'image/heic': 'heic',
+    'image/avif': 'avif'
+  }[mimeType] || '';
+}
+
+function recipeImageClaim(familyId, imageId) {
+  return createHmac('sha256', ENCRYPTION_KEY)
+    .update(`lx-recipe-image\u0000${familyId}\u0000${imageId}`)
+    .digest('base64url');
+}
+
+function recipeImageUrl(familyId, imageId) {
+  return `/api/recipes/images/${encodeURIComponent(imageId)}?family=${
+    encodeURIComponent(familyId)
+  }&claim=${encodeURIComponent(recipeImageClaim(familyId, imageId))}`;
 }
 
 function authRateLimit(req, res, next) {
@@ -10214,6 +10282,95 @@ export function createApp() {
       });
     }
     res.json({ success: true, ...imported });
+  });
+
+  app.put(
+    '/api/recipes/images',
+    requireAuth,
+    express.raw({
+      type: 'application/octet-stream',
+      limit: `${RECIPE_IMAGE_MAX_BYTES}`
+    }),
+    (req, res) => {
+      const content = Buffer.isBuffer(req.body)
+        ? req.body
+        : Buffer.from(req.body || '');
+      if (!content.length) {
+        return res.status(400).json({
+          success: false,
+          error: 'Bitte wähle zuerst ein Bild aus.'
+        });
+      }
+      if (content.length > RECIPE_IMAGE_MAX_BYTES) {
+        return res.status(413).json({
+          success: false,
+          error: 'Das Rezeptbild darf höchstens 15 MB groß sein.'
+        });
+      }
+      const mimeType = recipeImageMimeType(content);
+      const extension = recipeImageExtension(mimeType);
+      if (!extension) {
+        return res.status(415).json({
+          success: false,
+          error: 'Bitte wähle ein Bild im Format JPG, PNG, WebP, GIF, HEIC oder AVIF.'
+        });
+      }
+
+      const imageId = randomUUID();
+      const directory = recipeImageDataDirectory(req.session.familyId);
+      fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+      const target = path.join(directory, `${imageId}.${extension}`);
+      const temporary = `${target}.uploading`;
+      fs.writeFileSync(temporary, content, { mode: 0o600 });
+      fs.renameSync(temporary, target);
+      return res.status(201).json({
+        success: true,
+        image: recipeImageUrl(req.session.familyId, imageId),
+        mimeType,
+        size: content.length
+      });
+    }
+  );
+
+  // Recipe cards are normal <img> elements. They cannot send the Android
+  // session header, so the opaque signed URL is intentionally used as a
+  // read-only capability. The image itself is stored only in the local data
+  // directory and its family-specific filename remains unguessable.
+  app.get('/api/recipes/images/:imageId', (req, res) => {
+    const familyId = cleanText(req.query.family, '', 100);
+    const imageId = cleanText(req.params.imageId, '', 100);
+    const claim = cleanText(req.query.claim, '', 300);
+    if (
+      !familyId ||
+      !/^[a-f0-9-]{36}$/i.test(imageId) ||
+      !safeCompare(claim, recipeImageClaim(familyId, imageId))
+    ) {
+      return res.status(404).end();
+    }
+    const directory = recipeImageDataDirectory(familyId);
+    let fileName = '';
+    try {
+      fileName = fs.readdirSync(directory).find(name =>
+        new RegExp(`^${imageId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.(jpg|png|gif|webp|heic|avif)$`, 'i')
+          .test(name)
+      ) || '';
+    } catch {
+      return res.status(404).end();
+    }
+    if (!fileName) return res.status(404).end();
+    const mimeType = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      heic: 'image/heic',
+      avif: 'image/avif'
+    }[path.extname(fileName).slice(1).toLowerCase()];
+    if (!mimeType) return res.status(404).end();
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.type(mimeType);
+    return res.sendFile(path.join(directory, fileName));
   });
 
   app.post('/api/recipes/preview-image', requireAuth, async (req, res) => {
