@@ -22145,13 +22145,30 @@ body:has(.modal-backdrop) .problem-report-launcher {
 @media (max-width: 620px) {
   .calendar-editor-layer {
     place-items: end center;
+    /*
+     * iOS may report a dynamic viewport that is taller than the visible
+     * app area while the browser chrome is transitioning.  Keep the sheet
+     * flush with the bottom, but reserve a real action shelf inside it so
+     * the buttons never end up behind the home indicator or browser chrome.
+     */
+    --calendar-editor-mobile-viewport: min(100svh, 100dvh);
+    --calendar-editor-safe-top: max(10px, env(safe-area-inset-top, 0px));
+    --calendar-editor-action-shelf: max(
+      20px,
+      calc(12px + env(safe-area-inset-bottom, 0px))
+    );
     padding: 0;
   }
 
   .calendar-editor-dialog {
     width: 100%;
-    height: calc(100dvh - env(safe-area-inset-top));
-    max-height: calc(100dvh - env(safe-area-inset-top));
+    height: calc(
+      var(--calendar-editor-mobile-viewport) - var(--calendar-editor-safe-top)
+    );
+    max-height: calc(
+      var(--calendar-editor-mobile-viewport) - var(--calendar-editor-safe-top)
+    );
+    box-sizing: border-box;
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
@@ -22188,7 +22205,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
 
   .calendar-editor-dialog > footer {
     grid-template-columns: 1fr 1fr;
-    padding: 11px 12px max(11px, env(safe-area-inset-bottom));
+    padding: 11px 12px var(--calendar-editor-action-shelf);
   }
 
   .calendar-editor-dialog > footer > span {

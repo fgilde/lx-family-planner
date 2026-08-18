@@ -87,14 +87,21 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   const viewportSafe = await dialog.evaluate(element => {
     const dialogBounds = element.getBoundingClientRect();
     const footerBounds = element.querySelector('footer').getBoundingClientRect();
+    const actionBounds = Array.from(
+      element.querySelectorAll('footer button:not([hidden])')
+    ).map(button => button.getBoundingClientRect());
     return {
       dialogBottom: Math.ceil(dialogBounds.bottom),
       footerBottom: Math.ceil(footerBounds.bottom),
+      actionBottom: Math.ceil(Math.max(...actionBounds.map(bounds => bounds.bottom))),
       viewportHeight: window.innerHeight
     };
   });
   expect(viewportSafe.dialogBottom).toBeLessThanOrEqual(viewportSafe.viewportHeight);
   expect(viewportSafe.footerBottom).toBeLessThanOrEqual(viewportSafe.viewportHeight);
+  expect(viewportSafe.actionBottom).toBeLessThanOrEqual(
+    viewportSafe.viewportHeight - 18
+  );
 
   await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
   await page.goto('/?view=meals');
