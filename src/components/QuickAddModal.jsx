@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
 import {
@@ -35,6 +35,7 @@ export default function QuickAddModal() {
     addEvent, addShoppingItem, addTask, addNote
   } = useFamily();
   const { t } = useTranslation('profile');
+  const dialogRef = useRef(null);
 
   const [type, setType] = useState(quickAddDefaultType || 'event');
 
@@ -81,6 +82,33 @@ export default function QuickAddModal() {
     setEndDate('');
     setEndTime('');
   }, [activeMemberId, isQuickAddOpen, quickAddDefaultType]);
+
+  useEffect(() => {
+    if (!isQuickAddOpen) return undefined;
+
+    // iOS keeps dvh/svh at the app height while the keyboard is visible.
+    // visualViewport is the actual visible area, so keep the scrollable dialog
+    // inside it instead of leaving its actions behind the keyboard.
+    const viewport = window.visualViewport;
+    const updateAvailableHeight = () => {
+      const height = viewport?.height ?? window.innerHeight;
+      dialogRef.current?.style.setProperty(
+        '--quick-add-available-height',
+        `${Math.round(height)}px`
+      );
+    };
+
+    updateAvailableHeight();
+    viewport?.addEventListener('resize', updateAvailableHeight);
+    viewport?.addEventListener('scroll', updateAvailableHeight);
+    window.addEventListener('resize', updateAvailableHeight);
+
+    return () => {
+      viewport?.removeEventListener('resize', updateAvailableHeight);
+      viewport?.removeEventListener('scroll', updateAvailableHeight);
+      window.removeEventListener('resize', updateAvailableHeight);
+    };
+  }, [isQuickAddOpen]);
 
   if (!isQuickAddOpen) return null;
 
@@ -147,8 +175,12 @@ export default function QuickAddModal() {
   };
 
   return (
-    <div className="modal-backdrop" onClick={() => setIsQuickAddOpen(false)}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
+    <div className="modal-backdrop quick-add-backdrop" onClick={() => setIsQuickAddOpen(false)}>
+      <div
+        ref={dialogRef}
+        className="modal-card quick-add-modal"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="card-header" style={{ marginBottom: 16 }}>
           <h2 className="card-title">{t('quickAdd.title')}</h2>
           <button className="icon-circle-btn" onClick={() => setIsQuickAddOpen(false)}>

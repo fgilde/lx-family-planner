@@ -3235,6 +3235,17 @@ textarea {
   -webkit-overflow-scrolling: touch;
 }
 
+/* The quick-add form has many event fields. iOS does not reliably reduce
+ * dvh/svh for the software keyboard in a standalone PWA, so its React
+ * component supplies the visual viewport height as a custom property. */
+.quick-add-modal {
+  max-height: min(
+    90vh,
+    calc(var(--quick-add-available-height, 100dvh) - 32px)
+  );
+  scroll-padding-block: 12px;
+}
+
 /* Floating Action Button (FAB) */
 .fab-add-btn {
   position: fixed;
@@ -3353,6 +3364,22 @@ textarea {
   .modal-card {
     padding: 18px;
     border-radius: var(--radius-lg);
+  }
+
+  .quick-add-backdrop {
+    padding:
+      max(10px, env(safe-area-inset-top, 0px))
+      max(10px, env(safe-area-inset-right, 0px))
+      max(10px, env(safe-area-inset-bottom, 0px))
+      max(10px, env(safe-area-inset-left, 0px));
+  }
+
+  .quick-add-modal {
+    max-height: calc(
+      var(--quick-add-available-height, 100dvh)
+      - max(10px, env(safe-area-inset-top, 0px))
+      - max(10px, env(safe-area-inset-bottom, 0px))
+    );
   }
 
   .fab-add-btn {
