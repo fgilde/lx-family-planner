@@ -51,3 +51,17 @@ test('CalDAV rejects URLs that contain credentials', () => {
     /darf keine Zugangsdaten/
   );
 });
+
+test('CalDAV requires HTTPS outside the test environment', () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'production';
+  try {
+    assert.throws(
+      () => normalizeCalDavUrl('http://calendar.example.test/calendar'),
+      /HTTPS-Adresse/
+    );
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+  }
+});

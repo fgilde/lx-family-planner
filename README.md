@@ -101,10 +101,10 @@ the shared overview, plan a date and open the family archive.
 
 ### CalDAV calendar connections
 
-Open **Calendar → Calendar sources**, select **CalDAV** and enter the address
-of one calendar collection together with a dedicated app password. LX reads
-events into the family calendar but never writes to, changes or deletes the
-remote calendar. This works with standard CalDAV servers such as Synology
+Open **Calendar → Calendar sources**, select **CalDAV** and enter the HTTPS
+address of one calendar collection together with a dedicated app password. LX
+reads events into the family calendar but never writes to, changes or deletes
+the remote calendar. This works with standard CalDAV servers such as Synology
 Calendar, Nextcloud and many hosted calendars.
 
 For an intentionally local calendar server on a private LAN address, set

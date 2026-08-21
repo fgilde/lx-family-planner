@@ -33,6 +33,9 @@ export function normalizeCalDavUrl(value) {
   if (!['http:', 'https:'].includes(url.protocol)) {
     throw failure('Die CalDAV-Adresse muss mit http:// oder https:// beginnen.', 400);
   }
+  if (url.protocol !== 'https:' && process.env.NODE_ENV !== 'test') {
+    throw failure('CalDAV-Zugangsdaten werden nur über eine HTTPS-Adresse übertragen.', 400);
+  }
   if (url.username || url.password || url.hash) {
     throw failure('Die CalDAV-Adresse darf keine Zugangsdaten oder Anker enthalten.', 400);
   }
