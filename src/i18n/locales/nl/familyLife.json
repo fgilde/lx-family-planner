@@ -150,7 +150,10 @@
       "roomPlaceholder": "Lokaal (optioneel)",
       "teacherPlaceholder": "Leraar (optioneel)",
       "detailsPlaceholder": "Boek, materialen of een korte notitie",
-      "submit": "Item toevoegen"
+        "submit": "Item toevoegen",
+        "editTitle": "Schoolitem bewerken",
+        "save": "Wijzigingen opslaan",
+        "cancel": "Annuleren"
     }
   },
   "polls": {

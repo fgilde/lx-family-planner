@@ -92,12 +92,25 @@ the shared overview, plan a date and open the family archive.
 | Family network | invite grandparents or another household and share only what you approve | usually one isolated household |
 | Data ownership | self-hosted SQLite, safe updates, optional Nextcloud | provider account and cloud required |
 | Home setup | Docker, Proxmox, Unraid, Umbrel, CasaOS, Cosmos or plain Node.js | vendor-specific |
-| Integrations | Android push, browser push, Home Assistant, Bring!, ICS and Gotify | varies by vendor |
+| Integrations | Android push, browser push, Home Assistant, Bring!, ICS, CalDAV and Gotify | varies by vendor |
 
 ## Highlights
 
 - **Family calendar:** multiple participants, recurring appointments, birthdays,
-  waste collection, ICS subscriptions and flexible reminders.
+  waste collection, ICS and read-only CalDAV subscriptions, plus flexible reminders.
+
+### CalDAV calendar connections
+
+Open **Calendar → Calendar sources**, select **CalDAV** and enter the address
+of one calendar collection together with a dedicated app password. LX reads
+events into the family calendar but never writes to, changes or deletes the
+remote calendar. This works with standard CalDAV servers such as Synology
+Calendar, Nextcloud and many hosted calendars.
+
+For an intentionally local calendar server on a private LAN address, set
+`CALENDAR_ALLOW_PRIVATE_HOSTS=true` in the LX environment. Keep this setting
+off when no LAN calendar is required: it is an explicit safeguard against a
+calendar URL reaching other private devices from the LX server.
 - **Chores that stay fair:** shared assignments, automatic rotation, recurring
   routines and a four-eyes approval flow before children receive stars.
 - **Meals and recipes:** meal plan, cooking mode, shopping-list hand-off and
@@ -245,7 +258,7 @@ not in a public issue. Read the [security policy](SECURITY.md),
 LX is built around four principles: children are supported rather than
 monitored; private data is filtered on the server; integrations stay optional;
 and an update must not cost a family its history. Near-term work focuses on
-offline reliability, open CalDAV connections, a guided restore flow and
+offline reliability, a guided restore flow and
 optional modules for larger household features.
 
 Development is maintainer-led and uses automated tests plus AI-assisted tooling.

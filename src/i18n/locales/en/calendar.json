@@ -189,6 +189,8 @@
       "emptyTitle": "No calendar bridge yet",
       "emptyDescription": "Paste a private ICS link on the right. New events will then flow into your family calendar automatically.",
       "everyone": "All",
+      "icsProvider": "ICS",
+      "caldavProvider": "CalDAV",
       "eventCount_one": "{{count}} event",
       "eventCount_other": "{{count}} events",
       "syncNever": "Not successfully synced yet",
@@ -204,9 +206,15 @@
     "form": {
       "connect": "Connect calendar",
       "connectHint": "The link stays encrypted on your server.",
+      "providerLabel": "Connection type",
+      "providerIcs": "ICS link (public or private)",
+      "providerCalDav": "CalDAV (with credentials)",
       "nameLabel": "Source name",
       "namePlaceholder": "e.g. school calendar",
       "urlLabel": "Private ICS link",
+      "caldavUrlLabel": "CalDAV calendar address",
+      "caldavUsernameLabel": "CalDAV username",
+      "caldavPasswordLabel": "CalDAV app password",
       "visibilityLabel": "Visible to",
       "allMembers": "All family members",
       "householdLabel": "Planning space",
@@ -215,6 +223,7 @@
       "colorLegend": "Calendar color",
       "pickColorAria": "Choose color {{color}}",
       "privacyNote": "Read-only: the family planner cannot change or delete anything in the external calendar. Still, never share the secret link publicly.",
+      "caldavPrivacyNote": "Read-only: username and app password are stored encrypted only on your LX server. LX never changes or deletes anything in the CalDAV calendar.",
       "connecting": "Connecting …"
     }
   },

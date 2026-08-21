@@ -189,6 +189,8 @@
       "emptyTitle": "Pas encore de pont de calendrier",
       "emptyDescription": "Collez un lien ICS privé à droite. Les nouveaux événements arriveront alors automatiquement dans votre calendrier familial.",
       "everyone": "Tous",
+      "icsProvider": "ICS",
+      "caldavProvider": "CalDAV",
       "eventCount_one": "{{count}} événement",
       "eventCount_other": "{{count}} événements",
       "syncNever": "Pas encore synchronisé avec succès",
@@ -204,9 +206,15 @@
     "form": {
       "connect": "Connecter le calendrier",
       "connectHint": "Le lien reste chiffré sur votre serveur.",
+      "providerLabel": "Type de connexion",
+      "providerIcs": "Lien ICS (public ou privé)",
+      "providerCalDav": "CalDAV (avec identifiants)",
       "nameLabel": "Nom de la source",
       "namePlaceholder": "ex. calendrier scolaire",
       "urlLabel": "Lien ICS privé",
+      "caldavUrlLabel": "Adresse du calendrier CalDAV",
+      "caldavUsernameLabel": "Nom d’utilisateur CalDAV",
+      "caldavPasswordLabel": "Mot de passe d’application CalDAV",
       "visibilityLabel": "Visible par",
       "allMembers": "Tous les membres de la famille",
       "householdLabel": "Espace de planification",
@@ -215,6 +223,7 @@
       "colorLegend": "Couleur du calendrier",
       "pickColorAria": "Choisir la couleur {{color}}",
       "privacyNote": "Lecture seule : le planificateur familial ne peut rien modifier ni supprimer dans le calendrier externe. Toutefois, ne partagez jamais le lien secret publiquement.",
+      "caldavPrivacyNote": "Lecture seule : le nom d’utilisateur et le mot de passe d’application sont conservés chiffrés uniquement sur votre serveur LX. LX ne modifie ni ne supprime rien dans le calendrier CalDAV.",
       "connecting": "Connexion…"
     }
   },

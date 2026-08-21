@@ -189,6 +189,8 @@
       "emptyTitle": "Noch keine Kalenderbrücke",
       "emptyDescription": "Füge rechts einen privaten ICS-Link ein. Danach laufen neue Termine automatisch in euren Familienkalender.",
       "everyone": "Alle",
+      "icsProvider": "ICS",
+      "caldavProvider": "CalDAV",
       "eventCount_one": "{{count}} Termin",
       "eventCount_other": "{{count}} Termine",
       "syncNever": "Noch nicht erfolgreich abgeglichen",
@@ -204,9 +206,15 @@
     "form": {
       "connect": "Kalender verbinden",
       "connectHint": "Der Link bleibt verschlüsselt auf eurem Server.",
+      "providerLabel": "Verbindungsart",
+      "providerIcs": "ICS-Link (öffentlich oder privat)",
+      "providerCalDav": "CalDAV (mit Zugangsdaten)",
       "nameLabel": "Name der Quelle",
       "namePlaceholder": "z. B. Schulkalender",
       "urlLabel": "Privater ICS-Link",
+      "caldavUrlLabel": "CalDAV-Kalenderadresse",
+      "caldavUsernameLabel": "CalDAV-Benutzername",
+      "caldavPasswordLabel": "CalDAV-App-Passwort",
       "visibilityLabel": "Sichtbar für",
       "allMembers": "Alle Familienmitglieder",
       "householdLabel": "Planungsort",
@@ -215,6 +223,7 @@
       "colorLegend": "Kalenderfarbe",
       "pickColorAria": "Farbe {{color}} wählen",
       "privacyNote": "Nur lesen: Der Familienplaner kann im fremden Kalender nichts ändern oder löschen. Teile den geheimen Link trotzdem nicht öffentlich.",
+      "caldavPrivacyNote": "Nur lesen: Benutzername und App-Passwort werden verschlüsselt nur auf eurem LX-Server gespeichert. LX ändert oder löscht im CalDAV-Kalender nichts.",
       "connecting": "Wird verbunden …"
     }
   },

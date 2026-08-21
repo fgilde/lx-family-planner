@@ -150,7 +150,10 @@
       "roomPlaceholder": "Raum (optional)",
       "teacherPlaceholder": "Lehrkraft (optional)",
       "detailsPlaceholder": "Buch, Material oder kurze Notiz",
-      "submit": "Eintragen"
+        "submit": "Eintragen",
+        "editTitle": "Schuleintrag bearbeiten",
+        "save": "Änderungen speichern",
+        "cancel": "Abbrechen"
     }
   },
   "polls": {

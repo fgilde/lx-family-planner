@@ -52,6 +52,11 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   await page.getByRole('button', { name: 'Schließen' }).click();
   await expect(page.locator('body')).not.toHaveCSS('position', 'fixed');
 
+  // Reference viewport from the reported iPhone 17 Pro Max Safari issue.
+  // Keep this exact CSS viewport in the regression suite so calendar actions
+  // cannot silently disappear below the safe area again.
+  await page.setViewportSize({ width: 440, height: 956 });
+
   const created = await page.evaluate(async () => {
     const date = new Date();
     const dateKey = [
@@ -102,6 +107,7 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   expect(viewportSafe.actionBottom).toBeLessThanOrEqual(
     viewportSafe.viewportHeight - 18
   );
+  expect(viewportSafe.viewportHeight).toBe(956);
 
   await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
   await page.goto('/?view=meals');

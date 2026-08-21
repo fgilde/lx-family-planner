@@ -36,7 +36,7 @@
     "test:e2e": "playwright test",
     "check:i18n": "node scripts/check-i18n.js",
     "build:apk": "powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
-    "check": "node --check server.js && node --check server/app.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && npm run check:i18n && npm run test && vite build"
+    "check": "node --check server.js && node --check server/app.js && node --check server/caldav.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && npm run check:i18n && npm run test && vite build"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.1",

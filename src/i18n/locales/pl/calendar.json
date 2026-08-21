@@ -189,6 +189,8 @@
       "emptyTitle": "Brak mostka kalendarza",
       "emptyDescription": "Wklej prywatny link ICS po prawej stronie. Nowe wydarzenia będą automatycznie wpływać do Twojego kalendarza rodzinnego.",
       "everyone": "Wszyscy",
+      "icsProvider": "ICS",
+      "caldavProvider": "CalDAV",
       "eventCount_one": "{{count}} wydarzenie",
       "eventCount_other": "{{count}} wydarzenia(ów)",
       "syncNever": "Jeszcze nie udało się zsynchronizować",
@@ -204,9 +206,15 @@
     "form": {
       "connect": "Podłącz kalendarz",
       "connectHint": "Link pozostaje zaszyfrowany na Twoim serwerze.",
+      "providerLabel": "Typ połączenia",
+      "providerIcs": "Łącze ICS (publiczne lub prywatne)",
+      "providerCalDav": "CalDAV (z danymi logowania)",
       "nameLabel": "Nazwa źródła",
       "namePlaceholder": "np. kalendarz szkolny",
       "urlLabel": "Prywatny link ICS",
+      "caldavUrlLabel": "Adres kalendarza CalDAV",
+      "caldavUsernameLabel": "Nazwa użytkownika CalDAV",
+      "caldavPasswordLabel": "Hasło aplikacji CalDAV",
       "visibilityLabel": "Widoczne dla",
       "allMembers": "Wszyscy członkowie rodziny",
       "householdLabel": "Miejsce planowania",
@@ -215,6 +223,7 @@
       "colorLegend": "Kolor kalendarza",
       "pickColorAria": "Wybierz kolor {{color}}",
       "privacyNote": "Tylko do odczytu: planer rodzinny nie może niczego zmienić ani usunąć w zewnętrznym kalendarzu. Mimo to nigdy nie udostępniaj publicznie tajnego linku.",
+      "caldavPrivacyNote": "Tylko do odczytu: nazwa użytkownika i hasło aplikacji są przechowywane zaszyfrowane tylko na Twoim serwerze LX. LX niczego nie zmienia ani nie usuwa w kalendarzu CalDAV.",
       "connecting": "Łączenie …"
     }
   },

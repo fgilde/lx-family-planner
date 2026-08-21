@@ -61,8 +61,11 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
     deleteCalendarSubscription
   } = useFamily();
   const [form, setForm] = useState({
+    provider: 'ics',
     name: '',
     url: '',
+    username: '',
+    password: '',
     color: SOURCE_COLORS[0],
     memberId: 'all',
     household:
@@ -116,7 +119,9 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
       setForm(previous => ({
         ...previous,
         name: '',
-        url: ''
+        url: '',
+        username: '',
+        password: ''
       }));
     }
   };
@@ -242,6 +247,10 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                         <div>
                           <strong>{subscription.name}</strong>
                           <span>
+                            {subscription.provider === 'caldav'
+                              ? t('sources.list.caldavProvider')
+                              : t('sources.list.icsProvider')}
+                            {' · '}
                             {subscription.host}
                             {' · '}
                             {member?.name || t('sources.list.everyone')}
@@ -331,6 +340,24 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
             </div>
 
             <label>
+              <span>{t('sources.form.providerLabel')}</span>
+              <select
+                value={form.provider}
+                onChange={event =>
+                  setForm(previous => ({
+                    ...previous,
+                    provider: event.target.value,
+                    username: '',
+                    password: ''
+                  }))
+                }
+              >
+                <option value="ics">{t('sources.form.providerIcs')}</option>
+                <option value="caldav">{t('sources.form.providerCalDav')}</option>
+              </select>
+            </label>
+
+            <label>
               <span>{t('sources.form.nameLabel')}</span>
               <input
                 required
@@ -347,7 +374,9 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
             </label>
 
             <label>
-              <span>{t('sources.form.urlLabel')}</span>
+              <span>{form.provider === 'caldav'
+                ? t('sources.form.caldavUrlLabel')
+                : t('sources.form.urlLabel')}</span>
               <input
                 required
                 type="url"
@@ -359,11 +388,43 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     url: event.target.value
                   }))
                 }
-                placeholder="https://…/calendar.ics"
+                placeholder={form.provider === 'caldav'
+                  ? 'https://…/caldav/…/calendar/'
+                  : 'https://…/calendar.ics'}
                 autoComplete="off"
                 spellCheck="false"
               />
             </label>
+
+            {form.provider === 'caldav' && (
+              <div className="calendar-source-form-grid">
+                <label>
+                  <span>{t('sources.form.caldavUsernameLabel')}</span>
+                  <input
+                    required
+                    maxLength={300}
+                    value={form.username}
+                    onChange={event =>
+                      setForm(previous => ({ ...previous, username: event.target.value }))
+                    }
+                    autoComplete="username"
+                  />
+                </label>
+                <label>
+                  <span>{t('sources.form.caldavPasswordLabel')}</span>
+                  <input
+                    required
+                    type="password"
+                    maxLength={1000}
+                    value={form.password}
+                    onChange={event =>
+                      setForm(previous => ({ ...previous, password: event.target.value }))
+                    }
+                    autoComplete="current-password"
+                  />
+                </label>
+              </div>
+            )}
 
             <div className="calendar-source-form-grid">
               <label>
@@ -432,7 +493,9 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
 
             <aside className="calendar-source-privacy">
               <LockKeyhole size={16} />
-              <p>{t('sources.form.privacyNote')}</p>
+              <p>{form.provider === 'caldav'
+                ? t('sources.form.caldavPrivacyNote')
+                : t('sources.form.privacyNote')}</p>
             </aside>
 
             <button

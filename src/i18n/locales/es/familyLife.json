@@ -150,7 +150,10 @@
       "roomPlaceholder": "Aula (opcional)",
       "teacherPlaceholder": "Profesor/a (opcional)",
       "detailsPlaceholder": "Libro, materiales o una nota breve",
-      "submit": "Añadir entrada"
+        "submit": "Añadir entrada",
+        "editTitle": "Editar entrada escolar",
+        "save": "Guardar cambios",
+        "cancel": "Cancelar"
     }
   },
   "polls": {

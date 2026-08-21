@@ -16,6 +16,7 @@ import {
   Medal,
   MessageCircleHeart,
   PiggyBank,
+  Pencil,
   Plus,
   RotateCw,
   ShieldAlert,
@@ -220,6 +221,7 @@ export default function FamilyLifeHub() {
     teacher: '',
     details: ''
   });
+  const [editingSchoolItemId, setEditingSchoolItemId] = useState('');
   const [cancellationDates, setCancellationDates] = useState({});
   const [pollForm, setPollForm] = useState({
     question: '',
@@ -295,6 +297,15 @@ export default function FamilyLifeHub() {
           `${right.weekday}${String(right.period || 0).padStart(2, '0')}${right.time || ''}`
         )
     );
+  const timetablePeriods = Array.from(
+    {
+      length: Math.max(
+        8,
+        ...timetableLessons.map(lesson => Math.min(20, Math.max(1, Number(lesson.period) || 1)))
+      )
+    },
+    (_, index) => index + 1
+  );
   useEffect(() => {
     if (!isAdult && !schoolEnabled && section === 'school') {
       setSection('today');
@@ -417,12 +428,62 @@ export default function FamilyLifeHub() {
 
   const createSchoolItem = async event => {
     event.preventDefault();
-    const created = await addFamilyLifeRecord('schoolItems', {
+    const payload = {
       memberId: selectedId,
       ...schoolForm,
       weekday: Number(schoolForm.weekday)
+    };
+    const saved = editingSchoolItemId
+      ? await updateFamilyLifeRecord('schoolItems', editingSchoolItemId, payload)
+      : await addFamilyLifeRecord('schoolItems', payload);
+    if (saved) {
+      setEditingSchoolItemId('');
+      setSchoolForm(previous => ({ ...previous, title: '', subject: '', details: '' }));
+    }
+  };
+
+  const editSchoolItem = item => {
+    if (!isAdult) return;
+    setEditingSchoolItemId(item.id);
+    setSchoolForm({
+      kind: item.kind || 'homework',
+      title: item.title || '',
+      subject: item.subject || '',
+      date: item.date || today,
+      weekday: String(Number(item.weekday) || 1),
+      time: item.time || '',
+      endTime: item.endTime || '',
+      period: String(Number(item.period) || 1),
+      room: item.room || '',
+      teacher: item.teacher || '',
+      details: item.details || ''
     });
-    if (created) setSchoolForm(previous => ({ ...previous, title: '', details: '' }));
+    document.getElementById('school-item-editor')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
+  const startLessonForSlot = (weekday, period) => {
+    if (!isAdult) return;
+    setEditingSchoolItemId('');
+    setSchoolForm(previous => ({
+      ...previous,
+      kind: 'lesson',
+      title: '',
+      subject: '',
+      weekday: String(weekday),
+      period: String(period),
+      time: '',
+      endTime: '',
+      room: '',
+      teacher: '',
+      details: ''
+    }));
+    document.getElementById('school-item-editor')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
   };
 
   const setSchoolEnabled = async enabled => {
@@ -1006,23 +1067,45 @@ export default function FamilyLifeHub() {
                             month: '2-digit'
                           })}</small>
                         </header>
-                        <div>
-                          {dayLessons.map(lesson => {
-                            const cancelled = lesson.cancellations?.includes(
-                              currentDate
+                        <div className="school-day-slots">
+                          {timetablePeriods.map(period => {
+                            const lessonsInSlot = dayLessons.filter(
+                              entry => Number(entry.period || 1) === period
                             );
-                            const cancellationDate =
-                              cancellationDates[lesson.id] ||
-                              dateKeyForWeekday(lesson.weekday, { next: true });
-                            const cancellationDateMatches =
-                              new Date(`${cancellationDate}T12:00:00`).getDay() ===
-                              Number(lesson.weekday);
-                            const selectedDateCancelled =
-                              lesson.cancellations?.includes(cancellationDate);
-                            return (
+                            if (!lessonsInSlot.length) {
+                              return isAdult ? (
+                                <button
+                                  key={`empty-${weekday}-${period}`}
+                                  type="button"
+                                  className="school-empty-slot"
+                                  onClick={() => startLessonForSlot(weekday, period)}
+                                >
+                                  <span>{t('school.timetable.period', { count: period })}</span>
+                                  <Plus size={14} />
+                                </button>
+                              ) : (
+                                <div key={`empty-${weekday}-${period}`} className="school-empty-slot is-read-only">
+                                  <span>{t('school.timetable.period', { count: period })}</span>
+                                  <em>{t('school.timetable.free')}</em>
+                                </div>
+                              );
+                            }
+                            return lessonsInSlot.map(lesson => {
+                              const cancelled = lesson.cancellations?.includes(
+                                currentDate
+                              );
+                              const cancellationDate =
+                                cancellationDates[lesson.id] ||
+                                dateKeyForWeekday(lesson.weekday, { next: true });
+                              const cancellationDateMatches =
+                                new Date(`${cancellationDate}T12:00:00`).getDay() ===
+                                Number(lesson.weekday);
+                              const selectedDateCancelled =
+                                lesson.cancellations?.includes(cancellationDate);
+                              return (
                               <article
                                 key={lesson.id}
-                                className={cancelled ? 'is-cancelled' : ''}
+                                className={`school-lesson-card ${cancelled ? 'is-cancelled' : ''}`}
                               >
                                 <div className="school-lesson-time">
                                   <b>
@@ -1055,6 +1138,14 @@ export default function FamilyLifeHub() {
                                 </div>
                                 {isAdult && (
                                   <div className="school-lesson-actions">
+                                    <button
+                                      type="button"
+                                      className="is-edit"
+                                      onClick={() => editSchoolItem(lesson)}
+                                      aria-label={t('school.form.title')}
+                                    >
+                                      <Pencil size={13} />
+                                    </button>
                                     <input
                                       type="date"
                                       min={today}
@@ -1088,11 +1179,9 @@ export default function FamilyLifeHub() {
                                   </div>
                                 )}
                               </article>
-                            );
+                              );
+                            });
                           })}
-                          {!dayLessons.length && (
-                            <p>{t('school.timetable.free')}</p>
-                          )}
                         </div>
                       </section>
                     );
@@ -1132,11 +1221,18 @@ export default function FamilyLifeHub() {
                             </span>
                           </button>
                           {isAdult && (
-                            <button
-                              type="button"
-                              onClick={() => deleteFamilyLifeRecord('schoolItems', item.id)}
-                              aria-label={t('school.deleteAria')}
-                            ><Trash2 size={14} /></button>
+                            <span className="school-item-actions">
+                              <button
+                                type="button"
+                                onClick={() => editSchoolItem(item)}
+                                aria-label={t('school.form.title')}
+                              ><Pencil size={14} /></button>
+                              <button
+                                type="button"
+                                onClick={() => deleteFamilyLifeRecord('schoolItems', item.id)}
+                                aria-label={t('school.deleteAria')}
+                              ><Trash2 size={14} /></button>
+                            </span>
                           )}
                         </article>
                       ))}
@@ -1150,8 +1246,8 @@ export default function FamilyLifeHub() {
             )}
           </section>
           {isAdult && selectedId && schoolEnabled && (
-            <section className="family-life-panel">
-              <PanelHeader kicker={t('school.form.kicker')} title={t('school.form.title')} icon={BookOpenCheck} />
+            <section className="family-life-panel" id="school-item-editor">
+              <PanelHeader kicker={t('school.form.kicker')} title={editingSchoolItemId ? t('school.form.editTitle') : t('school.form.title')} icon={BookOpenCheck} />
               <form onSubmit={createSchoolItem} className="family-life-form">
                 <div className="form-row">
                   <select
@@ -1242,7 +1338,21 @@ export default function FamilyLifeHub() {
                   onChange={event => setSchoolForm(previous => ({ ...previous, details: event.target.value }))}
                   placeholder={t('school.form.detailsPlaceholder')}
                 />
-                <button className="family-life-primary"><Plus size={16} /> {t('school.form.submit')}</button>
+                <div className="school-form-actions">
+                  <button className="family-life-primary"><Plus size={16} /> {editingSchoolItemId ? t('school.form.save') : t('school.form.submit')}</button>
+                  {editingSchoolItemId && (
+                    <button
+                      type="button"
+                      className="family-life-secondary"
+                      onClick={() => {
+                        setEditingSchoolItemId('');
+                        setSchoolForm(previous => ({ ...previous, title: '', subject: '', details: '' }));
+                      }}
+                    >
+                      {t('school.form.cancel')}
+                    </button>
+                  )}
+                </div>
               </form>
             </section>
           )}

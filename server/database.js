@@ -216,6 +216,7 @@ database.exec(`
     member_id TEXT NOT NULL DEFAULT 'all',
     household TEXT NOT NULL DEFAULT 'familie',
     kind TEXT NOT NULL DEFAULT 'calendar',
+    provider TEXT NOT NULL DEFAULT 'ics',
     enabled INTEGER NOT NULL DEFAULT 1
       CHECK(enabled IN (0, 1)),
     last_synced_at INTEGER,
@@ -684,6 +685,18 @@ applySchemaMigration(14, 'Kalenderquellen fuer Muellabfuhr unterscheiden', () =>
     database.exec(`
       ALTER TABLE calendar_subscriptions
       ADD COLUMN kind TEXT NOT NULL DEFAULT 'calendar';
+    `);
+  }
+});
+
+applySchemaMigration(15, 'CalDAV-Kalenderquellen unterscheiden', () => {
+  const columns = database
+    .prepare('PRAGMA table_info(calendar_subscriptions)')
+    .all();
+  if (!columns.some(column => column.name === 'provider')) {
+    database.exec(`
+      ALTER TABLE calendar_subscriptions
+      ADD COLUMN provider TEXT NOT NULL DEFAULT 'ics';
     `);
   }
 });
@@ -3007,6 +3020,7 @@ function mapCalendarSubscriptionRow(row, { includeSecret = false } = {}) {
     memberId: row.member_id,
     household: row.household,
     kind: row.kind || 'calendar',
+    provider: row.provider === 'caldav' ? 'caldav' : 'ics',
     enabled: Boolean(row.enabled),
     lastSyncedAt: row.last_synced_at || null,
     lastSuccessAt: row.last_success_at || null,
@@ -3074,6 +3088,7 @@ export function createCalendarSubscription(
     memberId = 'all',
     household = 'familie',
     kind = 'calendar',
+    provider = 'ics',
     enabled = true
   }
 ) {
@@ -3083,9 +3098,9 @@ export function createCalendarSubscription(
     .prepare(`
       INSERT INTO calendar_subscriptions(
         id, family_id, name, feed_host, secret_encrypted, color,
-        member_id, household, kind, enabled, created_at, updated_at
+        member_id, household, kind, provider, enabled, created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -3097,6 +3112,7 @@ export function createCalendarSubscription(
       memberId,
       household,
       kind === 'trash' ? 'trash' : 'calendar',
+      provider === 'caldav' ? 'caldav' : 'ics',
       enabled ? 1 : 0,
       now,
       now
@@ -3131,6 +3147,7 @@ export function updateCalendarSubscription(
         member_id = ?,
         household = ?,
         kind = ?,
+        provider = ?,
         enabled = ?,
         updated_at = ?
       WHERE family_id = ? AND id = ?
@@ -3143,6 +3160,7 @@ export function updateCalendarSubscription(
       updated.memberId,
       updated.household,
       updated.kind === 'trash' ? 'trash' : 'calendar',
+      updated.provider === 'caldav' ? 'caldav' : 'ics',
       updated.enabled ? 1 : 0,
       updated.updatedAt,
       familyId,

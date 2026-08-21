@@ -43,6 +43,7 @@ import {
 import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 import { PRODUCT_NAME } from '../shared/brand.js';
 import { loadBringCatalog } from './bringCatalog.js';
+import { fetchCalDavEvents, normalizeCalDavUrl } from './caldav.js';
 import {
   extractSharedRecipeDraft,
   importRecipePreviewImage,
@@ -1263,15 +1264,22 @@ function calendarSubscriptionResourceType(subscription) {
 async function syncCalendarSubscription(subscription) {
   let url = '';
   try {
-    url = decryptJson(subscription.secretEncrypted).url;
-    const content = await fetchCalendarFeed(url);
+    const connection = decryptJson(subscription.secretEncrypted);
+    url = connection.url;
     const now = Date.now();
-    const events = parseICalendar(content, {
+    const parserOptions = {
       targetTimeZone: process.env.TZ || 'Europe/Berlin',
       rangeStart: now - 45 * 86_400_000,
       rangeEnd: now + 730 * 86_400_000,
       maxEvents: 1500
-    }).map(event => subscription.kind === 'trash'
+    };
+    const sourceEvents = subscription.provider === 'caldav'
+      ? await fetchCalDavEvents(connection, {
+          ...parserOptions,
+          appVersion: APP_VERSION
+        })
+      : parseICalendar(await fetchCalendarFeed(url), parserOptions);
+    const events = sourceEvents.map(event => subscription.kind === 'trash'
       ? trashSubscriptionRecord(subscription, event)
       : calendarEventRecord(subscription, event));
     const records = replaceRecordsBySource(
@@ -5620,7 +5628,16 @@ export function createApp() {
     requireAdult,
     async (req, res) => {
       const input = ensureObject(req.body);
-      const url = normalizeCalendarFeedUrl(input.url);
+      const provider = input.provider === 'caldav' ? 'caldav' : 'ics';
+      const url = provider === 'caldav'
+        ? normalizeCalDavUrl(input.url)
+        : normalizeCalendarFeedUrl(input.url);
+      const username = provider === 'caldav'
+        ? requireText(input.username, 'CalDAV-Benutzername', 300)
+        : '';
+      const password = provider === 'caldav'
+        ? requireText(input.password, 'CalDAV-App-Passwort', 1000)
+        : '';
       const memberId = cleanText(input.memberId, 'all', 100) || 'all';
       if (
         memberId !== 'all' &&
@@ -5642,11 +5659,16 @@ export function createApp() {
       const created = createCalendarSubscription(req.session.familyId, {
         name: requireText(input.name, translate('fields.calendarName'), 100),
         host: url.hostname,
-        secretEncrypted: encryptJson({ url: url.toString() }),
+        secretEncrypted: encryptJson(
+          provider === 'caldav'
+            ? { url: url.toString(), username, password }
+            : { url: url.toString() }
+        ),
         color,
         memberId,
         household,
         kind: input.kind === 'trash' ? 'trash' : 'calendar',
+        provider,
         enabled: true
       });
       let syncResult = null;
@@ -5704,9 +5726,38 @@ export function createApp() {
           error: translate('errors.selectedProfileNotFound')
         });
       }
+      const existingSecret = decryptJson(existing.secretEncrypted);
+      const provider = Object.hasOwn(input, 'provider')
+        ? input.provider === 'caldav' ? 'caldav' : 'ics'
+        : existing.provider;
+      if (provider !== existing.provider && !Object.hasOwn(input, 'url')) {
+        return res.status(400).json({
+          success: false,
+          error: 'Zum Wechsel der Kalenderart wird eine neue Kalenderadresse benötigt.'
+        });
+      }
       const nextUrl = Object.hasOwn(input, 'url')
-        ? normalizeCalendarFeedUrl(input.url)
+        ? provider === 'caldav'
+          ? normalizeCalDavUrl(input.url)
+          : normalizeCalendarFeedUrl(input.url)
         : null;
+      const nextSecret = provider === 'caldav'
+        ? {
+            url: nextUrl?.toString() || existingSecret.url,
+            username: Object.hasOwn(input, 'username')
+              ? requireText(input.username, 'CalDAV-Benutzername', 300)
+              : existingSecret.username,
+            password: Object.hasOwn(input, 'password')
+              ? requireText(input.password, 'CalDAV-App-Passwort', 1000)
+              : existingSecret.password
+          }
+        : { url: nextUrl?.toString() || existingSecret.url };
+      if (provider === 'caldav' && (!nextSecret.username || !nextSecret.password)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Für CalDAV werden Benutzername und App-Passwort benötigt.'
+        });
+      }
       const updated = updateCalendarSubscription(
         req.session.familyId,
         existing.id,
@@ -5715,9 +5766,8 @@ export function createApp() {
             ? requireText(input.name, translate('fields.calendarName'), 100)
             : existing.name,
           host: nextUrl?.hostname || existing.host,
-          secretEncrypted: nextUrl
-            ? encryptJson({ url: nextUrl.toString() })
-            : existing.secretEncrypted,
+          secretEncrypted: encryptJson(nextSecret),
+          provider,
           color:
             Object.hasOwn(input, 'color') &&
             /^#[0-9a-f]{6}$/i.test(String(input.color))

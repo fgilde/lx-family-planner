@@ -150,7 +150,10 @@
       "roomPlaceholder": "Aula (facoltativo)",
       "teacherPlaceholder": "Insegnante (facoltativo)",
       "detailsPlaceholder": "Libro, materiali o una breve nota",
-      "submit": "Aggiungi voce"
+        "submit": "Aggiungi voce",
+        "editTitle": "Modifica elemento scolastico",
+        "save": "Salva modifiche",
+        "cancel": "Annulla"
     }
   },
   "polls": {

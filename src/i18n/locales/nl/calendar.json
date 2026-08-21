@@ -189,6 +189,8 @@
       "emptyTitle": "Nog geen agendabrug",
       "emptyDescription": "Plak rechts een privé-ICS-koppeling. Nieuwe afspraken stromen daarna automatisch jouw gezinsagenda binnen.",
       "everyone": "Alle",
+      "icsProvider": "ICS",
+      "caldavProvider": "CalDAV",
       "eventCount_one": "{{count}} afspraak",
       "eventCount_other": "{{count}} afspraken",
       "syncNever": "Nog niet succesvol gesynchroniseerd",
@@ -204,9 +206,15 @@
     "form": {
       "connect": "Agenda verbinden",
       "connectHint": "De koppeling blijft versleuteld op jouw server.",
+      "providerLabel": "Verbindingstype",
+      "providerIcs": "ICS-link (openbaar of privé)",
+      "providerCalDav": "CalDAV (met inloggegevens)",
       "nameLabel": "Naam van bron",
       "namePlaceholder": "bijv. schoolagenda",
       "urlLabel": "Privé-ICS-koppeling",
+      "caldavUrlLabel": "CalDAV-kalenderadres",
+      "caldavUsernameLabel": "CalDAV-gebruikersnaam",
+      "caldavPasswordLabel": "CalDAV-appwachtwoord",
       "visibilityLabel": "Zichtbaar voor",
       "allMembers": "Alle gezinsleden",
       "householdLabel": "Planningsgebied",
@@ -215,6 +223,7 @@
       "colorLegend": "Agendakleur",
       "pickColorAria": "Kleur {{color}} kiezen",
       "privacyNote": "Alleen-lezen: de gezinsplanner kan niets wijzigen of verwijderen in de externe agenda. Deel de geheime koppeling toch nooit publiek.",
+      "caldavPrivacyNote": "Alleen-lezen: gebruikersnaam en appwachtwoord worden alleen versleuteld op jouw LX-server opgeslagen. LX wijzigt of verwijdert niets in de CalDAV-kalender.",
       "connecting": "Verbinden …"
     }
   },

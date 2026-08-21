@@ -17358,6 +17358,46 @@ textarea {
   background: var(--bg-card);
 }
 
+.school-empty-slot {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 35%, var(--border-color));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
+  color: var(--primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.school-empty-slot span {
+  font-size: .64rem;
+  font-weight: 850;
+}
+
+.school-empty-slot.is-read-only {
+  color: var(--text-muted);
+  border-color: color-mix(in srgb, var(--border-color) 78%, transparent);
+  background: color-mix(in srgb, var(--bg-subtle) 72%, transparent);
+  cursor: default;
+}
+
+.school-empty-slot em {
+  font-size: .58rem;
+  font-style: normal;
+}
+
+.school-empty-slot:not(.is-read-only):hover,
+.school-empty-slot:not(.is-read-only):focus-visible {
+  border-style: solid;
+  background: color-mix(in srgb, var(--primary) 11%, var(--bg-card));
+  outline: none;
+}
+
 .school-timetable article.is-cancelled {
   border-color: color-mix(in srgb, var(--danger) 55%, var(--border-color));
   background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
@@ -17416,7 +17456,7 @@ textarea {
 .school-lesson-actions {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: 4px;
   padding-top: 6px;
   border-top: 1px solid var(--border-color);
@@ -17452,6 +17492,50 @@ textarea {
   width: 30px;
   display: grid;
   place-items: center;
+}
+
+.school-lesson-actions .is-edit {
+  width: 30px;
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+}
+
+.school-item-actions {
+  display: inline-flex;
+  gap: 3px;
+  align-self: center;
+}
+
+.school-kind-grid article > .school-item-actions > button {
+  min-width: 30px;
+  padding: 5px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--primary);
+}
+
+.school-kind-grid article > .school-item-actions > button:last-child {
+  color: var(--danger);
+}
+
+.school-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.school-form-actions .family-life-secondary {
+  min-height: 42px;
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .school-lesson-form-fields {

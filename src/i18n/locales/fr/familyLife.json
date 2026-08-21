@@ -150,7 +150,10 @@
       "roomPlaceholder": "Salle (facultatif)",
       "teacherPlaceholder": "Enseignant (facultatif)",
       "detailsPlaceholder": "Livre, matériel ou courte note",
-      "submit": "Ajouter l'entrée"
+        "submit": "Ajouter l'entrée",
+        "editTitle": "Modifier l'entrée scolaire",
+        "save": "Enregistrer les modifications",
+        "cancel": "Annuler"
     }
   },
   "polls": {

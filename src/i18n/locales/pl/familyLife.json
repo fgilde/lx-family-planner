@@ -150,7 +150,10 @@
       "roomPlaceholder": "Sala (opcjonalnie)",
       "teacherPlaceholder": "Nauczyciel (opcjonalnie)",
       "detailsPlaceholder": "Książka, materiały lub krótka notatka",
-      "submit": "Dodaj wpis"
+        "submit": "Dodaj wpis",
+        "editTitle": "Edytuj wpis szkolny",
+        "save": "Zapisz zmiany",
+        "cancel": "Anuluj"
     }
   },
   "polls": {

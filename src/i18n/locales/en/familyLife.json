@@ -150,7 +150,10 @@
       "roomPlaceholder": "Room (optional)",
       "teacherPlaceholder": "Teacher (optional)",
       "detailsPlaceholder": "Book, materials or a short note",
-      "submit": "Add entry"
+        "submit": "Add entry",
+        "editTitle": "Edit school item",
+        "save": "Save changes",
+        "cancel": "Cancel"
     }
   },
   "polls": {
