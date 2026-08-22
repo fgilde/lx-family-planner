@@ -13,11 +13,18 @@
     "weekdays": "Du lundi au vendredi",
     "weekly": "Toutes les semaines",
     "monthly": "Tous les mois",
+    "custom": "Intervalle personnalisé",
+    "units": { "days": "jours", "weeks": "semaines", "months": "mois" },
     "recurring": "Récurrente"
   },
   "memberCard": {
     "managedOnly": "Uniquement organisée",
     "noTasks": "Aucune tâche assignée à {{name}}."
+  },
+  "scheduled": {
+    "title_one": "{{count}} tâche planifiée",
+    "title_other": "{{count}} tâches planifiées",
+    "hint": "Ces tâches restent planifiées et n’apparaissent qu’au moment choisi. Touchez pour modifier."
   },
   "shared": {
     "title": "S'y mettre ensemble",
@@ -80,6 +87,11 @@
     "dueDate": "Due le",
     "dueTime": "Heure (facultatif)",
     "repeatLabel": "Répéter",
+    "repeatEvery": "Répéter tous les",
+    "repeatUnit": "Unité de temps",
+    "visibilityLabel": "Visible pour le profil",
+    "visibilityHint": "La tâche reste planifiée et apparaît seulement au moment choisi.",
+    "visibility": { "onDueDate": "Le jour prévu", "oneDay": "1 jour avant", "twoDays": "2 jours avant", "threeDays": "3 jours avant", "oneWeek": "1 semaine avant", "twoWeeks": "2 semaines avant", "always": "Toujours visible" },
     "rotationToggle": "Alterner équitablement entre les profils",
     "rotationHint": "Après chaque répétition confirmée, la personne suivante est automatiquement tirée.",
     "category": "Catégorie",
@@ -89,8 +101,10 @@
       "room": "Chambre",
       "school": "École",
       "pet": "Animal",
-      "garden": "Jardin"
+      "garden": "Jardin",
+      "custom": "Ajouter un domaine personnalisé …"
     },
+    "customCategoryPlaceholder": "ex. Salle de bain, cave, voiture …",
     "managedNoteTitle": "Tâche d'organisation",
     "managedNoteHint": "Les profils gérés n'obtiennent pas d'étoiles ni de signalement de fin séparé.",
     "starsLabel": "Récompense en étoiles (+ étoiles)",

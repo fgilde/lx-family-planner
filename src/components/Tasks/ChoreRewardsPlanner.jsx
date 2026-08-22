@@ -27,8 +27,11 @@ import {
 import { formatDate } from '../../utils/formatting';
 import RewardIcon, { DEFAULT_REWARD_ICON } from './RewardIcon';
 import RewardIconPicker from './RewardIconPicker';
+import { taskIsVisibleOnDate } from '../../../shared/taskVisibility.js';
 
-const REPEAT_RULES = ['none', 'daily', 'weekdays', 'weekly', 'monthly'];
+const REPEAT_RULES = ['none', 'daily', 'weekdays', 'weekly', 'monthly', 'custom'];
+const TASK_CATEGORIES = ['Haushalt', 'Küche', 'Zimmer', 'Schule', 'Haustier', 'Garten'];
+const CUSTOM_CATEGORY = '__custom__';
 
 function formatTaskDate(value) {
   if (!value) return '';
@@ -70,6 +73,9 @@ export default function ChoreRewardsPlanner() {
   );
   const [taskDueTime, setTaskDueTime] = useState('');
   const [taskRepeatRule, setTaskRepeatRule] = useState('none');
+  const [taskRepeatInterval, setTaskRepeatInterval] = useState(2);
+  const [taskRepeatUnit, setTaskRepeatUnit] = useState('weeks');
+  const [taskVisibilityDaysBefore, setTaskVisibilityDaysBefore] = useState(2);
   const [taskAssignmentMode, setTaskAssignmentMode] = useState('individual');
   const [taskEligibleMemberIds, setTaskEligibleMemberIds] = useState([]);
   const [taskRotationEnabled, setTaskRotationEnabled] = useState(false);
@@ -103,6 +109,9 @@ export default function ChoreRewardsPlanner() {
     setTaskDueDate(currentLocalDate());
     setTaskDueTime('');
     setTaskRepeatRule('none');
+    setTaskRepeatInterval(2);
+    setTaskRepeatUnit('weeks');
+    setTaskVisibilityDaysBefore(2);
     setTaskAssignmentMode('individual');
     setTaskEligibleMemberIds(taskAssignableMembers.map(member => member.id));
     setTaskRotationEnabled(false);
@@ -125,6 +134,13 @@ export default function ChoreRewardsPlanner() {
     setTaskDueDate(task.dueDate || '');
     setTaskDueTime(task.dueTime || '');
     setTaskRepeatRule(task.repeatRule || 'none');
+    setTaskRepeatInterval(Math.max(1, Number(task.repeatInterval) || 2));
+    setTaskRepeatUnit(task.repeatUnit || 'weeks');
+    setTaskVisibilityDaysBefore(
+      Number.isFinite(Number(task.visibilityDaysBefore))
+        ? Number(task.visibilityDaysBefore)
+        : 365
+    );
     setTaskAssignmentMode(
       task.assignmentMode === 'shared' ? 'shared' : 'individual'
     );
@@ -160,6 +176,9 @@ export default function ChoreRewardsPlanner() {
       dueDate: taskDueDate,
       dueTime: taskDueTime,
       repeatRule: taskRepeatRule,
+      repeatInterval: Number(taskRepeatInterval),
+      repeatUnit: taskRepeatUnit,
+      visibilityDaysBefore: Number(taskVisibilityDaysBefore),
       rotationMemberIds:
         taskAssignmentMode !== 'shared' &&
         !taskIsForManagedProfile &&
@@ -225,6 +244,21 @@ export default function ChoreRewardsPlanner() {
 
   const isParent = canManageFamily(activeMember);
   const visibleMembers = isParent ? members : [activeMember].filter(Boolean);
+  const today = currentLocalDate();
+  const visibleTasks = tasks.filter(task =>
+    (task.household || 'familie') === activeHousehold &&
+    taskIsVisibleOnDate(task, today)
+  );
+  const scheduledTasks = isParent
+    ? tasks.filter(task =>
+        (task.household || 'familie') === activeHousehold &&
+        !taskIsVisibleOnDate(task, today) &&
+        !task.completed
+      )
+    : [];
+  const categoryChoice = TASK_CATEGORIES.includes(taskCategory)
+    ? taskCategory
+    : CUSTOM_CATEGORY;
   const sharedTasks = tasks.filter(task => {
     if (
       task.assignmentMode !== 'shared' ||
@@ -237,7 +271,7 @@ export default function ChoreRewardsPlanner() {
       !task.eligibleMemberIds?.length ||
       task.eligibleMemberIds.includes(activeMember?.id)
     );
-  }).sort((left, right) => {
+  }).filter(task => taskIsVisibleOnDate(task, today)).sort((left, right) => {
     if (Boolean(left.completed) !== Boolean(right.completed)) {
       return left.completed ? 1 : -1;
     }
@@ -420,10 +454,37 @@ export default function ChoreRewardsPlanner() {
         </section>
       )}
 
+      {isParent && scheduledTasks.length > 0 && (
+        <details className="task-scheduled-details">
+          <summary>
+            <CalendarDays size={17} />
+            {t('scheduled.title', { count: scheduledTasks.length })}
+          </summary>
+          <p>{t('scheduled.hint')}</p>
+          <div className="task-scheduled-list">
+            {scheduledTasks
+              .sort((left, right) => String(left.dueDate || '').localeCompare(String(right.dueDate || '')))
+              .map(task => (
+                <button
+                  type="button"
+                  key={task.id}
+                  onClick={() => openEditTask(task)}
+                >
+                  <span>
+                    <strong>{task.title}</strong>
+                    <small>{task.category || t('taskModal.categories.household')}</small>
+                  </span>
+                  <time>{formatTaskDate(task.dueDate)}</time>
+                </button>
+              ))}
+          </div>
+        </details>
+      )}
+
       {/* SECTION 1: TASKS BY FAMILY MEMBER */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
         {visibleMembers.map(member => {
-          const memberTasks = tasks.filter(
+          const memberTasks = visibleTasks.filter(
             task =>
               task.assignmentMode !== 'shared' &&
               task.memberId === member.id &&
@@ -948,6 +1009,53 @@ export default function ChoreRewardsPlanner() {
                     </select>
                   </label>
                 </div>
+                {taskRepeatRule === 'custom' && (
+                  <div className="task-repeat-details">
+                    <label className="form-group">
+                      <span className="form-label">{t('taskModal.repeatEvery')}</span>
+                      <input
+                        type="number"
+                        className="form-input"
+                        min="1"
+                        max="365"
+                        value={taskRepeatInterval}
+                        onChange={event => setTaskRepeatInterval(event.target.value)}
+                        required
+                      />
+                    </label>
+                    <label className="form-group">
+                      <span className="form-label">{t('taskModal.repeatUnit')}</span>
+                      <select
+                        className="form-select"
+                        value={taskRepeatUnit}
+                        onChange={event => setTaskRepeatUnit(event.target.value)}
+                      >
+                        <option value="days">{t('repeat.units.days')}</option>
+                        <option value="weeks">{t('repeat.units.weeks')}</option>
+                        <option value="months">{t('repeat.units.months')}</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
+                {taskRepeatRule !== 'none' && (
+                  <label className="form-group task-visibility-field">
+                    <span className="form-label">{t('taskModal.visibilityLabel')}</span>
+                    <select
+                      className="form-select"
+                      value={taskVisibilityDaysBefore}
+                      onChange={event => setTaskVisibilityDaysBefore(event.target.value)}
+                    >
+                      <option value="0">{t('taskModal.visibility.onDueDate')}</option>
+                      <option value="1">{t('taskModal.visibility.oneDay')}</option>
+                      <option value="2">{t('taskModal.visibility.twoDays')}</option>
+                      <option value="3">{t('taskModal.visibility.threeDays')}</option>
+                      <option value="7">{t('taskModal.visibility.oneWeek')}</option>
+                      <option value="14">{t('taskModal.visibility.twoWeeks')}</option>
+                      <option value="365">{t('taskModal.visibility.always')}</option>
+                    </select>
+                    <small className="form-hint">{t('taskModal.visibilityHint')}</small>
+                  </label>
+                )}
                 {taskAssignmentMode !== 'shared' &&
                   taskRepeatRule !== 'none' && !taskIsForManagedProfile && (
                   <div className="task-rotation-editor">
@@ -1013,8 +1121,10 @@ export default function ChoreRewardsPlanner() {
                 <label className="form-label">{t('taskModal.category')}</label>
                 <select
                   className="form-select"
-                  value={taskCategory}
-                  onChange={event => setTaskCategory(event.target.value)}
+                  value={categoryChoice}
+                  onChange={event => setTaskCategory(
+                    event.target.value === CUSTOM_CATEGORY ? '' : event.target.value
+                  )}
                 >
                   <option value="Haushalt">{t('taskModal.categories.household')}</option>
                   <option value="Küche">{t('taskModal.categories.kitchen')}</option>
@@ -1022,7 +1132,19 @@ export default function ChoreRewardsPlanner() {
                   <option value="Schule">{t('taskModal.categories.school')}</option>
                   <option value="Haustier">{t('taskModal.categories.pet')}</option>
                   <option value="Garten">{t('taskModal.categories.garden')}</option>
+                  <option value={CUSTOM_CATEGORY}>{t('taskModal.categories.custom')}</option>
                 </select>
+                {categoryChoice === CUSTOM_CATEGORY && (
+                  <input
+                    type="text"
+                    className="form-input task-custom-category"
+                    value={taskCategory}
+                    onChange={event => setTaskCategory(event.target.value)}
+                    placeholder={t('taskModal.customCategoryPlaceholder')}
+                    maxLength="80"
+                    required
+                  />
+                )}
               </div>
 
               {taskIsForManagedProfile ? (

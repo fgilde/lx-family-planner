@@ -13,11 +13,18 @@
     "weekdays": "Od poniedziałku do piątku",
     "weekly": "Co tydzień",
     "monthly": "Co miesiąc",
+    "custom": "Własny odstęp",
+    "units": { "days": "dni", "weeks": "tygodnie", "months": "miesiące" },
     "recurring": "Cykliczne"
   },
   "memberCard": {
     "managedOnly": "Tylko organizowane",
     "noTasks": "Brak zadań przypisanych do {{name}}."
+  },
+  "scheduled": {
+    "title_one": "{{count}} zaplanowane zadanie",
+    "title_other": "{{count}} zaplanowane zadania",
+    "hint": "Te cykliczne zadania pozostają zaplanowane i pojawiają się dopiero w wybranym czasie. Kliknij, aby edytować."
   },
   "shared": {
     "title": "Zabierzmy się za to razem",
@@ -80,6 +87,11 @@
     "dueDate": "Termin",
     "dueTime": "Godzina (opcjonalnie)",
     "repeatLabel": "Powtarzaj",
+    "repeatEvery": "Powtarzaj co",
+    "repeatUnit": "Jednostka czasu",
+    "visibilityLabel": "Widoczne dla profilu",
+    "visibilityHint": "Zadanie pozostaje zaplanowane i pojawia się dopiero w wybranym czasie.",
+    "visibility": { "onDueDate": "W dniu terminu", "oneDay": "1 dzień wcześniej", "twoDays": "2 dni wcześniej", "threeDays": "3 dni wcześniej", "oneWeek": "1 tydzień wcześniej", "twoWeeks": "2 tygodnie wcześniej", "always": "Zawsze widoczne" },
     "rotationToggle": "Uczciwa rotacja między profilami",
     "rotationHint": "Po każdym potwierdzonym powtórzeniu automatycznie nadchodzi kolejna osoba.",
     "category": "Kategoria",
@@ -89,8 +101,10 @@
       "room": "Pokój",
       "school": "Szkoła",
       "pet": "Zwierzątko",
-      "garden": "Ogród"
+      "garden": "Ogród",
+      "custom": "Dodaj własny obszar …"
     },
+    "customCategoryPlaceholder": "np. Łazienka, piwnica, samochód …",
     "managedNoteTitle": "Zadanie organizacyjne",
     "managedNoteHint": "Profile zarządzane nie dostają gwiazdek i osobnego raportu ukończenia.",
     "starsLabel": "Nagroda w gwiazdkach (+ gwiazdek)",

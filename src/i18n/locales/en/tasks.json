@@ -13,11 +13,22 @@
     "weekdays": "Monday to Friday",
     "weekly": "Every week",
     "monthly": "Every month",
+    "custom": "Custom interval",
+    "units": {
+      "days": "days",
+      "weeks": "weeks",
+      "months": "months"
+    },
     "recurring": "Recurring"
   },
   "memberCard": {
     "managedOnly": "Organized only",
     "noTasks": "No tasks assigned to {{name}}."
+  },
+  "scheduled": {
+    "title_one": "{{count}} scheduled task",
+    "title_other": "{{count}} scheduled tasks",
+    "hint": "These recurring tasks remain planned and appear for the assigned profile only in the chosen time window. Tap to edit."
   },
   "shared": {
     "title": "Tackle it together",
@@ -80,6 +91,19 @@
     "dueDate": "Due on",
     "dueTime": "Time (optional)",
     "repeatLabel": "Repeat",
+    "repeatEvery": "Repeat every",
+    "repeatUnit": "Time unit",
+    "visibilityLabel": "Visible to the profile",
+    "visibilityHint": "The task remains scheduled, but appears for the assigned person only at the selected time.",
+    "visibility": {
+      "onDueDate": "On the due date",
+      "oneDay": "1 day before",
+      "twoDays": "2 days before",
+      "threeDays": "3 days before",
+      "oneWeek": "1 week before",
+      "twoWeeks": "2 weeks before",
+      "always": "Immediately and always"
+    },
     "rotationToggle": "Rotate fairly between profiles",
     "rotationHint": "After each confirmed repetition, the next person is automatically up.",
     "category": "Category",
@@ -89,8 +113,10 @@
       "room": "Room",
       "school": "School",
       "pet": "Pet",
-      "garden": "Garden"
+      "garden": "Garden",
+      "custom": "Add a custom area …"
     },
+    "customCategoryPlaceholder": "e.g. Bathroom, basement, car …",
     "managedNoteTitle": "Organization task",
     "managedNoteHint": "Managed profiles get no stars and no separate done report.",
     "starsLabel": "Star reward (+ stars)",

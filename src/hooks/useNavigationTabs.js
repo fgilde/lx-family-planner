@@ -22,6 +22,7 @@ import {
   isPetProfile
 } from '../constants/roles';
 import { taskIsAvailableToMember } from '../../shared/taskAssignments.js';
+import { taskIsVisibleOnDate } from '../../shared/taskVisibility.js';
 
 /**
  * Builds the visible navigation tabs based on the active member's role and
@@ -54,7 +55,9 @@ export function useNavigationTabs() {
   const pendingTasksCount = isChildProfile(activeMember)
     ? tasks.filter(
         task =>
-          taskIsAvailableToMember(task, activeMember?.id) && !task.completed
+          taskIsAvailableToMember(task, activeMember?.id) &&
+          !task.completed &&
+          taskIsVisibleOnDate(task)
       ).length
     : tasks.filter(
         task =>

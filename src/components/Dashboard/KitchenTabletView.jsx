@@ -23,6 +23,7 @@ import {
   eventSpansToday
 } from '../../../shared/calendarAudience.js';
 import { birthdayEventCopy } from '../../../shared/birthdays.js';
+import { taskIsVisibleOnDate } from '../../../shared/taskVisibility.js';
 import { groupTrashEventsByDate, trashGroupTitle } from '../../../shared/trashSchedule.js';
 import useDashboardLayout from '../../hooks/useDashboardLayout';
 import {
@@ -262,7 +263,11 @@ export default function KitchenTabletView() {
   const pendingTasks = useMemo(
     () =>
       tasks
-        .filter(task => !task.completed && belongsToHousehold(task))
+        .filter(task =>
+          !task.completed &&
+          taskIsVisibleOnDate(task) &&
+          belongsToHousehold(task)
+        )
         .sort((left, right) => {
           const dueDateOrder = String(left.dueDate || '9999-12-31')
             .localeCompare(String(right.dueDate || '9999-12-31'));

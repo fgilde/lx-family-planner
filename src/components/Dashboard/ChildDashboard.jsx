@@ -35,6 +35,7 @@ import MediaCover from './MediaCover';
 import RewardIcon from '../Tasks/RewardIcon';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
 import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
+import { taskIsVisibleOnDate } from '../../../shared/taskVisibility.js';
 import {
   birthdayEventCopy,
   nextBirthdayOccurrencesOnly
@@ -118,7 +119,9 @@ export default function ChildDashboard() {
     : 'adventure';
   const world = CHILD_WORLDS[worldKey];
   const allMyTasks = tasks.filter(
-    task => taskIsAvailableToMember(task, activeMember?.id)
+    task =>
+      taskIsAvailableToMember(task, activeMember?.id) &&
+      taskIsVisibleOnDate(task)
   );
   const myTasks = allMyTasks.filter(task => !task.completed);
   const completedMissions = allMyTasks.filter(task => task.completed).length;

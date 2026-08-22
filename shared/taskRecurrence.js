@@ -3,8 +3,11 @@ export const TASK_REPEAT_RULES = new Set([
   'daily',
   'weekdays',
   'weekly',
-  'monthly'
+  'monthly',
+  'custom'
 ]);
+
+export const TASK_REPEAT_UNITS = new Set(['days', 'weeks', 'months']);
 
 export function normalizeTaskDate(value, fallback = '') {
   const text = String(value || '').trim();
@@ -29,7 +32,13 @@ function formatUtcDate(date) {
   ].join('-');
 }
 
-export function nextTaskDueDate(currentDate, repeatRule, anchorDay = 0) {
+export function nextTaskDueDate(
+  currentDate,
+  repeatRule,
+  anchorDay = 0,
+  repeatInterval = 1,
+  repeatUnit = 'weeks'
+) {
   const normalizedRule = TASK_REPEAT_RULES.has(repeatRule)
     ? repeatRule
     : 'none';
@@ -54,6 +63,31 @@ export function nextTaskDueDate(currentDate, repeatRule, anchorDay = 0) {
   if (normalizedRule === 'weekly') {
     date.setUTCDate(date.getUTCDate() + 7);
     return formatUtcDate(date);
+  }
+
+  if (normalizedRule === 'custom') {
+    const interval = Math.max(1, Math.min(365, Number(repeatInterval) || 1));
+    const unit = TASK_REPEAT_UNITS.has(repeatUnit) ? repeatUnit : 'weeks';
+    if (unit === 'days') {
+      date.setUTCDate(date.getUTCDate() + interval);
+      return formatUtcDate(date);
+    }
+    if (unit === 'weeks') {
+      date.setUTCDate(date.getUTCDate() + interval * 7);
+      return formatUtcDate(date);
+    }
+
+    const targetMonthStart = new Date(Date.UTC(year, month - 1 + interval, 1));
+    const lastTargetDay = new Date(
+      Date.UTC(
+        targetMonthStart.getUTCFullYear(),
+        targetMonthStart.getUTCMonth() + 1,
+        0
+      )
+    ).getUTCDate();
+    const requestedDay = Math.max(1, Math.min(31, Number(anchorDay || day)));
+    targetMonthStart.setUTCDate(Math.min(requestedDay, lastTargetDay));
+    return formatUtcDate(targetMonthStart);
   }
 
   const targetMonthStart = new Date(Date.UTC(year, month, 1));

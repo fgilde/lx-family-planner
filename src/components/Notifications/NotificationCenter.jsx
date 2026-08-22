@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
 import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
+import { taskIsVisibleOnDate } from '../../../shared/taskVisibility.js';
 import { canManageFamily } from '../../constants/roles';
 import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 import {
@@ -227,6 +228,7 @@ export default function NotificationCenter() {
       task =>
         taskIsAvailableToMember(task, activeMember?.id) &&
         !task.completed &&
+        taskIsVisibleOnDate(task, today) &&
         belongsToHousehold(task) &&
         (!task.dueDate || task.dueDate <= today)
     );

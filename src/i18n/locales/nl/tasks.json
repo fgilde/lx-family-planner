@@ -13,11 +13,18 @@
     "weekdays": "Maandag tot en met vrijdag",
     "weekly": "Elke week",
     "monthly": "Elke maand",
+    "custom": "Aangepast interval",
+    "units": { "days": "dagen", "weeks": "weken", "months": "maanden" },
     "recurring": "Terugkerend"
   },
   "memberCard": {
     "managedOnly": "Alleen georganiseerd",
     "noTasks": "Geen taken toegewezen aan {{name}}."
+  },
+  "scheduled": {
+    "title_one": "{{count}} geplande taak",
+    "title_other": "{{count}} geplande taken",
+    "hint": "Deze terugkerende taken blijven gepland en verschijnen pas op het gekozen moment. Tik om te bewerken."
   },
   "shared": {
     "title": "Samen oppakken",
@@ -80,6 +87,11 @@
     "dueDate": "Klaar op",
     "dueTime": "Tijd (optioneel)",
     "repeatLabel": "Herhalen",
+    "repeatEvery": "Herhalen elke",
+    "repeatUnit": "Tijdseenheid",
+    "visibilityLabel": "Zichtbaar voor profiel",
+    "visibilityHint": "De taak blijft gepland en verschijnt pas op het gekozen moment.",
+    "visibility": { "onDueDate": "Op de vervaldag", "oneDay": "1 dag eerder", "twoDays": "2 dagen eerder", "threeDays": "3 dagen eerder", "oneWeek": "1 week eerder", "twoWeeks": "2 weken eerder", "always": "Altijd zichtbaar" },
     "rotationToggle": "Eerlijk rouleren tussen profielen",
     "rotationHint": "Na elke bevestigde herhaling is automatisch de volgende persoon aan de beurt.",
     "category": "Categorie",
@@ -89,8 +101,10 @@
       "room": "Kamer",
       "school": "School",
       "pet": "Huisdier",
-      "garden": "Tuin"
+      "garden": "Tuin",
+      "custom": "Eigen gebied toevoegen …"
     },
+    "customCategoryPlaceholder": "bv. Badkamer, kelder, auto …",
     "managedNoteTitle": "Organisatietaak",
     "managedNoteHint": "Beheerde profielen krijgen geen sterren en geen aparte klaar-melding.",
     "starsLabel": "Sterrenbeloning (+ sterren)",

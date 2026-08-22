@@ -3500,7 +3500,9 @@ function createNextRecurringTask(familyId, task) {
   const nextDueDate = nextTaskDueDate(
     task.dueDate || task.occurrenceDate,
     task.repeatRule,
-    task.repeatAnchorDay
+    task.repeatAnchorDay,
+    task.repeatInterval,
+    task.repeatUnit
   );
   if (!nextDueDate) return null;
   const seriesId = task.seriesId || task.id;

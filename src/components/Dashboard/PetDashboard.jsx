@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
 import { eventIsForMember } from '../../../shared/calendarAudience.js';
+import { taskIsVisibleOnDate } from '../../../shared/taskVisibility.js';
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../../utils/imageFallback';
 import { formatDate } from '../../utils/formatting';
 
@@ -56,7 +57,10 @@ export default function PetDashboard() {
     activeMember?.name?.split(' ')[0] || t('pet.petFallbackName');
   const today = new Date().toISOString().slice(0, 10);
   const careTasks = tasks.filter(
-    task => task.memberId === activeMember?.id && !task.completed
+    task =>
+      task.memberId === activeMember?.id &&
+      !task.completed &&
+      taskIsVisibleOnDate(task, today)
   );
   const appointments = events
     .filter(

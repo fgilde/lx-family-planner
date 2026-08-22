@@ -13,11 +13,18 @@
     "weekdays": "Da lunedì a venerdì",
     "weekly": "Ogni settimana",
     "monthly": "Ogni mese",
+    "custom": "Intervallo personalizzato",
+    "units": { "days": "giorni", "weeks": "settimane", "months": "mesi" },
     "recurring": "Ricorrente"
   },
   "memberCard": {
     "managedOnly": "Solo organizzata",
     "noTasks": "Nessuna incombenza assegnata a {{name}}."
+  },
+  "scheduled": {
+    "title_one": "{{count}} attività pianificata",
+    "title_other": "{{count}} attività pianificate",
+    "hint": "Queste attività restano pianificate e compaiono solo al momento scelto. Tocca per modificare."
   },
   "shared": {
     "title": "Affrontatela insieme",
@@ -80,6 +87,11 @@
     "dueDate": "Scade il",
     "dueTime": "Ora (facoltativo)",
     "repeatLabel": "Ripeti",
+    "repeatEvery": "Ripeti ogni",
+    "repeatUnit": "Unità di tempo",
+    "visibilityLabel": "Visibile al profilo",
+    "visibilityHint": "L’attività resta pianificata e compare solo al momento scelto.",
+    "visibility": { "onDueDate": "Il giorno della scadenza", "oneDay": "1 giorno prima", "twoDays": "2 giorni prima", "threeDays": "3 giorni prima", "oneWeek": "1 settimana prima", "twoWeeks": "2 settimane prima", "always": "Sempre visibile" },
     "rotationToggle": "Ruota in modo equo tra i profili",
     "rotationHint": "Dopo ogni ripetizione confermata, la prossima persona è automaticamente di turno.",
     "category": "Categoria",
@@ -89,8 +101,10 @@
       "room": "Stanza",
       "school": "Scuola",
       "pet": "Animale",
-      "garden": "Giardino"
+      "garden": "Giardino",
+      "custom": "Aggiungi un’area personalizzata …"
     },
+    "customCategoryPlaceholder": "es. Bagno, cantina, auto …",
     "managedNoteTitle": "Incombenza di organizzazione",
     "managedNoteHint": "I profili gestiti non ricevono stelle né una segnalazione di completamento separata.",
     "starsLabel": "Ricompensa in stelle (+ stelle)",

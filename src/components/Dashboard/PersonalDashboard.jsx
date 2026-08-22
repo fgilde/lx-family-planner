@@ -38,6 +38,7 @@ import {
   nextBirthdayOccurrencesOnly
 } from '../../../shared/birthdays.js';
 import { taskIsAvailableToMember } from '../../../shared/taskAssignments.js';
+import { taskIsVisibleOnDate } from '../../../shared/taskVisibility.js';
 import {
   groupTrashEventsByDate,
   trashGroupIcons,
@@ -223,6 +224,7 @@ export default function PersonalDashboard() {
           task =>
             taskIsAvailableToMember(task, activeMember.id) &&
             !task.completed &&
+            taskIsVisibleOnDate(task, todayKey) &&
             belongsToHousehold(task)
         )
         .sort((left, right) =>

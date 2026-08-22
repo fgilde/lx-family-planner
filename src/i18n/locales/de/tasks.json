@@ -13,11 +13,22 @@
     "weekdays": "Montag bis Freitag",
     "weekly": "Jede Woche",
     "monthly": "Jeden Monat",
+    "custom": "Eigenes Intervall",
+    "units": {
+      "days": "Tage",
+      "weeks": "Wochen",
+      "months": "Monate"
+    },
     "recurring": "Wiederkehrend"
   },
   "memberCard": {
     "managedOnly": "Nur organisiert",
     "noTasks": "Keine Aufgaben für {{name}} zugeteilt."
+  },
+  "scheduled": {
+    "title_one": "{{count}} geplante Aufgabe",
+    "title_other": "{{count}} geplante Aufgaben",
+    "hint": "Diese wiederkehrenden Aufgaben werden den Profilen erst im gewählten Zeitraum angezeigt. Zum Bearbeiten antippen."
   },
   "shared": {
     "title": "Gemeinsam anpacken",
@@ -80,6 +91,19 @@
     "dueDate": "Fällig am",
     "dueTime": "Uhrzeit (optional)",
     "repeatLabel": "Wiederholung",
+    "repeatEvery": "Wiederholen alle",
+    "repeatUnit": "Zeiteinheit",
+    "visibilityLabel": "Für das Profil sichtbar",
+    "visibilityHint": "Die Aufgabe bleibt geplant, erscheint aber erst zum gewählten Zeitpunkt bei der zuständigen Person.",
+    "visibility": {
+      "onDueDate": "Erst am Fälligkeitstag",
+      "oneDay": "1 Tag vorher",
+      "twoDays": "2 Tage vorher",
+      "threeDays": "3 Tage vorher",
+      "oneWeek": "1 Woche vorher",
+      "twoWeeks": "2 Wochen vorher",
+      "always": "Sofort und immer"
+    },
     "rotationToggle": "Fair zwischen Profilen wechseln",
     "rotationHint": "Nach jeder bestätigten Wiederholung ist automatisch die nächste Person dran.",
     "category": "Bereich",
@@ -89,8 +113,10 @@
       "room": "Zimmer",
       "school": "Schule",
       "pet": "Haustier",
-      "garden": "Garten"
+      "garden": "Garten",
+      "custom": "Eigenen Bereich hinzufügen …"
     },
+    "customCategoryPlaceholder": "z. B. Bad, Keller, Auto …",
     "managedNoteTitle": "Organisationsaufgabe",
     "managedNoteHint": "Für verwaltete Profile gibt es keine Sterne und keine eigene Erledigt-Meldung.",
     "starsLabel": "Sterne-Belohnung (+ Sterne)",

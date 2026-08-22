@@ -41,6 +41,7 @@ const [
   { getInstructionDurationMinutes, parseInstructionSteps },
   { parseICalendar },
   { nextTaskDueDate },
+  { taskIsVisibleOnDate },
   { moveDashboardWidget, normalizeDashboardLayout }
 ] = await Promise.all([
   import('./app.js'),
@@ -49,6 +50,7 @@ const [
   import('../shared/recipeInstructions.js'),
   import('../shared/icsCalendar.js'),
   import('../shared/taskRecurrence.js'),
+  import('../shared/taskVisibility.js'),
   import('../src/utils/dashboardLayout.js')
 ]);
 
@@ -340,6 +342,28 @@ test('recurring task dates stay predictable across weekends and months', () => {
   assert.equal(nextTaskDueDate('2026-07-27', 'weekly'), '2026-08-03');
   assert.equal(nextTaskDueDate('2026-01-31', 'monthly'), '2026-02-28');
   assert.equal(nextTaskDueDate('2026-02-28', 'monthly', 31), '2026-03-31');
+  assert.equal(
+    nextTaskDueDate('2026-01-31', 'custom', 31, 3, 'months'),
+    '2026-04-30'
+  );
+  assert.equal(
+    nextTaskDueDate('2026-07-27', 'custom', 27, 2, 'weeks'),
+    '2026-08-10'
+  );
+  assert.equal(
+    taskIsVisibleOnDate(
+      { dueDate: '2026-08-20', visibilityDaysBefore: 2 },
+      '2026-08-17'
+    ),
+    false
+  );
+  assert.equal(
+    taskIsVisibleOnDate(
+      { dueDate: '2026-08-20', visibilityDaysBefore: 2 },
+      '2026-08-18'
+    ),
+    true
+  );
 });
 
 test('dashboard layouts remain complete, ordered and never fully hidden', () => {
@@ -1091,6 +1115,31 @@ test('family flow stays isolated, authorized and internally consistent', async (
     },
     201
   );
+
+  const customScheduledTask = await request(
+    '/api/resources/tasks',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        title: 'Bad gründlich putzen',
+        memberId: childOne.id,
+        category: 'Bad',
+        stars: 20,
+        dueDate: '2026-08-20',
+        repeatRule: 'custom',
+        repeatInterval: 3,
+        repeatUnit: 'months',
+        visibilityDaysBefore: 2
+      })
+    },
+    201
+  );
+  assert.equal(customScheduledTask.body.record.category, 'Bad');
+  assert.equal(customScheduledTask.body.record.repeatRule, 'custom');
+  assert.equal(customScheduledTask.body.record.repeatInterval, 3);
+  assert.equal(customScheduledTask.body.record.repeatUnit, 'months');
+  assert.equal(customScheduledTask.body.record.visibilityDaysBefore, 2);
 
   const editableTask = await request(
     '/api/resources/tasks',
@@ -1929,7 +1978,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
   });
   assert.equal(clearedTasks.body.deleted, 2);
   const remainingChildTask = clearedTasks.body.records.find(
-    entry => entry.memberId === childOne.id
+    entry => entry.memberId === childOne.id && entry.title === 'Testmission'
   );
   assert.equal(Boolean(remainingChildTask), true);
   assert.equal(remainingChildTask.dueDate, '2026-08-03');

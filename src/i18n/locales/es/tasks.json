@@ -13,11 +13,18 @@
     "weekdays": "De lunes a viernes",
     "weekly": "Cada semana",
     "monthly": "Cada mes",
+    "custom": "Intervalo personalizado",
+    "units": { "days": "días", "weeks": "semanas", "months": "meses" },
     "recurring": "Recurrente"
   },
   "memberCard": {
     "managedOnly": "Solo organización",
     "noTasks": "No hay tareas asignadas a {{name}}."
+  },
+  "scheduled": {
+    "title_one": "{{count}} tarea programada",
+    "title_other": "{{count}} tareas programadas",
+    "hint": "Estas tareas siguen programadas y solo aparecen en el momento elegido. Toca para editar."
   },
   "shared": {
     "title": "Afrontadlo juntos",
@@ -80,6 +87,11 @@
     "dueDate": "Vence el",
     "dueTime": "Hora (opcional)",
     "repeatLabel": "Repetir",
+    "repeatEvery": "Repetir cada",
+    "repeatUnit": "Unidad de tiempo",
+    "visibilityLabel": "Visible para el perfil",
+    "visibilityHint": "La tarea sigue programada y solo aparece en el momento elegido.",
+    "visibility": { "onDueDate": "El día de vencimiento", "oneDay": "1 día antes", "twoDays": "2 días antes", "threeDays": "3 días antes", "oneWeek": "1 semana antes", "twoWeeks": "2 semanas antes", "always": "Siempre visible" },
     "rotationToggle": "Rotar de forma equitativa entre perfiles",
     "rotationHint": "Tras cada repetición confirmada, la siguiente persona es la siguiente automáticamente.",
     "category": "Categoría",
@@ -89,8 +101,10 @@
       "room": "Habitación",
       "school": "Colegio",
       "pet": "Mascota",
-      "garden": "Jardín"
+      "garden": "Jardín",
+      "custom": "Añadir área personalizada …"
     },
+    "customCategoryPlaceholder": "p. ej. Baño, sótano, coche …",
     "managedNoteTitle": "Tarea de organización",
     "managedNoteHint": "Los perfiles gestionados no reciben estrellas ni ningún informe de tarea completada.",
     "starsLabel": "Recompensa en estrellas (+ estrellas)",

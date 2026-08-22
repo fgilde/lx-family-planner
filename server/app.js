@@ -24,6 +24,7 @@ import {
 } from '../shared/birthdays.js';
 import {
   TASK_REPEAT_RULES,
+  TASK_REPEAT_UNITS,
   normalizeTaskDate
 } from '../shared/taskRecurrence.js';
 import {
@@ -826,8 +827,27 @@ function normalizeTaskSchedule(value = {}) {
     value.dueDate,
     repeatRule === 'none' ? '' : today
   );
+  const repeatUnit = TASK_REPEAT_UNITS.has(value.repeatUnit)
+    ? value.repeatUnit
+    : 'weeks';
+  const repeatInterval = Math.max(
+    1,
+    Math.min(365, Number(value.repeatInterval) || (repeatRule === 'custom' ? 2 : 1))
+  );
+  const visibilityDaysBefore = Math.max(
+    0,
+    Math.min(
+      365,
+      Number.isFinite(Number(value.visibilityDaysBefore))
+        ? Number(value.visibilityDaysBefore)
+        : (repeatRule === 'none' ? 365 : 2)
+    )
+  );
   return {
     repeatRule,
+    repeatUnit,
+    repeatInterval,
+    visibilityDaysBefore,
     dueDate,
     repeatAnchorDay: Math.max(
       1,
