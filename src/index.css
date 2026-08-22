@@ -17387,16 +17387,17 @@ textarea {
 
 .school-timetable {
   display: grid;
-  grid-template-columns: repeat(5, minmax(160px, 1fr));
+  /* A weekly timetable belongs on one page on desktop: every weekday gets
+     an equal, flexible column instead of creating an inner scrollbar. */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 14px;
-  overflow-x: auto;
+  overflow: visible;
   padding: 2px 1px 9px;
-  scrollbar-width: thin;
 }
 
 .school-timetable > section {
-  min-width: 160px;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 18px;
@@ -17760,6 +17761,16 @@ textarea {
   .family-poll-card > div > button { grid-template-columns: auto minmax(0, 1fr) auto; }
   .family-poll-card button > i { grid-column: 2 / -1; width: 100%; }
   .saving-goals article > button { opacity: 1; }
+
+  /* Touch screens keep the comfortable lesson-card width; only there is
+     horizontal swiping preferable to cramming five days into tiny cards. */
+  .school-timetable {
+    grid-template-columns: repeat(5, minmax(142px, 1fr));
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .school-timetable > section { min-width: 142px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
