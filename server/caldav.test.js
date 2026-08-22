@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import test from 'node:test';
-import { fetchCalDavEvents, normalizeCalDavUrl } from './caldav.js';
+import {
+  calDavFetchErrorMessage,
+  fetchCalDavEvents,
+  normalizeCalDavUrl
+} from './caldav.js';
 
 test('CalDAV imports a read-only calendar collection with Basic auth', async () => {
   const previousNodeEnv = process.env.NODE_ENV;
@@ -64,4 +68,19 @@ test('CalDAV requires HTTPS outside the test environment', () => {
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previousNodeEnv;
   }
+});
+
+test('CalDAV explains certificate failures without suggesting insecure HTTP', () => {
+  assert.match(
+    calDavFetchErrorMessage({
+      cause: { code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' }
+    }),
+    /Zertifikat.*nicht vertraut/
+  );
+  assert.match(
+    calDavFetchErrorMessage({
+      cause: { code: 'ERR_TLS_CERT_ALTNAME_INVALID' }
+    }),
+    /passt nicht zur CalDAV-Adresse/
+  );
 });

@@ -111,6 +111,22 @@ function authorization(username, password) {
   return `Basic ${Buffer.from(`${username}:${password}`, 'utf8').toString('base64')}`;
 }
 
+export function calDavFetchErrorMessage(error) {
+  const codes = [error?.code, error?.cause?.code]
+    .filter(Boolean)
+    .map(code => String(code).toUpperCase());
+  if (codes.some(code => code.includes('ALTNAME') || code.includes('HOSTNAME'))) {
+    return 'Das HTTPS-Zertifikat passt nicht zur CalDAV-Adresse. Bitte einen Servernamen verwenden, der im Zertifikat enthalten ist.';
+  }
+  if (codes.some(code => code.includes('CERT') || code.includes('TLS') || code.includes('UNABLE_TO_VERIFY'))) {
+    return 'Das HTTPS-Zertifikat des CalDAV-Servers wird nicht vertraut. Bitte ein gültiges Zertifikat oder eine im System vertrauenswürdige eigene Zertifizierungsstelle verwenden.';
+  }
+  if (error?.name === 'TimeoutError' || error?.name === 'AbortError') {
+    return 'Der CalDAV-Server hat nicht rechtzeitig geantwortet.';
+  }
+  return 'Der CalDAV-Server ist unter dieser Adresse gerade nicht erreichbar.';
+}
+
 function calendarDataFromMultistatus(xml) {
   let parsed;
   try {
@@ -164,8 +180,8 @@ export async function fetchCalDavEvents(
           <c:filter><c:comp-filter name="VCALENDAR"/></c:filter>
         </c:calendar-query>`
     });
-  } catch {
-    throw failure('Der CalDAV-Server ist unter dieser Adresse gerade nicht erreichbar.');
+  } catch (error) {
+    throw failure(calDavFetchErrorMessage(error));
   }
   if (![200, 207].includes(response.status)) {
     const message = response.status === 401 || response.status === 403
