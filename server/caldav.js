@@ -18,6 +18,11 @@ function failure(message, statusCode = 502) {
   return error;
 }
 
+function insecureLocalHttpAllowed() {
+  return process.env.CALENDAR_ALLOW_INSECURE_HTTP === 'true'
+    && process.env.CALENDAR_ALLOW_PRIVATE_HOSTS === 'true';
+}
+
 function asArray(value) {
   if (value === undefined || value === null) return [];
   return Array.isArray(value) ? value : [value];
@@ -33,8 +38,12 @@ export function normalizeCalDavUrl(value) {
   if (!['http:', 'https:'].includes(url.protocol)) {
     throw failure('Die CalDAV-Adresse muss mit http:// oder https:// beginnen.', 400);
   }
-  if (url.protocol !== 'https:' && process.env.NODE_ENV !== 'test') {
-    throw failure('CalDAV-Zugangsdaten werden nur über eine HTTPS-Adresse übertragen.', 400);
+  if (url.protocol !== 'https:' && process.env.NODE_ENV !== 'test' && !insecureLocalHttpAllowed()) {
+    throw failure(
+      'CalDAV-Zugangsdaten werden nur über eine HTTPS-Adresse übertragen. '
+      + 'Für einen isolierten LAN-Test müssen CALENDAR_ALLOW_PRIVATE_HOSTS=true und CALENDAR_ALLOW_INSECURE_HTTP=true bewusst gesetzt werden.',
+      400
+    );
   }
   if (url.username || url.password || url.hash) {
     throw failure('Die CalDAV-Adresse darf keine Zugangsdaten oder Anker enthalten.', 400);
@@ -66,6 +75,17 @@ function privateAddress(address) {
   return false;
 }
 
+function privateLanAddress(address) {
+  const normalized = String(address || '').toLowerCase().replace(/^::ffff:/, '');
+  if (isIP(normalized) === 4) {
+    const [first, second] = normalized.split('.').map(Number);
+    return first === 10
+      || (first === 172 && second >= 16 && second <= 31)
+      || (first === 192 && second === 168);
+  }
+  return isIP(normalized) === 6 && (normalized.startsWith('fc') || normalized.startsWith('fd'));
+}
+
 async function validateTarget(url) {
   let addresses;
   try {
@@ -82,6 +102,10 @@ async function validateTarget(url) {
         : 'Lokale CalDAV-Adressen sind aus Sicherheitsgründen gesperrt. Für einen bewusst lokal betriebenen Kalender kann CALENDAR_ALLOW_PRIVATE_HOSTS=true gesetzt werden.',
       400
     );
+  }
+  if (url.protocol === 'http:' && process.env.NODE_ENV !== 'test'
+    && (!insecureLocalHttpAllowed() || !addresses.every(entry => privateLanAddress(entry.address)))) {
+    throw failure('Unverschlüsseltes CalDAV ist nur für eine bewusst freigegebene private LAN-Adresse erlaubt.', 400);
   }
 }
 

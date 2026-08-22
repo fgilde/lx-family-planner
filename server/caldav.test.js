@@ -58,7 +58,11 @@ test('CalDAV rejects URLs that contain credentials', () => {
 
 test('CalDAV requires HTTPS outside the test environment', () => {
   const previousNodeEnv = process.env.NODE_ENV;
+  const previousPrivateHosts = process.env.CALENDAR_ALLOW_PRIVATE_HOSTS;
+  const previousInsecureHttp = process.env.CALENDAR_ALLOW_INSECURE_HTTP;
   process.env.NODE_ENV = 'production';
+  delete process.env.CALENDAR_ALLOW_PRIVATE_HOSTS;
+  delete process.env.CALENDAR_ALLOW_INSECURE_HTTP;
   try {
     assert.throws(
       () => normalizeCalDavUrl('http://calendar.example.test/calendar'),
@@ -67,6 +71,29 @@ test('CalDAV requires HTTPS outside the test environment', () => {
   } finally {
     if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previousNodeEnv;
+    if (previousPrivateHosts === undefined) delete process.env.CALENDAR_ALLOW_PRIVATE_HOSTS;
+    else process.env.CALENDAR_ALLOW_PRIVATE_HOSTS = previousPrivateHosts;
+    if (previousInsecureHttp === undefined) delete process.env.CALENDAR_ALLOW_INSECURE_HTTP;
+    else process.env.CALENDAR_ALLOW_INSECURE_HTTP = previousInsecureHttp;
+  }
+});
+
+test('CalDAV only allows insecure HTTP after an explicit local test opt-in', () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  const previousPrivateHosts = process.env.CALENDAR_ALLOW_PRIVATE_HOSTS;
+  const previousInsecureHttp = process.env.CALENDAR_ALLOW_INSECURE_HTTP;
+  process.env.NODE_ENV = 'production';
+  process.env.CALENDAR_ALLOW_PRIVATE_HOSTS = 'true';
+  process.env.CALENDAR_ALLOW_INSECURE_HTTP = 'true';
+  try {
+    assert.doesNotThrow(() => normalizeCalDavUrl('http://calendar.lan/caldav/calendar/'));
+  } finally {
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+    if (previousPrivateHosts === undefined) delete process.env.CALENDAR_ALLOW_PRIVATE_HOSTS;
+    else process.env.CALENDAR_ALLOW_PRIVATE_HOSTS = previousPrivateHosts;
+    if (previousInsecureHttp === undefined) delete process.env.CALENDAR_ALLOW_INSECURE_HTTP;
+    else process.env.CALENDAR_ALLOW_INSECURE_HTTP = previousInsecureHttp;
   }
 });
 
