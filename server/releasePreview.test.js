@@ -6,7 +6,7 @@ import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 
 const projectRoot = process.cwd();
 
-test('the login screen makes the current release and iOS PWA work visible before sign-in', () => {
+test('the login screen presents the complete current release before sign-in', () => {
   const version = JSON.parse(
     fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
   ).version;
@@ -23,8 +23,13 @@ test('the login screen makes the current release and iOS PWA work visible before
   assert.equal(version, '1.18.5');
   assert.match(login, /<ReleasePreviewCard\s*\/>/);
   assert.match(previewCard, /releaseNotesForVersion\(APP_VERSION\)/);
-  assert.equal(
-    notes.highlights.some(highlight => highlight.id === 'ios-home-screen-install'),
-    true
+  assert.deepEqual(
+    notes.highlights.map(highlight => highlight.id),
+    [
+      'school-timetable',
+      'caldav-calendar-import',
+      'flexible-recurring-chores',
+      'ios-mobile-navigation'
+    ]
   );
 });

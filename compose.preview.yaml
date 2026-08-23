@@ -1,7 +1,0 @@
-services:
-  family-planner:
-    build:
-      context: .
-      target: runtime
-    image: lx-family-preview:1.18.5
-    pull_policy: build

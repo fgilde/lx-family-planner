@@ -1,68 +1,68 @@
 const RELEASE_NOTES = {
   '1.18.5': {
     version: '1.18.5',
-    eyebrow: 'LX Family auf iOS',
-    title: 'LX Family lässt sich auf iOS wie eine App installieren',
+    eyebrow: 'Mehr Schule, Kalender und Alltag',
+    title: 'Stundenplan, CalDAV und flexiblere Aufgaben sind da',
     intro:
-      'LX Family lässt sich auf iOS-Geräten jetzt direkt aus Safari heraus zum Home-Bildschirm hinzufügen.',
+      'Kinder bekommen einen echten Stundenplan, externe Kalender lassen sich anbinden und wiederkehrende Aufgaben passen sich besser an euren Alltag an.',
     highlights: [
       {
-        id: 'ios-home-screen-install',
-        title: 'Zum Home-Bildschirm hinzufügen',
+        id: 'school-timetable',
+        title: 'Ein richtiger Wochenstundenplan',
         description:
-          'Auf iOS erklärt LX Family direkt im Browser die wenigen Schritte zur Installation über Safari.'
+          'Fächer, Räume, Lehrkräfte und Unterrichtszeiten lassen sich direkt im Kinderprofil eintragen und übersichtlich anzeigen.'
       },
       {
-        id: 'ios-standalone-layout',
-        title: 'Eigenes App-Erlebnis',
+        id: 'caldav-calendar-import',
+        title: 'Kalender per CalDAV verbinden',
         description:
-          'Nach der Installation startet LX Family über sein Icon und nutzt den Bildschirm ohne Safari-Leiste.'
+          'Externe Kalender werden schreibgeschützt eingebunden. Auch offizielle Synology-Konto-Adressen werden automatisch erkannt.'
       },
       {
-        id: 'release-preview-before-login',
-        title: 'Neuigkeiten schon vor der Anmeldung',
+        id: 'flexible-recurring-chores',
+        title: 'Aufgaben, die passend wiederkehren',
         description:
-          'Der Startbildschirm zeigt ab jetzt kompakt, was sich in der installierten Version geändert hat.'
+          'Aufgaben können täglich, an ausgewählten Wochentagen, wöchentlich oder monatlich erscheinen – auf Wunsch erst am Fälligkeitstag.'
       },
       {
         id: 'ios-mobile-navigation',
-        title: 'Auf dem iPhone klarer unterwegs',
+        title: 'LX wie eine App auf iOS',
         description:
-          'Die Kopfzeile bleibt beim Scrollen sichtbar und kompakt. Menü und Profil liegen direkt nebeneinander; Planungsort, Design und weitere Einstellungen sind ordentlich im Menü gebündelt.'
+          'Safari erklärt die Installation auf dem Home-Bildschirm. Navigation, Kalenderaktionen und Dialoge bleiben auch auf schmalen Geräten erreichbar.'
       }
     ],
     closing:
       'Familien, Profile, Termine, Aufgaben, Rezepte, Dateien und Einstellungen bleiben unverändert erhalten.',
     localizations: {
       en: {
-        eyebrow: 'LX Family on iOS',
-        title: 'Install LX Family on iOS like an app',
+        eyebrow: 'More school, calendars and everyday life',
+        title: 'Timetables, CalDAV and flexible chores are here',
         intro:
-          'LX Family can now be added to the home screen directly from Safari on iOS devices.',
+          'Children get a real timetable, external calendars can be connected, and recurring chores adapt better to family life.',
         highlights: [
           {
-            id: 'ios-home-screen-install',
-            title: 'Add to Home Screen',
+            id: 'school-timetable',
+            title: 'A real weekly timetable',
             description:
-              'On iOS, LX Family explains the few Safari steps needed to install it from the browser.'
+              'Subjects, rooms, teachers and lesson times can be managed directly in the child profile.'
           },
           {
-            id: 'ios-standalone-layout',
-            title: 'A dedicated app experience',
+            id: 'caldav-calendar-import',
+            title: 'Connect calendars through CalDAV',
             description:
-              'After installation, LX Family launches from its icon and uses the screen without the Safari bar.'
+              'External calendars are imported read-only, including automatic discovery from Synology account URLs.'
           },
           {
-            id: 'release-preview-before-login',
-            title: 'What is new before you sign in',
+            id: 'flexible-recurring-chores',
+            title: 'Chores that recur when needed',
             description:
-              'The welcome screen now gives a compact overview of what changed in the installed version.'
+              'Chores can recur daily, on selected weekdays, weekly or monthly and stay hidden until their due day.'
           },
           {
             id: 'ios-mobile-navigation',
-            title: 'Clearer navigation on iPhone',
+            title: 'LX as an app on iOS',
             description:
-              'The header stays visible and compact while scrolling. Menu and profile sit next to each other, while planning location, design and further settings live neatly in the menu.'
+              'Safari explains the home screen installation, while navigation, calendar actions and dialogs remain reachable on narrow devices.'
           }
         ],
         closing:

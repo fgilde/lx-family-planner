@@ -104,10 +104,10 @@ x-casaos:
     - amd64
     - arm64
   version: "1.18.5"
-  update_at: "2026-08-11"
+  update_at: "2026-08-23"
   release_notes:
-    en_US: Preview: test the iOS Safari home screen installation before the next stable release.
-    de_DE: Vorschau: Bitte die iOS-Installation über Safari vor dem nächsten stabilen Release testen.
+    en_US: Adds an editable school timetable, read-only CalDAV including Synology discovery, flexible recurring chores and a polished iOS home-screen experience.
+    de_DE: Bringt einen editierbaren Stundenplan, schreibgeschütztes CalDAV inklusive Synology-Erkennung, flexible wiederkehrende Aufgaben und eine verbesserte iOS-Installation.
   website: https://github.com/laxxx-lab/lx-family-planner
   repo: https://github.com/laxxx-lab/lx-family-planner
   support: https://github.com/laxxx-lab/lx-family-planner/issues

@@ -6,28 +6,25 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
-## [1.18.5] — 2026-08-14
+## [1.18.5] — 2026-08-23
 
-### iOS PWA installation
+### School, CalDAV, chores and iOS
 
-- iPhone users now receive a concise Safari-specific install guide: **Share →
-  Add to Home Screen**;
-- the installed web app has an Apple home-screen icon, standalone launch mode
-  and safe-area support for modern iOS displays;
-- the prompt is only shown on eligible iOS Safari devices and can be dismissed
-  for seven days, so other browsers remain undisturbed.
-- the sign-in screen now also gives everyone a compact, readable overview of
-  the current release, even before selecting a family profile.
-
-### Mobile navigation refinement
-
-- the iPhone header is now a compact, fully opaque single row that remains
-  visible while scrolling;
-- the profile switcher sits directly beside the navigation button; planning
-  location, family settings, tablet mode, language, theme and logout are
-  grouped in the mobile menu instead of competing for header space;
-- the fixed header reserves its exact height in the document, so calendar
-  controls never slide underneath it.
+- child profiles gain a complete editable weekly timetable with subjects,
+  rooms, teachers and lesson times;
+- external calendars can be connected read-only through ICS or CalDAV.
+  Synology Calendar account URLs are discovered automatically, while unrelated
+  Synology system collections are skipped safely;
+- chores can recur daily, on selected weekdays, weekly or monthly and can be
+  hidden until their due day;
+- Safari on iOS explains **Share → Add to Home Screen**, after which LX starts
+  from its own icon without the Safari bar;
+- headers, profile switching, calendar actions, quick add and dialogs remain
+  reachable and correctly scrollable on narrow iOS screens;
+- recipe viewing and editing provide clearer mobile feedback without clipping
+  important actions;
+- the sign-in screen gives everyone a compact overview of the installed release
+  even before profile selection.
 
 ## [1.18.4] — 2026-08-11
 

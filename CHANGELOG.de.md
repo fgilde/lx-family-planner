@@ -4,18 +4,25 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
-## [1.18.5] – 2026-08-14
+## [1.18.5] – 2026-08-23
 
-### iOS-PWA installieren
+### Schule, CalDAV, Aufgaben und iOS
 
-- auf iOS-Geräten erklärt LX Family direkt in Safari den kurzen Weg über
-  **Teilen → Zum Home-Bildschirm**;
-- die installierte Web-App besitzt ein Apple-Home-Bildschirm-Icon, startet
-  eigenständig und berücksichtigt sichere Bildschirmränder;
-- der Hinweis erscheint nur auf passenden iOS-Safari-Geräten und kann für
-  sieben Tage ausgeblendet werden. Andere Browser bleiben unbehelligt.
-- der Anmeldebildschirm zeigt allen Personen jetzt bereits vor der
-  Profilauswahl kompakt, was sich in der aktuellen Version geändert hat.
+- Kinderprofile erhalten einen vollständigen, editierbaren Wochenstundenplan
+  mit Fächern, Räumen, Lehrkräften und Unterrichtszeiten;
+- externe Kalender lassen sich schreibgeschützt per ICS oder CalDAV anbinden.
+  Synology Calendar wird über seine offizielle Konto-Adresse automatisch
+  erkannt; unpassende Synology-Systemordner werden sicher übersprungen;
+- Aufgaben können täglich, an ausgewählten Wochentagen, wöchentlich oder
+  monatlich wiederkehren und optional nur am Fälligkeitstag sichtbar sein;
+- auf iOS-Geräten erklärt LX Family in Safari den Weg über **Teilen → Zum
+  Home-Bildschirm** und startet danach über ein eigenes Icon ohne Safari-Leiste;
+- Kopfzeile, Profilwechsel, Kalenderaktionen, Schnell-Erfassung und Dialoge
+  bleiben auf schmalen iOS-Bildschirmen erreichbar und korrekt scrollbar;
+- Rezeptansicht und Bearbeitung geben auf kleinen Bildschirmen klareres
+  Feedback und schneiden wichtige Aktionen nicht mehr ab;
+- der Anmeldebildschirm zeigt bereits vor der Profilauswahl kompakt, was sich
+  in der installierten Version geändert hat.
 
 ## [1.18.4] – 2026-08-11
 
