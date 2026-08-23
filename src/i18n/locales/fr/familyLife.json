@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "Heure {{count}}",
+      "periodShort": "Heure",
+      "periodLabel": "Heure",
       "free": "Libre",
       "cancelled": "Annulé cette semaine",
+      "lessonActions": "Gérer le cours",
       "cancellationDate": "Date de l'annulation ponctuelle du cours",
       "cancelOnce": "Annuler une fois",
       "restore": "Restaurer le cours"

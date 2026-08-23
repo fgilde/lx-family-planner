@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "Uur {{count}}",
+      "periodShort": "Uur",
+      "periodLabel": "Uur",
       "free": "Vrij",
       "cancelled": "Deze week uitgevallen",
+      "lessonActions": "Les beheren",
       "cancellationDate": "Datum van de eenmalige lesuitval",
       "cancelOnce": "Eén keer annuleren",
       "restore": "Les herstellen"

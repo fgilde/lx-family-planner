@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "Lekcja {{count}}",
+      "periodShort": "Lekcja",
+      "periodLabel": "Lekcja",
       "free": "Wolne",
       "cancelled": "Odwołane w tym tygodniu",
+      "lessonActions": "Zarządzaj lekcją",
       "cancellationDate": "Data jednorazowego odwołania lekcji",
       "cancelOnce": "Odwołaj raz",
       "restore": "Przywróć lekcję"

@@ -223,6 +223,7 @@ export default function FamilyLifeHub() {
   });
   const [editingSchoolItemId, setEditingSchoolItemId] = useState('');
   const [cancellationDates, setCancellationDates] = useState({});
+  const [activeLessonId, setActiveLessonId] = useState('');
   const [pollForm, setPollForm] = useState({
     question: '',
     options: t('polls.form.defaultOptions'),
@@ -305,6 +306,20 @@ export default function FamilyLifeHub() {
       )
     },
     (_, index) => index + 1
+  );
+  const activeTimetableLesson = timetableLessons.find(
+    lesson => lesson.id === activeLessonId
+  );
+  const activeLessonCancellationDate = activeTimetableLesson
+    ? cancellationDates[activeTimetableLesson.id] ||
+      dateKeyForWeekday(activeTimetableLesson.weekday, { next: true })
+    : '';
+  const activeLessonCancellationDateMatches = activeTimetableLesson
+    ? new Date(`${activeLessonCancellationDate}T12:00:00`).getDay() ===
+      Number(activeTimetableLesson.weekday)
+    : false;
+  const activeLessonDateCancelled = activeTimetableLesson?.cancellations?.includes(
+    activeLessonCancellationDate
   );
   useEffect(() => {
     if (!isAdult && !schoolEnabled && section === 'school') {
@@ -445,6 +460,7 @@ export default function FamilyLifeHub() {
   const editSchoolItem = item => {
     if (!isAdult) return;
     setEditingSchoolItemId(item.id);
+    setActiveLessonId(item.id);
     setSchoolForm({
       kind: item.kind || 'homework',
       title: item.title || '',
@@ -467,6 +483,7 @@ export default function FamilyLifeHub() {
   const startLessonForSlot = (weekday, period) => {
     if (!isAdult) return;
     setEditingSchoolItemId('');
+    setActiveLessonId('');
     setSchoolForm(previous => ({
       ...previous,
       kind: 'lesson',
@@ -1052,141 +1069,144 @@ export default function FamilyLifeHub() {
               </div>
             ) : (
               <>
-                <div className="school-timetable">
+                <div className="school-timetable" role="grid">
+                  <div className="school-timetable-corner">{t('school.timetable.periodLabel')}</div>
                   {[1, 2, 3, 4, 5].map(weekday => {
-                    const dayLessons = timetableLessons.filter(
-                      lesson => Number(lesson.weekday) === weekday
-                    );
                     const currentDate = dateKeyForWeekday(weekday);
                     return (
-                      <section key={weekday}>
-                        <header>
-                          <strong>{weekdays[weekday]}</strong>
-                          <small>{formatDate(`${currentDate}T12:00:00`, {
-                            day: '2-digit',
-                            month: '2-digit'
-                          })}</small>
-                        </header>
-                        <div className="school-day-slots">
-                          {timetablePeriods.map(period => {
-                            const lessonsInSlot = dayLessons.filter(
-                              entry => Number(entry.period || 1) === period
-                            );
-                            if (!lessonsInSlot.length) {
-                              return isAdult ? (
-                                <button
-                                  key={`empty-${weekday}-${period}`}
-                                  type="button"
-                                  className="school-empty-slot"
-                                  onClick={() => startLessonForSlot(weekday, period)}
-                                >
-                                  <span>{t('school.timetable.period', { count: period })}</span>
-                                  <Plus size={14} />
-                                </button>
-                              ) : (
-                                <div key={`empty-${weekday}-${period}`} className="school-empty-slot is-read-only">
-                                  <span>{t('school.timetable.period', { count: period })}</span>
-                                  <em>{t('school.timetable.free')}</em>
-                                </div>
-                              );
-                            }
-                            return lessonsInSlot.map(lesson => {
-                              const cancelled = lesson.cancellations?.includes(
-                                currentDate
-                              );
-                              const cancellationDate =
-                                cancellationDates[lesson.id] ||
-                                dateKeyForWeekday(lesson.weekday, { next: true });
-                              const cancellationDateMatches =
-                                new Date(`${cancellationDate}T12:00:00`).getDay() ===
-                                Number(lesson.weekday);
-                              const selectedDateCancelled =
-                                lesson.cancellations?.includes(cancellationDate);
-                              return (
-                              <article
-                                key={lesson.id}
-                                className={`school-lesson-card ${cancelled ? 'is-cancelled' : ''}`}
-                              >
-                                <div className="school-lesson-time">
-                                  <b>
-                                    {lesson.period
-                                      ? t('school.timetable.period', {
-                                          count: lesson.period
-                                        })
-                                      : lesson.time || '–'}
-                                  </b>
-                                  {lesson.period && lesson.time && (
-                                    <small>
-                                      {lesson.time}
-                                      {lesson.endTime ? `–${lesson.endTime}` : ''}
-                                    </small>
-                                  )}
-                                </div>
-                                <div className="school-lesson-copy">
-                                  <strong>{lesson.subject || lesson.title}</strong>
-                                  <span>{lesson.title}</span>
-                                  {(lesson.room || lesson.teacher) && (
-                                    <small>
-                                      {[lesson.room, lesson.teacher]
-                                        .filter(Boolean)
-                                        .join(' · ')}
-                                    </small>
-                                  )}
-                                  {cancelled && (
-                                    <em>{t('school.timetable.cancelled')}</em>
-                                  )}
-                                </div>
-                                {isAdult && (
-                                  <div className="school-lesson-actions">
-                                    <button
-                                      type="button"
-                                      className="is-edit"
-                                      onClick={() => editSchoolItem(lesson)}
-                                      aria-label={t('school.form.title')}
-                                    >
-                                      <Pencil size={13} />
-                                    </button>
-                                    <input
-                                      type="date"
-                                      min={today}
-                                      value={cancellationDate}
-                                      onChange={event =>
-                                        setCancellationDates(previous => ({
-                                          ...previous,
-                                          [lesson.id]: event.target.value
-                                        }))
-                                      }
-                                      aria-label={t('school.timetable.cancellationDate')}
-                                    />
-                                    <button
-                                      type="button"
-                                      disabled={!cancellationDateMatches}
-                                      onClick={() => toggleLessonCancellation(lesson)}
-                                    >
-                                      <BellOff size={13} />
-                                      {selectedDateCancelled
-                                        ? t('school.timetable.restore')
-                                        : t('school.timetable.cancelOnce')}
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="is-delete"
-                                      onClick={() => deleteFamilyLifeRecord('schoolItems', lesson.id)}
-                                      aria-label={t('school.deleteAria')}
-                                    >
-                                      <Trash2 size={13} />
-                                    </button>
-                                  </div>
-                                )}
-                              </article>
-                              );
-                            });
-                          })}
-                        </div>
-                      </section>
+                      <div key={`day-${weekday}`} className="school-timetable-day" role="columnheader">
+                        <strong>{weekdays[weekday]}</strong>
+                        <small>{formatDate(`${currentDate}T12:00:00`, {
+                          day: '2-digit',
+                          month: '2-digit'
+                        })}</small>
+                      </div>
                     );
                   })}
+                  {timetablePeriods.flatMap(period => {
+                    const periodLessons = timetableLessons.filter(
+                      lesson => Number(lesson.period || 1) === period
+                    );
+                    const periodTimes = periodLessons
+                      .map(lesson => [lesson.time, lesson.endTime].filter(Boolean).join('–'))
+                      .filter(Boolean);
+                    return [
+                      <div key={`period-${period}`} className="school-timetable-period" role="rowheader">
+                        <strong>{period}</strong>
+                        <span>{t('school.timetable.periodShort')}</span>
+                        {periodTimes[0] && <small>{periodTimes[0]}</small>}
+                      </div>,
+                      ...[1, 2, 3, 4, 5].map(weekday => {
+                        const lessonsInSlot = periodLessons.filter(
+                          lesson => Number(lesson.weekday) === weekday
+                        );
+                        const currentDate = dateKeyForWeekday(weekday);
+                        if (!lessonsInSlot.length) {
+                          return isAdult ? (
+                            <button
+                              key={`empty-${weekday}-${period}`}
+                              type="button"
+                              className="school-empty-slot"
+                              onClick={() => startLessonForSlot(weekday, period)}
+                              aria-label={`${weekdays[weekday]}, ${t('school.timetable.period', { count: period })}`}
+                            >
+                              <Plus size={15} />
+                            </button>
+                          ) : (
+                            <div key={`empty-${weekday}-${period}`} className="school-empty-slot is-read-only">
+                              <span>–</span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={`lesson-${weekday}-${period}`} className="school-timetable-cell" role="gridcell">
+                            {lessonsInSlot.map(lesson => {
+                              const cancelled = lesson.cancellations?.includes(currentDate);
+                              const lessonActionsOpen = activeLessonId === lesson.id;
+                              return (
+                                <button
+                                  key={lesson.id}
+                                  type="button"
+                                  className={`school-lesson-card ${cancelled ? 'is-cancelled' : ''} ${lessonActionsOpen ? 'is-actions-open' : ''}`}
+                                  onClick={() => isAdult && setActiveLessonId(previous =>
+                                    previous === lesson.id ? '' : lesson.id
+                                  )}
+                                  aria-expanded={isAdult ? lessonActionsOpen : undefined}
+                                  aria-label={isAdult
+                                    ? `${lesson.subject || lesson.title} – ${t('school.timetable.lessonActions')}`
+                                    : undefined}
+                                >
+                                  <strong>{lesson.subject || lesson.title}</strong>
+                                  {lesson.title && lesson.title !== lesson.subject && (
+                                    <span>{lesson.title}</span>
+                                  )}
+                                  {(lesson.room || lesson.teacher) && (
+                                    <small>{[lesson.room, lesson.teacher].filter(Boolean).join(' · ')}</small>
+                                  )}
+                                  {cancelled && <em>{t('school.timetable.cancelled')}</em>}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })
+                    ];
+                  })}
                 </div>
+                {isAdult && activeTimetableLesson && (
+                  <section className="school-lesson-actions" aria-label={t('school.timetable.lessonActions')}>
+                    <div className="school-lesson-actions-copy">
+                      <strong>{activeTimetableLesson.subject || activeTimetableLesson.title}</strong>
+                      <span>
+                        {t('school.timetable.period', { count: activeTimetableLesson.period || 1 })}
+                        {activeTimetableLesson.time ? ` · ${activeTimetableLesson.time}${activeTimetableLesson.endTime ? `–${activeTimetableLesson.endTime}` : ''}` : ''}
+                      </span>
+                    </div>
+                    <div className="school-lesson-actions-controls">
+                      <button
+                        type="button"
+                        className="is-edit"
+                        onClick={() => editSchoolItem(activeTimetableLesson)}
+                      >
+                        <Pencil size={14} /> {t('school.form.editTitle')}
+                      </button>
+                      <label className="school-cancellation-date">
+                        <span>{t('school.timetable.cancellationDate')}</span>
+                        <input
+                          type="date"
+                          min={today}
+                          value={activeLessonCancellationDate}
+                          onChange={event => setCancellationDates(previous => ({
+                            ...previous,
+                            [activeTimetableLesson.id]: event.target.value
+                          }))}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="is-cancellation"
+                        disabled={!activeLessonCancellationDateMatches}
+                        onClick={() => toggleLessonCancellation(activeTimetableLesson)}
+                      >
+                        <BellOff size={14} />
+                        {activeLessonDateCancelled
+                          ? t('school.timetable.restore')
+                          : t('school.timetable.cancelOnce')}
+                      </button>
+                      <button
+                        type="button"
+                        className="is-delete"
+                        onClick={() => {
+                          deleteFamilyLifeRecord('schoolItems', activeTimetableLesson.id);
+                          setActiveLessonId('');
+                        }}
+                        aria-label={t('school.deleteAria')}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </section>
+                )}
                 <div className="school-kind-grid">
               {Object.entries(SCHOOL_KIND)
                 .filter(([kind]) => kind !== 'lesson')

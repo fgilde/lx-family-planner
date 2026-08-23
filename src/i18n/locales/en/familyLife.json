@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "Period {{count}}",
+      "periodShort": "Period",
+      "periodLabel": "Period",
       "free": "Free",
       "cancelled": "Cancelled this week",
+      "lessonActions": "Manage lesson",
       "cancellationDate": "Date of the one-off lesson cancellation",
       "cancelOnce": "Cancel once",
       "restore": "Restore lesson"

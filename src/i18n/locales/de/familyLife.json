@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "{{count}}. Std.",
+      "periodShort": "Std.",
+      "periodLabel": "Stunde",
       "free": "Noch frei",
       "cancelled": "Fällt diese Woche aus",
+      "lessonActions": "Unterricht verwalten",
       "cancellationDate": "Datum des einmaligen Unterrichtsausfalls",
       "cancelOnce": "Einmalig ausfallen lassen",
       "restore": "Ausfall zurücknehmen"

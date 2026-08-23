@@ -17387,189 +17387,246 @@ textarea {
 
 .school-timetable {
   display: grid;
-  /* A weekly timetable belongs on one page on desktop: every weekday gets
-     an equal, flexible column instead of creating an inner scrollbar. */
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: minmax(64px, .72fr) repeat(5, minmax(0, 1fr));
+  gap: 1px;
   margin-bottom: 14px;
   overflow: visible;
-  padding: 2px 1px 9px;
-}
-
-.school-timetable > section {
-  min-width: 0;
-  overflow: hidden;
+  padding: 1px;
   border: 1px solid var(--border-color);
   border-radius: 18px;
+  background: var(--border-color);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--text-main) 5%, transparent);
+}
+
+.school-timetable-corner,
+.school-timetable-day,
+.school-timetable-period,
+.school-timetable-cell,
+.school-empty-slot {
+  min-width: 0;
+  min-height: 74px;
   background: var(--bg-subtle);
 }
 
-.school-timetable > section > header {
+.school-timetable-corner,
+.school-timetable-day {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 11px;
-  border-bottom: 1px solid var(--border-color);
+  gap: 5px;
+  min-height: 58px;
+  padding: 8px 10px;
   background: var(--bg-card);
 }
 
-.school-timetable > section > header strong {
-  font-size: .75rem;
+.school-timetable-corner {
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: .65rem;
+  font-weight: 850;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.school-timetable-day {
+  justify-content: center;
+  text-align: center;
+}
+
+.school-timetable-day strong {
+  font-size: .7rem;
   text-transform: capitalize;
 }
 
-.school-timetable > section > header small {
+.school-timetable-day small {
   color: var(--text-muted);
   font-size: .58rem;
 }
 
-.school-timetable > section > div {
+.school-timetable-period {
   display: grid;
-  align-content: start;
-  gap: 6px;
+  place-content: center;
+  gap: 0;
   padding: 7px;
-}
-
-.school-timetable > section > div > p {
-  margin: 18px 0;
   color: var(--text-muted);
-  font-size: .65rem;
   text-align: center;
 }
 
-.school-timetable article {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 7px;
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 13px;
-  background: var(--bg-card);
+.school-timetable-period strong {
+  color: var(--primary);
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  line-height: 1;
 }
 
-.school-empty-slot {
-  min-height: 58px;
+.school-timetable-period span {
+  font-size: .55rem;
+  font-weight: 800;
+}
+
+.school-timetable-period small {
+  margin-top: 3px;
+  font-size: .52rem;
+  white-space: nowrap;
+}
+
+.school-timetable-cell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 7px;
-  padding: 8px;
-  border: 1px dashed color-mix(in srgb, var(--primary) 35%, var(--border-color));
-  border-radius: 13px;
-  background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
-  color: var(--primary);
+  align-items: stretch;
+  gap: 3px;
+  padding: 3px;
+}
+
+.school-lesson-card {
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  width: 100%;
+  min-height: 100%;
+  padding: 7px 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-main);
+  background: var(--bg-card);
   font: inherit;
-  text-align: left;
+  text-align: center;
+  transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.school-lesson-card[aria-expanded] {
   cursor: pointer;
 }
 
-.school-empty-slot span {
-  font-size: .64rem;
-  font-weight: 850;
+.school-lesson-card[aria-expanded]:hover,
+.school-lesson-card.is-actions-open {
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border-color));
+  background: color-mix(in srgb, var(--primary) 8%, var(--bg-card));
+}
+
+.school-lesson-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.school-empty-slot {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: color-mix(in srgb, var(--text-muted) 64%, transparent);
+  background: var(--bg-subtle);
+  font: inherit;
+  cursor: pointer;
 }
 
 .school-empty-slot.is-read-only {
   color: var(--text-muted);
-  border-color: color-mix(in srgb, var(--border-color) 78%, transparent);
-  background: color-mix(in srgb, var(--bg-subtle) 72%, transparent);
   cursor: default;
-}
-
-.school-empty-slot em {
-  font-size: .58rem;
-  font-style: normal;
 }
 
 .school-empty-slot:not(.is-read-only):hover,
 .school-empty-slot:not(.is-read-only):focus-visible {
-  border-style: solid;
-  background: color-mix(in srgb, var(--primary) 11%, var(--bg-card));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--bg-subtle));
   outline: none;
 }
 
-.school-timetable article.is-cancelled {
+.school-lesson-card.is-cancelled {
   border-color: color-mix(in srgb, var(--danger) 55%, var(--border-color));
   background: color-mix(in srgb, var(--danger) 8%, var(--bg-card));
 }
 
-.school-lesson-time {
-  display: grid;
-  align-content: start;
-  gap: 1px;
-  color: var(--primary);
-}
-
-.school-lesson-time b {
-  font-size: .64rem;
-  white-space: nowrap;
-}
-
-.school-lesson-time small {
-  color: var(--text-muted);
-  font-size: .54rem;
-  white-space: nowrap;
-}
-
-.school-lesson-copy {
-  min-width: 0;
-  display: grid;
-  gap: 2px;
-}
-
-.school-lesson-copy strong,
-.school-lesson-copy span,
-.school-lesson-copy small {
+.school-lesson-card strong,
+.school-lesson-card span,
+.school-lesson-card small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.school-lesson-copy strong {
-  font-size: .7rem;
+.school-lesson-card strong {
+  font-family: var(--font-heading);
+  font-size: clamp(.7rem, 1.1vw, .91rem);
+  line-height: 1.1;
 }
 
-.school-lesson-copy span,
-.school-lesson-copy small {
+.school-lesson-card span,
+.school-lesson-card small {
   color: var(--text-muted);
-  font-size: .57rem;
+  font-size: .55rem;
 }
 
-.school-lesson-copy em {
-  margin-top: 3px;
+.school-lesson-card em {
+  margin-top: 2px;
   color: var(--danger);
-  font-size: .58rem;
+  font-size: .54rem;
   font-style: normal;
   font-weight: 900;
 }
 
 .school-lesson-actions {
-  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  gap: 4px;
-  padding-top: 6px;
-  border-top: 1px solid var(--border-color);
+  grid-template-columns: minmax(120px, .7fr) minmax(0, 1.7fr);
+  gap: 14px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border-color));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--primary) 5%, var(--bg-card));
+  animation: school-actions-in .16s ease-out both;
+}
+
+@keyframes school-actions-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.school-lesson-actions-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.school-lesson-actions-copy strong {
+  overflow: hidden;
+  font-family: var(--font-heading);
+  font-size: .87rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.school-lesson-actions-copy span {
+  color: var(--text-muted);
+  font-size: .64rem;
+}
+
+.school-lesson-actions-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .school-lesson-actions input,
 .school-lesson-actions button {
   min-width: 0;
-  min-height: 30px;
-  padding: 5px 6px;
+  min-height: 35px;
+  padding: 7px 9px;
   border: 1px solid var(--border-color);
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--text-main);
-  background: var(--bg-subtle);
+  background: var(--bg-card);
   font: inherit;
-  font-size: .55rem;
+  font-size: .62rem;
 }
 
 .school-lesson-actions button {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--danger);
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -17579,17 +17636,27 @@ textarea {
 }
 
 .school-lesson-actions .is-delete {
-  width: 30px;
+  width: 35px;
   display: grid;
   place-items: center;
+  color: var(--danger);
 }
 
 .school-lesson-actions .is-edit {
-  width: 30px;
-  display: grid;
-  place-items: center;
   color: var(--primary);
 }
+
+.school-lesson-actions .is-cancellation { color: var(--danger); }
+
+.school-cancellation-date {
+  display: grid;
+  gap: 3px;
+  color: var(--text-muted);
+  font-size: .54rem;
+  font-weight: 800;
+}
+
+.school-cancellation-date input { min-width: 132px; }
 
 .school-item-actions {
   display: inline-flex;
@@ -17762,15 +17829,16 @@ textarea {
   .family-poll-card button > i { grid-column: 2 / -1; width: 100%; }
   .saving-goals article > button { opacity: 1; }
 
-  /* Touch screens keep the comfortable lesson-card width; only there is
-     horizontal swiping preferable to cramming five days into tiny cards. */
+  /* A school timetable must stay readable on a phone. The whole grid scrolls
+     horizontally as one sheet instead of squeezing subjects into tiny cards. */
   .school-timetable {
-    grid-template-columns: repeat(5, minmax(142px, 1fr));
+    grid-template-columns: 64px repeat(5, minmax(136px, 1fr));
     overflow-x: auto;
     scrollbar-width: thin;
   }
 
-  .school-timetable > section { min-width: 142px; }
+  .school-lesson-actions { grid-template-columns: 1fr; gap: 10px; }
+  .school-lesson-actions-controls { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {

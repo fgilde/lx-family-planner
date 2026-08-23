@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "Ora {{count}}",
+      "periodShort": "Ora",
+      "periodLabel": "Ora",
       "free": "Libero",
       "cancelled": "Sospesa questa settimana",
+      "lessonActions": "Gestisci lezione",
       "cancellationDate": "Data della sospensione una tantum della lezione",
       "cancelOnce": "Sospendi una volta",
       "restore": "Ripristina lezione"

@@ -124,8 +124,11 @@
     },
     "timetable": {
       "period": "Clase {{count}}",
+      "periodShort": "Clase",
+      "periodLabel": "Clase",
       "free": "Libre",
       "cancelled": "Cancelada esta semana",
+      "lessonActions": "Gestionar clase",
       "cancellationDate": "Fecha de la cancelación puntual de la clase",
       "cancelOnce": "Cancelar una vez",
       "restore": "Restaurar clase"
