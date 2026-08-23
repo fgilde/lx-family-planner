@@ -367,14 +367,19 @@ export async function fetchCalDavEvents(
       throw failure(calDavFetchErrorMessage(error));
     }
     const events = [];
+    let readableCalendars = 0;
+    let firstCalendarError = null;
     for (const calendarUrl of calendarUrls) {
       let documents;
       try {
         documents = await fetchSynologyCalendarDocuments(calendarUrl, user, secret, body);
       } catch (error) {
-        if (error?.statusCode) throw error;
-        throw failure(calDavFetchErrorMessage(error));
+        firstCalendarError ||= error?.statusCode
+          ? error
+          : failure(calDavFetchErrorMessage(error));
+        continue;
       }
+      readableCalendars += 1;
       for (const document of documents) {
         events.push(...parseICalendar(document, {
           targetTimeZone,
@@ -385,6 +390,9 @@ export async function fetchCalDavEvents(
         if (events.length >= maxEvents) break;
       }
       if (events.length >= maxEvents) break;
+    }
+    if (!readableCalendars) {
+      throw firstCalendarError || failure('Im Synology-Konto wurde kein lesbarer Kalender gefunden.', 422);
     }
     return events.slice(0, maxEvents);
   }
