@@ -1,6 +1,6 @@
 const RELEASE_NOTES = {
-  '1.18.5': {
-    version: '1.18.5',
+  '1.19.0': {
+    version: '1.19.0',
     eyebrow: 'Mehr Schule, Kalender und Alltag',
     title: 'Stundenplan, CalDAV und flexiblere Aufgaben sind da',
     intro:

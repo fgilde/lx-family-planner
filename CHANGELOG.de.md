@@ -4,7 +4,7 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
-## [1.18.5] – 2026-08-23
+## [1.19.0] – 2026-08-23
 
 ### Schule, CalDAV, Aufgaben und iOS
 

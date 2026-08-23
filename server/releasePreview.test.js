@@ -20,7 +20,7 @@ test('the login screen presents the complete current release before sign-in', ()
     'utf8'
   );
 
-  assert.equal(version, '1.18.5');
+  assert.equal(version, '1.19.0');
   assert.match(login, /<ReleasePreviewCard\s*\/>/);
   assert.match(previewCard, /releaseNotesForVersion\(APP_VERSION\)/);
   assert.deepEqual(

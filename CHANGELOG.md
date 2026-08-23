@@ -6,7 +6,7 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
-## [1.18.5] — 2026-08-23
+## [1.19.0] — 2026-08-23
 
 ### School, CalDAV, chores and iOS
 
