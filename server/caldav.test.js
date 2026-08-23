@@ -4,7 +4,8 @@ import test from 'node:test';
 import {
   calDavFetchErrorMessage,
   fetchCalDavEvents,
-  normalizeCalDavUrl
+  normalizeCalDavUrl,
+  shouldUseSynologyCurlFallback
 } from './caldav.js';
 
 test('CalDAV imports a read-only calendar collection with Basic auth', async () => {
@@ -95,6 +96,25 @@ test('CalDAV only allows insecure HTTP after an explicit local test opt-in', () 
     if (previousInsecureHttp === undefined) delete process.env.CALENDAR_ALLOW_INSECURE_HTTP;
     else process.env.CALENDAR_ALLOW_INSECURE_HTTP = previousInsecureHttp;
   }
+});
+
+test('Synology invalid XML replies use the narrow curl compatibility fallback', () => {
+  assert.equal(
+    shouldUseSynologyCurlFallback(
+      new URL('http://nas.local/caldav.php/patzi/calendar/'),
+      400,
+      '<error xmlns="DAV:"><invalid-xml/></error>'
+    ),
+    true
+  );
+  assert.equal(
+    shouldUseSynologyCurlFallback(
+      new URL('https://calendar.example.test/caldav/calendar/'),
+      400,
+      '<error xmlns="DAV:"><invalid-xml/></error>'
+    ),
+    false
+  );
 });
 
 test('CalDAV explains certificate failures without suggesting insecure HTTP', () => {

@@ -1,10 +1,16 @@
 import { promises as dns } from 'dns';
 import { isIP } from 'net';
+import { spawn } from 'node:child_process';
+import { unlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { XMLParser } from 'fast-xml-parser';
 import { parseICalendar } from '../shared/icsCalendar.js';
 
 const REQUEST_TIMEOUT_MS = 15_000;
 const MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
+const SYNLOGY_CURL_MARKER = '__LX_CALDAV_STATUS__';
 const XML = new XMLParser({
   ignoreAttributes: false,
   removeNSPrefix: true,
@@ -131,6 +137,79 @@ async function readText(response) {
   return Buffer.concat(chunks).toString('utf8');
 }
 
+function calendarQueryBody() {
+  return `<?xml version="1.0" encoding="utf-8"?>
+    <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+      <d:prop><d:getetag/><c:calendar-data/></d:prop>
+      <c:filter><c:comp-filter name="VCALENDAR"/></c:filter>
+    </c:calendar-query>`;
+}
+
+export function shouldUseSynologyCurlFallback(url, status, body) {
+  return url.pathname.startsWith('/caldav.php/')
+    && status === 400
+    && /<\s*invalid-xml\b/i.test(String(body || ''));
+}
+
+function curlConfigValue(value) {
+  return String(value).replace(/([\\"])/g, '\\$1');
+}
+
+async function synologyCurlCalendarQuery(url, username, password, body) {
+  const bodyFile = join(tmpdir(), `lx-caldav-${randomUUID()}.xml`);
+  await writeFile(bodyFile, body, { encoding: 'utf8', mode: 0o600 });
+  try {
+    const output = await new Promise((resolve, reject) => {
+      const child = spawn('curl', [
+        '--silent',
+        '--show-error',
+        '--request', 'REPORT',
+        '--max-time', String(Math.ceil(REQUEST_TIMEOUT_MS / 1000)),
+        '--max-redirs', '0',
+        '--proto', '=http,https',
+        '--header', 'Depth: 1',
+        '--header', 'Accept: application/xml, text/xml;q=0.9',
+        '--header', 'Content-Type: application/xml; charset=utf-8',
+        '--data-binary', `@${bodyFile}`,
+        '--output', '-',
+        '--write-out', `\n${SYNLOGY_CURL_MARKER}%{http_code}`,
+        '--config', '-',
+        url.toString()
+      ], { stdio: ['pipe', 'pipe', 'pipe'] });
+      const chunks = [];
+      let size = 0;
+      let stderr = '';
+      child.stdout.on('data', chunk => {
+        size += chunk.length;
+        if (size > MAX_RESPONSE_BYTES + 100) {
+          child.kill();
+          reject(failure('Die Antwort des CalDAV-Servers ist zu groß.', 413));
+          return;
+        }
+        chunks.push(chunk);
+      });
+      child.stderr.on('data', chunk => { stderr += chunk.toString('utf8'); });
+      child.once('error', error => reject(error));
+      child.once('close', code => {
+        if (code !== 0) {
+          reject(new Error(stderr.trim() || 'Der Synology-CalDAV-Abruf ist fehlgeschlagen.'));
+          return;
+        }
+        resolve(Buffer.concat(chunks).toString('utf8'));
+      });
+      child.stdin.end(`user = "${curlConfigValue(username)}:${curlConfigValue(password)}"\n`);
+    });
+    const marker = output.lastIndexOf(SYNLOGY_CURL_MARKER);
+    if (marker < 0) throw new Error('Der Synology-CalDAV-Abruf lieferte keinen Status.');
+    return {
+      status: Number(output.slice(marker + SYNLOGY_CURL_MARKER.length).trim()),
+      body: output.slice(0, marker).replace(/\n$/, '')
+    };
+  } finally {
+    await unlink(bodyFile).catch(() => {});
+  }
+}
+
 function authorization(username, password) {
   return `Basic ${Buffer.from(`${username}:${password}`, 'utf8').toString('base64')}`;
 }
@@ -185,6 +264,7 @@ export async function fetchCalDavEvents(
     throw failure('Für CalDAV werden Benutzername und App-Passwort benötigt.', 400);
   }
   await validateTarget(url);
+  const body = calendarQueryBody();
   let response;
   try {
     response = await fetch(url, {
@@ -198,18 +278,41 @@ export async function fetchCalDavEvents(
         Accept: 'application/xml, text/xml;q=0.9',
         'User-Agent': `LX-Family/${appVersion} CalDAV-Sync`
       },
-      body: `<?xml version="1.0" encoding="utf-8"?>
-        <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
-          <d:prop><d:getetag/><c:calendar-data/></d:prop>
-          <c:filter><c:comp-filter name="VCALENDAR"/></c:filter>
-        </c:calendar-query>`
+      body
     });
   } catch (error) {
     throw failure(calDavFetchErrorMessage(error));
   }
   if (![200, 207].includes(response.status)) {
+    const responseBody = await readText(response);
+    if (shouldUseSynologyCurlFallback(url, response.status, responseBody)) {
+      let fallback;
+      try {
+        fallback = await synologyCurlCalendarQuery(url, user, secret, body);
+      } catch (error) {
+        throw failure(calDavFetchErrorMessage(error));
+      }
+      if (![200, 207].includes(fallback.status)) {
+        const message = fallback.status === 401 || fallback.status === 403
+          ? 'CalDAV hat Benutzername oder Passwort abgelehnt.'
+          : `Der CalDAV-Server antwortet mit HTTP ${fallback.status}.`;
+        throw failure(message);
+      }
+      const documents = calendarDataFromMultistatus(fallback.body);
+      const events = [];
+      for (const document of documents) {
+        events.push(...parseICalendar(document, {
+          targetTimeZone,
+          rangeStart,
+          rangeEnd,
+          maxEvents: Math.max(1, maxEvents - events.length)
+        }));
+        if (events.length >= maxEvents) break;
+      }
+      return events.slice(0, maxEvents);
+    }
     const message = response.status === 401 || response.status === 403
-      ? 'CalDAV hat Benutzername oder App-Passwort abgelehnt.'
+      ? 'CalDAV hat Benutzername oder Passwort abgelehnt.'
       : `Der CalDAV-Server antwortet mit HTTP ${response.status}.`;
     throw failure(message);
   }

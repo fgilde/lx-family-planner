@@ -23,7 +23,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gosu \
+    && apt-get install -y --no-install-recommends gosu curl \
     && rm -rf /var/lib/apt/lists/* \
     && npm ci --omit=dev \
     && npm cache clean --force \
