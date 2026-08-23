@@ -184,7 +184,24 @@ Copy-Item -LiteralPath $apkSource -Destination $apkDestination -Force
 Copy-Item -LiteralPath $apkSource -Destination "LX-Family-Planner.apk" -Force
 
 $fileInfo = Get-Item -LiteralPath $apkDestination
-$checksum = (Get-FileHash -LiteralPath $apkDestination -Algorithm SHA256).Hash.ToLowerInvariant()
+# Get-FileHash is unavailable in a few minimal/older PowerShell installations.
+# Use the .NET implementation as a portable fallback so that release metadata
+# and the downloaded APK can never get out of sync.
+if (Get-Command Get-FileHash -ErrorAction SilentlyContinue) {
+    $checksum = (Get-FileHash -LiteralPath $apkDestination -Algorithm SHA256).Hash.ToLowerInvariant()
+} else {
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $stream = [System.IO.File]::OpenRead((Resolve-Path -LiteralPath $apkDestination))
+        try {
+            $checksum = ([System.BitConverter]::ToString($sha256.ComputeHash($stream))).Replace('-', '').ToLowerInvariant()
+        } finally {
+            $stream.Dispose()
+        }
+    } finally {
+        $sha256.Dispose()
+    }
+}
 $metadata = [ordered]@{
     versionName = [string]$package.version
     versionCode = $versionCode

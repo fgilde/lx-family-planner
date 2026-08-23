@@ -2,7 +2,7 @@ name: lx-family
 
 services:
   lx-family:
-    image: ghcr.io/laxxx-lab/lx-family-planner:1.19.0
+    image: ghcr.io/laxxx-lab/lx-family-planner:1.19.1
     container_name: lx-family
     restart: unless-stopped
     environment:
@@ -103,11 +103,11 @@ x-casaos:
   architectures:
     - amd64
     - arm64
-  version: "1.19.0"
+  version: "1.19.1"
   update_at: "2026-08-23"
   release_notes:
-    en_US: Adds an editable school timetable, read-only CalDAV including Synology discovery, flexible recurring chores and a polished iOS home-screen experience.
-    de_DE: Bringt einen editierbaren Stundenplan, schreibgeschütztes CalDAV inklusive Synology-Erkennung, flexible wiederkehrende Aufgaben und eine verbesserte iOS-Installation.
+    en_US: Refines the weekly timetable into a clear grid. Lesson actions stay out of sight until a parent selects a subject.
+    de_DE: Macht den Wochenstundenplan zu einem klaren Raster. Unterricht verwalten erscheint erst, wenn Eltern ein Fach auswählen.
   website: https://github.com/laxxx-lab/lx-family-planner
   repo: https://github.com/laxxx-lab/lx-family-planner
   support: https://github.com/laxxx-lab/lx-family-planner/issues

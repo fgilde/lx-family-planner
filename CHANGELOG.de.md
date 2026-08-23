@@ -4,6 +4,18 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.19.1] – 2026-08-23
+
+### Stundenplan aufgeräumt
+
+- Der Wochenstundenplan ist jetzt ein ruhiges, gut lesbares Raster mit
+  Unterrichtsstunden links und Wochentagen oben – statt einzelner Listen pro
+  Tag.
+- Bearbeiten, einmaliger Ausfall und Löschen bleiben aus der Planansicht
+  heraus und erscheinen für Eltern erst nach Klick auf das betreffende Fach.
+- Auf schmalen Bildschirmen bleibt der komplette Plan durch horizontales
+  Wischen lesbar, ohne Fächer unbrauchbar zusammenzudrücken.
+
 ## [1.19.0] – 2026-08-23
 
 ### Schule, CalDAV, Aufgaben und iOS

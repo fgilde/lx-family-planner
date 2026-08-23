@@ -6,6 +6,17 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.19.1] — 2026-08-23
+
+### A calmer timetable
+
+- The weekly timetable is now one clear grid with periods on the left and
+  weekdays along the top, rather than separate lists for each day.
+- Edit, one-off cancellation and delete actions stay out of the timetable and
+  appear for parents only after selecting the relevant subject.
+- On narrow screens the complete timetable remains readable through horizontal
+  swiping instead of crushing subjects into tiny cards.
+
 ## [1.19.0] — 2026-08-23
 
 ### School, CalDAV, chores and iOS

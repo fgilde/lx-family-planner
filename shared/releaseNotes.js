@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.19.1': {
+    version: '1.19.1',
+    eyebrow: 'Kleines Update, viel mehr Ruhe',
+    title: 'Der Stundenplan wird zum echten Wochenplan',
+    intro:
+      'Der Stundenplan ist jetzt klarer, vertrauter und deutlich ruhiger zu bedienen. Alle bisherigen Stunden bleiben genau erhalten.',
+    highlights: [
+      {
+        id: 'timetable-grid',
+        title: 'Eine Woche auf einen Blick',
+        description:
+          'Stunden stehen links, die Wochentage oben. Fächer liegen sauber im gewohnten Stundenplan-Raster statt in einzelnen Tageslisten.'
+      }
+    ],
+    closing:
+      'Bestehende Stunden, Termine, Aufgaben, Profile, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'A small update with much more calm',
+        title: 'The timetable is now a real weekly plan',
+        intro:
+          'The timetable is clearer, more familiar and much calmer to use. Every existing lesson stays exactly where it was.',
+        highlights: [
+          {
+            id: 'timetable-grid',
+            title: 'The whole week at a glance',
+            description:
+              'Periods stay on the left and weekdays along the top. Subjects now sit in a familiar timetable grid instead of separate daily lists.'
+          }
+        ],
+        closing:
+          'Existing lessons, events, chores, profiles, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.19.0': {
     version: '1.19.0',
     eyebrow: 'Mehr Schule, Kalender und Alltag',

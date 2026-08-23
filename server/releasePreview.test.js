@@ -20,16 +20,11 @@ test('the login screen presents the complete current release before sign-in', ()
     'utf8'
   );
 
-  assert.equal(version, '1.19.0');
+  assert.equal(version, '1.19.1');
   assert.match(login, /<ReleasePreviewCard\s*\/>/);
   assert.match(previewCard, /releaseNotesForVersion\(APP_VERSION\)/);
   assert.deepEqual(
     notes.highlights.map(highlight => highlight.id),
-    [
-      'school-timetable',
-      'caldav-calendar-import',
-      'flexible-recurring-chores',
-      'ios-mobile-navigation'
-    ]
+    ['timetable-grid']
   );
 });
