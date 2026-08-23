@@ -122,6 +122,9 @@ test('Synology invalid XML replies use the narrow curl compatibility fallback', 
 test('Synology base URLs are recognized without matching normal collections', () => {
   assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav/')), true);
   assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav')), true);
+  assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav/alex'), 'alex'), true);
+  assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav/alex/'), 'alex'), true);
+  assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav/alex'), 'other'), false);
   assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav.php/alex/family/')), false);
 });
 

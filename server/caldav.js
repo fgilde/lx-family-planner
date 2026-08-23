@@ -152,8 +152,15 @@ function calendarDiscoveryBody() {
     </d:propfind>`;
 }
 
-export function isSynologyCalDavBaseUrl(url) {
-  return /^\/caldav\/?$/i.test(url.pathname);
+export function isSynologyCalDavBaseUrl(url, username = '') {
+  const segments = url.pathname.split('/').filter(Boolean);
+  if (segments.length === 1 && segments[0].toLowerCase() === 'caldav') return true;
+  if (segments.length !== 2 || segments[0].toLowerCase() !== 'caldav' || !username) return false;
+  try {
+    return decodeURIComponent(segments[1]) === username;
+  } catch {
+    return false;
+  }
 }
 
 export function shouldUseSynologyCurlFallback(url, status, body) {
@@ -351,7 +358,7 @@ export async function fetchCalDavEvents(
   }
   await validateTarget(url);
   const body = calendarQueryBody();
-  if (isSynologyCalDavBaseUrl(url)) {
+  if (isSynologyCalDavBaseUrl(url, user)) {
     let calendarUrls;
     try {
       calendarUrls = await discoverSynologyCalendars(url, user, secret);
