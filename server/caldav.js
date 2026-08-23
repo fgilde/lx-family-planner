@@ -145,6 +145,17 @@ function calendarQueryBody() {
     </c:calendar-query>`;
 }
 
+function calendarDiscoveryBody() {
+  return `<?xml version="1.0" encoding="utf-8"?>
+    <d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+      <d:prop><d:resourcetype/><d:displayname/></d:prop>
+    </d:propfind>`;
+}
+
+export function isSynologyCalDavBaseUrl(url) {
+  return /^\/caldav\/?$/i.test(url.pathname);
+}
+
 export function shouldUseSynologyCurlFallback(url, status, body) {
   return url.pathname.startsWith('/caldav.php/')
     && status === 400
@@ -155,27 +166,35 @@ function curlConfigValue(value) {
   return String(value).replace(/([\\"])/g, '\\$1');
 }
 
-async function synologyCurlCalendarQuery(url, username, password, body) {
+async function synologyCurlDavRequest(
+  url,
+  username,
+  password,
+  { method = 'REPORT', depth = '1', body = '' } = {}
+) {
   const bodyFile = join(tmpdir(), `lx-caldav-${randomUUID()}.xml`);
-  await writeFile(bodyFile, body, { encoding: 'utf8', mode: 0o600 });
+  if (body) {
+    await writeFile(bodyFile, body, { encoding: 'utf8', mode: 0o600 });
+  }
   try {
     const output = await new Promise((resolve, reject) => {
-      const child = spawn('curl', [
+      const args = [
         '--silent',
         '--show-error',
-        '--request', 'REPORT',
+        '--request', method,
         '--max-time', String(Math.ceil(REQUEST_TIMEOUT_MS / 1000)),
         '--max-redirs', '0',
         '--proto', '=http,https',
-        '--header', 'Depth: 1',
+        '--header', `Depth: ${depth}`,
         '--header', 'Accept: application/xml, text/xml;q=0.9',
         '--header', 'Content-Type: application/xml; charset=utf-8',
-        '--data-binary', `@${bodyFile}`,
         '--output', '-',
         '--write-out', `\n${SYNLOGY_CURL_MARKER}%{http_code}`,
-        '--config', '-',
-        url.toString()
-      ], { stdio: ['pipe', 'pipe', 'pipe'] });
+        '--config', '-'
+      ];
+      if (body) args.push('--data-binary', `@${bodyFile}`);
+      args.push(url.toString());
+      const child = spawn('curl', args, { stdio: ['pipe', 'pipe', 'pipe'] });
       const chunks = [];
       let size = 0;
       let stderr = '';
@@ -206,8 +225,72 @@ async function synologyCurlCalendarQuery(url, username, password, body) {
       body: output.slice(0, marker).replace(/\n$/, '')
     };
   } finally {
-    await unlink(bodyFile).catch(() => {});
+    if (body) await unlink(bodyFile).catch(() => {});
   }
+}
+
+function successfulDavStatus(status) {
+  return status === 200 || status === 207;
+}
+
+function synologyStatusFailure(status) {
+  return failure(
+    status === 401 || status === 403
+      ? 'CalDAV hat Benutzername oder Passwort abgelehnt.'
+      : `Der CalDAV-Server antwortet mit HTTP ${status}.`
+  );
+}
+
+export function synologyCalendarUrlsFromMultistatus(xml, baseUrl) {
+  let parsed;
+  try {
+    parsed = XML.parse(xml);
+  } catch {
+    throw failure('Synology hat keine lesbare Kalenderliste gesendet.', 422);
+  }
+  const root = parsed.multistatus || parsed['d:multistatus'];
+  const urls = [];
+  for (const response of asArray(root?.response)) {
+    const href = String(response?.href || '').trim();
+    if (!href) continue;
+    for (const propstat of asArray(response?.propstat)) {
+      const status = String(propstat?.status || '');
+      if (status && !/\s20\d\s/i.test(status)) continue;
+      const resourceType = propstat?.prop?.resourcetype;
+      if (!resourceType || !Object.prototype.hasOwnProperty.call(resourceType, 'calendar')) continue;
+      let calendarUrl;
+      try {
+        calendarUrl = new URL(href, baseUrl);
+      } catch {
+        continue;
+      }
+      if (calendarUrl.origin === baseUrl.origin) urls.push(calendarUrl);
+    }
+  }
+  return [...new Map(urls.map(url => [url.toString(), url])).values()];
+}
+
+async function discoverSynologyCalendars(baseUrl, username, password) {
+  const homeUrl = new URL(baseUrl.toString());
+  homeUrl.pathname = `/caldav.php/${encodeURIComponent(username)}/`;
+  homeUrl.search = '';
+  const response = await synologyCurlDavRequest(homeUrl, username, password, {
+    method: 'PROPFIND',
+    depth: '1',
+    body: calendarDiscoveryBody()
+  });
+  if (!successfulDavStatus(response.status)) throw synologyStatusFailure(response.status);
+  const urls = synologyCalendarUrlsFromMultistatus(response.body, homeUrl);
+  if (!urls.length) {
+    throw failure('Im Synology-Konto wurde kein lesbarer Kalender gefunden.', 422);
+  }
+  return urls;
+}
+
+async function fetchSynologyCalendarDocuments(url, username, password, body) {
+  const response = await synologyCurlDavRequest(url, username, password, { body });
+  if (!successfulDavStatus(response.status)) throw synologyStatusFailure(response.status);
+  return calendarDataFromMultistatus(response.body, { allowEmpty: true });
 }
 
 function authorization(username, password) {
@@ -230,7 +313,7 @@ export function calDavFetchErrorMessage(error) {
   return 'Der CalDAV-Server ist unter dieser Adresse gerade nicht erreichbar.';
 }
 
-function calendarDataFromMultistatus(xml) {
+function calendarDataFromMultistatus(xml, { allowEmpty = false } = {}) {
   let parsed;
   try {
     parsed = XML.parse(xml);
@@ -238,6 +321,9 @@ function calendarDataFromMultistatus(xml) {
     throw failure('Der CalDAV-Server hat keine lesbare Kalenderantwort gesendet.', 422);
   }
   const root = parsed.multistatus || parsed['d:multistatus'];
+  if (!root) {
+    throw failure('Der CalDAV-Server hat keine lesbare Kalenderantwort gesendet.', 422);
+  }
   const data = [];
   for (const response of asArray(root?.response)) {
     for (const propstat of asArray(response?.propstat)) {
@@ -247,7 +333,7 @@ function calendarDataFromMultistatus(xml) {
       if (typeof content === 'string' && /BEGIN:VCALENDAR/i.test(content)) data.push(content);
     }
   }
-  if (!data.length) {
+  if (!data.length && !allowEmpty) {
     throw failure('Der CalDAV-Server hat keine lesbaren Termine geliefert. Bitte die URL eines einzelnen Kalenders verwenden.', 422);
   }
   return data;
@@ -265,6 +351,36 @@ export async function fetchCalDavEvents(
   }
   await validateTarget(url);
   const body = calendarQueryBody();
+  if (isSynologyCalDavBaseUrl(url)) {
+    let calendarUrls;
+    try {
+      calendarUrls = await discoverSynologyCalendars(url, user, secret);
+    } catch (error) {
+      if (error?.statusCode) throw error;
+      throw failure(calDavFetchErrorMessage(error));
+    }
+    const events = [];
+    for (const calendarUrl of calendarUrls) {
+      let documents;
+      try {
+        documents = await fetchSynologyCalendarDocuments(calendarUrl, user, secret, body);
+      } catch (error) {
+        if (error?.statusCode) throw error;
+        throw failure(calDavFetchErrorMessage(error));
+      }
+      for (const document of documents) {
+        events.push(...parseICalendar(document, {
+          targetTimeZone,
+          rangeStart,
+          rangeEnd,
+          maxEvents: Math.max(1, maxEvents - events.length)
+        }));
+        if (events.length >= maxEvents) break;
+      }
+      if (events.length >= maxEvents) break;
+    }
+    return events.slice(0, maxEvents);
+  }
   let response;
   try {
     response = await fetch(url, {
@@ -288,16 +404,11 @@ export async function fetchCalDavEvents(
     if (shouldUseSynologyCurlFallback(url, response.status, responseBody)) {
       let fallback;
       try {
-        fallback = await synologyCurlCalendarQuery(url, user, secret, body);
+        fallback = await synologyCurlDavRequest(url, user, secret, { body });
       } catch (error) {
         throw failure(calDavFetchErrorMessage(error));
       }
-      if (![200, 207].includes(fallback.status)) {
-        const message = fallback.status === 401 || fallback.status === 403
-          ? 'CalDAV hat Benutzername oder Passwort abgelehnt.'
-          : `Der CalDAV-Server antwortet mit HTTP ${fallback.status}.`;
-        throw failure(message);
-      }
+      if (!successfulDavStatus(fallback.status)) throw synologyStatusFailure(fallback.status);
       const documents = calendarDataFromMultistatus(fallback.body);
       const events = [];
       for (const document of documents) {

@@ -4,7 +4,9 @@ import test from 'node:test';
 import {
   calDavFetchErrorMessage,
   fetchCalDavEvents,
+  isSynologyCalDavBaseUrl,
   normalizeCalDavUrl,
+  synologyCalendarUrlsFromMultistatus,
   shouldUseSynologyCurlFallback
 } from './caldav.js';
 
@@ -115,6 +117,34 @@ test('Synology invalid XML replies use the narrow curl compatibility fallback', 
     ),
     false
   );
+});
+
+test('Synology base URLs are recognized without matching normal collections', () => {
+  assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav/')), true);
+  assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav')), true);
+  assert.equal(isSynologyCalDavBaseUrl(new URL('https://nas.example/caldav.php/alex/family/')), false);
+});
+
+test('Synology calendar discovery keeps calendar collections on the same server', () => {
+  const baseUrl = new URL('https://nas.example/caldav.php/alex/');
+  const urls = synologyCalendarUrlsFromMultistatus(`<?xml version="1.0"?>
+    <d:multistatus xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
+      <d:response>
+        <d:href>/caldav.php/alex/</d:href>
+        <d:propstat><d:prop><d:resourcetype><d:collection/></d:resourcetype></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+      </d:response>
+      <d:response>
+        <d:href>/caldav.php/alex/family/</d:href>
+        <d:propstat><d:prop><d:resourcetype><d:collection/><c:calendar/></d:resourcetype></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+      </d:response>
+      <d:response>
+        <d:href>https://other.example/calendar/</d:href>
+        <d:propstat><d:prop><d:resourcetype><c:calendar/></d:resourcetype></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat>
+      </d:response>
+    </d:multistatus>`, baseUrl);
+  assert.deepEqual(urls.map(url => url.toString()), [
+    'https://nas.example/caldav.php/alex/family/'
+  ]);
 });
 
 test('CalDAV explains certificate failures without suggesting insecure HTTP', () => {
