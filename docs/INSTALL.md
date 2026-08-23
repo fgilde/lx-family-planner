@@ -51,12 +51,26 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-plan
 ```
 
 The tested installer creates a new unprivileged Debian 13 LXC with two CPU
-cores, 2 GB RAM and 10 GB storage. LX runs there as a native Node.js 22 system
-service on port `3001`; Docker is not installed inside the LXC.
+cores, 2 GB RAM and 8 GB storage. It installs the official Docker Engine in
+the LXC and starts LX Family on port `3001`.
 
 Use the installer’s advanced network settings to provide a static IP when the
 Proxmox network has no DHCP. After the installer finishes, open the printed
 `http://LXC-IP:3001` address.
+
+### Manual LXC setup without the helper
+
+Create an **unprivileged Debian 13 LXC** in Proxmox with at least 2 CPU cores,
+2 GB RAM, 8 GB storage, and the **Nesting** and **Keyctl** features enabled.
+Then run this as `root` in the LXC console:
+
+```bash
+apt-get update && apt-get install -y ca-certificates curl
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/pve-guest-install.sh)"
+```
+
+It installs Docker, retrieves LX Family from the official repository and starts
+the application. Then open `http://LXC-IP:3001`.
 
 ## Windows with Docker Desktop
 

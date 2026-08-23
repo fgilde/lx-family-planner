@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Engine comes from community-scripts/core; this repo only ships the scripts.
-_cs_boot="${COMMUNITY_SCRIPTS_CORE_DIR:-$(dirname "${BASH_SOURCE[0]}")/../../core}/shared/build.func"
-source "$_cs_boot" 2>/dev/null || source <(curl -fsSL "${COMMUNITY_SCRIPTS_CORE_URL:-https://raw.githubusercontent.com/community-scripts/core/main}/shared/build.func")
+# This file is for a future upstream ProxmoxVE contribution. The current
+# upstream build engine lives in the ProxmoxVE repository, not in the retired
+# community-scripts/core layout.
+source <(curl -fsSL "${COMMUNITY_SCRIPTS_CORE_URL:-https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func}")
 # Copyright (c) 2026 community-scripts ORG
 # Author: LaxXx Lab (laxxx-lab)
 # License: MIT | https://github.com/community-scripts/ProxmoxVED/raw/main/LICENSE

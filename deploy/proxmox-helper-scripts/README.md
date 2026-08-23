@@ -6,14 +6,14 @@ because the upstream contribution standard does not accept Docker installers.
 
 ## Install from this repository
 
-Until the upstream catalogue eligibility requirements are met, the tested
-installer can be started directly on a Proxmox VE host as `root`:
+Until the upstream catalogue eligibility requirements are met, use the tested
+standalone installer from a Proxmox VE host as `root`:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/proxmox-lxc.sh)"
 ```
 
-It creates a new unprivileged Debian 13 LXC with the Helper-Scripts defaults.
+It creates a new unprivileged Debian 13 LXC and installs Docker plus LX Family.
 Use the advanced network settings when the Proxmox host does not provide DHCP.
 
 ## Files for ProxmoxVED

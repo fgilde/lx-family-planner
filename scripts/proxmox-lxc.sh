@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# One-line entry point for the native LX Family Proxmox LXC installer.
-# It keeps the Helper-Scripts engine upstream while resolving LX-specific
-# CT and install files from this repository.
-readonly LX_HELPER_ROOT="${LX_HELPER_ROOT:-https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/deploy/proxmox-helper-scripts}"
+# One-line entry point for the maintained LX Family Proxmox installer.
+# Keep this launcher independent of third-party helper internals: their
+# build engine and file layout may change without notice.
+readonly LX_RAW_ROOT="${LX_RAW_ROOT:-https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main}"
 
-export COMMUNITY_SCRIPTS_URL="$LX_HELPER_ROOT"
-exec bash -c "$(curl -fsSL "$LX_HELPER_ROOT/ct/lx-family.sh")"
+installer="$(curl -fsSL "$LX_RAW_ROOT/scripts/pve-helper.sh")" || {
+  echo "LX Family: Der Proxmox-Installer konnte nicht geladen werden." >&2
+  exit 1
+}
+[[ "$installer" == '#!/usr/bin/env bash'* ]] || {
+  echo "LX Family: Der geladene Installer ist unvollständig oder ungültig." >&2
+  exit 1
+}
+
+exec bash -c "$installer"

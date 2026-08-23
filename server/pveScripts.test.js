@@ -62,11 +62,12 @@ test('PVE helper exposes a non-destructive help command', t => {
   assert.doesNotMatch(help.stdout, /Container jetzt erstellen/);
 });
 
-test('Proxmox LXC entry point resolves the LX helper files from this repository', () => {
+test('Proxmox LXC entry point uses the maintained LX installer without third-party internals', () => {
   const launcher = scripts['proxmox-lxc.sh'];
-  assert.match(launcher, /COMMUNITY_SCRIPTS_URL/);
-  assert.match(launcher, /deploy\/proxmox-helper-scripts/);
-  assert.match(launcher, /ct\/lx-family\.sh/);
+  assert.match(launcher, /LX_RAW_ROOT/);
+  assert.match(launcher, /scripts\/pve-helper\.sh/);
+  assert.match(launcher, /ungültig/);
+  assert.doesNotMatch(launcher, /community-scripts\/core/);
   assert.doesNotMatch(launcher, /docker\s+(compose|run|pull|build)/i);
 });
 

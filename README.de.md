@@ -564,28 +564,29 @@ Programmversion lässt sich mit `LX_FAMILY_VERSION=1.16.1` fest anheften.
 
 ## Proxmox VE: nativer LXC
 
-Für Proxmox VE gibt es einen kompakten, nativen Installer. Er wird in der
+Für Proxmox VE gibt es einen kompakten Installer. Er wird in der
 **Proxmox-Host-Shell als root** ausgeführt und erstellt einen neuen,
-unprivilegierten Debian-13-LXC mit LX Family und Node.js 22 – ohne Docker im
-Container:
+unprivilegierten Debian-13-LXC mit Docker und LX Family:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/scripts/proxmox-lxc.sh)"
 ```
 
 Der Installer fragt vor dem Anlegen nach Container-ID, Ressourcen, Storage und
-Netzwerk. Seine Standardwerte sind 2 CPU-Kerne, 2 GB RAM, 10 GB Speicher und
+Netzwerk. Seine Standardwerte sind 2 CPU-Kerne, 2 GB RAM, 8 GB Speicher und
 DHCP an `vmbr0`. Falls euer Netzwerk kein DHCP bereitstellt, im erweiterten
 Modus eine freie statische Adresse wählen.
 
 Danach die im Abschluss angezeigte Adresse im Browser öffnen, zum Beispiel
-`http://192.168.x.x:3001`, und das Onboarding abschließen. Innerhalb des LXC
-helfen diese Befehle bei Betrieb und Diagnose:
+`http://192.168.x.x:3001`, und das Onboarding abschließen. Für eine manuelle
+LXC-Installation ohne Helper steht die vollständige Anleitung unter
+[LX Family installieren](docs/INSTALL.de.md#manuell-ohne-den-proxmox-helper).
+Innerhalb des LXC helfen diese Befehle bei Betrieb und Diagnose:
 
 ```bash
-systemctl status lx-family
-systemctl restart lx-family
-journalctl -u lx-family -n 100 --no-pager
+lx-family status
+lx-family restart
+lx-family logs
 ```
 
 Der Installer ist für **neue Installationen** vorgesehen. Für einen Umzug erst
