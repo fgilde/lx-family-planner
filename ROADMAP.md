@@ -49,6 +49,14 @@ Mobile, calendar and tablet improvements:
 
 ## Next
 
+- **Calendar quality release:** duplicate a local event as a starting point for
+  a similar one, add recurring locally-created events, then provide a genuine
+  time-based day/week view with durations and visible overlaps.
+- **Generic WebDAV Family Cloud:** an optional NAS/WebDAV mode alongside
+  Nextcloud for browsing folders, creating folders, upload, download, preview
+  and deletion. It will use an app password where supported. Nextcloud-only
+  functions such as account provisioning, quota display, browser embedding,
+  backups and two-way calendar sync remain separate.
 - generic two-way CalDAV support beyond the bundled Nextcloud integration;
 - calendar import from Google Calendar and iCloud accounts;
 - optional waste-collection subscriptions via URL (not only ICS upload);

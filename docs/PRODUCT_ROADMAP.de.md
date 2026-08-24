@@ -47,6 +47,22 @@
    Kalender, Einkauf und Aufgaben bleiben ohne Verbindung lesbar. Änderungen
    werden später mit sichtbarer Konfliktauflösung synchronisiert.
 
+### Als Nächstes – Kalender und NAS
+
+1. **Kalender komfortabler machen**
+   Einen bestehenden lokalen Termin duplizieren und anpassen, anschließend
+   Wiederholungen für selbst angelegte Termine ergänzen. Darauf baut eine echte
+   Stundenansicht für Tag und Woche auf: Dauer, parallele Termine und
+   Überschneidungen werden direkt sichtbar.
+
+2. **Generische WebDAV-Family-Cloud**
+   Neben Nextcloud eine schlanke NAS-/WebDAV-Verbindung anbieten: Ordner
+   anzeigen und anlegen, Dateien hoch- und herunterladen, Vorschau und
+   Löschen. Zugangsdaten bleiben verschlüsselt im LX-Server; soweit möglich
+   wird ein App-Passwort verwendet. Nextcloud-spezifische Funktionen wie
+   automatische Konten, Speicheranzeige, Browser-Ansicht, Sicherungen und
+   Zwei-Wege-Kalendersync bleiben bewusst getrennt.
+
 ### Aus Feedback eingesammelt (GitHub-Issues und Reddit)
 
 Die Hauptanliegen der Issues #3 und #11 sind vollständig umgesetzt (Profilwechsel,
