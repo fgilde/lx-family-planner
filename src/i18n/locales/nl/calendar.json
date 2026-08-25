@@ -102,6 +102,17 @@
       "locationPlaceholder": "bijv. school of huisarts",
       "notes": "Notities (optioneel)"
     },
+    "recurrence": {
+      "title": "Herhaling",
+      "hint": "De afspraak wordt als één reeks opgeslagen; herinneringen gelden voor elke keer.",
+      "frequency": "Herhaalt",
+      "every": "Elke",
+      "unit": "Eenheid",
+      "until": "Eindigt op (optioneel)",
+      "rules": { "none": "Niet herhalen", "daily": "Dagelijks", "weekly": "Wekelijks", "monthly": "Maandelijks", "yearly": "Jaarlijks", "custom": "Eigen ritme" },
+      "units": { "days": "dagen", "weeks": "weken", "months": "maanden" },
+      "seriesNote": "Je bewerkt een reeks. Wijzigingen gelden voor de hele reeks."
+    },
     "audience": {
       "title": "Voor wie is deze afspraak?",
       "hint": "Kies het hele gezin of selecteer meerdere personen.",

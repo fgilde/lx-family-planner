@@ -102,6 +102,17 @@
       "locationPlaceholder": "p. ej. colegio o consulta médica",
       "notes": "Notas (opcional)"
     },
+    "recurrence": {
+      "title": "Repetición",
+      "hint": "El evento se guarda como una serie; los recordatorios valen para cada fecha.",
+      "frequency": "Se repite",
+      "every": "Cada",
+      "unit": "Unidad",
+      "until": "Termina el (opcional)",
+      "rules": { "none": "No se repite", "daily": "Cada día", "weekly": "Cada semana", "monthly": "Cada mes", "yearly": "Cada año", "custom": "Ritmo personalizado" },
+      "units": { "days": "días", "weeks": "semanas", "months": "meses" },
+      "seriesNote": "Estás editando una serie. Los cambios se aplican a toda la serie."
+    },
     "audience": {
       "title": "¿Para quién es este evento?",
       "hint": "Elige a toda la familia o selecciona a varias personas.",

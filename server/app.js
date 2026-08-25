@@ -38,6 +38,10 @@ import {
   trashReminderEvent
 } from '../shared/eventReminders.js';
 import {
+  expandCalendarEventSeries,
+  normalizeCalendarRecurrence
+} from '../shared/calendarRecurrence.js';
+import {
   DEFAULT_GOTIFY_RULES,
   DEFAULT_WEB_PUSH_PREFERENCES
 } from '../shared/notificationEvents.js';
@@ -4334,6 +4338,15 @@ function sanitizeCalendarEvent(req, value, existing = null) {
   const startTime = allDay ? '' : cleanTime(input.time, '');
   const endDate = cleanDate(input.endDate, '');
   const endTime = allDay ? '' : cleanTime(input.endTime, '');
+  const recurrence = normalizeCalendarRecurrence(input);
+  if (
+    recurrence.recurrenceUntil &&
+    recurrence.recurrenceUntil < date
+  ) {
+    const error = new Error('Das Ende der Wiederholung darf nicht vor dem Termin liegen.');
+    error.statusCode = 400;
+    throw error;
+  }
   if (
     (endDate && endDate < date) ||
     (allDay && endDate && endDate <= date) ||
@@ -4359,7 +4372,8 @@ function sanitizeCalendarEvent(req, value, existing = null) {
     location: cleanText(input.location, '', 300),
     notes: cleanText(input.notes, '', 2000),
     category: cleanText(input.category, 'Allgemein', 80),
-    reminders: normalizeEventReminders(input.reminders)
+    reminders: normalizeEventReminders(input.reminders),
+    ...recurrence
   };
 }
 
@@ -5174,8 +5188,24 @@ export function createApp() {
     try {
       for (const family of listPublicFamilies()) {
         const resources = getBootstrap(family.id).resources;
+        // Wiederkehrende LX-Termine bleiben als eine Serie in der Datenbank.
+        // Für den Erinnerungsdurchlauf werden nur die zeitnahen Vorkommen
+        // aufgefächert, damit jede einzelne Erinnerung einen eigenen Start-Key
+        // bekommt und weder doppelt noch nur beim ersten Termin gesendet wird.
+        const reminderEvents = expandCalendarEventSeries(
+          resources.events || [],
+          {
+            rangeStart: new Date(now - 2 * 86_400_000)
+              .toISOString()
+              .slice(0, 10),
+            rangeEnd: new Date(now + 8 * 86_400_000)
+              .toISOString()
+              .slice(0, 10),
+            maxOccurrences: 600
+          }
+        );
         const reminderCandidates = [
-          ...(resources.events || []).map(event => ({
+          ...reminderEvents.map(event => ({
             event,
             eventId: String(event.sharedEventId || event.id || ''),
             recipientMemberIds: eventReminderRecipientMemberIds(

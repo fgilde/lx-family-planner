@@ -102,6 +102,28 @@
       "locationPlaceholder": "z. B. Schule oder Arztpraxis",
       "notes": "Notizen (optional)"
     },
+    "recurrence": {
+      "title": "Wiederholung",
+      "hint": "Der Termin wird als eine Serie gespeichert – Erinnerungen gelten für jedes Vorkommen.",
+      "frequency": "Wiederholt sich",
+      "every": "Alle",
+      "unit": "Einheit",
+      "until": "Endet am (optional)",
+      "rules": {
+        "none": "Nicht wiederholen",
+        "daily": "Täglich",
+        "weekly": "Wöchentlich",
+        "monthly": "Monatlich",
+        "yearly": "Jährlich",
+        "custom": "Eigener Rhythmus"
+      },
+      "units": {
+        "days": "Tage",
+        "weeks": "Wochen",
+        "months": "Monate"
+      },
+      "seriesNote": "Du bearbeitest eine Terminserie. Änderungen gelten für die gesamte Serie."
+    },
     "audience": {
       "title": "Für wen ist der Termin?",
       "hint": "Wähle die ganze Familie oder mehrere einzelne Personen aus.",

@@ -4,6 +4,18 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.19.3] – 2026-08-25
+
+### Wiederkehrende Familientermine
+
+- eigene Kalendereinträge können täglich, wöchentlich, monatlich, jährlich
+  oder in einem frei wählbaren Rhythmus wiederholt werden;
+- ein Enddatum begrenzt eine Serie bei Bedarf; ohne Enddatum läuft sie weiter;
+- jede einzelne Wiederholung erhält ihre eigenen Terminerinnerungen;
+- Terminserien bleiben ein einzelner, übersichtlicher Eintrag. Änderungen und
+  Löschen wirken bewusst auf die gesamte Serie und werden bei Zwei-Wege-CalDAV
+  als Standard-RRULE mitgegeben.
+
 ## [1.19.2] – 2026-08-25
 
 ### Klarerer gemeinsamer Kalender und sichere Familienabläufe

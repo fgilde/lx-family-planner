@@ -40,6 +40,7 @@ import {
 import i18n from '../i18n';
 import { formatDateTime } from '../utils/formatting';
 import { birthdayEventsForMembers } from '../../shared/birthdays.js';
+import { expandCalendarEventSeries } from '../../shared/calendarRecurrence.js';
 import {
   DEFAULT_PUBLIC_ACCESS,
   EMPTY_INTEGRATIONS,
@@ -369,13 +370,26 @@ export function FamilyProvider({ children }) {
     [activeMemberIdState, members]
   );
   const calendarEvents = useMemo(
-    () => [
-      ...resources.events,
-      ...birthdayEventsForMembers(members, {
+    () => {
+      const now = new Date();
+      const rangeStart = new Date(now.getFullYear() - 1, 0, 1)
+        .toISOString()
+        .slice(0, 10);
+      const rangeEnd = new Date(now.getFullYear() + 5, 11, 31)
+        .toISOString()
+        .slice(0, 10);
+      return [
+        ...expandCalendarEventSeries(resources.events, {
+          rangeStart,
+          rangeEnd,
+          maxOccurrences: 12_000
+        }),
+        ...birthdayEventsForMembers(members, {
         startYear: new Date().getFullYear(),
-        years: 2
-      })
-    ],
+          years: 5
+        })
+      ];
+    },
     [members, resources.events]
   );
 
@@ -1568,7 +1582,9 @@ export function FamilyProvider({ children }) {
         event = data.event;
       } else {
         const eventId =
-          typeof eventOrId === 'object' ? eventOrId.id : eventOrId;
+          typeof eventOrId === 'object'
+            ? (eventOrId.seriesId || eventOrId.id)
+            : eventOrId;
         event = await patchResource('events', eventId, changes);
       }
       const reminderOnly = Object.keys(changes || {}).every(
@@ -1605,7 +1621,10 @@ export function FamilyProvider({ children }) {
 
   const deleteEvent = useCallback(eventId =>
     withActionError(async () => {
-      const event = resources.events.find(item => item.id === eventId);
+      const resolvedId = typeof eventId === 'object'
+        ? (eventId.seriesId || eventId.id)
+        : eventId;
+      const event = resources.events.find(item => item.id === resolvedId);
       if (event?.sharedEventId) {
         await apiRequest(
           `/api/family/shared-events/${event.sharedEventId}`,
@@ -1619,7 +1638,7 @@ export function FamilyProvider({ children }) {
         );
         return;
       }
-      await removeResource('events', eventId);
+      await removeResource('events', resolvedId);
       showToast(
         i18n.t('context:toasts.eventDeleted.title'),
         i18n.t('context:toasts.eventDeleted.message'),

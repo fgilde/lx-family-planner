@@ -7,6 +7,7 @@ import {
   CopyPlus,
   LockKeyhole,
   MapPin,
+  Repeat2,
   Trash2,
   X
 } from 'lucide-react';
@@ -33,18 +34,22 @@ function formState(event, t) {
   const displayEvent = birthdayEventCopy(event, t);
   return {
     title: displayEvent.title,
-    date: event?.date || '',
+    date: event?.seriesStartDate || event?.date || '',
     time: event?.time || '09:00',
     allDay: Boolean(event?.allDay),
     endDate:
-      event?.allDay && event?.endDate
-        ? addLocalDays(event.endDate, -1)
-        : event?.endDate || '',
+      event?.allDay && (event?.seriesStartEndDate || event?.endDate)
+        ? addLocalDays(event.seriesStartEndDate || event.endDate, -1)
+        : event?.seriesStartEndDate || event?.endDate || '',
     endTime: event?.endTime || '',
     memberIds: eventAudienceIds(event),
     location: displayEvent.location,
     notes: displayEvent.notes,
-    reminders: normalizeEventReminders(event?.reminders)
+    reminders: normalizeEventReminders(event?.reminders),
+    recurrenceRule: event?.recurrenceRule || 'none',
+    recurrenceInterval: Math.max(1, Number(event?.recurrenceInterval) || 1),
+    recurrenceUnit: event?.recurrenceUnit || 'weeks',
+    recurrenceUntil: event?.recurrenceUntil || ''
   };
 }
 
@@ -105,7 +110,11 @@ export default function CalendarEventDialog({
         memberId: form.memberIds[0] || 'all',
         location: form.location.trim(),
         notes: form.notes.trim(),
-        reminders: form.reminders
+        reminders: form.reminders,
+        recurrenceRule: form.recurrenceRule,
+        recurrenceInterval: Number(form.recurrenceInterval),
+        recurrenceUnit: form.recurrenceUnit,
+        recurrenceUntil: form.recurrenceUntil
       });
       if (result) onClose();
     } finally {
@@ -145,7 +154,11 @@ export default function CalendarEventDialog({
         memberId: form.memberIds[0] || 'all',
         location: form.location.trim(),
         notes: form.notes.trim(),
-        reminders: form.reminders
+        reminders: form.reminders,
+        recurrenceRule: form.recurrenceRule,
+        recurrenceInterval: Number(form.recurrenceInterval),
+        recurrenceUnit: form.recurrenceUnit,
+        recurrenceUntil: form.recurrenceUntil
       });
     } finally {
       setSaving(false);
@@ -277,6 +290,84 @@ export default function CalendarEventDialog({
               />
             </label>
           )}
+
+          <section className="calendar-editor-recurrence is-wide">
+            <div className="calendar-editor-recurrence-heading">
+              <span><Repeat2 size={15} /> {t('editor.recurrence.title')}</span>
+              <small>{t('editor.recurrence.hint')}</small>
+            </div>
+            <div className="calendar-editor-recurrence-fields">
+              <label className="calendar-editor-field">
+                <span>{t('editor.recurrence.frequency')}</span>
+                <select
+                  value={form.recurrenceRule}
+                  disabled={!editable}
+                  onChange={change => patch({
+                    recurrenceRule: change.target.value
+                  })}
+                >
+                  {['none', 'daily', 'weekly', 'monthly', 'yearly', 'custom']
+                    .map(rule => (
+                      <option key={rule} value={rule}>
+                        {t(`editor.recurrence.rules.${rule}`)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              {form.recurrenceRule === 'custom' && (
+                <>
+                  <label className="calendar-editor-field">
+                    <span>{t('editor.recurrence.every')}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={form.recurrenceInterval}
+                      disabled={!editable}
+                      onChange={change => patch({
+                        recurrenceInterval: change.target.value
+                      })}
+                    />
+                  </label>
+                  <label className="calendar-editor-field">
+                    <span>{t('editor.recurrence.unit')}</span>
+                    <select
+                      value={form.recurrenceUnit}
+                      disabled={!editable}
+                      onChange={change => patch({
+                        recurrenceUnit: change.target.value
+                      })}
+                    >
+                      {['days', 'weeks', 'months'].map(unit => (
+                        <option key={unit} value={unit}>
+                          {t(`editor.recurrence.units.${unit}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </>
+              )}
+              {form.recurrenceRule !== 'none' && (
+                <label className="calendar-editor-field">
+                  <span>{t('editor.recurrence.until')}</span>
+                  <input
+                    type="date"
+                    min={form.date}
+                    value={form.recurrenceUntil}
+                    disabled={!editable}
+                    onChange={change => patch({
+                      recurrenceUntil: change.target.value
+                    })}
+                  />
+                </label>
+              )}
+            </div>
+            {event.seriesId && (
+              <p className="calendar-editor-recurrence-series-note">
+                {t('editor.recurrence.seriesNote')}
+              </p>
+            )}
+          </section>
 
           <div className="is-wide">
             <EventAudiencePicker

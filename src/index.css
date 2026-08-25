@@ -22608,7 +22608,8 @@ body:has(.modal-backdrop) .problem-report-launcher {
 }
 
 .calendar-editor-field input,
-.calendar-editor-field textarea {
+.calendar-editor-field textarea,
+.calendar-editor-field select {
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
@@ -22625,14 +22626,16 @@ body:has(.modal-backdrop) .problem-report-launcher {
 }
 
 .calendar-editor-field input:focus,
-.calendar-editor-field textarea:focus {
+.calendar-editor-field textarea:focus,
+.calendar-editor-field select:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
   outline: none;
 }
 
 .calendar-editor-field input:disabled,
-.calendar-editor-field textarea:disabled {
+.calendar-editor-field textarea:disabled,
+.calendar-editor-field select:disabled {
   opacity: 1;
   color: var(--text-main);
   background: var(--bg-subtle);
@@ -22657,6 +22660,52 @@ body:has(.modal-backdrop) .problem-report-launcher {
 .calendar-editor-all-day span {
   display: grid;
   gap: 2px;
+}
+
+.calendar-editor-recurrence {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border-color));
+  border-radius: 17px;
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--primary) 7%, transparent), transparent 62%),
+    var(--bg-subtle);
+}
+
+.calendar-editor-recurrence-heading {
+  display: grid;
+  gap: 3px;
+}
+
+.calendar-editor-recurrence-heading > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.calendar-editor-recurrence-heading svg { color: var(--primary); }
+
+.calendar-editor-recurrence-heading small,
+.calendar-editor-recurrence-series-note {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.calendar-editor-recurrence-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.calendar-editor-recurrence-series-note {
+  margin: -2px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed color-mix(in srgb, var(--primary) 25%, var(--border-color));
 }
 
 .calendar-editor-all-day strong {
@@ -23048,6 +23097,10 @@ body:has(.modal-backdrop) .problem-report-launcher {
 
   .calendar-editor-body .is-wide {
     grid-column: auto;
+  }
+
+  .calendar-editor-recurrence-fields {
+    grid-template-columns: 1fr;
   }
 
   .event-audience-picker > div {

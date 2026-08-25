@@ -102,6 +102,17 @@
       "locationPlaceholder": "np. szkoła lub gabinet lekarza",
       "notes": "Notatki (opcjonalnie)"
     },
+    "recurrence": {
+      "title": "Powtarzanie",
+      "hint": "Wydarzenie jest zapisane jako seria; przypomnienia dotyczą każdego wystąpienia.",
+      "frequency": "Powtarza się",
+      "every": "Co",
+      "unit": "Jednostka",
+      "until": "Kończy się (opcjonalnie)",
+      "rules": { "none": "Nie powtarza się", "daily": "Codziennie", "weekly": "Co tydzień", "monthly": "Co miesiąc", "yearly": "Co rok", "custom": "Własny rytm" },
+      "units": { "days": "dni", "weeks": "tygodnie", "months": "miesiące" },
+      "seriesNote": "Edytujesz serię. Zmiany dotyczą całej serii."
+    },
     "audience": {
       "title": "Dla kogo jest to wydarzenie?",
       "hint": "Wybierz całą rodzinę lub zaznacz kilka osób.",

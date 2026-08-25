@@ -5,6 +5,10 @@ import { XMLParser } from 'fast-xml-parser';
 import { parseICalendar } from '../shared/icsCalendar.js';
 import { eventAudienceIds } from '../shared/calendarAudience.js';
 import {
+  calendarRecurrenceRRule,
+  normalizeCalendarRecurrence
+} from '../shared/calendarRecurrence.js';
+import {
   deleteIntegrationSyncItem,
   deleteRecord,
   listIntegrationSyncItems,
@@ -1001,6 +1005,16 @@ function serializeEvent(event, uid, timeZone) {
   if (event.location) lines.push(`LOCATION:${escapeIcs(event.location)}`);
   if (event.notes) lines.push(`DESCRIPTION:${escapeIcs(event.notes)}`);
   if (event.category) lines.push(`CATEGORIES:${escapeIcs(event.category)}`);
+  const rrule = calendarRecurrenceRRule(event);
+  if (rrule) lines.push(`RRULE:${rrule}`);
+  lines.push(
+    `X-LX-RECURRENCE:${escapeIcs(JSON.stringify({
+      recurrenceRule: event.recurrenceRule || 'none',
+      recurrenceInterval: event.recurrenceInterval || 1,
+      recurrenceUnit: event.recurrenceUnit || 'weeks',
+      recurrenceUntil: event.recurrenceUntil || ''
+    }))}`
+  );
   lines.push(`X-LX-FAMILY-ID:${escapeIcs(event.familyId || '')}`);
   lines.push(`X-LX-EVENT-ID:${escapeIcs(event.id || '')}`);
   lines.push(`X-LX-MEMBER-ID:${escapeIcs(event.memberId || 'all')}`);
@@ -1026,7 +1040,11 @@ function eventContentHash(event) {
       category: clean(event?.category),
       memberId: clean(event?.memberId, 'all'),
       memberIds: eventAudienceIds(event),
-      household: clean(event?.household, 'familie')
+      household: clean(event?.household, 'familie'),
+      recurrenceRule: clean(event?.recurrenceRule, 'none'),
+      recurrenceInterval: Math.max(1, Number(event?.recurrenceInterval) || 1),
+      recurrenceUnit: clean(event?.recurrenceUnit, 'weeks'),
+      recurrenceUntil: clean(event?.recurrenceUntil)
     }))
     .digest('hex');
 }
@@ -1051,6 +1069,17 @@ function remoteEvent(
     resource.calendarData,
     'X-LX-MEMBER-ID'
   );
+  let remoteRecurrence = {};
+  try {
+    const parsedRecurrence = JSON.parse(
+      customIcsValue(resource.calendarData, 'X-LX-RECURRENCE') || '{}'
+    );
+    if (parsedRecurrence && typeof parsedRecurrence === 'object') {
+      remoteRecurrence = parsedRecurrence;
+    }
+  } catch {
+    remoteRecurrence = {};
+  }
   let remoteMemberIds = [];
   try {
     const parsedMemberIds = JSON.parse(
@@ -1084,6 +1113,7 @@ function remoteEvent(
     category:
       customIcsValue(resource.calendarData, 'CATEGORIES') ||
       sourceName,
+    ...normalizeCalendarRecurrence(remoteRecurrence),
     syncUid: parsed.uid,
     syncHref: resource.href,
     syncManaged: true,

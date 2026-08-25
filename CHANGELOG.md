@@ -6,6 +6,17 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.19.3] — 2026-08-25
+
+### Recurring family events
+
+- locally created calendar events can repeat daily, weekly, monthly, yearly or
+  on a custom schedule;
+- an optional end date limits a series, while reminders are delivered for each
+  individual occurrence;
+- a series remains one tidy entry: editing and deleting deliberately affect
+  the entire series, and two-way CalDAV exports it as a standard RRULE.
+
 ## [1.19.2] — 2026-08-25
 
 ### A clearer shared calendar and safer family operations

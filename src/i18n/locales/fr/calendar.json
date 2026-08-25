@@ -102,6 +102,17 @@
       "locationPlaceholder": "ex. école ou cabinet médical",
       "notes": "Notes (facultatif)"
     },
+    "recurrence": {
+      "title": "Répétition",
+      "hint": "L'événement est enregistré comme une série ; les rappels s'appliquent à chaque occurrence.",
+      "frequency": "Se répète",
+      "every": "Tous les",
+      "unit": "Unité",
+      "until": "Se termine le (facultatif)",
+      "rules": { "none": "Ne se répète pas", "daily": "Chaque jour", "weekly": "Chaque semaine", "monthly": "Chaque mois", "yearly": "Chaque année", "custom": "Rythme personnalisé" },
+      "units": { "days": "jours", "weeks": "semaines", "months": "mois" },
+      "seriesNote": "Vous modifiez une série. Les changements s'appliquent à toute la série."
+    },
     "audience": {
       "title": "À qui est destiné cet événement ?",
       "hint": "Choisissez toute la famille ou sélectionnez plusieurs personnes.",

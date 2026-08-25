@@ -1,4 +1,5 @@
 import { parseICalendar } from '../../shared/icsCalendar.js';
+import { calendarRecurrenceRRule } from '../../shared/calendarRecurrence.js';
 import i18n from '../i18n';
 
 function escapeIcsText(value = '') {
@@ -56,6 +57,8 @@ export function exportEventsToICS(
       if (event.notes) {
         icsContent.push(`DESCRIPTION:${escapeIcsText(event.notes)}`);
       }
+      const rrule = calendarRecurrenceRRule(event);
+      if (rrule) icsContent.push(`RRULE:${rrule}`);
       icsContent.push('END:VEVENT');
     });
 

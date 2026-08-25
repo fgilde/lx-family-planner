@@ -1,4 +1,51 @@
 const RELEASE_NOTES = {
+  '1.19.3': {
+    version: '1.19.3',
+    eyebrow: 'Termine, die mitdenken',
+    title: 'Wiederkehrende Termine sind jetzt wirklich wiederkehrend',
+    intro:
+      'Ein Fußballtraining am Montag oder der Musikunterricht am Donnerstag muss nur noch einmal eingetragen werden.',
+    highlights: [
+      {
+        id: 'recurring-family-events',
+        title: 'Einmal anlegen, automatisch wiedersehen',
+        description:
+          'Eigene Termine können täglich, wöchentlich, monatlich, jährlich oder in deinem eigenen Rhythmus wiederholt werden.'
+      },
+      {
+        id: 'recurring-event-reminders',
+        title: 'Erinnerungen für jedes einzelne Mal',
+        description:
+          'Die gewählten Erinnerungen gelten für jedes Vorkommen der Serie. Ein Enddatum ist optional.'
+      }
+    ],
+    closing:
+      'Eine Terminserie bleibt ein einziger aufgeräumter Eintrag. Änderungen und Löschen gelten bewusst für die ganze Serie.',
+    localizations: {
+      en: {
+        eyebrow: 'Events that keep up',
+        title: 'Recurring events now really recur',
+        intro:
+          'A Monday football practice or Thursday music lesson only needs to be added once.',
+        highlights: [
+          {
+            id: 'recurring-family-events',
+            title: 'Add it once, see it automatically',
+            description:
+              'Your own events can repeat daily, weekly, monthly, yearly or on a custom schedule.'
+          },
+          {
+            id: 'recurring-event-reminders',
+            title: 'Reminders for every occurrence',
+            description:
+              'Your selected reminders apply to every occurrence in the series. An end date is optional.'
+          }
+        ],
+        closing:
+          'An event series stays one tidy entry. Editing and deleting deliberately affect the complete series.'
+      }
+    }
+  },
   '1.19.2': {
     version: '1.19.2',
     eyebrow: 'Mehr Übersicht, weniger Reibung',

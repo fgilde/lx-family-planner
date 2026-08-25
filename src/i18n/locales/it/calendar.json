@@ -102,6 +102,17 @@
       "locationPlaceholder": "es. scuola o studio medico",
       "notes": "Note (facoltativo)"
     },
+    "recurrence": {
+      "title": "Ripetizione",
+      "hint": "L'evento viene salvato come serie; i promemoria valgono per ogni occorrenza.",
+      "frequency": "Si ripete",
+      "every": "Ogni",
+      "unit": "Unità",
+      "until": "Termina il (facoltativo)",
+      "rules": { "none": "Non si ripete", "daily": "Ogni giorno", "weekly": "Ogni settimana", "monthly": "Ogni mese", "yearly": "Ogni anno", "custom": "Cadenza personalizzata" },
+      "units": { "days": "giorni", "weeks": "settimane", "months": "mesi" },
+      "seriesNote": "Stai modificando una serie. Le modifiche valgono per tutta la serie."
+    },
     "audience": {
       "title": "Per chi è questo evento?",
       "hint": "Scegli tutta la famiglia o seleziona più persone.",

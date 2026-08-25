@@ -102,6 +102,28 @@
       "locationPlaceholder": "e.g. school or doctor's office",
       "notes": "Notes (optional)"
     },
+    "recurrence": {
+      "title": "Repeat",
+      "hint": "The event is stored as one series – reminders apply to every occurrence.",
+      "frequency": "Repeats",
+      "every": "Every",
+      "unit": "Unit",
+      "until": "Ends on (optional)",
+      "rules": {
+        "none": "Does not repeat",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "custom": "Custom schedule"
+      },
+      "units": {
+        "days": "days",
+        "weeks": "weeks",
+        "months": "months"
+      },
+      "seriesNote": "You are editing an event series. Changes apply to the entire series."
+    },
     "audience": {
       "title": "Who is this event for?",
       "hint": "Choose the whole family or select several people.",
