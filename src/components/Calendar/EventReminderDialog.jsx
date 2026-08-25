@@ -14,6 +14,7 @@ import {
 } from '../../../shared/eventReminders.js';
 import { formatDate } from '../../utils/formatting';
 import EventReminderPicker from './EventReminderPicker';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 
 export default function EventReminderDialog({
   event,
@@ -26,6 +27,7 @@ export default function EventReminderDialog({
     normalizeEventReminders(event?.reminders)
   );
   const [saving, setSaving] = useState(false);
+  useViewportScrollLock(Boolean(event));
 
   useEffect(() => {
     setReminders(normalizeEventReminders(event?.reminders));

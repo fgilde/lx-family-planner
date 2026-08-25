@@ -217,6 +217,7 @@ database.exec(`
     household TEXT NOT NULL DEFAULT 'familie',
     kind TEXT NOT NULL DEFAULT 'calendar',
     provider TEXT NOT NULL DEFAULT 'ics',
+    sync_mode TEXT NOT NULL DEFAULT 'read',
     enabled INTEGER NOT NULL DEFAULT 1
       CHECK(enabled IN (0, 1)),
     last_synced_at INTEGER,
@@ -697,6 +698,18 @@ applySchemaMigration(15, 'CalDAV-Kalenderquellen unterscheiden', () => {
     database.exec(`
       ALTER TABLE calendar_subscriptions
       ADD COLUMN provider TEXT NOT NULL DEFAULT 'ics';
+    `);
+  }
+});
+
+applySchemaMigration(16, 'Optionaler CalDAV-Zwei-Wege-Abgleich', () => {
+  const columns = database
+    .prepare('PRAGMA table_info(calendar_subscriptions)')
+    .all();
+  if (!columns.some(column => column.name === 'sync_mode')) {
+    database.exec(`
+      ALTER TABLE calendar_subscriptions
+      ADD COLUMN sync_mode TEXT NOT NULL DEFAULT 'read';
     `);
   }
 });
@@ -3021,6 +3034,9 @@ function mapCalendarSubscriptionRow(row, { includeSecret = false } = {}) {
     household: row.household,
     kind: row.kind || 'calendar',
     provider: row.provider === 'caldav' ? 'caldav' : 'ics',
+    syncMode: row.provider === 'caldav' && row.sync_mode === 'two-way'
+      ? 'two-way'
+      : 'read',
     enabled: Boolean(row.enabled),
     lastSyncedAt: row.last_synced_at || null,
     lastSuccessAt: row.last_success_at || null,
@@ -3089,6 +3105,7 @@ export function createCalendarSubscription(
     household = 'familie',
     kind = 'calendar',
     provider = 'ics',
+    syncMode = 'read',
     enabled = true
   }
 ) {
@@ -3098,9 +3115,9 @@ export function createCalendarSubscription(
     .prepare(`
       INSERT INTO calendar_subscriptions(
         id, family_id, name, feed_host, secret_encrypted, color,
-        member_id, household, kind, provider, enabled, created_at, updated_at
+        member_id, household, kind, provider, sync_mode, enabled, created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -3113,6 +3130,7 @@ export function createCalendarSubscription(
       household,
       kind === 'trash' ? 'trash' : 'calendar',
       provider === 'caldav' ? 'caldav' : 'ics',
+      provider === 'caldav' && syncMode === 'two-way' ? 'two-way' : 'read',
       enabled ? 1 : 0,
       now,
       now
@@ -3148,6 +3166,7 @@ export function updateCalendarSubscription(
         household = ?,
         kind = ?,
         provider = ?,
+        sync_mode = ?,
         enabled = ?,
         updated_at = ?
       WHERE family_id = ? AND id = ?
@@ -3161,6 +3180,9 @@ export function updateCalendarSubscription(
       updated.household,
       updated.kind === 'trash' ? 'trash' : 'calendar',
       updated.provider === 'caldav' ? 'caldav' : 'ics',
+      updated.provider === 'caldav' && updated.syncMode === 'two-way'
+        ? 'two-way'
+        : 'read',
       updated.enabled ? 1 : 0,
       updated.updatedAt,
       familyId,

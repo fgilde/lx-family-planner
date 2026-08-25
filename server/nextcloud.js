@@ -1036,7 +1036,9 @@ function remoteEvent(
   familyId,
   defaultMemberId,
   timeZone,
-  allowedMemberIds
+  allowedMemberIds,
+  provider = PROVIDER,
+  sourceName = 'Nextcloud'
 ) {
   const parsed = parseICalendar(resource.calendarData, {
     targetTimeZone: timeZone,
@@ -1081,16 +1083,20 @@ function remoteEvent(
       customIcsValue(resource.calendarData, 'X-LX-HOUSEHOLD') || 'familie',
     category:
       customIcsValue(resource.calendarData, 'CATEGORIES') ||
-      'Nextcloud',
+      sourceName,
+    syncUid: parsed.uid,
+    syncHref: resource.href,
+    syncManaged: true,
+    syncProvider: provider,
     nextcloudUid: parsed.uid,
     nextcloudHref: resource.href,
     nextcloudManaged: true,
-    source: 'nextcloud',
+    source: provider,
     readOnly: false
   };
 }
 
-function eligibleLocalEvent(event, includeGrandparents) {
+function eligibleLocalEvent(event, includeGrandparents, provider = PROVIDER) {
   return Boolean(
     event?.id &&
     event?.title &&
@@ -1099,12 +1105,18 @@ function eligibleLocalEvent(event, includeGrandparents) {
     !event.sharedEventId &&
     !event.sharedOwnerFamilyId &&
     event.nextcloudExcluded !== true &&
+    event.syncExcluded !== true &&
+    (!event.syncProvider || event.syncProvider === provider) &&
     (includeGrandparents || (event.household || 'familie') === 'familie') &&
     !String(event.source || '').startsWith('calendar-subscription:')
   );
 }
 
-async function listRemoteEvents(connection, calendarHref) {
+async function listRemoteEvents(
+  connection,
+  calendarHref,
+  request = nextcloudRequest
+) {
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <c:calendar-query xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav">
   <d:prop>
@@ -1117,7 +1129,7 @@ async function listRemoteEvents(connection, calendarHref) {
     </c:comp-filter>
   </c:filter>
 </c:calendar-query>`;
-  const { text } = await nextcloudRequest(connection, calendarHref, {
+  const { text } = await request(connection, calendarHref, {
     method: 'REPORT',
     remoteHref: true,
     headers: {
@@ -1146,7 +1158,13 @@ function remoteFileName(uid) {
 }
 
 function appendRemoteFile(calendarHref, uid) {
-  return `${calendarHref.replace(/\/+$/, '')}/${remoteFileName(uid)}`;
+  const fileName = remoteFileName(uid);
+  try {
+    const url = new URL(calendarHref);
+    return `${url.pathname.replace(/\/+$/, '')}/${fileName}`;
+  } catch {
+    return `${calendarHref.replace(/\/+$/, '')}/${fileName}`;
+  }
 }
 
 async function putRemoteEvent(
@@ -1155,9 +1173,11 @@ async function putRemoteEvent(
   event,
   currentHref,
   currentEtag,
-  timeZone
+  timeZone,
+  request = nextcloudRequest
 ) {
   const uid =
+    clean(event.syncUid) ||
     clean(event.nextcloudUid) ||
     `${createHash('sha256')
       .update(`${event.familyId}:${event.id}`)
@@ -1169,7 +1189,7 @@ async function putRemoteEvent(
   if (currentEtag) headers['If-Match'] = currentEtag;
   else headers['If-None-Match'] = '*';
   const content = serializeEvent(event, uid, timeZone);
-  const { response } = await nextcloudRequest(connection, href, {
+  const { response } = await request(connection, href, {
     method: 'PUT',
     remoteHref: true,
     headers,
@@ -1184,9 +1204,13 @@ async function putRemoteEvent(
   };
 }
 
-async function deleteRemoteEvent(connection, href) {
+async function deleteRemoteEvent(
+  connection,
+  href,
+  request = nextcloudRequest
+) {
   try {
-    await nextcloudRequest(connection, href, {
+    await request(connection, href, {
       method: 'DELETE',
       remoteHref: true,
       expectedStatuses: [204, 404]
@@ -1196,9 +1220,14 @@ async function deleteRemoteEvent(connection, href) {
   }
 }
 
-function saveEventMapping(familyId, event, remote) {
+function saveEventMapping(
+  familyId,
+  event,
+  remote,
+  provider = PROVIDER
+) {
   const localHash = eventContentHash(event);
-  saveIntegrationSyncItem(familyId, PROVIDER, 'events', {
+  saveIntegrationSyncItem(familyId, provider, 'events', {
     localId: event.id,
     remoteHref: remote.href,
     remoteEtag: remote.etag,
@@ -1214,10 +1243,13 @@ export async function syncNextcloudEvents({
   defaultMemberId = 'all',
   includeGrandparents = false,
   timeZone = 'Europe/Berlin',
-  memberIds = []
+  memberIds = [],
+  provider = PROVIDER,
+  sourceName = 'Nextcloud',
+  request = nextcloudRequest
 }) {
   if (!calendarHref) {
-    throw httpError('Bitte wähle zuerst einen Nextcloud-Kalender aus.', 400);
+    throw httpError(`Bitte wähle zuerst einen ${sourceName}-Kalender aus.`, 400);
   }
   const stats = {
     imported: 0,
@@ -1229,13 +1261,17 @@ export async function syncNextcloudEvents({
     conflicts: 0
   };
   const allowedMemberIds = new Set(memberIds);
-  const remoteResources = await listRemoteEvents(connection, calendarHref);
+  const remoteResources = await listRemoteEvents(
+    connection,
+    calendarHref,
+    request
+  );
   const remoteByHref = new Map(
     remoteResources.map(resource => [resource.href, resource])
   );
   const mappings = listIntegrationSyncItems(
     familyId,
-    PROVIDER,
+    provider,
     'events'
   );
   const mappingByLocal = new Map(
@@ -1243,7 +1279,7 @@ export async function syncNextcloudEvents({
   );
   const mappedRemoteHrefs = new Set(mappings.map(mapping => mapping.remoteHref));
   let localEvents = listRecords(familyId, 'events').filter(event =>
-    eligibleLocalEvent(event, includeGrandparents)
+    eligibleLocalEvent(event, includeGrandparents, provider)
   );
   let localById = new Map(localEvents.map(event => [event.id, event]));
 
@@ -1251,13 +1287,20 @@ export async function syncNextcloudEvents({
     let local = localById.get(mapping.localId);
     const remoteResource = remoteByHref.get(mapping.remoteHref);
     if (!local) {
-      if (remoteResource) {
-        await deleteRemoteEvent(connection, mapping.remoteHref);
+      const remoteWasCreatedByLx = Boolean(
+        remoteResource &&
+        customIcsValue(
+          remoteResource.calendarData,
+          'X-LX-FAMILY-ID'
+        ) === familyId
+      );
+      if (remoteResource && (provider === PROVIDER || remoteWasCreatedByLx)) {
+        await deleteRemoteEvent(connection, mapping.remoteHref, request);
         stats.deletedRemote += 1;
       }
       deleteIntegrationSyncItem(
         familyId,
-        PROVIDER,
+        provider,
         'events',
         mapping.localId
       );
@@ -1271,7 +1314,7 @@ export async function syncNextcloudEvents({
         stats.deletedLocal += 1;
         deleteIntegrationSyncItem(
           familyId,
-          PROVIDER,
+          provider,
           'events',
           local.id
         );
@@ -1282,15 +1325,20 @@ export async function syncNextcloudEvents({
           local,
           mapping.remoteHref,
           '',
-          timeZone
+          timeZone,
+          request
         );
         local = upsertRecord(familyId, 'events', {
           ...local,
+          syncUid: pushed.uid,
+          syncHref: pushed.href,
+          syncManaged: true,
+          syncProvider: provider,
           nextcloudUid: pushed.uid,
           nextcloudHref: pushed.href,
           nextcloudManaged: true
         });
-        saveEventMapping(familyId, local, pushed);
+        saveEventMapping(familyId, local, pushed, provider);
         stats.updatedRemote += 1;
       }
       continue;
@@ -1300,7 +1348,9 @@ export async function syncNextcloudEvents({
       familyId,
       defaultMemberId,
       timeZone,
-      allowedMemberIds
+      allowedMemberIds,
+      provider,
+      sourceName
     );
     if (!remote) continue;
     const localHash = eventContentHash(local);
@@ -1313,8 +1363,9 @@ export async function syncNextcloudEvents({
     if (localChanged && remoteChanged && localHash !== remoteHash) {
       const conflict = upsertRecord(familyId, 'events', {
         ...remote,
-        id: `nextcloud-conflict-${randomUUID()}`,
-        title: `${remote.title} · Konflikt aus Nextcloud`,
+        id: `${provider.replace(/[^a-z0-9-]/gi, '-')}-conflict-${randomUUID()}`,
+        title: `${remote.title} · Konflikt aus ${sourceName}`,
+        syncExcluded: true,
         nextcloudExcluded: true,
         nextcloudConflictOf: local.id
       });
@@ -1325,9 +1376,10 @@ export async function syncNextcloudEvents({
         local,
         mapping.remoteHref,
         remoteResource.etag,
-        timeZone
+        timeZone,
+        request
       );
-      saveEventMapping(familyId, local, pushed);
+      saveEventMapping(familyId, local, pushed, provider);
       stats.conflicts += 1;
       stats.updatedRemote += 1;
       continue;
@@ -1345,7 +1397,7 @@ export async function syncNextcloudEvents({
         href: remoteResource.href,
         etag: remoteResource.etag,
         remoteHash
-      });
+      }, provider);
       localById.set(merged.id, merged);
       stats.updatedLocal += 1;
       continue;
@@ -1357,15 +1409,20 @@ export async function syncNextcloudEvents({
         local,
         mapping.remoteHref,
         remoteResource.etag,
-        timeZone
+        timeZone,
+        request
       );
       local = upsertRecord(familyId, 'events', {
         ...local,
+        syncUid: pushed.uid,
+        syncHref: pushed.href,
+        syncManaged: true,
+        syncProvider: provider,
         nextcloudUid: pushed.uid,
         nextcloudHref: pushed.href,
         nextcloudManaged: true
       });
-      saveEventMapping(familyId, local, pushed);
+      saveEventMapping(familyId, local, pushed, provider);
       stats.updatedRemote += 1;
       continue;
     }
@@ -1373,14 +1430,18 @@ export async function syncNextcloudEvents({
       href: remoteResource.href,
       etag: remoteResource.etag,
       remoteHash
-    });
+    }, provider);
   }
 
   localEvents = listRecords(familyId, 'events').filter(event =>
-    eligibleLocalEvent(event, includeGrandparents)
+    eligibleLocalEvent(event, includeGrandparents, provider)
   );
   for (const local of localEvents) {
-    if (mappingByLocal.has(local.id) || local.nextcloudExcluded) continue;
+    if (
+      mappingByLocal.has(local.id) ||
+      local.nextcloudExcluded ||
+      local.syncExcluded
+    ) continue;
     const recoveredResource = remoteResources.find(resource =>
       !mappedRemoteHrefs.has(resource.href) &&
       customIcsValue(resource.calendarData, 'X-LX-EVENT-ID') === local.id
@@ -1391,7 +1452,9 @@ export async function syncNextcloudEvents({
         familyId,
         defaultMemberId,
         timeZone,
-        allowedMemberIds
+        allowedMemberIds,
+        provider,
+        sourceName
       );
       const pushed = await putRemoteEvent(
         connection,
@@ -1399,15 +1462,20 @@ export async function syncNextcloudEvents({
         local,
         recoveredResource.href,
         recoveredResource.etag,
-        timeZone
+        timeZone,
+        request
       );
       const updated = upsertRecord(familyId, 'events', {
         ...local,
+        syncUid: recovered?.syncUid || pushed.uid,
+        syncHref: pushed.href,
+        syncManaged: true,
+        syncProvider: provider,
         nextcloudUid: recovered?.nextcloudUid || pushed.uid,
         nextcloudHref: pushed.href,
         nextcloudManaged: true
       });
-      saveEventMapping(familyId, updated, pushed);
+      saveEventMapping(familyId, updated, pushed, provider);
       mappedRemoteHrefs.add(pushed.href);
       stats.updatedRemote += 1;
       continue;
@@ -1418,15 +1486,20 @@ export async function syncNextcloudEvents({
       local,
       '',
       '',
-      timeZone
+      timeZone,
+      request
     );
     const updated = upsertRecord(familyId, 'events', {
       ...local,
+      syncUid: pushed.uid,
+      syncHref: pushed.href,
+      syncManaged: true,
+      syncProvider: provider,
       nextcloudUid: pushed.uid,
       nextcloudHref: pushed.href,
       nextcloudManaged: true
     });
-    saveEventMapping(familyId, updated, pushed);
+    saveEventMapping(familyId, updated, pushed, provider);
     mappedRemoteHrefs.add(pushed.href);
     stats.exported += 1;
   }
@@ -1441,7 +1514,9 @@ export async function syncNextcloudEvents({
       familyId,
       defaultMemberId,
       timeZone,
-      allowedMemberIds
+      allowedMemberIds,
+      provider,
+      sourceName
     );
     if (!remote) continue;
     const requestedId = customIcsValue(
@@ -1450,7 +1525,7 @@ export async function syncNextcloudEvents({
     );
     const id = requestedId && !occupiedLocalIds.has(requestedId)
       ? requestedId
-      : `nextcloud-event-${createHash('sha256')
+      : `${provider.replace(/[^a-z0-9-]/gi, '-')}-event-${createHash('sha256')
         .update(resource.href)
         .digest('hex')
         .slice(0, 28)}`;
@@ -1464,7 +1539,7 @@ export async function syncNextcloudEvents({
       href: resource.href,
       etag: resource.etag,
       remoteHash: eventContentHash(remote)
-    });
+    }, provider);
     stats.imported += 1;
   }
 

@@ -1,4 +1,51 @@
 const RELEASE_NOTES = {
+  '1.19.2': {
+    version: '1.19.2',
+    eyebrow: 'Mehr Übersicht, weniger Reibung',
+    title: 'Der Familienkalender wird klarer und verlässlicher',
+    intro:
+      'Termine, Navigation und Backups sind jetzt so angeordnet, dass sie im Familienalltag schneller erfassbar und sicherer bedienbar bleiben.',
+    highlights: [
+      {
+        id: 'calendar-stacks-and-colours',
+        title: 'Ein Kalender, der Familien auf einen Blick trennt',
+        description:
+          'Zeitgleiche Termine bleiben lesbar in einer Tageszelle. Familientermine haben eine feste Farbe, persönliche Termine die Farbe des jeweiligen Profils.'
+      },
+      {
+        id: 'backup-and-connections',
+        title: 'Sicherungen und freie Server-Verbindungen',
+        description:
+          'Geprüfte Datenbanksicherungen lassen sich planen und geschützt zurückspielen. Optionaler Zwei-Wege-CalDAV und eigenes WebDAV ergänzen Kalender und Familienarchiv.'
+      }
+    ],
+    closing:
+      'Familien, Profile, Termine, Aufgaben, Dateien und Einstellungen bleiben unverändert erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'More overview, less friction',
+        title: 'The family calendar becomes clearer and more reliable',
+        intro:
+          'Events, navigation and backups are now arranged to stay easier to scan and safer to use in everyday family life.',
+        highlights: [
+          {
+            id: 'calendar-stacks-and-colours',
+            title: 'A calendar that separates family life at a glance',
+            description:
+              'Concurrent events stay readable in one day column. Family events use one fixed colour, while personal events use the assigned profile colour.'
+          },
+          {
+            id: 'backup-and-connections',
+            title: 'Backups and flexible server connections',
+            description:
+              'Verified database backups can be scheduled and restored safely. Optional two-way CalDAV and personal WebDAV complement the calendar and family archive.'
+          }
+        ],
+        closing:
+          'Families, profiles, events, chores, files and settings remain unchanged.'
+      }
+    }
+  },
   '1.19.1': {
     version: '1.19.1',
     eyebrow: 'Kleines Update, viel mehr Ruhe',

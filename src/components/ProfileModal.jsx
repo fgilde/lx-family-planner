@@ -35,6 +35,7 @@ import {
 import { DEFAULT_FAMILY_AVATAR, handleImgError } from '../utils/imageFallback';
 import { NOTIFICATION_EVENT_DEFINITIONS } from '../../shared/notificationEvents';
 import { isCapacitorNative } from '../utils/apiConfig';
+import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 
 const COLOR_PRESETS = [
   '#246B58',
@@ -96,6 +97,7 @@ export default function ProfileModal() {
   const [showNotifications, setShowNotifications] = useState(false);
   const modalBodyRef = useRef(null);
   const isNative = isCapacitorNative();
+  useViewportScrollLock(isProfileModalOpen);
   const push = isNative ? nativePush : webPush;
   const enablePush = isNative ? enableNativePush : enableWebPush;
   const disablePush = isNative ? disableNativePush : disableWebPush;
@@ -112,15 +114,12 @@ export default function ProfileModal() {
     setPinInput('');
     setShowNotifications(false);
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     const frame = window.requestAnimationFrame(() => {
       modalBodyRef.current?.scrollTo({ top: 0 });
     });
 
     return () => {
       window.cancelAnimationFrame(frame);
-      document.body.style.overflow = previousOverflow;
     };
   }, [isProfileModalOpen]);
 

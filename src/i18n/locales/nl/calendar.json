@@ -34,6 +34,11 @@
       "more": "+{{count}} meer",
       "free": "vrij"
     },
+    "timeline": {
+      "kicker": "Weekplanning",
+      "allDay": "Hele dag",
+      "now": "Nu"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "Wat staat er te gebeuren",
@@ -80,6 +85,8 @@
     "birthdayKicker": "Gezinsverjaardag",
     "birthdayDescription": "Deze verjaardag wordt automatisch op basis van het profiel aangemaakt. LX herinnert het gezin een week van tevoren en op de verjaardag zelf.",
     "save": "Wijzigingen opslaan",
+    "duplicate": "Afspraak dupliceren",
+    "duplicateTitle": "{{title}} – kopie",
     "delete": "Afspraak verwijderen",
     "deleteConfirm": "\"{{title}}\" echt verwijderen?",
     "fields": {
@@ -191,6 +198,8 @@
       "everyone": "Alle",
       "icsProvider": "ICS",
       "caldavProvider": "CalDAV",
+      "readOnly": "read only",
+      "twoWay": "two way",
       "eventCount_one": "{{count}} afspraak",
       "eventCount_other": "{{count}} afspraken",
       "syncNever": "Nog niet succesvol gesynchroniseerd",
@@ -215,6 +224,9 @@
       "caldavUrlLabel": "CalDAV-kalenderadres",
       "caldavUsernameLabel": "CalDAV-gebruikersnaam",
       "caldavPasswordLabel": "CalDAV-appwachtwoord",
+      "syncModeLabel": "Sync mode",
+      "syncModeRead": "Display only (recommended for external calendars)",
+      "syncModeTwoWay": "Two way – LX may write events",
       "visibilityLabel": "Zichtbaar voor",
       "allMembers": "Alle gezinsleden",
       "householdLabel": "Planningsgebied",
@@ -224,6 +236,7 @@
       "pickColorAria": "Kleur {{color}} kiezen",
       "privacyNote": "Alleen-lezen: de gezinsplanner kan niets wijzigen of verwijderen in de externe agenda. Deel de geheime koppeling toch nooit publiek.",
       "caldavPrivacyNote": "Alleen-lezen: gebruikersnaam en appwachtwoord worden alleen versleuteld op jouw LX-server opgeslagen. LX wijzigt of verwijdert niets in de CalDAV-kalender.",
+      "caldavTwoWayNote": "Two way: LX imports changes and writes your local events to this one calendar. LX does not remotely delete foreign events; simultaneous edits create a visible conflict copy.",
       "connecting": "Verbinden …"
     }
   },

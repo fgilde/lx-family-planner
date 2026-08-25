@@ -10,11 +10,13 @@ import {
   Home,
   Users,
   LogOut,
+  Star,
   X
 } from 'lucide-react';
 import { useFamily } from '../context/FamilyContext';
 import { canManageFamily } from '../constants/roles';
 import { useNavigationTabs } from '../hooks/useNavigationTabs';
+import { useNavigationFavorites } from '../hooks/useNavigationFavorites';
 import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -48,6 +50,7 @@ export default function MobileNavDrawer({
   const { t } = useTranslation('chrome');
   const { activeTab, setActiveTab, activeMember } = useFamily();
   const { visibleTabs } = useNavigationTabs();
+  const { favoriteIds, toggleFavorite, maxFavorites } = useNavigationFavorites(visibleTabs);
 
   // Close on Escape while open (mirrors NotificationCenter behavior).
   useEffect(() => {
@@ -109,24 +112,49 @@ export default function MobileNavDrawer({
           </button>
         </div>
 
-        <nav className="mobile-nav-drawer-tabs" aria-label={t('header.menu.title')}>
+        <nav className="mobile-nav-drawer-tabs" aria-label={t('navigation.allAreas')}>
+          <div className="mobile-nav-drawer-section-heading">
+            <strong>{t('navigation.allAreas')}</strong>
+            <small>{t('navigation.favoritesHint', { count: maxFavorites })}</small>
+          </div>
           {visibleTabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
+            const isFavorite = favoriteIds.includes(tab.id);
             return (
-              <button
-                key={tab.id}
-                type="button"
-                className={`mobile-nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => selectTab(tab.id)}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon size={20} />
-                <span>{tab.label}</span>
-                {tab.badge && (
-                  <span className="mobile-nav-item-badge">{tab.badge}</span>
-                )}
-              </button>
+              <div className={`mobile-nav-item-row ${isActive ? 'active' : ''}`} key={tab.id}>
+                <button
+                  type="button"
+                  className="mobile-nav-item"
+                  onClick={() => selectTab(tab.id)}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon size={20} />
+                  <span>{tab.label}</span>
+                  {tab.badge && (
+                    <span className="mobile-nav-item-badge">{tab.badge}</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={`mobile-nav-favorite-toggle ${isFavorite ? 'is-favorite' : ''}`}
+                  onClick={() => toggleFavorite(tab.id)}
+                  aria-label={t(
+                    isFavorite
+                      ? 'navigation.favoriteRemoveAria'
+                      : 'navigation.favoriteAddAria',
+                    { name: tab.label }
+                  )}
+                  title={t(
+                    isFavorite
+                      ? 'navigation.favoriteRemoveAria'
+                      : 'navigation.favoriteAddAria',
+                    { name: tab.label }
+                  )}
+                >
+                  <Star size={17} fill={isFavorite ? 'currentColor' : 'none'} />
+                </button>
+              </div>
             );
           })}
 

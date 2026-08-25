@@ -4,6 +4,22 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.19.2] – 2026-08-25
+
+### Klarerer gemeinsamer Kalender und sichere Familienabläufe
+
+- Kalendereinträge behalten nun eine stabile Tagesbreite, überlappen als
+  lesbare Karten und nutzen eine feste Familienfarbe bzw. die Profilfarbe der
+  zugewiesenen Person;
+- die vollständige Navigation liegt kompakt im Menü, während persönliche
+  Schnelllinks kurz bleiben und „Mein Bereich“ immer zuerst zeigen;
+- iPhone-Nutzer erhalten eine klare Safari-Anleitung für den Home-Bildschirm;
+  die Anmeldung verbraucht keinen Platz mehr für Release-Hinweise;
+- Familien können geprüfte Datenbanksicherungen inklusive geschütztem
+  Wochenplan erstellen und zurückspielen sowie einen optionalen
+  Zwei-Wege-CalDAV-Kalender verbinden. Zusätzlich kann das Familienarchiv
+  nun mit einem eigenen WebDAV-Server oder NAS verbunden werden.
+
 ## [1.19.1] – 2026-08-23
 
 ### Stundenplan aufgeräumt

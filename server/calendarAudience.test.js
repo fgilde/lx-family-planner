@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  calendarEventColor,
   eventAudienceIds,
   eventAudienceMembers,
   eventIsCurrentOrFuture,
@@ -15,6 +16,18 @@ test('calendar audience keeps legacy events compatible', () => {
   assert.deepEqual(eventAudienceIds({ memberId: 'all' }), []);
   assert.equal(eventIsForEveryone({}), true);
   assert.equal(eventIsForMember({ memberId: 'all' }, 'member-b'), true);
+});
+
+test('calendar colours distinguish family appointments from assigned profiles', () => {
+  const members = [
+    { id: 'member-a', color: '#e65348' },
+    { id: 'member-b', color: '#2563eb' }
+  ];
+  assert.equal(calendarEventColor({ memberId: 'all' }, members), '#60758d');
+  assert.equal(
+    calendarEventColor({ memberIds: ['member-b'] }, members),
+    '#2563eb'
+  );
 });
 
 test('calendar dashboard keeps only current, ongoing and future events', () => {

@@ -3,6 +3,12 @@
     "loading": "Getting your family space ready …"
   },
   "navigation": {
+    "favorites": "Favorites",
+    "favoritesAria": "Favorite areas",
+    "allAreas": "All areas",
+    "favoritesHint": "Use the star to choose up to {{count}} quick links.",
+    "favoriteAddAria": "Add {{name}} to favorites",
+    "favoriteRemoveAria": "Remove {{name}} from favorites",
     "myArea": "My Space ({{name}})",
     "myAreaFallback": "Home",
     "chat": "Family Chat & DMs",

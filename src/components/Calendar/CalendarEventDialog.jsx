@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CakeSlice,
   Check,
+  CopyPlus,
   LockKeyhole,
   MapPin,
   Trash2,
@@ -13,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { eventAudienceIds } from '../../../shared/calendarAudience.js';
 import { normalizeEventReminders } from '../../../shared/eventReminders.js';
 import { birthdayEventCopy } from '../../../shared/birthdays.js';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 import EventAudiencePicker from './EventAudiencePicker';
 import EventReminderPicker from './EventReminderPicker';
 
@@ -51,6 +53,7 @@ export default function CalendarEventDialog({
   members,
   onClose,
   onSave,
+  onDuplicate,
   onDelete
 }) {
   const { t } = useTranslation('calendar');
@@ -58,6 +61,7 @@ export default function CalendarEventDialog({
   const [saving, setSaving] = useState(false);
   const editable = Boolean(event && !event.readOnly);
   const isBirthday = Boolean(event?.birthdayMemberId);
+  useViewportScrollLock(Boolean(event));
 
   useEffect(
     () => setForm(formState(event, t)),
@@ -118,6 +122,31 @@ export default function CalendarEventDialog({
     try {
       const result = await onDelete(event);
       if (result !== null) onClose();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const duplicate = async () => {
+    if (!editable || event.sharedEventId || saving || !onDuplicate) return;
+    setSaving(true);
+    try {
+      await onDuplicate(event, {
+        title: form.title.trim(),
+        date: form.date,
+        time: form.allDay ? '' : form.time,
+        allDay: form.allDay,
+        endDate:
+          form.allDay && form.endDate
+            ? addLocalDays(form.endDate, 1)
+            : form.endDate,
+        endTime: form.allDay ? '' : form.endTime,
+        memberIds: form.memberIds,
+        memberId: form.memberIds[0] || 'all',
+        location: form.location.trim(),
+        notes: form.notes.trim(),
+        reminders: form.reminders
+      });
     } finally {
       setSaving(false);
     }
@@ -296,6 +325,16 @@ export default function CalendarEventDialog({
               onClick={remove}
             >
               <Trash2 size={16} /> {t('editor.delete')}
+            </button>
+          )}
+          {editable && !event.sharedEventId && onDuplicate && (
+            <button
+              type="button"
+              className="calendar-editor-duplicate"
+              disabled={saving}
+              onClick={duplicate}
+            >
+              <CopyPlus size={16} /> {t('editor.duplicate')}
             </button>
           )}
           <span />

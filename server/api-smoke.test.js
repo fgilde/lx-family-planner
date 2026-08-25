@@ -17,6 +17,7 @@ const testDirectory = fs.mkdtempSync(
   path.join(os.tmpdir(), 'lx-family-api-')
 );
 process.env.DATABASE_FILE = path.join(testDirectory, 'test.sqlite');
+process.env.BACKUP_DIRECTORY = path.join(testDirectory, 'backups');
 process.env.DISABLE_LEGACY_IMPORT = 'true';
 process.env.APP_SECRET = 'test-secret-only-for-automated-api-checks';
 process.env.NODE_ENV = 'test';
@@ -672,6 +673,70 @@ test('family flow stays isolated, authorized and internally consistent', async (
     body: JSON.stringify({ memberId: adult.id })
   });
 
+  const backupStatus = await request('/api/admin/database-backups', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(backupStatus.body.owner, true);
+  assert.equal(backupStatus.body.settings.frequency, 'weekly');
+  assert.equal(backupStatus.body.settings.dayOfWeek, 2);
+  assert.equal(backupStatus.body.settings.hour, 20);
+
+  const backupSettings = await request(
+    '/api/admin/database-backups/settings',
+    {
+      method: 'PUT',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        enabled: true,
+        frequency: 'weekly',
+        dayOfWeek: 2,
+        hour: 20,
+        keep: 8
+      })
+    }
+  );
+  assert.equal(backupSettings.body.settings.enabled, true);
+
+  const createdBackup = await request(
+    '/api/admin/database-backups',
+    { method: 'POST', headers: authenticatedHeaders },
+    201
+  );
+  assert.equal(createdBackup.body.backup.verified, true);
+  assert.equal(createdBackup.body.backups.length, 1);
+  await request(
+    '/api/admin/database-backups/restore',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        fileName: createdBackup.body.backup.fileName,
+        familyPassword: 'falsch',
+        confirmation: 'WIEDERHERSTELLEN'
+      })
+    },
+    401
+  );
+  let requestedRestore = '';
+  app.locals.requestDatabaseRestore = fileName => {
+    requestedRestore = fileName;
+    return true;
+  };
+  await request(
+    '/api/admin/database-backups/restore',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        fileName: createdBackup.body.backup.fileName,
+        familyPassword: password,
+        confirmation: 'WIEDERHERSTELLEN'
+      })
+    },
+    202
+  );
+  assert.equal(requestedRestore, createdBackup.body.backup.fileName);
+
   const updatedFamilySettings = await request('/api/family', {
     method: 'PATCH',
     headers: authenticatedHeaders,
@@ -1097,6 +1162,31 @@ test('family flow stays isolated, authorized and internally consistent', async (
       headers: authenticatedHeaders
     },
     409
+  );
+
+  const writableCalDav = await request(
+    '/api/calendar/subscriptions',
+    {
+      method: 'POST',
+      headers: authenticatedHeaders,
+      body: JSON.stringify({
+        provider: 'caldav',
+        syncMode: 'two-way',
+        name: 'Schreibbarer NAS-Kalender',
+        url: calendarFeedUrl,
+        username: 'familie',
+        password: 'app-passwort',
+        memberId: 'all',
+        household: 'familie'
+      })
+    },
+    201
+  );
+  assert.equal(writableCalDav.body.subscription.syncMode, 'two-way');
+  assert.match(writableCalDav.body.warning, /HTTP 200/);
+  await request(
+    `/api/calendar/subscriptions/${writableCalDav.body.subscription.id}`,
+    { method: 'DELETE', headers: authenticatedHeaders }
   );
 
   const task = await request(

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
+import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 
 const HIGHLIGHT_ICONS = {
   profiles: UsersRound,
@@ -27,6 +28,7 @@ export default function ReleaseNotesModal() {
   const { releaseNotes, acknowledgeReleaseNotes } = useFamily();
   const [isSaving, setIsSaving] = useState(false);
   const closeButtonRef = useRef(null);
+  useViewportScrollLock(Boolean(releaseNotes));
 
   const closeReleaseNotes = useCallback(async () => {
     if (isSaving) return;
@@ -37,10 +39,6 @@ export default function ReleaseNotesModal() {
 
   useEffect(() => {
     if (!releaseNotes) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    const previousRootOverflow = document.documentElement.style.overflow;
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
     const focusTimer = window.setTimeout(
       () => closeButtonRef.current?.focus({ preventScroll: true }),
       120
@@ -52,8 +50,6 @@ export default function ReleaseNotesModal() {
     return () => {
       window.clearTimeout(focusTimer);
       document.removeEventListener('keydown', closeOnEscape);
-      document.body.style.overflow = previousOverflow;
-      document.documentElement.style.overflow = previousRootOverflow;
     };
   }, [closeReleaseNotes, releaseNotes]);
 

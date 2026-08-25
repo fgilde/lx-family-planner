@@ -38,6 +38,7 @@ const {
   uploadNextcloudFile,
   uploadNextcloudUserFile
 } = await import('./nextcloud.js');
+const { calDavRequest } = await import('./caldav.js');
 
 const remoteEvents = new Map();
 const uploadedFiles = new Map();
@@ -521,6 +522,72 @@ test('Nextcloud discovery, WebDAV files and two-way calendar sync stay safe', as
   });
   assert.equal(deletion.deletedRemote, 1);
   assert.equal(remoteEvents.has(remoteHref), false);
+});
+
+test('generic CalDAV two-way sync writes LX events but preserves foreign remote events', async () => {
+  remoteEvents.clear();
+  const familyId = 'family-caldav-two-way';
+  createFamily({
+    id: familyId,
+    familyName: 'Familie CalDAV',
+    password: 'long-test-password',
+    members: [{
+      id: 'caldav-adult',
+      name: 'Sam',
+      role: 'adult',
+      position: 'papa'
+    }]
+  });
+  createRecord(familyId, 'events', {
+    id: 'caldav-local',
+    title: 'LX Termin',
+    date: '2026-09-01',
+    time: '18:00',
+    memberId: 'all',
+    household: 'familie'
+  });
+  const calDavConnection = {
+    url: `${connection.baseUrl}${calendarHref}`,
+    username: 'family',
+    password: 'app-password',
+    appVersion: 'test'
+  };
+  const syncOptions = {
+    familyId,
+    connection: calDavConnection,
+    calendarHref: calDavConnection.url,
+    provider: 'caldav:test-calendar',
+    sourceName: 'NAS-Kalender',
+    request: calDavRequest,
+    memberIds: ['caldav-adult']
+  };
+  const exported = await syncNextcloudEvents(syncOptions);
+  assert.equal(exported.exported, 1);
+  assert.equal(
+    listIntegrationSyncItems(
+      familyId,
+      'caldav:test-calendar',
+      'events'
+    ).length,
+    1
+  );
+
+  const foreignHref = `${calendarHref}foreign.ics`;
+  remoteEvents.set(foreignHref, {
+    etag: '"foreign-1"',
+    data: calendarData('Fremder Termin', 'foreign-uid')
+  });
+  const imported = await syncNextcloudEvents(syncOptions);
+  assert.equal(imported.imported, 1);
+  const foreignLocal = listRecords(familyId, 'events').find(
+    event => event.title === 'Fremder Termin'
+  );
+  assert.equal(foreignLocal.source, 'caldav:test-calendar');
+
+  deleteRecord(familyId, 'events', foreignLocal.id);
+  const deletion = await syncNextcloudEvents(syncOptions);
+  assert.equal(deletion.deletedRemote, 0);
+  assert.equal(remoteEvents.has(foreignHref), true);
 });
 
 test('bundled Nextcloud users receive isolated renewable app credentials', async () => {

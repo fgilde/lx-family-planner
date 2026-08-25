@@ -21,6 +21,7 @@ import {
 } from '../../utils/imageFallback';
 import { toLocaleLowerCase } from '../../utils/formatting';
 import FamilyConnectionAccess from './FamilyConnectionAccess';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 
 const RELATION_OPTIONS = [
   { value: 'parent' },
@@ -122,6 +123,7 @@ export default function FamilyTreeModal({ isOpen, onClose }) {
   const [relationType, setRelationType] = useState('parent');
   const [busy, setBusy] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState('');
+  useViewportScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) refreshPublicFamilies();

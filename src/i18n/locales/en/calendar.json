@@ -34,6 +34,11 @@
       "more": "+{{count}} more",
       "free": "free"
     },
+    "timeline": {
+      "kicker": "Weekly schedule",
+      "allDay": "All day",
+      "now": "Now"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "What's coming up next",
@@ -80,6 +85,8 @@
     "birthdayKicker": "Family birthday",
     "birthdayDescription": "This birthday is created automatically from the profile. LX reminds the family one week before and on the birthday.",
     "save": "Save changes",
+    "duplicate": "Duplicate event",
+    "duplicateTitle": "{{title}} — copy",
     "delete": "Delete event",
     "deleteConfirm": "Really delete \"{{title}}\"?",
     "fields": {
@@ -191,6 +198,8 @@
       "everyone": "All",
       "icsProvider": "ICS",
       "caldavProvider": "CalDAV",
+      "readOnly": "read only",
+      "twoWay": "two way",
       "eventCount_one": "{{count}} event",
       "eventCount_other": "{{count}} events",
       "syncNever": "Not successfully synced yet",
@@ -215,6 +224,9 @@
       "caldavUrlLabel": "CalDAV calendar address",
       "caldavUsernameLabel": "CalDAV username",
       "caldavPasswordLabel": "CalDAV app password",
+      "syncModeLabel": "Sync mode",
+      "syncModeRead": "Display only (recommended for external calendars)",
+      "syncModeTwoWay": "Two way – LX may write events",
       "visibilityLabel": "Visible to",
       "allMembers": "All family members",
       "householdLabel": "Planning space",
@@ -224,6 +236,7 @@
       "pickColorAria": "Choose color {{color}}",
       "privacyNote": "Read-only: the family planner cannot change or delete anything in the external calendar. Still, never share the secret link publicly.",
       "caldavPrivacyNote": "Read-only: username and app password are stored encrypted only on your LX server. LX never changes or deletes anything in the CalDAV calendar.",
+      "caldavTwoWayNote": "Two way: LX imports changes and writes your local events to this one calendar. LX does not remotely delete foreign events; simultaneous edits create a visible conflict copy.",
       "connecting": "Connecting …"
     }
   },

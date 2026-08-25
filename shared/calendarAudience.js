@@ -28,6 +28,17 @@ export function eventAudienceMembers(event, members = []) {
     : [];
 }
 
+// Family-wide appointments deliberately use one calm, neutral colour. Personal
+// appointments inherit the saved profile colour so the weekly calendar stays
+// scannable even when several people have events at the same time.
+export const FAMILY_CALENDAR_COLOR = '#60758d';
+
+export function calendarEventColor(event, members = []) {
+  if (eventIsForEveryone(event)) return FAMILY_CALENDAR_COLOR;
+  const member = eventAudienceMembers(event, members)[0];
+  return member?.color || event?.color || event?.sourceColor || '#2563eb';
+}
+
 export function eventIsCurrentOrFuture(event, todayDate) {
   const today = String(todayDate || '').slice(0, 10);
   const eventDate = String(event?.date || '').slice(0, 10);

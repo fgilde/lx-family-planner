@@ -34,6 +34,11 @@
       "more": "+{{count}} weitere",
       "free": "frei"
     },
+    "timeline": {
+      "kicker": "Wochenplan",
+      "allDay": "Ganztags",
+      "now": "Jetzt"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "Was als Nächstes ansteht",
@@ -80,6 +85,8 @@
     "birthdayKicker": "Familiengeburtstag",
     "birthdayDescription": "Dieser Geburtstag entsteht automatisch aus dem Profil. LX erinnert die Familie eine Woche vorher und am Geburtstag.",
     "save": "Änderungen speichern",
+    "duplicate": "Termin duplizieren",
+    "duplicateTitle": "{{title}} – Kopie",
     "delete": "Termin löschen",
     "deleteConfirm": "\"{{title}}\" wirklich löschen?",
     "fields": {
@@ -191,6 +198,8 @@
       "everyone": "Alle",
       "icsProvider": "ICS",
       "caldavProvider": "CalDAV",
+      "readOnly": "nur lesen",
+      "twoWay": "Zwei Wege",
       "eventCount_one": "{{count}} Termin",
       "eventCount_other": "{{count}} Termine",
       "syncNever": "Noch nicht erfolgreich abgeglichen",
@@ -215,6 +224,9 @@
       "caldavUrlLabel": "CalDAV-Kalenderadresse",
       "caldavUsernameLabel": "CalDAV-Benutzername",
       "caldavPasswordLabel": "CalDAV-App-Passwort",
+      "syncModeLabel": "Synchronisationsmodus",
+      "syncModeRead": "Nur anzeigen (empfohlen für fremde Kalender)",
+      "syncModeTwoWay": "Zwei Wege – LX darf Termine schreiben",
       "visibilityLabel": "Sichtbar für",
       "allMembers": "Alle Familienmitglieder",
       "householdLabel": "Planungsort",
@@ -224,6 +236,7 @@
       "pickColorAria": "Farbe {{color}} wählen",
       "privacyNote": "Nur lesen: Der Familienplaner kann im fremden Kalender nichts ändern oder löschen. Teile den geheimen Link trotzdem nicht öffentlich.",
       "caldavPrivacyNote": "Nur lesen: Benutzername und App-Passwort werden verschlüsselt nur auf eurem LX-Server gespeichert. LX ändert oder löscht im CalDAV-Kalender nichts.",
+      "caldavTwoWayNote": "Zwei Wege: LX importiert Änderungen und schreibt eure lokalen Termine in genau diesen Kalender. Fremde Termine werden von LX nicht remote gelöscht; gleichzeitig geänderte Termine erzeugen eine sichtbare Konfliktkopie.",
       "connecting": "Wird verbunden …"
     }
   },

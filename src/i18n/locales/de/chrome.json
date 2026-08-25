@@ -3,6 +3,12 @@
     "loading": "Dein Familienraum wird vorbereitet …"
   },
   "navigation": {
+    "favorites": "Favoriten",
+    "favoritesAria": "Favorisierte Bereiche",
+    "allAreas": "Alle Bereiche",
+    "favoritesHint": "Mit dem Stern bis zu {{count}} Schnellzugriffe festlegen.",
+    "favoriteAddAria": "{{name}} als Favorit hinzufügen",
+    "favoriteRemoveAria": "{{name}} aus Favoriten entfernen",
     "myArea": "Mein Bereich ({{name}})",
     "myAreaFallback": "Start",
     "chat": "Familien-Chat & PM",

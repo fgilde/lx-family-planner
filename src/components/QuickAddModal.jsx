@@ -16,6 +16,7 @@ import {
 } from '../constants/roles';
 import EventReminderPicker from './Calendar/EventReminderPicker';
 import EventAudiencePicker from './Calendar/EventAudiencePicker';
+import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 
 function addLocalDays(value, days) {
   const date = new Date(`${value}T12:00:00`);
@@ -36,6 +37,7 @@ export default function QuickAddModal() {
   } = useFamily();
   const { t } = useTranslation('profile');
   const dialogRef = useRef(null);
+  useViewportScrollLock(isQuickAddOpen);
 
   const [type, setType] = useState(quickAddDefaultType || 'event');
 

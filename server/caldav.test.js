@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import test from 'node:test';
 import {
+  calDavRequest,
   calDavFetchErrorMessage,
   fetchCalDavEvents,
   isSynologyCalDavBaseUrl,
@@ -9,6 +10,58 @@ import {
   synologyCalendarUrlsFromMultistatus,
   shouldUseSynologyCurlFallback
 } from './caldav.js';
+
+test('CalDAV write transport uses Basic auth and stays on one server', async () => {
+  const previousNodeEnv = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'test';
+  const methods = [];
+  const server = http.createServer(async (request, response) => {
+    methods.push(request.method);
+    assert.equal(
+      request.headers.authorization,
+      `Basic ${Buffer.from('alex:app-secret').toString('base64')}`
+    );
+    for await (const _chunk of request) {
+      // Request body vollständig einlesen.
+    }
+    response.writeHead(request.method === 'PUT' ? 201 : 204, {
+      etag: '"caldav-write"'
+    });
+    response.end();
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const { port } = server.address();
+  const connection = {
+    url: `http://127.0.0.1:${port}/caldav/family/`,
+    username: 'alex',
+    password: 'app-secret'
+  };
+  try {
+    const uploaded = await calDavRequest(
+      connection,
+      `/caldav/family/event.ics`,
+      {
+        method: 'PUT',
+        body: 'BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n',
+        expectedStatuses: [201]
+      }
+    );
+    assert.equal(uploaded.response.headers.get('etag'), '"caldav-write"');
+    await calDavRequest(connection, '/caldav/family/event.ics', {
+      method: 'DELETE',
+      expectedStatuses: [204]
+    });
+    assert.deepEqual(methods, ['PUT', 'DELETE']);
+    await assert.rejects(
+      calDavRequest(connection, 'https://other.example/event.ics'),
+      /verbundenen Server nicht verlassen/
+    );
+  } finally {
+    await new Promise(resolve => server.close(resolve));
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = previousNodeEnv;
+  }
+});
 
 test('CalDAV imports a read-only calendar collection with Basic auth', async () => {
   const previousNodeEnv = process.env.NODE_ENV;

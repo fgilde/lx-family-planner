@@ -42,6 +42,8 @@ import GotifySettings from './GotifySettings';
 import NtfySettings from './NtfySettings';
 import HomeAssistantSettings from './HomeAssistantSettings';
 import NextcloudSettings from './NextcloudSettings';
+import WebDavSettings from './WebDavSettings';
+import DatabaseBackupSettings from './DatabaseBackupSettings';
 import ProblemReportsPanel from './ProblemReportsPanel';
 import WebPushSettings from './WebPushSettings';
 
@@ -579,7 +581,9 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
           </div>
         </section>
 
+        <DatabaseBackupSettings />
         <NextcloudSettings />
+        <WebDavSettings />
         <WebPushSettings />
         <GotifySettings />
         <NtfySettings />

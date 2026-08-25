@@ -1,37 +1,24 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../context/FamilyContext';
-import { Network } from 'lucide-react';
-import { canManageFamily } from '../constants/roles';
+import { Star } from 'lucide-react';
 import { useNavigationTabs } from '../hooks/useNavigationTabs';
+import { useNavigationFavorites } from '../hooks/useNavigationFavorites';
 
-export default function Navigation({ onOpenFamilyTree }) {
-  const navigationRef = useRef(null);
+export default function Navigation() {
   const { t } = useTranslation('chrome');
-  const { activeTab, setActiveTab, activeMember } = useFamily();
+  const { activeTab, setActiveTab } = useFamily();
   const { visibleTabs } = useNavigationTabs();
+  const { favoriteTabs } = useNavigationFavorites(visibleTabs);
 
-  useEffect(() => {
-    const nav = navigationRef.current;
-    const activeButton = nav?.querySelector('[aria-current="page"]');
-    if (!nav || !activeButton) return;
-    const navRect = nav.getBoundingClientRect();
-    const buttonRect = activeButton.getBoundingClientRect();
-    // Nur scrollen, wenn der aktive Tab wirklich außerhalb des sichtbaren
-    // Bereichs liegt – verhindert das lästige Springen der ganzen Leiste.
-    const isHiddenLeft = buttonRect.left < navRect.left - 1;
-    const isHiddenRight = buttonRect.right > navRect.right + 1;
-    if (!isHiddenLeft && !isHiddenRight) return;
-    activeButton.scrollIntoView({
-      behavior: 'auto',
-      block: 'nearest',
-      inline: 'nearest'
-    });
-  }, [activeTab]);
+  if (!favoriteTabs.length) return null;
 
   return (
-    <nav className="main-nav" ref={navigationRef}>
-      {visibleTabs.map(tab => {
+    <nav className="main-nav" aria-label={t('navigation.favoritesAria')}>
+      <span className="main-nav-favorites-label">
+        <Star size={15} fill="currentColor" /> {t('navigation.favorites')}
+      </span>
+      {favoriteTabs.map(tab => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
         return (
@@ -47,15 +34,6 @@ export default function Navigation({ onOpenFamilyTree }) {
           </button>
         );
       })}
-
-      {canManageFamily(activeMember) && <button
-        className="nav-tab family-tree-nav-tab"
-        onClick={onOpenFamilyTree}
-        title={t('navigation.familyTreeTitle')}
-      >
-        <Network size={19} />
-        <span>{t('navigation.familyTree')}</span>
-      </button>}
     </nav>
   );
 }

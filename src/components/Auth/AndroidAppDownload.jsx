@@ -5,6 +5,7 @@ import {
   Download,
   QrCode,
   RefreshCw,
+  Share,
   ShieldCheck,
   Smartphone,
   Wifi
@@ -103,81 +104,92 @@ export default function AndroidAppDownload() {
     [release, t]
   );
 
-  if (isCapacitorNative() || status === 'unavailable') return null;
-
-  if (status === 'loading') {
-    return (
-      <aside
-        className="android-download-card is-loading"
-        aria-label={t('androidApp.loadingAria')}
-      >
-        <RefreshCw className="spin" size={20} />
-        <span>{t('androidApp.loading')}</span>
-      </aside>
-    );
-  }
+  if (isCapacitorNative()) return null;
+  const androidReady = status === 'ready';
 
   return (
-    <aside className="android-download-card" aria-labelledby="android-app-title">
+    <aside
+      className={`android-download-card ${androidReady ? '' : 'is-pwa-only'}`}
+      aria-labelledby="android-app-title"
+    >
       <div className="android-download-phone" aria-hidden="true">
         <span className="android-download-phone-speaker" />
         <span className="android-download-app-mark">LX</span>
         <CheckCircle2 size={16} />
       </div>
 
-      <div className="android-download-copy">
-        <span className="android-download-kicker">
-          <Smartphone size={14} /> {t('androidApp.kicker')}
-        </span>
-        <h3 id="android-app-title">{t('androidApp.title')}</h3>
-        <p>{t('androidApp.description')}</p>
-        <div className="android-download-facts">
-          {releaseFacts.map(fact => <span key={fact}>{fact}</span>)}
-          <span><ShieldCheck size={13} /> {t('androidApp.fromYourServer')}</span>
+        <div className="android-download-copy">
+          <span className="android-download-kicker">
+            <Smartphone size={14} /> {t('androidApp.kicker')}
+          </span>
+          <h3 id="android-app-title">{t('androidApp.title')}</h3>
+          <p>{t('androidApp.description')}</p>
+          <section className="ios-pwa-install">
+            <strong><Share size={14} /> {t('androidApp.iosTitle')}</strong>
+            <span>{t('androidApp.iosDescription')}</span>
+            <ol>
+              <li>{t('androidApp.iosStepShare')}</li>
+              <li>{t('androidApp.iosStepHome')}</li>
+              <li>{t('androidApp.iosStepAdd')}</li>
+            </ol>
+          </section>
+          {androidReady ? (
+            <>
+              <div className="android-download-facts">
+                {releaseFacts.map(fact => <span key={fact}>{fact}</span>)}
+                <span><ShieldCheck size={13} /> {t('androidApp.fromYourServer')}</span>
+              </div>
+              <a
+                className="android-download-button"
+                href={release.downloadUrl}
+                download="LX-Family-Planner.apk"
+                aria-label={t('androidApp.downloadAria', {
+                  version: release.versionName
+                })}
+              >
+                <Download size={17} />
+                {t('androidApp.downloadButton')}
+              </a>
+            </>
+          ) : status === 'loading' ? (
+            <span className="android-download-loading">
+              <RefreshCw className="spin" size={14} /> {t('androidApp.loading')}
+            </span>
+          ) : null}
         </div>
-        <a
-          className="android-download-button"
-          href={release.downloadUrl}
-          download="LX-Family-Planner.apk"
-          aria-label={t('androidApp.downloadAria', {
-            version: release.versionName
-          })}
-        >
-          <Download size={17} />
-          {t('androidApp.downloadButton')}
-        </a>
-      </div>
 
-      <div
-        className={`android-download-qr ${
-          release.qrAvailable ? '' : 'is-local'
-        }`}
-      >
-        {release.qrAvailable ? (
-          <>
-            <span><QrCode size={13} /> {t('androidApp.scanWithPhone')}</span>
-            <div className="android-download-qr-frame">
-              <QRCodeSVG
-                value={release.qrDownloadUrl}
-                size={104}
-                level="Q"
-                marginSize={1}
-                bgColor="#fffdf8"
-                fgColor="#173e34"
-                title={t('androidApp.qrTitle')}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <span><Wifi size={13} /> {t('androidApp.openOnPhone')}</span>
-            <div className="android-download-local-hint">
-              <strong>{t('androidApp.localPreviewTitle')}</strong>
-              <small>{t('androidApp.localPreviewHint')}</small>
-            </div>
-          </>
-        )}
-      </div>
+      {androidReady && (
+        <div
+          className={`android-download-qr ${
+            release.qrAvailable ? '' : 'is-local'
+          }`}
+        >
+          {release.qrAvailable ? (
+            <>
+              <span><QrCode size={13} /> {t('androidApp.scanWithPhone')}</span>
+              <div className="android-download-qr-frame">
+                <QRCodeSVG
+                  value={release.qrDownloadUrl}
+                  size={104}
+                  level="Q"
+                  marginSize={1}
+                  bgColor="#fffdf8"
+                  fgColor="#173e34"
+                  title={t('androidApp.qrTitle')}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <span><Wifi size={13} /> {t('androidApp.openOnPhone')}</span>
+              <div className="android-download-local-hint">
+                <strong>{t('androidApp.localPreviewTitle')}</strong>
+                <small>{t('androidApp.localPreviewHint')}</small>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </aside>
   );
 }

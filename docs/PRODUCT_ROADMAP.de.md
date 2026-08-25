@@ -55,13 +55,21 @@
    Stundenansicht für Tag und Woche auf: Dauer, parallele Termine und
    Überschneidungen werden direkt sichtbar.
 
+   Der generische CalDAV-Zugang bietet inzwischen wahlweise Nur-Lesen oder
+   einen ETag-geschützten Zwei-Wege-Abgleich mit genau einem schreibenden
+   Zielkalender. Als nächste Härtung folgen eine breitere Server-Matrix und eine
+   geführte Kalenderauswahl statt der manuellen Collection-Adresse.
+
 2. **Generische WebDAV-Family-Cloud**
    Neben Nextcloud eine schlanke NAS-/WebDAV-Verbindung anbieten: Ordner
    anzeigen und anlegen, Dateien hoch- und herunterladen, Vorschau und
    Löschen. Zugangsdaten bleiben verschlüsselt im LX-Server; soweit möglich
    wird ein App-Passwort verwendet. Nextcloud-spezifische Funktionen wie
    automatische Konten, Speicheranzeige, Browser-Ansicht, Sicherungen und
-   Zwei-Wege-Kalendersync bleiben bewusst getrennt.
+   Zwei-Wege-Kalendersync bleiben bewusst getrennt. Der isolierte und getestete
+   DAV-Client auf dem Server deckt Verbindungsprüfung und Dateioperationen
+   inzwischen ab. Vor der Freigabe für Familien fehlen noch die verschlüsselte
+   Integrationsspeicherung, API-Routen und die Einstellungsoberfläche.
 
 ### Aus Feedback eingesammelt (GitHub-Issues und Reddit)
 

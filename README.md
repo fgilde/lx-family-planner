@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Latest release 1.19.1" src="https://img.shields.io/badge/release-1.19.1-17483F">
+  <img alt="Latest release 1.19.2" src="https://img.shields.io/badge/release-1.19.2-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -95,20 +95,33 @@ the shared overview, plan a date and open the family archive.
 ## Highlights
 
 - **Family calendar:** multiple participants, recurring appointments, birthdays,
-  waste collection, ICS and read-only CalDAV subscriptions, plus flexible reminders.
+  waste collection, ICS and optional read-only or two-way CalDAV connections,
+  plus flexible reminders.
 
 ### CalDAV calendar connections
 
 Open **Calendar → Calendar sources**, select **CalDAV** and enter the HTTPS
-address of one calendar collection together with a dedicated app password. LX
-reads events into the family calendar but never writes to, changes or deletes
-the remote calendar. This works with standard CalDAV servers such as Synology
-Calendar, Nextcloud and many hosted calendars.
+address of one calendar collection together with a dedicated app password.
+Choose **read only** for work, school or shared calendars. Choose **two way**
+for one primary family calendar when LX should also create and update events.
+Only one writable target can be active; foreign remote events are never deleted
+by LX, and ETags protect concurrent changes. This works with standard CalDAV
+servers such as Synology Calendar, Nextcloud and many hosted calendars.
 
 For an intentionally local calendar server on a private LAN address, set
 `CALENDAR_ALLOW_PRIVATE_HOSTS=true` in the LX environment. Keep this setting
 off when no LAN calendar is required: it is an explicit safeguard against a
 calendar URL reaching other private devices from the LX server.
+
+### WebDAV family archive
+
+Open **Parent center → WebDAV family archive** to connect a NAS or another
+DAV-compatible server. LX stores the credentials encrypted, creates the chosen
+family folder when needed, and lets the existing archive view browse folders,
+upload, download, preview and delete files. Use HTTPS and a dedicated app
+password whenever the server supports it. For a NAS on a private LAN address,
+set `WEBDAV_ALLOW_PRIVATE_HOSTS=true` explicitly in the LX environment.
+
 - **Chores that stay fair:** shared assignments, automatic rotation, recurring
   routines and a four-eyes approval flow before children receive stars.
 - **Meals and recipes:** meal plan, cooking mode, shopping-list hand-off and

@@ -6,7 +6,7 @@ import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 
 const projectRoot = process.cwd();
 
-test('the login screen presents the complete current release before sign-in', () => {
+test('the login screen keeps release notes out of the sign-in flow', () => {
   const version = JSON.parse(
     fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
   ).version;
@@ -15,16 +15,10 @@ test('the login screen presents the complete current release before sign-in', ()
     path.join(projectRoot, 'src', 'components', 'Auth', 'FamilyLoginScreen.jsx'),
     'utf8'
   );
-  const previewCard = fs.readFileSync(
-    path.join(projectRoot, 'src', 'components', 'Auth', 'ReleasePreviewCard.jsx'),
-    'utf8'
-  );
-
-  assert.equal(version, '1.19.1');
-  assert.match(login, /<ReleasePreviewCard\s*\/>/);
-  assert.match(previewCard, /releaseNotesForVersion\(APP_VERSION\)/);
+  assert.equal(version, '1.19.2');
+  assert.doesNotMatch(login, /ReleasePreviewCard/);
   assert.deepEqual(
     notes.highlights.map(highlight => highlight.id),
-    ['timetable-grid']
+    ['calendar-stacks-and-colours', 'backup-and-connections']
   );
 });

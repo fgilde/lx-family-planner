@@ -44,6 +44,49 @@ bash scripts/docker-update.sh
 Er erstellt eine Sicherung, probiert Migrationen auf einer Kopie aus, prüft
 die Daten und stellt bei einem Fehler die vorherige Version wieder her.
 
+### Datenbank sichern und wiederherstellen
+
+Eine konsistente SQLite-Sicherung lässt sich jederzeit erzeugen:
+
+```bash
+docker compose exec -T family-planner node server/backup.js
+```
+
+Die Datei und ihr Prüfmanifest liegen anschließend in `backups/`. Für eine
+Wiederherstellung niemals nur die `.sqlite`-Datei über eine laufende Datenbank
+kopieren: SQLite kann zusätzlich geöffnete `-wal`- und `-shm`-Dateien halten.
+Der geführte Restore hält LX an, prüft Manifest, Dateihash und SQLite-Inhalt,
+erstellt eine zusätzliche Sicherung des aktuellen Zustands und entfernt die
+alten WAL-Dateien kontrolliert:
+
+```bash
+bash scripts/docker-restore.sh
+```
+
+Ohne Dateinamen wird die neueste Sicherung verwendet. Eine bestimmte
+Sicherung kann über ihren Namen aus `backups/` ausgewählt werden:
+
+```bash
+bash scripts/docker-restore.sh family-planner-2026-08-25T12-00-00-000Z.sqlite
+```
+
+Unter Windows steht dafür `Restore-Familienplaner.cmd` bereit; der optionale
+Dateiname kann in einer Eingabeaufforderung als Argument übergeben werden.
+
+Die Eigentümerfamilie der Installation kann dieselben geprüften Sicherungen in
+der **Elternzentrale → Datenbanksicherungen** verwalten. Dort lassen sich ein
+täglicher oder wöchentlicher Zeitplan, Uhrzeit und Aufbewahrung einstellen. Ein
+verpasster Lauf wird beim nächsten Serverstart nachgeholt. Beim Zurückspielen
+werden Familienpasswort und die ausdrückliche Eingabe `WIEDERHERSTELLEN`
+verlangt; anschließend beendet sich LX mit einem Neustartcode. Die unterstützten
+Docker-Installationen starten den Dienst automatisch wieder. Bei einem direkt
+mit `npm start` gestarteten Server muss LX danach manuell neu gestartet werden.
+
+Ohne `INSTANCE_OWNER_FAMILY_ID` gilt die zuerst angelegte Familie als
+Eigentümerfamilie. Mehrfamilien-Installationen können stattdessen die gewünschte
+Familien-ID ausdrücklich über diese Umgebungsvariable festlegen. Andere
+Familien können die vollständige Instanzdatenbank weder sehen noch zurücksetzen.
+
 ## Proxmox VE: nativer LXC
 
 Diesen Befehl **als `root` in der Proxmox-Host-Shell** ausführen, nicht in

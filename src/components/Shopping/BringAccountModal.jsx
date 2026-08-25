@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useFamily } from '../../context/FamilyContext';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 
 export default function BringAccountModal() {
   const { t } = useTranslation('shopping');
@@ -32,6 +33,7 @@ export default function BringAccountModal() {
   const [selectedListUuid, setSelectedListUuid] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  useViewportScrollLock(isBringModalOpen);
 
   if (!isBringModalOpen) return null;
 

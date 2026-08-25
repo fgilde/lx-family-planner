@@ -56,8 +56,12 @@ Mobile, calendar and tablet improvements:
   Nextcloud for browsing folders, creating folders, upload, download, preview
   and deletion. It will use an app password where supported. Nextcloud-only
   functions such as account provisioning, quota display, browser embedding,
-  backups and two-way calendar sync remain separate.
-- generic two-way CalDAV support beyond the bundled Nextcloud integration;
+  backups and two-way calendar sync remain separate. The isolated, tested
+  server-side DAV client now covers connection checks and file operations; the
+  encrypted integration storage, API routes and settings UI are the remaining
+  steps before this mode can be enabled for families.
+- harden the new generic two-way CalDAV mode with a broader server
+  compatibility matrix and guided calendar discovery;
 - calendar import from Google Calendar and iCloud accounts;
 - optional waste-collection subscriptions via URL (not only ICS upload);
 - optional Mealie, Immich and Paperless-ngx connections;

@@ -170,5 +170,19 @@
     "chooseFolder": "Veuillez choisir un dossier.",
     "uploading": "Envoi…",
     "uploadHere": "Envoyer ici"
+  },
+  "databaseBackup": {
+    "loading": "Loading backup status …", "kicker": "Instance · protected", "title": "Database backups", "ownerBadge": "Owner family",
+    "intro": "Creates a complete, verified backup of this LX installation. Only the first or configured owner family can see this section.",
+    "createNow": "Back up now", "creating": "Backup running …", "refresh": "Refresh",
+    "scheduleEnabled": "Automatic backup", "scheduleHint": "A missed run is performed once when the server is available again.",
+    "frequency": "Frequency", "daily": "Daily", "weekly": "Weekly", "weekday": "Weekday", "hour": "Time", "retention": "Backups to keep",
+    "saveSchedule": "Save schedule", "saved": "The backup schedule was saved.", "created": "A verified database backup was created.",
+    "lastBackup": "Last successful backup: {{date}}", "available": "Available backups", "empty": "No database backup exists yet.",
+    "verified": "Verified", "invalid": "Damaged", "restore": "Restore", "restoreTitle": "Reset the whole installation",
+    "restoreWarning": "All changes after this backup will be lost. LX first creates an additional safety backup and then restarts.",
+    "familyPassword": "Owner family password", "confirmation": "Enter WIEDERHERSTELLEN to confirm", "restoreConfirmed": "Verify and restore",
+    "restoring": "Starting restore …", "restoreRestarting": "The database is being restored. LX will restart afterwards.",
+    "days": { "sunday": "Sunday", "monday": "Monday", "tuesday": "Tuesday", "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday", "saturday": "Saturday" }
   }
 }

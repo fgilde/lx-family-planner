@@ -3,6 +3,12 @@
     "loading": "Preparando tu espacio familiar …"
   },
   "navigation": {
+    "favorites": "Favoritos",
+    "favoritesAria": "Áreas favoritas",
+    "allAreas": "Todas las áreas",
+    "favoritesHint": "Usa la estrella para elegir hasta {{count}} accesos rápidos.",
+    "favoriteAddAria": "Añadir {{name}} a favoritos",
+    "favoriteRemoveAria": "Quitar {{name}} de favoritos",
     "myArea": "Mi espacio ({{name}})",
     "myAreaFallback": "Inicio",
     "chat": "Chat familiar y mensajes directos",

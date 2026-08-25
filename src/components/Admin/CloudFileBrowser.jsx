@@ -103,7 +103,7 @@ function CloudImageThumbnail({ entry }) {
     const loadThumbnail = async () => {
       try {
         const response = await plannerApiFetch(
-          `/api/integrations/nextcloud/files/content?inline=true&path=${
+          `/api/integrations/family-cloud/files/content?inline=true&path=${
             encodeURIComponent(entry.path)
           }`
         );
@@ -173,7 +173,7 @@ export default function CloudFileBrowser() {
     try {
       setLoadError('');
       const data = await plannerApiRequest(
-        `/api/integrations/nextcloud/files?path=${encodeURIComponent(
+        `/api/integrations/family-cloud/files?path=${encodeURIComponent(
           nextPath
         )}`
       );
@@ -261,7 +261,7 @@ export default function CloudFileBrowser() {
     for (const file of files.slice(0, 20)) {
       try {
         await plannerApiRequest(
-          `/api/integrations/nextcloud/files/file?path=${encodeURIComponent(
+          `/api/integrations/family-cloud/files/file?path=${encodeURIComponent(
             path
           )}`,
           {
@@ -302,7 +302,7 @@ export default function CloudFileBrowser() {
     setBusy('folder');
     try {
       await plannerApiRequest(
-        '/api/integrations/nextcloud/files/folder',
+        '/api/integrations/family-cloud/files/folder',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -338,7 +338,7 @@ export default function CloudFileBrowser() {
     setPreviewUrl('');
     try {
       const response = await plannerApiFetch(
-        `/api/integrations/nextcloud/files/content?inline=true&path=${
+        `/api/integrations/family-cloud/files/content?inline=true&path=${
           encodeURIComponent(entry.path)
         }`
       );
@@ -361,7 +361,7 @@ export default function CloudFileBrowser() {
     setBusy(`download:${entry.path}`);
     try {
       const response = await plannerApiFetch(
-        `/api/integrations/nextcloud/files/content?path=${
+        `/api/integrations/family-cloud/files/content?path=${
           encodeURIComponent(entry.path)
         }`
       );
@@ -390,7 +390,7 @@ export default function CloudFileBrowser() {
     setBusy(`delete:${entry.path}`);
     try {
       await plannerApiRequest(
-        `/api/integrations/nextcloud/files/entry?path=${
+        `/api/integrations/family-cloud/files/entry?path=${
           encodeURIComponent(entry.path)
         }`,
         { method: 'DELETE' }

@@ -3,6 +3,12 @@
     "loading": "Preparo lo spazio famiglia …"
   },
   "navigation": {
+    "favorites": "Preferiti",
+    "favoritesAria": "Aree preferite",
+    "allAreas": "Tutte le aree",
+    "favoritesHint": "Usa la stella per scegliere fino a {{count}} collegamenti rapidi.",
+    "favoriteAddAria": "Aggiungi {{name}} ai preferiti",
+    "favoriteRemoveAria": "Rimuovi {{name}} dai preferiti",
     "myArea": "Il mio spazio ({{name}})",
     "myAreaFallback": "Home",
     "chat": "Chat di famiglia e messaggi",

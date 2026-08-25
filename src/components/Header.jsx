@@ -149,7 +149,7 @@ export default function Header({ onLogout, onOpenServerConfig, onOpenFamilyTree,
     <header className="app-header" ref={headerRef}>
       <button
         type="button"
-        className="icon-circle-btn mobile-menu-btn"
+        className="icon-circle-btn app-menu-btn"
         onClick={() => setIsMobileNavOpen(true)}
         aria-label={t('header.menu.open')}
         aria-expanded={isMobileNavOpen}

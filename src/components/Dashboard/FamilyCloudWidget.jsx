@@ -26,6 +26,7 @@ function fileSize(bytes) {
 export default function FamilyCloudWidget() {
   const {
     nextcloudIntegration,
+    webdavIntegration,
     setActiveTab,
     showToast
   } = useFamily();
@@ -37,14 +38,14 @@ export default function FamilyCloudWidget() {
   const [loading, setLoading] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
   const fileInputRef = useRef(null);
-  const connected = Boolean(nextcloudIntegration?.connected);
+  const connected = Boolean(webdavIntegration?.connected || nextcloudIntegration?.connected);
 
   const loadSummary = async () => {
     if (!connected) return;
     setLoading(true);
     try {
       const data = await plannerApiRequest(
-        '/api/integrations/nextcloud/files?path='
+        '/api/integrations/family-cloud/files?path='
       );
       setSummary({
         entries: data.entries || [],
@@ -59,7 +60,7 @@ export default function FamilyCloudWidget() {
 
   useEffect(() => {
     void loadSummary();
-  }, [connected, nextcloudIntegration?.updatedAt]);
+  }, [connected, nextcloudIntegration?.updatedAt, webdavIntegration?.updatedAt]);
 
   const prepareUpload = fileList => {
     const files = [...(fileList || [])].slice(0, 10);

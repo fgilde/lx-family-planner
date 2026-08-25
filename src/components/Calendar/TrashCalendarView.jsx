@@ -22,6 +22,7 @@ import { formatDate } from '../../utils/formatting';
 import { parseICSContent } from '../../utils/icsUtils';
 import { canManageFamily } from '../../constants/roles';
 import { groupTrashEventsByDate, trashGroupTitle } from '../../../shared/trashSchedule.js';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 import EventReminderDialog from './EventReminderDialog';
 import EventReminderPicker from './EventReminderPicker';
 
@@ -115,6 +116,7 @@ export default function TrashCalendarView() {
   const [isFeedOpen, setIsFeedOpen] = useState(false);
   const [feedBusy, setFeedBusy] = useState('');
   const [feedForm, setFeedForm] = useState({ name: '', url: '' });
+  useViewportScrollLock(isAddOpen || isFeedOpen || Boolean(reminderEvent));
   const canManage = canManageFamily(activeMember);
   const trashSubscriptions = useMemo(
     () => calendarSubscriptions.filter(subscription => subscription.kind === 'trash'),

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
 import { formatDate, formatTime } from '../../utils/formatting';
+import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 
 const SOURCE_COLORS = [
   '#147d64',
@@ -66,6 +67,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
     url: '',
     username: '',
     password: '',
+    syncMode: 'read',
     color: SOURCE_COLORS[0],
     memberId: 'all',
     household:
@@ -75,6 +77,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
         : activeHousehold
   });
   const [busy, setBusy] = useState('');
+  useViewportScrollLock(isOpen);
 
   const regularSubscriptions = useMemo(
     () => calendarSubscriptions.filter(subscription => subscription.kind !== 'trash'),
@@ -250,6 +253,11 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                             {subscription.provider === 'caldav'
                               ? t('sources.list.caldavProvider')
                               : t('sources.list.icsProvider')}
+                            {subscription.provider === 'caldav' && (
+                              <> · {subscription.syncMode === 'two-way'
+                                ? t('sources.list.twoWay')
+                                : t('sources.list.readOnly')}</>
+                            )}
                             {' · '}
                             {subscription.host}
                             {' · '}
@@ -348,7 +356,8 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                     ...previous,
                     provider: event.target.value,
                     username: '',
-                    password: ''
+                    password: '',
+                    syncMode: 'read'
                   }))
                 }
               >
@@ -397,33 +406,48 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
             </label>
 
             {form.provider === 'caldav' && (
-              <div className="calendar-source-form-grid">
+              <>
+                <div className="calendar-source-form-grid">
+                  <label>
+                    <span>{t('sources.form.caldavUsernameLabel')}</span>
+                    <input
+                      required
+                      maxLength={300}
+                      value={form.username}
+                      onChange={event =>
+                        setForm(previous => ({ ...previous, username: event.target.value }))
+                      }
+                      autoComplete="username"
+                    />
+                  </label>
+                  <label>
+                    <span>{t('sources.form.caldavPasswordLabel')}</span>
+                    <input
+                      required
+                      type="password"
+                      maxLength={1000}
+                      value={form.password}
+                      onChange={event =>
+                        setForm(previous => ({ ...previous, password: event.target.value }))
+                      }
+                      autoComplete="current-password"
+                    />
+                  </label>
+                </div>
                 <label>
-                  <span>{t('sources.form.caldavUsernameLabel')}</span>
-                  <input
-                    required
-                    maxLength={300}
-                    value={form.username}
-                    onChange={event =>
-                      setForm(previous => ({ ...previous, username: event.target.value }))
-                    }
-                    autoComplete="username"
-                  />
+                  <span>{t('sources.form.syncModeLabel')}</span>
+                  <select
+                    value={form.syncMode}
+                    onChange={event => setForm(previous => ({
+                      ...previous,
+                      syncMode: event.target.value
+                    }))}
+                  >
+                    <option value="read">{t('sources.form.syncModeRead')}</option>
+                    <option value="two-way">{t('sources.form.syncModeTwoWay')}</option>
+                  </select>
                 </label>
-                <label>
-                  <span>{t('sources.form.caldavPasswordLabel')}</span>
-                  <input
-                    required
-                    type="password"
-                    maxLength={1000}
-                    value={form.password}
-                    onChange={event =>
-                      setForm(previous => ({ ...previous, password: event.target.value }))
-                    }
-                    autoComplete="current-password"
-                  />
-                </label>
-              </div>
+              </>
             )}
 
             <div className="calendar-source-form-grid">
@@ -494,7 +518,9 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
             <aside className="calendar-source-privacy">
               <LockKeyhole size={16} />
               <p>{form.provider === 'caldav'
-                ? t('sources.form.caldavPrivacyNote')
+                ? form.syncMode === 'two-way'
+                  ? t('sources.form.caldavTwoWayNote')
+                  : t('sources.form.caldavPrivacyNote')
                 : t('sources.form.privacyNote')}</p>
             </aside>
 

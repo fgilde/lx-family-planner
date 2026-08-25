@@ -3,6 +3,12 @@
     "loading": "Préparation de votre espace familial…"
   },
   "navigation": {
+    "favorites": "Favoris",
+    "favoritesAria": "Espaces favoris",
+    "allAreas": "Tous les espaces",
+    "favoritesHint": "Utilisez l’étoile pour choisir jusqu’à {{count}} raccourcis.",
+    "favoriteAddAria": "Ajouter {{name}} aux favoris",
+    "favoriteRemoveAria": "Retirer {{name}} des favoris",
     "myArea": "Mon espace ({{name}})",
     "myAreaFallback": "Accueil",
     "chat": "Chat familial & MP",

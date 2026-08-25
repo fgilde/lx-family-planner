@@ -304,6 +304,86 @@ function authorization(username, password) {
   return `Basic ${Buffer.from(`${username}:${password}`, 'utf8').toString('base64')}`;
 }
 
+export async function calDavRequest(
+  connection,
+  pathname,
+  {
+    method = 'GET',
+    headers = {},
+    body,
+    expectedStatuses = [200]
+  } = {}
+) {
+  const baseUrl = normalizeCalDavUrl(connection.url);
+  let url;
+  try {
+    url = new URL(String(pathname || ''), baseUrl);
+  } catch {
+    throw failure('Der CalDAV-Pfad ist ungültig.', 400);
+  }
+  if (url.origin !== baseUrl.origin) {
+    throw failure('CalDAV-Verweise dürfen den verbundenen Server nicht verlassen.', 400);
+  }
+  await validateTarget(url);
+  const user = String(connection.username || '').trim();
+  const secret = String(connection.password || '');
+  if (!user || !secret) {
+    throw failure('Für CalDAV werden Benutzername und App-Passwort benötigt.', 400);
+  }
+  let response;
+  try {
+    response = await fetch(url, {
+      method,
+      redirect: 'error',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      headers: {
+        Authorization: authorization(user, secret),
+        'User-Agent': `LX-Family/${connection.appVersion || '1'} CalDAV-Sync`,
+        ...headers
+      },
+      body
+    });
+  } catch (error) {
+    throw failure(calDavFetchErrorMessage(error));
+  }
+  let text = response.status === 204 ? '' : await readText(response);
+  if (
+    method === 'REPORT' &&
+    shouldUseSynologyCurlFallback(url, response.status, text)
+  ) {
+    const fallback = await synologyCurlDavRequest(url, user, secret, {
+      method,
+      depth: headers.Depth || headers.depth || '1',
+      body
+    });
+    response = {
+      status: fallback.status,
+      headers: new Headers()
+    };
+    text = fallback.body;
+  }
+  if (!expectedStatuses.includes(response.status)) {
+    const message = response.status === 401 || response.status === 403
+      ? 'CalDAV hat Benutzername oder Passwort abgelehnt.'
+      : response.status === 404
+        ? 'Der CalDAV-Termin wurde nicht gefunden.'
+        : response.status === 412
+          ? 'Der CalDAV-Termin wurde gleichzeitig auf einem anderen Gerät geändert.'
+          : `Der CalDAV-Server antwortet mit HTTP ${response.status}.`;
+    const error = failure(
+      message,
+      response.status === 404
+        ? 404
+        : response.status === 412
+          ? 409
+          : 502
+    );
+    error.remoteStatus = response.status;
+    throw error;
+  }
+  return { response, text, url };
+}
+
 export function calDavFetchErrorMessage(error) {
   const codes = [error?.code, error?.cause?.code]
     .filter(Boolean)

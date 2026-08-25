@@ -36,21 +36,10 @@ function safeBackupEntryPath(backupDirectory, fileName) {
   return candidate;
 }
 
-/**
- * Keeps only verified LX database backup pairs. Files outside the strict LX
- * naming convention are intentionally never touched.
- */
-export function pruneDatabaseBackups({
-  backupDirectory = backupDirectoryPath(),
-  keep = DEFAULT_BACKUP_KEEP_COUNT
-} = {}) {
-  const retain = normalizedKeepCount(keep);
+function backupEntries(backupDirectory) {
   const directory = path.resolve(backupDirectory);
-  if (!fs.existsSync(directory)) {
-    return { kept: [], removed: [] };
-  }
-
-  const backups = fs
+  if (!fs.existsSync(directory)) return [];
+  return fs
     .readdirSync(directory, { withFileTypes: true })
     .filter(entry => entry.isFile() && BACKUP_FILE_NAME.test(entry.name))
     .map(entry => {
@@ -64,6 +53,52 @@ export function pruneDatabaseBackups({
     .sort((left, right) =>
       right.modifiedAt - left.modifiedAt || right.file.localeCompare(left.file)
     );
+}
+
+export function listDatabaseBackups({
+  backupDirectory = backupDirectoryPath()
+} = {}) {
+  return backupEntries(backupDirectory).map(entry => ({ ...entry }));
+}
+
+export function listDatabaseBackupDetails({
+  backupDirectory = backupDirectoryPath()
+} = {}) {
+  return backupEntries(backupDirectory).map(entry => {
+    try {
+      const { manifest } = verifiedBackupManifest(entry.file);
+      return {
+        fileName: path.basename(entry.file),
+        createdAt: Date.parse(manifest.createdAt) || entry.modifiedAt,
+        modifiedAt: entry.modifiedAt,
+        size: Number(manifest.databaseBytes || fs.statSync(entry.file).size),
+        verified: true,
+        error: ''
+      };
+    } catch (error) {
+      return {
+        fileName: path.basename(entry.file),
+        createdAt: entry.modifiedAt,
+        modifiedAt: entry.modifiedAt,
+        size: fs.statSync(entry.file).size,
+        verified: false,
+        error: String(error.message || 'Prüfung fehlgeschlagen.').slice(0, 300)
+      };
+    }
+  });
+}
+
+/**
+ * Keeps only verified LX database backup pairs. Files outside the strict LX
+ * naming convention are intentionally never touched.
+ */
+export function pruneDatabaseBackups({
+  backupDirectory = backupDirectoryPath(),
+  keep = DEFAULT_BACKUP_KEEP_COUNT
+} = {}) {
+  const retain = normalizedKeepCount(keep);
+  const directory = path.resolve(backupDirectory);
+  const backups = backupEntries(directory);
 
   const kept = backups.slice(0, retain);
   const removed = backups.slice(retain);
@@ -126,6 +161,129 @@ export function createDatabaseBackup({
     manifest,
     retention
   };
+}
+
+function resolveRestoreSource(backupDirectory, backupFile) {
+  const directory = path.resolve(backupDirectory);
+  const candidate = backupFile
+    ? path.resolve(
+        path.isAbsolute(backupFile) ? backupFile : path.join(directory, backupFile)
+      )
+    : backupEntries(directory)[0]?.file;
+  if (!candidate) {
+    throw new Error('Es wurde keine Datenbanksicherung gefunden.');
+  }
+  if (
+    path.dirname(candidate) !== directory ||
+    !BACKUP_FILE_NAME.test(path.basename(candidate))
+  ) {
+    throw new Error('Die Sicherung muss eine LX-Sicherung aus dem Backup-Ordner sein.');
+  }
+  if (!fs.existsSync(candidate)) {
+    throw new Error('Die ausgewählte Datenbanksicherung wurde nicht gefunden.');
+  }
+  return candidate;
+}
+
+function verifiedBackupManifest(backupFile) {
+  const manifestFile = `${backupFile}.manifest.json`;
+  if (!fs.existsSync(manifestFile)) {
+    throw new Error('Das Prüfmanifest der ausgewählten Sicherung fehlt.');
+  }
+  let expected;
+  try {
+    expected = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
+  } catch {
+    throw new Error('Das Prüfmanifest der ausgewählten Sicherung ist ungültig.');
+  }
+  const actual = createDataManifest(backupFile, { includeFileHash: true });
+  if (
+    expected.formatVersion !== 1 ||
+    expected.ok !== true ||
+    actual.ok !== true ||
+    !expected.databaseSha256 ||
+    expected.databaseSha256 !== actual.databaseSha256 ||
+    Number(expected.databaseBytes) !== actual.databaseBytes
+  ) {
+    throw new Error(
+      'Die ausgewählte Sicherung ist beschädigt oder passt nicht zu ihrem Prüfmanifest.'
+    );
+  }
+  return { manifestFile, manifest: actual };
+}
+
+/**
+ * Restores only a verified backup from the configured backup directory.
+ * The caller must stop the server first so no process keeps a WAL connection
+ * open while the database and its sidecars are replaced.
+ */
+export function restoreDatabaseBackup({
+  backupFile = '',
+  backupDirectory = backupDirectoryPath(),
+  databaseFile = databaseFilePath(),
+  serverStopped = false
+} = {}) {
+  if (!serverStopped) {
+    throw new Error(
+      'Der Server muss vor der Wiederherstellung angehalten und dies ausdrücklich bestätigt werden.'
+    );
+  }
+
+  const directory = path.resolve(backupDirectory);
+  const target = path.resolve(databaseFile);
+  const source = resolveRestoreSource(directory, backupFile);
+  const { manifestFile, manifest } = verifiedBackupManifest(source);
+  fs.mkdirSync(path.dirname(target), { recursive: true, mode: 0o700 });
+
+  const existingBackups = backupEntries(directory).length;
+  const safetyBackup = fs.existsSync(target)
+    ? createDatabaseBackup({
+        databaseFile: target,
+        backupDirectory: directory,
+        keep: Math.max(DEFAULT_BACKUP_KEEP_COUNT, existingBackups + 1)
+      })
+    : null;
+
+  const temporaryTarget = path.join(
+    path.dirname(target),
+    `.${path.basename(target)}.restore-${process.pid}-${Date.now()}`
+  );
+  let targetChanged = false;
+  try {
+    fs.copyFileSync(source, temporaryTarget, fs.constants.COPYFILE_EXCL);
+    const copied = createDataManifest(temporaryTarget, { includeFileHash: true });
+    if (!copied.ok || copied.databaseSha256 !== manifest.databaseSha256) {
+      throw new Error('Die vorbereitete Wiederherstellung hat die Prüfung nicht bestanden.');
+    }
+
+    targetChanged = true;
+    for (const file of [target, `${target}-wal`, `${target}-shm`]) {
+      if (fs.existsSync(file)) fs.rmSync(file, { force: false });
+    }
+    fs.renameSync(temporaryTarget, target);
+
+    const restored = createDataManifest(target, { includeFileHash: true });
+    if (!restored.ok || restored.databaseSha256 !== manifest.databaseSha256) {
+      throw new Error('Die wiederhergestellte Datenbank ist nicht identisch mit der Sicherung.');
+    }
+    return {
+      file: target,
+      source,
+      manifestFile,
+      safetyBackupFile: safetyBackup?.file || ''
+    };
+  } catch (error) {
+    if (fs.existsSync(temporaryTarget)) {
+      fs.rmSync(temporaryTarget, { force: false });
+    }
+    if (targetChanged) {
+      if (fs.existsSync(target)) fs.rmSync(target, { force: false });
+      if (safetyBackup?.file && fs.existsSync(safetyBackup.file)) {
+        fs.copyFileSync(safetyBackup.file, target);
+      }
+    }
+    throw error;
+  }
 }
 
 export { DEFAULT_BACKUP_KEEP_COUNT };

@@ -34,6 +34,11 @@
       "more": "+{{count}} más",
       "free": "libre"
     },
+    "timeline": {
+      "kicker": "Plan semanal",
+      "allDay": "Todo el día",
+      "now": "Ahora"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "Lo que viene ahora",
@@ -80,6 +85,8 @@
     "birthdayKicker": "Cumpleaños familiar",
     "birthdayDescription": "Este cumpleaños se crea automáticamente a partir del perfil. LX recuerda a la familia una semana antes y el día del cumpleaños.",
     "save": "Guardar cambios",
+    "duplicate": "Duplicar evento",
+    "duplicateTitle": "{{title}} – copia",
     "delete": "Eliminar evento",
     "deleteConfirm": "¿Seguro que quieres eliminar «{{title}}»?",
     "fields": {
@@ -191,6 +198,8 @@
       "everyone": "Todos",
       "icsProvider": "ICS",
       "caldavProvider": "CalDAV",
+      "readOnly": "read only",
+      "twoWay": "two way",
       "eventCount_one": "{{count}} evento",
       "eventCount_other": "{{count}} eventos",
       "syncNever": "Aún no se ha sincronizado correctamente",
@@ -215,6 +224,9 @@
       "caldavUrlLabel": "Dirección del calendario CalDAV",
       "caldavUsernameLabel": "Usuario de CalDAV",
       "caldavPasswordLabel": "Contraseña de aplicación CalDAV",
+      "syncModeLabel": "Sync mode",
+      "syncModeRead": "Display only (recommended for external calendars)",
+      "syncModeTwoWay": "Two way – LX may write events",
       "visibilityLabel": "Visible para",
       "allMembers": "Todos los miembros de la familia",
       "householdLabel": "Espacio de planificación",
@@ -224,6 +236,7 @@
       "pickColorAria": "Elegir color {{color}}",
       "privacyNote": "Solo lectura: el planificador familiar no puede cambiar ni eliminar nada en el calendario externo. Aun así, nunca compartas el enlace secreto públicamente.",
       "caldavPrivacyNote": "Solo lectura: el usuario y la contraseña de aplicación se guardan cifrados solo en tu servidor LX. LX no cambia ni borra nada en el calendario CalDAV.",
+      "caldavTwoWayNote": "Two way: LX imports changes and writes your local events to this one calendar. LX does not remotely delete foreign events; simultaneous edits create a visible conflict copy.",
       "connecting": "Conectando …"
     }
   },

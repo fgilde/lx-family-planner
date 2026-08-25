@@ -36,6 +36,7 @@ import CalendarSubscriptionManager from './CalendarSubscriptionManager';
 import EventReminderDialog from './EventReminderDialog';
 import CalendarEventDialog from './CalendarEventDialog';
 import {
+  calendarEventColor,
   eventAudienceMembers,
   eventIsForMember,
   eventLastDate
@@ -53,6 +54,12 @@ import {
   calendarEventsForDay,
   shiftCalendarAnchor
 } from '../../../shared/calendarGrid.js';
+import {
+  calendarTimelineBounds,
+  layoutTimelineEvents,
+  timelineAllDayEvents,
+  timelineEventsForDay
+} from '../../../shared/calendarTimeline.js';
 
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -122,6 +129,183 @@ function calendarRangeLabel(anchorDate, view, language) {
   return `${formatter.format(first)} – ${formatter.format(last)}`;
 }
 
+function timelineTimeLabel(minutes) {
+  const hour = Math.floor(minutes / 60);
+  const minute = minutes % 60;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
+function CalendarTimeline({
+  anchorDate,
+  events,
+  members,
+  onSelectEvent,
+  t,
+  todayKey
+}) {
+  const { i18n } = useTranslation();
+  const days = useMemo(
+    () => calendarDaysForView(anchorDate, 'week'),
+    [anchorDate]
+  );
+  const entries = useMemo(
+    () => days.map(dateKey => ({
+      dateKey,
+      allDay: timelineAllDayEvents(events, dateKey),
+      timed: layoutTimelineEvents(timelineEventsForDay(events, dateKey))
+    })),
+    [days, events]
+  );
+  const bounds = useMemo(
+    () => calendarTimelineBounds(entries.flatMap(entry => entry.timed)),
+    [entries]
+  );
+  const startMinutes = bounds.startHour * 60;
+  const minuteHeight = 1.1;
+  const timelineHeight = (bounds.endHour - bounds.startHour) * 60 * minuteHeight;
+  const hours = Array.from(
+    { length: bounds.endHour - bounds.startHour + 1 },
+    (_, index) => bounds.startHour + index
+  );
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const showNow = days.includes(todayKey) &&
+    nowMinutes >= startMinutes && nowMinutes <= bounds.endHour * 60;
+  const hasAllDay = entries.some(entry => entry.allDay.length > 0);
+
+  return (
+    <section className="calendar-timeline">
+      <header className="calendar-date-grid-heading">
+        <div>
+          <span>{t('view.timeline.kicker')}</span>
+          <h2>{calendarRangeLabel(anchorDate, 'week', i18n.language)}</h2>
+        </div>
+        <strong>{events.length}</strong>
+      </header>
+      <div className="calendar-timeline-scroller">
+        <div
+          className="calendar-timeline-board"
+          style={{ '--timeline-height': `${timelineHeight}px` }}
+        >
+          <div className="calendar-timeline-days-heading">
+            <span aria-hidden="true" />
+            {entries.map(({ dateKey }) => {
+              const date = dateFromKey(dateKey);
+              return (
+                <time
+                  key={dateKey}
+                  dateTime={dateKey}
+                  className={dateKey === todayKey ? 'is-today' : ''}
+                >
+                  <span>{new Intl.DateTimeFormat(i18n.language, {
+                    weekday: 'short'
+                  }).format(date)}</span>
+                  <strong>{date.getDate()}</strong>
+                </time>
+              );
+            })}
+          </div>
+          {hasAllDay && (
+            <div className="calendar-timeline-all-day">
+              <span>{t('view.timeline.allDay')}</span>
+              <div>
+                {entries.map(({ dateKey, allDay }) => (
+                  <section key={dateKey}>
+                    {allDay.map(event => {
+                      const accent = calendarEventColor(event, members);
+                      return (
+                        <button
+                          key={event.id}
+                          type="button"
+                          style={{ '--event-color': accent }}
+                          onClick={() => onSelectEvent(event)}
+                          title={event.title}
+                          aria-label={t('view.event.openAria', { title: event.title })}
+                        >
+                          {birthdayEventCopy(event, t).title}
+                        </button>
+                      );
+                    })}
+                  </section>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="calendar-timeline-body">
+            <div className="calendar-timeline-time-axis" aria-hidden="true">
+              {hours.map(hour => <span key={hour}>{`${String(hour).padStart(2, '0')}:00`}</span>)}
+            </div>
+            <div className="calendar-timeline-days">
+              {entries.map(({ dateKey, timed }) => (
+                <section
+                  key={dateKey}
+                  className={`calendar-timeline-day ${
+                    dateKey === todayKey ? 'is-today' : ''
+                  }`}
+                >
+                  {timed.map((segment, index) => {
+                    const event = segment.event;
+                    const accent = calendarEventColor(event, members);
+                    const baseTop = Math.max(
+                      0,
+                      (segment.start - startMinutes) * minuteHeight
+                    );
+                    const baseHeight = Math.max(
+                      44,
+                      (segment.end - segment.start) * minuteHeight
+                    );
+                    // Concurrent cards stay inside one day column. A compact
+                    // vertical cascade keeps every title readable instead of
+                    // letting the top card conceal the others.
+                    const stackOffset = segment.stackIndex * 22;
+                    const top = baseTop + stackOffset;
+                    const height = segment.stackIndex
+                      ? Math.max(28, baseHeight - stackOffset)
+                      : baseHeight;
+                    const displayEvent = birthdayEventCopy(event, t);
+                    return (
+                      <button
+                        key={`${dateKey}-${event.id}`}
+                        type="button"
+                        className={`calendar-timeline-event ${
+                          segment.stackIndex ? 'is-stacked' : ''
+                        }`}
+                        style={{
+                          '--event-color': accent,
+                          '--event-top': `${top}px`,
+                          '--event-height': `${height}px`,
+                          '--event-layer': index + 1
+                        }}
+                        onClick={() => onSelectEvent(event)}
+                        title={displayEvent.title}
+                        aria-label={t('view.event.openAria', {
+                          title: displayEvent.title
+                        })}
+                      >
+                        <strong>{displayEvent.title}</strong>
+                        <span>{timelineTimeLabel(segment.start)} – {timelineTimeLabel(segment.end)}</span>
+                      </button>
+                    );
+                  })}
+                </section>
+              ))}
+              {showNow && (
+                <span
+                  className="calendar-timeline-now"
+                  style={{ '--now-top': `${(nowMinutes - startMinutes) * minuteHeight}px` }}
+                >
+                  <i />
+                  <b>{t('view.timeline.now')}</b>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CalendarDateGrid({
   anchorDate,
   events,
@@ -183,9 +367,7 @@ function CalendarDateGrid({
               </header>
               <div className="calendar-grid-events">
                 {dayEvents.slice(0, view === 'month' ? 3 : 6).map(event => {
-                  const audience = eventAudienceMembers(event, members);
-                  const accent = event.sourceColor || audience[0]?.color ||
-                    event.color || 'var(--primary)';
+                  const accent = calendarEventColor(event, members);
                   const displayEvent = birthdayEventCopy(event, t);
                   return (
                     <button
@@ -229,6 +411,7 @@ export default function CalendarView() {
   const { t: tShared } = useTranslation('shared');
   const {
     events,
+    addEvent,
     deleteEvent,
     updateEvent,
     members,
@@ -566,9 +749,7 @@ export default function CalendarView() {
                 <div className="calendar-day-events">
                   {dayEvents.map(event => {
                     const audienceMembers = eventAudienceMembers(event, members);
-                    const member = audienceMembers[0];
-                    const accent =
-                      event.sourceColor || member?.color || 'var(--primary)';
+                    const accent = calendarEventColor(event, members);
                     const reminders = normalizeEventReminders(
                       event.reminders
                     );
@@ -754,7 +935,18 @@ export default function CalendarView() {
         )}
       </section>
 
-      {calendarView !== 'agenda' && (
+      {calendarView === 'week' && (
+        <CalendarTimeline
+          anchorDate={calendarAnchorDate}
+          events={gridEvents}
+          members={members}
+          onSelectEvent={setSelectedEvent}
+          t={t}
+          todayKey={todayKey}
+        />
+      )}
+
+      {calendarView === 'month' && (
         <CalendarDateGrid
           anchorDate={calendarAnchorDate}
           events={gridEvents}
@@ -782,6 +974,14 @@ export default function CalendarView() {
         members={members}
         onClose={() => setSelectedEvent(null)}
         onSave={(event, changes) => updateEvent(event, changes)}
+        onDuplicate={async (_event, changes) => {
+          const duplicate = await addEvent({
+            ...changes,
+            title: t('editor.duplicateTitle', { title: changes.title })
+          });
+          if (duplicate) setSelectedEvent(duplicate);
+          return duplicate;
+        }}
         onDelete={event => deleteEvent(event.id)}
       />
     </div>

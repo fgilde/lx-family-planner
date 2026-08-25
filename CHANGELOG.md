@@ -6,6 +6,21 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.19.2] — 2026-08-25
+
+### A clearer shared calendar and safer family operations
+
+- calendar events now keep one stable day column, stack overlapping cards so
+  every title remains readable, and use a fixed family colour or the assigned
+  person's profile colour;
+- the full navigation is available through a compact menu, while personal
+  quick links stay short and keep the personal dashboard first;
+- iPhone users get an explicit Safari Home Screen installation guide, and the
+  sign-in screen no longer uses space for release notes;
+- families can create and restore verified database backups, including a
+  guarded weekly schedule, connect an optional two-way CalDAV calendar, and
+  use a personal WebDAV server or NAS for the family archive.
+
 ## [1.19.1] — 2026-08-23
 
 ### A calmer timetable

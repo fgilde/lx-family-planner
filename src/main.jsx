@@ -5,7 +5,10 @@ import { initI18n } from './i18n/index.js';
 import './index.css';
 import './familyCloudMail.css';
 
-if ('serviceWorker' in navigator) {
+// The static service worker is deliberately production-only. Its cache-first
+// strategy is right for an installed PWA, but would otherwise keep stale Vite
+// modules during local development and can mix two React context instances.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {
     // Die App bleibt auch ohne Offline-Cache vollständig nutzbar.
   });

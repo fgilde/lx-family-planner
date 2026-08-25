@@ -15,6 +15,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <script type="module">
+      // A production PWA may keep its offline worker. In local Vite sessions
+      // it would cache source modules and mix old/new React contexts instead.
+      if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          registrations.forEach(registration => registration.unregister());
+        });
+      }
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

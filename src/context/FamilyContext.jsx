@@ -3499,6 +3499,7 @@ export function FamilyProvider({ children }) {
     syncNextcloud,
     backupToNextcloud,
     disconnectNextcloud,
+    webdavIntegration: integrations.webdav,
     webPush,
     refreshWebPushStatus,
     enableWebPush,

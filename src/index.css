@@ -2468,7 +2468,7 @@ textarea {
   /* The two most frequent actions belong together: open navigation and
      switch profile. Keeping the logo between them and the bell makes the
      header readable at a glance without a second control row. */
-  .app-header .mobile-menu-btn {
+  .app-header .app-menu-btn {
     grid-column: 1;
     grid-row: 1;
   }
@@ -2598,6 +2598,7 @@ textarea {
   border-bottom: 1px solid var(--border-color);
   padding: 0 16px;
   display: flex;
+  align-items: center;
   gap: 6px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -2605,10 +2606,7 @@ textarea {
   scroll-padding-inline: 16px;
 }
 
-.main-nav::after {
-  content: '';
-  flex: 0 0 24px;
-}
+.main-nav::after { content: ''; flex: 0 0 10px; }
 
 .main-nav::-webkit-scrollbar {
   display: none;
@@ -2633,6 +2631,19 @@ textarea {
   scroll-margin-inline: 16px;
 }
 
+.main-nav-favorites-label {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px 0 2px;
+  color: var(--primary);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .nav-tab:hover {
   color: var(--primary);
   background-color: var(--bg-subtle);
@@ -2642,12 +2653,6 @@ textarea {
 .nav-tab.active {
   color: var(--primary);
   border-bottom-color: var(--primary);
-}
-
-.family-tree-nav-tab {
-  margin-left: auto;
-  color: var(--primary);
-  background: var(--bg-subtle);
 }
 
 .wall-display-badge {
@@ -4069,6 +4074,53 @@ textarea {
   color: rgba(249, 245, 235, 0.68);
   font-size: 0.76rem;
   line-height: 1.5;
+}
+
+.ios-pwa-install {
+  display: grid;
+  gap: 4px;
+  margin-top: 11px;
+  padding: 9px 10px;
+  border: 1px solid rgba(246, 216, 178, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ios-pwa-install strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #f6d8b2;
+  font-size: 0.7rem;
+}
+
+.ios-pwa-install > span,
+.ios-pwa-install li {
+  color: rgba(249, 245, 235, 0.76);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.ios-pwa-install ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 13px;
+  margin: 1px 0 0;
+  padding-left: 17px;
+}
+
+.android-download-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 11px;
+  color: rgba(249, 245, 235, 0.75);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.android-download-card.is-pwa-only {
+  grid-template-columns: 78px minmax(0, 1fr);
 }
 
 .android-download-facts {
@@ -9196,6 +9248,217 @@ textarea {
   margin: -10px 0 16px;
   color: var(--text-muted);
   font-size: 0.8rem;
+}
+
+.database-backup-panel {
+  display: grid;
+  gap: 18px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, #2563eb 5%, transparent), transparent 45%),
+    var(--bg-card);
+}
+
+.database-backup-panel.is-loading {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  color: var(--text-muted);
+  font-weight: 750;
+}
+
+.database-backup-panel .admin-panel-header,
+.database-backup-panel .admin-panel-intro {
+  margin-bottom: 0;
+}
+
+.database-backup-owner-badge,
+.database-backup-message,
+.database-backup-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.database-backup-owner-badge {
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #176b52;
+  background: color-mix(in srgb, #10b981 13%, var(--bg-elevated));
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.database-backup-actions,
+.database-backup-schedule > button,
+.database-backup-restore > div > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.database-backup-actions button,
+.database-backup-schedule > button,
+.database-backup-restore button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.database-backup-schedule {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  background: var(--bg-subtle);
+}
+
+.database-backup-schedule > .integration-toggle-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.database-backup-schedule > .integration-toggle-row input {
+  margin-top: 3px;
+}
+
+.database-backup-schedule > .integration-toggle-row span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.database-backup-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.database-backup-schedule-grid label,
+.database-backup-restore label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.database-backup-schedule-grid input,
+.database-backup-schedule-grid select,
+.database-backup-restore input {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-main);
+  background: var(--bg-card);
+}
+
+.database-backup-last-run,
+.database-backup-message,
+.database-backup-error {
+  margin: 0;
+  font-size: 0.79rem;
+  font-weight: 750;
+}
+
+.database-backup-message { color: #167555; }
+.database-backup-error { color: var(--danger); }
+
+.database-backup-list {
+  display: grid;
+  gap: 9px;
+}
+
+.database-backup-list h3,
+.database-backup-list > p {
+  margin: 0;
+}
+
+.database-backup-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 15px;
+  background: var(--bg-subtle);
+}
+
+.database-backup-list article > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.database-backup-list article small {
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.database-backup-list article > b {
+  color: #167555;
+  font-size: 0.72rem;
+}
+
+.database-backup-list article.is-invalid > b { color: var(--danger); }
+
+.database-backup-restore {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border-color));
+  border-radius: 18px;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 7%, var(--bg-card));
+}
+
+.database-backup-restore p {
+  margin: 5px 0 12px;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.database-backup-restore label { margin-bottom: 10px; }
+.database-backup-restore > div > div { margin-top: 14px; }
+
+.database-backup-restore .btn-danger {
+  min-height: 41px;
+  padding: 8px 13px;
+  border: 1px solid color-mix(in srgb, var(--danger) 55%, var(--border-color));
+  border-radius: 12px;
+  color: white;
+  background: var(--danger);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.database-backup-restore .btn-danger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 760px) {
+  .database-backup-owner-badge { display: none; }
+  .database-backup-schedule-grid { grid-template-columns: 1fr 1fr; }
+  .database-backup-list article {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .database-backup-list article > button { grid-column: 1 / -1; }
+}
+
+@media (max-width: 480px) {
+  .database-backup-schedule-grid { grid-template-columns: 1fr; }
+  .database-backup-actions button,
+  .database-backup-schedule > button,
+  .database-backup-restore button { flex: 1 1 100%; }
 }
 
 .admin-link-form {
@@ -15546,6 +15809,273 @@ textarea {
   display: inline;
 }
 
+.calendar-timeline {
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+}
+
+.calendar-timeline-scroller {
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: color-mix(in srgb, var(--primary) 34%, transparent) transparent;
+}
+
+.calendar-timeline-board {
+  --timeline-hour-height: 66px;
+  min-width: 940px;
+}
+
+.calendar-timeline-days-heading {
+  display: grid;
+  grid-template-columns: 58px repeat(7, minmax(0, 1fr));
+  min-width: 100%;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-subtle);
+}
+
+.calendar-timeline-days-heading > span {
+  border-right: 1px solid var(--border-color);
+}
+
+.calendar-timeline-days-heading time {
+  min-height: 58px;
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  border-right: 1px solid var(--border-color);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.calendar-timeline-days-heading time:last-child { border-right: 0; }
+
+.calendar-timeline-days-heading time span {
+  font-size: 0.61rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.calendar-timeline-days-heading time strong {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  border-radius: 50%;
+  color: var(--text-main);
+  font-size: 0.82rem;
+}
+
+.calendar-timeline-days-heading time.is-today strong {
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--primary) 31%, transparent);
+}
+
+.calendar-timeline-all-day {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-subtle) 70%, var(--bg-card));
+}
+
+.calendar-timeline-all-day > span {
+  padding: 9px 5px;
+  border-right: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.53rem;
+  font-weight: 850;
+  line-height: 1.15;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.calendar-timeline-all-day > div {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-timeline-all-day section {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  padding: 5px;
+  border-right: 1px solid var(--border-color);
+}
+
+.calendar-timeline-all-day section:last-child { border-right: 0; }
+
+.calendar-timeline-all-day button {
+  min-width: 0;
+  overflow: hidden;
+  padding: 4px 5px;
+  border: 0;
+  border-left: 3px solid var(--event-color);
+  border-radius: 6px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--event-color) 14%, var(--bg-card));
+  cursor: pointer;
+  font-size: 0.59rem;
+  font-weight: 800;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-timeline-body {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+}
+
+.calendar-timeline-time-axis {
+  height: var(--timeline-height);
+  overflow: hidden;
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-subtle);
+}
+
+.calendar-timeline-time-axis span {
+  height: var(--timeline-hour-height);
+  display: block;
+  padding: 0 7px 0 2px;
+  color: var(--text-muted);
+  font-size: 0.59rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: right;
+  transform: translateY(-4px);
+}
+
+.calendar-timeline-days {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  height: var(--timeline-height);
+}
+
+.calendar-timeline-day {
+  position: relative;
+  min-width: 0;
+  height: var(--timeline-height);
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--timeline-hour-height) / 2 - 1px),
+      color-mix(in srgb, var(--border-color) 44%, transparent) calc(var(--timeline-hour-height) / 2),
+      transparent calc(var(--timeline-hour-height) / 2 + 1px),
+      transparent calc(var(--timeline-hour-height) - 1px),
+      var(--border-color) var(--timeline-hour-height)
+    );
+}
+
+.calendar-timeline-day:last-of-type { border-right: 0; }
+
+.calendar-timeline-day.is-today {
+  background-color: color-mix(in srgb, var(--primary) 5%, var(--bg-card));
+}
+
+.calendar-timeline-event {
+  position: absolute;
+  z-index: var(--event-layer, 1);
+  top: var(--event-top);
+  left: 3px;
+  width: calc(100% - 6px);
+  height: var(--event-height);
+  min-height: 44px;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  overflow: hidden;
+  padding: 6px 7px;
+  border: 1px solid color-mix(in srgb, var(--event-color) 72%, var(--border-color));
+  border-left: 4px solid var(--event-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--event-color) 24%, var(--bg-card));
+  box-shadow: 0 3px 7px color-mix(in srgb, var(--event-color) 15%, transparent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.calendar-timeline-event.is-stacked {
+  min-height: 28px;
+  padding: 4px 6px;
+}
+
+.calendar-timeline-event.is-stacked span {
+  display: none;
+}
+
+.calendar-timeline-event:hover,
+.calendar-timeline-event:focus-visible {
+  z-index: 3;
+  outline: 2px solid color-mix(in srgb, var(--event-color) 58%, transparent);
+  outline-offset: 1px;
+  background: color-mix(in srgb, var(--event-color) 28%, var(--bg-card));
+}
+
+.calendar-timeline-event strong,
+.calendar-timeline-event span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-timeline-event strong {
+  font-size: 0.66rem;
+  line-height: 1.2;
+}
+
+.calendar-timeline-event span {
+  color: color-mix(in srgb, var(--event-color) 75%, var(--text-main));
+  font-size: 0.56rem;
+  font-weight: 850;
+}
+
+.calendar-timeline-now {
+  position: absolute;
+  z-index: 4;
+  top: var(--now-top);
+  right: 0;
+  left: 0;
+  height: 1px;
+  display: block;
+  pointer-events: none;
+  background: #e65348;
+}
+
+.calendar-timeline-now::before {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  content: '';
+  background: #e65348;
+}
+
+.calendar-timeline-now b {
+  position: absolute;
+  top: -12px;
+  left: 7px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  color: white;
+  background: #e65348;
+  font-size: 0.53rem;
+  line-height: 1;
+}
+
 .calendar-agenda {
   overflow: hidden;
   border: 1px solid var(--border-color);
@@ -16527,6 +17057,42 @@ textarea {
   .calendar-date-grid.is-week .calendar-grid-events button span {
     display: block;
   }
+
+  .calendar-timeline {
+    border-radius: 20px;
+  }
+
+  .calendar-timeline-board {
+    min-width: 760px;
+  }
+
+  .calendar-timeline-days-heading {
+    grid-template-columns: 48px repeat(7, minmax(88px, 1fr));
+  }
+
+  .calendar-timeline-days-heading time {
+    min-height: 49px;
+  }
+
+  .calendar-timeline-all-day,
+  .calendar-timeline-body {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .calendar-timeline-time-axis span {
+    padding-right: 5px;
+    font-size: 0.53rem;
+  }
+
+  .calendar-timeline-event {
+    left: 2px;
+    width: calc(100% - 4px);
+    padding: 5px;
+    border-left-width: 3px;
+  }
+
+  .calendar-timeline-event strong { font-size: 0.59rem; }
+  .calendar-timeline-event span { font-size: 0.51rem; }
 
   .calendar-agenda-heading {
     padding: 20px 18px 15px;
@@ -22195,7 +22761,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
 
 .calendar-editor-dialog > footer {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr auto auto;
   gap: 8px;
   padding: 14px 23px;
   border-top: 1px solid var(--border-color);
@@ -22220,6 +22786,12 @@ body:has(.modal-backdrop) .problem-report-launcher {
   border: 1px solid color-mix(in srgb, var(--danger) 32%, var(--border-color));
   color: var(--danger);
   background: color-mix(in srgb, var(--danger) 6%, var(--bg-card));
+}
+
+.calendar-editor-duplicate {
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border-color));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--bg-card));
 }
 
 .calendar-editor-cancel {
@@ -22494,6 +23066,16 @@ body:has(.modal-backdrop) .problem-report-launcher {
   .calendar-editor-delete {
     grid-column: 1 / -1;
     order: 3;
+  }
+
+  .calendar-editor-duplicate {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+
+  .calendar-editor-cancel,
+  .calendar-editor-save {
+    order: 1;
   }
 
   .event-reminder-options {
@@ -23690,13 +24272,13 @@ body:has(.modal-backdrop) .problem-report-launcher {
   }
 }
 
-/* --- MOBILE NAVIGATION DRAWER (Issue #14) --- */
-/* Below 900px the horizontal tab bar is replaced by a slide-in drawer.
-   The drawer is portal-rendered and triggered by the hamburger button in
-   the header. Above 900px the hamburger is hidden and the tab bar remains. */
+/* --- APP NAVIGATION DRAWER --- */
+/* The compact bar shows only personal quick links. The complete, role-aware
+   navigation lives behind one hamburger on every screen size. */
 
-.mobile-menu-btn {
-  display: none;
+.app-menu-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
 }
 
 @media (max-width: 900px) {
@@ -23704,7 +24286,7 @@ body:has(.modal-backdrop) .problem-report-launcher {
     display: none;
   }
 
-  .mobile-menu-btn {
+  .app-menu-btn {
     display: inline-flex;
   }
 
@@ -23795,6 +24377,35 @@ body:has(.modal-backdrop) .problem-report-launcher {
   -webkit-overflow-scrolling: touch;
 }
 
+.mobile-nav-drawer-section-heading {
+  display: grid;
+  gap: 3px;
+  padding: 7px 8px 9px;
+}
+
+.mobile-nav-drawer-section-heading strong {
+  color: var(--text-main);
+  font-size: 0.78rem;
+}
+
+.mobile-nav-drawer-section-heading small {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.mobile-nav-item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-radius: var(--radius-md);
+}
+
+.mobile-nav-item-row.active {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-subtle));
+}
+
 .mobile-nav-item {
   display: flex;
   align-items: center;
@@ -23825,6 +24436,28 @@ body:has(.modal-backdrop) .problem-report-launcher {
 .mobile-nav-item.active {
   color: var(--primary);
   background: color-mix(in srgb, var(--primary) 12%, var(--bg-subtle));
+}
+
+.mobile-nav-item-row.active .mobile-nav-item { color: var(--primary); }
+
+.mobile-nav-favorite-toggle {
+  width: 39px;
+  height: 39px;
+  display: inline-grid;
+  place-items: center;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.mobile-nav-favorite-toggle:hover,
+.mobile-nav-favorite-toggle:focus-visible,
+.mobile-nav-favorite-toggle.is-favorite {
+  color: #bb7414;
+  background: color-mix(in srgb, #f5b942 18%, transparent);
 }
 
 .mobile-nav-item-secondary {

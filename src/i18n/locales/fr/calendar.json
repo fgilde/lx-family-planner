@@ -34,6 +34,11 @@
       "more": "+{{count}} en plus",
       "free": "libre"
     },
+    "timeline": {
+      "kicker": "Planning hebdomadaire",
+      "allDay": "Toute la journée",
+      "now": "Maintenant"
+    },
     "agenda": {
       "kicker": "Agenda",
       "title": "Ce qui arrive ensuite",
@@ -80,7 +85,9 @@
     "birthdayKicker": "Anniversaire familial",
     "birthdayDescription": "Cet anniversaire est créé automatiquement depuis le profil. LX rappelle à la famille une semaine avant et le jour de l'anniversaire.",
     "save": "Enregistrer les modifications",
-    "delete": "Supprimer l'événement",
+    "duplicate": "Dupliquer l’événement",
+    "duplicateTitle": "{{title}} – copie",
+    "delete": "Supprimer l’événement",
     "deleteConfirm": "Vraiment supprimer « {{title}} » ?",
     "fields": {
       "title": "Titre",
@@ -191,6 +198,8 @@
       "everyone": "Tous",
       "icsProvider": "ICS",
       "caldavProvider": "CalDAV",
+      "readOnly": "read only",
+      "twoWay": "two way",
       "eventCount_one": "{{count}} événement",
       "eventCount_other": "{{count}} événements",
       "syncNever": "Pas encore synchronisé avec succès",
@@ -215,6 +224,9 @@
       "caldavUrlLabel": "Adresse du calendrier CalDAV",
       "caldavUsernameLabel": "Nom d’utilisateur CalDAV",
       "caldavPasswordLabel": "Mot de passe d’application CalDAV",
+      "syncModeLabel": "Sync mode",
+      "syncModeRead": "Display only (recommended for external calendars)",
+      "syncModeTwoWay": "Two way – LX may write events",
       "visibilityLabel": "Visible par",
       "allMembers": "Tous les membres de la famille",
       "householdLabel": "Espace de planification",
@@ -224,6 +236,7 @@
       "pickColorAria": "Choisir la couleur {{color}}",
       "privacyNote": "Lecture seule : le planificateur familial ne peut rien modifier ni supprimer dans le calendrier externe. Toutefois, ne partagez jamais le lien secret publiquement.",
       "caldavPrivacyNote": "Lecture seule : le nom d’utilisateur et le mot de passe d’application sont conservés chiffrés uniquement sur votre serveur LX. LX ne modifie ni ne supprime rien dans le calendrier CalDAV.",
+      "caldavTwoWayNote": "Two way: LX imports changes and writes your local events to this one calendar. LX does not remotely delete foreign events; simultaneous edits create a visible conflict copy.",
       "connecting": "Connexion…"
     }
   },

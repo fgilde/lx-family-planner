@@ -3,6 +3,12 @@
     "loading": "Jouw gezinsruimte gereedmaken …"
   },
   "navigation": {
+    "favorites": "Favorieten",
+    "favoritesAria": "Favoriete onderdelen",
+    "allAreas": "Alle onderdelen",
+    "favoritesHint": "Kies met de ster maximaal {{count}} snelkoppelingen.",
+    "favoriteAddAria": "{{name}} aan favorieten toevoegen",
+    "favoriteRemoveAria": "{{name}} uit favorieten verwijderen",
     "myArea": "Mijn gebied ({{name}})",
     "myAreaFallback": "Home",
     "chat": "Gezinschat & DM's",

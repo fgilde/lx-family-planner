@@ -18,17 +18,17 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   await page.getByRole('button', { name: 'Weiter', exact: true }).click();
   await page.getByRole('button', { name: 'Familienraum eröffnen' }).click();
 
-  await expect(
-    page.getByRole('button', { name: 'Kalender', exact: true })
-  ).toBeVisible();
   const releaseNotes = page.locator('.release-notes-layer');
   await expect(releaseNotes).toBeVisible();
   await releaseNotes.locator('.release-notes-confirm').click();
   await expect(releaseNotes).toBeHidden();
-  await page.getByRole('button', { name: 'Kalender', exact: true }).click();
+  await page.getByRole('button', { name: 'Menü öffnen' }).click();
+  await page.getByRole('dialog', { name: 'Menü' })
+    .getByRole('button', { name: 'Kalender', exact: true })
+    .click();
   await expect(
-    page.getByRole('button', { name: 'Kalender', exact: true })
-  ).toHaveAttribute('aria-current', 'page');
+    page.getByRole('heading', { name: /kalender/i })
+  ).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('.app-header')).toHaveCSS('position', 'fixed');
@@ -88,6 +88,7 @@ test('a new family can complete onboarding and open the calendar', async ({ page
     name: 'Termin bearbeiten'
   });
   await expect(dialog).toBeVisible();
+  await expect(page.locator('body')).toHaveCSS('position', 'fixed');
   await expect(page.locator('.calendar-editor-dialog > footer')).toBeVisible();
   const viewportSafe = await dialog.evaluate(element => {
     const dialogBounds = element.getBoundingClientRect();
@@ -109,7 +110,16 @@ test('a new family can complete onboarding and open the calendar', async ({ page
   );
   expect(viewportSafe.viewportHeight).toBe(956);
 
+  await page.getByRole('button', {
+    name: 'Termin duplizieren',
+    exact: true
+  }).click();
+  await expect(dialog.getByLabel('Titel')).toHaveValue(
+    'Mobiler Dialog-Test – Kopie'
+  );
+
   await page.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+  await expect(page.locator('body')).not.toHaveCSS('position', 'fixed');
   await page.goto('/?view=meals');
   await page.getByRole('button', { name: 'Rezeptbuch (0)', exact: true }).click();
   await page.getByRole('button', { name: 'Neues Rezept', exact: true }).click();

@@ -49,7 +49,7 @@ export default function CloudUploadDestinationDialog({
     setLoading(true);
     try {
       const data = await plannerApiRequest(
-        '/api/integrations/nextcloud/folders'
+        '/api/integrations/family-cloud/folders'
       );
       const loaded = (data.folders || []).filter(folder => folder.path);
       setFolders(loaded);
@@ -100,7 +100,7 @@ export default function CloudUploadDestinationDialog({
     setCreating(true);
     try {
       const data = await plannerApiRequest(
-        '/api/integrations/nextcloud/files/folder',
+        '/api/integrations/family-cloud/files/folder',
         {
           method: 'POST',
           body: JSON.stringify({
@@ -149,7 +149,7 @@ export default function CloudUploadDestinationDialog({
       }));
       try {
         await plannerApiRequest(
-          `/api/integrations/nextcloud/files/file?path=${
+          `/api/integrations/family-cloud/files/file?path=${
             encodeURIComponent(selectedPath)
           }`,
           {

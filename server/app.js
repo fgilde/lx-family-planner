@@ -44,7 +44,20 @@ import {
 import { releaseNotesForVersion } from '../shared/releaseNotes.js';
 import { PRODUCT_NAME } from '../shared/brand.js';
 import { loadBringCatalog } from './bringCatalog.js';
-import { fetchCalDavEvents, normalizeCalDavUrl } from './caldav.js';
+import {
+  calDavRequest,
+  fetchCalDavEvents,
+  normalizeCalDavUrl
+} from './caldav.js';
+import {
+  createDatabaseBackup,
+  listDatabaseBackupDetails,
+  restoreDatabaseBackup
+} from './backupService.js';
+import {
+  databaseBackupIsDue,
+  normalizeDatabaseBackupSettings
+} from './databaseBackupSchedule.js';
 import {
   extractSharedRecipeDraft,
   importRecipePreviewImage,
@@ -56,6 +69,7 @@ import {
 } from './mediaPreview.js';
 import {
   RECORD_TYPES,
+  database,
   acknowledgeMemberReleaseNotes,
   countFamilies,
   countUnreadInboxNotifications,
@@ -77,6 +91,7 @@ import {
   deleteCalendarSubscription,
   deleteFamilyRelationship,
   deleteIntegration,
+  deleteIntegrationSyncItems,
   deleteSharedFamilyEvent,
   deleteMember,
   deleteNativePushDevice,
@@ -178,6 +193,16 @@ import {
   uploadNextcloudFile,
   uploadNextcloudUserFile
 } from './nextcloud.js';
+import {
+  createWebDavFolder,
+  deleteWebDavEntry,
+  downloadWebDavFile,
+  inspectWebDav,
+  listWebDavEntries,
+  normalizeWebDavBaseUrl,
+  normalizeWebDavRelativePath,
+  uploadWebDavFile
+} from './webdav.js';
 import { createTranslator } from './i18n.js';
 import { configuredCorsOrigins, configuredTrustProxy } from './serverSecurity.js';
 import { registerRuntimeRoutes } from './routes/runtimeRoutes.js';
@@ -298,6 +323,9 @@ const pendingBringLogins = new Map();
 const authAttempts = new Map();
 const nextcloudSyncLocks = new Map();
 const nextcloudBackupLocks = new Map();
+const INSTANCE_OWNER_META_KEY = 'instance_owner_family_id';
+const DATABASE_BACKUP_SETTINGS_META_KEY = 'database_backup_settings_v1';
+let databaseBackupRunning = false;
 
 const ROLE_TYPES = new Set([
   'adult',
@@ -1281,6 +1309,60 @@ function calendarSubscriptionResourceType(subscription) {
   return subscription?.kind === 'trash' ? 'trashEvents' : 'events';
 }
 
+function calDavSyncProvider(subscriptionId) {
+  return `caldav:${subscriptionId}`;
+}
+
+function clearCalDavTwoWayState(familyId, subscriptionId) {
+  const provider = calDavSyncProvider(subscriptionId);
+  for (const event of listRecords(familyId, 'events')) {
+    if (event.source === provider) {
+      deleteRecord(familyId, 'events', event.id);
+      continue;
+    }
+    if (event.syncProvider !== provider) continue;
+    const {
+      syncUid: _syncUid,
+      syncHref: _syncHref,
+      syncManaged: _syncManaged,
+      syncProvider: _syncProvider,
+      nextcloudUid: _nextcloudUid,
+      nextcloudHref: _nextcloudHref,
+      nextcloudManaged: _nextcloudManaged,
+      ...localEvent
+    } = event;
+    upsertRecord(familyId, 'events', localEvent);
+  }
+  deleteIntegrationSyncItems(familyId, provider);
+}
+
+function activeCalDavTwoWaySubscription(familyId, ignoredSubscriptionId = '') {
+  return listCalendarSubscriptions(familyId).find(subscription =>
+    subscription.id !== ignoredSubscriptionId &&
+    subscription.enabled &&
+    subscription.provider === 'caldav' &&
+    subscription.syncMode === 'two-way'
+  );
+}
+
+function calDavTwoWayConflict(familyId, ignoredSubscriptionId = '') {
+  const nextcloud = getIntegration(familyId, 'nextcloud');
+  if (
+    nextcloud &&
+    nextcloud.config?.enabled !== false &&
+    nextcloud.config?.eventSyncEnabled !== false
+  ) {
+    return 'Der Nextcloud-Zwei-Wege-Kalender ist bereits aktiv. Bitte nur einen schreibenden Zielkalender verwenden.';
+  }
+  const other = activeCalDavTwoWaySubscription(
+    familyId,
+    ignoredSubscriptionId
+  );
+  return other
+    ? 'Es ist bereits ein anderer CalDAV-Kalender für den Zwei-Wege-Abgleich aktiv.'
+    : '';
+}
+
 async function syncCalendarSubscription(subscription) {
   let url = '';
   try {
@@ -1293,6 +1375,39 @@ async function syncCalendarSubscription(subscription) {
       rangeEnd: now + 730 * 86_400_000,
       maxEvents: 1500
     };
+    if (
+      subscription.provider === 'caldav' &&
+      subscription.syncMode === 'two-way' &&
+      subscription.kind !== 'trash'
+    ) {
+      replaceRecordsBySource(
+        subscription.familyId,
+        'events',
+        calendarSourceKey(subscription.id),
+        []
+      );
+      const stats = await syncNextcloudEvents({
+        familyId: subscription.familyId,
+        connection: { ...connection, appVersion: APP_VERSION },
+        calendarHref: connection.url,
+        defaultMemberId: subscription.memberId || 'all',
+        includeGrandparents: subscription.household === 'oma_opa',
+        memberIds: getMembers(subscription.familyId).map(member => member.id),
+        timeZone: process.env.TZ || 'Europe/Berlin',
+        provider: calDavSyncProvider(subscription.id),
+        sourceName: subscription.name || 'CalDAV',
+        request: calDavRequest
+      });
+      const records = listRecords(subscription.familyId, 'events').filter(
+        event => event.syncProvider === calDavSyncProvider(subscription.id)
+      );
+      const updated = updateCalendarSubscriptionSync(
+        subscription.familyId,
+        subscription.id,
+        { success: true, eventCount: records.length }
+      );
+      return { subscription: updated, records, stats };
+    }
     const sourceEvents = subscription.provider === 'caldav'
       ? await fetchCalDavEvents(connection, {
           ...parserOptions,
@@ -2469,6 +2584,10 @@ function demoIntegrationStatus() {
       lastSyncError: '',
       lastBackupAt: 0,
       lastBackupError: ''
+    },
+    webdav: {
+      connected: false,
+      enabled: false
     }
   };
 }
@@ -2499,6 +2618,91 @@ function requireAdult(req, res, next) {
   }
   req.activeMember = member;
   return next();
+}
+
+function instanceOwnerFamilyId() {
+  const configured = cleanText(
+    process.env.INSTANCE_OWNER_FAMILY_ID,
+    '',
+    100
+  );
+  if (configured) return getFamily(configured) ? configured : '';
+  const stored = cleanText(getAppMeta(INSTANCE_OWNER_META_KEY), '', 100);
+  if (stored && getFamily(stored)) return stored;
+  const firstFamilyId = listPublicFamilies()[0]?.id || '';
+  if (firstFamilyId) setAppMeta(INSTANCE_OWNER_META_KEY, firstFamilyId);
+  return firstFamilyId;
+}
+
+function requireInstanceOwner(req, res, next) {
+  if (req.session?.familyId !== instanceOwnerFamilyId()) {
+    return res.status(403).json({
+      success: false,
+      error: 'Nur die Eigentümerfamilie dieser Installation darf vollständige Datenbanksicherungen verwalten.'
+    });
+  }
+  return next();
+}
+
+function databaseBackupSettings() {
+  let stored = {};
+  try {
+    stored = JSON.parse(
+      getAppMeta(DATABASE_BACKUP_SETTINGS_META_KEY) || '{}'
+    );
+  } catch {
+    stored = {};
+  }
+  return normalizeDatabaseBackupSettings(stored);
+}
+
+function saveDatabaseBackupSettings(settings) {
+  const normalized = normalizeDatabaseBackupSettings(settings);
+  setAppMeta(
+    DATABASE_BACKUP_SETTINGS_META_KEY,
+    JSON.stringify(normalized)
+  );
+  return normalized;
+}
+
+function databaseBackupStatus() {
+  return {
+    owner: true,
+    settings: databaseBackupSettings(),
+    backups: listDatabaseBackupDetails(),
+    running: databaseBackupRunning
+  };
+}
+
+function performDatabaseBackup() {
+  if (databaseBackupRunning) {
+    const error = new Error('Eine Datenbanksicherung läuft bereits.');
+    error.statusCode = 409;
+    throw error;
+  }
+  databaseBackupRunning = true;
+  const settings = databaseBackupSettings();
+  const attempted = saveDatabaseBackupSettings({
+    ...settings,
+    lastAttemptAt: Date.now()
+  });
+  try {
+    const result = createDatabaseBackup({ keep: attempted.keep });
+    saveDatabaseBackupSettings({
+      ...attempted,
+      lastBackupAt: Date.now(),
+      lastError: ''
+    });
+    return result;
+  } catch (error) {
+    saveDatabaseBackupSettings({
+      ...attempted,
+      lastError: cleanText(error.message, 'Sicherung fehlgeschlagen.', 300)
+    });
+    throw error;
+  } finally {
+    databaseBackupRunning = false;
+  }
 }
 
 function memberHasModuleAccess(member, moduleId) {
@@ -3127,6 +3331,28 @@ function integrationStatus(familyId, member = null) {
           lastSyncError: '',
           lastBackupAt: 0,
           lastBackupError: ''
+        },
+    webdav: getIntegration(familyId, 'webdav')
+      ? (() => {
+          const integration = getIntegration(familyId, 'webdav');
+          const config = integration.config || {};
+          return {
+            connected: true,
+            enabled: config.enabled !== false,
+            updatedAt: integration.updatedAt,
+            ...(member && !memberHasModuleAccess(member, 'cloud')
+              ? {}
+              : {
+                  baseUrl: config.baseUrl || '',
+                  host: config.host || '',
+                  displayName: config.displayName || 'WebDAV',
+                  folder: config.folder || 'LX Family'
+                })
+          };
+        })()
+      : {
+          connected: false,
+          enabled: false
         }
   };
 }
@@ -3159,6 +3385,49 @@ function nextcloudWorkspace(familyId) {
       integration.config?.folder || 'LX Family'
     )
   };
+}
+
+function webdavConnection(integration) {
+  const secret = decryptJson(integration.secretEncrypted);
+  return {
+    baseUrl: integration.config.baseUrl,
+    username: secret.username,
+    password: secret.password,
+    appVersion: APP_VERSION
+  };
+}
+
+function webdavWorkspace(familyId) {
+  const integration = getIntegration(familyId, 'webdav');
+  if (!integration || integration.config?.enabled === false) return null;
+  const connection = webdavConnection(integration);
+  const folder = normalizeWebDavRelativePath(
+    integration.config?.folder || 'LX Family'
+  );
+  const baseUrl = new URL(normalizeWebDavBaseUrl(connection.baseUrl));
+  if (folder) {
+    baseUrl.pathname += folder.split('/').map(encodeURIComponent).join('/');
+    baseUrl.pathname = `${baseUrl.pathname.replace(/\/+$/, '')}/`;
+  }
+  return {
+    provider: 'webdav',
+    integration,
+    connection: { ...connection, baseUrl: baseUrl.href },
+    folder
+  };
+}
+
+async function ensureWebDavFolder(connection, relativePath) {
+  const pieces = normalizeWebDavRelativePath(relativePath).split('/').filter(Boolean);
+  let current = '';
+  for (const piece of pieces) {
+    try {
+      await createWebDavFolder(connection, current, piece);
+    } catch (error) {
+      if (![405, 409].includes(Number(error.remoteStatus || error.statusCode))) throw error;
+    }
+    current = current ? `${current}/${piece}` : piece;
+  }
 }
 
 async function ensureFamilyCloudStructure(familyId, workspace) {
@@ -4666,6 +4935,14 @@ export function createApp() {
       return workspace;
     }
   };
+  const genericCloudWorkspaceForFamily = async familyId => {
+    const dav = webdavWorkspace(familyId);
+    if (dav) return dav;
+    return {
+      provider: 'nextcloud',
+      ...(await cloudWorkspaceForFamily(familyId))
+    };
+  };
   const uploadChatAttachmentContent = async (
     familyId,
     {
@@ -5045,6 +5322,23 @@ export function createApp() {
       eventReminderSweepRunning = false;
     }
   };
+  app.locals.runDatabaseBackupSweep = async (now = new Date()) => {
+    const settings = databaseBackupSettings();
+    if (!databaseBackupIsDue(settings, now) || databaseBackupRunning) {
+      return { skipped: true };
+    }
+    try {
+      const backup = performDatabaseBackup();
+      return {
+        skipped: false,
+        fileName: path.basename(backup.file)
+      };
+    } catch (error) {
+      console.warn('Die geplante Datenbanksicherung ist fehlgeschlagen:', error.message);
+      return { skipped: false, error: error.message };
+    }
+  };
+
   let nextcloudSweepRunning = false;
   app.locals.runNextcloudSweep = async (now = new Date()) => {
     if (nextcloudSweepRunning) return { skipped: true };
@@ -5676,6 +5970,19 @@ export function createApp() {
       const color = /^#[0-9a-f]{6}$/i.test(String(input.color || ''))
         ? String(input.color)
         : '#2563eb';
+      const kind = input.kind === 'trash' ? 'trash' : 'calendar';
+      const syncMode =
+        provider === 'caldav' &&
+        kind === 'calendar' &&
+        input.syncMode === 'two-way'
+          ? 'two-way'
+          : 'read';
+      const conflict = syncMode === 'two-way'
+        ? calDavTwoWayConflict(req.session.familyId)
+        : '';
+      if (conflict) {
+        return res.status(409).json({ success: false, error: conflict });
+      }
       const created = createCalendarSubscription(req.session.familyId, {
         name: requireText(input.name, translate('fields.calendarName'), 100),
         host: url.hostname,
@@ -5687,8 +5994,9 @@ export function createApp() {
         color,
         memberId,
         household,
-        kind: input.kind === 'trash' ? 'trash' : 'calendar',
+        kind,
         provider,
+        syncMode,
         enabled: true
       });
       let syncResult = null;
@@ -5750,6 +6058,23 @@ export function createApp() {
       const provider = Object.hasOwn(input, 'provider')
         ? input.provider === 'caldav' ? 'caldav' : 'ics'
         : existing.provider;
+      const enabled = Object.hasOwn(input, 'enabled')
+        ? Boolean(input.enabled)
+        : existing.enabled;
+      const syncMode =
+        provider === 'caldav' &&
+        existing.kind !== 'trash' &&
+        (Object.hasOwn(input, 'syncMode')
+          ? input.syncMode === 'two-way'
+          : existing.syncMode === 'two-way')
+          ? 'two-way'
+          : 'read';
+      const conflict = enabled && syncMode === 'two-way'
+        ? calDavTwoWayConflict(req.session.familyId, existing.id)
+        : '';
+      if (conflict) {
+        return res.status(409).json({ success: false, error: conflict });
+      }
       if (provider !== existing.provider && !Object.hasOwn(input, 'url')) {
         return res.status(400).json({
           success: false,
@@ -5778,6 +6103,18 @@ export function createApp() {
           error: 'Für CalDAV werden Benutzername und App-Passwort benötigt.'
         });
       }
+      if (
+        existing.provider === 'caldav' &&
+        existing.syncMode === 'two-way' &&
+        (
+          provider !== 'caldav' ||
+          syncMode !== 'two-way' ||
+          !enabled ||
+          Boolean(nextUrl)
+        )
+      ) {
+        clearCalDavTwoWayState(req.session.familyId, existing.id);
+      }
       const updated = updateCalendarSubscription(
         req.session.familyId,
         existing.id,
@@ -5788,6 +6125,7 @@ export function createApp() {
           host: nextUrl?.hostname || existing.host,
           secretEncrypted: encryptJson(nextSecret),
           provider,
+          syncMode,
           color:
             Object.hasOwn(input, 'color') &&
             /^#[0-9a-f]{6}$/i.test(String(input.color))
@@ -5801,9 +6139,7 @@ export function createApp() {
                 ? input.household
                 : existing.household
             : existing.household,
-          enabled: Object.hasOwn(input, 'enabled')
-            ? Boolean(input.enabled)
-            : existing.enabled
+          enabled
         }
       );
       let syncResult = null;
@@ -5921,6 +6257,12 @@ export function createApp() {
           success: false,
           error: translate('errors.calendarSourceNotFound')
         });
+      }
+      if (
+        subscription.provider === 'caldav' &&
+        subscription.syncMode === 'two-way'
+      ) {
+        clearCalDavTwoWayState(req.session.familyId, subscription.id);
       }
       replaceRecordsBySource(
         req.session.familyId,
@@ -7061,6 +7403,111 @@ export function createApp() {
         }
       );
       res.status(201).json({ success: true, ...result });
+    }
+  );
+
+  app.get(
+    '/api/admin/database-backups',
+    requireAuth,
+    requireAdult,
+    requireInstanceOwner,
+    (_req, res) => {
+      res.json({ success: true, ...databaseBackupStatus() });
+    }
+  );
+
+  app.put(
+    '/api/admin/database-backups/settings',
+    requireAuth,
+    requireAdult,
+    requireInstanceOwner,
+    (req, res) => {
+      const current = databaseBackupSettings();
+      const input = ensureObject(req.body);
+      const settings = saveDatabaseBackupSettings({
+        ...current,
+        enabled: Boolean(input.enabled),
+        frequency: input.frequency,
+        dayOfWeek: input.dayOfWeek,
+        hour: input.hour,
+        keep: input.keep
+      });
+      res.json({ success: true, settings });
+    }
+  );
+
+  app.post(
+    '/api/admin/database-backups',
+    requireAuth,
+    requireAdult,
+    requireInstanceOwner,
+    (_req, res) => {
+      const backup = performDatabaseBackup();
+      res.status(201).json({
+        success: true,
+        backup: listDatabaseBackupDetails().find(
+          entry => entry.fileName === path.basename(backup.file)
+        ),
+        ...databaseBackupStatus()
+      });
+    }
+  );
+
+  app.post(
+    '/api/admin/database-backups/restore',
+    requireAuth,
+    requireAdult,
+    requireInstanceOwner,
+    (req, res) => {
+      const input = ensureObject(req.body);
+      const fileName = requireText(
+        input.fileName,
+        'Sicherungsdatei',
+        260
+      );
+      if (input.confirmation !== 'WIEDERHERSTELLEN') {
+        return res.status(400).json({
+          success: false,
+          error: 'Bitte bestätige die Wiederherstellung mit WIEDERHERSTELLEN.'
+        });
+      }
+      const familyRow = getFamilyAuthRow(req.session.familyId);
+      if (
+        !familyRow ||
+        !verifySecret(String(input.familyPassword || ''), familyRow.password_hash)
+      ) {
+        return res.status(401).json({
+          success: false,
+          error: translate('errors.familyPasswordIncorrect')
+        });
+      }
+      const selected = listDatabaseBackupDetails().find(
+        entry => entry.fileName === fileName
+      );
+      if (!selected?.verified) {
+        return res.status(400).json({
+          success: false,
+          error: 'Die ausgewählte Sicherung fehlt oder hat ihre Integritätsprüfung nicht bestanden.'
+        });
+      }
+      if (typeof req.app.locals.requestDatabaseRestore !== 'function') {
+        return res.status(503).json({
+          success: false,
+          error: 'Die Wiederherstellung benötigt einen kontrollierten Serverneustart.'
+        });
+      }
+      const accepted = req.app.locals.requestDatabaseRestore(fileName);
+      if (!accepted) {
+        return res.status(409).json({
+          success: false,
+          error: 'Eine Wiederherstellung oder ein Neustart läuft bereits.'
+        });
+      }
+      res.status(202).json({
+        success: true,
+        restarting: true,
+        message: 'Die Sicherung wird geprüft und der Server anschließend neu gestartet.'
+      });
     }
   );
 
@@ -9020,6 +9467,188 @@ export function createApp() {
   );
 
   app.get(
+    '/api/integrations/family-cloud/files',
+    requireAuth,
+    requireCloudAccess,
+    async (req, res) => {
+      const workspace = await genericCloudWorkspaceForFamily(req.session.familyId);
+      const currentPath = publicFamilyCloudPath(req.query.path);
+      if (workspace.provider === 'webdav') {
+        const entries = await listWebDavEntries(workspace.connection, currentPath);
+        return res.json({
+          success: true,
+          provider: 'webdav',
+          path: currentPath,
+          folder: workspace.folder || 'WebDAV',
+          storage: null,
+          entries
+        });
+      }
+      const [entries, account] = await Promise.all([
+        listNextcloudFiles(workspace.connection, workspace.userId, workspace.folder, currentPath),
+        fetchNextcloudAccount(workspace.connection)
+      ]);
+      return res.json({
+        success: true,
+        provider: 'nextcloud',
+        path: currentPath,
+        folder: workspace.folder,
+        storage: account.storage,
+        entries: entries.filter(entry => !entry.name.startsWith('.LX-'))
+      });
+    }
+  );
+
+  app.get(
+    '/api/integrations/family-cloud/files/content',
+    requireAuth,
+    requireCloudAccess,
+    async (req, res) => {
+      const workspace = await genericCloudWorkspaceForFamily(req.session.familyId);
+      const currentPath = publicFamilyCloudPath(req.query.path);
+      const file = workspace.provider === 'webdav'
+        ? await downloadWebDavFile(workspace.connection, currentPath)
+        : await downloadNextcloudFile(workspace.connection, workspace.userId, workspace.folder, currentPath);
+      const disposition = req.query.inline === 'true' ? 'inline' : 'attachment';
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('Content-Type', file.contentType);
+      res.setHeader('Content-Length', String(file.content.length));
+      res.setHeader('Content-Disposition', `${disposition}; filename*=UTF-8''${encodeURIComponent(file.fileName)}`);
+      if (file.etag) res.setHeader('ETag', file.etag);
+      res.end(file.content);
+    }
+  );
+
+  app.get(
+    '/api/integrations/family-cloud/folders',
+    requireAuth,
+    requireCloudAccess,
+    async (req, res) => {
+      const workspace = await genericCloudWorkspaceForFamily(req.session.familyId);
+      if (workspace.provider !== 'webdav') {
+        return res.json({ success: true, folders: await listFamilyCloudFolders(workspace) });
+      }
+      const folders = [];
+      const pending = [''];
+      const visited = new Set();
+      while (pending.length && folders.length < 100) {
+        const current = pending.shift();
+        if (visited.has(current)) continue;
+        visited.add(current);
+        const entries = await listWebDavEntries(workspace.connection, current);
+        for (const entry of entries.filter(entry => entry.type === 'folder')) {
+          folders.push({ name: entry.name, path: entry.path });
+          pending.push(entry.path);
+          if (folders.length >= 100) break;
+        }
+      }
+      res.json({ success: true, folders });
+    }
+  );
+
+  app.post(
+    '/api/integrations/family-cloud/files/folder',
+    requireAuth,
+    requireCloudAccess,
+    async (req, res) => {
+      const workspace = await genericCloudWorkspaceForFamily(req.session.familyId);
+      const currentPath = publicFamilyCloudPath(req.body?.path);
+      const name = requireText(req.body?.name, translate('fields.folderName'), 240);
+      const entry = workspace.provider === 'webdav'
+        ? await createWebDavFolder(workspace.connection, currentPath, name)
+        : await createNextcloudFolder(workspace.connection, workspace.userId, workspace.folder, currentPath, name);
+      res.status(201).json({ success: true, entry });
+    }
+  );
+
+  app.put(
+    '/api/integrations/family-cloud/files/file',
+    requireAuth,
+    requireCloudAccess,
+    express.raw({ type: 'application/octet-stream', limit: '50mb' }),
+    async (req, res) => {
+      const workspace = await genericCloudWorkspaceForFamily(req.session.familyId);
+      const currentPath = publicFamilyCloudPath(req.query.path);
+      if (!currentPath) return res.status(400).json({ success: false, error: translate('errors.folderRequired') });
+      let fileName = cleanText(req.headers['x-lx-file-name'], '', 1000);
+      try { fileName = decodeURIComponent(fileName); } catch {}
+      if (!fileName) return res.status(400).json({ success: false, error: translate('errors.fileNameMissing') });
+      const content = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');
+      if (!content.length) return res.status(400).json({ success: false, error: translate('errors.fileEmpty') });
+      const contentType = cleanText(req.headers['x-lx-file-type'], 'application/octet-stream', 200);
+      const file = workspace.provider === 'webdav'
+        ? await uploadWebDavFile(workspace.connection, currentPath, fileName, content, contentType)
+        : await uploadNextcloudUserFile(workspace.connection, workspace.userId, workspace.folder, currentPath, fileName, content, contentType);
+      res.status(201).json({ success: true, file });
+    }
+  );
+
+  app.delete(
+    '/api/integrations/family-cloud/files/entry',
+    requireAuth,
+    requireCloudAccess,
+    async (req, res) => {
+      const workspace = await genericCloudWorkspaceForFamily(req.session.familyId);
+      const currentPath = publicFamilyCloudPath(req.query.path);
+      if (workspace.provider === 'webdav') {
+        await deleteWebDavEntry(workspace.connection, currentPath);
+      } else {
+        await deleteNextcloudEntry(workspace.connection, workspace.userId, workspace.folder, currentPath);
+      }
+      res.json({ success: true });
+    }
+  );
+
+  app.post(
+    '/api/integrations/webdav/setup',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const baseUrl = normalizeWebDavBaseUrl(req.body?.baseUrl);
+      const username = requireText(req.body?.username, 'WebDAV-Benutzername', 300);
+      const password = requireText(req.body?.password, 'WebDAV-App-Passwort', 1000);
+      const folder = normalizeWebDavRelativePath(req.body?.folder || 'LX Family');
+      if (!folder) return res.status(400).json({ success: false, error: 'Bitte gib einen Familienordner an.' });
+      const connection = { baseUrl, username, password, appVersion: APP_VERSION };
+      const inspection = await inspectWebDav(connection);
+      await ensureWebDavFolder(connection, folder);
+      const host = new URL(baseUrl).host;
+      saveIntegration(req.session.familyId, 'webdav', {
+        enabled: true,
+        baseUrl,
+        folder,
+        host,
+        displayName: inspection.displayName
+      }, encryptJson({ username, password }));
+      publishFamilyChange(req.session.familyId, 'webdav');
+      res.status(201).json({ success: true, integration: integrationStatus(req.session.familyId, req.activeMember).webdav });
+    }
+  );
+
+  app.post(
+    '/api/integrations/webdav/test',
+    requireAuth,
+    requireAdult,
+    async (req, res) => {
+      const workspace = webdavWorkspace(req.session.familyId);
+      if (!workspace) return res.status(404).json({ success: false, error: 'Keine WebDAV-Verbindung eingerichtet.' });
+      const inspection = await inspectWebDav(webdavConnection(workspace.integration));
+      res.json({ success: true, message: `WebDAV ist erreichbar: ${inspection.displayName}`, integration: integrationStatus(req.session.familyId, req.activeMember).webdav });
+    }
+  );
+
+  app.delete(
+    '/api/integrations/webdav',
+    requireAuth,
+    requireAdult,
+    (req, res) => {
+      deleteIntegration(req.session.familyId, 'webdav');
+      publishFamilyChange(req.session.familyId, 'webdav');
+      res.json({ success: true, integration: integrationStatus(req.session.familyId, req.activeMember).webdav });
+    }
+  );
+
+  app.get(
     '/api/integrations/nextcloud/files',
     requireAuth,
     requireCloudAccess,
@@ -9188,6 +9817,15 @@ export function createApp() {
     requireAuth,
     requireAdult,
     async (req, res) => {
+      if (
+        req.body?.eventSyncEnabled !== false &&
+        activeCalDavTwoWaySubscription(req.session.familyId)
+      ) {
+        return res.status(409).json({
+          success: false,
+          error: 'Ein generischer CalDAV-Zwei-Wege-Kalender ist bereits aktiv. Bitte nur einen schreibenden Zielkalender verwenden.'
+        });
+      }
       const baseUrl = normalizeNextcloudBaseUrl(
         req.body?.baseUrl,
         translate('fields.internalNextcloudAddress')
@@ -9406,6 +10044,16 @@ export function createApp() {
           ? Math.max(0, Math.min(23, Number(req.body.backupHour)))
           : Number(integration.config.backupHour ?? 3)
       };
+      if (
+        config.enabled &&
+        config.eventSyncEnabled &&
+        activeCalDavTwoWaySubscription(req.session.familyId)
+      ) {
+        return res.status(409).json({
+          success: false,
+          error: 'Ein generischer CalDAV-Zwei-Wege-Kalender ist bereits aktiv. Bitte nur einen schreibenden Zielkalender verwenden.'
+        });
+      }
       await ensureNextcloudFolder(
         nextcloudConnection(integration),
         integration.config.userId,
@@ -10585,10 +11233,46 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     }
     console.log(`${PRODUCT_NAME} läuft auf http://localhost:${port}`);
   });
+  let restoreRequested = false;
+  app.locals.requestDatabaseRestore = fileName => {
+    if (restoreRequested) return false;
+    restoreRequested = true;
+    const beginRestore = setTimeout(() => {
+      server.close(() => {
+        let exitCode = 75;
+        try {
+          database.close();
+          const result = restoreDatabaseBackup({
+            backupFile: fileName,
+            serverStopped: true
+          });
+          console.log(
+            `Datenbank aus ${path.basename(result.source)} wiederhergestellt. ` +
+            'Der Server wird neu gestartet.'
+          );
+        } catch (error) {
+          exitCode = 76;
+          console.error('Datenbank-Wiederherstellung fehlgeschlagen:', error);
+        }
+        process.exit(exitCode);
+      });
+      server.closeIdleConnections?.();
+      const forceConnectionsClosed = setTimeout(() => {
+        server.closeAllConnections?.();
+      }, 2_000);
+      forceConnectionsClosed.unref();
+    }, 800);
+    beginRestore.unref();
+    return true;
+  };
   const calendarSyncTimer = setInterval(() => {
     void syncAllCalendarSubscriptions();
   }, CALENDAR_SYNC_INTERVAL_MS);
   calendarSyncTimer.unref();
+  const databaseBackupTimer = setInterval(() => {
+    void app.locals.runDatabaseBackupSweep();
+  }, 10 * 60 * 1000);
+  databaseBackupTimer.unref();
   const eventReminderTimer = setInterval(() => {
     void app.locals.runEventReminderSweep();
   }, EVENT_REMINDER_INTERVAL_MS);
@@ -10623,6 +11307,10 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
     void syncAllCalendarSubscriptions();
   }, 20_000);
   initialCalendarSync.unref();
+  const initialDatabaseBackupSweep = setTimeout(() => {
+    void app.locals.runDatabaseBackupSweep();
+  }, 30_000);
+  initialDatabaseBackupSweep.unref();
   const initialEventReminderSweep = setTimeout(() => {
     void app.locals.runEventReminderSweep();
   }, 5_000);
@@ -10655,12 +11343,14 @@ export function startServer(port = Number(process.env.PORT || DEFAULT_PORT)) {
   initialDashboardCoverRefresh.unref();
   server.on('close', () => {
     clearInterval(calendarSyncTimer);
+    clearInterval(databaseBackupTimer);
     clearInterval(eventReminderTimer);
     clearInterval(nextcloudSyncTimer);
     clearInterval(bundledCloudProvisioningTimer);
     clearInterval(legacyChatPhotoMigrationTimer);
     clearInterval(dashboardCoverRefreshTimer);
     clearTimeout(initialCalendarSync);
+    clearTimeout(initialDatabaseBackupSweep);
     clearTimeout(initialEventReminderSweep);
     clearTimeout(initialNextcloudSweep);
     clearTimeout(initialBundledCloudProvisioning);

@@ -1,4 +1,6 @@
-const CACHE = 'lx-familie-v1.19.1';
+// Increment when cache behavior changes so existing installations discard
+// stale module responses on their next service-worker update.
+const CACHE = 'lx-familie-v1.19.2';
 const STATIC = [
   '/',
   '/manifest.json',
