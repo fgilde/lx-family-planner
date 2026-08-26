@@ -4,6 +4,14 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.19.5] – 2026-08-27
+
+### Android-Wochenkalender
+
+- Die Wochenansicht fängt vertikale Wischgesten nicht mehr ab. Die gesamte
+  Kalenderseite lässt sich wieder nach oben und unten scrollen, während die
+  Tages-Spalten auf schmalen Geräten weiterhin seitlich erreichbar bleiben.
+
 ## [1.19.4] – 2026-08-26
 
 ### Klarerer Familienkalender

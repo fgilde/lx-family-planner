@@ -15822,9 +15822,14 @@ textarea {
 
 .calendar-timeline-scroller {
   /* Keep horizontal scrolling for seven narrow day columns on phones, but
-     let the complete 00:00–24:00 timeline grow into the normal page flow. */
+     let the complete 00:00–24:00 timeline grow into the normal page flow.
+     Android WebView treats `overflow-x: auto` plus a visible Y axis as a
+     two-dimensional nested scroller. That captures vertical swipes after a
+     tap in the calendar, so explicitly keep only the horizontal axis local. */
   overflow-x: auto;
-  overscroll-behavior: contain;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
   scrollbar-color: color-mix(in srgb, var(--primary) 34%, transparent) transparent;
 }
 

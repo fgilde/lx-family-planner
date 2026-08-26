@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.19.5': {
+    version: '1.19.5',
+    eyebrow: 'Kleiner Kalender-Hotfix',
+    title: 'Der Wochenkalender scrollt wieder',
+    intro:
+      'In der Android-App lässt sich die Wochenansicht wieder ganz normal nach oben und unten bewegen.',
+    highlights: [
+      {
+        id: 'android-week-scroll',
+        title: 'Vertikal wieder frei',
+        description:
+          'Wischen im Wochenkalender scrollt wieder die ganze Seite. Die Wochenspalten bleiben bei Bedarf seitlich beweglich.'
+      }
+    ],
+    closing:
+      'Keine Termine, Quellen oder Einstellungen werden dabei verändert.',
+    localizations: {
+      en: {
+        eyebrow: 'A small calendar hotfix',
+        title: 'The weekly calendar scrolls again',
+        intro:
+          'The weekly view in the Android app can once again move normally up and down.',
+        highlights: [
+          {
+            id: 'android-week-scroll',
+            title: 'Vertical scrolling is free again',
+            description:
+              'Swiping in the weekly calendar scrolls the whole page again. Day columns remain horizontally movable when needed.'
+          }
+        ],
+        closing:
+          'No events, sources or settings are changed.'
+      }
+    }
+  },
   '1.19.4': {
     version: '1.19.4',
     eyebrow: 'Kalender, der mit euch mitgeht',

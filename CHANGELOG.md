@@ -6,6 +6,14 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.19.5] — 2026-08-27
+
+### Android weekly calendar
+
+- The weekly view no longer captures vertical swipes. The whole calendar page
+  scrolls up and down again while day columns remain horizontally reachable on
+  narrow devices.
+
 ## [1.19.4] — 2026-08-26
 
 ### Clearer family calendar
