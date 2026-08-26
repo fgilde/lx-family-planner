@@ -10,7 +10,9 @@ export default function EventAudiencePicker({
   members,
   value,
   onChange,
-  disabled = false
+  disabled = false,
+  title,
+  hint
 }) {
   const { t } = useTranslation('calendar');
   const selected = Array.isArray(value) ? value : [];
@@ -30,8 +32,8 @@ export default function EventAudiencePicker({
 
   return (
     <fieldset className="event-audience-picker" disabled={disabled}>
-      <legend>{t('editor.audience.title')}</legend>
-      <p>{t('editor.audience.hint')}</p>
+      <legend>{title || t('editor.audience.title')}</legend>
+      <p>{hint || t('editor.audience.hint')}</p>
       <div>
         <button
           type="button"

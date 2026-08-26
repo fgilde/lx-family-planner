@@ -5,6 +5,7 @@ import {
   CalendarClock,
   Check,
   CloudDownload,
+  AlertTriangle,
   EyeOff,
   Globe2,
   Link2,
@@ -16,16 +17,17 @@ import {
   X
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
+import EventAudiencePicker from './EventAudiencePicker';
 import { formatDate, formatTime } from '../../utils/formatting';
 import { useViewportScrollLock } from '../../hooks/useViewportScrollLock';
 
 const SOURCE_COLORS = [
-  '#147d64',
-  '#2563eb',
-  '#d97706',
-  '#dc4f6c',
-  '#7c3aed',
-  '#0891b2'
+  { value: '#147d64', name: 'green' },
+  { value: '#2563eb', name: 'blue' },
+  { value: '#d97706', name: 'orange' },
+  { value: '#dc4f6c', name: 'pink' },
+  { value: '#7c3aed', name: 'purple' },
+  { value: '#0891b2', name: 'turquoise' }
 ];
 
 function syncLabel(timestamp, t) {
@@ -68,8 +70,8 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
     username: '',
     password: '',
     syncMode: 'read',
-    color: SOURCE_COLORS[0],
-    memberId: 'all',
+    color: SOURCE_COLORS[0].value,
+    memberIds: [],
     household:
       activeHousehold === 'oma_opa' &&
       !familyAccount?.grandparentsHouseholdEnabled
@@ -88,6 +90,17 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
     () => regularSubscriptions.filter(subscription => subscription.enabled),
     [regularSubscriptions]
   );
+
+  const colorConflictNames = useMemo(
+    () => regularSubscriptions
+      .filter(subscription =>
+        subscription.color?.toLowerCase() === form.color.toLowerCase()
+      )
+      .map(subscription => subscription.name)
+      .filter(Boolean),
+    [form.color, regularSubscriptions]
+  );
+  const selectedColor = SOURCE_COLORS.find(color => color.value === form.color);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -232,9 +245,14 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                 regularSubscriptions.map(subscription => {
                   const isSyncing = busy === `sync:${subscription.id}`;
                   const isToggling = busy === `toggle:${subscription.id}`;
-                  const member = members.find(
-                    entry => entry.id === subscription.memberId
-                  );
+                  const audience = Array.isArray(subscription.memberIds)
+                    ? subscription.memberIds
+                    : subscription.memberId && subscription.memberId !== 'all'
+                      ? [subscription.memberId]
+                      : [];
+                  const audienceNames = audience
+                    .map(memberId => members.find(entry => entry.id === memberId)?.name)
+                    .filter(Boolean);
                   return (
                     <article
                       key={subscription.id}
@@ -261,7 +279,7 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
                             {' · '}
                             {subscription.host}
                             {' · '}
-                            {member?.name || t('sources.list.everyone')}
+                            {audienceNames.join(', ') || t('sources.list.everyone')}
                           </span>
                         </div>
                         {subscription.lastError ? (
@@ -450,27 +468,18 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
               </>
             )}
 
-            <div className="calendar-source-form-grid">
-              <label>
-                <span>{t('sources.form.visibilityLabel')}</span>
-                <select
-                  value={form.memberId}
-                  onChange={event =>
-                    setForm(previous => ({
-                      ...previous,
-                      memberId: event.target.value
-                    }))
-                  }
-                >
-                  <option value="all">{t('sources.form.allMembers')}</option>
-                  {members.map(member => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            <EventAudiencePicker
+              members={members}
+              value={form.memberIds}
+              onChange={memberIds => setForm(previous => ({
+                ...previous,
+                memberIds
+              }))}
+              title={t('sources.form.visibilityLabel')}
+              hint={t('sources.form.visibilityHint')}
+            />
 
+            <div className="calendar-source-form-grid">
               <label>
                 <span>{t('sources.form.householdLabel')}</span>
                 <select
@@ -499,21 +508,33 @@ export default function CalendarSubscriptionManager({ isOpen, onClose }) {
               <div>
                 {SOURCE_COLORS.map(color => (
                   <button
-                    key={color}
+                    key={color.value}
                     type="button"
-                    className={form.color === color ? 'is-selected' : ''}
-                    style={{ '--choice-color': color }}
+                    className={form.color === color.value ? 'is-selected' : ''}
+                    style={{ '--choice-color': color.value }}
                     onClick={() =>
-                      setForm(previous => ({ ...previous, color }))
+                      setForm(previous => ({ ...previous, color: color.value }))
                     }
-                    aria-label={t('sources.form.pickColorAria', { color })}
-                    aria-pressed={form.color === color}
+                    aria-label={t('sources.form.pickColorAria', {
+                      color: t(`sources.form.colors.${color.name}`)
+                    })}
+                    aria-pressed={form.color === color.value}
                   >
-                    {form.color === color && <Check size={14} />}
+                    {form.color === color.value && <Check size={14} />}
                   </button>
                 ))}
               </div>
             </fieldset>
+
+            {colorConflictNames.length > 0 && (
+              <p className="calendar-source-color-warning">
+                <AlertTriangle size={16} />
+                {t('sources.form.colorConflict', {
+                  color: t(`sources.form.colors.${selectedColor?.name || 'green'}`),
+                  names: colorConflictNames.join(', ')
+                })}
+              </p>
+            )}
 
             <aside className="calendar-source-privacy">
               <LockKeyhole size={16} />

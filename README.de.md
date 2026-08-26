@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Aktuelles Release 1.19.3" src="https://img.shields.io/badge/Release-1.19.3-17483F">
+  <img alt="Aktuelles Release 1.19.4" src="https://img.shields.io/badge/Release-1.19.4-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -936,6 +936,19 @@ Für einen neuen App-Build genügt unter Windows:
 
 ```powershell
 npm run build:apk
+```
+
+Auf Pop!_OS, Ubuntu und anderen Debian-basierten Linux-Systemen richtet der
+folgende Befehl die lokalen Build-Werkzeuge einmalig ein:
+
+```bash
+bash scripts/setup-android-popos.sh
+```
+
+Danach baut derselbe Projektordner eine signierte APK mit:
+
+```bash
+npm run build:apk:linux
 ```
 
 Damit die APK echte Android-Benachrichtigungen empfangen kann, muss vorher

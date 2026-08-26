@@ -6,6 +6,19 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.19.4] — 2026-08-26
+
+### Clearer family calendar
+
+- The weekly view now covers the complete day from 00:00 to 24:00. Concurrent
+  events remain at their actual time and are separated horizontally.
+- Calendar sources can be assigned to selected family profiles. A warning
+  points out source colours that are already in use.
+- ICS exports include end times and end dates so other calendars import events
+  correctly.
+- The server-address dialog no longer blocks page scrolling, and backup
+  controls remain contained on narrow admin screens.
+
 ## [1.19.3] — 2026-08-25
 
 ### Recurring family events

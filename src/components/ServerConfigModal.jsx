@@ -7,7 +7,6 @@ import {
   normalizeServerUrl,
   setStoredServerUrl
 } from '../utils/apiConfig';
-import { useViewportScrollLock } from '../hooks/useViewportScrollLock';
 
 export default function ServerConfigModal({ isOpen, onClose, onSave }) {
   const { t } = useTranslation('chrome');
@@ -17,7 +16,6 @@ export default function ServerConfigModal({ isOpen, onClose, onSave }) {
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState(null);
-  useViewportScrollLock(isOpen);
 
   useEffect(() => {
     if (!isOpen) return;

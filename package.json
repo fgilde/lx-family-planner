@@ -1,7 +1,7 @@
 {
   "name": "lx-family-planner",
   "private": true,
-  "version": "1.19.3",
+  "version": "1.19.4",
   "description": "LX Family is a private self-hosted Family OS with dedicated spaces for parents, children, grandparents and pets.",
   "homepage": "https://github.com/laxxx-lab/lx-family-planner",
   "repository": {
@@ -36,6 +36,7 @@
     "test:e2e": "playwright test",
     "check:i18n": "node scripts/check-i18n.js",
     "build:apk": "powershell -ExecutionPolicy Bypass -File scripts/build-apk.ps1",
+    "build:apk:linux": "bash scripts/build-apk.sh",
     "check": "node --check server.js && node --check server/app.js && node --check server/caldav.js && node --check server/database.js && node --check server/firebasePush.js && node --check server/mediaPreview.js && node --check shared/taskVisibility.js && npm run check:i18n && npm run test && vite build"
   },
   "dependencies": {

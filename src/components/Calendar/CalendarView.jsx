@@ -57,6 +57,7 @@ import {
 import {
   calendarTimelineBounds,
   layoutTimelineEvents,
+  timelineEventPlacement,
   timelineAllDayEvents,
   timelineEventsForDay
 } from '../../../shared/calendarTimeline.js';
@@ -246,22 +247,14 @@ function CalendarTimeline({
                   {timed.map((segment, index) => {
                     const event = segment.event;
                     const accent = calendarEventColor(event, members);
-                    const baseTop = Math.max(
-                      0,
-                      (segment.start - startMinutes) * minuteHeight
+                    // An overlap is indicated horizontally only. The top edge
+                    // must stay at the real start time; otherwise a 10:00
+                    // appointment visually drifts later in the day.
+                    const placement = timelineEventPlacement(
+                      segment,
+                      startMinutes,
+                      minuteHeight
                     );
-                    const baseHeight = Math.max(
-                      44,
-                      (segment.end - segment.start) * minuteHeight
-                    );
-                    // Concurrent cards stay inside one day column. A compact
-                    // vertical cascade keeps every title readable instead of
-                    // letting the top card conceal the others.
-                    const stackOffset = segment.stackIndex * 22;
-                    const top = baseTop + stackOffset;
-                    const height = segment.stackIndex
-                      ? Math.max(28, baseHeight - stackOffset)
-                      : baseHeight;
                     const displayEvent = birthdayEventCopy(event, t);
                     return (
                       <button
@@ -272,8 +265,9 @@ function CalendarTimeline({
                         }`}
                         style={{
                           '--event-color': accent,
-                          '--event-top': `${top}px`,
-                          '--event-height': `${height}px`,
+                          '--event-top': `${placement.top}px`,
+                          '--event-height': `${placement.height}px`,
+                          '--event-inset': `${placement.horizontalInset}px`,
                           '--event-layer': index + 1
                         }}
                         onClick={() => onSelectEvent(event)}

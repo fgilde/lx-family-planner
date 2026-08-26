@@ -1053,6 +1053,7 @@ function remoteEvent(
   resource,
   familyId,
   defaultMemberId,
+  defaultMemberIds,
   timeZone,
   allowedMemberIds,
   provider = PROVIDER,
@@ -1098,16 +1099,21 @@ function remoteEvent(
     (remoteMemberId === 'all' || allowedMemberIds?.has(remoteMemberId))
       ? remoteMemberId
       : defaultMemberId || 'all';
+  const fallbackMemberIds = Array.isArray(defaultMemberIds)
+    ? [...new Set(defaultMemberIds
+        .map(memberId => clean(memberId, '', 100))
+        .filter(memberId => memberId && allowedMemberIds?.has(memberId)))]
+    : fallbackMemberId === 'all'
+      ? []
+      : [fallbackMemberId];
   return {
     ...parsed,
     familyId,
-    memberId: remoteMemberIds[0] || fallbackMemberId,
+    memberId: remoteMemberIds[0] || fallbackMemberIds[0] || fallbackMemberId,
     memberIds:
       remoteMemberIds.length
         ? remoteMemberIds
-        : fallbackMemberId === 'all'
-          ? []
-          : [fallbackMemberId],
+        : fallbackMemberIds,
     household:
       customIcsValue(resource.calendarData, 'X-LX-HOUSEHOLD') || 'familie',
     category:
@@ -1271,6 +1277,7 @@ export async function syncNextcloudEvents({
   connection,
   calendarHref,
   defaultMemberId = 'all',
+  defaultMemberIds = null,
   includeGrandparents = false,
   timeZone = 'Europe/Berlin',
   memberIds = [],
@@ -1377,6 +1384,7 @@ export async function syncNextcloudEvents({
       remoteResource,
       familyId,
       defaultMemberId,
+      defaultMemberIds,
       timeZone,
       allowedMemberIds,
       provider,
@@ -1481,6 +1489,7 @@ export async function syncNextcloudEvents({
         recoveredResource,
         familyId,
         defaultMemberId,
+        defaultMemberIds,
         timeZone,
         allowedMemberIds,
         provider,
@@ -1543,6 +1552,7 @@ export async function syncNextcloudEvents({
       resource,
       familyId,
       defaultMemberId,
+      defaultMemberIds,
       timeZone,
       allowedMemberIds,
       provider,

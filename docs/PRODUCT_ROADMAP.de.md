@@ -55,6 +55,9 @@
    Stundenansicht für Tag und Woche auf: Dauer, parallele Termine und
    Überschneidungen werden direkt sichtbar.
 
+   Die Wochenansicht zeigt nun die vollständige 00:00–24:00-Zeitskala im
+   normalen Seitenfluss. Frühe und späte Termine bleiben dadurch sichtbar.
+
    Der generische CalDAV-Zugang bietet inzwischen wahlweise Nur-Lesen oder
    einen ETag-geschützten Zwei-Wege-Abgleich mit genau einem schreibenden
    Zielkalender. Als nächste Härtung folgen eine breitere Server-Matrix und eine

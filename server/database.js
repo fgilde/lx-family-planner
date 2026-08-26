@@ -214,6 +214,7 @@ database.exec(`
     secret_encrypted TEXT NOT NULL,
     color TEXT NOT NULL DEFAULT '#2563eb',
     member_id TEXT NOT NULL DEFAULT 'all',
+    member_ids_json TEXT NOT NULL DEFAULT '[]',
     household TEXT NOT NULL DEFAULT 'familie',
     kind TEXT NOT NULL DEFAULT 'calendar',
     provider TEXT NOT NULL DEFAULT 'ics',
@@ -711,6 +712,32 @@ applySchemaMigration(16, 'Optionaler CalDAV-Zwei-Wege-Abgleich', () => {
       ALTER TABLE calendar_subscriptions
       ADD COLUMN sync_mode TEXT NOT NULL DEFAULT 'read';
     `);
+  }
+});
+
+applySchemaMigration(17, 'Mehrere Empfaenger fuer Kalenderquellen', () => {
+  const columns = database
+    .prepare('PRAGMA table_info(calendar_subscriptions)')
+    .all();
+  if (!columns.some(column => column.name === 'member_ids_json')) {
+    database.exec(`
+      ALTER TABLE calendar_subscriptions
+      ADD COLUMN member_ids_json TEXT NOT NULL DEFAULT '[]';
+    `);
+    const update = database.prepare(`
+      UPDATE calendar_subscriptions
+      SET member_ids_json = ?
+      WHERE id = ?
+    `);
+    database
+      .prepare('SELECT id, member_id FROM calendar_subscriptions')
+      .all()
+      .forEach(row => {
+        const memberIds = row.member_id && row.member_id !== 'all'
+          ? [row.member_id]
+          : [];
+        update.run(JSON.stringify(memberIds), row.id);
+      });
   }
 });
 
@@ -3022,15 +3049,31 @@ export function pruneEventReminderDeliveries(
   );
 }
 
+function calendarSubscriptionMemberIds(row) {
+  try {
+    const value = JSON.parse(row?.member_ids_json || '[]');
+    if (Array.isArray(value)) {
+      return [...new Set(value
+        .map(memberId => String(memberId || '').trim())
+        .filter(memberId => memberId && memberId !== 'all'))];
+    }
+  } catch {
+    // Legacy rows fall back to their former single profile assignment.
+  }
+  return row?.member_id && row.member_id !== 'all' ? [row.member_id] : [];
+}
+
 function mapCalendarSubscriptionRow(row, { includeSecret = false } = {}) {
   if (!row) return null;
+  const memberIds = calendarSubscriptionMemberIds(row);
   const subscription = {
     id: row.id,
     familyId: row.family_id,
     name: row.name,
     host: row.feed_host,
     color: row.color,
-    memberId: row.member_id,
+    memberId: memberIds[0] || 'all',
+    memberIds,
     household: row.household,
     kind: row.kind || 'calendar',
     provider: row.provider === 'caldav' ? 'caldav' : 'ics',
@@ -3102,6 +3145,7 @@ export function createCalendarSubscription(
     secretEncrypted,
     color = '#2563eb',
     memberId = 'all',
+    memberIds = [],
     household = 'familie',
     kind = 'calendar',
     provider = 'ics',
@@ -3115,9 +3159,9 @@ export function createCalendarSubscription(
     .prepare(`
       INSERT INTO calendar_subscriptions(
         id, family_id, name, feed_host, secret_encrypted, color,
-        member_id, household, kind, provider, sync_mode, enabled, created_at, updated_at
+        member_id, member_ids_json, household, kind, provider, sync_mode, enabled, created_at, updated_at
       )
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     .run(
       id,
@@ -3127,6 +3171,7 @@ export function createCalendarSubscription(
       secretEncrypted,
       color,
       memberId,
+      JSON.stringify(memberIds),
       household,
       kind === 'trash' ? 'trash' : 'calendar',
       provider === 'caldav' ? 'caldav' : 'ics',
@@ -3163,6 +3208,7 @@ export function updateCalendarSubscription(
         secret_encrypted = ?,
         color = ?,
         member_id = ?,
+        member_ids_json = ?,
         household = ?,
         kind = ?,
         provider = ?,
@@ -3177,6 +3223,7 @@ export function updateCalendarSubscription(
       updated.secretEncrypted,
       updated.color,
       updated.memberId,
+      JSON.stringify(Array.isArray(updated.memberIds) ? updated.memberIds : []),
       updated.household,
       updated.kind === 'trash' ? 'trash' : 'calendar',
       updated.provider === 'caldav' ? 'caldav' : 'ics',

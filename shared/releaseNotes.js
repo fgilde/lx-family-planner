@@ -1,4 +1,51 @@
 const RELEASE_NOTES = {
+  '1.19.4': {
+    version: '1.19.4',
+    eyebrow: 'Kalender, der mit euch mitgeht',
+    title: 'Mehr Überblick für volle Familientage',
+    intro:
+      'Der Wochenkalender zeigt den ganzen Tag und bleibt auch bei mehreren gleichzeitigen Terminen verständlich.',
+    highlights: [
+      {
+        id: 'calendar-timeline',
+        title: 'Alles zur richtigen Zeit',
+        description:
+          'Die Zeitachse reicht jetzt von Mitternacht bis Mitternacht. Überlappende Termine bleiben auf ihrer tatsächlichen Uhrzeit und sind seitlich klar voneinander getrennt.'
+      },
+      {
+        id: 'calendar-sources-and-export',
+        title: 'Kalender passend teilen',
+        description:
+          'Kalenderquellen lassen sich für mehrere ausgewählte Profile freigeben. Farbhinweise und vollständige ICS-Endzeiten machen den Überblick noch klarer.'
+      }
+    ],
+    closing:
+      'Deine bestehenden Termine, Kalenderquellen, Familienprofile und Sicherungen bleiben erhalten.',
+    localizations: {
+      en: {
+        eyebrow: 'A calendar that moves with you',
+        title: 'More clarity for busy family days',
+        intro:
+          'The weekly calendar shows the whole day and stays understandable even when several events happen at once.',
+        highlights: [
+          {
+            id: 'calendar-timeline',
+            title: 'Everything at the right time',
+            description:
+              'The timeline now runs from midnight to midnight. Overlapping events stay at their real time and are clearly separated horizontally.'
+          },
+          {
+            id: 'calendar-sources-and-export',
+            title: 'Share calendars precisely',
+            description:
+              'Calendar sources can be shared with several selected profiles. Colour hints and complete ICS end values make planning clearer.'
+          }
+        ],
+        closing:
+          'Your existing events, calendar sources, family profiles and backups stay intact.'
+      }
+    }
+  },
   '1.19.3': {
     version: '1.19.3',
     eyebrow: 'Termine, die mitdenken',

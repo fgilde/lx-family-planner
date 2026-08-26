@@ -1268,7 +1268,12 @@ function calendarEventRecord(subscription, event) {
     category: translate('labels.subscriptionCategory', {
       name: subscription.name
     }),
-    memberId: subscription.memberId || 'all',
+    memberId: subscription.memberIds?.[0] || subscription.memberId || 'all',
+    memberIds: Array.isArray(subscription.memberIds)
+      ? subscription.memberIds
+      : subscription.memberId && subscription.memberId !== 'all'
+        ? [subscription.memberId]
+        : [],
     household: subscription.household === 'grosseltern'
       ? 'oma_opa'
       : subscription.household || 'familie',
@@ -1395,6 +1400,7 @@ async function syncCalendarSubscription(subscription) {
         connection: { ...connection, appVersion: APP_VERSION },
         calendarHref: connection.url,
         defaultMemberId: subscription.memberId || 'all',
+        defaultMemberIds: subscription.memberIds || [],
         includeGrandparents: subscription.household === 'oma_opa',
         memberIds: getMembers(subscription.familyId).map(member => member.id),
         timeZone: process.env.TZ || 'Europe/Berlin',
@@ -5958,6 +5964,24 @@ export function createApp() {
     }
   );
 
+  function calendarSubscriptionAudience(input, familyId, fallback = []) {
+    const raw = Object.hasOwn(input, 'memberIds')
+      ? input.memberIds
+      : Object.hasOwn(input, 'memberId')
+        ? [input.memberId]
+        : fallback;
+    const memberIds = Array.isArray(raw)
+      ? [...new Set(raw
+          .map(memberId => cleanText(memberId, '', 100))
+          .filter(memberId => memberId && memberId !== 'all'))]
+      : fallback;
+    return Array.isArray(memberIds) ? memberIds : [];
+  }
+
+  function invalidCalendarSubscriptionAudience(familyId, memberIds) {
+    return memberIds.some(memberId => !getMember(familyId, memberId));
+  }
+
   app.get('/api/calendar/subscriptions', requireAuth, (req, res) => {
     res.json({
       success: true,
@@ -5982,16 +6006,14 @@ export function createApp() {
       const password = provider === 'caldav'
         ? requireText(input.password, 'CalDAV-App-Passwort', 1000)
         : '';
-      const memberId = cleanText(input.memberId, 'all', 100) || 'all';
-      if (
-        memberId !== 'all' &&
-        !getMember(req.session.familyId, memberId)
-      ) {
+      const memberIds = calendarSubscriptionAudience(input, req.session.familyId);
+      if (invalidCalendarSubscriptionAudience(req.session.familyId, memberIds)) {
         return res.status(400).json({
           success: false,
           error: translate('errors.selectedProfileNotFound')
         });
       }
+      const memberId = memberIds[0] || 'all';
       const household = input.household === 'grosseltern'
         ? 'oma_opa'
         : ['familie', 'oma_opa'].includes(input.household)
@@ -6023,6 +6045,7 @@ export function createApp() {
         ),
         color,
         memberId,
+        memberIds,
         household,
         kind,
         provider,
@@ -6072,18 +6095,18 @@ export function createApp() {
         });
       }
       const input = ensureObject(req.body);
-      const memberId = Object.hasOwn(input, 'memberId')
-        ? cleanText(input.memberId, 'all', 100) || 'all'
-        : existing.memberId;
-      if (
-        memberId !== 'all' &&
-        !getMember(req.session.familyId, memberId)
-      ) {
+      const memberIds = calendarSubscriptionAudience(
+        input,
+        req.session.familyId,
+        existing.memberIds || []
+      );
+      if (invalidCalendarSubscriptionAudience(req.session.familyId, memberIds)) {
         return res.status(400).json({
           success: false,
           error: translate('errors.selectedProfileNotFound')
         });
       }
+      const memberId = memberIds[0] || 'all';
       const existingSecret = decryptJson(existing.secretEncrypted);
       const provider = Object.hasOwn(input, 'provider')
         ? input.provider === 'caldav' ? 'caldav' : 'ics'
@@ -6162,6 +6185,7 @@ export function createApp() {
               ? String(input.color)
               : existing.color,
           memberId,
+          memberIds,
           household: Object.hasOwn(input, 'household')
             ? input.household === 'grosseltern'
               ? 'oma_opa'

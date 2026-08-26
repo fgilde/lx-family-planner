@@ -1129,7 +1129,7 @@ test('family flow stays isolated, authorized and internally consistent', async (
         name: 'Schule',
         url: calendarFeedUrl,
         color: '#2563eb',
-        memberId: childOne.id,
+        memberIds: [childOne.id, childTwo.id],
         household: 'familie'
       })
     },
@@ -1155,6 +1155,11 @@ test('family flow stays isolated, authorized and internally consistent', async (
   assert.equal(subscribedEvents.length, 3);
   assert.equal(subscribedEvents.every(event => event.readOnly), true);
   assert.equal(subscribedEvents[0].memberId, childOne.id);
+  assert.deepEqual(subscribedEvents[0].memberIds, [childOne.id, childTwo.id]);
+  assert.deepEqual(
+    calendarSubscription.body.subscription.memberIds,
+    [childOne.id, childTwo.id]
+  );
   await request(
     `/api/resources/events/${subscribedEvents[0].id}`,
     {

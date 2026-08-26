@@ -1,6 +1,6 @@
 import { parseICalendar } from '../../shared/icsCalendar.js';
 import { calendarRecurrenceRRule } from '../../shared/calendarRecurrence.js';
-import i18n from '../i18n';
+import i18n from '../i18n/index.js';
 
 function escapeIcsText(value = '') {
   return String(value)
@@ -14,7 +14,21 @@ function dateStamp() {
   return new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 }
 
-export function exportEventsToICS(
+function icsDate(value) {
+  return String(value || '').slice(0, 10).replace(/-/g, '');
+}
+
+function icsTime(value) {
+  return String(value || '').replace(':', '').padEnd(4, '0').slice(0, 4) + '00';
+}
+
+function nextDateKey(value) {
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  date.setDate(date.getDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+export function exportEventsToICSContent(
   events,
   familyName = i18n.t('context:ics.defaultFamilyName')
 ) {
@@ -32,10 +46,9 @@ export function exportEventsToICS(
   events
     .filter(event => !event.readOnly)
     .forEach(event => {
-      const formattedDate = (
-        event.date || new Date().toISOString().split('T')[0]
-      ).replace(/-/g, '');
-      const formattedTime = (event.time || '09:00').replace(':', '') + '00';
+      const eventDate = event.date || new Date().toISOString().split('T')[0];
+      const formattedDate = icsDate(eventDate);
+      const formattedTime = icsTime(event.time || '09:00');
       icsContent.push('BEGIN:VEVENT');
       icsContent.push(
         `UID:${escapeIcsText(event.id || `event-${formattedDate}`)}@lxfamily.local`
@@ -43,8 +56,20 @@ export function exportEventsToICS(
       icsContent.push(`DTSTAMP:${dateStamp()}`);
       if (event.allDay || !event.time) {
         icsContent.push(`DTSTART;VALUE=DATE:${formattedDate}`);
+        // iCalendar all-day end dates are exclusive. LX already persists them
+        // in this format, so a selected inclusive end date remains intact.
+        icsContent.push(
+          `DTEND;VALUE=DATE:${icsDate(event.endDate || nextDateKey(eventDate))}`
+        );
       } else {
         icsContent.push(`DTSTART:${formattedDate}T${formattedTime}`);
+        if (event.endDate || event.endTime) {
+          icsContent.push(
+            `DTEND:${icsDate(event.endDate || eventDate)}T${icsTime(
+              event.endTime || event.time
+            )}`
+          );
+        }
       }
       icsContent.push(
         `SUMMARY:${escapeIcsText(
@@ -63,9 +88,17 @@ export function exportEventsToICS(
     });
 
   icsContent.push('END:VCALENDAR');
+  return icsContent.join('\r\n');
+}
+
+export function exportEventsToICS(
+  events,
+  familyName = i18n.t('context:ics.defaultFamilyName')
+) {
+  const content = exportEventsToICSContent(events, familyName);
 
   const blob = new Blob(
-    [icsContent.join('\r\n')],
+    [content],
     { type: 'text/calendar;charset=utf-8;' }
   );
   const link = document.createElement('a');

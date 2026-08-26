@@ -9251,6 +9251,9 @@ textarea {
 }
 
 .database-backup-panel {
+  /* The schedule has several controls and restore details. In the narrow
+     right admin column it could overflow into neighbouring cards. */
+  grid-column: 1 / -1;
   display: grid;
   gap: 18px;
   background:
@@ -15818,7 +15821,9 @@ textarea {
 }
 
 .calendar-timeline-scroller {
-  overflow: auto;
+  /* Keep horizontal scrolling for seven narrow day columns on phones, but
+     let the complete 00:00–24:00 timeline grow into the normal page flow. */
+  overflow-x: auto;
   overscroll-behavior: contain;
   scrollbar-color: color-mix(in srgb, var(--primary) 34%, transparent) transparent;
 }
@@ -15986,8 +15991,8 @@ textarea {
   position: absolute;
   z-index: var(--event-layer, 1);
   top: var(--event-top);
-  left: 3px;
-  width: calc(100% - 6px);
+  left: calc(3px + var(--event-inset, 0px));
+  width: calc(100% - 6px - var(--event-inset, 0px));
   height: var(--event-height);
   min-height: 44px;
   display: grid;
@@ -16006,12 +16011,12 @@ textarea {
 }
 
 .calendar-timeline-event.is-stacked {
-  min-height: 28px;
-  padding: 4px 6px;
+  min-height: 44px;
+  padding: 5px 6px;
 }
 
 .calendar-timeline-event.is-stacked span {
-  display: none;
+  display: block;
 }
 
 .calendar-timeline-event:hover,
@@ -16822,6 +16827,26 @@ textarea {
   border-radius: 13px;
   color: var(--primary);
   background: color-mix(in srgb, var(--primary-light) 47%, var(--bg-card));
+}
+
+.calendar-source-color-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: -2px 0 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #d97706 42%, var(--border-color));
+  border-radius: 13px;
+  color: #9a5b08;
+  background: color-mix(in srgb, #f59e0b 10%, var(--bg-card));
+  font-size: .74rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.calendar-source-color-warning svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
 }
 
 .calendar-source-privacy p {
@@ -23272,6 +23297,8 @@ body:has(.modal-backdrop) .problem-report-launcher {
   place-items: center;
   padding: 18px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   background: color-mix(in srgb, #071712 72%, transparent);
   backdrop-filter: blur(14px) saturate(0.85);
 }
@@ -23280,6 +23307,8 @@ body:has(.modal-backdrop) .problem-report-launcher {
   width: min(580px, 100%);
   max-height: calc(100dvh - 36px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid color-mix(
     in srgb,
     var(--primary) 28%,

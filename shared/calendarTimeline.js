@@ -80,17 +80,33 @@ export function layoutTimelineEvents(segments) {
   return sorted;
 }
 
+/**
+ * Calculate a calendar card without ever compromising its position on the
+ * time axis. Colliding events are identified through `stackIndex`, but their
+ * visual separation happens horizontally in the component. Moving a card
+ * down would make, for example, a 10:00 appointment look like it starts at
+ * 10:40.
+ */
+export function timelineEventPlacement(segment, startMinutes, minuteHeight) {
+  const safeStartMinutes = Number(startMinutes) || 0;
+  const safeMinuteHeight = Number(minuteHeight) || 1;
+  const start = Number(segment?.start) || 0;
+  const end = Math.max(start + 1, Number(segment?.end) || start + 60);
+
+  return {
+    top: Math.max(0, (start - safeStartMinutes) * safeMinuteHeight),
+    height: Math.max(44, (end - start) * safeMinuteHeight),
+    // Eight pixels are enough to keep the coloured edge of every parent
+    // appointment visible, while the corresponding width reduction keeps
+    // the whole stack inside its own day column.
+    horizontalInset: Math.min(Math.max(0, Number(segment?.stackIndex) || 0), 3) * 8
+  };
+}
+
 export function calendarTimelineBounds(segments) {
-  const values = Array.isArray(segments) ? segments : [];
-  const earliest = values.reduce(
-    (lowest, segment) => Math.min(lowest, Number(segment?.start ?? lowest)),
-    6 * 60
-  );
-  const latest = values.reduce(
-    (highest, segment) => Math.max(highest, Number(segment?.end ?? highest)),
-    22 * 60
-  );
-  const startHour = Math.max(0, Math.floor(earliest / 60));
-  const endHour = Math.min(24, Math.max(startHour + 1, Math.ceil(latest / 60)));
-  return { startHour, endHour };
+  // A family calendar should not silently crop the quiet hours. Keep the
+  // complete day available even when no current appointment happens before
+  // 06:00 or after 22:00. The surrounding page handles vertical scrolling.
+  void segments;
+  return { startHour: 0, endHour: 24 };
 }

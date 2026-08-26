@@ -4,6 +4,20 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.19.4] – 2026-08-26
+
+### Klarerer Familienkalender
+
+- Die Wochenansicht zeigt den gesamten Tag von 00:00 bis 24:00 Uhr. Parallel
+  laufende Termine bleiben auf ihrer tatsächlichen Uhrzeit und sind seitlich
+  klar voneinander getrennt.
+- Kalenderquellen können gezielt mehreren Familienprofilen zugeordnet werden.
+  Eine Warnung macht auf bereits verwendete Quellfarben aufmerksam.
+- ICS-Exporte enthalten Endzeit und Enddatum, damit andere Kalender Termine
+  korrekt übernehmen.
+- Der Dialog für die Server-Adresse blockiert das Scrollen nicht mehr; die
+  Sicherungsverwaltung bleibt auch in der schmalen Elternzentrale übersichtlich.
+
 ## [1.19.3] – 2026-08-25
 
 ### Wiederkehrende Familientermine

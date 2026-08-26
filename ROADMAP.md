@@ -52,6 +52,8 @@ Mobile, calendar and tablet improvements:
 - **Calendar quality release:** duplicate a local event as a starting point for
   a similar one, add recurring locally-created events, then provide a genuine
   time-based day/week view with durations and visible overlaps.
+  The week timeline now shows 00:00–24:00 in the normal page flow, so early
+  and late appointments are never hidden.
 - **Generic WebDAV Family Cloud:** an optional NAS/WebDAV mode alongside
   Nextcloud for browsing folders, creating folders, upload, download, preview
   and deletion. It will use an app password where supported. Nextcloud-only

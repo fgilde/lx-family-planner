@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   calendarTimelineBounds,
   layoutTimelineEvents,
+  timelineEventPlacement,
   timelineAllDayEvents,
   timelineEventsForDay
 } from '../shared/calendarTimeline.js';
@@ -19,7 +20,20 @@ test('calendar timeline stacks overlaps without narrowing the day column', () =>
   );
 });
 
-test('calendar timeline carries timed and all-day events across days safely', () => {
+test('calendar timeline keeps overlapping cards at their real start time', () => {
+  const placement = timelineEventPlacement(
+    { start: 10 * 60, end: 12 * 60, stackIndex: 2 },
+    6 * 60,
+    1.1
+  );
+  assert.deepEqual(placement, {
+    top: 264,
+    height: 132,
+    horizontalInset: 16
+  });
+});
+
+test('calendar timeline keeps a complete day for timed and all-day events', () => {
   const events = [
     {
       id: 'trip',
@@ -48,7 +62,7 @@ test('calendar timeline carries timed and all-day events across days safely', ()
   );
   assert.deepEqual(calendarTimelineBounds(timed), {
     startHour: 0,
-    endHour: 22
+    endHour: 24
   });
 });
 
