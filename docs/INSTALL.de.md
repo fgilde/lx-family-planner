@@ -13,7 +13,8 @@ geführten Onboarding an.
 | Proxmox VE | eigener nativer LXC | sofort verfügbar | [Proxmox VE](#proxmox-ve-nativer-lxc) |
 | Windows + Docker Desktop | Windows-Heimserver | sofort verfügbar | [Windows](#windows-mit-docker-desktop) |
 | Node.js | vorhandener Node-22-Server | sofort verfügbar | [Node.js](#ohne-docker-mit-nodejs) |
-| Unraid, Umbrel, CasaOS, Cosmos | Heimserver mit App-Store | Pakete werden geprüft | [App-Stores](#pakete-für-app-stores) |
+| Unraid | Unraid-Heimserver | in Community Applications verfügbar | [Unraid-App](https://ca.unraid.net/apps/lx-family-planner-1kvgxdh1njii8h) |
+| Umbrel, CasaOS, Cosmos | Heimserver mit App-Store | Pakete werden geprüft | [App-Stores](#pakete-für-app-stores) |
 
 Danach `http://SERVER-IP:3001` öffnen. Die erste Familie legt ihr eigenes
 Passwort an; anschließend schließt der Server die öffentliche Registrierung
@@ -151,12 +152,14 @@ Android und Proxy stehen unter [Selbst hosten](SELF_HOSTING.md).
 
 ## Pakete für App-Stores
 
-LX Family ist für **Unraid Community Applications, Umbrel, CasaOS und Cosmos**
-vorbereitet. Alle nutzen dasselbe Multi-Architektur-Image und bewahren
-`/app/data` sowie `/app/backups` bei Updates. Bis ein Store LX Family sichtbar
-listet, ist Docker Compose oben der unterstützte Installationsweg.
+LX Family ist bereits in **Unraid Community Applications** verfügbar. Die
+Pakete für **Umbrel, CasaOS und Cosmos** verwenden dasselbe
+Multi-Architektur-Image und bewahren `/app/data` sowie `/app/backups` bei
+Updates, warten aber noch auf die manuelle Store-Prüfung. Bis ein Store LX
+Family sichtbar listet, ist Docker Compose oben der unterstützte
+Installationsweg.
 
-- [Unraid-Einreichung](https://ca.unraid.net/submissions)
+- [Unraid-App](https://ca.unraid.net/apps/lx-family-planner-1kvgxdh1njii8h)
 - [Umbrel-Prüfung](https://github.com/getumbrel/umbrel-apps/pull/5939)
 - [CasaOS-Prüfung](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/999)
 - [Cosmos-Prüfung](https://github.com/azukaar/cosmos-servapps-official/pull/267)

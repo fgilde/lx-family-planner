@@ -12,7 +12,8 @@ server, open LX in a browser and create the first family in guided onboarding.
 | Proxmox VE | a dedicated native LXC | available now | [Proxmox VE](#proxmox-ve-native-lxc) |
 | Windows + Docker Desktop | a Windows home server | available now | [Windows](#windows-with-docker-desktop) |
 | Plain Node.js | an existing Node.js 22 server | available now | [Node.js](#plain-nodejs) |
-| Unraid, Umbrel, CasaOS, Cosmos | an app-store based home server | packages are being reviewed | [Store packages](#app-store-packages) |
+| Unraid | an Unraid home server | available in Community Applications | [Unraid app](https://ca.unraid.net/apps/lx-family-planner-1kvgxdh1njii8h) |
+| Umbrel, CasaOS, Cosmos | an app-store based home server | packages are being reviewed | [Store packages](#app-store-packages) |
 
 After any installation, open `http://SERVER-IP:3001`. The first family creates
 its own password and the server then closes public registration by default.
@@ -104,13 +105,13 @@ HTTPS, Android and proxy guidance.
 
 ## App-store packages
 
-LX Family’s packages for **Unraid Community Applications, Umbrel, CasaOS and
-Cosmos** all use the same published multi-architecture container image and
-preserve `/app/data` and `/app/backups`. Their public review status can change;
-until a store lists LX Family, Docker Compose above is the supported install
-path.
+LX Family is already available in **Unraid Community Applications**. The
+packages for **Umbrel, CasaOS and Cosmos** use the same published
+multi-architecture container image and preserve `/app/data` and `/app/backups`,
+but still await manual store review. Until a store lists LX Family, Docker
+Compose above is the supported install path.
 
-- [Unraid submission](https://ca.unraid.net/submissions)
+- [Unraid app](https://ca.unraid.net/apps/lx-family-planner-1kvgxdh1njii8h)
 - [Umbrel review](https://github.com/getumbrel/umbrel-apps/pull/5939)
 - [CasaOS review](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/999)
 - [Cosmos review](https://github.com/azukaar/cosmos-servapps-official/pull/267)

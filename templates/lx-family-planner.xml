@@ -15,8 +15,8 @@
   <Category>Tools:Utilities</Category>
   <ExtraSearchTerms>LX Family private family OS family organizer calendar household children meal shopping self hosted</ExtraSearchTerms>
   <Requires>A 32-character or longer random APP_SECRET. Keep the same value for every update.</Requires>
-  <Changes>v1.17.0: Mobile navigation drawer, ntfy notifications, wall display, profile permissions, dynamic trash card, birthdays, shared chores, themes, full i18n and child timetables. Initial Community Applications release.</Changes>
-  <Date>2026-08-05</Date>
+  <Changes>v1.20.0: Encrypted family transfers, family recycle bin, faster weekly-calendar entry and clearer overlapping events. LX Family keeps data and backups in the selected appdata folders during updates.</Changes>
+  <Date>2026-08-27</Date>
   <License>MIT</License>
   <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-dashboard.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/laxxx-lab/lx-family-planner/main/docs/screenshots/demo-kinderprofil.png</Screenshot>

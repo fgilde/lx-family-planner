@@ -150,7 +150,8 @@ expanded.
 | Proxmox VE | [Native LX Family LXC](docs/INSTALL.md#proxmox-ve-native-lxc) |
 | Windows home server | [Windows + Docker Desktop](docs/INSTALL.md#windows-with-docker-desktop) |
 | Existing Node server | [Plain Node.js](docs/INSTALL.md#plain-nodejs) |
-| Unraid, Umbrel, CasaOS or Cosmos | [App-store packages](docs/INSTALL.md#app-store-packages) |
+| Unraid | [Community Applications](https://ca.unraid.net/apps/lx-family-planner-1kvgxdh1njii8h) |
+| Umbrel, CasaOS or Cosmos | [Packages under review](docs/INSTALL.md#app-store-packages) |
 
 ## Quick start
 

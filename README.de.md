@@ -596,10 +596,10 @@ vollständige, aktuelle Anleitung steht zusätzlich unter
 
 ## Installation aus einem App-Store
 
-LX Family ist für **Unraid Community Applications** und den
-**Umbrel App Store** vorbereitet. Nach der Prüfung durch die jeweiligen
-Store-Teams erscheint LX dort als normale App: Installieren anklicken,
-Speicherort und Zugang festlegen, fertig.
+**Unraid Community Applications** listet LX Family bereits als installierbare
+App. Die Pakete für **Umbrel**, **CasaOS** und **Cosmos** sind technisch geprüft,
+warten aber noch auf die jeweilige manuelle Store-Freigabe. Bis dahin ist das
+veröffentlichte Docker-Image der gleichwertige Installationsweg.
 
 ### Unraid-Datenordner
 
@@ -614,9 +614,10 @@ Wer für Appdata eine andere Benutzerkennung verwendet, kann PUID und PGID in
 der erweiterten Container-Konfiguration anpassen. Bereits vorhandene Dateien
 und alle späteren Updates bleiben in den beiden Appdata-Ordnern erhalten.
 
-Bis zur Freischaltung funktionieren Docker, das fertige GHCR-Image und der
-Proxmox-Helper unverändert weiter. Die Store-Pakete und ihre Prüfschritte sind
-unter [Store-Veröffentlichungen](docs/STORE_SUBMISSIONS.md) dokumentiert.
+Für Umbrel, CasaOS und Cosmos funktionieren Docker, das fertige GHCR-Image und
+der Proxmox-Helper unverändert weiter. Die Store-Pakete und ihr jeweiliger
+Prüfstatus sind unter [Store-Veröffentlichungen](docs/STORE_SUBMISSIONS.md)
+dokumentiert.
 
 ## Bequem und sicher aktualisieren
 
