@@ -150,7 +150,7 @@ export default function NtfySettings() {
             <span>{t('ntfy.topic')}</span>
             <input
               value={form.topic}
-              pattern="[-_A-Za-z0-9]{1,64}"
+              pattern="(?:[A-Za-z0-9_]|-){1,64}"
               onChange={event => setForm(previous => ({
                 ...previous,
                 topic: event.target.value
@@ -248,7 +248,7 @@ export default function NtfySettings() {
               <span>{t('ntfy.topic')}</span>
               <input
                 value={form.topic}
-                pattern="[-_A-Za-z0-9]{1,64}"
+                pattern="(?:[A-Za-z0-9_]|-){1,64}"
                 onChange={event => setForm(previous => ({
                   ...previous,
                   topic: event.target.value

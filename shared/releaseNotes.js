@@ -1,4 +1,39 @@
 const RELEASE_NOTES = {
+  '1.19.6': {
+    version: '1.19.6',
+    eyebrow: 'Kleiner Einstellungs-Hotfix',
+    title: 'Ntfy-Einstellungen ohne Browserfehler',
+    intro:
+      'Die Elternzentrale bleibt beim Einrichten von ntfy jetzt auch in modernen Browsern ruhig und fehlerfrei.',
+    highlights: [
+      {
+        id: 'ntfy-topic-validation',
+        title: 'Thema sicher geprüft',
+        description:
+          'Ntfy-Themen mit Buchstaben, Zahlen, Unterstrichen und Bindestrichen werden wieder sauber im Browser geprüft.'
+      }
+    ],
+    closing:
+      'Deine Benachrichtigungseinstellungen und alle Familieninhalte bleiben unverändert.',
+    localizations: {
+      en: {
+        eyebrow: 'A small settings hotfix',
+        title: 'ntfy settings without browser errors',
+        intro:
+          'The parent hub now stays calm and error-free when setting up ntfy in modern browsers.',
+        highlights: [
+          {
+            id: 'ntfy-topic-validation',
+            title: 'Topics validated safely',
+            description:
+              'ntfy topics with letters, numbers, underscores and hyphens are once again checked cleanly in the browser.'
+          }
+        ],
+        closing:
+          'Your notification settings and all family content remain unchanged.'
+      }
+    }
+  },
   '1.19.5': {
     version: '1.19.5',
     eyebrow: 'Kleiner Kalender-Hotfix',

@@ -15,10 +15,10 @@ test('the login screen keeps release notes out of the sign-in flow', () => {
     path.join(projectRoot, 'src', 'components', 'Auth', 'FamilyLoginScreen.jsx'),
     'utf8'
   );
-  assert.equal(version, '1.19.5');
+  assert.equal(version, '1.19.6');
   assert.doesNotMatch(login, /ReleasePreviewCard/);
   assert.deepEqual(
     notes.highlights.map(highlight => highlight.id),
-    ['android-week-scroll']
+    ['ntfy-topic-validation']
   );
 });

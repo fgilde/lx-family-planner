@@ -6,6 +6,14 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.19.6] — 2026-08-27
+
+### Notification settings
+
+- Browser validation of ntfy topics no longer emits a console error in modern
+  browsers. Safe topic names with letters, numbers, underscores and hyphens
+  remain accepted.
+
 ## [1.19.5] — 2026-08-27
 
 ### Android weekly calendar

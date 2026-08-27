@@ -4,6 +4,14 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.19.6] – 2026-08-27
+
+### Benachrichtigungseinstellungen
+
+- Die Browserprüfung für ntfy-Themen erzeugt in modernen Browsern keinen
+  Konsolenfehler mehr. Sichere Namen mit Buchstaben, Zahlen, Unterstrichen und
+  Bindestrichen bleiben weiterhin erlaubt.
+
 ## [1.19.5] – 2026-08-27
 
 ### Android-Wochenkalender
