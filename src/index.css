@@ -17115,8 +17115,6 @@ textarea {
   }
 
   .calendar-timeline-event {
-    left: 2px;
-    width: calc(100% - 4px);
     padding: 5px;
     border-left-width: 3px;
   }

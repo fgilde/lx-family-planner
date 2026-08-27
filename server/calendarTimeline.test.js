@@ -29,7 +29,7 @@ test('calendar timeline keeps overlapping cards at their real start time', () =>
   assert.deepEqual(placement, {
     top: 264,
     height: 132,
-    horizontalInset: 16
+    horizontalInset: 10
   });
 });
 

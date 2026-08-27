@@ -267,7 +267,7 @@ function CalendarTimeline({
                           '--event-color': accent,
                           '--event-top': `${placement.top}px`,
                           '--event-height': `${placement.height}px`,
-                          '--event-inset': `${placement.horizontalInset}px`,
+                          '--event-inset': `${placement.horizontalInset}%`,
                           '--event-layer': index + 1
                         }}
                         onClick={() => onSelectEvent(event)}

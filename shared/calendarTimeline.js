@@ -96,10 +96,10 @@ export function timelineEventPlacement(segment, startMinutes, minuteHeight) {
   return {
     top: Math.max(0, (start - safeStartMinutes) * safeMinuteHeight),
     height: Math.max(44, (end - start) * safeMinuteHeight),
-    // Eight pixels are enough to keep the coloured edge of every parent
-    // appointment visible, while the corresponding width reduction keeps
-    // the whole stack inside its own day column.
-    horizontalInset: Math.min(Math.max(0, Number(segment?.stackIndex) || 0), 3) * 8
+    // A percentage scales with the width of its weekday column. That keeps
+    // overlapping cards distinguishable on phones without a hard visual jump
+    // when a responsive breakpoint is crossed.
+    horizontalInset: Math.min(Math.max(0, Number(segment?.stackIndex) || 0), 3) * 5
   };
 }
 
