@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://fgilde.github.io/QuickRun/quickrun.schema.json
+#
+# Runs LX Family locally without Docker, the way "Without Docker" in the README does:
+# install, build, start. Everything stays inside this checkout - the SQLite database and
+# the backups land in data/ and backups/ next to these files.
+#
+# For a real household installation follow docs/INSTALL.md: this starts the server with
+# the development APP_SECRET, which is fine for looking around and not for family data.
+version: 1
+name: LX Family
+description: >-
+  A self-hosted Family OS with separate spaces for parents, children, grandparents and pets.
+  Starts on http://localhost:3001, where the first family can be created.
+docs: https://github.com/laxxx-lab/lx-family-planner/blob/main/docs/INSTALL.md
+
+requires:
+  - tool: node
+    version: ">=22.13"
+    install: https://nodejs.org/en/download
+
+inputs:
+  - id: port
+    label: Port
+    type: number
+    description: Where LX Family listens. 3001 unless something else already has it.
+    default: "3001"
+    min: 1024
+    max: 65535
+    env: PORT
+  - id: language
+    label: Language
+    type: select
+    description: The interface language of a new installation.
+    options: [de, en, fr, es, it, nl, pl]
+    default: de
+    env: APP_LANGUAGE
+
+setup:
+  - npm ci
+  - npm run build
+
+tasks:
+  - name: lx-family
+    run: npm start
+    readyWhen: {http: "http://localhost:${inputs.port}"}
+    open: true
