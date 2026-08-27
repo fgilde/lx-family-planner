@@ -44,6 +44,8 @@ import HomeAssistantSettings from './HomeAssistantSettings';
 import NextcloudSettings from './NextcloudSettings';
 import WebDavSettings from './WebDavSettings';
 import DatabaseBackupSettings from './DatabaseBackupSettings';
+import RecycleBinSettings from './RecycleBinSettings';
+import FamilyTransferSettings from './FamilyTransferSettings';
 import ProblemReportsPanel from './ProblemReportsPanel';
 import WebPushSettings from './WebPushSettings';
 
@@ -582,6 +584,8 @@ export default function ParentAdmin({ onOpenFamilyTree }) {
         </section>
 
         <DatabaseBackupSettings />
+        <RecycleBinSettings />
+        <FamilyTransferSettings />
         <NextcloudSettings />
         <WebDavSettings />
         <WebPushSettings />

@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="Qualitätsprüfung" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Aktuelles Release 1.19.6" src="https://img.shields.io/badge/Release-1.19.6-17483F">
+  <img alt="Aktuelles Release 1.20.0" src="https://img.shields.io/badge/Release-1.20.0-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -1141,6 +1141,16 @@ Rückfallnetz erhalten.
 Sicherungen sollten regelmäßig zusätzlich auf ein anderes Gerät oder Medium
 kopiert werden. Ein Backup ist erst dann ein gutes Backup, wenn die
 Wiederherstellung einmal getestet wurde.
+
+### Sicher wiederherstellen
+
+**Bitte niemals** `family_planner.sqlite`, `-wal` oder `-shm` direkt im
+laufenden Datenordner ersetzen. SQLite verwaltet diese Dateien gemeinsam; ein
+manueller Austausch kann dadurch zu fehlenden Änderungen oder Schreibrechten
+führen. Nutze stattdessen in der Elternzentrale **Datenbanksicherungen →
+Zurückspielen** oder das bereitgestellte Wiederherstellungsskript. Beide Wege
+prüfen die Sicherung, erstellen vorher eine Sicherheitskopie und starten LX
+kontrolliert neu.
 
 Mit verbundener Family Cloud legt LX zusätzlich ein verschlüsseltes,
 familiengetrenntes `.lxbackup` samt Prüfsummenmanifest unter

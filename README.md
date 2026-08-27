@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/laxxx-lab/lx-family-planner/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="Latest release 1.19.6" src="https://img.shields.io/badge/release-1.19.6-17483F">
+  <img alt="Latest release 1.20.0" src="https://img.shields.io/badge/release-1.20.0-17483F">
   <img alt="Node.js 22+" src="https://img.shields.io/badge/Node.js-22%2B-43853D?logo=nodedotjs&logoColor=white">
   <img alt="Docker ready" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white">
   <img alt="Android 7+" src="https://img.shields.io/badge/Android-7%2B-3DDC84?logo=android&logoColor=white">
@@ -189,6 +189,14 @@ checks the result and rolls back if validation fails. LX retains the three
 newest local backup-and-manifest pairs; a fourth is held only until a guarded
 update has passed all checks. The `data/` and `backups/` directories are
 independent from the application image.
+
+### Restore safely
+
+**Never** replace `family_planner.sqlite`, `-wal` or `-shm` directly in the
+live data directory. SQLite manages those files together, so a manual swap can
+leave LX unable to write data. Use **Database backups → Restore** in the Parent
+Hub or the supplied restore script instead. Both paths verify the backup,
+create a safety copy first and restart LX in a controlled way.
 
 ### Without Docker
 

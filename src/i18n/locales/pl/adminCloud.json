@@ -179,10 +179,17 @@
     "frequency": "Frequency", "daily": "Daily", "weekly": "Weekly", "weekday": "Weekday", "hour": "Time", "retention": "Backups to keep",
     "saveSchedule": "Save schedule", "saved": "The backup schedule was saved.", "created": "A verified database backup was created.",
     "lastBackup": "Last successful backup: {{date}}", "available": "Available backups", "empty": "No database backup exists yet.",
-    "verified": "Verified", "invalid": "Damaged", "restore": "Restore", "restoreTitle": "Reset the whole installation",
+    "verified": "Verified", "invalid": "Damaged", "restore": "Restore", "restoreGuideTitle": "Bezpieczne przywracanie bazy danych", "restoreGuide": "Nigdy nie zastępuj ręcznie plików SQLite w katalogu danych. Wybierz poniżej zweryfikowaną kopię zapasową: LX najpierw tworzy kopię bezpieczeństwa, obsługuje pliki bazy danych i uruchamia się ponownie w kontrolowany sposób.", "restoreTitle": "Reset the whole installation",
     "restoreWarning": "All changes after this backup will be lost. LX first creates an additional safety backup and then restarts.",
     "familyPassword": "Owner family password", "confirmation": "Enter WIEDERHERSTELLEN to confirm", "restoreConfirmed": "Verify and restore",
     "restoring": "Starting restore …", "restoreRestarting": "The database is being restored. LX will restart afterwards.",
     "days": { "sunday": "Sunday", "monday": "Monday", "tuesday": "Tuesday", "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday", "saturday": "Saturday" }
+  },
+  "recycleBin": {
+    "kicker": "30 days · protected", "title": "Recycle bin", "intro": "Deleted events, tasks and other entries stay here for {{days}} days and can be restored one at a time.", "refresh": "Refresh", "loading": "Loading recycle bin …", "emptyTitle": "The recycle bin is empty", "emptyBody": "Deleted entries can be safely brought back here for a while.", "deletedAt": "deleted {{date}}", "expiresAt": "Automatically removed on {{date}}", "restore": "Restore", "restoring": "Restoring …", "removeForever": "Delete permanently", "removeConfirm": "Delete this entry permanently from the recycle bin? This cannot be undone.",
+    "types": { "event": "Event", "task": "Task", "note": "Note", "meal": "Meal plan", "recipe": "Recipe", "shopping": "Shopping", "message": "Message", "entry": "Entry" }
+  },
+  "familyTransfer": {
+    "kicker": "Private · move", "title": "Move family to another server", "badge": "Encrypted file", "intro": "Creates a protected move file for this family only. It can be restored on a new, still empty LX server.", "noteTitle": "Server-bound connections stay safely behind", "noteBody": "Events, tasks, notes, recipes, profiles and the recycle bin move with you. Reconnect Family Cloud, CalDAV, Home Assistant, Bring and notification devices on the new server afterwards.", "familyPassword": "Family password to confirm", "passphrase": "New move passphrase", "passphrasePlaceholder": "At least 12 characters", "passphraseConfirm": "Repeat move passphrase", "passphraseTooShort": "The move passphrase must be at least 12 characters long.", "passphraseMismatch": "The two move passphrases do not match.", "export": "Download encrypted move file", "exporting": "Creating move file …", "exported": "The encrypted move file was downloaded. Keep the file and passphrase separate and safe.", "footnote": "The file can only be read with the move passphrase. Without it, it cannot be restored."
   }
 }

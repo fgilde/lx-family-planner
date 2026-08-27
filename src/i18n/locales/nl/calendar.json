@@ -37,7 +37,8 @@
     "timeline": {
       "kicker": "Weekplanning",
       "allDay": "Hele dag",
-      "now": "Nu"
+      "now": "Nu",
+      "selectHint": "Tik of sleep over vrije tijd om een afspraak voor te bereiden."
     },
     "agenda": {
       "kicker": "Agenda",

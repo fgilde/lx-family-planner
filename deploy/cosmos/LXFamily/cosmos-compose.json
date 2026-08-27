@@ -18,7 +18,7 @@
   "minVersion": "0.18.0",
   "services": {
     "{ServiceName}": {
-      "image": "ghcr.io/laxxx-lab/lx-family-planner:1.19.6",
+      "image": "ghcr.io/laxxx-lab/lx-family-planner:1.20.0",
       "container_name": "{ServiceName}",
       "restart": "unless-stopped",
       "environment": [

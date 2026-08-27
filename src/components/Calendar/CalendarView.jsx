@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
   Calendar as CalendarIcon,
@@ -140,11 +140,14 @@ function CalendarTimeline({
   anchorDate,
   events,
   members,
+  onCreateFromSlot,
   onSelectEvent,
   t,
   todayKey
 }) {
   const { i18n } = useTranslation();
+  const slotStartRef = useRef(null);
+  const [slotSelection, setSlotSelection] = useState(null);
   const days = useMemo(
     () => calendarDaysForView(anchorDate, 'week'),
     [anchorDate]
@@ -173,6 +176,52 @@ function CalendarTimeline({
   const showNow = days.includes(todayKey) &&
     nowMinutes >= startMinutes && nowMinutes <= bounds.endHour * 60;
   const hasAllDay = entries.some(entry => entry.allDay.length > 0);
+  const lastSlotStart = bounds.endHour * 60 - 30;
+
+  const minutesAtPointer = pointerEvent => {
+    const rectangle = pointerEvent.currentTarget.getBoundingClientRect();
+    const rawMinutes = startMinutes + (
+      (pointerEvent.clientY - rectangle.top) / minuteHeight
+    );
+    return Math.max(
+      startMinutes,
+      Math.min(lastSlotStart, Math.round(rawMinutes / 30) * 30)
+    );
+  };
+
+  const beginSlotSelection = (pointerEvent, dateKey) => {
+    if (pointerEvent.button !== 0 || pointerEvent.target.closest('button')) {
+      return;
+    }
+    const start = minutesAtPointer(pointerEvent);
+    slotStartRef.current = { dateKey, start };
+    setSlotSelection({ dateKey, start, end: start + 30 });
+    pointerEvent.currentTarget.setPointerCapture?.(pointerEvent.pointerId);
+  };
+
+  const updateSlotSelection = pointerEvent => {
+    const selected = slotStartRef.current;
+    if (!selected) return;
+    const current = minutesAtPointer(pointerEvent);
+    const start = Math.min(selected.start, current);
+    const end = Math.min(bounds.endHour * 60, Math.max(selected.start, current) + 30);
+    setSlotSelection({ dateKey: selected.dateKey, start, end });
+  };
+
+  const finishSlotSelection = pointerEvent => {
+    const selected = slotStartRef.current;
+    if (!selected) return;
+    const current = minutesAtPointer(pointerEvent);
+    const start = Math.min(selected.start, current);
+    const end = Math.min(bounds.endHour * 60, Math.max(selected.start, current) + 30);
+    slotStartRef.current = null;
+    setSlotSelection(null);
+    onCreateFromSlot({
+      date: selected.dateKey,
+      time: timelineTimeLabel(start),
+      endTime: timelineTimeLabel(end)
+    });
+  };
 
   return (
     <section className="calendar-timeline">
@@ -180,6 +229,9 @@ function CalendarTimeline({
         <div>
           <span>{t('view.timeline.kicker')}</span>
           <h2>{calendarRangeLabel(anchorDate, 'week', i18n.language)}</h2>
+          <p className="calendar-timeline-selection-hint">
+            {t('view.timeline.selectHint')}
+          </p>
         </div>
         <strong>{events.length}</strong>
       </header>
@@ -243,7 +295,23 @@ function CalendarTimeline({
                   className={`calendar-timeline-day ${
                     dateKey === todayKey ? 'is-today' : ''
                   }`}
+                  onPointerDown={event => beginSlotSelection(event, dateKey)}
+                  onPointerMove={updateSlotSelection}
+                  onPointerUp={finishSlotSelection}
+                  onPointerCancel={() => {
+                    slotStartRef.current = null;
+                    setSlotSelection(null);
+                  }}
                 >
+                  {slotSelection?.dateKey === dateKey && (
+                    <span
+                      className="calendar-timeline-slot-selection"
+                      style={{
+                        '--selection-top': `${(slotSelection.start - startMinutes) * minuteHeight}px`,
+                        '--selection-height': `${Math.max(33, (slotSelection.end - slotSelection.start) * minuteHeight)}px`
+                      }}
+                    />
+                  )}
                   {timed.map((segment, index) => {
                     const event = segment.event;
                     const accent = calendarEventColor(event, members);
@@ -415,6 +483,7 @@ export default function CalendarView() {
     importICS,
     setIsQuickAddOpen,
     setQuickAddDefaultType,
+    setQuickAddEventPreset,
     activeHousehold
   } = useFamily();
   const [selectedMemberFilter, setSelectedMemberFilter] = useState('all');
@@ -554,6 +623,7 @@ export default function CalendarView() {
             className="calendar-add-button"
             onClick={() => {
               setQuickAddDefaultType('event');
+              setQuickAddEventPreset(null);
               setIsQuickAddOpen(true);
             }}
           >
@@ -722,6 +792,7 @@ export default function CalendarView() {
               type="button"
               onClick={() => {
                 setQuickAddDefaultType('event');
+                setQuickAddEventPreset(null);
                 setIsQuickAddOpen(true);
               }}
             >
@@ -934,6 +1005,11 @@ export default function CalendarView() {
           anchorDate={calendarAnchorDate}
           events={gridEvents}
           members={members}
+          onCreateFromSlot={slot => {
+            setQuickAddDefaultType('event');
+            setQuickAddEventPreset(slot);
+            setIsQuickAddOpen(true);
+          }}
           onSelectEvent={setSelectedEvent}
           t={t}
           todayKey={todayKey}

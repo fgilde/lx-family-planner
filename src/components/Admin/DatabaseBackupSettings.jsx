@@ -129,6 +129,14 @@ export default function DatabaseBackupSettings() {
 
       <p className="admin-panel-intro">{t('databaseBackup.intro')}</p>
 
+      <aside className="database-backup-safety-guide">
+        <ShieldCheck size={19} />
+        <div>
+          <strong>{t('databaseBackup.restoreGuideTitle')}</strong>
+          <p>{t('databaseBackup.restoreGuide')}</p>
+        </div>
+      </aside>
+
       <div className="database-backup-actions">
         <button
           type="button"

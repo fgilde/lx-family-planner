@@ -741,6 +741,25 @@ applySchemaMigration(17, 'Mehrere Empfaenger fuer Kalenderquellen', () => {
   }
 });
 
+applySchemaMigration(18, 'Papierkorb fuer wiederherstellbare Familieninhalte', () => {
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS recycle_bin_records (
+      id TEXT PRIMARY KEY,
+      family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      record_type TEXT NOT NULL,
+      record_id TEXT NOT NULL,
+      data_json TEXT NOT NULL,
+      deleted_by_member_id TEXT REFERENCES members(id) ON DELETE SET NULL,
+      deleted_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS recycle_bin_family_idx
+      ON recycle_bin_records(family_id, deleted_at DESC);
+    CREATE INDEX IF NOT EXISTS recycle_bin_expiry_idx
+      ON recycle_bin_records(expires_at);
+  `);
+});
+
 function withTransaction(work) {
   database.exec('BEGIN IMMEDIATE');
   try {
@@ -1293,6 +1312,249 @@ export function deleteFamily(familyId) {
   });
 }
 
+function transferRecordData(value, sourceFamilyId, targetFamilyId) {
+  if (Array.isArray(value)) {
+    return value.map(entry =>
+      transferRecordData(entry, sourceFamilyId, targetFamilyId)
+    );
+  }
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [
+      key,
+      key === 'familyId' && entry === sourceFamilyId
+        ? targetFamilyId
+        : transferRecordData(entry, sourceFamilyId, targetFamilyId)
+    ])
+  );
+}
+
+function parseTransferRecord(type, row, sourceFamilyId, targetFamilyId) {
+  assertRecordType(type);
+  const parsed = JSON.parse(String(row?.dataJson || row?.data_json || '{}'));
+  const record = transferRecordData(parsed, sourceFamilyId, targetFamilyId);
+  return {
+    id: String(row?.id || record?.id || ''),
+    dataJson: JSON.stringify({ ...record, id: String(row?.id || record?.id), familyId: targetFamilyId }),
+    createdAt: Number(row?.createdAt || row?.created_at || Date.now()),
+    updatedAt: Number(row?.updatedAt || row?.updated_at || Date.now())
+  };
+}
+
+/**
+ * Creates the portable, server-independent part of one family. Secrets for
+ * cloud, CalDAV, Home Assistant and push devices deliberately stay behind:
+ * they are encrypted with this server's key or tied to a particular device.
+ */
+export function exportFamilyTransferData(familyId) {
+  const family = database
+    .prepare('SELECT * FROM families WHERE id = ?')
+    .get(familyId);
+  if (!family) return null;
+  const rows = database.prepare(`
+    SELECT type, id, data_json, created_at, updated_at
+    FROM family_records
+    WHERE family_id = ?
+    ORDER BY created_at ASC
+  `).all(familyId);
+  const recycled = database.prepare(`
+    SELECT id, record_type, record_id, data_json, deleted_by_member_id,
+      deleted_at, expires_at
+    FROM recycle_bin_records
+    WHERE family_id = ?
+    ORDER BY deleted_at ASC
+  `).all(familyId);
+  const members = database.prepare(`
+    SELECT id, name, role, position, avatar, color, bg_color, theme,
+      custom_theme_css, birth_date, stars, pin_hash, is_managed,
+      allowed_modules_json, last_seen_release_version, created_at, updated_at
+    FROM members
+    WHERE family_id = ?
+    ORDER BY created_at ASC
+  `).all(familyId);
+
+  return {
+    format: 'lx-family-transfer',
+    version: 1,
+    exportedAt: Date.now(),
+    family: {
+      id: family.id,
+      name: family.name,
+      avatar: family.avatar,
+      badge: family.badge,
+      passwordHash: family.password_hash,
+      grandparentsHouseholdEnabled:
+        Number(family.grandparents_household_enabled ?? 1) === 1,
+      createdAt: family.created_at,
+      updatedAt: family.updated_at
+    },
+    members: members.map(member => ({
+      id: member.id,
+      name: member.name,
+      role: member.role,
+      position: member.position,
+      avatar: member.avatar,
+      color: member.color,
+      bgColor: member.bg_color,
+      theme: member.theme,
+      customThemeCss: member.custom_theme_css,
+      birthDate: member.birth_date,
+      stars: member.stars,
+      pinHash: member.pin_hash,
+      isManaged: Number(member.is_managed) === 1,
+      allowedModulesJson: member.allowed_modules_json,
+      lastSeenReleaseVersion: member.last_seen_release_version,
+      createdAt: member.created_at,
+      updatedAt: member.updated_at
+    })),
+    records: rows.map(row => ({
+      type: row.type,
+      id: row.id,
+      dataJson: row.data_json,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    })),
+    recycleBin: recycled.map(row => ({
+      id: row.id,
+      type: row.record_type,
+      recordId: row.record_id,
+      dataJson: row.data_json,
+      deletedByMemberId: row.deleted_by_member_id,
+      deletedAt: row.deleted_at,
+      expiresAt: row.expires_at
+    })),
+    reconnectRequired: [
+      'Family Cloud und andere WebDAV-/Nextcloud-Verbindungen',
+      'CalDAV-Kalenderquellen',
+      'Home Assistant, Bring, Gotify und ntfy',
+      'Browser- und Android-Benachrichtigungen'
+    ]
+  };
+}
+
+export function importFamilyTransferData(payload) {
+  const family = payload?.family;
+  const familyId = String(family?.id || '').trim();
+  const familyName = String(family?.name || '').trim();
+  const passwordHash = String(family?.passwordHash || '');
+  const members = Array.isArray(payload?.members) ? payload.members : [];
+  const records = Array.isArray(payload?.records) ? payload.records : [];
+  const recycled = Array.isArray(payload?.recycleBin) ? payload.recycleBin : [];
+  if (!familyId || !familyName || !passwordHash.includes(':')) {
+    const error = new Error('Die Umzugsdatei enthält keine gültige Familie.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (getFamily(familyId)) {
+    const error = new Error('Diese Familie ist auf diesem Server bereits vorhanden.');
+    error.statusCode = 409;
+    throw error;
+  }
+  if (!members.length || members.length > 50 || records.length > 100_000) {
+    const error = new Error('Die Umzugsdatei enthält zu viele oder keine gültigen Familieninhalte.');
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!members.some(member => ['adult', 'senior'].includes(member?.role))) {
+    const error = new Error('Die Umzugsdatei enthält kein Erwachsenenprofil.');
+    error.statusCode = 400;
+    throw error;
+  }
+  const duplicateMember = members.find(member =>
+    !member?.id || database.prepare('SELECT 1 FROM members WHERE id = ?').get(member.id)
+  );
+  if (duplicateMember) {
+    const error = new Error('Ein Profil aus der Umzugsdatei existiert auf diesem Server bereits.');
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const importedAt = Date.now();
+  return withTransaction(() => {
+    database.prepare(`
+      INSERT INTO families(
+        id, name, avatar, badge, password_hash, grandparents_household_enabled,
+        created_at, updated_at
+      ) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      familyId,
+      familyName.slice(0, 100),
+      String(family.avatar || '').slice(0, 1_200_000),
+      String(family.badge || 'Familie').slice(0, 60),
+      passwordHash,
+      family.grandparentsHouseholdEnabled === false ? 0 : 1,
+      Number(family.createdAt || importedAt),
+      importedAt
+    );
+    database.prepare(`
+      INSERT INTO family_versions(family_id, version, updated_at)
+      VALUES(?, 1, ?)
+    `).run(familyId, importedAt);
+
+    const insertMemberTransfer = database.prepare(`
+      INSERT INTO members(
+        id, family_id, name, role, position, avatar, color, bg_color, theme,
+        custom_theme_css, birth_date, stars, pin_hash, is_managed,
+        allowed_modules_json, last_seen_release_version, created_at, updated_at
+      ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    members.forEach(member => {
+      insertMemberTransfer.run(
+        String(member.id), familyId,
+        String(member.name || 'Familienmitglied').slice(0, 80),
+        String(member.role || 'member'), String(member.position || 'familienmitglied'),
+        String(member.avatar || '').slice(0, 1_200_000),
+        String(member.color || '#2563eb'), String(member.bgColor || '#eff6ff'),
+        String(member.theme || 'light'), String(member.customThemeCss || ''),
+        String(member.birthDate || ''), Math.max(0, Number(member.stars || 0)),
+        member.isManaged ? null : (member.pinHash || null),
+        member.isManaged ? 1 : 0,
+        typeof member.allowedModulesJson === 'string' ? member.allowedModulesJson : null,
+        '', Number(member.createdAt || importedAt), importedAt
+      );
+    });
+
+    const insertRecord = database.prepare(`
+      INSERT INTO family_records(family_id, type, id, data_json, created_at, updated_at)
+      VALUES(?, ?, ?, ?, ?, ?)
+    `);
+    records.forEach(row => {
+      const record = parseTransferRecord(row?.type, row, familyId, familyId);
+      if (!record.id) throw new Error('Ein Eintrag der Umzugsdatei ist unvollständig.');
+      insertRecord.run(familyId, String(row.type), record.id, record.dataJson, record.createdAt, record.updatedAt);
+    });
+
+    const insertRecycle = database.prepare(`
+      INSERT INTO recycle_bin_records(
+        id, family_id, record_type, record_id, data_json, deleted_by_member_id,
+        deleted_at, expires_at
+      ) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    recycled.slice(0, 20_000).forEach(entry => {
+      const record = parseTransferRecord(entry?.type, {
+        id: entry.recordId,
+        dataJson: entry.dataJson,
+        createdAt: entry.deletedAt,
+        updatedAt: entry.deletedAt
+      }, familyId, familyId);
+      if (!entry?.id || !record.id) return;
+      insertRecycle.run(
+        String(entry.id), familyId, String(entry.type), record.id, record.dataJson,
+        members.some(member => member.id === entry.deletedByMemberId)
+          ? entry.deletedByMemberId
+          : null,
+        Number(entry.deletedAt || importedAt), Number(entry.expiresAt || importedAt)
+      );
+    });
+
+    return {
+      family: getFamily(familyId),
+      members: getMembers(familyId),
+      records: records.length
+    };
+  });
+}
+
 export function assertRecordType(type) {
   if (!RECORD_TYPES.has(type)) {
     const error = new Error(`Unbekannter Datentyp: ${type}`);
@@ -1418,6 +1680,130 @@ export function deleteRecord(familyId, type, id) {
       .run(familyId, type, id);
     if (result.changes > 0) bumpFamilyVersion(familyId);
     return result.changes > 0;
+  });
+}
+
+const RECYCLE_BIN_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+function purgeExpiredRecycledRecords(familyId = '') {
+  const statement = familyId
+    ? database.prepare(`
+      DELETE FROM recycle_bin_records
+      WHERE family_id = ? AND expires_at <= ?
+    `)
+    : database.prepare('DELETE FROM recycle_bin_records WHERE expires_at <= ?');
+  return familyId
+    ? statement.run(familyId, Date.now()).changes
+    : statement.run(Date.now()).changes;
+}
+
+export function archiveRecord(familyId, type, id, { deletedByMemberId = null } = {}) {
+  assertRecordType(type);
+  const now = Date.now();
+  return withTransaction(() => {
+    purgeExpiredRecycledRecords(familyId);
+    const row = database.prepare(`
+      SELECT data_json FROM family_records
+      WHERE family_id = ? AND type = ? AND id = ?
+    `).get(familyId, type, id);
+    if (!row) return null;
+
+    const recycleId = `recycle-${randomUUID()}`;
+    database.prepare(`
+      INSERT INTO recycle_bin_records(
+        id, family_id, record_type, record_id, data_json,
+        deleted_by_member_id, deleted_at, expires_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      recycleId,
+      familyId,
+      type,
+      id,
+      row.data_json,
+      deletedByMemberId || null,
+      now,
+      now + RECYCLE_BIN_RETENTION_MS
+    );
+    database.prepare(`
+      DELETE FROM family_records
+      WHERE family_id = ? AND type = ? AND id = ?
+    `).run(familyId, type, id);
+    bumpFamilyVersion(familyId);
+    return {
+      id: recycleId,
+      type,
+      record: JSON.parse(row.data_json),
+      deletedAt: now,
+      expiresAt: now + RECYCLE_BIN_RETENTION_MS
+    };
+  });
+}
+
+export function listRecycledRecords(familyId) {
+  return withTransaction(() => {
+    purgeExpiredRecycledRecords(familyId);
+    return database.prepare(`
+      SELECT * FROM recycle_bin_records
+      WHERE family_id = ?
+      ORDER BY deleted_at DESC
+      LIMIT 250
+    `).all(familyId).map(row => ({
+      id: row.id,
+      type: row.record_type,
+      recordId: row.record_id,
+      record: JSON.parse(row.data_json),
+      deletedByMemberId: row.deleted_by_member_id || '',
+      deletedAt: Number(row.deleted_at),
+      expiresAt: Number(row.expires_at)
+    }));
+  });
+}
+
+export function restoreRecycledRecord(familyId, recycleId) {
+  return withTransaction(() => {
+    purgeExpiredRecycledRecords(familyId);
+    const row = database.prepare(`
+      SELECT * FROM recycle_bin_records
+      WHERE family_id = ? AND id = ?
+    `).get(familyId, recycleId);
+    if (!row) return { status: 'missing' };
+
+    const exists = database.prepare(`
+      SELECT 1 FROM family_records
+      WHERE family_id = ? AND type = ? AND id = ?
+    `).get(familyId, row.record_type, row.record_id);
+    if (exists) return { status: 'conflict' };
+
+    const now = Date.now();
+    database.prepare(`
+      INSERT INTO family_records(
+        family_id, type, id, data_json, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?)
+    `).run(
+      familyId,
+      row.record_type,
+      row.record_id,
+      row.data_json,
+      now,
+      now
+    );
+    database.prepare('DELETE FROM recycle_bin_records WHERE id = ?').run(recycleId);
+    bumpFamilyVersion(familyId);
+    return {
+      status: 'restored',
+      type: row.record_type,
+      record: JSON.parse(row.data_json)
+    };
+  });
+}
+
+export function permanentlyDeleteRecycledRecord(familyId, recycleId) {
+  return withTransaction(() => {
+    purgeExpiredRecycledRecords(familyId);
+    return database.prepare(`
+      DELETE FROM recycle_bin_records
+      WHERE family_id = ? AND id = ?
+    `).run(familyId, recycleId).changes > 0;
   });
 }
 

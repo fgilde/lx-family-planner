@@ -55,6 +55,7 @@ export const EMPTY_INTEGRATIONS = {
 export const DEFAULT_PUBLIC_ACCESS = {
   directoryEnabled: false,
   demo: null,
+  familyTransfer: { allowed: false },
   registration: {
     mode: 'closed',
     allowed: false,

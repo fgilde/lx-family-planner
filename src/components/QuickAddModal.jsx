@@ -32,11 +32,13 @@ export default function QuickAddModal() {
   const {
     isQuickAddOpen, setIsQuickAddOpen,
     quickAddDefaultType, setQuickAddDefaultType,
+    quickAddEventPreset, setQuickAddEventPreset,
     members, activeMemberId, activeMember, familyRelationships,
     addEvent, addShoppingItem, addTask, addNote
   } = useFamily();
   const { t } = useTranslation('profile');
   const dialogRef = useRef(null);
+  const didInitializeOpenRef = useRef(false);
   useViewportScrollLock(isQuickAddOpen);
 
   const [type, setType] = useState(quickAddDefaultType || 'event');
@@ -56,6 +58,10 @@ export default function QuickAddModal() {
   const [notes, setNotes] = useState('');
   const [reminders, setReminders] = useState([60]);
   const [saving, setSaving] = useState(false);
+  const shouldAutofocusTitle = Boolean(
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(pointer: fine)').matches
+  );
   
   // Shopping specific
   const [category, setCategory] = useState('Obst & Gemüse');
@@ -76,14 +82,29 @@ export default function QuickAddModal() {
   );
 
   useEffect(() => {
-    if (!isQuickAddOpen) return;
+    if (!isQuickAddOpen) {
+      didInitializeOpenRef.current = false;
+      return;
+    }
+    if (didInitializeOpenRef.current) return;
+    didInitializeOpenRef.current = true;
+    const preset = quickAddEventPreset || {};
     setType(quickAddDefaultType || 'event');
     setMemberId(activeMemberId || 'all');
     setEventMemberIds(activeMemberId ? [activeMemberId] : []);
+    setDate(preset.date || new Date().toISOString().split('T')[0]);
+    setTime(preset.time || '14:00');
     setAllDay(false);
-    setEndDate('');
-    setEndTime('');
-  }, [activeMemberId, isQuickAddOpen, quickAddDefaultType]);
+    setEndDate(preset.endDate || '');
+    setEndTime(preset.endTime || '');
+    setQuickAddEventPreset(null);
+  }, [
+    activeMemberId,
+    isQuickAddOpen,
+    quickAddDefaultType,
+    quickAddEventPreset,
+    setQuickAddEventPreset
+  ]);
 
   useEffect(() => {
     if (!isQuickAddOpen) return undefined;
@@ -233,7 +254,7 @@ export default function QuickAddModal() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               required
-              autoFocus
+              autoFocus={shouldAutofocusTitle}
             />
           </div>
 

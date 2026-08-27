@@ -37,7 +37,8 @@
     "timeline": {
       "kicker": "Weekly schedule",
       "allDay": "All day",
-      "now": "Now"
+      "now": "Now",
+      "selectHint": "Tap or drag across free time to prepare an event."
     },
     "agenda": {
       "kicker": "Agenda",

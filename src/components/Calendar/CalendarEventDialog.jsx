@@ -66,6 +66,12 @@ export default function CalendarEventDialog({
   const [saving, setSaving] = useState(false);
   const editable = Boolean(event && !event.readOnly);
   const isBirthday = Boolean(event?.birthdayMemberId);
+  // On iPhones, focusing an input opens the keyboard before people can see
+  // the form. Mouse and keyboard users still get the useful desktop focus.
+  const shouldAutofocusTitle = Boolean(
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(pointer: fine)').matches
+  );
   useViewportScrollLock(Boolean(event));
 
   useEffect(
@@ -223,7 +229,7 @@ export default function CalendarEventDialog({
               onChange={change => patch({ title: change.target.value })}
               disabled={!editable}
               required
-              autoFocus={editable}
+              autoFocus={editable && shouldAutofocusTitle}
             />
           </label>
 

@@ -197,6 +197,8 @@
     "verified": "Geprüft",
     "invalid": "Beschädigt",
     "restore": "Zurückspielen",
+    "restoreGuideTitle": "Datenbank sicher zurückspielen",
+    "restoreGuide": "Bitte niemals SQLite-Dateien im Datenordner manuell ersetzen. Wähle unten eine geprüfte Sicherung: LX legt vorher eine Sicherheitskopie an, kümmert sich um die Datenbankdateien und startet kontrolliert neu.",
     "restoreTitle": "Gesamte Installation zurücksetzen",
     "restoreWarning": "Alle Änderungen nach dieser Sicherung gehen verloren. LX erstellt vorher automatisch eine zusätzliche Sicherheitskopie und startet anschließend neu.",
     "familyPassword": "Passwort der Eigentümerfamilie",
@@ -213,5 +215,48 @@
       "friday": "Freitag",
       "saturday": "Samstag"
     }
+  },
+  "recycleBin": {
+    "kicker": "30 Tage · geschützt",
+    "title": "Papierkorb",
+    "intro": "Gelöschte Termine, Aufgaben und weitere Einträge bleiben {{days}} Tage hier und können einzeln zurückgeholt werden.",
+    "refresh": "Aktualisieren",
+    "loading": "Papierkorb wird geladen …",
+    "emptyTitle": "Der Papierkorb ist leer",
+    "emptyBody": "Gelöschte Einträge lassen sich hier für eine Weile sicher zurückholen.",
+    "deletedAt": "gelöscht {{date}}",
+    "expiresAt": "Automatisch gelöscht am {{date}}",
+    "restore": "Zurückholen",
+    "restoring": "Wird zurückgeholt …",
+    "removeForever": "Endgültig löschen",
+    "removeConfirm": "Diesen Eintrag endgültig aus dem Papierkorb löschen? Das kann nicht rückgängig gemacht werden.",
+    "types": {
+      "event": "Termin",
+      "task": "Aufgabe",
+      "note": "Notiz",
+      "meal": "Essensplan",
+      "recipe": "Rezept",
+      "shopping": "Einkauf",
+      "message": "Nachricht",
+      "entry": "Eintrag"
+    }
+  },
+  "familyTransfer": {
+    "kicker": "Privat · Umzug",
+    "title": "Familie auf einen anderen Server umziehen",
+    "badge": "Verschlüsselte Datei",
+    "intro": "Erstellt eine geschützte Umzugsdatei nur für eure Familie. Sie kann auf einem neuen, noch leeren LX-Server wieder eingespielt werden.",
+    "noteTitle": "Servergebundene Verbindungen bleiben sicher zurück",
+    "noteBody": "Termine, Aufgaben, Notizen, Rezepte, Profile und der Papierkorb ziehen mit. Family Cloud, CalDAV, Home Assistant, Bring und Benachrichtigungsgeräte verbindest du anschließend auf dem neuen Server neu.",
+    "familyPassword": "Familienpasswort zur Bestätigung",
+    "passphrase": "Neues Umzugskennwort",
+    "passphrasePlaceholder": "Mindestens 12 Zeichen",
+    "passphraseConfirm": "Umzugskennwort wiederholen",
+    "passphraseTooShort": "Das Umzugskennwort muss mindestens 12 Zeichen lang sein.",
+    "passphraseMismatch": "Die beiden Umzugskennwörter stimmen nicht überein.",
+    "export": "Verschlüsselte Umzugsdatei laden",
+    "exporting": "Umzugsdatei wird erstellt …",
+    "exported": "Die verschlüsselte Umzugsdatei wurde geladen. Bewahre Kennwort und Datei getrennt und sicher auf.",
+    "footnote": "Die Datei ist nur mit dem Umzugskennwort lesbar. Ohne dieses Kennwort kann sie nicht wiederhergestellt werden."
   }
 }

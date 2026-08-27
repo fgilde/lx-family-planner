@@ -183,6 +183,7 @@ export function FamilyProvider({ children }) {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [quickAddDefaultType, setQuickAddDefaultType] = useState('event');
+  const [quickAddEventPreset, setQuickAddEventPreset] = useState(null);
   const [isBringModalOpen, setIsBringModalOpen] = useState(false);
   const versionRef = useRef(0);
   const liveRefreshRef = useRef(false);
@@ -211,6 +212,10 @@ export function FamilyProvider({ children }) {
       setPublicAccess({
         directoryEnabled: Boolean(data.directoryEnabled),
         demo: data.demo || null,
+        familyTransfer: {
+          ...DEFAULT_PUBLIC_ACCESS.familyTransfer,
+          ...(data.familyTransfer || {})
+        },
         registration: {
           ...DEFAULT_PUBLIC_ACCESS.registration,
           ...(data.registration || {})
@@ -3639,6 +3644,8 @@ export function FamilyProvider({ children }) {
     setIsQuickAddOpen,
     quickAddDefaultType,
     setQuickAddDefaultType,
+    quickAddEventPreset,
+    setQuickAddEventPreset,
     isBringModalOpen,
     setIsBringModalOpen
   };

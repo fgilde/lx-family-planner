@@ -863,6 +863,41 @@ test('family flow stays isolated, authorized and internally consistent', async (
   );
   assert.equal(managedEvent.body.record.memberId, managedProfile.id);
 
+  await request(
+    `/api/resources/events/${managedEvent.body.record.id}`,
+    {
+      method: 'DELETE',
+      headers: authenticatedHeaders
+    }
+  );
+  const recycleBin = await request('/api/recycle-bin', {
+    headers: authenticatedHeaders
+  });
+  const archivedEvent = recycleBin.body.records.find(entry =>
+    entry.recordId === managedEvent.body.record.id
+  );
+  assert.equal(archivedEvent.type, 'events');
+  assert.equal(archivedEvent.record.title, 'Termin für Oma');
+  assert.equal(
+    archivedEvent.expiresAt - archivedEvent.deletedAt,
+    30 * 24 * 60 * 60 * 1000
+  );
+  const restoredEvent = await request(
+    `/api/recycle-bin/${archivedEvent.id}/restore`,
+    {
+      method: 'POST',
+      headers: authenticatedHeaders
+    }
+  );
+  assert.equal(restoredEvent.body.record.id, managedEvent.body.record.id);
+  const recycleBinAfterRestore = await request('/api/recycle-bin', {
+    headers: authenticatedHeaders
+  });
+  assert.equal(
+    recycleBinAfterRestore.body.records.some(entry => entry.id === archivedEvent.id),
+    false
+  );
+
   const multiMemberEvent = await request(
     '/api/resources/events',
     {

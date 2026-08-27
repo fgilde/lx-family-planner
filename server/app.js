@@ -59,6 +59,11 @@ import {
   restoreDatabaseBackup
 } from './backupService.js';
 import {
+  decryptFamilyTransfer,
+  encryptFamilyTransfer,
+  FAMILY_TRANSFER_MAX_BYTES
+} from './familyTransfer.js';
+import {
   databaseBackupIsDue,
   normalizeDatabaseBackupSettings
 } from './databaseBackupSchedule.js';
@@ -82,6 +87,8 @@ import {
   createCalendarSubscription,
   createInboxNotifications,
   createFamily,
+  exportFamilyTransferData,
+  importFamilyTransferData,
   createFamilyRelationshipRequest,
   createProblemReport,
   createSharedFamilyEvent,
@@ -89,6 +96,7 @@ import {
   createPocketMoneyTransaction,
   createRecord,
   createSession,
+  archiveRecord,
   countPushSubscriptionsByEndpoint,
   countNativePushProfilesForInstallation,
   deleteFamily,
@@ -105,7 +113,6 @@ import {
   deletePushSubscriptionById,
   deletePushSubscriptionsByEndpoint,
   deleteRecord,
-  deleteTaskRecords,
   deleteSession,
   findFamilyAuthCandidates,
   getBootstrap,
@@ -136,9 +143,12 @@ import {
   listNativePushDevices,
   listPushSubscriptions,
   listRecords,
+  listRecycledRecords,
   redeemRewardRecord,
   requestTaskApprovalRecord,
   replaceRecordsBySource,
+  restoreRecycledRecord,
+  permanentlyDeleteRecycledRecord,
   respondFamilyRelationship,
   relationshipAllows,
   saveIntegration,
@@ -226,6 +236,7 @@ const APP_VERSION = (() => {
   }
 })();
 const JSON_LIMIT = process.env.JSON_LIMIT || '5mb';
+const FAMILY_TRANSFER_BODY_LIMIT = process.env.FAMILY_TRANSFER_BODY_LIMIT || '20mb';
 const REWARD_ICON_IMAGE_MAX_LENGTH = 350_000;
 const CHAT_ATTACHMENT_MAX_BYTES = 100 * 1024 * 1024;
 const CHAT_ATTACHMENT_MAX_COUNT = 8;
@@ -388,6 +399,15 @@ const BULK_RESOURCE_TYPES = new Set([
   'events',
   'shoppingItems',
   'trashEvents'
+]);
+const RECYCLE_BIN_RESOURCE_TYPES = new Set([
+  'events',
+  'tasks',
+  'notes',
+  'meals',
+  'savedRecipes',
+  'shoppingItems',
+  'chatMessages'
 ]);
 const FAMILY_RELATION_TYPES = new Set([
   'parent',
@@ -2467,6 +2487,76 @@ function recipeImageUrl(familyId, imageId) {
   return `/api/recipes/images/${encodeURIComponent(imageId)}?family=${
     encodeURIComponent(familyId)
   }&claim=${encodeURIComponent(recipeImageClaim(familyId, imageId))}`;
+}
+
+function recipeImageIdFromUrl(value) {
+  try {
+    const url = new URL(String(value || ''), 'http://lx.local');
+    const match = url.pathname.match(/\/api\/recipes\/images\/([a-f0-9-]{36})$/i);
+    return match ? match[1] : '';
+  } catch {
+    return '';
+  }
+}
+
+function collectFamilyTransferRecipeImages(familyId, payload) {
+  const imageIds = new Set(
+    (payload.records || [])
+      .filter(record => record.type === 'savedRecipes')
+      .map(record => {
+        try {
+          return recipeImageIdFromUrl(JSON.parse(record.dataJson || '{}').image);
+        } catch {
+          return '';
+        }
+      })
+      .filter(Boolean)
+  );
+  const directory = recipeImageDataDirectory(familyId);
+  if (!imageIds.size || !fs.existsSync(directory)) return [];
+  return fs.readdirSync(directory, { withFileTypes: true })
+    .filter(entry => entry.isFile())
+    .map(entry => {
+      const match = entry.name.match(/^([a-f0-9-]{36})\.(jpg|png|gif|webp|heic|avif)$/i);
+      if (!match || !imageIds.has(match[1])) return null;
+      const content = fs.readFileSync(path.join(directory, entry.name));
+      if (content.length > RECIPE_IMAGE_MAX_BYTES) return null;
+      return {
+        id: match[1],
+        extension: match[2].toLowerCase(),
+        content: content.toString('base64')
+      };
+    })
+    .filter(Boolean);
+}
+
+function restoreFamilyTransferRecipeImages(familyId, payload) {
+  const images = Array.isArray(payload?.recipeImages) ? payload.recipeImages : [];
+  if (!images.length) return 0;
+  const directory = recipeImageDataDirectory(familyId);
+  fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
+  const restoredIds = new Set();
+  images.slice(0, 500).forEach(image => {
+    const id = String(image?.id || '');
+    const extension = String(image?.extension || '').toLowerCase();
+    if (!/^[a-f0-9-]{36}$/i.test(id) || !['jpg', 'png', 'gif', 'webp', 'heic', 'avif'].includes(extension)) {
+      return;
+    }
+    const content = Buffer.from(String(image?.content || ''), 'base64');
+    if (!content.length || content.length > RECIPE_IMAGE_MAX_BYTES) return;
+    fs.writeFileSync(path.join(directory, `${id}.${extension}`), content, { mode: 0o600 });
+    restoredIds.add(id);
+  });
+  if (!restoredIds.size) return 0;
+  listRecords(familyId, 'savedRecipes').forEach(recipe => {
+    const imageId = recipeImageIdFromUrl(recipe.image);
+    if (imageId && restoredIds.has(imageId)) {
+      updateRecord(familyId, 'savedRecipes', recipe.id, {
+        image: recipeImageUrl(familyId, imageId)
+      });
+    }
+  });
+  return restoredIds.size;
 }
 
 function authRateLimit(req, res, next) {
@@ -5610,6 +5700,12 @@ export function createApp() {
     }
     next();
   });
+  // A family move contains an encrypted JSON archive. Keep the larger parser
+  // tightly scoped instead of increasing the request limit for every route.
+  app.use(
+    '/api/public/family-transfer/import',
+    express.json({ limit: FAMILY_TRANSFER_BODY_LIMIT })
+  );
   app.use(express.json({ limit: JSON_LIMIT }));
   app.use(sessionMiddleware);
   app.use(protectReadOnlyDemo);
@@ -5628,6 +5724,7 @@ export function createApp() {
   registerPublicAccessRoutes(app, {
     demoFamilyId: process.env.DEMO_FAMILY_ID,
     getFamily,
+    countFamilies,
     listPublicFamilies,
     publicFamilyDirectory: PUBLIC_FAMILY_DIRECTORY,
     publicRegistrationStatus,
@@ -5642,6 +5739,9 @@ export function createApp() {
     isManagedMember,
     isAdultMember,
     createFamily,
+    importFamilyTransferData,
+    decryptFamilyTransfer,
+    restoreFamilyTransferRecipeImages,
     createSession,
     getSession,
     clearAuthAttempts,
@@ -7565,6 +7665,85 @@ export function createApp() {
     }
   );
 
+  app.post('/api/family-transfer/export', requireAuth, requireAdult, (req, res) => {
+    const input = ensureObject(req.body);
+    const familyRow = getFamilyAuthRow(req.session.familyId);
+    if (
+      !familyRow ||
+      !verifySecret(String(input.familyPassword || ''), familyRow.password_hash)
+    ) {
+      return res.status(401).json({
+        success: false,
+        error: translate('errors.familyPasswordIncorrect')
+      });
+    }
+    try {
+      const payload = exportFamilyTransferData(req.session.familyId);
+      payload.recipeImages = collectFamilyTransferRecipeImages(
+        req.session.familyId,
+        payload
+      );
+      const bundle = encryptFamilyTransfer(payload, input.passphrase);
+      res.setHeader('Cache-Control', 'no-store');
+      return res.json({
+        success: true,
+        bundle,
+        fileName: `lx-family-umzug-${new Date().toISOString().slice(0, 10)}.lxfamily`,
+        maxBytes: FAMILY_TRANSFER_MAX_BYTES,
+        reconnectRequired: payload.reconnectRequired
+      });
+    } catch (error) {
+      return res.status(Number(error.statusCode || 400)).json({
+        success: false,
+        error: cleanText(error.message, 'Die Umzugsdatei konnte nicht erstellt werden.', 300)
+      });
+    }
+  });
+
+  app.get('/api/recycle-bin', requireAuth, requireAdult, (req, res) => {
+    res.json({
+      success: true,
+      retentionDays: 30,
+      records: listRecycledRecords(req.session.familyId)
+    });
+  });
+
+  app.post('/api/recycle-bin/:id/restore', requireAuth, requireAdult, (req, res) => {
+    const result = restoreRecycledRecord(req.session.familyId, req.params.id);
+    if (result.status === 'missing') {
+      return res.status(404).json({
+        success: false,
+        error: translate('errors.entryNotFound')
+      });
+    }
+    if (result.status === 'conflict') {
+      return res.status(409).json({
+        success: false,
+        error: 'Der Eintrag kann nicht zurückgeholt werden, weil bereits ein gleichnamiger Datenstand vorhanden ist.'
+      });
+    }
+    if (result.type === 'events') {
+      notifyCalendarChange(req, result.record, { kind: 'created' });
+      queueNextcloudEventSync(req.session.familyId);
+    }
+    publishFamilyChange(req.session.familyId, result.type);
+    return res.json({
+      success: true,
+      record: result.record,
+      version: getFamilyVersion(req.session.familyId)
+    });
+  });
+
+  app.delete('/api/recycle-bin/:id', requireAuth, requireAdult, (req, res) => {
+    if (!permanentlyDeleteRecycledRecord(req.session.familyId, req.params.id)) {
+      return res.status(404).json({
+        success: false,
+        error: translate('errors.entryNotFound')
+      });
+    }
+    return res.json({ success: true });
+  });
+
   app.patch('/api/family', requireAuth, requireAdult, (req, res) => {
     const input = ensureObject(req.body);
     const changes = {};
@@ -7779,10 +7958,20 @@ export function createApp() {
         error: translate('errors.selectedProfileNotFound')
       });
     }
-    const result = deleteTaskRecords(req.session.familyId, {
-      memberId,
-      completedOnly: Boolean(req.body?.completedOnly)
-    });
+    const selectedTasks = listRecords(req.session.familyId, 'tasks')
+      .filter(task => !memberId || task.memberId === memberId)
+      .filter(task => !req.body?.completedOnly || Boolean(task.completed));
+    const deleted = selectedTasks.reduce((count, task) => (
+      archiveRecord(req.session.familyId, 'tasks', task.id, {
+        deletedByMemberId: req.session.memberId || null
+      })
+        ? count + 1
+        : count
+    ), 0);
+    const result = {
+      deleted,
+      records: listRecords(req.session.familyId, 'tasks')
+    };
     if (result.deleted) {
       publishFamilyChange(req.session.familyId, 'tasks');
     }
@@ -8301,7 +8490,15 @@ export function createApp() {
         });
       }
     }
-    if (!deleteRecord(req.session.familyId, req.params.type, req.params.id)) {
+    const archived = RECYCLE_BIN_RESOURCE_TYPES.has(req.params.type)
+      ? archiveRecord(req.session.familyId, req.params.type, req.params.id, {
+        deletedByMemberId: req.session.memberId || null
+      })
+      : null;
+    const deleted = archived
+      ? true
+      : deleteRecord(req.session.familyId, req.params.type, req.params.id);
+    if (!deleted) {
       return res
         .status(404)
         .json({ success: false, error: translate('errors.entryNotFound') });

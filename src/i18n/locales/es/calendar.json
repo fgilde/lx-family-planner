@@ -37,7 +37,8 @@
     "timeline": {
       "kicker": "Plan semanal",
       "allDay": "Todo el día",
-      "now": "Ahora"
+      "now": "Ahora",
+      "selectHint": "Toque o arrastre sobre un horario libre para preparar un evento."
     },
     "agenda": {
       "kicker": "Agenda",

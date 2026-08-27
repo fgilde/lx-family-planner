@@ -12,6 +12,7 @@ import {
   Server,
   ShieldCheck,
   Sparkles,
+  Upload,
   Users
 } from 'lucide-react';
 import { useFamily } from '../../context/FamilyContext';
@@ -27,6 +28,7 @@ import { GITHUB_REPOSITORY_URL } from '../../constants/project';
 import AndroidAppDownload from './AndroidAppDownload';
 import LanguageSwitcher from '../LanguageSwitcher';
 import ProjectSupportCard from '../ProjectSupportCard';
+import FamilyTransferImport from './FamilyTransferImport';
 import { PRODUCT_NAME } from '../../../shared/brand.js';
 
 export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfig }) {
@@ -48,6 +50,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const selectedFamily = useMemo(
     () => familiesList.find(family => family.id === selectedFamilyId),
@@ -63,6 +66,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
   const familyReference = selectedFamilyId || familyName.trim();
   const directoryEnabled = Boolean(publicAccess?.directoryEnabled);
   const registration = publicAccess?.registration || {};
+  const familyTransferAllowed = Boolean(publicAccess?.familyTransfer?.allowed);
 
   const handleFamilyLogin = async event => {
     event.preventDefault();
@@ -274,7 +278,9 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
 
       <main className="auth-action-panel">
         <div className="auth-action-stack">
-        <div className="auth-card auth-card-wide">
+        {isTransferOpen ? (
+          <FamilyTransferImport onClose={() => setIsTransferOpen(false)} />
+        ) : <div className="auth-card auth-card-wide">
           <div className="auth-card-heading">
             <div className="auth-icon"><Users size={24} /></div>
             <div>
@@ -438,6 +444,16 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
                 </span>
               </div>
             )}
+            {familyTransferAllowed && (
+              <button
+                type="button"
+                className="auth-secondary flex-1"
+                onClick={() => setIsTransferOpen(true)}
+              >
+                <Upload size={18} />
+                {t('login.familyStep.moveFamily')}
+              </button>
+            )}
             {onOpenServerConfig && (
               <button
                 type="button"
@@ -450,7 +466,7 @@ export default function FamilyLoginScreen({ onStartOnboarding, onOpenServerConfi
               </button>
             )}
           </div>
-        </div>
+        </div>}
         <AndroidAppDownload />
         </div>
       </main>

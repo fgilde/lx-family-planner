@@ -4,6 +4,34 @@ Alle wichtigen Änderungen am LX Family Planner werden hier festgehalten.
 
 ## [Unveröffentlicht]
 
+## [1.20.0] – 2026-08-27
+
+### Sicherer Familienumzug und Wiederherstellen im Alltag
+
+- Familien können jetzt in der Elternzentrale eine verschlüsselte,
+  passwortgeschützte Umzugsdatei erstellen und diese auf einem neuen, leeren
+  LX-Family-Server einspielen.
+- Der Umzug enthält Familienprofile, PINs, Kalender, Aufgaben, Notizen,
+  Rezepte, lokale Rezeptbilder und den Papierkorb. Geräte- und
+  servergebundene Verbindungen werden auf dem neuen Server bewusst neu
+  verbunden.
+- Gelöschte Termine, Aufgaben, Notizen, Mahlzeiten, Rezepte, Einkaufs- und
+  Chat-Einträge landen im Familienpapierkorb. Eltern können einzelne Einträge
+  zurückholen oder dauerhaft entfernen.
+
+### Schneller Termine anlegen
+
+- Ein Klick auf einen freien Bereich der Wochenansicht startet einen
+  30-Minuten-Termin. Ein Aufziehen über einen Zeitraum öffnet die Eingabe mit
+  genau diesem Zeitraum.
+- Überlappende Kalenderkarten nutzen den vorhandenen Platz auf schmalen und
+  breiten Ansichten besser aus.
+
+### Angenehmere Formulare auf dem Handy
+
+- Auf Touch-Geräten setzt das Terminformular den Cursor nicht mehr sofort in
+  den Titel. Dadurch verdeckt die Tastatur nicht mehr Zeit und Aktionen.
+
 ## [1.19.6] – 2026-08-27
 
 ### Benachrichtigungseinstellungen

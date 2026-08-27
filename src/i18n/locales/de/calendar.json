@@ -37,7 +37,8 @@
     "timeline": {
       "kicker": "Wochenplan",
       "allDay": "Ganztags",
-      "now": "Jetzt"
+      "now": "Jetzt",
+      "selectHint": "Freien Zeitbereich antippen oder aufziehen, um einen Termin vorzubereiten."
     },
     "agenda": {
       "kicker": "Agenda",

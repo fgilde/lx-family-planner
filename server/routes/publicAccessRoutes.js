@@ -6,6 +6,7 @@
 export function registerPublicAccessRoutes(app, {
   demoFamilyId,
   getFamily,
+  countFamilies,
   listPublicFamilies,
   publicFamilyDirectory,
   publicRegistrationStatus,
@@ -20,6 +21,9 @@ export function registerPublicAccessRoutes(app, {
   isManagedMember,
   isAdultMember,
   createFamily,
+  importFamilyTransferData,
+  decryptFamilyTransfer,
+  restoreFamilyTransferRecipeImages,
   createSession,
   getSession,
   clearAuthAttempts,
@@ -43,7 +47,53 @@ export function registerPublicAccessRoutes(app, {
             badge: demoFamily.badge
           }
         : null,
-      registration: publicRegistrationStatus()
+      registration: publicRegistrationStatus(),
+      familyTransfer: {
+        allowed: countFamilies() === 0
+      }
+    });
+  });
+
+  app.post('/api/public/family-transfer/import', authRateLimit, (req, res) => {
+    if (countFamilies() !== 0) {
+      return res.status(409).json({
+        success: false,
+        error: 'Ein Familienumzug ist nur auf einem noch leeren LX-Server möglich.'
+      });
+    }
+    const input = ensureObject(req.body);
+    const payload = decryptFamilyTransfer(input.bundle, input.passphrase);
+    const result = importFamilyTransferData(payload);
+    // Local recipe images are portable, but their short-lived URL claim is
+    // tied to the old server. Rewriting it here keeps the imported recipes
+    // private on the new instance as well.
+    let restoredRecipeImages = 0;
+    try {
+      restoredRecipeImages = restoreFamilyTransferRecipeImages(
+        result.family.id,
+        payload
+      );
+    } catch (error) {
+      console.warn('Lokale Rezeptbilder konnten beim Familienumzug nicht vollständig wiederhergestellt werden:', error.message);
+    }
+    const initialMember =
+      result.members.find(isAdultMember) ||
+      result.members.find(member => !isManagedMember(member));
+    const sessionToken = createSession(result.family.id, {
+      memberId: initialMember?.id || null,
+      maxAgeMs: sessionMaxAgeMs
+    });
+    const session = getSession(sessionToken);
+    clearAuthAttempts(req);
+    res.setHeader('Set-Cookie', sessionCookie(sessionToken, secureCookieForRequest(req)));
+    res.status(201).json({
+      success: true,
+      family: result.family,
+      members: result.members,
+      restoredRecipeImages,
+      activeMemberId: initialMember?.id || null,
+      session: publicSessionPayload(session),
+      ...nativeSessionTokenPayload(req, sessionToken)
     });
   });
 

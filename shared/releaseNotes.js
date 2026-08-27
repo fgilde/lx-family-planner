@@ -1,4 +1,63 @@
 const RELEASE_NOTES = {
+  '1.20.0': {
+    version: '1.20.0',
+    eyebrow: 'Sicher umziehen, entspannt wiederherstellen',
+    title: 'Eure Familie zieht jetzt geschützt mit um',
+    intro:
+      'Eine Familie kann als verschlüsselte Datei auf einen neuen, leeren LX-Family-Server umziehen. Im Alltag hilft zusätzlich der neue Papierkorb.',
+    highlights: [
+      {
+        id: 'encrypted-family-transfer',
+        title: 'Familie sicher umziehen',
+        description:
+          'Profile, PINs, Kalender, Aufgaben, Notizen, Rezepte, lokale Rezeptbilder und Papierkorb reisen passwortgeschützt mit. Server- und Geräteverbindungen verbindet ihr am neuen Ort bewusst neu.'
+      },
+      {
+        id: 'family-recycle-bin',
+        title: 'Einzelne Dinge zurückholen',
+        description:
+          'Gelöschte Termine, Aufgaben, Notizen, Mahlzeiten, Rezepte, Einkaufs- und Chat-Einträge liegen zuerst im Familienpapierkorb und können gezielt wiederhergestellt werden.'
+      },
+      {
+        id: 'calendar-range-selection',
+        title: 'Termine direkt aus der Woche',
+        description:
+          'Ein Klick auf freie Zeit startet einen 30-Minuten-Termin. Einen Zeitraum aufziehen übernimmt genau diese Zeit in die Eingabe.'
+      }
+    ],
+    closing:
+      'Alle bestehenden Familieninhalte bleiben erhalten. Für einen Umzug werden externe Verbindungen auf dem neuen Server neu eingerichtet.',
+    localizations: {
+      en: {
+        eyebrow: 'Move safely, restore calmly',
+        title: 'Your family can now move securely',
+        intro:
+          'A family can move to a new, empty LX Family server in an encrypted file. The new recycle bin also helps in everyday life.',
+        highlights: [
+          {
+            id: 'encrypted-family-transfer',
+            title: 'Move a family safely',
+            description:
+              'Profiles, PINs, calendars, tasks, notes, recipes, local recipe images and the recycle bin travel in a password-protected file. Server and device connections are deliberately set up again at the new location.'
+          },
+          {
+            id: 'family-recycle-bin',
+            title: 'Bring back individual items',
+            description:
+              'Deleted events, tasks, notes, meals, recipes, shopping and chat entries first go to the family recycle bin and can be restored individually.'
+          },
+          {
+            id: 'calendar-range-selection',
+            title: 'Create events right from the week',
+            description:
+              'A click on free time starts a 30-minute event. Dragging a time span applies that exact time to the form.'
+          }
+        ],
+        closing:
+          'All existing family content remains intact. External connections are set up again on the new server when moving.'
+      }
+    }
+  },
   '1.19.6': {
     version: '1.19.6',
     eyebrow: 'Kleiner Einstellungs-Hotfix',

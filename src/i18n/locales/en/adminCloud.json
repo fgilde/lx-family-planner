@@ -197,6 +197,8 @@
     "verified": "Verified",
     "invalid": "Damaged",
     "restore": "Restore",
+    "restoreGuideTitle": "Restore the database safely",
+    "restoreGuide": "Never replace SQLite files in the data directory manually. Choose a verified backup below: LX creates a safety copy first, handles the database files and restarts in a controlled way.",
     "restoreTitle": "Reset the whole installation",
     "restoreWarning": "All changes after this backup will be lost. LX first creates an additional safety backup and then restarts.",
     "familyPassword": "Owner family password",
@@ -213,5 +215,48 @@
       "friday": "Friday",
       "saturday": "Saturday"
     }
+  },
+  "recycleBin": {
+    "kicker": "30 days · protected",
+    "title": "Recycle bin",
+    "intro": "Deleted events, tasks and other entries stay here for {{days}} days and can be restored one at a time.",
+    "refresh": "Refresh",
+    "loading": "Loading recycle bin …",
+    "emptyTitle": "The recycle bin is empty",
+    "emptyBody": "Deleted entries can be safely brought back here for a while.",
+    "deletedAt": "deleted {{date}}",
+    "expiresAt": "Automatically removed on {{date}}",
+    "restore": "Restore",
+    "restoring": "Restoring …",
+    "removeForever": "Delete permanently",
+    "removeConfirm": "Delete this entry permanently from the recycle bin? This cannot be undone.",
+    "types": {
+      "event": "Event",
+      "task": "Task",
+      "note": "Note",
+      "meal": "Meal plan",
+      "recipe": "Recipe",
+      "shopping": "Shopping",
+      "message": "Message",
+      "entry": "Entry"
+    }
+  },
+  "familyTransfer": {
+    "kicker": "Private · move",
+    "title": "Move family to another server",
+    "badge": "Encrypted file",
+    "intro": "Creates a protected move file for this family only. It can be restored on a new, still empty LX server.",
+    "noteTitle": "Server-bound connections stay safely behind",
+    "noteBody": "Events, tasks, notes, recipes, profiles and the recycle bin move with you. Reconnect Family Cloud, CalDAV, Home Assistant, Bring and notification devices on the new server afterwards.",
+    "familyPassword": "Family password to confirm",
+    "passphrase": "New move passphrase",
+    "passphrasePlaceholder": "At least 12 characters",
+    "passphraseConfirm": "Repeat move passphrase",
+    "passphraseTooShort": "The move passphrase must be at least 12 characters long.",
+    "passphraseMismatch": "The two move passphrases do not match.",
+    "export": "Download encrypted move file",
+    "exporting": "Creating move file …",
+    "exported": "The encrypted move file was downloaded. Keep the file and passphrase separate and safe.",
+    "footnote": "The file can only be read with the move passphrase. Without it, it cannot be restored."
   }
 }

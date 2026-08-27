@@ -3849,6 +3849,69 @@ textarea {
   width: 100%;
 }
 
+.family-transfer-import-card {
+  background:
+    radial-gradient(circle at 96% 6%, color-mix(in srgb, #3ba58d 15%, transparent), transparent 34%),
+    var(--bg-card);
+}
+
+.family-transfer-import-card .auth-back {
+  margin: -4px 0 20px;
+}
+
+.family-transfer-import-intro {
+  margin: -7px 0 18px;
+  color: var(--text-muted);
+  font-size: .9rem;
+  line-height: 1.55;
+}
+
+.family-transfer-file-control {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  padding: 0 13px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 45%, var(--border-color));
+  border-radius: 14px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--bg-elevated));
+  cursor: pointer;
+}
+
+.family-transfer-file-control strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .83rem;
+}
+
+.family-transfer-file-control input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.family-transfer-import-security,
+.auth-success {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px 0;
+  color: #176354;
+  font-size: .78rem;
+  font-weight: 720;
+}
+
+.family-transfer-import-security {
+  color: var(--text-muted);
+  font-weight: 650;
+}
+
 .auth-release-preview {
   width: 100%;
   display: grid;
@@ -9268,9 +9331,253 @@ textarea {
   font-weight: 750;
 }
 
+.recycle-bin-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.recycle-bin-panel::before {
+  content: '';
+  position: absolute;
+  inset: auto -42px -70px auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  pointer-events: none;
+}
+
+.recycle-bin-refresh {
+  position: relative;
+  z-index: 1;
+}
+
+.recycle-bin-loading,
+.recycle-bin-empty,
+.recycle-bin-record,
+.recycle-bin-record-actions {
+  display: flex;
+  align-items: center;
+}
+
+.recycle-bin-loading {
+  gap: 9px;
+  color: var(--text-muted);
+}
+
+.recycle-bin-empty {
+  gap: 14px;
+  padding: 20px;
+  border: 1px dashed var(--border-color);
+  border-radius: 18px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-card) 78%, var(--primary) 4%);
+}
+
+.recycle-bin-empty svg {
+  color: var(--primary);
+}
+
+.recycle-bin-empty strong,
+.recycle-bin-empty p {
+  display: block;
+  margin: 0;
+}
+
+.recycle-bin-empty strong { color: var(--text-primary); }
+.recycle-bin-empty p { margin-top: 3px; font-size: .9rem; }
+
+.recycle-bin-list {
+  display: grid;
+  gap: 9px;
+}
+
+.recycle-bin-record {
+  position: relative;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-card) 92%, var(--primary) 3%);
+}
+
+.recycle-bin-record-icon {
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 13px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-card));
+}
+
+.recycle-bin-record-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  flex: 1;
+}
+
+.recycle-bin-record-copy strong,
+.recycle-bin-record-copy small,
+.recycle-bin-record-copy em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recycle-bin-record-copy strong { color: var(--text-primary); }
+.recycle-bin-record-copy small { color: var(--text-muted); font-size: .82rem; }
+.recycle-bin-record-copy em { color: var(--text-muted); font-size: .76rem; font-style: normal; }
+
+.recycle-bin-record-actions { gap: 7px; }
+
+.family-transfer-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, #1f7a68 25%, var(--border-color));
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, #37a68e 12%, transparent), transparent 34%),
+    var(--bg-card);
+}
+
+.family-transfer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, #1f7a68 30%, var(--border-color));
+  border-radius: 999px;
+  color: #176354;
+  background: color-mix(in srgb, #38a88d 10%, var(--bg-card));
+  font-size: .72rem;
+  font-weight: 850;
+}
+
+.family-transfer-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, #d19435 30%, var(--border-color));
+  border-radius: 16px;
+  background: color-mix(in srgb, #f5bb5a 9%, var(--bg-subtle));
+}
+
+.family-transfer-note svg { color: #ad7014; }
+.family-transfer-note strong { color: var(--text-primary); font-size: .87rem; }
+.family-transfer-note p,
+.family-transfer-footnote {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.family-transfer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.family-transfer-grid label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: .74rem;
+  font-weight: 760;
+}
+
+.family-transfer-grid input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 9px 11px;
+  color: var(--text-main);
+  background: var(--bg-elevated);
+}
+
+.family-transfer-download { margin-top: 16px; }
+
+.btn-quiet-danger {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, #dc2626 30%, var(--border-color));
+  border-radius: 10px;
+  color: #c2410c;
+  background: transparent;
+}
+
+.btn-quiet-danger:hover:not(:disabled) {
+  color: #fff;
+  background: #c2410c;
+  border-color: #c2410c;
+}
+
+@media (max-width: 620px) {
+  .recycle-bin-panel .admin-panel-header {
+    align-items: flex-start;
+  }
+
+  .recycle-bin-record {
+    align-items: flex-start;
+  }
+
+  .recycle-bin-record-actions {
+    align-self: center;
+  }
+
+  .recycle-bin-record-actions .btn-secondary {
+    padding-inline: 9px;
+  }
+
+  .family-transfer-panel .admin-panel-header {
+    align-items: flex-start;
+  }
+
+  .family-transfer-badge {
+    flex: 0 0 auto;
+  }
+
+  .family-transfer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .database-backup-panel .admin-panel-header,
 .database-backup-panel .admin-panel-intro {
   margin-bottom: 0;
+}
+
+.database-backup-safety-guide {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border-color));
+  border-radius: 15px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg-subtle));
+}
+
+.database-backup-safety-guide > div { min-width: 0; }
+
+.database-backup-safety-guide strong {
+  display: block;
+  font-size: 0.78rem;
+}
+
+.database-backup-safety-guide p {
+  margin: 4px 0 0;
+  color: var(--text-main);
+  font-size: 0.74rem;
+  line-height: 1.45;
 }
 
 .database-backup-owner-badge,
@@ -15886,6 +16193,14 @@ textarea {
   box-shadow: 0 5px 12px color-mix(in srgb, var(--primary) 31%, transparent);
 }
 
+.calendar-timeline-selection-hint {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .calendar-timeline-all-day {
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
@@ -15984,6 +16299,8 @@ textarea {
       transparent calc(var(--timeline-hour-height) - 1px),
       var(--border-color) var(--timeline-hour-height)
     );
+  cursor: cell;
+  touch-action: pan-y;
 }
 
 .calendar-timeline-day:last-of-type { border-right: 0; }
@@ -16013,6 +16330,20 @@ textarea {
   box-shadow: 0 3px 7px color-mix(in srgb, var(--event-color) 15%, transparent);
   cursor: pointer;
   text-align: left;
+}
+
+.calendar-timeline-slot-selection {
+  position: absolute;
+  z-index: 0;
+  top: var(--selection-top);
+  right: 3px;
+  left: 3px;
+  height: var(--selection-height);
+  min-height: 33px;
+  border: 2px solid color-mix(in srgb, var(--primary) 72%, transparent);
+  border-radius: 8px;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--primary) 13%, transparent);
 }
 
 .calendar-timeline-event.is-stacked {

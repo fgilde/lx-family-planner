@@ -6,6 +6,31 @@ German version: [CHANGELOG.de.md](CHANGELOG.de.md)
 
 ## [Unreleased]
 
+## [1.20.0] — 2026-08-27
+
+### Safer family moves and everyday recovery
+
+- Families can now export an encrypted, password-protected move file from the
+  Parent Hub and import it on a new, empty LX Family server.
+- The move includes family profiles, PINs, calendar, tasks, notes, recipes,
+  local recipe images and the recycle bin. Device- and server-specific
+  connections are deliberately reconnected on the new server.
+- Deleted events, tasks, notes, meals, recipes, shopping entries and chat
+  messages are kept in a family recycle bin, where parents can restore an
+  individual entry or remove it permanently.
+
+### Faster calendar entry
+
+- A click on a free space in the weekly view starts a 30-minute event. Dragging
+  over a free time range opens the event form with that exact span already set.
+- Overlapping calendar cards use the available column width more effectively on
+  narrow and wide displays.
+
+### Easier mobile forms
+
+- On touch devices, opening the event form no longer immediately focuses the
+  title input, so the keyboard does not hide the time and action controls.
+
 ## [1.19.6] — 2026-08-27
 
 ### Notification settings
